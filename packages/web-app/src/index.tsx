@@ -1,11 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+
+import App from './app'
+import { WalletProvider } from './context/augmentedWallet'
 import 'tailwindcss/tailwind.css'
-import App from './App'
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <WalletProvider>
+      <App />
+    </WalletProvider>
   </React.StrictMode>,
   document.getElementById('root')
 )
