@@ -14,6 +14,6 @@ i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false // react already safes from xss
   },
-  supportedLngs: ['en', 'pt'],
+  supportedLngs: ['en', 'pt', 'es'],
   fallbackLng: 'en'
 })
