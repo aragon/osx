@@ -1,11 +1,10 @@
 import React from 'react'
 import { Route, HashRouter as Router, Switch } from 'react-router-dom'
 
-import '../i18n.config'
-
 import Footer from './containers/footer'
 import Navbar from './containers/navbar'
 import { PageRoute, routes } from './routes'
+import '../i18n.config'
 
 function App() {
   return (
