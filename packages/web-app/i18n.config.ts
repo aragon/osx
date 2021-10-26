@@ -1,10 +1,10 @@
 import i18n from 'i18next'
-import en from './src/languages/en.json'
+import commonEn from './src/languages/en/common.json'
 import { initReactI18next } from 'react-i18next'
 
 export const resources = {
   en: {
-    translation: en
+    translation: commonEn
   }
 } as const
 
@@ -14,5 +14,6 @@ i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false // react already safes from xss
   },
+  supportedLngs: ['en', 'pt'],
   fallbackLng: 'en'
 })
