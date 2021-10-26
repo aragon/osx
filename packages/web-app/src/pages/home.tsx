@@ -1,16 +1,15 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import { useTranslation } from 'react-i18next'
-import '../i18n.config'
 
-function App() {
+import Wallet from '../components/wallet'
+
+const Home: React.FC = () => {
   const { t } = useTranslation()
-  const wallet = useWallet()
-  const blockNumber = wallet.getBlockNumber()
-  
+
   return (
     <div className="bg-white">
+      <p>Placeholder Homepage</p>
       <div className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 mx-auto max-w-screen-xl">
         <div className="text-center">
           <WelcomeMessage>{t('subtitle')}</WelcomeMessage>
@@ -19,20 +18,7 @@ function App() {
         </div>
       </div>
       <h1>Wallet</h1>
-      {wallet.status === 'connected' ? (
-        <div>
-          <div>Account: {wallet.account}</div>
-          <div>Balance: {wallet.balance}</div>
-          <Button onClick={() => wallet.reset()}>disconnect</Button>
-        </div>
-      ) : (
-        <div>
-          Connect:
-          <Button onClick={() => wallet.connect()}>MetaMask</Button>
-          <Button onClick={() => wallet.connect('frame')}>Frame</Button>
-          <Button onClick={() => wallet.connect('portis')}>Portis</Button>
-        </div>
-      )}
+      <Wallet />
     </div>
   )
 }
@@ -48,9 +34,5 @@ const Subtitle = styled.p.attrs({
   className:
     'my-3 text-4xl sm:text-5xl lg:text-6xl font-bold sm:tracking-tight text-gray-900'
 })``
-const Button = styled.button.attrs({
-  className:
-    'mx-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full'
-})``
 
-export default App
+export default Home
