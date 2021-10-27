@@ -1,5 +1,7 @@
 enum MethodType {
-  PAGE
+  PAGE,
+  IDENTIFY,
+  EVENT
 }
 
 /**
@@ -14,6 +16,8 @@ function getAnalyticsMethod(methodType: MethodType) {
     return
   }
   if (methodType === MethodType.PAGE) return windowAnalytics.page
+  if (methodType === MethodType.IDENTIFY) return windowAnalytics.identify
+  if (methodType === MethodType.EVENT) return windowAnalytics.track
 }
 
 /**
@@ -30,4 +34,29 @@ export function trackPage(pathName: string) {
   trackerMethod({
     path: pathName
   })
+}
+
+/**
+ * Sends analytics informations about the connected wallets.
+ *
+ * @param {String} account Wallet address
+ * @param {String} networkType The network the wallet is connected to
+ * @param {String} connector Wallet connector used by use-wallet library
+ * @returns {void}
+ */
+export function identifyUser(
+  account: string,
+  networkType: string,
+  connector: string
+) {
+  const trackerMethod = getAnalyticsMethod(MethodType.IDENTIFY)
+  if (typeof trackerMethod !== 'function') {
+    return
+  }
+  const walletData = {
+    wallet_address: account,
+    wallet_provider: connector,
+    network: networkType
+  }
+  trackerMethod(walletData)
 }

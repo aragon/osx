@@ -13,7 +13,7 @@
       !(function () {
         // TODO: add key to pipeline
         const analyticsKey = '%VITE_REACT_APP_ANALYTICS_KEY%'
-        if (!analyticsKey.includes('REACT_APP_ANALYTICS_KEY')) {
+        if (!analyticsKey.includes('undefined')) {
           rudderAnalytics = window.rudderanalytics = []
           for (
             var methods = [
