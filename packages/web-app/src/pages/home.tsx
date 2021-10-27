@@ -3,8 +3,10 @@ import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 
 import Wallet from 'components/wallet'
+import { useTrackPage } from 'hooks/analytics-hooks'
 
 const Home: React.FC = () => {
+  useTrackPage()
   const { t } = useTranslation()
 
   return (
