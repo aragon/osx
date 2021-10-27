@@ -7,6 +7,7 @@ export type PageRoute = {
   component: React.FC
 }
 
+// Order does matter
 export const routes: PageRoute[] = [
   { name: 'Homepage', path: '/', component: Home },
   { name: '404NotFound', path: '*', component: NotFound }
