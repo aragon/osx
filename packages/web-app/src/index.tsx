@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom'
 
 import App from './app'
 import { WalletProvider } from './context/augmentedWallet'
+import { APMProvider } from './context/elasticAPM';
 import 'tailwindcss/tailwind.css'
 
 ReactDOM.render(
   <React.StrictMode>
-    <WalletProvider>
-      <App />
-    </WalletProvider>
+    <APMProvider>
+      <WalletProvider>
+        <App />
+      </WalletProvider>
+    </APMProvider>
   </React.StrictMode>,
   document.getElementById('root')
 )

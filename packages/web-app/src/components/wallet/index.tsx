@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
+import { useWallet } from '../../context/augmentedWallet'
 
 const Wallet: React.FC = () => {
   const { account, balance, reset, connect, isConnected } = useWallet()
@@ -14,7 +14,7 @@ const Wallet: React.FC = () => {
   ) : (
     <div>
       Connect:
-      <Button onClick={() => connect()}>MetaMask</Button>
+      <Button onClick={() => connect('injected')}>MetaMask</Button>
       <Button onClick={() => connect('frame')}>Frame</Button>
       <Button onClick={() => connect('portis')}>Portis</Button>
     </div>
