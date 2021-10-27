@@ -1,5 +1,6 @@
 import React from 'react'
-import { Route, HashRouter as Router, Switch } from 'react-router-dom'
+import { ApmRoute as Route } from '@elastic/apm-rum-react'
+import { HashRouter as Router, Switch } from 'react-router-dom'
 
 import Footer from './containers/footer'
 import Navbar from './containers/navbar'
@@ -16,7 +17,7 @@ function App() {
             <Route
               key={route.name}
               path={route.path}
-              exact
+              exact={route.path === '/'}
               component={route.component}
             />
           ))}
