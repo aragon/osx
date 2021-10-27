@@ -12,8 +12,7 @@
     <script>
       !(function () {
         // TODO: add key to pipeline
-        // const analyticsKey = '%REACT_APP_ANALYTICS_KEY%'
-        const analyticsKey = process.env.REACT_APP_ANALYTICS_KEY
+        const analyticsKey = '%VITE_REACT_APP_ANALYTICS_KEY%'
         if (!analyticsKey.includes('REACT_APP_ANALYTICS_KEY')) {
           rudderAnalytics = window.rudderanalytics = []
           for (
