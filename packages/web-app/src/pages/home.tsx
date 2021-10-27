@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 
-import Wallet from '../components/wallet'
+import Wallet from 'components/wallet'
 
 const Home: React.FC = () => {
   const { t } = useTranslation()

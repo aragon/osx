@@ -1,15 +1,22 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ApmRoute as Route } from '@elastic/apm-rum-react'
-import { HashRouter as Router, Switch } from 'react-router-dom'
+import { Switch, useLocation } from 'react-router-dom'
 
-import Footer from './containers/footer'
-import Navbar from './containers/navbar'
-import { PageRoute, routes } from './routes'
+import Footer from 'containers/footer'
+import Navbar from 'containers/navbar'
+import { trackPage } from 'services/analytics'
+import { PageRoute, routes } from 'routes'
 import '../i18n.config'
 
 function App() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    trackPage(pathname)
+  }, [pathname])
+
   return (
-    <Router>
+    <>
       <Navbar />
       <div className="h-screen">
         <Switch>
@@ -17,14 +24,14 @@ function App() {
             <Route
               key={route.name}
               path={route.path}
-              exact={route.path === '/'}
+              exact={route.exact}
               component={route.component}
             />
           ))}
         </Switch>
       </div>
       <Footer />
-    </Router>
+    </>
   )
 }
 
