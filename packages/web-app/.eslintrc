@@ -10,6 +10,15 @@
       "version": "detect"
     }
   },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      // Allows for the parsing of JSX
+      "jsx": true
+    }
+  },
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
@@ -51,7 +60,6 @@
   "overrides": [
     {
       "files": ["**/*.ts", "**/*.tsx"],
-      "parser": "@typescript-eslint/parser",
       "rules": {
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-use-before-define": "off",
@@ -69,10 +77,6 @@
         "node/shebang": "off",
         "no-dupe-class-members": "off",
         "require-atomic-updates": "off"
-      },
-      "parserOptions": {
-        "ecmaVersion": 11,
-        "sourceType": "module"
       }
     }
   ]
