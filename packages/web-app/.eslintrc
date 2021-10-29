@@ -15,7 +15,6 @@
     "ecmaVersion": 11,
     "sourceType": "module",
     "ecmaFeatures": {
-      // Allows for the parsing of JSX
       "jsx": true
     }
   },

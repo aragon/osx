@@ -1,19 +1,19 @@
-import React, { useEffect } from 'react'
-import { ApmRoute as Route } from '@elastic/apm-rum-react'
-import { Switch, useLocation } from 'react-router-dom'
+import React, {useEffect} from 'react';
+import {ApmRoute as Route} from '@elastic/apm-rum-react';
+import {Switch, useLocation} from 'react-router-dom';
 
-import Footer from 'containers/footer'
-import Navbar from 'containers/navbar'
-import { trackPage } from 'services/analytics'
-import { PageRoute, routes } from 'routes'
-import '../i18n.config'
+import Footer from 'containers/footer';
+import Navbar from 'containers/navbar';
+import {trackPage} from 'services/analytics';
+import {PageRoute, routes} from 'routes';
+import '../i18n.config';
 
 function App() {
-  const { pathname } = useLocation()
+  const {pathname} = useLocation();
 
   useEffect(() => {
-    trackPage(pathname)
-  }, [pathname])
+    trackPage(pathname);
+  }, [pathname]);
 
   return (
     <>
@@ -32,7 +32,7 @@ function App() {
       </div>
       <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

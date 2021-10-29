@@ -1,7 +1,7 @@
 enum MethodType {
   PAGE,
   IDENTIFY,
-  EVENT
+  EVENT,
 }
 
 /**
@@ -11,13 +11,13 @@ enum MethodType {
  * @returns the corresponding analytics method
  */
 function getAnalyticsMethod(methodType: MethodType) {
-  const windowAnalytics = (window as any).rudderanalytics
+  const windowAnalytics = (window as any).rudderanalytics;
   if (!windowAnalytics) {
-    return
+    return;
   }
-  if (methodType === MethodType.PAGE) return windowAnalytics.page
-  if (methodType === MethodType.IDENTIFY) return windowAnalytics.identify
-  if (methodType === MethodType.EVENT) return windowAnalytics.track
+  if (methodType === MethodType.PAGE) return windowAnalytics.page;
+  if (methodType === MethodType.IDENTIFY) return windowAnalytics.identify;
+  if (methodType === MethodType.EVENT) return windowAnalytics.track;
 }
 
 /**
@@ -27,13 +27,13 @@ function getAnalyticsMethod(methodType: MethodType) {
  * @returns void
  */
 export function trackPage(pathName: string) {
-  const trackerMethod = getAnalyticsMethod(MethodType.PAGE)
+  const trackerMethod = getAnalyticsMethod(MethodType.PAGE);
   if (typeof trackerMethod !== 'function') {
-    return
+    return;
   }
   trackerMethod({
-    path: pathName
-  })
+    path: pathName,
+  });
 }
 
 /**
@@ -49,14 +49,14 @@ export function identifyUser(
   networkType: string,
   connector: string
 ) {
-  const trackerMethod = getAnalyticsMethod(MethodType.IDENTIFY)
+  const trackerMethod = getAnalyticsMethod(MethodType.IDENTIFY);
   if (typeof trackerMethod !== 'function') {
-    return
+    return;
   }
   const walletData = {
     wallet_address: account,
     wallet_provider: connector,
-    network: networkType
-  }
-  trackerMethod(walletData)
+    network: networkType,
+  };
+  trackerMethod(walletData);
 }

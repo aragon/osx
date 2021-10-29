@@ -1,13 +1,13 @@
-import React from 'react'
-import { render, screen } from '@testing-library/react'
+import React from 'react';
+import {render, screen} from '@testing-library/react';
 
-import Footer from '..'
+import Footer from '..';
 
 describe('Footer', () => {
   test('should render', () => {
-    render(<Footer />)
+    render(<Footer />);
 
-    const element = screen.getByText(/footer/i)
-    expect(element).toBeVisible()
-  })
-})
+    const element = screen.getByText(/footer/i);
+    expect(element).toBeVisible();
+  });
+});
