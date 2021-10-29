@@ -1,11 +1,11 @@
-import React from 'react'
-import styled from 'styled-components'
-import { useTranslation } from 'react-i18next'
+import React from 'react';
+import styled from 'styled-components';
+import {useTranslation} from 'react-i18next';
 
-import Wallet from 'components/wallet'
+import Wallet from 'components/wallet';
 
 const Home: React.FC = () => {
-  const { t } = useTranslation()
+  const {t} = useTranslation();
 
   return (
     <div className="bg-white">
@@ -20,19 +20,19 @@ const Home: React.FC = () => {
       <h1>Wallet</h1>
       <Wallet />
     </div>
-  )
-}
+  );
+};
 
 const WelcomeMessage = styled.h2.attrs({
-  className: 'text-base font-semibold tracking-wide text-blue-600 uppercase'
-})``
+  className: 'text-base font-semibold tracking-wide text-blue-600 uppercase',
+})``;
 const Title = styled.p.attrs({
   className:
-    'my-3 text-4xl sm:text-5xl lg:text-6xl font-bold sm:tracking-tight text-gray-900'
-})``
+    'my-3 text-4xl sm:text-5xl lg:text-6xl font-bold sm:tracking-tight text-gray-900',
+})``;
 const Subtitle = styled.p.attrs({
   className:
-    'my-3 text-4xl sm:text-5xl lg:text-6xl font-bold sm:tracking-tight text-gray-900'
-})``
+    'my-3 text-4xl sm:text-5xl lg:text-6xl font-bold sm:tracking-tight text-gray-900',
+})``;
 
-export default Home
+export default Home;
