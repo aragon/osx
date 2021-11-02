@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export interface IButton {
+export interface ButtonProps {
   /**
    * Is this the principal call to action on the page?
    */
@@ -18,10 +18,6 @@ export interface IButton {
    * Button contents
    */
   label: string;
-  /**
-   * Optional click handler
-   */
-  onClick?: () => void;
 }
 
 /**
@@ -33,7 +29,7 @@ export const Button = ({
   primary = false,
   backgroundColor,
   ...props
-}: IButton) => {
+}: ButtonProps) => {
   return (
     <StyledButton
       size={size}
@@ -49,35 +45,28 @@ export const Button = ({
 type StyledButtonProps = {
   backgroundColor?: string;
   primary: boolean;
-  size: IButton['size'];
+  size: ButtonProps['size'];
+};
+
+const variantSizeStyles = {
+  small: {fontSize: '12px', padding: '10px 16px'},
+  medium: {fontSize: '14px', padding: '11px 20px'},
+  large: {fontSize: '16px', padding: '12px 24px'},
+  default: {fontSize: '14px', padding: '11px 20px'},
 };
 
 const StyledButton = styled.button.attrs(
-  ({ primary, size, backgroundColor }: StyledButtonProps) => {
+  ({primary, size, backgroundColor}: StyledButtonProps) => {
     const mode = primary
       ? 'text-white bg-blue-500'
       : 'text-gray-800 bg-transparent shadow';
 
-    let styles;
-
-    switch (size) {
-      case 'small':
-        styles = { fontSize: '12px', padding: '10px 16px' };
-        break;
-      case 'medium':
-        styles = { fontSize: '14px', padding: '11px 20px' };
-        break;
-      case 'large':
-        styles = { fontSize: '16px', padding: '12px 24px' };
-        break;
-      default:
-        styles = { fontSize: '14px', padding: '11px 20px' };
-        break;
-    }
-
     return {
       className: `font-bold cursor-pointer leading-none inline-block ${mode}`,
-      style: { ...styles, backgroundColor },
+      style: {
+        ...(size ? variantSizeStyles[size] : variantSizeStyles.default),
+        backgroundColor,
+      },
     };
   }
 )<StyledButtonProps>`

@@ -11,9 +11,12 @@
     "react-app-polyfill": "^1.0.0"
   },
   "alias": {
-    "react": "../node_modules/react",
-    "react-dom": "../node_modules/react-dom/profiling",
-    "scheduler/tracing": "../node_modules/scheduler/tracing-profiling"
+    "react": "../../../node_modules/react",
+    "react-dom": "../../../node_modules/react-dom/profiling",
+    "scheduler/tracing": "../../../node_modules/scheduler/tracing-profiling"
+  },
+  "resolutions": {
+    "@babel/preset-env": "7.13.8"
   },
   "devDependencies": {
     "@types/react": "^16.9.11",
