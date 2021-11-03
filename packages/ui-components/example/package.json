@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build index.html",
+    "postcss:watch": "postcss ./index.css -o ./index.css --env development -w",
+    "postcss:build": "postcss ./index.css -o ./index.css --env production"
   },
   "dependencies": {
     "react-app-polyfill": "^1.0.0"
@@ -21,7 +23,11 @@
   "devDependencies": {
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.8.4",
+    "autoprefixer": "^9",
     "parcel": "^1.12.3",
+    "postcss": "^7",
+    "postcss-cli": "^9.0.1",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat",
     "typescript": "^3.4.5"
   }
 }
