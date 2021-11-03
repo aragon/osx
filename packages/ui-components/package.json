@@ -6,57 +6,75 @@
   "repository": "https://github.com/aragon/Zaragoza",
   "license": "MIT",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
-    "web-vitals": "^1.0.1"
+  "main": "dist/index.js",
+  "module": "dist/ui-components.esm.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
-    ]
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "size-limit": [
+    {
+      "path": "dist/ui-components.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/ui-components.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "peerDependencies": {
+    "react": ">=16",
+    "styled-components": ">=5",
+    "tailwindcss": ">=2"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^6.3.12",
+    "@babel/core": "^7.16.0",
+    "@size-limit/preset-small-lib": "^6.0.4",
     "@storybook/addon-essentials": "^6.3.12",
+    "@storybook/addon-info": "^5.3.21",
     "@storybook/addon-links": "^6.3.12",
-    "@storybook/node-logger": "^6.3.12",
-    "@storybook/preset-create-react-app": "^3.2.0",
-    "@storybook/react": "^6.3.12"
+    "@storybook/addon-postcss": "^2.0.0",
+    "@storybook/addons": "^6.3.12",
+    "@storybook/react": "^6.3.12",
+    "@tailwindcss/postcss7-compat": "^2.2.17",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^12.1.2",
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@types/styled-components": "^5.1.15",
+    "autoprefixer": "^9",
+    "babel-loader": "^8.2.3",
+    "husky": "^7.0.4",
+    "postcss": "^8",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-is": "^17.0.2",
+    "rollup-plugin-postcss": "^4.0.0",
+    "size-limit": "^6.0.4",
+    "styled-components": "^5.3.3",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4"
   }
 }
