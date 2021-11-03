@@ -1,8 +1,19 @@
 const postcss = require('rollup-plugin-postcss');
+const replace = require('@rollup/plugin-replace');
 
-// TODO: prevent assignment workaround if postcss is being bundled
 module.exports = {
-  rollup(config) {
+  rollup(config, opts) {
+    // suppress prevent assignment warning
+    config.plugins = config.plugins.map(plugin =>
+      plugin.name === 'replace'
+        ? replace({
+            'process.env.NODE_ENV': JSON.stringify(opts.env),
+            preventAssignment: true,
+          })
+        : plugin
+    );
+
+    // postcss config
     config.plugins.push(
       postcss({
         config: {

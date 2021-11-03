@@ -16,7 +16,8 @@
     "jsx": "react",
     "baseUrl": "./src",
     "paths": {
-      "*": ["./*"]
+      "*": ["./*"],
+      "ui-components": ["../../ui-components"]
     }
   },
   "include": ["src", "typings/**/*.d.ts"],

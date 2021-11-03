@@ -1,29 +1,31 @@
 import React from 'react';
 import styled from 'styled-components';
-import {useWallet} from '../../context/augmentedWallet';
+import {Button} from 'ui-components';
+
+import {useWallet} from 'context/augmentedWallet';
 
 const Wallet: React.FC = () => {
   const {account, balance, reset, connect, isConnected} = useWallet();
 
   return isConnected() ? (
     <div>
-      <div>Account: {account}</div>
+      <div className="text-lg">Account: {account}</div>
       <div>Balance: {balance}</div>
-      <Button onClick={() => reset()}>disconnect</Button>
+      <Button primary label="disconnect" onClick={() => reset()} />
     </div>
   ) : (
-    <div>
+    <Container>
       Connect:
-      <Button onClick={() => connect('injected')}>MetaMask</Button>
-      <Button onClick={() => connect('frame')}>Frame</Button>
-      <Button onClick={() => connect('portis')}>Portis</Button>
-    </div>
+      <Button primary label="MetaMask" onClick={() => connect('injected')} />
+      <Button primary label="Frame" onClick={() => connect('frame')} />
+      <Button primary label="Portis" onClick={() => connect('portis')} />
+    </Container>
   );
 };
 
-const Button = styled.button.attrs({
-  className:
-    'mx-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full',
-})``;
+const Container = styled.div`
+  display: flex;
+  gap: 20px;
+`;
 
 export default Wallet;
