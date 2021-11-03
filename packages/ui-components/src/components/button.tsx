@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-export interface ButtonProps {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Is this the principal call to action on the page?
    */
@@ -18,23 +18,18 @@ export interface ButtonProps {
    * Button contents
    */
   label: string;
-
-  /**
-   * Optional click handler
-   */
-  onClick?: () => void;
 }
 
 /**
  * Primary UI component for user interaction
  */
-export const Button = ({
+export const Button: React.FC<ButtonProps> = ({
   size = 'medium',
   label,
   primary = false,
   backgroundColor,
   ...props
-}: ButtonProps) => {
+}) => {
   return (
     <StyledButton
       size={size}
@@ -62,17 +57,16 @@ const variantSizeStyles = {
 
 const StyledButton = styled.button.attrs(
   ({primary, size, backgroundColor}: StyledButtonProps) => {
-    const mode = primary
-      ? 'text-white bg-blue-500'
-      : 'text-gray-800 bg-transparent shadow';
+    const className: string = `font-bold cursor-pointer leading-none inline-block ${
+      primary ? 'text-white bg-blue-500' : 'text-gray-800 bg-transparent shadow'
+    }`;
 
-    return {
-      className: `font-bold cursor-pointer leading-none inline-block ${mode}`,
-      style: {
-        ...(size ? variantSizeStyles[size] : variantSizeStyles.default),
-        backgroundColor,
-      },
+    const style: any = {
+      ...(size ? variantSizeStyles[size] : variantSizeStyles.default),
+      backgroundColor,
     };
+
+    return {className, style};
   }
 )<StyledButtonProps>`
   border-radius: 3em;

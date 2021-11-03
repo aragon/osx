@@ -44,7 +44,8 @@
   ],
   "peerDependencies": {
     "react": ">=16",
-    "styled-components": ">=5"
+    "styled-components": ">=5",
+    "tailwindcss": ">=2"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
