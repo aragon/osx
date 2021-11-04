@@ -1,5 +1,5 @@
 {
-  "name": "aragonzaragoza-webapp",
+  "name": "@aragon/zaragoza-webapp",
   "description": "Webapp to interact with Zaragoza",
   "version": "0.1.0",
   "private": true,
@@ -12,6 +12,7 @@
     "lint": "eslint src --max-warnings=0"
   },
   "dependencies": {
+    "@aragon/ui-components": "0.1.0",
     "@elastic/apm-rum-react": "^1.3.1",
     "@rollup/plugin-typescript": "^8.3.0",
     "i18next": "^21.3.3",

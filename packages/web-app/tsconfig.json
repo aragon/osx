@@ -15,10 +15,6 @@
     "noEmit": true,
     "jsx": "react",
     "baseUrl": "./src",
-    "paths": {
-      "*": ["./*"],
-      "ui-components": ["../../ui-components"]
-    }
   },
   "include": ["src", "typings/**/*.d.ts"],
   "exclude": ["node_modules"]

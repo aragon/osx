@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import {Button} from 'ui-components';
+import {Button} from '@aragon/ui-components';
 
 import {useWallet} from 'context/augmentedWallet';
 
