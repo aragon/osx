@@ -1,5 +1,5 @@
-import Home from './pages/home';
-import NotFound from './pages/notFound';
+import Home from 'pages/home';
+import NotFound from 'pages/notFound';
 
 export type PageRoute = {
   exact: boolean;
