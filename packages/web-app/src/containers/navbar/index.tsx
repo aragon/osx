@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
   const {t} = useTranslation();
 
   return (
-    <NavContainer>
+    <NavContainer data-testid="nav">
       <TestNetworkIndicator />
       <NavigationBar>
         <Container>
