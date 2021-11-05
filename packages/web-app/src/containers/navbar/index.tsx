@@ -3,20 +3,15 @@ import styled from 'styled-components';
 import {NavLink} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 
-// TODO: consider refactoring to have single source of truth for paths
-const LINKS = [
-  {label: 'Dashboard', path: '/'},
-  {label: 'Governance', path: '/Governance'},
-  {label: 'Finance', path: '/Finance'},
-  {label: 'Community', path: '/Community'},
-];
+import {NAV_LINKS} from 'utils/constants';
+import TestNetworkIndicator from 'components/testNetworkIndicator';
 
 const Navbar: React.FC = () => {
   const {t} = useTranslation();
 
   return (
     <NavContainer>
-      <TestNetworkIndicator>{t('testnetIndicator')}</TestNetworkIndicator>
+      <TestNetworkIndicator />
       <NavigationBar>
         <Container>
           <DaoSelector>
@@ -24,7 +19,7 @@ const Navbar: React.FC = () => {
             <DaoIdentifier>Bushido DAO</DaoIdentifier>
           </DaoSelector>
           <LinksContainer>
-            {LINKS.map((link, index) => (
+            {NAV_LINKS.map((link, index) => (
               <StyledNavLink key={index} to={link.path} exact={true}>
                 {t`${link.label}`}
               </StyledNavLink>
@@ -51,11 +46,6 @@ const NavContainer = styled.div.attrs({
     rgba(245, 247, 250, 0.24) 100%
   );
 `;
-
-const TestNetworkIndicator = styled.div.attrs({
-  className:
-    'flex justify-center items-center p-1 text-xs font-extrabold text-primary-100 bg-primary-900',
-})``;
 
 const NavigationBar = styled.nav.attrs({
   className:

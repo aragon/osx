@@ -7,7 +7,7 @@ describe('Navbar', () => {
   test('should render', () => {
     render(<Navbar />);
 
-    const element = screen.getByText(/navbar/i);
+    const element = screen.getByRole('nav');
     expect(element).toBeVisible();
   });
 });
