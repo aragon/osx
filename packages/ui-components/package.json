@@ -5,7 +5,6 @@
   "author": "Aragon Association",
   "repository": "https://github.com/aragon/Zaragoza",
   "license": "MIT",
-  "private": true,
   "main": "dist/index.js",
   "module": "dist/ui-components.esm.js",
   "typings": "dist/index.d.ts",
@@ -32,16 +31,6 @@
       "pre-commit": "tsdx lint"
     }
   },
-  "size-limit": [
-    {
-      "path": "dist/ui-components.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/ui-components.esm.js",
-      "limit": "10 KB"
-    }
-  ],
   "peerDependencies": {
     "react": ">=16",
     "styled-components": ">=5",
