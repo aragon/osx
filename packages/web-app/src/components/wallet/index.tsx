@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import styled from 'styled-components';
 import {Button} from '@aragon/ui-components';
 
@@ -6,7 +6,6 @@ import {useWallet} from 'context/augmentedWallet';
 
 const Wallet: React.FC = () => {
   const {account, balance, reset, connect, isConnected} = useWallet();
-
   return isConnected() ? (
     <div>
       <div className="text-lg">Account: {account}</div>

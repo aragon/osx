@@ -1,11 +1,26 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
+import {Button} from '@aragon/ui-components';
 
 import Wallet from 'components/wallet';
+import BottomSheet from 'components/BottomSheet';
 
 const Home: React.FC = () => {
   const {t} = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  function onClose() {
+    setIsOpen(false);
+  }
+
+  function onOpen() {
+    setIsOpen(true);
+  }
+
+  function onToggle() {
+    setIsOpen(!isOpen);
+  }
 
   return (
     <div className="bg-white">
@@ -19,6 +34,8 @@ const Home: React.FC = () => {
       </div>
       <h1>Wallet</h1>
       <Wallet />
+      <Button onClick={onToggle} label="Toggle" />
+      <BottomSheet onOpen={onOpen} isOpen={isOpen} onClose={onClose} />
     </div>
   );
 };
