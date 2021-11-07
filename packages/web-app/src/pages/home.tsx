@@ -35,7 +35,7 @@ const Home: React.FC = () => {
       <h1>Wallet</h1>
       <Wallet />
       <Button onClick={onToggle} label="Toggle" />
-      <BottomSheet onOpen={onOpen} isOpen={isOpen} onClose={onClose} />
+      <BottomSheet onOpen={onOpen} isOpen={isOpen} onClose={onToggle} />
     </div>
   );
 };

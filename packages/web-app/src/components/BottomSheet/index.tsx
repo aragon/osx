@@ -1,5 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import {motion, useAnimation} from 'framer-motion';
+import {Backdrop} from '@aragon/ui-components';
 
 type InputProps = {
   isOpen: boolean;
@@ -42,31 +43,34 @@ export default function BottomSheet({isOpen, onClose, onOpen}: InputProps) {
   }, [controls, isOpen, prevIsOpen]);
 
   return (
-    <motion.div
-      drag="y"
-      onDragEnd={onDragEnd}
-      initial="hidden"
-      animate={controls}
-      transition={{
-        type: 'spring',
-        damping: 40,
-        stiffness: 400,
-      }}
-      variants={{
-        visible: {y: 0, height: 200},
-        hidden: {y: 100, height: 0},
-      }}
-      dragConstraints={{top: 0}}
-      dragElastic={0.2}
-      style={{
-        display: 'block',
-        position: 'fixed',
-        bottom: 0,
-        backgroundColor: 'blue',
-        width: '100%',
-        borderTopRightRadius: 10,
-        borderTopLeftRadius: 10,
-      }}
-    />
+    <>
+      <Backdrop visible={isOpen} onClose={onClose} />
+      <motion.div
+        drag="y"
+        onDragEnd={onDragEnd}
+        initial="hidden"
+        animate={controls}
+        transition={{
+          type: 'spring',
+          damping: 40,
+          stiffness: 400,
+        }}
+        variants={{
+          visible: {y: 0, height: 200},
+          hidden: {y: 100, height: 0},
+        }}
+        dragConstraints={{top: 0}}
+        dragElastic={0.2}
+        style={{
+          display: 'block',
+          position: 'fixed',
+          bottom: 0,
+          backgroundColor: 'white',
+          width: '100%',
+          borderTopRightRadius: 10,
+          borderTopLeftRadius: 10,
+        }}
+      />
+    </>
   );
 }

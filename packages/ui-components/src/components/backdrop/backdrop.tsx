@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
+// import {EscapeOutside} from '../escapeOutside';
 export interface BackdropProps {
   /**
    * The `visible` prop determines whether your modal is visible.
@@ -14,7 +14,7 @@ export interface BackdropProps {
   /**
    * Children Element
    */
-  children?: any;
+  children?: React.ReactNode;
 }
 
 /**
@@ -27,20 +27,22 @@ export const Backdrop: React.FC<BackdropProps> = ({
   ...props
 }) => {
   return (
-    <StyledBackdrop visible={visible} onClick={()=>{
-      onClose();
-      }} {...props}>
+    <StyledBackdrop visible={visible} onClick={onClose} {...props}>
+      {/* <EscapeOutside useCapture onEscapeOutside={onClose}> */}
       {children}
+      {/* </EscapeOutside> */}
     </StyledBackdrop>
   );
 };
 
 type StyledBackdropProps = {
   visible: boolean;
-}
+};
 
 const StyledBackdrop = styled.div.attrs(({visible}: StyledBackdropProps) => {
-  const className: string = visible ? 'block' : 'hidden';
+  const className: string = visible
+    ? 'visible opacity-100'
+    : 'invisible opacity-0';
 
   const style: any = {
     position: 'fixed',
@@ -48,9 +50,11 @@ const StyledBackdrop = styled.div.attrs(({visible}: StyledBackdropProps) => {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(97, 110, 124, 0.5)',
-    backdropFilter: 'blur(40px)',
-    cursor: 'pointer'
+    background:
+      'linear-gradient(167.96deg, rgba(31, 41, 51, 0.24) 0%, #1F2933 100%)',
+    transition: 'visibility 0.2s, opacity 0.2s linear',
+    backdropFilter: 'blur(24px)',
+    cursor: 'pointer',
   };
 
   return {className, style};
