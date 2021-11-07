@@ -21,7 +21,7 @@ export default function BottomSheet({isOpen, onClose, onOpen}: InputProps) {
   const prevIsOpen = usePrevious(isOpen);
   const controls = useAnimation();
 
-  function onDragEnd(event: any, info: any) {
+  function onDragEnd(event: MouseEvent | TouchEvent | PointerEvent, info: any) {
     const shouldClose =
       info.velocity.y > 20 || (info.velocity.y >= 0 && info.point.y > 45);
     if (shouldClose) {
@@ -53,18 +53,17 @@ export default function BottomSheet({isOpen, onClose, onOpen}: InputProps) {
         stiffness: 400,
       }}
       variants={{
-        visible: {y: 0, height: 100},
-        hidden: {y: 100, height: 100},
+        visible: {y: 0, height: 200},
+        hidden: {y: 100, height: 0},
       }}
       dragConstraints={{top: 0}}
       dragElastic={0.2}
       style={{
         display: 'block',
-        position: 'absolute',
+        position: 'fixed',
         bottom: 0,
         backgroundColor: 'blue',
         width: '100%',
-        height: 100,
         borderTopRightRadius: 10,
         borderTopLeftRadius: 10,
       }}
