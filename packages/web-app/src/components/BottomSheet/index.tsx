@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, ReactNode} from 'react';
 import {motion, useAnimation} from 'framer-motion';
 import {Backdrop} from '@aragon/ui-components';
+import styled from 'styled-components';
 
 type InputProps = {
   children?: ReactNode;
@@ -52,7 +53,7 @@ export default function BottomSheet({
   return (
     <>
       <Backdrop visible={isOpen} onClose={onClose} />
-      <motion.div
+      <StyledMotionContainer
         drag="y"
         onDragEnd={onDragEnd}
         initial="hidden"
@@ -68,17 +69,28 @@ export default function BottomSheet({
         }}
         dragConstraints={{top: 0}}
         dragElastic={0.2}
-        style={{
-          display: 'block',
-          position: 'fixed',
-          bottom: 0,
-          backgroundColor: '#FFFFFF',
-          width: '100%',
-          borderRadius: '12px 12px 0px 0px',
-        }}
       >
         {children}
-      </motion.div>
+      </StyledMotionContainer>
     </>
   );
 }
+
+const StyledMotionContainer = styled(motion.div).attrs({
+  className: 'block fixed bottom-0 bg-white w-full',
+})`
+  border-radius: 12px 12px 0px 0px;
+  &::before {
+    content: '';
+    display: inline-block;
+    background: #e4e7eb;
+    width: 120px;
+    height: 6px;
+    border-radius: 8px;
+    position: absolute;
+    margin: 0px auto 0px auto;
+    left: 0;
+    right: 0;
+    top: -14px;
+  }
+`;
