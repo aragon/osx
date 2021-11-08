@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-// import {EscapeOutside} from '../escapeOutside';
 export interface BackdropProps {
   /**
    * The `visible` prop determines whether your modal is visible.
@@ -26,11 +25,10 @@ export const Backdrop: React.FC<BackdropProps> = ({
   onClose,
   ...props
 }) => {
+  // TODO:Implement Backdrop to use as wrapper
   return (
     <StyledBackdrop visible={visible} onClick={onClose} {...props}>
-      {/* <EscapeOutside useCapture onEscapeOutside={onClose}> */}
       {children}
-      {/* </EscapeOutside> */}
     </StyledBackdrop>
   );
 };
