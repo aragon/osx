@@ -1,4 +1,4 @@
-import React, {HTMLAttributes} from 'react';
+import React, {HTMLAttributes, ReactNode, CSSProperties} from 'react';
 import styled from 'styled-components';
 import {Root, Trigger, Content} from '@radix-ui/react-popover';
 
@@ -16,21 +16,26 @@ export interface PopoverProps extends HTMLAttributes<HTMLElement> {
    */
   onOpenChange?: (open: boolean) => void;
   /**
-   * The preferred side of the anchor to render against when open
+   * The preferred popover position
    */
-  side: 'top' | 'right' | 'bottom' | 'left';
-  /**
-   * The preferred alignment against the anchor. May change when collisions occur.
-   */
-  align: 'start' | 'center' | 'end';
+  position: {
+    /**
+     * The preferred side of the anchor to render against when open
+     */
+    side: 'top' | 'right' | 'bottom' | 'left';
+    /**
+     * The preferred alignment against the anchor. May change when collisions occur.
+     */
+    align: 'start' | 'center' | 'end';
+  };
   /**
    * Trigger
    */
-  children: React.ReactNode;
+  children: ReactNode;
   /**
    * Content
    */
-  content: React.ReactNode;
+  content: ReactNode;
   /**
    * Content Width
    */
@@ -46,14 +51,15 @@ export const Popover: React.FC<PopoverProps> = ({
   defaultOpen,
   open,
   onOpenChange,
-  side = 'bottom',
-  align = 'center',
-  width,
+  position = {side: 'bottom', align: 'center'},
+  ...props
 }) => {
   return (
-    <Root>
-      <Trigger {...{defaultOpen, open, onOpenChange}}>{children}</Trigger>
-      <StyledContent {...{side, align, width}}>{content}</StyledContent>
+    <Root {...{defaultOpen, open, onOpenChange}}>
+      <Trigger data-testid="popover-trigger">{children}</Trigger>
+      <StyledContent data-testid="popover-content" {...props} align={position.align} side={position.side}>
+        {content}
+      </StyledContent>
     </Root>
   );
 };
@@ -64,9 +70,7 @@ type StyledContentProps = {
 
 const StyledContent = styled(Content).attrs(
   ({width = 300}: StyledContentProps) => {
-    // const className: string = `font-bold cursor-pointer leading-none inline-block`;
-
-    const style: any = {
+    const style: CSSProperties = {
       width,
       background: '#FFFFFF',
       boxShadow: '0px 0px 4px rgba(50, 63, 75, 0.16)',
