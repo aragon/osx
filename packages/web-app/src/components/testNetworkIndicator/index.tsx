@@ -12,5 +12,5 @@ export default TestNetworkIndicator;
 
 const Container = styled.div.attrs({
   className:
-    'flex justify-center items-center p-1 text-xs font-extrabold text-primary-100 bg-primary-900',
+    'flex justify-center items-center p-0.5 text-xs font-extrabold text-primary-100 bg-primary-900',
 })``;

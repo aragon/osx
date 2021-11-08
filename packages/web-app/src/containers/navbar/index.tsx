@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
           </LinksContainer>
         </Container>
         <AccountButton>
-          punk420.eth
+          <div>punk420.eth</div>
           <TempAvatar />
         </AccountButton>
       </NavigationBar>
@@ -57,18 +57,18 @@ const NavContainer = styled.div.attrs({
 
 const NavigationBar = styled.nav.attrs({
   className:
-    'flex justify-between items-center py-6 px-10 2xl:px-52 text-ui-600 ',
+    'flex justify-between items-center py-3 px-5 2xl:px-25 text-ui-600',
 })``;
 
 const Container = styled.div.attrs({
-  className: 'flex gap-12 items-center',
+  className: 'flex space-x-6 items-center',
 })``;
 
 const LinksContainer = styled.div.attrs({
-  className: 'flex gap-4 items-center ',
+  className: 'flex space-x-1.5 items-center ',
 })``;
 
-const roundedButtonClasses = 'flex items-center h-12 py-3 px-4 rounded-xl';
+const roundedButtonClasses = 'flex items-center h-6 py-1.5 px-2 rounded-lg';
 
 // TODO: investigate NavLink for activeClassName
 const StyledNavLink = styled(NavLink).attrs({
@@ -81,7 +81,7 @@ const StyledNavLink = styled(NavLink).attrs({
 `;
 
 const DaoSelector = styled.div.attrs({
-  className: `${roundedButtonClasses} flex gap-3 `,
+  className: `${roundedButtonClasses} space-x-1.5 `,
 })``;
 
 const DaoIdentifier = styled.span.attrs({
@@ -89,13 +89,13 @@ const DaoIdentifier = styled.span.attrs({
 })``;
 
 const TempDaoAvatar = styled.div.attrs({
-  className: 'w-12 h-12 rounded-xl bg-primary-700',
+  className: 'w-6 h-6 rounded-xl bg-primary-700',
 })``;
 
 const AccountButton = styled.button.attrs({
-  className: `${roundedButtonClasses} gap-3 bg-ui-0`,
+  className: `${roundedButtonClasses} space-x-1.5 bg-ui-0`,
 })``;
 
 const TempAvatar = styled.div.attrs({
-  className: 'w-6 h-6 rounded-full bg-primary-700',
+  className: 'w-3 h-3 rounded-full bg-primary-700',
 })``;
