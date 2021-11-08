@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {Button, Popover, PopoverProps} from '../src';
 
 export default {
-  title: 'Utils/Popover',
+  title: 'Components/Popover',
   component: Popover,
   argTypes: {
     backgroundColor: {control: 'color'},
