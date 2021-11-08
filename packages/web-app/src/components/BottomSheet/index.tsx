@@ -1,8 +1,9 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, ReactNode} from 'react';
 import {motion, useAnimation} from 'framer-motion';
 import {Backdrop} from '@aragon/ui-components';
 
 type InputProps = {
+  children?: ReactNode;
   isOpen: boolean;
   onClose: () => void;
   onOpen: () => void;
@@ -18,10 +19,16 @@ function usePrevious(value: boolean) {
   return previousValueRef.current;
 }
 
-export default function BottomSheet({isOpen, onClose, onOpen}: InputProps) {
+export default function BottomSheet({
+  children,
+  isOpen,
+  onClose,
+  onOpen,
+}: InputProps) {
   const prevIsOpen = usePrevious(isOpen);
   const controls = useAnimation();
 
+  // For adding drag on bottom sheet
   function onDragEnd(event: MouseEvent | TouchEvent | PointerEvent, info: any) {
     const shouldClose =
       info.velocity.y > 20 || (info.velocity.y >= 0 && info.point.y > 45);
@@ -33,7 +40,7 @@ export default function BottomSheet({isOpen, onClose, onOpen}: InputProps) {
       onOpen();
     }
   }
-
+  // For Run animation on each state change
   useEffect(() => {
     if (prevIsOpen && !isOpen) {
       controls.start('hidden');
@@ -65,12 +72,13 @@ export default function BottomSheet({isOpen, onClose, onOpen}: InputProps) {
           display: 'block',
           position: 'fixed',
           bottom: 0,
-          backgroundColor: 'white',
+          backgroundColor: '#FFFFFF',
           width: '100%',
-          borderTopRightRadius: 10,
-          borderTopLeftRadius: 10,
+          borderRadius: '12px 12px 0px 0px',
         }}
-      />
+      >
+        {children}
+      </motion.div>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {ReactNode} from 'react';
 import styled from 'styled-components';
 export interface BackdropProps {
   /**
@@ -7,13 +7,12 @@ export interface BackdropProps {
   visible?: boolean;
   /**
    * The `onClose` prop allows passing a function that will be called once the modal has been dismissed.
-   * _On the Android platform, this is a required function._
    */
   onClose: () => void;
   /**
    * Children Element
    */
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 /**
@@ -27,7 +26,12 @@ export const Backdrop: React.FC<BackdropProps> = ({
 }) => {
   // TODO:Implement Backdrop to use as wrapper
   return (
-    <StyledBackdrop visible={visible} onClick={onClose} {...props}>
+    <StyledBackdrop
+      data-testid="backdrop-container"
+      visible={visible}
+      onClick={onClose}
+      {...props}
+    >
       {children}
     </StyledBackdrop>
   );
