@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import {NavLink} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 
-import {NAV_LINKS} from 'utils/constants';
 import TestNetworkIndicator from 'components/testNetworkIndicator';
+import {Dashboard, Community, Finance, Governance} from 'utils/paths';
 
 const Navbar: React.FC = () => {
   const {t} = useTranslation();
@@ -19,11 +19,19 @@ const Navbar: React.FC = () => {
             <DaoIdentifier>Bushido DAO</DaoIdentifier>
           </DaoSelector>
           <LinksContainer>
-            {NAV_LINKS.map((link, index) => (
-              <StyledNavLink key={index} to={link.path} exact={true}>
-                {t`${link.label}`}
-              </StyledNavLink>
-            ))}
+            {/* TODO: Investigate string interpolation with react-i18next */}
+            <StyledNavLink to={Dashboard} exact={true}>
+              {t('navLinks.dashboard')}
+            </StyledNavLink>
+            <StyledNavLink to={Governance} exact={true}>
+              {t('navLinks.governance')}
+            </StyledNavLink>
+            <StyledNavLink to={Finance} exact={true}>
+              {t('navLinks.finance')}
+            </StyledNavLink>
+            <StyledNavLink to={Community} exact={true}>
+              {t('navLinks.community')}
+            </StyledNavLink>
           </LinksContainer>
         </Container>
         <AccountButton>

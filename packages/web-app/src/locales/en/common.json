@@ -7,8 +7,8 @@
   "testnetIndicator": "TESTNET ACTIVE",
   "navLinks": {
     "dashboard": "Dashboard",
-    "governance": "Dashboard",
-    "finance": "Dashboard",
-    "community": "Dashboard"
+    "governance": "Governance",
+    "finance": "Finance",
+    "community": "Community"
   }
 }
