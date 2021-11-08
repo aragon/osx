@@ -2,21 +2,9 @@ import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * Is this the principal call to action on the page?
-   */
-  primary?: boolean;
-  /**
-   * What background color to use
-   */
-  backgroundColor?: string;
-  /**
-   * How large should the button be?
-   */
-  size?: 'small' | 'medium' | 'large';
-  /**
-   * Button contents
-   */
+  mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
+  size: 'small' | 'default';
+  functionality: 'add' | 'open' | 'normal';
   label: string;
 }
 
@@ -24,50 +12,69 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * Primary UI component for user interaction
  */
 export const Button: React.FC<ButtonProps> = ({
-  size = 'medium',
+  mode = 'tertiary',
+  size = 'default',
+  functionality = 'normal',
   label,
-  primary = false,
-  backgroundColor,
-  ...props
+  onClick,
 }) => {
-  return (
-    <StyledButton
-      size={size}
-      primary={primary}
-      backgroundColor={backgroundColor}
-      {...props}
-    >
-      {label}
-    </StyledButton>
-  );
-};
-
-type StyledButtonProps = {
-  backgroundColor?: string;
-  primary: boolean;
-  size: ButtonProps['size'];
-};
-
-const variantSizeStyles = {
-  small: {fontSize: '12px', padding: '10px 16px'},
-  medium: {fontSize: '14px', padding: '11px 20px'},
-  large: {fontSize: '16px', padding: '12px 24px'},
-  default: {fontSize: '14px', padding: '11px 20px'},
-};
-
-const StyledButton = styled.button.attrs(
-  ({primary, size, backgroundColor}: StyledButtonProps) => {
-    const className: string = `font-bold cursor-pointer leading-none inline-block ${
-      primary ? 'text-white bg-blue-500' : 'text-gray-800 bg-transparent shadow'
-    }`;
-
-    const style: any = {
-      ...(size ? variantSizeStyles[size] : variantSizeStyles.default),
-      backgroundColor,
-    };
-
-    return {className, style};
+  switch (mode) {
+    case 'primary':
+      return (
+        <PrimaryButton onClick={onClick} size={size}>
+          {label}
+        </PrimaryButton>
+      );
+    case 'secondary':
+      return (
+        <SecondaryButton onClick={onClick} size={size}>
+          {label}
+        </SecondaryButton>
+      );
+    case 'tertiary':
+      return (
+        <TertiaryButton onClick={onClick} size={size}>
+          {label}
+        </TertiaryButton>
+      );
+    case 'ghost':
+      return <GhostButton size={size}>{label}</GhostButton>;
   }
-)<StyledButtonProps>`
-  border-radius: 3em;
-`;
+};
+
+export interface SizedButtonProps {
+  size: ButtonProps['size'];
+}
+
+const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
+  let className = 'px-4';
+  switch (size) {
+    case 'small':
+      className += ' py-2 rounded-xl';
+      break;
+    default:
+      className += ' py-3 rounded-2xl';
+      break;
+  }
+  return {className};
+})<SizedButtonProps>``;
+
+const PrimaryButton = styled(SizedButton).attrs({
+  className:
+    'text-ui-0 bg-primary-400 hover:bg-primary-500 active:bg-primary-700 disabled:',
+})<SizedButtonProps>``;
+
+const SecondaryButton = styled(SizedButton).attrs({
+  className:
+    'text-primary-500 bg-primary-100 hover:text-primary-800 active:bg-primary-200 active:text-primary-800',
+})<SizedButtonProps>``;
+
+const TertiaryButton = styled(SizedButton).attrs({
+  className:
+    'text-ui-600 bg-ui-0 border-2 border-ui-100 hover:border-ui-300 active:border-ui-800',
+})<SizedButtonProps>``;
+
+const GhostButton = styled(SizedButton).attrs({
+  className:
+    'text-primary-500 bg-ui-0 hover:text-primary-800 active:bg-primary-50',
+})<SizedButtonProps>``;
