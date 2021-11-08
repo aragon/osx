@@ -11,6 +11,7 @@ enum MethodType {
  * @returns the corresponding analytics method
  */
 function getAnalyticsMethod(methodType: MethodType) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const windowAnalytics = (window as any).rudderanalytics;
   if (!windowAnalytics) {
     return;

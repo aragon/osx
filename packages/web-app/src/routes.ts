@@ -1,5 +1,6 @@
-import Home from './pages/home';
-import NotFound from './pages/notFound';
+import HomePage from 'pages/home';
+import NotFoundPage from 'pages/notFound';
+import {Dashboard, NotFound} from 'utils/paths';
 
 export type PageRoute = {
   exact: boolean;
@@ -10,6 +11,6 @@ export type PageRoute = {
 
 // Note that order matters if all routes aren't exact
 export const routes: PageRoute[] = [
-  {name: 'Homepage', path: '/', component: Home, exact: true},
-  {name: '404NotFound', path: '*', component: NotFound, exact: false},
+  {name: 'Dashboard', path: Dashboard, component: HomePage, exact: true},
+  {name: 'NotFound', path: NotFound, component: NotFoundPage, exact: false},
 ];
