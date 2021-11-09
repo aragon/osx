@@ -13,4 +13,7 @@ export const AllProps = Template.bind({});
 AllProps.args = {
   label: 'Button Text',
   disabled: false,
+  onClick: () => {
+    console.log('hi');
+  },
 };

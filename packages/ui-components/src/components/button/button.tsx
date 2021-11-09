@@ -2,9 +2,6 @@ import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * The text to display in the button.
-   */
   mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
   size: 'small' | 'default';
   functionality: 'add' | 'open' | 'normal';
@@ -20,9 +17,10 @@ export const Button: React.FC<ButtonProps> = ({
   functionality = 'normal',
   label,
   onClick,
+  disable,
 }) => {
   return (
-    <StyledButton mode={mode} size={size} onClick={onClick}>
+    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disable}>
       <Content label={label} functionality={functionality} />
     </StyledButton>
   );
