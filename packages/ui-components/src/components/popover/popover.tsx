@@ -16,18 +16,13 @@ export interface PopoverProps extends HTMLAttributes<HTMLElement> {
    */
   onOpenChange?: (open: boolean) => void;
   /**
-   * The preferred popover position
+   * The preferred side of the anchor to render against when open
    */
-  position: {
-    /**
-     * The preferred side of the anchor to render against when open
-     */
-    side: 'top' | 'right' | 'bottom' | 'left';
-    /**
-     * The preferred alignment against the anchor. May change when collisions occur.
-     */
-    align: 'start' | 'center' | 'end';
-  };
+  side: 'top' | 'right' | 'bottom' | 'left';
+  /**
+   * The preferred alignment against the anchor. May change when collisions occur.
+   */
+  align: 'start' | 'center' | 'end';
   /**
    * Trigger
    */
@@ -43,7 +38,7 @@ export interface PopoverProps extends HTMLAttributes<HTMLElement> {
 }
 
 /**
- * Primary UI component for user interaction
+ * Default UI component
  */
 export const Popover: React.FC<PopoverProps> = ({
   children,
@@ -51,13 +46,19 @@ export const Popover: React.FC<PopoverProps> = ({
   defaultOpen,
   open,
   onOpenChange,
-  position = {side: 'bottom', align: 'center'},
+  side = 'bottom',
+  align = 'center',
   ...props
 }) => {
   return (
     <Root {...{defaultOpen, open, onOpenChange}}>
       <Trigger data-testid="popover-trigger">{children}</Trigger>
-      <StyledContent data-testid="popover-content" {...props} align={position.align} side={position.side}>
+      <StyledContent
+        data-testid="popover-content"
+        {...props}
+        align={align}
+        side={side}
+      >
         {content}
       </StyledContent>
     </Root>
