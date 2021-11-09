@@ -1,8 +1,6 @@
 import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-import logo from '../../public/favicon.svg';
-
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * The text to display in the button.
@@ -24,7 +22,7 @@ export const Button: React.FC<ButtonProps> = ({
   onClick,
 }) => {
   return (
-    <StyledButton mode={mode} size={size}>
+    <StyledButton mode={mode} size={size} onClick={onClick}>
       <Content label={label} functionality={functionality} />
     </StyledButton>
   );
