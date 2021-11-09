@@ -42,7 +42,6 @@ type ContentProps = {
  * will be just a label.
  */
 const Content: React.FC<ContentProps> = ({label, functionality}) => {
-  // TODO replace image holder with correct icons. [VR 09-11-2021]
   if (functionality === 'add') {
     return (
       <FlexDiv className="flex">
@@ -66,11 +65,13 @@ const FlexDiv = styled.div`
   display: flex;
 `;
 
+// TODO replace image holder with correct icons. [VR 09-11-2021]
 const AddIcon = styled.img.attrs({
   src: 'https://place-hold.it/150x150',
   className: 'mr-2 w-3 h-3',
 })``;
 
+// TODO replace image holder with correct icons. [VR 09-11-2021]
 const OpenIcon = styled.img.attrs({
   src: 'https://place-hold.it/150x150',
   className: 'ml-2 w-3 h-3',
