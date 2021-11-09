@@ -47,13 +47,13 @@ export interface SizedButtonProps {
 }
 
 const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
-  let className = 'px-4';
+  let className = 'px-2';
   switch (size) {
     case 'small':
-      className += ' py-2 rounded-xl';
+      className += ' py-1 rounded-xl';
       break;
     default:
-      className += ' py-3 rounded-2xl';
+      className += ' py-1.5 rounded-2xl';
       break;
   }
   return {className};
