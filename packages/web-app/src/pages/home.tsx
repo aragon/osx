@@ -10,12 +10,12 @@ const Home: React.FC = () => {
   const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  function onOpen() {
-    setIsOpen(true);
+  function onClose() {
+    setIsOpen(false);
   }
 
-  function onToggle() {
-    setIsOpen(!isOpen);
+  function onOpen() {
+    setIsOpen(true);
   }
 
   return (
@@ -30,8 +30,8 @@ const Home: React.FC = () => {
       </div>
       <h1>Wallet</h1>
       <Wallet />
-      <Button onClick={onToggle} label="Toggle" />
-      <BottomSheet onOpen={onOpen} isOpen={isOpen} onClose={onToggle} />
+      <Button onClick={onOpen} label="Toggle" />
+      <BottomSheet onOpen={onOpen} isOpen={isOpen} onClose={onClose} />
     </div>
   );
 };

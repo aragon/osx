@@ -3,7 +3,7 @@ import {motion, useAnimation} from 'framer-motion';
 import {Backdrop} from '@aragon/ui-components';
 import styled from 'styled-components';
 
-import usePrevious from 'Hooks/usePrevious';
+import usePrevious from 'hooks/usePrevious';
 
 type InputProps = {
   children?: ReactNode;
