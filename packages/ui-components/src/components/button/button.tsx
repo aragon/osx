@@ -66,7 +66,7 @@ const FlexDiv = styled.div.attrs(({side}: FlexDivProps) => {
   if (side === 'left') className = 'flex space-x-2';
   else className = 'flex flex-row-reverse space-x-reverse space-x-2';
   return {className: className};
-})``;
+})<FlexDivProps>``;
 
 type StyledIconProps = {
   iconSrc: IconButtonProps['iconSrc'];
@@ -74,7 +74,7 @@ type StyledIconProps = {
 
 const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
   return {src: iconSrc, className: 'w-3 h-3'};
-})``;
+})<StyledIconProps>``;
 
 // Auxiliary Components ========================================================
 

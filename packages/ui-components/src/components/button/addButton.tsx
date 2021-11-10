@@ -1,6 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
-import {IconButton} from './button';
+import {IconButton, ButtonProps} from './button';
 
 /** Button to add stuff. Comes with a plus sign icon  */
 export const AddButton: React.FC<ButtonProps> = ({
@@ -20,6 +19,7 @@ export const AddButton: React.FC<ButtonProps> = ({
       mode={mode}
       size={size}
       disabled={disabled}
+      onClick={onClick}
     />
   );
 };
