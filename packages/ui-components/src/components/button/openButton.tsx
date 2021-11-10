@@ -1,5 +1,6 @@
 import React from 'react';
-import {IconButton, ButtonProps} from './button';
+import {ButtonProps} from './button';
+import {IconButton} from './iconButton';
 
 /** Button used to open dropdowns or popovers. Comes with a downward-facing
  * arrowhead icon  */

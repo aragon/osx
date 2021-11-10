@@ -1,5 +1,6 @@
 import React from 'react';
-import {IconButton, ButtonProps} from './button';
+import {ButtonProps} from './button';
+import {IconButton} from './iconButton';
 
 /** Button to add stuff. Comes with a plus sign icon  */
 export const AddButton: React.FC<ButtonProps> = ({
