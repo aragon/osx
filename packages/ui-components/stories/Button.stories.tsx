@@ -1,13 +1,13 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
-import {Button, ButtonProps} from '../src';
+import {IconButton, IconButtonProps} from '../src';
 
 export default {
   title: 'Components/Button',
-  component: Button,
+  component: IconButton,
 } as Meta;
 
-const Template: Story<ButtonProps> = args => <Button {...args} />;
+const Template: Story<IconButtonProps> = args => <IconButton {...args} />;
 
 export const AllProps = Template.bind({});
 AllProps.args = {
@@ -16,4 +16,6 @@ AllProps.args = {
   onClick: () => {
     console.log('hi');
   },
+  side: 'left',
+  iconSrc: 'https://place-hold.it/150x150',
 };

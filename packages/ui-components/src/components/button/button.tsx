@@ -1,91 +1,81 @@
 import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// Simple Button ===============================================================
+
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Changes a button's color scheme */
   mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
   /** Changes a button's size */
   size: 'small' | 'default';
-  /** Adds an icon to the button, reflecting the functionality ("plus" icon for
-   * "add" and arrow head for open).
-   * */
-  functionality: 'add' | 'open' | 'normal';
   /** Text displayed on the button */
   label: string;
-}
+};
 
-/**
- * Primary UI component for user interaction
- */
-export const Button: React.FC<ButtonProps> = ({
+export const SimpleButton: React.FC<ButtonProps> = ({
   mode = 'primary',
   size = 'default',
-  functionality = 'normal',
   label,
   onClick,
   disabled,
 }) => {
   return (
     <StyledButton mode={mode} size={size} onClick={onClick} disabled={disabled}>
-      <Content label={label} functionality={functionality} />
+      {label}
     </StyledButton>
   );
 };
 
-// Content Components ======================================================
+// ICON BUTTON ================================================================
 
-type ContentProps = {
-  label: ButtonProps['label'];
-  functionality: ButtonProps['functionality'];
+export type IconButtonProps = ButtonProps & {
+  side: 'left' | 'right';
+  iconSrc: string;
 };
 
-/**
- * Provides the content for the button. The content depends on the Button's
- * functionality prop. If the functionality is 'add', or 'open', the content
- * will be a label and an icon. If the functionality is 'normal', the content
- * will be just a label.
- */
-const Content: React.FC<ContentProps> = ({label, functionality}) => {
-  if (functionality === 'add') {
-    return (
-      <FlexDiv>
-        <AddIcon />
-        {label}
+export const IconButton: React.FC<IconButtonProps> = ({
+  mode = 'primary',
+  size = 'default',
+  side = 'left',
+  iconSrc,
+  label,
+  onClick,
+  disabled,
+}) => {
+  return (
+    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disabled}>
+      <FlexDiv side={side}>
+        <StyledIcon iconSrc={iconSrc} />
+        <p>{label}</p>
       </FlexDiv>
-    );
-  }
-  if (functionality === 'open') {
-    return (
-      <FlexDiv>
-        {label}
-        <OpenIcon />
-      </FlexDiv>
-    );
-  }
-  return <FlexDiv>{label}</FlexDiv>;
+    </StyledButton>
+  );
 };
 
-const FlexDiv = styled.div`
-  display: flex;
-`;
+type FlexDivProps = {
+  side: IconButtonProps['side'];
+};
 
-// TODO replace image holder with correct icons. [VR 09-11-2021]
-const AddIcon = styled.img.attrs({
-  src: 'https://place-hold.it/150x150',
-  className: 'mr-2 w-3 h-3',
+const FlexDiv = styled.div.attrs(({side}: FlexDivProps) => {
+  let className = 'flex space-x-2';
+  if (side === 'left') className = 'flex space-x-2';
+  else className = 'flex flex-row-reverse space-x-reverse space-x-2';
+  return {className: className};
 })``;
 
-// TODO replace image holder with correct icons. [VR 09-11-2021]
-const OpenIcon = styled.img.attrs({
-  src: 'https://place-hold.it/150x150',
-  className: 'ml-2 w-3 h-3',
+type StyledIconProps = {
+  iconSrc: IconButtonProps['iconSrc'];
+};
+
+const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
+  return {src: iconSrc, className: 'w-3 h-3'};
 })``;
+
+// Auxiliary Components ========================================================
 
 type SizedButtonProps = {
   size: ButtonProps['size'];
 };
-
-// Base Button Components ======================================================
 
 /**
  * Extends the button element with the desired size.
