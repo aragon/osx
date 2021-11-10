@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import {render, screen} from 'test-utils';
 
 import Navbar from '..';
 
@@ -7,7 +7,7 @@ describe('Navbar', () => {
   test('should render', () => {
     render(<Navbar />);
 
-    const element = screen.getByText(/navbar/i);
-    expect(element).toBeVisible();
+    const element = screen.getByTestId(/nav/i);
+    expect(element).toBeInTheDocument();
   });
 });
