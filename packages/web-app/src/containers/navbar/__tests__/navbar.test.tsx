@@ -7,7 +7,7 @@ describe('Navbar', () => {
   test('should render', () => {
     render(<Navbar />);
 
-    const element = screen.getByText(/navbar/i);
-    expect(element).toBeVisible();
+    const element = screen.getByTestId(/nav/i);
+    expect(element).toBeInTheDocument();
   });
 });

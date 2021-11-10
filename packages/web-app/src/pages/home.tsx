@@ -9,7 +9,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="bg-white">
-      <p>Placeholder Homepage</p>
       <div className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 mx-auto max-w-screen-xl">
         <div className="text-center">
           <WelcomeMessage>{t('subtitle')}</WelcomeMessage>

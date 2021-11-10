@@ -3,5 +3,12 @@
   "title": {
     "part1": "Zaragoza",
     "part2": "The human centered Dao infrastructure."
+  },
+  "testnetIndicator": "TESTNET ACTIVE",
+  "navLinks": {
+    "dashboard": "Dashboard",
+    "governance": "Governance",
+    "finance": "Finance",
+    "community": "Community"
   }
 }
