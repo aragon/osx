@@ -1,7 +1,9 @@
-import React, {useEffect, useRef, ReactNode} from 'react';
+import React, {useEffect, ReactNode} from 'react';
 import {motion, useAnimation} from 'framer-motion';
 import {Backdrop} from '@aragon/ui-components';
 import styled from 'styled-components';
+
+import usePrevious from 'Hooks/usePrevious';
 
 type InputProps = {
   children?: ReactNode;
@@ -9,16 +11,6 @@ type InputProps = {
   onClose: () => void;
   onOpen: () => void;
 };
-
-function usePrevious(value: boolean) {
-  const previousValueRef = useRef<boolean>();
-
-  useEffect(() => {
-    previousValueRef.current = value;
-  }, [value]);
-
-  return previousValueRef.current;
-}
 
 export default function BottomSheet({
   children,
@@ -80,7 +72,7 @@ const StyledMotionContainer = styled(motion.div).attrs({
   className: 'block fixed bottom-0 bg-white w-full',
 })`
   border-radius: 12px 12px 0px 0px;
-  &::before {
+  &:before {
     content: '';
     display: inline-block;
     background: #e4e7eb;

@@ -10,10 +10,6 @@ const Home: React.FC = () => {
   const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  function onClose() {
-    setIsOpen(false);
-  }
-
   function onOpen() {
     setIsOpen(true);
   }
