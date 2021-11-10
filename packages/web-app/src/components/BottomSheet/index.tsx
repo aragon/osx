@@ -22,7 +22,7 @@ export default function BottomSheet({
   const controls = useAnimation();
 
   // For adding drag on bottom sheet
-  function onDragEnd(event: MouseEvent | TouchEvent | PointerEvent, info: any) {
+  function onDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: any) {
     const shouldClose =
       info.velocity.y > 20 || (info.velocity.y >= 0 && info.point.y > 45);
     if (shouldClose) {
