@@ -2,9 +2,15 @@ import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Changes a button's color scheme */
   mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
+  /** Changes a button's size */
   size: 'small' | 'default';
+  /** Adds an icon to the button, reflecting the functionality ("plus" icon for
+   * "add" and arrow head for open).
+   * */
   functionality: 'add' | 'open' | 'normal';
+  /** Text displayed on the button */
   label: string;
 }
 
