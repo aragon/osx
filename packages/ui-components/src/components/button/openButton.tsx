@@ -1,6 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
-import {IconButton} from './button';
+import {IconButton, ButtonProps} from './button';
 
 export const OpenButton: React.FC<ButtonProps> = ({
   mode = 'primary',
@@ -21,6 +20,7 @@ export const OpenButton: React.FC<ButtonProps> = ({
       mode={mode}
       size={size}
       disabled={disabled}
+      onClick={onClick}
     />
   );
 };

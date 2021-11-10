@@ -14,7 +14,7 @@ AllProps.args = {
   label: 'Button Text',
   disabled: false,
   onClick: () => {
-    console.log('hi');
+    alert('hey, you just triggered the onClick method :)');
   },
   side: 'left',
   iconSrc: 'https://place-hold.it/150x150',

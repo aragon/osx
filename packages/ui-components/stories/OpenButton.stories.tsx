@@ -13,6 +13,6 @@ export const AllProps = Template.bind({});
 AllProps.args = {
   label: 'Open Button',
   onClick: () => {
-    console.log('hi');
+    alert('hey, you just triggered the onClick method :)');
   },
 };
