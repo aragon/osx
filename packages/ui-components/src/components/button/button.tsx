@@ -55,6 +55,7 @@ export const StyledButton = styled(SizedButton).attrs(
   ({mode}: StyledButtonProps) => {
     let className;
 
+    //TODO add disabled styling once design is finalized
     if (mode === 'primary') {
       className =
         'text-ui-0 bg-primary-400 hover:bg-primary-500 active:bg-primary-700';
