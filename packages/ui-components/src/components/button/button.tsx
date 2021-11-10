@@ -23,10 +23,10 @@ export const Button: React.FC<ButtonProps> = ({
   functionality = 'normal',
   label,
   onClick,
-  disable,
+  disabled,
 }) => {
   return (
-    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disable}>
+    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disabled}>
       <Content label={label} functionality={functionality} />
     </StyledButton>
   );
@@ -48,21 +48,21 @@ type ContentProps = {
 const Content: React.FC<ContentProps> = ({label, functionality}) => {
   if (functionality === 'add') {
     return (
-      <FlexDiv className="flex">
+      <FlexDiv>
         <AddIcon />
         {label}
       </FlexDiv>
     );
-  } else if (functionality === 'open') {
+  }
+  if (functionality === 'open') {
     return (
-      <FlexDiv className="flex">
+      <FlexDiv>
         {label}
         <OpenIcon />
       </FlexDiv>
     );
-  } else {
-    return <div className="flex">{label}</div>;
   }
+  return <FlexDiv>{label}</FlexDiv>;
 };
 
 const FlexDiv = styled.div`
