@@ -1,73 +1,75 @@
 import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * Is this the principal call to action on the page?
-   */
-  primary?: boolean;
-  /**
-   * What background color to use
-   */
-  backgroundColor?: string;
-  /**
-   * How large should the button be?
-   */
-  size?: 'small' | 'medium' | 'large';
-  /**
-   * Button contents
-   */
-  label: string;
-}
+// Simple Button ===============================================================
 
-/**
- * Primary UI component for user interaction
- */
-export const Button: React.FC<ButtonProps> = ({
-  size = 'medium',
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  /** Changes a button's color scheme */
+  mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
+  /** Changes a button's size */
+  size: 'small' | 'default';
+  /** Text displayed on the button */
+  label: string;
+};
+
+/** Simple button with variable styling (depending on mode) and variable sizin */
+export const SimpleButton: React.FC<ButtonProps> = ({
+  mode = 'primary',
+  size = 'default',
   label,
-  primary = false,
-  backgroundColor,
-  ...props
+  onClick,
+  disabled,
 }) => {
   return (
-    <StyledButton
-      size={size}
-      primary={primary}
-      backgroundColor={backgroundColor}
-      {...props}
-    >
+    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disabled}>
       {label}
     </StyledButton>
   );
 };
 
-type StyledButtonProps = {
-  backgroundColor?: string;
-  primary: boolean;
+// Auxiliary Components ========================================================
+
+type SizedButtonProps = {
   size: ButtonProps['size'];
 };
 
-const variantSizeStyles = {
-  small: {fontSize: '12px', padding: '10px 16px'},
-  medium: {fontSize: '14px', padding: '11px 20px'},
-  large: {fontSize: '16px', padding: '12px 24px'},
-  default: {fontSize: '14px', padding: '11px 20px'},
+/**
+ * Extends the button element with the desired size.
+ */
+const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
+  const className = `px-4 ${
+    size === 'default' ? 'py-3 rounded-2xl' : 'py-2 rounded-xl'
+  }`;
+  return {className};
+})<SizedButtonProps>``;
+
+type StyledButtonProps = {
+  mode: ButtonProps['mode'];
+  size: ButtonProps['size'];
 };
 
-const StyledButton = styled.button.attrs(
-  ({primary, size, backgroundColor}: StyledButtonProps) => {
-    const className: string = `font-bold cursor-pointer leading-none inline-block ${
-      primary ? 'text-white bg-blue-500' : 'text-gray-800 bg-transparent shadow'
-    }`;
+/**
+ * Extends the SizedButton element with the desired styling
+ */
+export const StyledButton = styled(SizedButton).attrs(
+  ({mode}: StyledButtonProps) => {
+    let className;
 
-    const style: any = {
-      ...(size ? variantSizeStyles[size] : variantSizeStyles.default),
-      backgroundColor,
-    };
+    //TODO add disabled styling once design is finalized
+    if (mode === 'primary') {
+      className =
+        'text-ui-0 bg-primary-400 hover:bg-primary-500 active:bg-primary-700';
+    } else if (mode === 'secondary') {
+      className =
+        'text-primary-500 bg-primary-100 hover:text-primary-800 active:bg-primary-200 active:text-primary-800';
+    } else if (mode === 'tertiary') {
+      className =
+        'text-ui-600 bg-ui-0 border-2 border-ui-100 hover:border-ui-300 active:border-ui-800';
+    } else if (mode === 'ghost') {
+      className =
+        'text-primary-500 bg-ui-0 hover:text-primary-800 active:bg-primary-50';
+    }
 
-    return {className, style};
+    return {className};
   }
-)<StyledButtonProps>`
-  border-radius: 3em;
-`;
+)<StyledButtonProps>``;
