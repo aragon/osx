@@ -15,6 +15,9 @@
     "noEmit": true,
     "jsx": "react",
     "baseUrl": "./src",
+    "paths": {
+      "test-utils": ["./utils/test-utils"]
+    }
   },
   "include": ["src", "typings/**/*.d.ts"],
   "exclude": ["node_modules"]
