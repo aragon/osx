@@ -1,5 +1,6 @@
 import React, {ReactNode} from 'react';
 import styled from 'styled-components';
+
 export interface BackdropProps {
   /**
    * The `visible` prop determines whether your modal is visible.
@@ -16,7 +17,7 @@ export interface BackdropProps {
 }
 
 /**
- * Primary UI component for user interaction
+ * Backdrop UI component
  */
 export const Backdrop: React.FC<BackdropProps> = ({
   visible = false,
