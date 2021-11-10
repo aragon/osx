@@ -1,6 +1,8 @@
 import React from 'react';
 import {IconButton, ButtonProps} from './button';
 
+/** Button used to open dropdowns or popovers. Comes with a downward-facing
+ * arrowhead icon  */
 export const OpenButton: React.FC<ButtonProps> = ({
   mode = 'primary',
   size = 'default',

@@ -12,6 +12,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   label: string;
 };
 
+/** Simple button with variable styling (depending on mode) and variable sizin */
 export const SimpleButton: React.FC<ButtonProps> = ({
   mode = 'primary',
   size = 'default',
@@ -29,10 +30,14 @@ export const SimpleButton: React.FC<ButtonProps> = ({
 // ICON BUTTON ================================================================
 
 export type IconButtonProps = ButtonProps & {
+  /** Wheter the icon is left or right of the label */
   side: 'left' | 'right';
+  /** The icon's source */
   iconSrc: string;
 };
 
+/** Button with settable icon. The icon can be specified via its source and can
+ * be but left or right of the lable. */
 export const IconButton: React.FC<IconButtonProps> = ({
   mode = 'primary',
   size = 'default',
