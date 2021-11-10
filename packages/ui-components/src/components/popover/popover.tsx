@@ -67,11 +67,12 @@ export const Popover: React.FC<PopoverProps> = ({
 
 type StyledContentProps = {
   width: number | string;
+  style?: CSSProperties | undefined;
 };
 
 const StyledContent = styled(Content).attrs(
-  ({width = 300}: StyledContentProps) => {
-    const style: CSSProperties = {
+  ({width = 300, style}: StyledContentProps) => {
+    const currentStyle: CSSProperties = style || {
       width,
       background: '#FFFFFF',
       boxShadow: '0px 0px 4px rgba(50, 63, 75, 0.16)',
@@ -80,6 +81,6 @@ const StyledContent = styled(Content).attrs(
       margin: 8,
     };
 
-    return {style};
+    return {style: currentStyle};
   }
 )<StyledContentProps>``;
