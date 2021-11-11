@@ -1,0 +1,35 @@
+name: WebApp Push
+on:
+  push:
+    paths:
+      - 'packages/web-app/**'
+    branches-ignore:
+      - 'develop'
+      - 'main'
+
+env:
+  working-directory: packages/web-app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: fleek/create-react-app:node-16
+    defaults:
+      run:
+        working-directory: ${{env.working-directory}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build ui-components
+        run: |
+          cd ../ui-components
+          yarn install --pure-lockfile
+          yarn build
+          yarn link
+      - name: Install depdendencies
+        run: yarn install --pure-lockfile
+      - name: Link ui-components
+        run: yarn link @aragon/ui-components
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test

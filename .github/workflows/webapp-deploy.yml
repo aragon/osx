@@ -1,0 +1,70 @@
+name: WebApp Deploy
+on:
+  push:
+    paths:
+      - 'packages/web-app/**'
+    branches:
+      - 'develop'
+      - 'main'
+
+env:
+  working-directory: packages/web-app
+
+jobs:
+  set-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+    steps:
+      - name: Set environment to staging
+        if: endsWith(github.ref, '/develop')
+        id: env
+        run: echo "::set-output name=environment::staging"
+  build-deploy:
+    runs-on: ubuntu-latest
+    container: fleek/create-react-app:node-16
+    needs: [set-environment]
+    if: needs.set-environment.outputs.environment != ''
+    environment: ${{ needs.set-environment.outputs.environment }}
+    defaults:
+      run:
+        working-directory: ${{env.working-directory}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build ui-components
+        run: |
+          cd ../ui-components
+          yarn install --pure-lockfile
+          yarn build
+          yarn link
+      - name: Install depdendencies
+        run: yarn install --pure-lockfile
+      - name: Link ui-components
+        run: yarn link @aragon/ui-components
+      - name: Test
+        run: yarn test
+      - name: Build
+        run: yarn build
+        env:
+          VITE_REACT_APP_DEPLOY_VERSION: ${{ github.sha }}
+          VITE_REACT_APP_DEPLOY_ENVIRONMENT: ${{ needs.set-environment.outputs.environment }}
+          VITE_REACT_APP_ANALYTICS_KEY: ${{ secrets.VITE_REACT_APP_ANALYTICS_KEY }}
+      - name: Activate rinkeby's fleek
+        env:
+          FLEEK_FILE: ${{ needs.set-environment.outputs.environment }}
+        run: mv fleek/$FLEEK_FILE.json .fleek.json
+      - name: Deploy fleek
+        id: deploy
+        uses: fleekhq/action-deploy@v1
+        with:
+          apiKey: ${{ secrets.FLEEK_API_KEY }}
+          workDir: ${{ env.working-directory }}
+      - name: Get the output url
+        run: echo "Deploy url is ${{ steps.deploy.outputs.deployUrl }}"
+      - name: upload sourcemap to apm
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          for f in ./build/static/**/*.js.map ; do 
+            curl -X POST https://apm-monitoring.aragon.org/assets/v1/sourcemaps -F service_name="zaragoza" -F service_version="$COMMIT_SHA" -F bundle_filepath="http://localhost/assets/$(basename $f)" -F sourcemap=@$f
+          done
