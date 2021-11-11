@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const IconCheckboxCheckmark = ({height = 24, width = 24, ...props}) => {
+export const IconCheckmark = ({height = 24, width = 24, ...props}) => {
   return (
     <svg
       width={width}
