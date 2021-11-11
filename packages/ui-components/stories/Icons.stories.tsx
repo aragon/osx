@@ -14,7 +14,7 @@ const InterfaceList: Story = args => (
   <IconListContainer>
     {Object.entries(interface_icons).map(([name, Icon]) => (
       <IconContainer>
-        <Icon />
+        <Icon {...args} />
         <span>{name}</span>
       </IconContainer>
     ))}
@@ -25,7 +25,7 @@ const ModuleList: Story = args => (
   <IconListContainer>
     {Object.entries(module_icons).map(([name, Icon]) => (
       <IconContainer>
-        <Icon />
+        <Icon {...args} />
         <span>{name}</span>
       </IconContainer>
     ))}
@@ -40,5 +40,5 @@ const IconListContainer = styled.div.attrs({
 })``;
 
 const IconContainer = styled.div.attrs({
-  className: 'flex flex-col items-center justify-center p-2',
+  className: 'flex flex-col items-center justify-center p-2 border rounded',
 })``;
