@@ -20,9 +20,16 @@ export const IconButton: React.FC<IconButtonProps> = ({
   label,
   onClick,
   disabled,
+  ...props
 }) => {
   return (
-    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disabled}>
+    <StyledButton
+      mode={mode}
+      size={size}
+      onClick={onClick}
+      disabled={disabled}
+      {...props}
+    >
       <FlexDiv side={side}>
         <StyledIcon iconSrc={iconSrc} />
         <p>{label}</p>
