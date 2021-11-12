@@ -1,6 +1,11 @@
 import React from 'react';
+import {IconType} from '..';
 
-export const IconRadioDefault = ({height = 24, width = 24, ...props}) => {
+export const IconRadioDefault: IconType = ({
+  height = 24,
+  width = 24,
+  ...props
+}) => {
   return (
     <svg
       width={width}

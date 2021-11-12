@@ -1,6 +1,7 @@
 import React from 'react';
+import {IconType} from '..';
 
-export const IconSpinner = ({height = 24, width = 24, ...props}) => {
+export const IconSpinner: IconType = ({height = 24, width = 24, ...props}) => {
   return (
     <svg
       width={width}

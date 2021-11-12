@@ -1,6 +1,11 @@
 import React from 'react';
+import {IconType} from '..';
 
-export const IconFavoriteSelected = ({height = 24, width = 24, ...props}) => {
+export const IconFavoriteSelected: IconType = ({
+  height = 24,
+  width = 24,
+  ...props
+}) => {
   return (
     <svg
       width={width}
