@@ -1,17 +1,17 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 
-import {Button} from '../src/components/button';
+import {Default as ActionItem} from '../stories/ActionItem.stories';
 
-describe('Button', () => {
-  function setup(args: any) {
-    render(<Button label="test" {...args} />);
-    return screen.getByRole('button');
+describe('ActionItem', () => {
+  function setup(args?: any) {
+    render(<ActionItem {...args} />);
+    return screen.getByTestId('actionItem');
   }
 
   test('should render without crashing', () => {
-    const element = setup({});
-    expect(element).toBeInTheDocument;
+    const element = setup();
+    expect(element).toBeVisible;
   });
 
   test('should call the onClick method when clicked', () => {
@@ -19,6 +19,7 @@ describe('Button', () => {
     const element = setup({onClick: mockHandler});
 
     fireEvent.click(element);
+
     expect(mockHandler).toHaveBeenCalledTimes(1);
   });
 });
