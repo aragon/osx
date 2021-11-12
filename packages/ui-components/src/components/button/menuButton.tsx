@@ -31,7 +31,7 @@ export const MenuButton = ({
     return (
       <OpenButton onClick={onClick} size={size}>
         <FlexDiv side={'left'}>
-          <IconMenu />
+          <IconMenu className="fill-current text-primary-500" />
           <p>Menu</p>
         </FlexDiv>
       </OpenButton>
@@ -49,7 +49,7 @@ export const MenuButton = ({
 };
 
 const StyledButton = styled(SizedButton).attrs({
-  className: 'bg-ui-0',
+  className: 'bg-ui-0 text-ui-600',
 })``;
 const OpenButton = styled(SizedButton).attrs({
   className: 'bg-ui-0 text-primary-500',
