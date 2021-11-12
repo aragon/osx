@@ -7,7 +7,7 @@ export const IconClose: IconType = ({height = 24, width = 24, ...props}) => {
       width={width}
       height={height}
       fill="none"
-      viewBox="0 0 24 24"
+      viewBox="-4 -4 24 24"
       {...props}
     >
       <path

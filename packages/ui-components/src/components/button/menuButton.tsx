@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {IconMenu} from '../icons/interface/icon_menu';
+import {IconClose, IconMenu} from '../icons';
 import {SizedButton} from './button';
 import {FlexDiv} from './iconButton';
 
@@ -31,7 +31,7 @@ export const MenuButton = ({
     return (
       <OpenButton onClick={onClick} size={size}>
         <FlexDiv side={'left'}>
-          <IconMenu className="fill-current text-primary-500" />
+          <IconClose className="fill-current text-primary-500" />
           <p>Menu</p>
         </FlexDiv>
       </OpenButton>
