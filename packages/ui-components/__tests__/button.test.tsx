@@ -4,11 +4,11 @@ import {fireEvent, render, screen} from '@testing-library/react';
 // TODO: add at setup
 import '@testing-library/jest-dom/extend-expect';
 
-import {Button} from '../src/components/button';
+import {SimpleButton} from '../src/components/button';
 
 describe('Button', () => {
   function setup(args: any) {
-    render(<Button label="test" {...args} />);
+    render(<SimpleButton label="test" {...args} />);
     return screen.getByRole('button');
   }
 

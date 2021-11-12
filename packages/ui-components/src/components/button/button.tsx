@@ -5,9 +5,9 @@ import styled from 'styled-components';
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Changes a button's color scheme */
-  mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
+  mode?: 'primary' | 'secondary' | 'tertiary' | 'ghost';
   /** Changes a button's size */
-  size: 'small' | 'default';
+  size?: 'small' | 'default';
   /** Text displayed on the button */
   label: string;
 };
