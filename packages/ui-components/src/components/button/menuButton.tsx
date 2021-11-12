@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import {IconMenu} from '../icons/interface/icon_menu';
 import {SizedButton} from './button';
-import {FlexDiv, StyledIcon} from './iconButton';
+import {FlexDiv} from './iconButton';
 
 export type MenuButtonProps = {
   size: 'small' | 'default';
@@ -21,7 +22,7 @@ export const MenuButton = ({
   if (isMobile) {
     return (
       <StyledButton onClick={onClick} size={'default'}>
-        <StyledIcon iconSrc="https://place-hold.it/150x150" />
+        <IconMenu />
       </StyledButton>
     );
   }
@@ -30,7 +31,7 @@ export const MenuButton = ({
     return (
       <OpenButton onClick={onClick} size={size}>
         <FlexDiv side={'left'}>
-          <StyledIcon iconSrc="https://place-hold.it/150x150" />
+          <IconMenu />
           <p>Menu</p>
         </FlexDiv>
       </OpenButton>
@@ -39,7 +40,7 @@ export const MenuButton = ({
     return (
       <StyledButton onClick={onClick} size={size}>
         <FlexDiv side={'left'}>
-          <StyledIcon iconSrc="https://place-hold.it/150x150" />
+          <IconMenu />
           <p>Menu</p>
         </FlexDiv>
       </StyledButton>
