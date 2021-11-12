@@ -2,8 +2,8 @@ import React from 'react';
 import {Meta, Story} from '@storybook/react';
 import styled from 'styled-components';
 
-import * as interface_icons from './components/interface-icons-list';
-import * as module_icons from './components/module-icons-list';
+import * as interface_icons from '../src/components/icons/interface/interface-icons-list';
+import * as module_icons from '../src/components/icons/module/module-icons-list';
 
 export default {
   title: 'Components/Icons',
