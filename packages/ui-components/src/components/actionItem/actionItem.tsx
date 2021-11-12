@@ -1,15 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
 
+// import {IconType} from '../../';
+
 export type ActionItemProps = {
   /**
-   * Whether the button is enabled
+   * Whether list item is disabled
    */
   disabled?: boolean;
   /**
    * Icon to prepend to the button text
    */
-  icon: string; //TODO: find library Icon type and set
+  // icon: IconType;
+  icon: string; // TODO: set proper type
   /**
    * Button text
    */
@@ -46,7 +49,7 @@ export const ActionItem: React.FC<ActionItemProps> = ({
 };
 
 const StyledActionItem = styled.button.attrs({
-  className: `rounded-xl py-1.5 px-2 text-base text-ui-600 bg-ui-0
+  className: `rounded-xl font-semibold py-1.5 px-2 text-base text-ui-600 bg-ui-0
     hover:text-primary-500 active:bg-primary-50 disabled:text-ui-300 disabled:bg-ui-0`,
 })``;
 
@@ -58,7 +61,7 @@ const Content = styled.div.attrs({
 
 type IconContainerProps = {toggleIcon: boolean};
 const IconContainer = styled.div.attrs({
-  className: 'w-2 h-2 border',
+  className: 'h-2 w-2 border',
 })<IconContainerProps>`
   display: flex;
   align-items: center;

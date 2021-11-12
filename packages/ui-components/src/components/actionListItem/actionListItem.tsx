@@ -1,27 +1,96 @@
 import React from 'react';
+import styled from 'styled-components';
+
+// import {IconChevronRight} from '../../';
 
 export type ActionListItemProps = {
-  title: string;
+  /**
+   * Whether list item is disabled
+   */
+  disabled?: boolean;
+  onClick?: () => void;
+  /**
+   * Action subtitle
+   */
   subtitle: string;
+  /**
+   * Action label
+   */
+  title: string;
 };
 
 /**
  * List group action item
  */
 export const ActionListItem: React.FC<ActionListItemProps> = ({
-  title,
+  disabled = false,
+  onClick,
   subtitle,
+  title,
 }) => {
   return (
-    <div
+    <Container
+      disabled={disabled}
+      onClick={onClick}
       data-testid="actionListItem"
-      className="flex justify-between items-center py-1.5 px-2 space-x-1.5 .box-border border-2 border-ui-100 active:border-ui-800 rounded-xl"
     >
-      <div>
-        <p className="font-semibold text-ui-600">{title}</p>
-        <p className="font-semibold text-xs text-ui-400">{subtitle}</p>
-      </div>
-      <div className="flex justify-center items-center w-2 h-2 border"></div>
-    </div>
+      <TextContainer>
+        <Title>{title}</Title>
+        <Subtitle>{subtitle}</Subtitle>
+      </TextContainer>
+      <IconContainer>
+        {/* <IconChevronRight width={16} height={16} /> */}
+      </IconContainer>
+    </Container>
   );
 };
+
+const Container = styled.button.attrs({
+  className: `flex justify-between items-center py-1.5 px-2 space-x-1.5
+  .box-border border-2 border-ui-100 active:border-ui-800 hover:border-ui-300
+   disabled:border-ui-200 disabled:bg-ui-100 rounded-xl`,
+})``;
+
+const TextContainer = styled.div.attrs({
+  className: 'text-left font-semibold',
+})``;
+
+const Title = styled.p.attrs({})`
+  color: #52606d; //UI-600
+
+  ${Container}:active & {
+    color: #323f4b; //UI-800
+  }
+
+  ${Container}:disabled & {
+    color: #9aa5b1; //UI-300
+  }
+`;
+
+const Subtitle = styled.p.attrs({
+  className: 'text-xs',
+})`
+  color: #7b8794; //UI-400
+
+  ${Container}:disabled & {
+    color: #9aa5b1; //UI-300
+  }
+`;
+
+const IconContainer = styled.div.attrs({
+  className: 'h-2 w-2 border',
+})`
+  color: #9aa5b1; //UI-300
+
+  ${Container}:hover & {
+    color: #52606d; //UI-600
+  }
+
+  ${Container}:active & {
+    color: #323f4b; //UI-800
+  }
+
+  ${Container}:disabled & {
+    color: #9aa5b1; //UI-300
+  }
+`;

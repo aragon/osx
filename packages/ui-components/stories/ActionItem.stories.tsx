@@ -1,5 +1,6 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
+
 import {ActionItem, ActionItemProps} from '../src';
 
 export default {

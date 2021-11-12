@@ -17,16 +17,9 @@ Default.args = {
   subtitle: 'Action List Item Subtitle',
 };
 
-export const ToggleIcon = Template.bind({});
-ToggleIcon.args = {
-  label: 'Icon shown only on active state',
-  icon: ':)',
-  toggleIcon: true,
-};
-
 export const Disabled = Template.bind({});
 Disabled.args = {
+  title: 'Action List Item',
+  subtitle: 'Action List Item Subtitle',
   disabled: true,
-  label: 'Disabled ActionItem',
-  icon: 'X',
 };
