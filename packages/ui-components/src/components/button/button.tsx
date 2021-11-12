@@ -36,7 +36,7 @@ type SizedButtonProps = {
 /**
  * Extends the button element with the desired size.
  */
-const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
+export const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
   const className = `px-4 ${
     size === 'default' ? 'py-3 rounded-2xl' : 'py-2 rounded-xl'
   }`;
