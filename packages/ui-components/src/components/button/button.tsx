@@ -39,8 +39,8 @@ type SizedButtonProps = {
  * is shared by all buttons in this library.
  */
 export const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
-  let className = `px-4 focus:outline-none focus:ring-2 focus:ring-primary-500 
-    ${size === 'default' ? 'py-3 rounded-2xl' : 'py-2 rounded-xl'}`;
+  let className = `px-2 focus:outline-none focus:ring-2 focus:ring-primary-500 
+    ${size === 'default' ? 'py-1.5 rounded-2xl' : 'py-1 rounded-xl'}`;
   return {className};
 })<SizedButtonProps>``;
 
