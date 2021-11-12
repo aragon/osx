@@ -21,9 +21,8 @@ export type ActionItemProps = {
   toggleIcon?: boolean;
 };
 
-// TODO: Test
 /**
- * Action UI component used for list groups and navigation links
+ * Action UI component
  */
 export const ActionItem: React.FC<ActionItemProps> = ({
   disabled = false,
