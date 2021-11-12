@@ -11,7 +11,8 @@ const Template: Story<MenuButtonProps> = args => <MenuButton {...args} />;
 
 export const AllProps = Template.bind({});
 AllProps.args = {
-  label: 'Menu Button',
+  isMobile: false,
+  isOpen: false,
   onClick: () => {
     alert('hey, you just triggered the onClick method :)');
   },
