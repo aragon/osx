@@ -35,11 +35,12 @@ type SizedButtonProps = {
 
 /**
  * Extends the button element with the desired size.
+ * Furthermore, the button comes with rounded corners and a focus ring, as this
+ * is shared by all buttons in this library.
  */
 export const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
-  const className = `px-4 ${
-    size === 'default' ? 'py-3 rounded-2xl' : 'py-2 rounded-xl'
-  }`;
+  let className = `px-4 focus:outline-none focus:ring-2 focus:ring-primary-500 
+    ${size === 'default' ? 'py-3 rounded-2xl' : 'py-2 rounded-xl'}`;
   return {className};
 })<SizedButtonProps>``;
 

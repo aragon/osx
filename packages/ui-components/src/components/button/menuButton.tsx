@@ -47,7 +47,9 @@ export const MenuButton = ({
   }
 };
 
-const StyledButton = styled(SizedButton).attrs({className: 'bg-ui-0 '})``;
+const StyledButton = styled(SizedButton).attrs({
+  className: 'bg-ui-0',
+})``;
 const OpenButton = styled(SizedButton).attrs({
   className: 'bg-ui-0 text-primary-500',
 })``;
