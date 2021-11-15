@@ -16,13 +16,6 @@ Default.args = {
   icon: 'X',
 };
 
-export const ToggleIcon = Template.bind({});
-ToggleIcon.args = {
-  label: 'Icon shown only on active state',
-  icon: ':)',
-  toggleIcon: true,
-};
-
 export const Disabled = Template.bind({});
 Disabled.args = {
   disabled: true,

@@ -18,10 +18,6 @@ export type ActionItemProps = {
    */
   label: string;
   onClick?: () => void;
-  /**
-   * Shows the icon only when the ActionItem is active
-   */
-  toggleIcon?: boolean;
 };
 
 /**
@@ -32,7 +28,6 @@ export const ActionItem: React.FC<ActionItemProps> = ({
   icon,
   label,
   onClick,
-  toggleIcon = false,
 }) => {
   return (
     <StyledActionItem
@@ -41,7 +36,7 @@ export const ActionItem: React.FC<ActionItemProps> = ({
       data-testid="actionItem"
     >
       <Content>
-        <IconContainer toggleIcon={toggleIcon}>{icon}</IconContainer>
+        <IconContainer>{icon}</IconContainer>
         <Label>{label}</Label>
       </Content>
     </StyledActionItem>
@@ -59,18 +54,6 @@ const Content = styled.div.attrs({
   className: 'flex items-center space-x-1.5',
 })``;
 
-type IconContainerProps = {toggleIcon: boolean};
 const IconContainer = styled.div.attrs({
-  className: 'h-2 w-2 border',
-})<IconContainerProps>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  // If toggleIcon, hide icon on all states except for active
-  ${({toggleIcon}) =>
-    toggleIcon &&
-    `display: none; 
-     ${StyledActionItem}:active & {display: flex};
-    `}
-`;
+  className: 'flex justify-center items-center h-2 w-2 border',
+})``;
