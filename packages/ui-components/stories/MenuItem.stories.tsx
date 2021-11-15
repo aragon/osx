@@ -15,3 +15,10 @@ Default.args = {
   label: 'Menu Item',
   icon: <IconCommunity />,
 };
+
+export const Active = Template.bind({});
+Active.args = {
+  isActive: true,
+  label: 'Menu Item',
+  icon: <IconCommunity />,
+};

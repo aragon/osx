@@ -11,7 +11,7 @@ export type ActionItemProps = {
   /**
    * Icon to prepend to the button text
    */
-  // icon: IconType;
+
   icon: string; // TODO: set proper type
   /**
    * Button text
