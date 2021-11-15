@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// import {IconChevronRight} from '../../';
+import {IconChevronRight} from '../../';
 
 export type ActionListItemProps = {
   /**
@@ -39,16 +39,18 @@ export const ActionListItem: React.FC<ActionListItemProps> = ({
         <Subtitle>{subtitle}</Subtitle>
       </TextContainer>
       <IconContainer>
-        {/* <IconChevronRight width={16} height={16} /> */}
+        <IconChevronRight />
       </IconContainer>
     </Container>
   );
 };
 
+// TODO: Investigate group flexibility when children have different styles based
+// on parent state
 const Container = styled.button.attrs({
   className: `flex justify-between items-center py-1.5 px-2 space-x-1.5
   .box-border border-2 border-ui-100 active:border-ui-800 hover:border-ui-300
-   disabled:border-ui-200 disabled:bg-ui-100 rounded-xl`,
+   disabled:border-ui-200 disabled:bg-ui-100 rounded-xl `,
 })``;
 
 const TextContainer = styled.div.attrs({
@@ -78,7 +80,7 @@ const Subtitle = styled.p.attrs({
 `;
 
 const IconContainer = styled.div.attrs({
-  className: 'h-2 w-2 border',
+  className: 'h-2 w-2',
 })`
   color: #9aa5b1; //UI-300
 
