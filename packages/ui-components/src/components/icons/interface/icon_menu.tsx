@@ -1,14 +1,14 @@
 import React from 'react';
 import {IconType} from '..';
 
-export const IconMenu: IconType = ({height = 24, width = 24, ...props}) => {
+export const IconMenu: IconType = ({height = 16, width = 16, ...props}) => {
   return (
     <svg
       width={width}
       height={height}
       fill="none"
       className="fill-current text-ui-600"
-      viewBox="0 0 24 10"
+      viewBox="0 -4 16 16"
       {...props}
     >
       <path d="M14.6665 0H0.66666C0.298474 0 0 0.298474 0 0.66666V1.33332C0 1.70151 0.298474 1.99998 0.66666 1.99998H14.6665C15.0347 1.99998 15.3332 1.70151 15.3332 1.33332V0.66666C15.3332 0.298474 15.0347 0 14.6665 0Z" />
