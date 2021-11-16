@@ -18,7 +18,7 @@ Default.args = {
 
 export const Active = Template.bind({});
 Active.args = {
-  isActive: true,
+  isSelected: true,
   label: 'Menu Item',
   icon: <IconCommunity />,
 };

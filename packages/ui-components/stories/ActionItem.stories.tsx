@@ -20,7 +20,7 @@ export const Active = Template.bind({});
 Active.args = {
   label: 'Action Item',
   icon: <IconDashboard />,
-  isActive: true,
+  isSelected: true,
 };
 
 export const Disabled = Template.bind({});

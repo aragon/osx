@@ -11,7 +11,7 @@ export type MenuItemProps = {
   /**
    * Whether the current item is active
    */
-  isActive: boolean;
+  isSelected: boolean;
 
   /**
    * Menu item text
@@ -23,22 +23,22 @@ export type MenuItemProps = {
 
 export const MenuItem: React.FC<MenuItemProps> = ({
   icon,
-  isActive = false,
+  isSelected = false,
   label,
   onClick,
 }) => {
   return (
-    <Container onClick={onClick} isActive={isActive} data-testid="menuItem">
-      {isActive && <IconContainer>{icon}</IconContainer>}
+    <Container onClick={onClick} isSelected={isSelected} data-testid="menuItem">
+      {isSelected && <IconContainer>{icon}</IconContainer>}
       <Label>{label}</Label>
     </Container>
   );
 };
 
-type ContainerProp = {isActive: boolean};
-const Container = styled.button.attrs(({isActive}: ContainerProp) => ({
+type ContainerProp = {isSelected: boolean};
+const Container = styled.button.attrs(({isSelected}: ContainerProp) => ({
   className: `flex items-center px-1.5 py-2 space-x-1.5 ${
-    isActive ? 'text-primary-500 bg-ui-0' : 'text-ui-600'
+    isSelected ? 'text-primary-500 bg-ui-0' : 'text-ui-600'
   } focus:outline-none focus:ring-2 focus:ring-primary-500 active:text-primary-500 hover:text-ui-800 focus:bg-ui-0 rounded-xl`,
 }))<ContainerProp>`
   cursor: pointer;
