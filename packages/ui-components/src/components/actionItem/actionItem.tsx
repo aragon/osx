@@ -15,6 +15,11 @@ export type ActionItemProps = {
   icon: any; // TODO: set proper type
 
   /**
+   * Whether item is currently active or selected
+   */
+  isActive?: boolean;
+
+  /**
    * Button text
    */
   label: string;
@@ -32,6 +37,7 @@ export type ActionItemProps = {
 export const ActionItem: React.FC<ActionItemProps> = ({
   disabled = false,
   icon,
+  isActive = false,
   label,
   wide = false,
   onClick,
@@ -40,6 +46,7 @@ export const ActionItem: React.FC<ActionItemProps> = ({
     <Container
       wide={wide}
       onClick={onClick}
+      isActive={isActive}
       disabled={disabled}
       data-testid="actionItem"
     >
@@ -51,11 +58,11 @@ export const ActionItem: React.FC<ActionItemProps> = ({
   );
 };
 
-type ContainerProps = {wide: boolean};
-const Container = styled.button.attrs(({wide}: ContainerProps) => ({
-  className: `${
-    wide && 'w-full'
-  } rounded-xl font-semibold py-1.5 px-2 text-base text-ui-600 bg-ui-0 hover:text-primary-500 active:bg-primary-50 disabled:text-ui-300 disabled:bg-ui-0`,
+type ContainerProps = {isActive: boolean; wide: boolean};
+const Container = styled.button.attrs(({isActive, wide}: ContainerProps) => ({
+  className: `${wide && 'w-full'} rounded-xl py-1.5 px-2 text-base ${
+    isActive ? 'text-primary-500 bg-primary-50' : 'text-ui-600 bg-ui-0'
+  } focus:outline-none focus:ring-2 focus:ring-primary-500 hover:text-primary-500 active:bg-primary-50 disabled:text-ui-300 disabled:bg-ui-0`,
 }))<ContainerProps>``;
 
 const Label = styled.p.attrs({})``;

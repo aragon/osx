@@ -16,6 +16,13 @@ Default.args = {
   icon: <IconDashboard />,
 };
 
+export const Active = Template.bind({});
+Active.args = {
+  label: 'Action Item',
+  icon: <IconDashboard />,
+  isActive: true,
+};
+
 export const Disabled = Template.bind({});
 Disabled.args = {
   disabled: true,

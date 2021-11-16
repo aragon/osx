@@ -60,7 +60,7 @@ type ContainerProps = {wide: boolean};
 const Container = styled.button.attrs(({wide}: ContainerProps) => ({
   className: `${
     wide && 'w-full'
-  } flex justify-between items-center py-1.5 px-2 space-x-1.5 box-border border-2 border-ui-100 active:border-ui-800 hover:border-ui-300 disabled:border-ui-200 disabled:bg-ui-100 rounded-xl`,
+  } flex justify-between items-center py-1.5 px-2 space-x-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 box-border border-2 border-ui-100 active:border-ui-800 hover:border-ui-300 disabled:border-ui-200 disabled:bg-ui-100 rounded-xl`,
 }))<ContainerProps>``;
 
 const TextContainer = styled.div.attrs({
