@@ -6,10 +6,17 @@ import {Avatar} from '../avatar';
 import {Spinner} from '../spinner';
 
 export type WalletButtonProps = {
-  size: 'small' | 'default';
-  address: string;
+  /**
+  * set wallet Address/Ens
+  */
+  label: string;
+  /**
+  * Avatar Image source
+  */
   src: string;
-  isMobile: boolean;
+  /**
+  * Loading mode
+  */
   isLoading: boolean;
   onClick: () => void;
   /**
@@ -18,36 +25,43 @@ export type WalletButtonProps = {
   isSelected: boolean;
 };
 
-export function getTruncatedAddress(address: string | null) {
-  if (address === null) return '';
-  return (
-    address.substring(0, 5) +
-    '...' +
-    address.substring(address.length - 4, address.length)
-  );
+// get truncated address
+export function BeautifyLabel(label: string | null) {
+  if (label === null) return '';
+  if(IsAddress(label))
+    return (
+      label.substring(0, 5) +
+      '...' +
+      label.substring(label.length - 4, label.length)
+    );
+  else return label
 }
 
-// TODO Should the button manage the open/close state from within?
+// check Label type
+export function IsAddress(address: string | null) {
+  const re = /0x[a-fA-F0-9]{40}/g;
+  return Boolean(address?.match(re));
+}
+
+
 export const WalletButton = ({
-  size = 'default',
-  address,
+  label,
   src,
   isSelected = false,
-  isMobile,
   isLoading,
   onClick,
 }: WalletButtonProps) => {
   if (!isLoading)
     return (
-      <StyledButton onClick={onClick} size={size} isSelected={isSelected}>
-        {!isMobile && <p>{getTruncatedAddress(address)}</p>}
+      <StyledButton onClick={onClick} size={'default'} isSelected={isSelected}>
+        <StyledAddress>{BeautifyLabel(label)}</StyledAddress>
         <Avatar src={src} size={'small'} />
       </StyledButton>
     );
   else
     return (
-      <StyledButton onClick={onClick} size={size} isSelected={false}>
-        {!isMobile && <p>1 TX Pending</p>}
+      <StyledButton onClick={onClick} size={'default'} isSelected={false}>
+        <LoadingLabel>{BeautifyLabel(label)}</LoadingLabel>
         <Spinner size={'small'} />
       </StyledButton>
     );
@@ -55,6 +69,14 @@ export const WalletButton = ({
 
 type StyledButtonProp = {isSelected: boolean};
 const StyledButton = styled(SizedButton).attrs(({isSelected}: StyledButtonProp) => ({
-  className : `flex space-x-1.5 py-1.5 
+  className : `flex md:space-x-1.5 py-1.5 
   ${isSelected ? 'text-primary-500 bg-primary-50' : 'text-ui-600 bg-ui-0'}`
 }))<StyledButtonProp>``;
+
+const LoadingLabel = styled.p.attrs({
+  className: 'md:inline hidden text-primary-500'
+})``;
+
+const StyledAddress = styled.p.attrs({
+  className: 'md:inline hidden'
+})``;
