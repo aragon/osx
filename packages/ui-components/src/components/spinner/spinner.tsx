@@ -34,8 +34,8 @@ const StyledSpinner = styled.div.attrs(({size}: SpinnerProps) => {
   return {className};
 })<SpinnerProps>`
   border-top-color: #003bf5;
-  -webkit-animation: spinner 1.5s linear infinite;
-  animation: spinner 1.5s linear infinite;
+  -webkit-animation: spinner 1s linear infinite;
+  animation: spinner 1s linear infinite;
   @-webkit-keyframes spinner {
     0% {
       -webkit-transform: rotate(0deg);

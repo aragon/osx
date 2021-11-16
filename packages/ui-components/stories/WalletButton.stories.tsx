@@ -9,10 +9,28 @@ export default {
 
 const Template: Story<WalletButtonProps> = args => <WalletButton {...args} />;
 
-export const AllProps = Template.bind({});
-AllProps.args = {
-  isMobile: false,
-  isLoading: false,
+export const Default = Template.bind({});
+Default.args = {
+  address:'0x6720000000000000000000000000000000007739',
+  src: 'https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg',
+  onClick: () => {
+    alert('hey, you just triggered the onClick method :)');
+  },
+};
+
+export const Active = Template.bind({});
+Active.args = {
+  isSelected:true,
+  address:'0x6720000000000000000000000000000000007739',
+  src: 'https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg',
+  onClick: () => {
+    alert('hey, you just triggered the onClick method :)');
+  },
+};
+
+export const Mobile = Template.bind({});
+Mobile.args = {
+  isMobile: true,
   address:'0x6720000000000000000000000000000000007739',
   src: 'https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg',
   onClick: () => {

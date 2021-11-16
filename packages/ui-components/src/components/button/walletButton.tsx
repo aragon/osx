@@ -12,6 +12,10 @@ export type WalletButtonProps = {
   isMobile: boolean;
   isLoading: boolean;
   onClick: () => void;
+  /**
+  * Whether the current item is active
+  */
+  isSelected: boolean;
 };
 
 export function getTruncatedAddress(address: string | null) {
@@ -28,26 +32,29 @@ export const WalletButton = ({
   size = 'default',
   address,
   src,
+  isSelected = false,
   isMobile,
   isLoading,
   onClick,
 }: WalletButtonProps) => {
   if (!isLoading)
     return (
-      <StyledButton onClick={onClick} size={size}>
+      <StyledButton onClick={onClick} size={size} isSelected={isSelected}>
         {!isMobile && <p>{getTruncatedAddress(address)}</p>}
         <Avatar src={src} size={'small'} />
       </StyledButton>
     );
   else
     return (
-      <StyledButton onClick={onClick} size={size}>
+      <StyledButton onClick={onClick} size={size} isSelected={false}>
         {!isMobile && <p>1 TX Pending</p>}
         <Spinner size={'small'} />
       </StyledButton>
     );
 };
 
-const StyledButton = styled(SizedButton).attrs({
-  className: 'bg-ui-0 text-ui-600 flex space-x-1.5 py-1.5',
-})``;
+type StyledButtonProp = {isSelected: boolean};
+const StyledButton = styled(SizedButton).attrs(({isSelected}: StyledButtonProp) => ({
+  className : `flex space-x-1.5 py-1.5 
+  ${isSelected ? 'text-primary-500 bg-primary-50' : 'text-ui-600 bg-ui-0'}`
+}))<StyledButtonProp>``;

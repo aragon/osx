@@ -20,9 +20,16 @@ export const IconButton: React.FC<IconButtonProps> = ({
   label,
   onClick,
   disabled,
+  ...props
 }) => {
   return (
-    <StyledButton mode={mode} size={size} onClick={onClick} disabled={disabled}>
+    <StyledButton
+      mode={mode}
+      size={size}
+      onClick={onClick}
+      disabled={disabled}
+      {...props}
+    >
       <FlexDiv side={side}>
         <StyledIcon iconSrc={iconSrc} />
         <p>{label}</p>
@@ -46,6 +53,6 @@ type StyledIconProps = {
   iconSrc: IconButtonProps['iconSrc'];
 };
 
-export const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
+const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
   return {src: iconSrc, className: 'w-3 h-3'};
 })<StyledIconProps>``;

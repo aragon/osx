@@ -1,4 +1,4 @@
-export {ButtonProps, SimpleButton} from './button';
+export {ButtonProps, Button} from './button';
 export * from './addButton';
 export * from './openButton';
 export {IconButton, IconButtonProps} from './iconButton';
