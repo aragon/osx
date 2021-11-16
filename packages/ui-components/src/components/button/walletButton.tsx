@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import {SizedButton} from './button';
 import {Avatar} from '../avatar';
+import {Spinner} from '../spinner';
 
 export type WalletButtonProps = {
   size: 'small' | 'default';
@@ -42,7 +43,7 @@ export const WalletButton = ({
     return (
       <StyledButton onClick={onClick} size={size}>
         {!isMobile && <p>1 TX Pending</p>}
-        <Avatar src={src} size={'small'} />
+        <Spinner size={'small'} />
       </StyledButton>
     );
 };
