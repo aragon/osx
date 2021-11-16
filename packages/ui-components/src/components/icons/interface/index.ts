@@ -17,3 +17,4 @@ export {IconSettings} from './icon_settings';
 export {IconSpinner} from './icon_spinner';
 export {IconSwitch} from './icon_switch';
 export {IconTurnOff} from './icon_turn_off';
+export {IconMenu} from './icon_menu';

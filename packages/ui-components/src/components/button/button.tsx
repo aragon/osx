@@ -5,15 +5,15 @@ import styled from 'styled-components';
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Changes a button's color scheme */
-  mode: 'primary' | 'secondary' | 'tertiary' | 'ghost';
+  mode?: 'primary' | 'secondary' | 'tertiary' | 'ghost';
   /** Changes a button's size */
-  size: 'small' | 'default';
+  size?: 'small' | 'default';
   /** Text displayed on the button */
   label: string;
 };
 
 /** Simple button with variable styling (depending on mode) and variable sizin */
-export const SimpleButton: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps> = ({
   mode = 'primary',
   size = 'default',
   label,
@@ -35,11 +35,12 @@ type SizedButtonProps = {
 
 /**
  * Extends the button element with the desired size.
+ * Furthermore, the button comes with rounded corners and a focus ring, as this
+ * is shared by all buttons in this library.
  */
-const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
-  const className = `px-4 ${
-    size === 'default' ? 'py-3 rounded-2xl' : 'py-2 rounded-xl'
-  }`;
+export const SizedButton = styled.button.attrs(({size}: SizedButtonProps) => {
+  let className = `px-2 focus:outline-none focus:ring-2 focus:ring-primary-500 
+    ${size === 'default' ? 'py-1.5 rounded-2xl' : 'py-1 rounded-xl'}`;
   return {className};
 })<SizedButtonProps>``;
 
