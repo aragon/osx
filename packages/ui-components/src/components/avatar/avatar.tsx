@@ -1,7 +1,7 @@
 import React, {HTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-type AvatarProps = HTMLAttributes<HTMLElement> & {
+export type AvatarProps = HTMLAttributes<HTMLElement> & {
   /** Change Avatar's border Radius */
   mode?: 'circle' | 'square';
   /** Changes a Avatar's size */
@@ -29,7 +29,7 @@ type SizesType = {
 };
 
 const StyledAvatar = styled.img.attrs(({size, mode}: StyledAvatarProps) => {
-  
+
   const sizes : SizesType = {'small': 'w-3 h-3', 'default': 'w-5 h-5', 'big': 'w-6 h-6'};
   const className: string = `bg-ui-100
     ${sizes[size]}
