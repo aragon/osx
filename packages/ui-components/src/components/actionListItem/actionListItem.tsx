@@ -64,7 +64,7 @@ const Container = styled.button.attrs(({wide}: ContainerProps) => ({
 }))<ContainerProps>``;
 
 const TextContainer = styled.div.attrs({
-  className: 'text-left font-semibold',
+  className: 'text-left',
 })``;
 
 const Title = styled.p.attrs({})`
