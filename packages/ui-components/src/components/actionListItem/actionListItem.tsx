@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {IconChevronRight} from '../../';
+import {IconChevronRight} from '../icons';
 
 export type ActionListItemProps = {
   /**

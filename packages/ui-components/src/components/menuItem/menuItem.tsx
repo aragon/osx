@@ -1,14 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// import {IconType} from '../../';
-
 export type MenuItemProps = {
   /**
    * Icon to prepend to the Menu item text
    */
-  //TODO: set up proper type
-  icon: any;
+
+  icon: any; // TODO: set up proper type
 
   /**
    * Whether the current item is active
