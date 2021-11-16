@@ -12,7 +12,7 @@ export interface SpinnerProps extends HTMLAttributes<HTMLElement> {
  * Spinner UI component
  */
 export const Spinner: React.FC<SpinnerProps> = ({size = 'small', ...props}) => {
-  return <StyledSpinner {...props} size={size}></StyledSpinner>;
+  return <StyledSpinner data-testid="spinner" {...props} size={size}></StyledSpinner>;
 };
 
 type SizesType = {
