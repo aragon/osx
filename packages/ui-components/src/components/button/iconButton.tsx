@@ -46,6 +46,6 @@ type StyledIconProps = {
   iconSrc: IconButtonProps['iconSrc'];
 };
 
-export const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
+const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
   return {src: iconSrc, className: 'w-3 h-3'};
 })<StyledIconProps>``;
