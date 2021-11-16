@@ -2,8 +2,8 @@ import React from 'react';
 import {IconType} from '..';
 
 export const IconCheckboxDefault: IconType = ({
-  height = 24,
-  width = 24,
+  height = 16,
+  width = 16,
   ...props
 }) => {
   return (
@@ -11,7 +11,7 @@ export const IconCheckboxDefault: IconType = ({
       width={width}
       height={height}
       fill="none"
-      viewBox="0 0 24 24"
+      viewBox="0 0 16 16"
       {...props}
     >
       <path
