@@ -1,7 +1,7 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
 
-import {ActionItem, ActionItemProps} from '../src';
+import {ActionItem, ActionItemProps, IconDashboard} from '../src';
 
 export default {
   title: 'Components/ActionItem',
@@ -13,12 +13,19 @@ const Template: Story<ActionItemProps> = args => <ActionItem {...args} />;
 export const Default = Template.bind({});
 Default.args = {
   label: 'Action Item',
-  icon: 'X',
+  icon: <IconDashboard />,
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
   disabled: true,
   label: 'Disabled ActionItem',
-  icon: 'X',
+  icon: <IconDashboard />,
+};
+
+export const Wide = Template.bind({});
+Wide.args = {
+  label: 'Action Item',
+  icon: <IconDashboard />,
+  wide: true,
 };

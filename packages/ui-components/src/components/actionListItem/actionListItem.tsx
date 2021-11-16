@@ -8,15 +8,22 @@ export type ActionListItemProps = {
    * Whether list item is disabled
    */
   disabled?: boolean;
-  onClick?: () => void;
+
   /**
    * Action subtitle
    */
   subtitle: string;
+
   /**
    * Action label
    */
   title: string;
+
+  /**
+   * Whether item fits its container
+   */
+  wide?: boolean;
+  onClick?: () => void;
 };
 
 /**
@@ -24,14 +31,16 @@ export type ActionListItemProps = {
  */
 export const ActionListItem: React.FC<ActionListItemProps> = ({
   disabled = false,
-  onClick,
   subtitle,
   title,
+  wide = false,
+  onClick,
 }) => {
   return (
     <Container
-      disabled={disabled}
+      wide={wide}
       onClick={onClick}
+      disabled={disabled}
       data-testid="actionListItem"
     >
       <TextContainer>
@@ -47,11 +56,12 @@ export const ActionListItem: React.FC<ActionListItemProps> = ({
 
 // TODO: Investigate group flexibility when children have different styles based
 // on parent state
-const Container = styled.button.attrs({
-  className: `flex justify-between items-center py-1.5 px-2 space-x-1.5
-  .box-border border-2 border-ui-100 active:border-ui-800 hover:border-ui-300
-   disabled:border-ui-200 disabled:bg-ui-100 rounded-xl `,
-})``;
+type ContainerProps = {wide: boolean};
+const Container = styled.button.attrs(({wide}: ContainerProps) => ({
+  className: `${
+    wide && 'w-full'
+  } flex justify-between items-center py-1.5 px-2 space-x-1.5 box-border border-2 border-ui-100 active:border-ui-800 hover:border-ui-300 disabled:border-ui-200 disabled:bg-ui-100 rounded-xl`,
+}))<ContainerProps>``;
 
 const TextContainer = styled.div.attrs({
   className: 'text-left font-semibold',

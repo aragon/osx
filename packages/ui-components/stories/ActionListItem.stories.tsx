@@ -23,3 +23,10 @@ Disabled.args = {
   subtitle: 'Action List Item Subtitle',
   disabled: true,
 };
+
+export const Wide = Template.bind({});
+Wide.args = {
+  title: 'Action List Item',
+  subtitle: 'Action List Item Subtitle',
+  wide: true,
+};
