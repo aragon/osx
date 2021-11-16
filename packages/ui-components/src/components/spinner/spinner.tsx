@@ -1,7 +1,7 @@
 import React, {HTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-export interface SpinnerProps extends HTMLAttributes<HTMLElement> {
+export type SpinnerProps = HTMLAttributes<HTMLElement> & {
   /**
    * The preferred Size of the spinner
    */

@@ -37,7 +37,7 @@ export function BeautifyLabel(label: string | null) {
   else return label
 }
 
-// check Label type
+// check label type
 export function IsAddress(address: string | null) {
   const re = /0x[a-fA-F0-9]{40}/g;
   return Boolean(address?.match(re));
