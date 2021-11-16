@@ -13,7 +13,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 /** Simple button with variable styling (depending on mode) and variable sizin */
-export const SimpleButton: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps> = ({
   mode = 'primary',
   size = 'default',
   label,
