@@ -14,9 +14,7 @@ const Template: Story<PopoverProps> = args => (
   <Popover {...args}>{args.children}</Popover>
 );
 
-const trigger: ReactNode = (
-  <Button label="button" mode="primary" size="default" />
-);
+const trigger: ReactNode = <Button label="Trigger" />;
 const popoverContent: ReactNode = (
   <div>
     Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime mollitia,
