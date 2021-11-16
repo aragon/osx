@@ -7,12 +7,22 @@ import {FlexDiv} from './iconButton';
 
 export type MenuButtonProps = {
   size: 'small' | 'default';
+  /**
+   * When set, the button will consist only of the menu icon, with no text.
+   */
   isMobile: boolean;
+  /**
+   * Changes the buttons appearance to either show a the menu icon or the a
+   * cross icon. This state distinction is currently only available when
+   * isMobile is false.
+   */
   isOpen: boolean;
   onClick: () => void;
 };
 
 // TODO Should the button manage the open/close state from within?
+// TODO Add a isOpen state distinction to the mobile version as well, as soon as
+// the design is finalized.
 export const MenuButton = ({
   size = 'default',
   isMobile,
