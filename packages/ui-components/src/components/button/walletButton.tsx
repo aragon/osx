@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import {SizedButton} from './button';
 import {Avatar} from '../avatar';
 import {Spinner} from '../spinner';
+import {BeautifyLabel} from '../../utils/addresses';
 
 export type WalletButtonProps = {
   /**
@@ -17,32 +18,13 @@ export type WalletButtonProps = {
   /**
   * Loading mode
   */
-  isLoading: boolean;
+  isLoading?: boolean;
   onClick: () => void;
   /**
   * Whether the current item is active
   */
-  isSelected: boolean;
+  isSelected?: boolean;
 };
-
-// get truncated address
-export function BeautifyLabel(label: string | null) {
-  if (label === null) return '';
-  if(IsAddress(label))
-    return (
-      label.substring(0, 5) +
-      '...' +
-      label.substring(label.length - 4, label.length)
-    );
-  else return label
-}
-
-// check label type
-export function IsAddress(address: string | null) {
-  const re = /0x[a-fA-F0-9]{40}/g;
-  return Boolean(address?.match(re));
-}
-
 
 export const WalletButton = ({
   label,

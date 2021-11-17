@@ -15,9 +15,7 @@ export const Spinner: React.FC<SpinnerProps> = ({size = 'small', ...props}) => {
   return <StyledSpinner data-testid="spinner" {...props} size={size}></StyledSpinner>;
 };
 
-type SizesType = {
-  [key: string]: string;
-};
+type SizesType = Record<SpinnerProps['size'], string>;
 
 const StyledSpinner = styled.div.attrs(({size}: SpinnerProps) => {
   const sizes: SizesType = {
@@ -26,7 +24,7 @@ const StyledSpinner = styled.div.attrs(({size}: SpinnerProps) => {
     big: 'w-6 h-6',
   };
   const className: string = `rounded-full 
-        ease-linear rounded-full border-2
+        ease-linear border-2
         border-t-2 border-ui-0
         ${sizes[size]}
     `;

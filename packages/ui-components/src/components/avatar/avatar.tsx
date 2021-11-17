@@ -5,7 +5,7 @@ export type AvatarProps = HTMLAttributes<HTMLElement> & {
   /** Change Avatar's border Radius */
   mode?: 'circle' | 'square';
   /** Changes a Avatar's size */
-  size?: 'small' | 'default' | 'big';
+  size: 'small' | 'default' | 'big';
   /** Avatar image src*/
   src: string;
 };
@@ -19,14 +19,9 @@ export const Avatar: React.FC<AvatarProps> = ({
   return <StyledAvatar {...{mode, size, src}} />;
 };
 
-type StyledAvatarProps = {
-  size: string;
-  mode: string;
-};
+type StyledAvatarProps = Pick<AvatarProps, 'mode' | 'size'>;
 
-type SizesType = {
-  [key: string]: string;
-};
+type SizesType = Record<NonNullable<AvatarProps['size']>, string>;
 
 const StyledAvatar = styled.img.attrs(({size, mode}: StyledAvatarProps) => {
 
