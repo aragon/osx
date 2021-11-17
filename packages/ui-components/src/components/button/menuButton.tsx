@@ -41,11 +41,7 @@ export const MenuButton = ({
     return (
       <OpenButton onClick={onClick} size={size}>
         <FlexDiv side={'left'}>
-          <IconClose
-            width={12}
-            height={12}
-            className="fill-current text-primary-500"
-          />
+          <IconClose width={12} height={12} />
           <p>Menu</p>
         </FlexDiv>
       </OpenButton>
