@@ -33,32 +33,22 @@ export const WalletButton = ({
   isLoading,
   onClick,
 }: WalletButtonProps) => {
-  if (!isLoading)
     return (
       <StyledButton onClick={onClick} size={'default'} isSelected={isSelected}>
-        <StyledAddress>{BeautifyLabel(label)}</StyledAddress>
-        <Avatar src={src} size={'small'} />
-      </StyledButton>
-    );
-  else
-    return (
-      <StyledButton onClick={onClick} size={'default'} isSelected={false}>
-        <LoadingLabel>{BeautifyLabel(label)}</LoadingLabel>
-        <Spinner size={'small'} />
+        <StyledLabel {...{isLoading}}>{BeautifyLabel(label)}</StyledLabel>
+        {(!isLoading)?<Avatar src={src} size={'small'} />:<Spinner size={'small'} />}
       </StyledButton>
     );
 };
 
-type StyledButtonProp = {isSelected: boolean};
+type StyledButtonProp = Pick<WalletButtonProps, 'isSelected'>;
+type StyledLabelProp = Pick<WalletButtonProps, 'isLoading'>;
+
 const StyledButton = styled(SizedButton).attrs(({isSelected}: StyledButtonProp) => ({
   className : `flex md:space-x-1.5 py-1.5 
   ${isSelected ? 'text-primary-500 bg-primary-50' : 'text-ui-600 bg-ui-0'}`
 }))<StyledButtonProp>``;
 
-const LoadingLabel = styled.p.attrs({
-  className: 'md:inline hidden text-primary-500'
-})``;
-
-const StyledAddress = styled.p.attrs({
-  className: 'md:inline hidden'
-})``;
+const StyledLabel = styled.p.attrs(({isLoading}: StyledLabelProp)=>({
+  className: `md:inline hidden ${isLoading && 'text-primary-500'}`
+}))``;

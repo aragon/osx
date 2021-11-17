@@ -9,4 +9,4 @@ export default {
 
 const Template: Story<SpinnerProps> = args => <Spinner {...args} />;
 
-export const Primary = Template.bind({});
+export const Default = Template.bind({});

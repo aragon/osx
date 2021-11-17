@@ -6,13 +6,17 @@ export type SpinnerProps = HTMLAttributes<HTMLElement> & {
    * The preferred Size of the spinner
    */
   size: 'small' | 'default' | 'big';
+  /**
+   * Styles
+   */
+  color?: string; 
 }
 
 /**
  * Spinner UI component
  */
-export const Spinner: React.FC<SpinnerProps> = ({size = 'small', ...props}) => {
-  return <StyledSpinner data-testid="spinner" {...props} size={size}></StyledSpinner>;
+export const Spinner: React.FC<SpinnerProps> = ({size = 'small', color}) => {
+  return <StyledSpinner data-testid="spinner" {...{size,color}}></StyledSpinner>;
 };
 
 type SizesType = Record<SpinnerProps['size'], string>;
@@ -31,7 +35,7 @@ const StyledSpinner = styled.div.attrs(({size}: SpinnerProps) => {
 
   return {className};
 })<SpinnerProps>`
-  border-top-color: #003bf5;
+  border-top-color: ${({color}) => (color || '#003bf5')};
   -webkit-animation: spinner 1s linear infinite;
   animation: spinner 1s linear infinite;
   @-webkit-keyframes spinner {
