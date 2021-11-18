@@ -41,7 +41,7 @@ export const MenuButton = ({
     return (
       <OpenButton onClick={onClick} size={size}>
         <FlexDiv side={'left'}>
-          <IconClose />
+          <IconClose width={12} height={12} />
           <p>Menu</p>
         </FlexDiv>
       </OpenButton>
@@ -59,8 +59,8 @@ export const MenuButton = ({
 };
 
 const StyledButton = styled(SizedButton).attrs({
-  className: 'bg-ui-0 text-ui-600',
+  className: 'bg-ui-0 text-ui-600 border-2',
 })``;
 const OpenButton = styled(SizedButton).attrs({
-  className: 'bg-ui-0 text-primary-500',
+  className: 'bg-ui-0 text-primary-500 border-2',
 })``;
