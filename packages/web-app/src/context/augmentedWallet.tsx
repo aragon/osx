@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Workarounds are used that necessitate the any escape hatch
+
 import React, {useContext, useEffect} from 'react';
 import {identifyUser} from 'services/analytics';
 import {UseWalletProvider, useWallet} from 'use-wallet';

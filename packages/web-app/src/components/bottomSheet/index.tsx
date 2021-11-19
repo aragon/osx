@@ -1,5 +1,5 @@
 import React, {useEffect, ReactNode} from 'react';
-import {motion, useAnimation} from 'framer-motion';
+import {motion, PanInfo, useAnimation} from 'framer-motion';
 import {Backdrop} from '@aragon/ui-components';
 import styled from 'styled-components';
 
@@ -22,7 +22,7 @@ export default function BottomSheet({
   const controls = useAnimation();
 
   // For adding drag on bottom sheet
-  function onDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: any) {
+  function onDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     const shouldClose =
       info.velocity.y > 20 || (info.velocity.y >= 0 && info.point.y > 45);
     if (shouldClose) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Primary as Spinner} from '../stories/Spinner.stories';
+import {Default as Spinner} from '../stories/Spinner.stories';
 
 describe('Spinner', () => {
   function setup(args: any) {

@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {IconChevronRight} from '../icons';
-
 export type ActionListItemProps = {
   /**
    * Whether list item is disabled
@@ -10,9 +8,14 @@ export type ActionListItemProps = {
   disabled?: boolean;
 
   /**
+   * Icon to display to the right of the item text
+   */
+  icon: any; // TODO: Set proper type
+
+  /**
    * Action subtitle
    */
-  subtitle: string;
+  subtitle?: string;
 
   /**
    * Action label
@@ -31,6 +34,7 @@ export type ActionListItemProps = {
  */
 export const ActionListItem: React.FC<ActionListItemProps> = ({
   disabled = false,
+  icon,
   subtitle,
   title,
   wide = false,
@@ -45,11 +49,9 @@ export const ActionListItem: React.FC<ActionListItemProps> = ({
     >
       <TextContainer>
         <Title>{title}</Title>
-        <Subtitle>{subtitle}</Subtitle>
+        {subtitle && <Subtitle>{subtitle}</Subtitle>}
       </TextContainer>
-      <IconContainer>
-        <IconChevronRight />
-      </IconContainer>
+      <IconContainer>{icon}</IconContainer>
     </Container>
   );
 };

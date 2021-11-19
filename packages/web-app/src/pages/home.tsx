@@ -4,7 +4,7 @@ import {useTranslation} from 'react-i18next';
 import {Button} from '@aragon/ui-components';
 
 import Wallet from 'components/wallet';
-import BottomSheet from 'components/BottomSheet';
+import BottomSheet from 'components/bottomSheet';
 
 const Home: React.FC = () => {
   const {t} = useTranslation();

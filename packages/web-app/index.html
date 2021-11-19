@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/src/public/favicon.svg" />
+
+    <!-- TODO: remove once fonts have been downloaded and set in stone -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zaragoza</title>
   </head>
@@ -12,9 +19,9 @@
     <script>
       !(function () {
         // TODO: add key to pipeline
-        const analyticsKey = '%VITE_REACT_APP_ANALYTICS_KEY%'
+        const analyticsKey = '%VITE_REACT_APP_ANALYTICS_KEY%';
         if (!analyticsKey.includes('undefined')) {
-          rudderAnalytics = window.rudderanalytics = []
+          rudderAnalytics = window.rudderanalytics = [];
           for (
             var methods = [
                 'load',
@@ -26,25 +33,25 @@
                 'ready',
                 'reset',
                 'getAnonymousId',
-                'setAnonymousId'
+                'setAnonymousId',
               ],
               i = 0;
             i < methods.length;
             i++
           ) {
-            var method = methods[i]
+            var method = methods[i];
             rudderAnalytics[method] = (function (a) {
               return function () {
                 rudderAnalytics.push(
                   [a].concat(Array.prototype.slice.call(arguments))
-                )
-              }
-            })(method)
+                );
+              };
+            })(method);
           }
-          rudderAnalytics.load(analyticsKey, 'https://rudderstack.aragon.org')
-          rudderAnalytics.page()
+          rudderAnalytics.load(analyticsKey, 'https://rudderstack.aragon.org');
+          rudderAnalytics.page();
         }
-      })()
+      })();
     </script>
     <script
       async
