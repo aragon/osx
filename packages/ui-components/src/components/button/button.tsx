@@ -34,7 +34,7 @@ type SizedButtonProps = {
 };
 
 /**
- * Extends the button element with the desired size.
+ * Extends the html button element with the desired size.
  * Furthermore, the button comes with rounded corners and a focus ring, as this
  * is shared by all buttons in this library.
  */

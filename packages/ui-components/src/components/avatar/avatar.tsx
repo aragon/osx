@@ -21,14 +21,17 @@ export const Avatar: React.FC<AvatarProps> = ({
 
 type StyledAvatarProps = Pick<AvatarProps, 'mode' | 'size'>;
 
-type SizesType = Record<NonNullable<AvatarProps['size']>, string>;
+type SizesType = Record<AvatarProps['size'], string>;
 
 const StyledAvatar = styled.img.attrs(({size, mode}: StyledAvatarProps) => {
-
-  const sizes : SizesType = {'small': 'w-3 h-3', 'default': 'w-5 h-5', 'large': 'w-6 h-6'};
+  const sizes: SizesType = {
+    small: 'w-3 h-3',
+    default: 'w-5 h-5',
+    large: 'w-6 h-6',
+  };
   const className: string = `bg-ui-100
     ${sizes[size]}
-    ${mode === 'circle' ? 'rounded-full' : 'rounded-xl'}
+    ${mode === 'circle' ? 'rounded-full' : 'rounded-2xl'}
   `;
 
   return {className};

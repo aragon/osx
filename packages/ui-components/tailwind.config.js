@@ -45,6 +45,11 @@ module.exports = {
         25: '200px',
       },
     },
+    screens: {
+      tablet: '768px',
+      desktop: '1440px',
+      wide: '1920px',
+    },
     fontFamily: {
       sans: ['Manrope'],
     },
