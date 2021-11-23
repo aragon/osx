@@ -8,3 +8,4 @@ export * from './components/icons';
 export * from './components/menuItem';
 export * from './components/popover';
 export * from './components/spinner';
+export * from './components/daoCard';

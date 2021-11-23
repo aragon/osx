@@ -6,7 +6,7 @@ export type AvatarProps = {
   mode?: 'circle' | 'square';
   /** Changes a Avatar's size */
   size: 'small' | 'default' | 'large';
-  /** Avatar image src*/
+  /** URL of the Avatar's src */
   src: string;
 };
 
