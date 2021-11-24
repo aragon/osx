@@ -2,12 +2,21 @@ import React from 'react';
 import styled from 'styled-components';
 import {NavLink} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
+import {WalletButton} from '@aragon/ui-components';
 
 import TestNetworkIndicator from 'components/testNetworkIndicator';
 import {Dashboard, Community, Finance, Governance} from 'utils/paths';
+import {useMenuContext} from 'context/menu';
+import {useWallet} from 'context/augmentedWallet';
 
 const Navbar: React.FC = () => {
   const {t} = useTranslation();
+  const {open} = useMenuContext();
+  const {connect, isConnected, account} = useWallet();
+
+  const onToggle = () => {
+    isConnected() ? open() : connect('injected');
+  };
 
   return (
     <NavContainer data-testid="nav">
@@ -34,10 +43,11 @@ const Navbar: React.FC = () => {
             </StyledNavLink>
           </LinksContainer>
         </Container>
-        <AccountButton>
-          <div>punk420.eth</div>
-          <TempAvatar />
-        </AccountButton>
+        <WalletButton
+          onClick={onToggle}
+          label={isConnected() ? account : t('navButtons.connectWallet')}
+          src={'https://place-hold.it/150x150'}
+        />
       </NavigationBar>
     </NavContainer>
   );
@@ -90,12 +100,4 @@ const DaoIdentifier = styled.span.attrs({
 
 const TempDaoAvatar = styled.div.attrs({
   className: 'w-6 h-6 rounded-xl bg-primary-700',
-})``;
-
-const AccountButton = styled.button.attrs({
-  className: `${roundedButtonClasses} space-x-1.5 bg-ui-0`,
-})``;
-
-const TempAvatar = styled.div.attrs({
-  className: 'w-3 h-3 rounded-full bg-primary-700',
 })``;

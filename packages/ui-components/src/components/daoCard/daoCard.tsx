@@ -12,7 +12,7 @@ export type DaoCardProps = {
   /** Dao's ethereum address **or** ENS name */
   daoAddress: Address;
   /**
-   * Allows the Dao Card component grow vertically, thereby moving the switcher
+   * Allows the Dao Card component grow horizontally, thereby moving the switcher
    * button right.
    * */
   wide: boolean;

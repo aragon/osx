@@ -35,6 +35,7 @@ module.exports = {
         1: '8px',
         1.5: '12px',
         2: '16px',
+        2.5: '20px',
         3: '24px',
         4: '32px',
         5: '40px',
@@ -45,7 +46,11 @@ module.exports = {
         25: '200px',
       },
     },
-
+    screens: {
+      tablet: '768px',
+      desktop: '1440px',
+      wide: '1920px',
+    },
     fontFamily: {
       sans: ['Manrope'],
     },

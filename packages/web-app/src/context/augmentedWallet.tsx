@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Workarounds are used that necessitate the any escape hatch
 
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useMemo} from 'react';
 import {identifyUser} from 'services/analytics';
 import {UseWalletProvider, useWallet} from 'use-wallet';
 import {Wallet} from 'use-wallet/dist/cjs/types';
+import {providers as EthersProviders} from 'ethers';
 import {updateAPMContext, useAPM} from './elasticAPM';
 
 // Any is a workaround so TS doesn't ask for a filled out default
@@ -16,6 +17,12 @@ const useWalletAugmented = (): Wallet => {
 
 const WalletAugmented: React.FC<unknown> = ({children}) => {
   const wallet = useWallet();
+  const ethereum: any = wallet.ethereum;
+
+  const injectedProvider: any = useMemo(
+    () => (ethereum ? new EthersProviders.Web3Provider(ethereum) : null),
+    [ethereum]
+  );
 
   useEffect(() => {
     if (
@@ -34,7 +41,7 @@ const WalletAugmented: React.FC<unknown> = ({children}) => {
   }, [apm, wallet.networkName]);
 
   return (
-    <WalletAugmentedContext.Provider value={wallet}>
+    <WalletAugmentedContext.Provider value={{...wallet, ...injectedProvider}}>
       {children}
     </WalletAugmentedContext.Provider>
   );

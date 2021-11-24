@@ -5,6 +5,7 @@ import {Button} from '@aragon/ui-components';
 
 import Wallet from 'components/wallet';
 import BottomSheet from 'components/bottomSheet';
+import WalletMenu from 'containers/walletMenu';
 
 const Home: React.FC = () => {
   const {t} = useTranslation();
@@ -20,7 +21,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="bg-white">
-      <div className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 mx-auto max-w-screen-xl">
+      <div className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 mx-auto">
         <div className="text-center">
           <WelcomeMessage>{t('subtitle')}</WelcomeMessage>
           <Title>{t('title.part1')}</Title>
@@ -29,6 +30,7 @@ const Home: React.FC = () => {
       </div>
       <h1>Wallet</h1>
       <Wallet />
+      <WalletMenu />
       <Button onClick={onOpen} label="Toggle" />
       <BottomSheet onOpen={onOpen} isOpen={isOpen} onClose={onClose} />
     </div>

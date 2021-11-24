@@ -29,3 +29,10 @@ Initials.args = {
     'https://eu.ui-avatars.com/api/?name=Dao+Name+three&background=0037D2&color=fff',
   mode: 'circle',
 };
+
+export const Identicon = Template.bind({});
+Identicon.args = {
+  src:
+    '0x6720000000000000000000000000000000007739',
+  mode: 'circle',
+};

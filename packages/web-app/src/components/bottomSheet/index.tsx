@@ -56,13 +56,13 @@ export default function BottomSheet({
           stiffness: 400,
         }}
         variants={{
-          visible: {y: 0, height: 200},
+          visible: {y: 0, height: 'auto'},
           hidden: {y: 100, height: 0},
         }}
         dragConstraints={{top: 0}}
         dragElastic={0.2}
       >
-        {children}
+        <Content>{children}</Content>
       </StyledMotionContainer>
     </>
   );
@@ -86,3 +86,7 @@ const StyledMotionContainer = styled(motion.div).attrs({
     top: -14px;
   }
 `;
+
+const Content = styled.div.attrs({
+  className: 'px-2 pt-2.5 pb-5',
+})``;

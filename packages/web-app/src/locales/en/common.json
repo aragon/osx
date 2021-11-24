@@ -10,5 +10,8 @@
     "governance": "Governance",
     "finance": "Finance",
     "community": "Community"
+  },
+  "navButtons":{
+    "connectWallet": "Connect account"
   }
 }

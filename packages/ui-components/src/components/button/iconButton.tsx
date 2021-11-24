@@ -6,8 +6,10 @@ import {ButtonProps, StyledButton} from './button';
 export type IconButtonProps = ButtonProps & {
   /** Wheter the icon is left or right of the label */
   side: 'left' | 'right';
-  /** The icon's source */
-  iconSrc: string;
+  /**
+  * Icon to prepend to the button text
+  */
+  icon: any; // TODO: set proper type
 };
 
 /** Button with settable icon. The icon can be specified via its source and can
@@ -16,7 +18,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   mode = 'primary',
   size = 'default',
   side = 'left',
-  iconSrc,
+  icon,
   label,
   onClick,
   disabled,
@@ -31,7 +33,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
       {...props}
     >
       <FlexDiv side={side}>
-        <StyledIcon iconSrc={iconSrc} />
+        <StyledIconContainer>
+          {icon}
+        </StyledIconContainer>
         <p>{label}</p>
       </FlexDiv>
     </StyledButton>
@@ -45,14 +49,10 @@ type FlexDivProps = {
 export const FlexDiv = styled.div.attrs(({side}: FlexDivProps) => {
   let className = 'flex items-center space-x-2';
   if (side === 'right')
-    className = 'flex items-center flex-row-reverse space-x-reverse space-x-2';
+    className = 'flex items-center flex-row-reverse space-x-reverse space-x-1.5';
   return {className: className};
 })<FlexDivProps>``;
 
-type StyledIconProps = {
-  iconSrc: IconButtonProps['iconSrc'];
-};
-
-const StyledIcon = styled.img.attrs(({iconSrc}: StyledIconProps) => {
-  return {src: iconSrc, className: 'w-3 h-3'};
-})<StyledIconProps>``;
+const StyledIconContainer = styled.div.attrs({
+  className: 'flex items-center w-3 h-3'
+})``;

@@ -59,16 +59,16 @@ export const StyledButton = styled(SizedButton).attrs(
     //TODO add disabled styling once design is finalized
     if (mode === 'primary') {
       className =
-        'text-ui-0 bg-primary-400 hover:bg-primary-500 active:bg-primary-700';
+        'text-ui-0 bg-primary-400 hover:bg-primary-500 active:bg-primary-700 font-semibold';
     } else if (mode === 'secondary') {
       className =
-        'text-primary-500 bg-primary-100 hover:text-primary-800 active:bg-primary-200 active:text-primary-800';
+        'text-primary-500 bg-primary-100 hover:text-primary-800 active:bg-primary-200 active:text-primary-800 font-semibold';
     } else if (mode === 'tertiary') {
       className =
-        'text-ui-600 bg-ui-0 border-2 border-ui-100 hover:border-ui-300 active:border-ui-800';
+        'text-ui-600 bg-ui-0 border-2 border-ui-100 hover:border-ui-300 active:border-ui-800 font-semibold';
     } else if (mode === 'ghost') {
       className =
-        'text-primary-500 bg-ui-0 hover:text-primary-800 active:bg-primary-50';
+        'text-primary-500 bg-ui-0 hover:text-primary-800 active:bg-primary-50 font-semibold';
     }
 
     return {className};
