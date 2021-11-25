@@ -11,11 +11,15 @@ export type DaoCardProps = {
   daoName: string;
   /** Dao's ethereum address **or** ENS name */
   daoAddress: Address;
+  /** Determines if switch button is displayed and sets the card to clickable */
+  includeSwitch?: boolean;
   /**
    * Allows the Dao Card component grow horizontally, thereby moving the switcher
    * button right.
    * */
-  wide: boolean;
+  wide?: boolean;
+  /** Label for switch button */
+  switchLabel?: string;
   /** Handler for the switch button. Will be called when the button is clicked.
    * */
   onClick: () => void;
@@ -34,12 +38,19 @@ export type DaoCardProps = {
 export const DaoCard: React.FC<DaoCardProps> = ({
   daoName,
   daoAddress,
+  includeSwitch = true,
   onClick,
   wide = false,
   src,
+  switchLabel,
 }: DaoCardProps) => {
   return (
-    <Card data-testid="daoCard" wide={wide}>
+    <Card
+      data-testid="daoCard"
+      includeSwitch={includeSwitch}
+      wide={wide}
+      {...(!includeSwitch && {onClick})}
+    >
       <LeftContent>
         <Avatar src={src} mode={'square'} size={'large'} />
         <TextContainer>
@@ -47,22 +58,27 @@ export const DaoCard: React.FC<DaoCardProps> = ({
           <DaoAddress>{shortenAddress(daoAddress)}</DaoAddress>
         </TextContainer>
       </LeftContent>
-      <StyledButton mode={'ghost'} size={'small'} onClick={onClick}>
-        <FlexDiv side={'right'}>
-          <IconSwitch />
-          <p>{'Switch'}</p>
-        </FlexDiv>
-      </StyledButton>
+      {includeSwitch && (
+        <StyledButton mode={'ghost'} size={'small'} onClick={onClick}>
+          <FlexDiv side={'right'}>
+            <IconSwitch />
+            <p>{switchLabel}</p>
+          </FlexDiv>
+        </StyledButton>
+      )}
     </Card>
   );
 };
 
 type CardProps = {
+  includeSwitch?: boolean;
   wide?: boolean;
 };
 
-const Card = styled.div.attrs(({wide}: CardProps) => ({
-  className: wide ? 'flex justify-between' : 'inline-flex',
+const Card = styled.div.attrs(({includeSwitch, wide}: CardProps) => ({
+  className: `${!includeSwitch && 'cursor-pointer'} ${
+    wide ? 'flex justify-between' : 'inline-flex'
+  }`,
 }))<CardProps>``;
 
 const LeftContent = styled.div.attrs({
@@ -76,6 +92,8 @@ const TextContainer = styled.div.attrs({
 const DaoName = styled.p.attrs({
   className: 'text-ui-800 font-bold text-base',
 })``;
+
+// FIXME: temporarily changed font weight
 const DaoAddress = styled.p.attrs({
-  className: 'text-ui-400 font-normal text-sm',
+  className: 'text-ui-400 font-medium text-sm',
 })``;

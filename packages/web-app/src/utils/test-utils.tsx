@@ -4,12 +4,18 @@ import {HashRouter as Router} from 'react-router-dom';
 import {render, RenderOptions} from '@testing-library/react';
 
 import {i18n} from '../../i18n.config';
+import {MenuProvider} from 'context/menu';
+import {WalletProvider} from 'context/augmentedWallet';
 
 const AllProviders: React.FC = ({children}) => {
   return (
-    <I18nextProvider i18n={i18n}>
-      <Router>{children}</Router>
-    </I18nextProvider>
+    <WalletProvider>
+      <MenuProvider>
+        <I18nextProvider i18n={i18n}>
+          <Router>{children}</Router>
+        </I18nextProvider>
+      </MenuProvider>
+    </WalletProvider>
   );
 };
 

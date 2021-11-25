@@ -1,7 +1,7 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 
-import {Default as ActionListItem} from '../stories/ActionListItem.stories';
+import {Default as ActionListItem} from '../stories/actionListItem.stories';
 
 describe('ActionItem', () => {
   function setup(args?: any) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Circle as Avatar} from '../stories/Avatar.stories';
+import {Circle as Avatar} from '../stories/avatar.stories';
 
 describe('Avatar', () => {
   function setup(args: any) {

@@ -5,13 +5,21 @@
     "part2": "The human centered Dao infrastructure."
   },
   "testnetIndicator": "TESTNET ACTIVE",
+  "menu": "Menu",
   "navLinks": {
     "dashboard": "Dashboard",
     "governance": "Governance",
     "finance": "Finance",
     "community": "Community"
   },
-  "navButtons":{
+  "daoCard": {
+    "switchLabel": "Switch"
+  },
+  "daoSwitcher": {
+    "title": "Explore",
+    "subtitle": "Find other DAOs to join"
+  },
+  "navButtons": {
     "connectWallet": "Connect account"
   }
 }

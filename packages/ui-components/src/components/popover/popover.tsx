@@ -65,6 +65,13 @@ export const Popover: React.FC<PopoverProps> = ({
   );
 };
 
+const contentMargins = {
+  top: 'margin-bottom: 8px',
+  bottom: 'margin-top: 8px',
+  left: 'margin-right: 8px',
+  right: 'margin-left: 8px',
+};
+
 type StyledContentProps = {
   width: number | string;
   style?: CSSProperties | undefined;
@@ -77,10 +84,10 @@ const StyledContent = styled(Content).attrs(
       background: '#FFFFFF',
       boxShadow: '0px 0px 4px rgba(50, 63, 75, 0.16)',
       borderRadius: 12,
-      padding: '20px 16px',
-      margin: 8,
     };
 
     return {style: currentStyle};
   }
-)<StyledContentProps>``;
+)<StyledContentProps>`
+  ${({side}) => side && contentMargins[side]}
+`;

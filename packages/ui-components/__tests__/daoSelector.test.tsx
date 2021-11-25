@@ -1,7 +1,7 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 
-import {Default as DaoSelector} from '../stories/DaoSelector.stories';
+import {Default as DaoSelector} from '../stories/daoSelector.stories';
 
 describe('DaoSelector', () => {
   function setup(args: any) {

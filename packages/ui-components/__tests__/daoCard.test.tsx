@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Default as DaoCard} from '../stories/DaoCard.stories';
+import {Default as DaoCard} from '../stories/daoCard.stories';
 
 describe('DaoSelector', () => {
   function setup(args: any) {

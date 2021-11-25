@@ -1,12 +1,12 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 
-import {Default as MenuItem} from '../stories/menuItem.stories';
+import {IconOnlyButton} from '../src';
 
-describe('ActionItem', () => {
+describe('IconOnlyButton', () => {
   function setup(args?: any) {
-    render(<MenuItem {...args} />);
-    return screen.getByTestId('menuItem');
+    render(<IconOnlyButton {...args} />);
+    return screen.getByRole('button');
   }
 
   test('should render without crashing', () => {

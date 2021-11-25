@@ -42,21 +42,28 @@ module.exports = {
         6: '48px',
         8: '64px',
         10: '80px',
+        12: '96px',
         14: '112px',
         25: '200px',
       },
     },
     screens: {
       tablet: '768px',
-      desktop: '1440px',
+      desktop: '1280px',
+      // desktop: '1440px',
       wide: '1920px',
     },
     fontFamily: {
       sans: ['Manrope'],
     },
   },
+
   variants: {
-    extend: {},
+    extend: {
+      backgroundColor: ['active', 'disabled'],
+      textColor: ['active', 'disabled'],
+      borderColor: ['active', 'disabled'],
+    },
   },
   plugins: [],
 };

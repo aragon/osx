@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Default as Popover} from '../stories/Popover.stories';
+import {Default as Popover} from '../stories/popover.stories';
 
 describe('Popover', () => {
   function setup(args: any) {
