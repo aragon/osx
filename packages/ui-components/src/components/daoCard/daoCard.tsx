@@ -90,7 +90,7 @@ const TextContainer = styled.div.attrs({
 })``;
 
 const DaoName = styled.p.attrs({
-  className: 'text-ui-800 font-bold text-base',
+  className: 'text-ui-800 font-bold',
 })``;
 
 // FIXME: temporarily changed font weight

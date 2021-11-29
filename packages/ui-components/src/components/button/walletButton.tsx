@@ -31,10 +31,10 @@ export const WalletButton = ({
   src,
   isSelected = false,
   isLoading,
-  onClick,
+  ...props
 }: WalletButtonProps) => {
   return (
-    <StyledButton onClick={onClick} size={'small'} isSelected={isSelected}>
+    <StyledButton size={'small'} isSelected={isSelected} {...props}>
       <StyledLabel {...{isLoading}}>{shortenAddress(label)}</StyledLabel>
       {!isLoading ? (
         <Avatar src={src} size={'small'} />

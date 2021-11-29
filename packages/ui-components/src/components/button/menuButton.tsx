@@ -27,10 +27,10 @@ export const MenuButton = ({
   size = 'default',
   isOpen,
   label,
-  onClick,
+  ...props
 }: MenuButtonProps) => {
   return (
-    <Container onClick={onClick} size={size} isOpen={isOpen}>
+    <Container size={size} isOpen={isOpen} {...props}>
       <FlexDiv side={'left'}>
         {isOpen ? <IconClose /> : <IconMenu />}
         <p className="hidden tablet:inline">{label}</p>

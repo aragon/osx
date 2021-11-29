@@ -1,12 +1,12 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 
-import { Badge } from '../src';
+import {Badge} from '../src';
 
 describe('Badge', () => {
   function setup(args: any) {
     render(<Badge {...args} />);
-    return screen.getByRole('img');
+    return screen.getByTestId('badge');
   }
 
   test('should render without crashing', () => {

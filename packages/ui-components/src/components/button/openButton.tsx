@@ -9,13 +9,12 @@ import {FlexDiv} from './iconButton';
 export const OpenButton: React.FC<ButtonProps> = ({
   mode = 'primary',
   size = 'default',
-  disabled = false,
   label,
-  onClick,
+  ...props
 }) => {
   // TODO make component keep track of open/closed state and change icon acordingly.
   return (
-    <StyledButton mode={mode} onClick={onClick} size={size} disabled={disabled}>
+    <StyledButton mode={mode} size={size} {...props}>
       <FlexDiv side={'right'}>
         <IconChevronDown />
         <p>{label}</p>

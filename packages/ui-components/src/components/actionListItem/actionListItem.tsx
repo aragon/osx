@@ -82,7 +82,7 @@ const Title = styled.p.attrs({})`
 `;
 
 const Subtitle = styled.p.attrs({
-  className: 'text-xs',
+  className: 'text-sm',
 })`
   color: #7b8794; //UI-400
 

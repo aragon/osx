@@ -7,9 +7,9 @@ export type IconButtonProps = ButtonProps & {
   /** Wheter the icon is left or right of the label */
   side: 'left' | 'right';
   /**
-  * Icon to prepend to the button text
-  */
-  icon: any; // TODO: set proper type
+   * Icon to prepend to the button text
+   */
+  icon: React.ReactNode; // Can this be set to accept only an Icon?
 };
 
 /** Button with settable icon. The icon can be specified via its source and can
@@ -33,9 +33,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       {...props}
     >
       <FlexDiv side={side}>
-        <StyledIconContainer>
-          {icon}
-        </StyledIconContainer>
+        <StyledIconContainer>{icon}</StyledIconContainer>
         <p>{label}</p>
       </FlexDiv>
     </StyledButton>
@@ -49,10 +47,11 @@ type FlexDivProps = {
 export const FlexDiv = styled.div.attrs(({side}: FlexDivProps) => {
   let className = 'flex items-center space-x-2';
   if (side === 'right')
-    className = 'flex items-center flex-row-reverse space-x-reverse space-x-1.5';
+    className =
+      'flex items-center flex-row-reverse space-x-reverse space-x-1.5';
   return {className: className};
 })<FlexDivProps>``;
 
 const StyledIconContainer = styled.div.attrs({
-  className: 'flex items-center w-3 h-3'
+  className: 'flex items-center w-3 h-3',
 })``;

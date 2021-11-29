@@ -58,7 +58,7 @@ export const ActionItem: React.FC<ActionItemProps> = ({
 
 type ContainerProps = {isSelected: boolean; wide: boolean};
 const Container = styled.button.attrs(({isSelected, wide}: ContainerProps) => ({
-  className: `${wide && 'w-full'} rounded-xl py-1.5 px-2 text-base ${
+  className: `${wide && 'w-full'} rounded-xl py-1.5 px-2 ${
     isSelected ? 'text-primary-500 bg-primary-50' : 'text-ui-600 bg-ui-0'
   } hover:text-primary-500 active:bg-primary-50 disabled:text-ui-300 disabled:bg-ui-0 focus:outline-none focus:ring-2 focus:ring-primary-500`,
 }))<ContainerProps>``;

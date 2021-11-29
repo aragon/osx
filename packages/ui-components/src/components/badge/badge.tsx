@@ -8,15 +8,22 @@ export type BadgeProps = {
   label: string;
 };
 
-export const Badge: React.FC<BadgeProps> = ({ label, colorScheme = 'default' }) => {
-  return <StyledBadge colorScheme={colorScheme}>{label}</StyledBadge>
+export const Badge: React.FC<BadgeProps> = ({
+  label,
+  colorScheme = 'default',
+}) => {
+  return (
+    <StyledBadge data-testid="badge" colorScheme={colorScheme}>
+      {label}
+    </StyledBadge>
+  );
 };
 
 type StyledBadgeProps = {
   colorScheme: BadgeProps['colorScheme'];
 };
 
-const StyledBadge = styled.span.attrs(({ colorScheme }: StyledBadgeProps) => {
+const StyledBadge = styled.span.attrs(({colorScheme}: StyledBadgeProps) => {
   let colorCode;
   if (colorScheme === 'green') {
     colorCode = 'bg-success-200 text-success-800';
@@ -26,7 +33,7 @@ const StyledBadge = styled.span.attrs(({ colorScheme }: StyledBadgeProps) => {
     colorCode = 'bg-ui-50 text-ui-600';
   }
 
-  const className: string = `text-xs p-0.5 rounded ${colorCode}`;
+  const className: string = `text-xs p-0.5 font-bold rounded ${colorCode}`;
 
-  return { className };
-}) <StyledBadgeProps>``;
+  return {className};
+})<StyledBadgeProps>``;
