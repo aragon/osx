@@ -21,5 +21,12 @@
   },
   "navButtons": {
     "connectWallet": "Connect account"
+  },
+  "labels": {
+    "seeAll": "See all"
+  },
+  "finance": {
+    "tokenSection": "Token Section",
+    "transferSection": "Transfer Section"
   }
 }
