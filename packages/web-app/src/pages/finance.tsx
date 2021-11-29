@@ -11,11 +11,11 @@ const Finance: React.FC = () => {
   const {t} = useTranslation();
 
   return (
-    <div className={'m-auto w-8/12 mt-4'}>
+    <div className={'m-auto mt-4 w-8/12'}>
       <h1 className={'text-2xl font-bold text-center '}>Finance Page</h1>
       <div className={'h-4'} />
       <TokenSectionWrapper title={t('finance.tokenSection')}>
-        <div className="py-2 border-1 border-solid space-y-2">
+        <div className="py-2 space-y-2 border-solid">
           <ColoredDiv />
           <ColoredDiv />
           <ColoredDiv />
@@ -25,7 +25,7 @@ const Finance: React.FC = () => {
       </TokenSectionWrapper>
       <div className={'h-4'} />
       <TransferSectionWrapper title={t('finance.transferSection')}>
-        <div className="my-2 border-1 border-solid space-y-2">
+        <div className="my-2 space-y-2 border-solid">
           <ColoredDiv />
           <ColoredDiv />
           <ColoredDiv />

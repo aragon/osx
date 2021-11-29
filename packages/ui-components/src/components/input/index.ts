@@ -1,0 +1,1 @@
+export {InputProps, Input} from './input';
