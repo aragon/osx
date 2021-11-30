@@ -1,25 +1,29 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {Avatar, AvatarProps} from '../avatar';
+import {Avatar} from '../avatar';
 import {IconButton} from '../button/iconButton';
 import {IconCopy} from '../icons';
 import {shortenAddress} from '../../utils/addresses';
 
 export type WalletCardProps = {
   /**
-   * wallet ENS name or wallet eth address
-   */
-  name?: string;
+  * wallet ENS name or wallet eth address
+  */
+  name?: string | null;
   /**
    * Wallet eth address
    */
   address: string | null;
   /**
-   * Allows the Wallet Card component grow horizontally
-   * */
-  wide: boolean;
-} & Pick<AvatarProps, 'src'>;
+  * Allows the Wallet Card component grow horizontally
+  */
+  wide:boolean;
+  /**
+  * Avatar Image source
+  */
+  src: string | null;
+};
 
 /**
  * WalletCard UI component
@@ -35,22 +39,22 @@ export const WalletCard: React.FC<WalletCardProps> = ({
   };
 
   return (
-    <Card {...{wide}} data-testid="walletCard">
-      <Content>
-        <Avatar size={'default'} src={src} />
-        <TextContainer>
-          <Title>{shortenAddress(name || address)}</Title>
-          {address && <Subtitle>{shortenAddress(address)}</Subtitle>}
-        </TextContainer>
-      </Content>
-      <IconButton
-        icon={<IconCopy />}
-        mode={'ghost'}
-        label="copy"
-        side="right"
-        onClick={copyToClipboard}
-      />
-    </Card>
+      <Card {...{wide}} data-testid="walletCard">
+          <Content>
+            <Avatar size={'default'} src={src || ''}/>
+            <TextContainer>
+              <Title>{shortenAddress(name || address)}</Title>
+              {name && <Subtitle>{shortenAddress(address)}</Subtitle>}
+            </TextContainer>
+          </Content>
+          <IconButton 
+            icon={<IconCopy/>} 
+            mode={'ghost'} 
+            label="copy" 
+            side="right" 
+            onClick={copyToClipboard}
+          />
+      </Card>
   );
 };
 

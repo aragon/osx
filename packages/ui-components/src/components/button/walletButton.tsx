@@ -5,6 +5,7 @@ import {SizedButton} from './button';
 import {Avatar} from '../avatar';
 import {Spinner} from '../spinner';
 import {shortenAddress} from '../../utils/addresses';
+import {IconPerson} from '../icons';
 
 export type WalletButtonProps = {
   /**
@@ -14,7 +15,7 @@ export type WalletButtonProps = {
   /**
    * Avatar Image source
    */
-  src: string;
+  src: string | null;
   /**
    * Loading mode
    */
@@ -24,6 +25,10 @@ export type WalletButtonProps = {
    * Whether the current item is active (isSelected)
    */
   isSelected?: boolean;
+  /**
+  * Check if wallet is connected!
+  */
+  isConnected?: boolean;
 };
 
 export const WalletButton = ({
@@ -31,16 +36,29 @@ export const WalletButton = ({
   src,
   isSelected = false,
   isLoading,
+  isConnected = false,
   ...props
 }: WalletButtonProps) => {
+
+  const LoadAvatar = () => {
+    if(isConnected)
+    return (!isLoading ? (
+        <Avatar src={src || ''} size={'small'} />
+      ) : (
+        <Spinner size={'small'} />
+      ))
+    else
+      return (
+        <IconWrapper>
+          <IconPerson />
+        </IconWrapper>
+      );
+  }
+
   return (
     <StyledButton size={'small'} isSelected={isSelected} {...props}>
       <StyledLabel {...{isLoading}}>{shortenAddress(label)}</StyledLabel>
-      {!isLoading ? (
-        <Avatar src={src} size={'small'} />
-      ) : (
-        <Spinner size={'small'} />
-      )}
+      {LoadAvatar()}
     </StyledButton>
   );
 };
@@ -57,5 +75,9 @@ const StyledButton = styled(SizedButton).attrs(
 )<StyledButtonProp>``;
 
 const StyledLabel = styled.p.attrs(({isLoading}: StyledLabelProp) => ({
-  className: `tablet:inline hidden ${isLoading && 'text-primary-500'}`,
+  className: `tablet:inline hidden font-semibold ${isLoading && 'text-primary-500'}`,
 }))``;
+
+const IconWrapper = styled.div.attrs({
+  className: `flex align-center justify-center items-center h-3`,
+})``;

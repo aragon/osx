@@ -24,6 +24,13 @@ const WalletAugmented: React.FC<unknown> = ({children}) => {
     [ethereum]
   );
 
+  const getEnsData: any = useMemo(async () => {
+    const ensName = await injectedProvider?.lookupAddress(wallet.account);
+    const ensAvatarUrl = await injectedProvider?.getAvatar(wallet.account);
+    const address = await injectedProvider?.resolveName(ensName || '');
+    return address ? {ensName, ensAvatarUrl} : null;
+  }, [injectedProvider, wallet.account]);
+
   useEffect(() => {
     if (
       wallet.status === 'connected' &&
@@ -35,13 +42,20 @@ const WalletAugmented: React.FC<unknown> = ({children}) => {
     }
   }, [wallet.networkName, wallet.connector, wallet.status, wallet.account]);
 
+  const contextValue = useMemo(() => {
+    return {
+      ...wallet,
+      ...getEnsData,
+    };
+  }, [getEnsData, wallet]);
+
   const {apm} = useAPM();
   useEffect(() => {
     updateAPMContext(apm, wallet.networkName!);
   }, [apm, wallet.networkName]);
 
   return (
-    <WalletAugmentedContext.Provider value={{...wallet, ...injectedProvider}}>
+    <WalletAugmentedContext.Provider value={contextValue}>
       {children}
     </WalletAugmentedContext.Provider>
   );
