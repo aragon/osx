@@ -12,5 +12,5 @@ const Template: Story<BadgeProps> = args => <Badge {...args} />;
 export const Default = Template.bind({});
 Default.args = {
   label: '0.07%',
-  colorScheme: 'default',
+  colorScheme: 'neutral',
 };
