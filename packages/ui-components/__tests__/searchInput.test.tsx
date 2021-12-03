@@ -1,12 +1,12 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Text as TextInput} from '../stories/Input.stories';
+import {Search as SearchInput} from '../stories/inputSearch.stories';
 
-describe('TextInput', () => {
+describe('SearchInput', () => {
   function setup(args: any) {
-    render(<TextInput {...args} />);
-    return screen.getByTestId('input');
+    render(<SearchInput {...args} />);
+    return screen.getByTestId('search-input');
   }
 
   test('should render without crashing', () => {

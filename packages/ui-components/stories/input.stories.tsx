@@ -1,16 +1,16 @@
 import React from 'react';
 import { Meta, Story } from '@storybook/react';
-import { Input, InputProps } from '../src';
+import { TextInput, TextInputProps } from '../src';
 
 export default {
-  title: 'Components/Input',
-  component: Input,
+  title: 'Components/Input/Text',
+  component: TextInput,
 } as Meta;
 
-const Template: Story<InputProps> = args => <Input {...args} />;
+const Template: Story<TextInputProps> = args => <TextInput {...args} />;
 
-export const Simple = Template.bind({});
-Simple.args = {
+export const Text = Template.bind({});
+Text.args = {
   mode: 'default',
   placeholder:'Placeholder'
 };
