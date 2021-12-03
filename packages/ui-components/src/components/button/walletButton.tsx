@@ -26,8 +26,8 @@ export type WalletButtonProps = {
    */
   isSelected?: boolean;
   /**
-  * Check if wallet is connected!
-  */
+   * Check if wallet is connected!
+   */
   isConnected?: boolean;
 };
 
@@ -39,21 +39,20 @@ export const WalletButton = ({
   isConnected = false,
   ...props
 }: WalletButtonProps) => {
-
   const LoadAvatar = () => {
-    if(isConnected)
-    return (!isLoading ? (
+    if (isConnected)
+      return !isLoading ? (
         <Avatar src={src || ''} size={'small'} />
       ) : (
         <Spinner size={'small'} />
-      ))
+      );
     else
       return (
         <IconWrapper>
           <IconPerson />
         </IconWrapper>
       );
-  }
+  };
 
   return (
     <StyledButton size={'small'} isSelected={isSelected} {...props}>
@@ -68,16 +67,18 @@ type StyledLabelProp = Pick<WalletButtonProps, 'isLoading'>;
 
 const StyledButton = styled(SizedButton).attrs(
   ({isSelected}: StyledButtonProp) => ({
-    className: `flex tablet:space-x-1.5
+    className: `flex items-center tablet:space-x-1.5
       ${isSelected ? ' text-primary-500 bg-primary-50' : ' text-ui-600 bg-ui-0'}
       focus:outline-none focus:ring-2 focus:ring-primary-500 hover:text-primary-500 active:bg-primary-50 disabled:text-ui-300 disabled:bg-ui-0`,
   })
 )<StyledButtonProp>``;
 
 const StyledLabel = styled.p.attrs(({isLoading}: StyledLabelProp) => ({
-  className: `tablet:inline hidden font-semibold ${isLoading && 'text-primary-500'}`,
+  className: `tablet:inline hidden font-semibold ${
+    isLoading && 'text-primary-500'
+  }`,
 }))``;
 
 const IconWrapper = styled.div.attrs({
-  className: `flex align-center justify-center items-center h-3`,
+  className: `flex justify-center items-center h-3`,
 })``;

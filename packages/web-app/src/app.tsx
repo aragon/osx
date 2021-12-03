@@ -15,12 +15,13 @@ function App() {
 
   useEffect(() => {
     trackPage(pathname);
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   return (
     <div className="bg-primary-50">
       <Navbar />
-      <div className="h-screen">
+      <div className="min-h-screen">
         <Switch>
           {routes.map((route: PageRoute) => (
             <Route

@@ -215,7 +215,7 @@ const LinksContainer = styled.div.attrs({
 
 const DaoSelectorWrapper = styled.div.attrs({
   className:
-    'absolute flex items-center desktop:static left-2/4 dekstop:left-auto transform -translate-x-1/2 desktop:-translate-x-0',
+    'absolute flex items-center desktop:static left-2/4 desktop:left-auto transform -translate-x-1/2 desktop:-translate-x-0',
 })``;
 
 const TestNetworkIndicator = styled.p.attrs({

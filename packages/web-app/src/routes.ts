@@ -2,9 +2,11 @@ import React from 'react';
 
 import HomePage from 'pages/home';
 import * as paths from 'utils/paths';
+import TokensPage from 'pages/tokens';
 import FinancePage from 'pages/finance';
 import NotFoundPage from 'pages/notFound';
 import CommunityPage from 'pages/community';
+import TransfersPage from 'pages/transfers';
 import GovernancePage from 'pages/governance';
 
 export type PageRoute = {
@@ -36,13 +38,17 @@ export const routes: PageRoute[] = [
     exact: true,
   },
 
-  // Temporary route to test breadcrumbs
   {
-    name: 'Temp Finance subroute',
-    path: paths.Finance + '/abc',
-    component: FinancePage,
+    name: 'Transfers',
+    path: paths.AllTransfers,
+    component: TransfersPage,
     exact: true,
-    breadcrumb: 'Temp Finance Subroute',
+  },
+  {
+    name: 'Tokens',
+    path: paths.AllTokens,
+    component: TokensPage,
+    exact: true,
   },
   {
     name: 'Governance',

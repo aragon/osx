@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-
-import {Button, IconButton, IconLinkExternal} from '@aragon/ui-components';
-import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
+import {Button, IconButton, IconLinkExternal} from '@aragon/ui-components';
+
+import {AllTokens, AllTransfers} from 'utils/paths';
 
 export type SectionWrapperProps = {
   title: string;
@@ -37,7 +38,7 @@ export const TokenSectionWrapper = ({title, children}: SectionWrapperProps) => {
         />
       </HeaderContainer>
       {children}
-      <SeeAllButton />
+      <SeeAllButton path={AllTokens} />
     </>
   );
 };
@@ -60,16 +61,19 @@ export const TransferSectionWrapper = ({
         <Title>{title}</Title>
       </HeaderContainer>
       {children}
-      <SeeAllButton />
+      <SeeAllButton path={AllTransfers} />
     </>
   );
 };
 
-const SeeAllButton = () => {
+type SeeAllButtonProps = {
+  path: string;
+};
+const SeeAllButton = ({path}: SeeAllButtonProps) => {
   const {t} = useTranslation();
   return (
     <div>
-      <Link to={'/governance'}>
+      <Link to={path}>
         <Button mode={'ghost'} label={t('labels.seeAll')} />
       </Link>
     </div>

@@ -52,6 +52,7 @@ const DaoSwitcherMenu: React.FC<DaoSwitcherMenuProps> = ({
         title={t('daoSwitcher.title')}
         subtitle={t('daoSwitcher.subtitle')}
         wide
+        disabled
       />
     </Container>
   );
