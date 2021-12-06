@@ -53,5 +53,5 @@ export const FlexDiv = styled.div.attrs(({side}: FlexDivProps) => {
 })<FlexDivProps>``;
 
 const StyledIconContainer = styled.div.attrs({
-  className: 'flex items-center w-3 h-3',
+  className: 'flex items-center',
 })``;

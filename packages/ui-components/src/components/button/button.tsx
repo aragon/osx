@@ -9,7 +9,7 @@ export type ButtonProps = {
   /** Changes a button's size */
   size?: 'small' | 'default';
   /** Text displayed on the button */
-  label: string;
+  label?: string;
   /** Function to be called when the button is clicked */
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   /** Whether the button is disabled */

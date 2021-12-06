@@ -52,6 +52,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
             mode={'ghost'} 
             label="copy" 
             side="right" 
+            size="small"
             onClick={copyToClipboard}
           />
       </Card>

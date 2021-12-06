@@ -3,8 +3,7 @@ import styled from 'styled-components';
 
 import {Address, shortenAddress} from '../../utils/addresses';
 import {Avatar, AvatarProps} from '../avatar';
-import {StyledButton} from '../button/button';
-import {FlexDiv} from '../button/iconButton';
+import {IconButton} from '../button/iconButton';
 import {IconSwitch} from '../icons';
 
 export type DaoCardProps = {
@@ -59,12 +58,14 @@ export const DaoCard: React.FC<DaoCardProps> = ({
         </TextContainer>
       </LeftContent>
       {includeSwitch && (
-        <StyledButton mode={'ghost'} size={'small'} onClick={onClick}>
-          <FlexDiv side={'right'}>
-            <IconSwitch />
-            <p>{switchLabel}</p>
-          </FlexDiv>
-        </StyledButton>
+         <IconButton 
+            icon={<IconSwitch/>} 
+            mode={'ghost'} 
+            label={switchLabel} 
+            side="right" 
+            size="small"
+            onClick={onClick}
+          />
       )}
     </Card>
   );
