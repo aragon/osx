@@ -1,6 +1,6 @@
 # Zaragoza Web-app
 
-This package holds the webapp that allows user to interact with Zaragoza. It is a [ReactJS](https://reactjs.org) based webapp.
+This package holds the web-app that allows user to interact with Zaragoza. It is a [ReactJS](https://reactjs.org) based webapp.
 
 ## Getting Started
 
