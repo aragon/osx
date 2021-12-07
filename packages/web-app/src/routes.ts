@@ -8,6 +8,7 @@ import NotFoundPage from 'pages/notFound';
 import CommunityPage from 'pages/community';
 import TransfersPage from 'pages/transfers';
 import GovernancePage from 'pages/governance';
+import Tokens from './pages/tokens';
 
 export type PageRoute = {
   exact: boolean;
@@ -35,6 +36,12 @@ export const routes: PageRoute[] = [
     name: 'Finance',
     path: paths.Finance,
     component: FinancePage,
+    exact: true,
+  },
+  {
+    name: 'All Tokens',
+    path: paths.AllTokens,
+    component: Tokens,
     exact: true,
   },
 

@@ -72,8 +72,8 @@ const CoinDetailsWithImage = styled.div.attrs({
   className: 'flex items-center',
 })``;
 
-const CoinImage = styled.img.attrs(({src}) => ({
-  className: 'w-3 h-3 lg:h-5 lg:w-5 rounded-full',
+const CoinImage = styled.img.attrs(({ src }) => ({
+  className: 'w-3 h-3 tablet:h-5 tablet:w-5 rounded-full',
   src,
 }))``;
 

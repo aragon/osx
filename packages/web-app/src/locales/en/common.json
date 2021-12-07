@@ -28,6 +28,7 @@
   "finance": {
     "tokenSection": "Token Section",
     "transferSection": "Transfer Section",
-    "unknownUSDValue": "Value unknown"
+    "unknownUSDValue": "Value unknown",
+    "tokens": "Tokens"
   }
 }
