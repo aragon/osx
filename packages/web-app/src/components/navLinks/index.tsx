@@ -1,4 +1,6 @@
 import {
+  ActionItem,
+  MenuItem,
   IconFinance,
   IconCommunity,
   IconDashboard,
@@ -11,15 +13,15 @@ import NavLink from 'components/navLink';
 import {Dashboard, Community, Finance, Governance} from 'utils/paths';
 
 type NavLinksProps = {
-  isMobile?: boolean;
+  isDropdown?: boolean;
   selected?: string;
-  onClick?: () => void;
+  onItemClick?: () => void;
 };
 
 const NavLinks: React.FC<NavLinksProps> = ({
-  isMobile = false,
+  isDropdown = false,
   selected,
-  onClick,
+  onItemClick,
 }) => {
   const {t} = useTranslation();
 
@@ -28,40 +30,83 @@ const NavLinks: React.FC<NavLinksProps> = ({
     <div
       data-testid="navLinks"
       className={
-        isMobile ? 'flex flex-col space-y-1.5' : 'flex space-x-1.5 items-center'
+        isDropdown
+          ? 'flex flex-col space-y-1.5'
+          : 'flex space-x-1.5 items-center'
       }
     >
       <NavLink
         to={Dashboard}
-        icon={<IconDashboard />}
-        label={t('navLinks.dashboard')}
-        onClick={onClick}
+        onClick={onItemClick}
         selected={selected}
-        isMobile={isMobile}
+        component={
+          isDropdown ? (
+            <ActionItem
+              wide
+              icon={<IconDashboard />}
+              label={t('navLinks.dashboard')}
+            />
+          ) : (
+            <MenuItem
+              icon={<IconDashboard />}
+              label={t('navLinks.dashboard')}
+            />
+          )
+        }
       />
       <NavLink
         to={Governance}
-        icon={<IconGovernance />}
-        label={t('navLinks.governance')}
-        onClick={onClick}
+        onClick={onItemClick}
         selected={selected}
-        isMobile={isMobile}
+        component={
+          isDropdown ? (
+            <ActionItem
+              wide
+              icon={<IconGovernance />}
+              label={t('navLinks.governance')}
+            />
+          ) : (
+            <MenuItem
+              icon={<IconGovernance />}
+              label={t('navLinks.governance')}
+            />
+          )
+        }
       />
       <NavLink
         to={Finance}
-        icon={<IconFinance />}
-        label={t('navLinks.finance')}
-        onClick={onClick}
+        onClick={onItemClick}
         selected={selected}
-        isMobile={isMobile}
+        component={
+          isDropdown ? (
+            <ActionItem
+              wide
+              icon={<IconFinance />}
+              label={t('navLinks.finance')}
+            />
+          ) : (
+            <MenuItem icon={<IconFinance />} label={t('navLinks.finance')} />
+          )
+        }
       />
       <NavLink
         to={Community}
-        icon={<IconCommunity />}
-        label={t('navLinks.community')}
-        onClick={onClick}
+        onClick={onItemClick}
         selected={selected}
-        isMobile={isMobile}
+        component={
+          isDropdown ? (
+            <ActionItem
+              wide
+              icon={<IconCommunity />}
+              label={t('navLinks.community')}
+            />
+          ) : (
+            <MenuItem
+              icon={<IconCommunity />}
+              label={t('navLinks.community')}
+            />
+          )
+        }
       />
     </div>
   );

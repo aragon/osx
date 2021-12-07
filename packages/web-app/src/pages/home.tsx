@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
+import {withTransaction} from '@elastic/apm-rum-react';
 
 const Home: React.FC = () => {
   const {t} = useTranslation();
@@ -30,4 +31,4 @@ const Subtitle = styled.p.attrs({
     'my-3 text-4xl sm:text-5xl desktop:text-6xl font-bold sm:tracking-tight text-gray-900',
 })``;
 
-export default Home;
+export default withTransaction('Dashboard', 'component')(Home);

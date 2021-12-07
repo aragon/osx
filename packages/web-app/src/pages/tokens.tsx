@@ -1,7 +1,8 @@
-import {AddButton, SearchInput, TokenCard} from '@aragon/ui-components';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
 import styled from 'styled-components';
+import {useTranslation} from 'react-i18next';
+import {withTransaction} from '@elastic/apm-rum-react';
+import {AddButton, SearchInput, TokenCard} from '@aragon/ui-components';
 
 const tokens = [
   {
@@ -52,7 +53,7 @@ const Tokens: React.FC = () => {
   );
 };
 
-export default Tokens;
+export default withTransaction('Tokens', 'component')(Tokens);
 
 const Layout = styled.div.attrs({
   className: 'm-auto mt-5 space-y-5 w-8/12',

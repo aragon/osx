@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import {constants} from 'ethers';
 import {useTranslation} from 'react-i18next';
+import {withTransaction} from '@elastic/apm-rum-react';
 
 import {
   TokenSectionWrapper,
@@ -87,6 +88,6 @@ const Finance: React.FC = () => {
   );
 };
 
-export default Finance;
+export default withTransaction('Finance', 'component')(Finance);
 
 const ColoredDiv = styled.div.attrs({className: 'h-6 w-full bg-blue-100'})``;

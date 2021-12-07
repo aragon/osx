@@ -32,7 +32,6 @@ const WalletMenu: React.FC = () => {
         />
         <ActionContainer>
           <ActionListItem
-            wide
             title="Disconnect Wallet"
             icon={<IconTurnOff />}
             onClick={() => {

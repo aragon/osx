@@ -1,23 +1,23 @@
 import React from 'react';
 import styled from 'styled-components';
 import {Link} from 'react-router-dom';
+import {BreadcrumbData} from 'use-react-router-breadcrumbs';
 import {IconChevronRight} from '@aragon/ui-components';
-import {BreadcrumbsRoute} from 'react-router-breadcrumbs-hoc';
 
-type BreadcrumbsProps = {breadcrumbs: React.ReactNode[]};
-
-const Breadcrumbs: React.FC<BreadcrumbsProps> = ({breadcrumbs}) => {
-  const crumbs = breadcrumbs as BreadcrumbsRoute[];
+type Props = {
+  breadcrumbs: BreadcrumbData[];
+};
+const Breadcrumbs: React.FC<Props> = ({breadcrumbs}) => {
   let isLast: boolean;
 
   return (
     <Container data-testid="breadcrumbs">
-      {crumbs.map(({match, key, breadcrumb}, index) => {
+      {breadcrumbs.map(({breadcrumb, match, key}, index) => {
         isLast = index === breadcrumbs.length - 1;
         return (
           <Breadcrumb key={key}>
             <Link
-              to={match.url}
+              to={match.pathname}
               className={
                 isLast ? 'text-ui-600 cursor-default' : 'text-primary-500'
               }

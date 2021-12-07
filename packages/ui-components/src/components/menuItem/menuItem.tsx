@@ -11,7 +11,7 @@ export type MenuItemProps = {
   /**
    * Whether the current item is active
    */
-  isSelected: boolean;
+  isSelected?: boolean;
 
   /**
    * Menu item text

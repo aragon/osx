@@ -1,15 +1,16 @@
 import React from 'react';
+import {BreadcrumbData} from 'use-react-router-breadcrumbs';
 import {render, screen} from 'test-utils';
 
 import Breadcrumbs from '..';
 
 const DEFAULT_CRUMBS = [
-  {match: {url: '/'}, key: '123', breadcrumb: <button>first</button>},
-  {match: {url: '/dex'}, key: '456', breadcrumb: <button>last</button>},
+  {match: {pathname: '/'}, key: '123', breadcrumb: <button>first</button>},
+  {match: {pathname: '/dex'}, key: '456', breadcrumb: <button>last</button>},
 ];
 
 const setup = () => {
-  render(<Breadcrumbs breadcrumbs={DEFAULT_CRUMBS} />);
+  render(<Breadcrumbs breadcrumbs={DEFAULT_CRUMBS as BreadcrumbData[]} />);
   return {
     container: screen.getByTestId('breadcrumbs'),
     crumbs: screen.getAllByRole('link'),
@@ -40,7 +41,7 @@ describe('Breadcrumbs', () => {
     crumbs.forEach((crumb, index) => {
       expect(crumb).toHaveAttribute(
         'href',
-        '#' + DEFAULT_CRUMBS[index].match.url
+        '#' + DEFAULT_CRUMBS[index].match.pathname
       );
     });
   });

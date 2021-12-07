@@ -1,48 +1,42 @@
 import React, {useCallback} from 'react';
-import {ActionItem, MenuItem} from '@aragon/ui-components';
-import {useHistory, useRouteMatch} from 'react-router-dom';
+import {useMatch, useNavigate, useResolvedPath} from 'react-router-dom';
 
 type NavLinkProps = {
-  icon: React.ReactElement;
-  isMobile: boolean;
-  label: string;
   to: string;
+  component: React.FunctionComponentElement<{
+    isSelected: boolean;
+    onClick?: () => void;
+  }>;
   selected?: string;
   onClick?: () => void;
 };
 
 const NavLink: React.FC<NavLinkProps> = ({
-  isMobile,
-  icon,
-  selected = false,
-  label,
   to,
   onClick,
+  selected,
+  component,
 }) => {
-  const history = useHistory();
-  const isMatch = useRouteMatch({path: to, exact: true});
+  const resolved = useResolvedPath(to);
+  const isMatch = useMatch({path: resolved.pathname, end: true});
+  const navigate = useNavigate();
 
-  const handleClick = useCallback(() => {
-    if (!isMatch) {
-      history.push(to);
-    }
-
-    if (onClick) {
-      onClick();
-    }
-  }, [history, isMatch, onClick, to]);
-
-  const getIsSelected = useCallback(() => {
-    return (!selected ? isMatch : selected === to) as boolean;
+  const getSelected = useCallback(() => {
+    return (selected ? selected === to : isMatch) as boolean;
   }, [isMatch, selected, to]);
 
-  const props = {
-    icon,
-    label,
-    onClick: handleClick,
-    isSelected: getIsSelected(),
+  const handleClick = () => {
+    if (onClick) onClick();
+    navigate(to);
   };
-  return isMobile ? <ActionItem {...props} /> : <MenuItem {...props} />;
+  return (
+    <>
+      {React.cloneElement(component, {
+        isSelected: getSelected(),
+        onClick: handleClick,
+      })}
+    </>
+  );
 };
 
 export default NavLink;
