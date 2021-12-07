@@ -3790,6 +3790,14 @@
     magic-string "^0.25.2"
     resolve "^1.11.0"
 
+"@rollup/plugin-image@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-image/-/plugin-image-2.1.1.tgz#898d6b59ac0025d7971ef45640ab330cb0663b0c"
+  integrity sha512-AgP4U85zuQJdUopLUCM+hTf45RepgXeTb8EJsleExVy99dIoYpt3ZlDYJdKmAc2KLkNntCDg6BPJvgJU3uGF+g==
+  dependencies:
+    "@rollup/pluginutils" "^3.1.0"
+    mini-svg-data-uri "^1.2.3"
+
 "@rollup/plugin-json@^4.0.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-json/-/plugin-json-4.1.0.tgz#54e09867ae6963c593844d8bd7a9c718294496f3"
@@ -17898,6 +17906,11 @@ min-indent@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/min-indent/-/min-indent-1.0.1.tgz#a63f681673b30571fbe8bc25686ae746eefa9869"
   integrity sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==
+
+mini-svg-data-uri@^1.2.3:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/mini-svg-data-uri/-/mini-svg-data-uri-1.4.3.tgz#43177b2e93766ba338931a3e2a84a3dfd3a222b8"
+  integrity sha512-gSfqpMRC8IxghvMcxzzmMnWpXAChSA+vy4cia33RgerMS8Fex95akUyQZPbxJJmeBGiGmK7n/1OpUX8ksRjIdA==
 
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"

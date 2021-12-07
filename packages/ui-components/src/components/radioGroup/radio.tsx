@@ -1,6 +1,6 @@
 import React, {ButtonHTMLAttributes} from 'react';
 import styled from 'styled-components';
-import {useRadioGroupContext} from '.';
+import {useRadioGroupContext} from './radioGroup';
 
 type RadioProps = {
   value: string;
