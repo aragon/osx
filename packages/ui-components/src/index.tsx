@@ -13,3 +13,4 @@ export * from './components/daoCard';
 export * from './components/badge';
 export * from './components/input';
 export * from './components/tokenCard';
+export * from './components/radioGroup';
