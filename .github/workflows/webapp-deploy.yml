@@ -52,7 +52,7 @@ jobs:
       - name: Activate rinkeby's fleek
         env:
           FLEEK_FILE: ${{ needs.set-environment.outputs.environment }}
-        run: mv .github/fleek/$FLEEK_FILE.json .fleek.json
+        run: mv ../../.github/fleek/$FLEEK_FILE.json .fleek.json
       - name: Deploy fleek
         id: deploy
         uses: fleekhq/action-deploy@v1
