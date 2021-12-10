@@ -81,6 +81,10 @@ module.exports = {
         25: '200px',
       },
     },
+    fontWeight: {
+      normal: 500,
+      bold: 700,
+    },
     // overwirtes screen breakpoints according to design system
     screens: {
       tablet: '768px',

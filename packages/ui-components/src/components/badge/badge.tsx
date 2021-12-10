@@ -14,7 +14,7 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   return (
     <StyledBadge data-testid="badge" colorScheme={colorScheme}>
-      {label}
+      <p>{label}</p>
     </StyledBadge>
   );
 };
@@ -23,7 +23,7 @@ type StyledBadgeProps = {
   colorScheme: BadgeProps['colorScheme'];
 };
 
-const StyledBadge = styled.span.attrs(({colorScheme}: StyledBadgeProps) => {
+const StyledBadge = styled.div.attrs(({colorScheme}: StyledBadgeProps) => {
   let colorCode;
   if (colorScheme === 'success') {
     colorCode = 'bg-success-200 text-success-800';
