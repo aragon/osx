@@ -23,9 +23,7 @@ abstract contract DisputableGovernancePrimitive is StoppableGovernancePrimitive 
         
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG); 
         require(
-            Permissions(dao.permissions.address).checkPermission(
-                execution.process.permissions.halt
-            ),
+            dao.checkPermission(execution.process.permissions.halt),
             ERROR_EXECUTION_STATE_WRONG
         );
         
@@ -45,9 +43,7 @@ abstract contract DisputableGovernancePrimitive is StoppableGovernancePrimitive 
 
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
         require(
-            Permissions(dao.permissions.address).checkPermission(
-                execution.process.permissions.halt
-            ),
+            dao.checkPermission(execution.process.permissions.halt),
             ERROR_EXECUTION_STATE_WRONG
         );
         

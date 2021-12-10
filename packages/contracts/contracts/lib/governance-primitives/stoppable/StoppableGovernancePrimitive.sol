@@ -22,9 +22,7 @@ abstract contract StoppableGovernancePrimitive is GovernancePrimitive {
 
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
         require(
-            Permissions(dao.permissions.address).checkPermission(
-                execution.process.permissions.stop
-            ),
+            dao.checkPermission(execution.process.permissions.stop),
             ERROR_EXECUTION_STATE_WRONG
         );
 

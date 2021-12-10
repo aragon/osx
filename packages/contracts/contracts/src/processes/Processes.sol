@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "../../lib/governance-primitives/GovernancePrimitive.sol";
 import "../permissions/Permissions.sol";
 import "../executor/Executor.sol";
-import "../DAO.sol";
+import "../../lib/component/IDAO.sol";
 
 /// @title The processes contract defining the flow of every interaction with the DAO
 /// @author Samuel Furter - Aragon Association - 2021
@@ -21,7 +21,7 @@ contract Processes is UpgradableComponent {
     bytes32 public constant PROCESSES_SET_ROLE = keccak256("PROCESSES_SET_ROLE");
 
     event ProcessStarted(GovernancePrimitive.Proposal indexed proposal, uint256 indexed executionId);
-    event NewProcessAdded(string indexed name, Process indexed process);
+    event ProcessSet(string indexed name, Process indexed process);
 
     struct Process {
         GovernancePrimitive governancePrimitive; // The primitve to execute for example a simple yes/no voting.
@@ -41,7 +41,7 @@ contract Processes is UpgradableComponent {
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
-    function initialize(DAO _dao) public override initializer {
+    function initialize(IDAO _dao) public override initializer {
         Component.initialize(_dao);
     }
 
@@ -72,10 +72,9 @@ contract Processes is UpgradableComponent {
         public 
         authP(PROCESSES_SET_ROLE) 
     {
-        // TODO: Check if name already exists
         processes[name] = process;
 
-        emit NewProcessAdded(name, process);
+        emit ProcessSet(name, process);
     }
 
     // TODO: Optimize this!

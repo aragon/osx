@@ -7,8 +7,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "../../lib/permissions/PermissionValidator.sol";
-import "../DAO.sol";
-import "../proxy/Component.sol";
+import "../../lib/component/IDAO.sol";
+import "../../lib/component/UpgradableComponent.sol";
 
 // TODO: Add update, remove etc. role
 /// @title The permissions contract responsible to handle all the governance process related permissions.
@@ -18,7 +18,7 @@ contract Permissions is UpgradableComponent {
     
     bytes32 public constant PERMISSIONS_SET_ROLE = keccak256("PERMISSIONS_SET_ROLE");
 
-    event NewRoleAdded(string indexed role, Permission indexed permission);
+    event RoleSet(string indexed role, Permission indexed permission);
 
     // The operator used to combine the validators accordingly to the the users wish
     enum Operator { 
@@ -51,7 +51,7 @@ contract Permissions is UpgradableComponent {
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
-    function initialize(DAO _dao) public override initializer {
+    function initialize(IDAO _dao) public override initializer {
         Component.initialize(_dao);
     }
 
@@ -62,7 +62,7 @@ contract Permissions is UpgradableComponent {
     function setRole(string calldata role, Permission calldata permission) external authP(PERMISSIONS_SET_ROLE) {
         permissions[role] = permission; // Group1 => [AND, ERC20Validator]
 
-        emit NewRoleAdded(role, permission);
+        emit RoleSet(role, permission);
     }
 
     // TODO: This method is not gas efficient

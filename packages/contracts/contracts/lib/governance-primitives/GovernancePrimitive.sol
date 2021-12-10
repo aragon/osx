@@ -10,7 +10,7 @@ import "../../src/permissions/Permissions.sol";
 import "../../src/processes/Processes.sol";
 import "../../src/executor/Executor.sol";
 import "../../src/DAO.sol";
-import "../../src/proxy/Component.sol";
+import "../component/Component.sol";
 
 /// @title Abstract implementation of the governance primitive
 /// @author Samuel Furter - Aragon Association - 2021
@@ -70,9 +70,7 @@ abstract contract GovernancePrimitive is Component {
         returns (uint256 executionId) 
     {
         require(
-            Permissions(dao.permissions.address).checkPermission(
-                process.permissions.start
-            ),
+            dao.checkPermission(process.permissions.start),
             ERROR_NOT_ALLOWED_TO_START
         );
 
@@ -102,9 +100,7 @@ abstract contract GovernancePrimitive is Component {
         
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
         require(
-            Permissions(dao.permissions.address).checkPermission(
-                execution.process.permissions.execute
-            ),
+            dao.checkPermission(execution.process.permissions.execute),
             ERROR_NOT_ALLOWED_TO_EXECUTE
         );
 
@@ -112,7 +108,7 @@ abstract contract GovernancePrimitive is Component {
 
         _execute(execution); // "Hook" to add logic in execute of a concrete implementation
 
-        Executor(dao.executor.address).execute(execution.proposal.actions);
+        // Executor(dao.executor.address).execute(execution.proposal.actions);
 
         emit GovernancePrimitiveExecuted(execution, executionId);
     }

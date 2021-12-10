@@ -9,10 +9,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../DAO.sol";
-import "../proxy/Component.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-contract Vault is UpgradableComponent {
+import "../../lib/component/IDAO.sol";
+import "../../lib/component/UpgradableComponent.sol";
+
+contract Vault is UpgradableComponent, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
 
     address internal constant ETH = address(0);
@@ -32,8 +34,9 @@ contract Vault is UpgradableComponent {
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
-    function initialize(DAO _dao) public override initializer {
+    function initialize(IDAO _dao) public override initializer {
         Component.initialize(_dao);
+        __ReentrancyGuard_init();
     }
 
     /**  
@@ -61,21 +64,17 @@ contract Vault is UpgradableComponent {
     }
     
     
-    // TODO: 
-    // 1. we use the call instead of send/transfer and now problem is reentrancy.
-    // do we need to bring import "@openzeppelin/contracts/security/ReentrancyGuard.sol" 
-    // solution or since transfer will only be called by the voting contract, the attack
-    // wouldn't happen anymore.
-    // 2. add permission role to voting as a first implementation.
+    
     /**
     *  @notice allows to transfer ether or token from this vault.
+    *  @dev nonReentrant is an extra added safety feature even though it might not be necessary. It actually comes in help
+            when somehow malicious contract gets a TRANSFER_ROLE and tries to drain the contract balance.
     *  @param _token token address(0x..00 in case of ETH)
     *  @param _to who to transfer to.
     *  @param _value how much to transfer
     *  @param _description reason for the transfer
      */
-    function transfer(address _token, address _to, uint256 _value, string calldata _description) external authP(TRANSFER_ROLE) {
-        // require(dao.hasRole(APP_TRANSFER_ROLE, msg.sender), "Not Eligible To transfer");
+    function transfer(address _token, address _to, uint256 _value, string calldata _description) external nonReentrant authP(TRANSFER_ROLE) {
         require(_value > 0, ERROR_TRANSFER_VALUE_ZERO);
 
         if (_token == ETH) {

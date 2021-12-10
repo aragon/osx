@@ -21,9 +21,7 @@ abstract contract VotingGovernancePrimitive is GovernancePrimitive {
         
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
         require(
-            Permissions(dao.permissions.address).checkPermission(
-                execution.process.permissions.vote
-            ),
+            dao.checkPermission(execution.process.permissions.vote),
             ERROR_EXECUTION_STATE_WRONG
         );
 
