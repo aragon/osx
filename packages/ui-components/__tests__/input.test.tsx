@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Text as TextInput} from '../stories/Input.stories';
+import {Text as TextInput} from '../stories/input.stories';
 
 describe('TextInput', () => {
   function setup(args: any) {

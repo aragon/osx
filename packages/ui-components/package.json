@@ -57,6 +57,7 @@
     "autoprefixer": "^9",
     "babel-loader": "^8.2.3",
     "husky": "^7.0.4",
+    "jest-svg-transformer": "^1.0.0",
     "postcss": "^8",
     "react": "^17.0.2",
     "react-blockies": "^1.4.1",

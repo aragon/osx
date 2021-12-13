@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Default as Backdrop} from '../stories/backdrop.stories';
+import {Backdrop} from '../src';
 
 describe('Backdrop', () => {
   function setup(args: any) {

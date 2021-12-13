@@ -67,7 +67,6 @@ const Finance: React.FC = () => {
 
   return (
     <div className={'m-auto mt-4 w-8/12'}>
-      <h1 className={'text-2xl font-bold text-center'}>Finance Page</h1>
       <div className={'h-4'} />
       <TokenSectionWrapper title={t('finance.tokenSection')}>
         <div className="py-2 space-y-2 border-solid">

@@ -29,7 +29,6 @@ const DaoSwitcherMenu: React.FC<DaoSwitcherMenuProps> = ({
           includeSwitch={false}
           onClick={onClick}
           src={TEMP_ICON}
-          switchLabel={t('daoCard.switchLabel')}
           wide
         />
         {daos.map(({name, ens, icon}) => (
@@ -40,7 +39,6 @@ const DaoSwitcherMenu: React.FC<DaoSwitcherMenuProps> = ({
               includeSwitch={false}
               onClick={onClick}
               src={icon}
-              switchLabel={t('daoCard.switchLabel')}
               wide
             />
           </div>

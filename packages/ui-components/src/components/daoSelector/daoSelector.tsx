@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {IconSwitch} from '../icons';
 import {Avatar} from '../avatar';
+import {IconSwitch} from '../icons';
+import {ButtonIcon} from '../button';
 
 export type DaoSelectorProps = {
   src: string;
@@ -31,7 +32,12 @@ export const DaoSelector = ({
     >
       <Avatar src={src} size={'large'} mode="square" />
       <p>{label}</p>
-      <HoverIconSwitch />
+      <ButtonIcon
+        icon={<HoverIconSwitch />}
+        mode="ghost"
+        size="small"
+        bgWhite
+      />
     </StyledButton>
   );
 };

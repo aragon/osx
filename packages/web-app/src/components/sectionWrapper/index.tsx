@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import {Button, IconButton, IconLinkExternal} from '@aragon/ui-components';
+import {ButtonText, IconChevronRight} from '@aragon/ui-components';
 
 import {AllTokens, AllTransfers} from 'utils/paths';
 
@@ -24,21 +24,21 @@ export type SectionWrapperProps = {
  * define this.
  */
 export const TokenSectionWrapper = ({title, children}: SectionWrapperProps) => {
+  const {t} = useTranslation();
+
   return (
     <>
       <HeaderContainer>
         <Title>{title}</Title>
-        <IconButton
-          mode="ghost"
-          size="small"
-          side="right"
-          label={'See on Explorer'}
-          icon={<IconLinkExternal />}
-          onClick={() => window.open('http://www.google.com', '_blank')}
-        />
       </HeaderContainer>
       {children}
-      <SeeAllButton path={AllTokens} />
+      <Link to={AllTokens}>
+        <ButtonText
+          mode="secondary"
+          label={t('labels.seeAllTokens')}
+          iconRight={<IconChevronRight />}
+        />
+      </Link>
     </>
   );
 };
@@ -55,28 +55,22 @@ export const TransferSectionWrapper = ({
   title,
   children,
 }: SectionWrapperProps) => {
+  const {t} = useTranslation();
+
   return (
     <>
       <HeaderContainer>
         <Title>{title}</Title>
       </HeaderContainer>
       {children}
-      <SeeAllButton path={AllTransfers} />
-    </>
-  );
-};
-
-type SeeAllButtonProps = {
-  path: string;
-};
-const SeeAllButton = ({path}: SeeAllButtonProps) => {
-  const {t} = useTranslation();
-  return (
-    <div>
-      <Link to={path}>
-        <Button mode={'ghost'} label={t('labels.seeAll')} />
+      <Link to={AllTransfers}>
+        <ButtonText
+          mode="secondary"
+          label={t('labels.seeAllTransfers')}
+          iconRight={<IconChevronRight />}
+        />
       </Link>
-    </div>
+    </>
   );
 };
 

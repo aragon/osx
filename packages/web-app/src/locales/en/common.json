@@ -12,9 +12,7 @@
     "finance": "Finance",
     "community": "Community"
   },
-  "daoCard": {
-    "switchLabel": "Switch"
-  },
+
   "daoSwitcher": {
     "title": "Explore",
     "subtitle": "Find other DAOs to join"
@@ -23,12 +21,15 @@
     "connectWallet": "Login"
   },
   "labels": {
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "seeAllTokens": "See All Tokens",
+    "seeAllTransfers": "See All Transfers"
   },
   "finance": {
-    "tokenSection": "Token Section",
-    "transferSection": "Transfer Section",
+    "tokenSection": "Tokens",
+    "transferSection": "Transfers",
     "unknownUSDValue": "Value unknown",
-    "tokens": "Tokens"
+    "tokens": "Tokens",
+    "newTransfer": "New Transfer"
   }
 }
