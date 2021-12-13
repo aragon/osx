@@ -15,4 +15,7 @@ export type DisplayToken = {
   imgUrl: string;
   name: string;
   symbol: string;
+  changeDuringInterval?: number;
+  treasurySharePercentage?: number;
+  percentageChangeDuringInterval?: string;
 };

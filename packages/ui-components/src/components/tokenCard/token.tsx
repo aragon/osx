@@ -8,15 +8,19 @@ export type TokenCardProps = {
   tokenName: string;
   tokenSymbol: string;
   tokenImageUrl: string;
-  treasurySharePercentage: string;
+  treasurySharePercentage?: string;
   tokenCount: string;
   tokenUSDValue: string;
   treasuryShare: string;
-  changeDuringInterval: string;
-  percentageChangeDuringInterval: string;
+  changeType?: 'Positive' | 'Negative';
+  changeDuringInterval?: string;
+  percentageChangeDuringInterval?: string;
 };
 
-export const TokenCard: React.FC<TokenCardProps> = props => {
+export const TokenCard: React.FC<TokenCardProps> = ({
+  changeType = 'Positive',
+  ...props
+}) => {
   return (
     <Card data-testid="tokenCard">
       <CoinDetailsWithImage>
@@ -30,7 +34,9 @@ export const TokenCard: React.FC<TokenCardProps> = props => {
           <CoinNameAndAllocation>
             <CoinName>{props.tokenName}</CoinName>
             <ToggleMobileVisibility visible={false}>
-              <Badge label={props.treasurySharePercentage} />
+              {props.treasurySharePercentage && (
+                <Badge label={props.treasurySharePercentage} />
+              )}
             </ToggleMobileVisibility>
           </CoinNameAndAllocation>
           <SecondaryCoinDetails>
@@ -47,13 +53,25 @@ export const TokenCard: React.FC<TokenCardProps> = props => {
       <MarketProperties>
         <FiatValue>{props.treasuryShare}</FiatValue>
         <SecondaryFiatDetails>
-          <ToggleMobileVisibility visible={false}>
-            <span>{props.changeDuringInterval}</span>
-          </ToggleMobileVisibility>
-          <Badge
-            label={props.percentageChangeDuringInterval}
-            colorScheme="success"
-          />
+          {props.changeDuringInterval && (
+            <ToggleMobileVisibility visible={false}>
+              <span
+                className={
+                  changeType === 'Positive'
+                    ? 'text-success-800'
+                    : 'text-critical-800'
+                }
+              >
+                {props.changeDuringInterval}
+              </span>
+            </ToggleMobileVisibility>
+          )}
+          {props.percentageChangeDuringInterval && (
+            <Badge
+              label={props.percentageChangeDuringInterval}
+              colorScheme={changeType === 'Positive' ? 'success' : 'critical'}
+            />
+          )}
         </SecondaryFiatDetails>
       </MarketProperties>
     </Card>
