@@ -2,8 +2,9 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
-import {ButtonText, IconAdd, SearchInput} from '@aragon/ui-components';
-
+import {SearchInput} from '@aragon/ui-components';
+import {useTransferModalContext} from 'context/transfersModal';
+import {PageWrapper} from 'components/wrappers';
 import TokenList from 'components/tokenList';
 import {useDaoTokens} from 'hooks/useDaoTokens';
 import usePollTokens from 'hooks/usePollTokens';
@@ -15,6 +16,7 @@ const Tokens: React.FC = () => {
   const {data: tokens} = useDaoTokens('0xMyDaoAddress');
   const {data: tokenInfos} = useTokenInfo(tokens);
   const {data: tokenPrices} = usePollTokens(tokenInfos);
+  const {open} = useTransferModalContext();
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -26,23 +28,19 @@ const Tokens: React.FC = () => {
 
   return (
     <Layout>
-      <CenteredFlex>
-        <div className="space-y-1">
-          <Title>5 {t('finance.tokens')}</Title>
-          <SubTitle>$469,657.98 Holdings</SubTitle>
-        </div>
-        <ButtonText
-          size="large"
-          label={t('finance.newTransfer')}
-          iconLeft={<IconAdd />}
+      <PageWrapper
+        title={t('TransferModal.allTransfers') as string}
+        buttonLabel={t('TransferModal.newTransfer') as string}
+        subtitle={'$1,002,200.00 Total Volume'}
+        onClick={open}
+      >
+        <SearchInput
+          placeholder="Type to filter"
+          value={searchTerm}
+          onChange={handleChange}
         />
-      </CenteredFlex>
-      <SearchInput
-        placeholder="Type to filter"
-        value={searchTerm}
-        onChange={handleChange}
-      />
-      <TokenList prices={tokenPrices} tokens={filteredInfo} />
+        <TokenList prices={tokenPrices} tokens={filteredInfo} />
+      </PageWrapper>
     </Layout>
   );
 };
@@ -51,16 +49,4 @@ export default withTransaction('Tokens', 'component')(Tokens);
 
 const Layout = styled.div.attrs({
   className: 'm-auto mt-5 space-y-5 w-8/12',
-})``;
-
-const CenteredFlex = styled.div.attrs({
-  className: 'flex justify-between items-center',
-})``;
-
-const Title = styled.h1.attrs({
-  className: 'text-2xl font-bold text-ui-800',
-})``;
-
-const SubTitle = styled.h2.attrs({
-  className: 'text-lg font-semibold text-ui-500',
 })``;

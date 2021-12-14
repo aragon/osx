@@ -20,6 +20,16 @@ export type BaseTokenInfo = {
   percentageChangeDuringInterval?: string;
 };
 
+export type Transfers = {
+  title: string;
+  tokenAmount: number;
+  tokenSymbol: string;
+  transferDate: string;
+  transferType: 'Deposit' | 'Withdraw';
+  usdValue: string;
+  isPending?: boolean;
+};
+
 export type HookData<T> = {
   data: T;
   isLoading: boolean;
