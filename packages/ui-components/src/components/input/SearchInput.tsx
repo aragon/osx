@@ -6,17 +6,13 @@ import {IconSearch} from '../icons';
 
 export type SearchInputProps = Omit<TextInputProps, 'adornment' | 'side'>;
 
-export const SearchInput: React.FC<SearchInputProps> = ({
-  ...props
-}) => {
+export const SearchInput: React.FC<SearchInputProps> = ({...props}) => {
   return (
     <TextInput
       data-testid="search-input"
-      {...props} 
-      adornment={
-        <IconSearch className="text-ui-300"/>
-      } 
+      adornment={<IconSearch className="text-ui-300" />}
       side={'left'}
+      {...props}
     />
   );
 };

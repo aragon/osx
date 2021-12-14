@@ -2,13 +2,15 @@ import {useCallback, useState} from 'react';
 
 import useInterval from 'hooks/useInterval';
 import useIsMounted from 'hooks/useIsMounted';
-import {TokenPrices} from 'utils/types';
 import {fetchTokenUsdPrice} from 'services/prices';
+import {HookData, TokenPrices, BaseTokenInfo} from 'utils/types';
 
-type Token = {
-  address: string;
-  decimals: number | undefined;
-};
+// TODO: unify the token price and info type.
+
+// TODO: Eventually, the idea is to pass HookData<BaseTokenInfo[]> into this
+// this hook directly (Note that this hook depends on the ouput of
+// useTokenInfo). This would then allow to handle the loading and error state of
+// the useTokenInfo directly in here.
 
 /**
  * Hook for fetching token prices at specified intervals
@@ -21,13 +23,14 @@ type Token = {
  * const {prices, isLoading} = usePollTokens(tokenList, 1000);
  * console.log(prices) // { 0x123...34fd: '5.0045', 0x123...fa23: null};
  */
-const usePollTokens = (tokenList: Token[], interval?: number) => {
+const usePollTokens = (tokenList: BaseTokenInfo[], interval?: number) => {
   const isMounted = useIsMounted();
   const [prices, setPrices] = useState<TokenPrices>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState(); // eslint-disable-line
 
   const fetchPrices = useCallback(
-    async (tokens: Token[]) => {
+    async (tokens: BaseTokenInfo[]) => {
       const fetchedPrices: TokenPrices = {};
       setIsLoading(true);
 
@@ -53,7 +56,7 @@ const usePollTokens = (tokenList: Token[], interval?: number) => {
 
   useInterval(() => fetchPrices(tokenList), interval);
 
-  return {prices, isLoading};
+  return {data: prices, isLoading: isLoading} as HookData<TokenPrices>;
 };
 
 export default usePollTokens;

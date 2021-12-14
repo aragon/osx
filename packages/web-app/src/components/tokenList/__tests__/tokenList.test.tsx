@@ -3,10 +3,10 @@ import {constants} from 'ethers';
 import {render, screen} from 'test-utils';
 
 import TokenList from '..';
-import {DisplayToken, TokenPrices} from 'utils/types';
+import {BaseTokenInfo, TokenPrices} from 'utils/types';
 
 const DEFAULT_PRICES: TokenPrices = {[constants.AddressZero]: '1'};
-const DEFAULT_TOKENS: DisplayToken[] = [
+const DEFAULT_TOKENS: BaseTokenInfo[] = [
   {
     name: 'Ethereum',
     address: constants.AddressZero,
