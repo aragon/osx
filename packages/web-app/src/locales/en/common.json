@@ -31,5 +31,13 @@
     "unknownUSDValue": "Value unknown",
     "tokens": "Tokens",
     "newTransfer": "New Transfer"
+  },
+  "TransferModal": {
+    "allTransfers":"All Transfers",
+    "newTransfer": "New Transfer",
+    "item1Title": "Deposit assets",
+    "item1Subtitle": "Add assets to the DAO treasury",
+    "item2Title": "Withdraw assets",
+    "item2Subtitle": "Add assets to the DAO treasury"
   }
 }

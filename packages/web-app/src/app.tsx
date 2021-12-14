@@ -7,6 +7,7 @@ import {Navigate, Routes, Route, useLocation} from 'react-router-dom';
 import Footer from 'containers/footer';
 import Navbar from 'containers/navbar';
 import WalletMenu from 'containers/walletMenu';
+import TransferMenu from 'containers/transferMenu';
 import {trackPage} from 'services/analytics';
 import '../i18n.config';
 
@@ -49,6 +50,7 @@ function App() {
       </div>
       <Footer />
       <WalletMenu />
+      <TransferMenu />
     </div>
   );
 }

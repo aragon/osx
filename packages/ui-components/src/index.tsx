@@ -15,3 +15,4 @@ export * from './components/spinner';
 export * from './components/tokenCard';
 export * from './components/transferListItem';
 export * from './components/walletCard';
+export * from './components/modal';

@@ -18,7 +18,7 @@ import BottomSheet from 'components/bottomSheet';
 import Breadcrumbs from 'components/breadcrumbs';
 import {useWallet} from 'context/augmentedWallet';
 import DaoSwitcherMenu from 'components/daoSwitcherMenu';
-import {useMenuContext} from 'context/menu';
+import {useWalletMenuContext} from 'context/walletMenu';
 import {useWalletProps} from '../walletMenu';
 import BreadcrumbDropdown from 'components/breadcrumbMenuDropdown';
 import {Dashboard, NotFound} from 'utils/paths';
@@ -51,9 +51,15 @@ const Navbar: React.FC = () => {
     excludePaths: [Dashboard, NotFound],
   });
 
-  const {open} = useMenuContext();
-  const {connect, isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
-    useWallet();
+  const {open} = useWalletMenuContext();
+  const {
+    connect,
+    isConnected,
+    account,
+    chainId,
+    ensName,
+    ensAvatarUrl,
+  }: useWalletProps = useWallet();
 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showCrumbPopover, setShowCrumbPopover] = useState(false);
@@ -176,7 +182,9 @@ const Navbar: React.FC = () => {
             src={ensAvatarUrl || account}
           />
         </NavigationBar>
-        <TestNetworkIndicator>{t('testnetIndicator')}</TestNetworkIndicator>
+        {chainId === 4 && (
+          <TestNetworkIndicator>{t('testnetIndicator')}</TestNetworkIndicator>
+        )}
       </NavContainer>
 
       {/* ------- NavLinks (Mobile) ------- */}

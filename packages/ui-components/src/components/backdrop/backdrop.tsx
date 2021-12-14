@@ -9,7 +9,7 @@ export interface BackdropProps {
   /**
    * The `onClose` prop allows passing a function that will be called once the modal has been dismissed.
    */
-  onClose: () => void;
+  onClose?: () => void;
   /**
    * Children Element
    */
