@@ -66,7 +66,7 @@ const Finance: React.FC = () => {
           </div>
         </TokenSectionWrapper>
         <div className={'h-4'} />
-        <TransferSectionWrapper title={t('finance.transferSection')}>
+        <TransferSectionWrapper title={t('finance.transferSection')} showButton>
           <div className="py-2 space-y-2">
             <TransferList transfers={TEMP_TRANSFERS} />
           </div>

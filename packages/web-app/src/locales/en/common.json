@@ -29,6 +29,10 @@
     "tokenSection": "Tokens",
     "transferSection": "Transfers",
     "unknownUSDValue": "Value unknown",
+    "tokens": "Tokens"
+  },
+  "allTransfer": {
+    "thisWeek": "This Week",
     "tokens": "Tokens",
     "newTransfer": "New Transfer",
     "allTransfers": "All Transfers",

@@ -12,7 +12,7 @@ const TransferList: React.FC<TransferListProps> = ({transfers}) => {
   const {t} = useTranslation();
 
   if (transfers.length === 0)
-    return <p data-testid="transferList">{t('finance.noTransfers')}</p>;
+    return <p data-testid="transferList">{t('allTransfer.noTransfers')}</p>;
 
   return (
     <div className="space-y-2" data-testid="transferList">
