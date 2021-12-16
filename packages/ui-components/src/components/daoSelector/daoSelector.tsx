@@ -32,12 +32,7 @@ export const DaoSelector = ({
     >
       <Avatar src={src} size={'large'} mode="square" />
       <p>{label}</p>
-      <ButtonIcon
-        icon={<HoverIconSwitch />}
-        mode="ghost"
-        size="small"
-        bgWhite
-      />
+      <SwitchButton icon={<IconSwitch />} mode="ghost" size="small" bgWhite />
     </StyledButton>
   );
 };
@@ -46,12 +41,11 @@ type StyledButtonProps = {
   isSelected: DaoSelectorProps['isSelected'];
 };
 
-// TODO: Switch font from bold to the appropriate weight (700)
-const StyledButton = styled.button.attrs(({isSelected}: StyledButtonProps) => {
-  const dimensions = 'flex flex-col items-center rounded-2xl font-bold';
+const StyledButton = styled.div.attrs(({isSelected}: StyledButtonProps) => {
+  const dimensions = 'inline-flex flex-col items-center rounded-2xl font-bold';
   const baseStyle = 'text-ui-800 font-bold text-sm';
   const dimensionsDesktop =
-    'desktop:flex desktop:flex-row desktop:items-center desktop:space-x-2 desktop:text-base desktop:pr-1.5';
+    'desktop:inline-flex desktop:flex-row desktop:items-center desktop:space-x-2 desktop:text-base desktop:pr-1.5';
   const hoverDesktop = 'group ';
   const focusStyle = 'focus:outline-none focus:ring-2 focus:ring-primary-500';
   const activeStyle = 'active:text-primary-500';
@@ -63,7 +57,7 @@ const StyledButton = styled.button.attrs(({isSelected}: StyledButtonProps) => {
   return {className: combinedClasses};
 })<StyledButtonProps>``;
 
-const HoverIconSwitch = styled(IconSwitch).attrs(() => {
+const SwitchButton = styled(ButtonIcon).attrs(() => {
   return {
     className: 'hidden desktop:block group-hover:text-primary-500',
   };

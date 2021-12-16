@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {Radio, RadioGroup, RadioGroupProps} from '../src';
 
 export default {
-  title: 'Components/Radio Group',
+  title: 'Components/Buttons/Group',
   component: RadioGroup,
 } as Meta;
 

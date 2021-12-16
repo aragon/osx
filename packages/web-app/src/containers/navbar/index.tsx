@@ -1,12 +1,12 @@
 import {
   ButtonIcon,
   ButtonText,
+  ButtonWallet,
   DaoCard,
   DaoSelector,
   IconClose,
   IconMenu,
   Popover,
-  WalletButton,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
@@ -30,12 +30,10 @@ const TEMP_DAOS = [
   {
     name: 'Axolittle Dao',
     ens: 'axolittle-dao.eth',
-    icon: TEMP_ICON,
   },
   {
     name: 'Skullx Dao',
     ens: 'skullx-dao.eth',
-    icon: TEMP_ICON,
   },
 ];
 
@@ -173,7 +171,7 @@ const Navbar: React.FC = () => {
           </Container>
 
           {/* ------- Wallet Button (Desktop) ------- */}
-          <WalletButton
+          <ButtonWallet
             onClick={handleWalletButtonClick}
             isConnected={isConnected()}
             label={

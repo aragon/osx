@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Workarounds are used that necessitate the any escape hatch
 
-import React, {useContext, useEffect, useMemo} from 'react';
-import {identifyUser} from 'services/analytics';
-import {UseWalletProvider, useWallet} from 'use-wallet';
 import {Wallet} from 'use-wallet/dist/cjs/types';
-import {providers as EthersProviders} from 'ethers';
+import {identifyUser} from 'services/analytics';
 import {updateAPMContext, useAPM} from './elasticAPM';
+import {providers as EthersProviders} from 'ethers';
+import {UseWalletProvider, useWallet} from 'use-wallet';
+import React, {useContext, useEffect, useMemo} from 'react';
 
 // Any is a workaround so TS doesn't ask for a filled out default
 const WalletAugmentedContext = React.createContext<Wallet | any>({});

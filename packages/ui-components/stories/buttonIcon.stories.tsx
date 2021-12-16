@@ -5,7 +5,7 @@ import {IconAdd} from '../src';
 import {ButtonIcon, ButtonIconProps} from '../src/components/button/buttonIcon';
 
 export default {
-  title: 'Components/Buttons/ButtonIcon',
+  title: 'Components/Buttons/Icon',
   component: ButtonIcon,
 } as Meta;
 

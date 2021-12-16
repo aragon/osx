@@ -1,3 +1,4 @@
+// TODO: remove story when publishing storybook
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
 
@@ -5,7 +6,7 @@ import {IconAdd} from '../src';
 import {ButtonBase, ButtonBaseProps} from '../src/components/button/buttonBase';
 
 export default {
-  title: 'Components/Buttons/ButtonBase',
+  title: 'Components/Buttons/Base',
   component: ButtonBase,
 } as Meta;
 

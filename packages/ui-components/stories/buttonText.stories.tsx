@@ -5,7 +5,7 @@ import {IconAdd} from '../src';
 import {ButtonText, ButtonTextProps} from '../src/components/button/buttonText';
 
 export default {
-  title: 'Components/Buttons/ButtonText',
+  title: 'Components/Buttons/Text',
   component: ButtonText,
 } as Meta;
 

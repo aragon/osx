@@ -1,13 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
-import {ActionListItem, DaoCard, IconLinkExternal} from '@aragon/ui-components';
+import {
+  ActionListItem,
+  AvatarDao,
+  IconLinkExternal,
+} from '@aragon/ui-components';
 
 const TEMP_ICON =
   'https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg';
 
 type DaoSwitcherMenuProps = {
-  daos?: {name: string; ens: string; icon: string}[];
+  daos?: {name: string; ens: string; icon?: string}[];
 
   // Note: This onClick function must be called to close the popover
   onClick: () => void;
@@ -23,24 +27,15 @@ const DaoSwitcherMenu: React.FC<DaoSwitcherMenuProps> = ({
     <Container>
       <DaoListContainer>
         {/* NOTE: Temporarily static  */}
-        <DaoCard
-          daoAddress="bushido.aragonid.eth"
-          daoName="Bushido DAO"
-          includeSwitch={false}
-          onClick={onClick}
+        <AvatarDao
+          label="Bushido DAO"
+          domain="bushido.aragonid.eth"
           src={TEMP_ICON}
-          wide
+          onClick={onClick}
         />
         {daos.map(({name, ens, icon}) => (
           <div key={name}>
-            <DaoCard
-              daoAddress={ens}
-              daoName={name}
-              includeSwitch={false}
-              onClick={onClick}
-              src={icon}
-              wide
-            />
+            <AvatarDao label={name} domain={ens} src={icon} onClick={onClick} />
           </div>
         ))}
       </DaoListContainer>
