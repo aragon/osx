@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import {ButtonText, IconChevronRight} from '@aragon/ui-components';
 
 import {AllTokens, AllTransfers} from 'utils/paths';
+import {useTranslation} from 'react-i18next';
 
 export type SectionWrapperProps = {
   title: string;
@@ -20,6 +21,8 @@ export type SectionWrapperProps = {
  * define this.
  */
 export const TokenSectionWrapper = ({title, children}: SectionWrapperProps) => {
+  const {t} = useTranslation();
+
   return (
     <>
       <HeaderContainer>
@@ -64,7 +67,9 @@ export const TransferSectionWrapper = ({
 type SeeAllButtonProps = {
   path: string;
 };
+
 const SeeAllButton = ({path}: SeeAllButtonProps) => {
+  const {t} = useTranslation();
   return (
     <div>
       <Link to={path}>

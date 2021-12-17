@@ -1,3 +1,7 @@
+/**
+ * Note: This function will return a list of timestamp that we can use to categorize transfers
+ * @return a object with milliseconds params
+ */
 export function getDateSections(): {
   lastWeek: number;
   lastMonth: number;
@@ -13,11 +17,6 @@ export function getDateSections(): {
     1
   ).getTime();
   const lastYear: number = new Date(date.getFullYear(), 0, 1).getTime();
-
-  /**
-   * Note: This function will return a list of timestamp that we can use to categorize transfers
-   * @return a object with milliseconds params
-   */
 
   return {
     lastWeek,

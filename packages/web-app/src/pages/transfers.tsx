@@ -1,51 +1,43 @@
-import {SearchInput} from '@aragon/ui-components';
-import React from 'react';
+import {Radio, RadioGroup, SearchInput} from '@aragon/ui-components';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
 
 import {TransferSectionWrapper} from 'components/wrappers';
-import useCategorizedTransfers, {
-  TransferSectionsType,
-} from 'hooks/useCategorizedTransfers';
+import useCategorizedTransfers from 'hooks/useCategorizedTransfers';
 import {useTransferModalContext} from 'context/transfersModal';
 import {PageWrapper} from 'components/wrappers';
 import TransferList from 'components/transferList';
 import {Transfers} from 'utils/types';
 
-const transfers: Array<Transfers> = [
-  {
-    title: 'Deposit',
-    tokenAmount: 300,
-    transferDate: 'Pending...',
-    tokenSymbol: 'DAI',
-    transferType: 'Deposit',
-    usdValue: '$200.00',
-    isPending: true,
-  },
-  {
-    title: 'Deposit DAI so I can do whatever I want whenever I want',
-    tokenAmount: 300,
-    tokenSymbol: 'DAI',
-    transferDate: 'Yesterday',
-    transferType: 'Deposit',
-    usdValue: '$200.00',
-  },
-  {
-    title: 'Withdraw',
-    tokenAmount: 300,
-    transferDate: 'Yesterday',
-    tokenSymbol: 'DAI',
-    transferType: 'Withdraw',
-    usdValue: '$200.00',
-  },
-];
-
 const Transfers: React.FC = () => {
   const {t} = useTranslation();
-  const transfersList: TransferSectionsType = useCategorizedTransfers();
   const {open} = useTransferModalContext();
+  const {data: categorizedTransfers} = useCategorizedTransfers();
+  const [filterValue, setFilterValue] = useState('');
 
+  const handleButtonGroupChange = (selected: string) => {
+    const val = selected === 'All' ? '' : selected;
+    setFilterValue(val);
+  };
+
+  const displayedTransfers = {
+    week: categorizedTransfers.week,
+    month: categorizedTransfers.month,
+    year: categorizedTransfers.year,
+  };
+  if (filterValue) {
+    displayedTransfers.week = categorizedTransfers.week.filter(
+      t => t.transferType === filterValue
+    );
+    displayedTransfers.month = categorizedTransfers.month.filter(
+      t => t.transferType === filterValue
+    );
+    displayedTransfers.year = categorizedTransfers.year.filter(
+      t => t.transferType === filterValue
+    );
+  }
   /**
    * Note: We can add a nested iterator for both sections and transfer cards
    */
@@ -58,31 +50,33 @@ const Transfers: React.FC = () => {
         subtitle={'$1,002,200.00 Total Volume'}
         onClick={open}
       >
-        <SearchInput placeholder="Type to filter" />
+        <div className="space-y-1.5">
+          <SearchInput placeholder="Type to filter" />
+          <RadioGroup defaultValue="All" onChange={handleButtonGroupChange}>
+            <Radio value="All">All</Radio>
+            <Radio value="Deposit">Deposit</Radio>
+            <Radio value="Withdraw">Withdraw</Radio>
+            <Radio value="External Contract">External Contract</Radio>
+          </RadioGroup>
+        </div>
         <SectionContainer>
           <TransferSectionWrapper title={t('allTransfer.thisWeek') as string}>
-            <div className="my-2 space-y-2 border-solid">
-              {transfersList.week.map((data, index) => (
-                <TransferList transfers={transfers} key={index} />
-              ))}
+            <div className="my-2 space-y-1.5 border-solid">
+              <TransferList transfers={displayedTransfers.week} />
             </div>
           </TransferSectionWrapper>
         </SectionContainer>
         <SectionContainer>
           <TransferSectionWrapper title={'December'}>
-            <div className="my-2 space-y-2 border-solid">
-              {transfersList.month.map((data, index) => (
-                <TransferList transfers={transfers} key={index} />
-              ))}
+            <div className="my-2 space-y-1.5 border-solid">
+              <TransferList transfers={displayedTransfers.month} />
             </div>
           </TransferSectionWrapper>
         </SectionContainer>
         <SectionContainer>
           <TransferSectionWrapper title={'2021'}>
-            <div className="my-2 space-y-2 border-solid">
-              {transfersList.year.map((data, index) => (
-                <TransferList transfers={transfers} key={index} />
-              ))}
+            <div className="my-2 space-y-1.5 border-solid">
+              <TransferList transfers={displayedTransfers.year} />
             </div>
           </TransferSectionWrapper>
         </SectionContainer>
