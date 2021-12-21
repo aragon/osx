@@ -3,7 +3,7 @@ module.exports = {
   darkMode: false,
   theme: {
     extend: {
-      // extends colors accorging to design system
+      // extends colors according to design system
       colors: {
         primary: {
           50: '#F5F8FF',
@@ -64,7 +64,7 @@ module.exports = {
           900: '#770A30',
         },
       },
-      // extends spacing accorging to design system
+      // extends spacing according to design system
       spacing: {
         0.5: '4px',
         1: '8px',
@@ -82,7 +82,7 @@ module.exports = {
         25: '200px',
       },
     },
-    // overwirtes screen breakpoints according to design system
+    // overwrites screen breakpoints according to design system
     screens: {
       tablet: '768px',
       desktop: '1440px',
@@ -91,7 +91,7 @@ module.exports = {
     fontFamily: {
       sans: ['Manrope'],
     },
-    // overwirtes font sizes according to design system
+    // overwrites font sizes according to design system
     // These are to be used on components (labels, etc.).
     fontSize: {
       xs: ['0.64rem', 1.5],

@@ -1,77 +1,81 @@
-import {Address} from '@aragon/ui-components/dist/utils/addresses';
-import {constants} from 'ethers';
-import {useEffect, useState} from 'react';
-import {BaseTokenInfo, HookData} from 'utils/types';
+import {useCallback, useEffect, useState} from 'react';
 
-// TODO: Eventually, the idea is to pass HookData<Address[]> into this this hook
-// directly (Note that this hook depends on the ouput of useDaoTokens). This
-// would then allow to handle the loading and error state of the useDaoTokens
-// directly in here.
+import useIsMounted from './useIsMounted';
+import {fetchTokenData} from 'services/prices';
+import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
 
 /**
  * Hook that fetches information for given list of tokens.
- *
- * @param tokenAddresses Address of a Token
+ * @param tokenBalances Address of a Token
  * @returns List of token information as well as the hook state.
  */
-export const useTokenInfo = (tokenAddresses: Address[]) => {
+export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
+  const isMounted = useIsMounted();
+  const [error, setError] = useState<Error>();
   const [tokenInfo, setTokenInfo] = useState<BaseTokenInfo[]>([]);
-  const [loading, setLoading] = useState(false); // eslint-disable-line
-  const [error, setError] = useState<Error>(); // eslint-disable-line
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  /*************************************************
+   *           Callbacks and Functions             *
+   *************************************************/
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function fetchBlockchainTokenInfo(_address: string) {
+    // TODO: TEMPORARY; getTokenInfo from chain using ethers
+    // Keep in mind there is no need to get Ethereum info: can just get from constants
+    return Promise.resolve({
+      name: 'Patito Dao Token',
+      symbol: 'PDT',
+      decimals: 18,
+    });
+  }
+
+  const fetchAllTokenData = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const allFetchPromise = Promise.all(
+        tokenBalances.map(tokenBalance => fetchTokenData(tokenBalance.address))
+      );
+
+      // Await all promises
+      const fetched = await allFetchPromise;
+
+      const allTokenDataPromise = Promise.all(
+        fetched.map((value, index) =>
+          fetchBlockchainTokenInfo(tokenBalances[index].address).then(info => {
+            const count = tokenBalances[index].count;
+            const address = tokenBalances[index].address;
+            if (value) return {...value, count, decimals: info.decimals};
+            return {...info, count, address, imgUrl: ''};
+          })
+        )
+      );
+
+      // Update the state
+      if (isMounted()) {
+        setTokenInfo(await allTokenDataPromise);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      if (isMounted()) setError(error as Error);
+      console.error(error);
+    }
+  }, [isMounted, tokenBalances]);
+
+  /*************************************************
+   *                      Hooks                    *
+   *************************************************/
   useEffect(() => {
-    // TODO Fetch data for given token addresses from token API here
-    if (tokenAddresses) 42;
-    setTokenInfo(TEMP_TOKENS);
-  }, []); // eslint-disable-line
+    fetchAllTokenData();
+  }, [fetchAllTokenData]);
 
+  /*************************************************
+   *                  Hook Response                *
+   *************************************************/
   const res: HookData<BaseTokenInfo[]> = {
     data: tokenInfo,
-    isLoading: false,
+    error,
+    isLoading,
   };
   return res;
 };
-
-// Temporary, should be gotten from the respective API
-const TEMP_TOKENS: BaseTokenInfo[] = [
-  {
-    name: 'Ethereum',
-    address: constants.AddressZero,
-    imgUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-    count: 0.255555,
-    symbol: 'ETH',
-    decimals: 18,
-  },
-  {
-    name: 'Aragon',
-    address: '0xa117000000f279d81a1d3cc75430faa017fa5a2e',
-    imgUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1680.png',
-    count: 6,
-    symbol: 'ANT',
-    decimals: 18,
-  },
-  {
-    name: 'Dai',
-    address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-    imgUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
-    count: 245,
-    symbol: 'DAI',
-    decimals: 18,
-  },
-  {
-    name: 'Patito DAO TOken',
-    address: 'randomAddress',
-    imgUrl: '',
-    count: 500000,
-    symbol: 'PDT',
-    decimals: 18,
-  },
-  {
-    name: 'Tether',
-    address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-    imgUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
-    count: 344578,
-    symbol: 'USDT',
-    decimals: 6,
-  },
-];

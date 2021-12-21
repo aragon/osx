@@ -1,21 +1,20 @@
-import {Radio, RadioGroup, SearchInput} from '@aragon/ui-components';
-import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
+import React, {useState} from 'react';
 import {withTransaction} from '@elastic/apm-rum-react';
+import {Radio, RadioGroup, SearchInput} from '@aragon/ui-components';
 
-import {TransferSectionWrapper} from 'components/wrappers';
-import useCategorizedTransfers from 'hooks/useCategorizedTransfers';
-import {useTransferModalContext} from 'context/transfersModal';
-import {PageWrapper} from 'components/wrappers';
 import TransferList from 'components/transferList';
-import {Transfers} from 'utils/types';
+import {PageWrapper} from 'components/wrappers';
+import useCategorizedTransfers from 'hooks/useCategorizedTransfers';
+import {TransferSectionWrapper} from 'components/wrappers';
+import {useTransferModalContext} from 'context/transfersModal';
 
 const Transfers: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useTransferModalContext();
-  const {data: categorizedTransfers} = useCategorizedTransfers();
   const [filterValue, setFilterValue] = useState('');
+  const {data: categorizedTransfers} = useCategorizedTransfers();
 
   const handleButtonGroupChange = (selected: string) => {
     const val = selected === 'All' ? '' : selected;

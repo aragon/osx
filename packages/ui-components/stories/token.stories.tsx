@@ -17,8 +17,8 @@ Default.args = {
   treasurySharePercentage: '45%',
   tokenCount: '15,000,230.2323',
   tokenUSDValue: '$1',
-  treasuryShare: '$15,000,230.2323',
-  changeDuringInterval: '+$150,002.3',
+  treasuryShare: '$15,000,230.23',
+  changeDuringInterval: '+$150,002.30',
   percentageChangeDuringInterval: '+ 0.01%',
 };
 
@@ -27,10 +27,7 @@ WithFallback.args = {
   tokenName: 'Patito DAO Token',
   tokenImageUrl: '',
   tokenSymbol: 'PDT',
-  treasurySharePercentage: '45%',
   tokenCount: '15,000,230.2323',
   tokenUSDValue: 'Value unknown',
   treasuryShare: 'Value unknown',
-  changeDuringInterval: '+$150,002.3',
-  percentageChangeDuringInterval: '+ 0.01%',
 };

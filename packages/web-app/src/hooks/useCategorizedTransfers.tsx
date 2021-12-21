@@ -1,12 +1,12 @@
 // import {getDateSections} from 'utils/date';
 
+import {HookData, Transfer} from 'utils/types';
 import {useEffect, useState} from 'react';
-import {HookData, Transfers} from 'utils/types';
 
 export type CategorizedTransfer = {
-  week: Transfers[];
-  month: Transfers[];
-  year: Transfers[];
+  week: Transfer[];
+  month: Transfer[];
+  year: Transfer[];
 };
 
 /**
@@ -33,9 +33,9 @@ export default function useCategorizedTransfers(): HookData<CategorizedTransfer>
     useState<CategorizedTransfer>(init);
 
   useEffect(() => {
-    const week: Transfers[] = [];
-    const month: Transfers[] = [];
-    const year: Transfers[] = [];
+    const week: Transfer[] = [];
+    const month: Transfer[] = [];
+    const year: Transfer[] = [];
 
     transfers.forEach(t => {
       switch (t.transferDate) {
@@ -63,7 +63,7 @@ export default function useCategorizedTransfers(): HookData<CategorizedTransfer>
   return {data: categorizedTransfers, isLoading: false};
 }
 
-const transfers: Array<Transfers> = [
+const transfers: Array<Transfer> = [
   //this week -> today
   {
     title: 'Deposit',

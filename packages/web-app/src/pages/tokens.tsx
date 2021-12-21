@@ -1,22 +1,21 @@
-import React, {useState} from 'react';
 import styled from 'styled-components';
+import {SearchInput} from '@aragon/ui-components';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
-import {SearchInput} from '@aragon/ui-components';
-import {useTransferModalContext} from 'context/transfersModal';
-import {PageWrapper} from 'components/wrappers';
+import React, {useState} from 'react';
+
 import TokenList from 'components/tokenList';
-import {useDaoTokens} from 'hooks/useDaoTokens';
-import usePollTokens from 'hooks/usePollTokens';
-import {useTokenInfo} from 'hooks/useTokenInformation';
+import {TimeFilter} from 'utils/constants';
+import {PageWrapper} from 'components/wrappers';
 import {filterTokens} from 'utils/tokens';
+import {useDaoTreasury} from 'hooks/useDaoTreasury';
+import {useTransferModalContext} from 'context/transfersModal';
+import type {TreasuryToken} from 'utils/types';
 
 const Tokens: React.FC = () => {
   const {t} = useTranslation();
-  const {data: tokens} = useDaoTokens('0xMyDaoAddress');
-  const {data: tokenInfos} = useTokenInfo(tokens);
-  const {data: tokenPrices} = usePollTokens(tokenInfos);
   const {open} = useTransferModalContext();
+  const {data: treasury} = useDaoTreasury('0xMyDaoAddress', TimeFilter.day);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -24,14 +23,20 @@ const Tokens: React.FC = () => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredInfo = filterTokens(tokenInfos, searchTerm);
+  const filteredInfo: TreasuryToken[] = filterTokens(
+    treasury.tokens,
+    searchTerm
+  );
 
   return (
     <Layout>
       <PageWrapper
         title={t('TransferModal.allTransfers') as string}
         buttonLabel={t('TransferModal.newTransfer') as string}
-        subtitle={'$1,002,200.00 Total Volume'}
+        subtitle={`${new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(treasury.totalAssetValue)} Total Volume`}
         onClick={open}
       >
         <SearchInput
@@ -39,7 +44,7 @@ const Tokens: React.FC = () => {
           value={searchTerm}
           onChange={handleChange}
         />
-        <TokenList prices={tokenPrices} tokens={filteredInfo} />
+        <TokenList tokens={filteredInfo} />
       </PageWrapper>
     </Layout>
   );

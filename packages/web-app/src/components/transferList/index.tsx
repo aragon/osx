@@ -1,11 +1,11 @@
 import React from 'react';
 import {TransferListItem} from '@aragon/ui-components';
 import {useTranslation} from 'react-i18next';
-import {Transfers} from 'utils/types';
+import {Transfer} from 'utils/types';
 
 // types might come from subgraph - not adding any now
 type TransferListProps = {
-  transfers: Array<Transfers>;
+  transfers: Array<Transfer>;
 };
 
 const TransferList: React.FC<TransferListProps> = ({transfers}) => {
