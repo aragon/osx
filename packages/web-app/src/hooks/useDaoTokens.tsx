@@ -54,4 +54,12 @@ const TEMP_TOKEN_ADDR: TokenBalance[] = [
     address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
     count: BigInt('3659742870270000000000'),
   },
+  {
+    address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+    count: BigInt('1337742870270000000000'),
+  },
+  {
+    address: '0x0f5d2fb29fb7d3cfee444a200298f468908cc942',
+    count: BigInt('12342870270000000000'),
+  },
 ];
