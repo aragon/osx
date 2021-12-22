@@ -32,7 +32,11 @@
     "tokenSection": "Tokens",
     "transferSection": "Transfers",
     "unknownUSDValue": "Value unknown",
-    "tokens": "Tokens"
+    "tokens": "Tokens",
+    "labels": {
+      "to": "to",
+      "from": "from"
+    }
   },
   "allTransfer": {
     "thisWeek": "This Week",

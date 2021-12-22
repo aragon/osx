@@ -82,7 +82,7 @@ module.exports = {
         25: '200px',
       },
     },
-    // overwrites screen breakpoints according to design system
+    // overrides screen breakpoints according to design system
     screens: {
       tablet: '768px',
       desktop: '1440px',
@@ -91,7 +91,7 @@ module.exports = {
     fontFamily: {
       sans: ['Manrope'],
     },
-    // overwrites font sizes according to design system
+    // overrides font sizes according to design system
     // These are to be used on components (labels, etc.).
     fontSize: {
       xs: ['0.64rem', 1.5],
