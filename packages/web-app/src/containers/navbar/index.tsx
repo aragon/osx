@@ -213,7 +213,7 @@ const NavContainer = styled.div.attrs({
    from-gray-50 tablet:from-gray-50 backdrop-filter backdrop-blur-xl`,
 })``;
 
-const NavigationBar = styled.nav.attrs({
+export const NavigationBar = styled.nav.attrs({
   className: `flex tablet:order-1 h-12 justify-between items-center px-2 pb-2 pt-1.5 
     tablet:py-2 tablet:px-3 desktop:py-3 desktop:px-5 wide:px-25 text-ui-600`,
 })``;

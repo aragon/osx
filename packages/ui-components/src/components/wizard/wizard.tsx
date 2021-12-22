@@ -42,5 +42,5 @@ const StepSubTitle = styled.p.attrs({
 })``;
 
 const CenteredFlex = styled.div.attrs({
-  className: 'flex justify-between items-baseline text-sm lg:text-base',
+  className: 'flex justify-between items-baseline text-sm lg:text-base mb-1',
 })``;

@@ -12,7 +12,6 @@
     "finance": "Finance",
     "community": "Community"
   },
-
   "daoSwitcher": {
     "title": "Explore",
     "subtitle": "Find other DAOs to join"
@@ -23,7 +22,11 @@
   "labels": {
     "seeAll": "See all",
     "seeAllTokens": "See All Tokens",
-    "seeAllTransfers": "See All Transfers"
+    "seeAllTransfers": "See All Transfers",
+    "to": "To",
+    "token": "Token",
+    "amount": "Amount",
+    "reference": "Reference"
   },
   "finance": {
     "tokenSection": "Tokens",
@@ -40,11 +43,20 @@
     "totalVolume": "Total Volume"
   },
   "TransferModal": {
-    "allTransfers":"All Transfers",
+    "allTransfers": "All Transfers",
     "newTransfer": "New Transfer",
     "item1Title": "Deposit assets",
     "item1Subtitle": "Add assets to the DAO treasury",
     "item2Title": "Withdraw assets",
     "item2Subtitle": "Add assets to the DAO treasury"
+  },
+  "newDeposit": {
+    "depositAssets": "Deposit Assets",
+    "configureDeposit": "Configure Deposit",
+    "configureDepositSubtitle": "Enter the desired token and its number for transmission. Furthermore, a reception address is necessary.",
+    "toSubtitle": "The recipient of the tokens is the DAO in which you are currently operating.",
+    "tokenSubtitle": "Select Token to deposit in DAO",
+    "amountSubtitle": "Define amount to deposit",
+    "referenceSubtitle": "Add a reference copy to identify this transaction later on"
   }
 }

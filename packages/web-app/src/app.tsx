@@ -2,7 +2,7 @@ import React, {useEffect, lazy, Suspense} from 'react';
 
 // FIXME: Change route to ApmRoute once package has been updated to be
 // compatible with react-router-dom v6
-import {Navigate, Routes, Route, useLocation} from 'react-router-dom';
+import {Navigate, Routes, Route, useLocation, Outlet} from 'react-router-dom';
 
 import Footer from 'containers/footer';
 import Navbar from 'containers/navbar';
@@ -22,6 +22,7 @@ const NotFoundPage = lazy(() => import('pages/notFound'));
 const CommunityPage = lazy(() => import('pages/community'));
 const TransfersPage = lazy(() => import('pages/transfers'));
 const GovernancePage = lazy(() => import('pages/governance'));
+const NewDepositPage = lazy(() => import('pages/newDeposit'));
 
 function App() {
   const {pathname} = useLocation();
@@ -33,18 +34,21 @@ function App() {
 
   return (
     <div className="bg-primary-50">
-      <Navbar />
       <div className="min-h-screen">
         <Suspense fallback={null}>
           <Routes>
-            <Route path={paths.Dashboard} element={<HomePage />} />
-            <Route path={paths.Community} element={<CommunityPage />} />
-            <Route path={paths.Finance} element={<FinancePage />} />
-            <Route path={paths.Governance} element={<GovernancePage />} />
-            <Route path={paths.AllTokens} element={<TokensPage />} />
-            <Route path={paths.AllTransfers} element={<TransfersPage />} />
-            <Route path={paths.NotFound} element={<NotFoundPage />} />
-            <Route path="*" element={<Navigate to={paths.NotFound} />} />
+            <Route path={paths.NewDeposit} element={<NewDepositPage />} />
+
+            <Route element={<Layout />}>
+              <Route path={paths.Dashboard} element={<HomePage />} />
+              <Route path={paths.Community} element={<CommunityPage />} />
+              <Route path={paths.Finance} element={<FinancePage />} />
+              <Route path={paths.Governance} element={<GovernancePage />} />
+              <Route path={paths.AllTokens} element={<TokensPage />} />
+              <Route path={paths.AllTransfers} element={<TransfersPage />} />
+              <Route path={paths.NotFound} element={<NotFoundPage />} />
+              <Route path="*" element={<Navigate to={paths.NotFound} />} />
+            </Route>
           </Routes>
         </Suspense>
       </div>
@@ -56,3 +60,12 @@ function App() {
 }
 
 export default App;
+
+const Layout: React.FC = () => {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
+};
