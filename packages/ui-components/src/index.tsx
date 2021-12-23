@@ -19,4 +19,5 @@ export * from './components/modal';
 export * from './components/label';
 export * from './components/wizard';
 export * from './components/progress';
+export * from './components/tokenListItem';
 export * from './components/textarea';
