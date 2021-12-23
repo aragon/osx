@@ -1,30 +1,71 @@
-import React from 'react';
-import styled from 'styled-components';
-import {useTranslation} from 'react-i18next';
-import {withTransaction} from '@elastic/apm-rum-react';
 import {
+  ButtonIcon,
+  ButtonText,
   ButtonWallet,
   IconChevronLeft,
   IconChevronRight,
   IconMenuVertical,
-  Label,
   Wizard,
-  ButtonText,
-  ButtonIcon,
 } from '@aragon/ui-components';
-import {useWalletProps} from 'containers/walletMenu';
+import styled from 'styled-components';
+import {Address} from '@aragon/ui-components/dist/utils/addresses';
+import {useForm} from 'react-hook-form';
+import {useTranslation} from 'react-i18next';
+import {withTransaction} from '@elastic/apm-rum-react';
+import React, {useCallback, useEffect} from 'react';
+
 import {useWallet} from 'context/augmentedWallet';
+import DepositForm from 'containers/depositForm';
+import {useStepper} from 'hooks/useStepper';
 import {NavigationBar} from 'containers/navbar';
+import {TransferTypes} from 'utils/constants';
+import {useWalletProps} from 'containers/walletMenu';
+import {useWalletMenuContext} from 'context/walletMenu';
+
+export type FormData = {
+  amount: number;
+  reference?: string;
+  type: TransferTypes;
+  from: Address | null; // null because of useWallet props types
+  to: Address;
+  tokenSymbol: string;
+  tokenAddress: Address;
+};
+
+const steps = {
+  configure: 1,
+  review: 2,
+};
+
+const TOTAL_STEPS = Object.keys(steps).length;
+
+const defaultValues = {
+  amount: 0,
+  reference: '',
+  tokenAddress: '',
+  tokenSymbol: '',
+};
 
 const NewDeposit: React.FC = () => {
   const {t} = useTranslation();
+  const {open} = useWalletMenuContext();
+  const {currentStep, prev, next} = useStepper(TOTAL_STEPS);
+  const {control, watch, setValue} = useForm<FormData>({defaultValues});
   const {connect, isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
     useWallet();
 
-  const handleWalletButtonClick = () => {
+  useEffect(() => {
+    if (account) {
+      setValue('from', account);
+      setValue('type', TransferTypes.Deposit);
+    }
+  }, [account, setValue]);
+
+  /** Toggle wallet */
+  const handleWalletButtonClick = useCallback(() => {
     console.log('trigger');
     isConnected() ? open() : connect('injected');
-  };
+  }, [connect, isConnected, open]);
 
   return (
     <>
@@ -56,61 +97,40 @@ const NewDeposit: React.FC = () => {
 
       <Layout>
         <Wizard
-          processName={t('newDeposit.depositAssets')}
-          currentStep={1}
-          totalSteps={2}
           title={t('newDeposit.configureDeposit')}
+          processName={t('newDeposit.depositAssets')}
           description={t('newDeposit.configureDepositSubtitle')}
+          totalSteps={TOTAL_STEPS}
+          currentStep={currentStep}
         />
-
         <FormLayout>
-          <FormItem>
-            <Label
-              label={t('labels.to')}
-              helpText={t('newDeposit.toSubtitle')}
-            ></Label>
-            <ButtonWallet label="patito.dao.eth" src={null} />
-          </FormItem>
-
-          <FormItem>
-            <Label
-              label={t('labels.token')}
-              helpText={t('newDeposit.tokenSubtitle')}
-            />
-          </FormItem>
-
-          <FormItem>
-            <Label
-              label={t('labels.amount')}
-              helpText={t('newDeposit.amountSubtitle')}
-            />
-          </FormItem>
-
-          <FormItem>
-            <Label
-              label={t('labels.reference')}
-              helpText={t('newDeposit.referenceSubtitle')}
-              isOptional={true}
-            />
-          </FormItem>
-
-          <div className="flex justify-between mt-8">
+          {currentStep === steps.configure ? (
+            <DepositForm control={control} />
+          ) : (
+            <h1>Review Deposit</h1>
+          )}
+          <FormFooter>
             {/* Should change this to secondary on gray which is unsupported now */}
             <ButtonText
               label="Back"
-              iconLeft={<IconChevronLeft />}
               mode="secondary"
               size="large"
-              disabled
+              onClick={prev}
+              disabled={currentStep === 1}
+              iconLeft={<IconChevronLeft />}
             />
             <ButtonText
               label="Continue"
-              iconRight={<IconChevronRight />}
-              mode="secondary"
               size="large"
+              onClick={next}
+              iconRight={<IconChevronRight />}
             />
-          </div>
+          </FormFooter>
         </FormLayout>
+        {/* View form values; to be removed later */}
+        <pre className="mt-2">
+          Form values: {JSON.stringify(watch(), null, 2)}
+        </pre>
       </Layout>
     </>
   );
@@ -124,10 +144,6 @@ const Layout = styled.div.attrs({
 
 const FormLayout = styled.div.attrs({
   className: 'my-8 mx-auto space-y-5 w-3/4',
-})``;
-
-const FormItem = styled.div.attrs({
-  className: 'space-y-1.5',
 })``;
 
 const HStack = styled.div.attrs({
@@ -144,4 +160,8 @@ const InsetIconContainer = styled.div.attrs({
 
 const InsetButtonText = styled.div.attrs({
   className: 'pr-2 pl-1.5 font-bold text-ui-700',
+})``;
+
+const FormFooter = styled.div.attrs({
+  className: 'flex justify-between mt-8',
 })``;

@@ -9,9 +9,9 @@ import {
 } from 'components/wrappers';
 import TokenList from 'components/tokenList';
 import TransferList from 'components/transferList';
-import {TimeFilter} from 'utils/constants';
 import {useDaoTreasury} from 'hooks/useDaoTreasury';
 import {useTransferModalContext} from 'context/transfersModal';
+import {TimeFilter, TransferTypes} from 'utils/constants';
 
 import type {Transfer, TreasuryToken} from 'utils/types';
 import {sortTokens} from 'utils/tokens';
@@ -24,7 +24,7 @@ const TEMP_TRANSFERS: Transfer[] = [
     tokenAmount: 300,
     tokenSymbol: 'DAI',
     transferDate: 'Pending...',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
     isPending: true,
   },
@@ -34,7 +34,7 @@ const TEMP_TRANSFERS: Transfer[] = [
     tokenAmount: 300,
     tokenSymbol: 'DAI',
     transferDate: 'Yesterday',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
   },
   {
@@ -42,7 +42,7 @@ const TEMP_TRANSFERS: Transfer[] = [
     tokenAmount: 300,
     tokenSymbol: 'DAI',
     transferDate: 'Yesterday',
-    transferType: 'Withdraw',
+    transferType: TransferTypes.Withdraw,
     usdValue: '$200.00',
   },
 ];

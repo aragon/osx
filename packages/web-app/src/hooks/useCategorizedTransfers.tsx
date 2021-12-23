@@ -1,7 +1,9 @@
 // import {getDateSections} from 'utils/date';
 
-import {HookData, Transfer} from 'utils/types';
 import {useEffect, useState} from 'react';
+
+import {TransferTypes} from 'utils/constants';
+import {HookData, Transfer} from 'utils/types';
 
 export type CategorizedTransfer = {
   week: Transfer[];
@@ -70,7 +72,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 42,
     transferDate: 'Pending...',
     tokenSymbol: 'DAI',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
     isPending: true,
   },
@@ -79,7 +81,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 300,
     tokenSymbol: 'DAI',
     transferDate: 'Yesterday',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
   },
   {
@@ -87,7 +89,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 1337,
     transferDate: 'Yesterday',
     tokenSymbol: 'DAI',
-    transferType: 'Withdraw',
+    transferType: TransferTypes.Withdraw,
     usdValue: '$200.00',
     isPending: true,
   },
@@ -97,7 +99,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 1,
     transferDate: 'Last Week',
     tokenSymbol: 'DAI',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
   },
   {
@@ -105,7 +107,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 2,
     tokenSymbol: 'DAI',
     transferDate: 'Last Week',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
   },
   {
@@ -113,7 +115,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 3,
     transferDate: 'Last Week',
     tokenSymbol: 'DAI',
-    transferType: 'Withdraw',
+    transferType: TransferTypes.Withdraw,
     usdValue: '$200.00',
   },
   //this year -> this month
@@ -122,7 +124,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 1,
     transferDate: 'Last Month',
     tokenSymbol: 'DAI',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
   },
   {
@@ -130,7 +132,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 2,
     tokenSymbol: 'DAI',
     transferDate: 'Last Month',
-    transferType: 'Deposit',
+    transferType: TransferTypes.Deposit,
     usdValue: '$200.00',
   },
   {
@@ -138,7 +140,7 @@ const transfers: Array<Transfer> = [
     tokenAmount: 3,
     transferDate: 'Last Month',
     tokenSymbol: 'DAI',
-    transferType: 'Withdraw',
+    transferType: TransferTypes.Withdraw,
     usdValue: '$200.00',
   },
 ];

@@ -1,6 +1,12 @@
 import {Address} from '@aragon/ui-components/dist/utils/addresses';
+import {TimeFilter, TransferTypes} from './constants';
 
-import {TimeFilter} from './constants';
+/**
+ * Response object from fetching token USD values
+ */
+export type TokenPrices = {
+  [key: string]: string | undefined;
+};
 
 /**
  * Token with basic information populated from external api and/or blockchain
@@ -54,7 +60,7 @@ export type Transfer = {
   tokenAmount: number;
   tokenSymbol: string;
   transferDate: string;
-  transferType: 'Deposit' | 'Withdraw';
+  transferType: TransferTypes;
   usdValue: string;
   isPending?: boolean;
 };

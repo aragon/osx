@@ -1,15 +1,27 @@
 import React from 'react';
 import styled from 'styled-components';
-import {Modal, ActionListItem, IconChevronRight} from '@aragon/ui-components';
-import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
+import {Modal, ActionListItem, IconChevronRight} from '@aragon/ui-components';
 
+import {useWallet} from 'context/augmentedWallet';
+import {NewDeposit} from 'utils/paths';
 import {useTransferModalContext} from 'context/transfersModal';
 
 const TransferMenu: React.FC = () => {
-  const {isOpen, close} = useTransferModalContext();
   const {t} = useTranslation();
   const navigate = useNavigate();
+  const {isConnected} = useWallet();
+  const {isOpen, close} = useTransferModalContext();
+
+  const handleNewDepositClick = () => {
+    // TODO: change alert to proper error reporting mechanism,
+    // Move to proper placing
+    if (isConnected()) {
+      navigate(NewDeposit);
+      close();
+    } else alert('Please connect your wallet');
+  };
 
   return (
     <Modal
@@ -25,10 +37,7 @@ const TransferMenu: React.FC = () => {
           icon={<IconChevronRight />}
           background="white"
           bordered={false}
-          onClick={() => {
-            navigate('/finance/new-deposit');
-            close();
-          }}
+          onClick={handleNewDepositClick}
         />
         <ActionListItem
           title={t('TransferModal.item2Title') as string}
