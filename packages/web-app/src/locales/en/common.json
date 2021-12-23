@@ -54,6 +54,11 @@
     "item2Title": "Withdraw assets",
     "item2Subtitle": "Add assets to the DAO treasury"
   },
+  "TokenModal": {
+    "yourTokens": "Your Token",
+    "tokenNotFoundTitle": "Token not found",
+    "tokenNotFoundSubtitle": "Add custom token to deposit"
+  },
   "newDeposit": {
     "depositAssets": "Deposit Assets",
     "configureDeposit": "Configure Deposit",

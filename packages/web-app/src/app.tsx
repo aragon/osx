@@ -8,6 +8,7 @@ import Footer from 'containers/footer';
 import Navbar from 'containers/navbar';
 import WalletMenu from 'containers/walletMenu';
 import TransferMenu from 'containers/transferMenu';
+import TokenMenu from 'containers/tokenMenu';
 import {trackPage} from 'services/analytics';
 import '../i18n.config';
 
@@ -55,6 +56,7 @@ function App() {
       <Footer />
       <WalletMenu />
       <TransferMenu />
+      <TokenMenu />
     </div>
   );
 }

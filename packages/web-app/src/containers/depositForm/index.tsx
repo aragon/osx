@@ -6,10 +6,12 @@ import {Control, Controller} from 'react-hook-form';
 import {ButtonWallet, Label, TextInput} from '@aragon/ui-components';
 
 import {FormData} from 'pages/newDeposit';
+import {useTransferModalContext} from 'context/transfersModal';
 
 type DepositFormProps = {control: Control<FormData>};
 const DepositForm: React.FC<DepositFormProps> = ({control}) => {
   const {t} = useTranslation();
+  const {open} = useTransferModalContext();
 
   return (
     <>
@@ -30,6 +32,8 @@ const DepositForm: React.FC<DepositFormProps> = ({control}) => {
           label={t('labels.token')}
           helpText={t('newDeposit.tokenSubtitle')}
         />
+        {/* TODO: Should change to dropdown input*/}
+        <TextInput side="left" onClick={() => open('token')} />
       </FormItem>
 
       <FormItem>

@@ -1,23 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Workarounds are used that necessitate the any escape hatch
 
+import React, {useContext, useEffect, useMemo, useState} from 'react';
+import {UseWalletProvider, useWallet} from 'use-wallet';
 import {Wallet} from 'use-wallet/dist/cjs/types';
+import {providers as EthersProviders} from 'ethers';
+
 import {identifyUser} from 'services/analytics';
 import {updateAPMContext, useAPM} from './elasticAPM';
-import {providers as EthersProviders} from 'ethers';
-import {UseWalletProvider, useWallet} from 'use-wallet';
-import React, {useContext, useEffect, useMemo} from 'react';
+import {INFURA_PROJECT_ID} from 'utils/constants';
 
-// Any is a workaround so TS doesn't ask for a filled out default
-const WalletAugmentedContext = React.createContext<Wallet | any>({});
-
-const useWalletAugmented = (): Wallet => {
-  return useContext(WalletAugmentedContext);
+type WalletAugmented = Wallet & {
+  provider: EthersProviders.Provider;
 };
+// Any is a workaround so TS doesn't ask for a filled out default
+const WalletAugmentedContext = React.createContext<WalletAugmented | any>({});
+
+function useWalletAugmented(): WalletAugmented {
+  return useContext(WalletAugmentedContext);
+}
 
 const WalletAugmented: React.FC<unknown> = ({children}) => {
   const wallet = useWallet();
   const ethereum: any = wallet.ethereum;
+  const fallbackProvider = new EthersProviders.InfuraProvider(
+    wallet.chainId, // set provider based on wallet chain id
+    INFURA_PROJECT_ID
+  );
+  const [provider, setProvider] =
+    useState<EthersProviders.Provider>(fallbackProvider);
 
   const injectedProvider: any = useMemo(
     () => (ethereum ? new EthersProviders.Web3Provider(ethereum) : null),
@@ -42,12 +53,17 @@ const WalletAugmented: React.FC<unknown> = ({children}) => {
     }
   }, [wallet.networkName, wallet.connector, wallet.status, wallet.account]);
 
+  useEffect(() => {
+    if (injectedProvider) setProvider(injectedProvider);
+  }, [injectedProvider]);
+
   const contextValue = useMemo(() => {
     return {
+      provider,
       ...wallet,
       ...getEnsData,
     };
-  }, [getEnsData, wallet]);
+  }, [getEnsData, provider, wallet]);
 
   const {apm} = useAPM();
   useEffect(() => {

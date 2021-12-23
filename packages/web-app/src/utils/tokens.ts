@@ -1,4 +1,7 @@
+import {ethers, providers as EthersProviders} from 'ethers';
+import {erc20TokenABI} from 'abis/erc20TokenABI';
 import {BaseTokenInfo, TreasuryToken} from './types';
+import {formatUnits} from 'utils/library';
 
 /**
  * This method sorts a list of array information. It is applicable to any field
@@ -69,3 +72,67 @@ export function filterTokens(tokens: BaseTokenInfo[], searchTerm: string) {
 
   return tokens.filter(t => tokenInfoMatches(t, searchTerm));
 }
+
+/**
+ * This Validation function prevents sending broken
+ * addresses that may cause subgraph crash
+ *
+ * @param address Wallet Address
+ * @param provider Eth provider
+ * @returns boolean determines whether it is erc20 compatible or not
+ */
+
+export async function isTokenERC20(
+  address: string,
+  provider: EthersProviders.Provider
+) {
+  const contract = new ethers.Contract(address, erc20TokenABI, provider);
+  try {
+    await Promise.all([contract.balanceOf(address), contract.totalSupply()]);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+/**
+ * This Function is necessary because
+ * you can't fetch decimals from the api
+ *
+ * @param address token contract address
+ * @param provider Eth provider
+ * @returns number for decimals for each token
+ */
+export async function getTokenInfo(
+  address: string,
+  provider: EthersProviders.Provider
+) {
+  const contract = new ethers.Contract(address, erc20TokenABI, provider);
+  const [decimals, name, symbol] = await Promise.all([
+    contract.decimals(),
+    contract.name(),
+    contract.symbol(),
+  ]);
+  return {
+    decimals,
+    name,
+    symbol,
+  };
+}
+
+/**
+ * @param tokenAddress address of token contract
+ * @param ownerAddress owner address / wallet address
+ * @param provider interface to node
+ * @returns a promise that will return a balance amount
+ */
+export const fetchBalance = async (
+  tokenAddress: string,
+  ownerAddress: string,
+  provider: EthersProviders.Provider
+) => {
+  const contract = new ethers.Contract(tokenAddress, erc20TokenABI, provider);
+  const balance = await contract.balanceOf(ownerAddress);
+  const {decimals, symbol} = await getTokenInfo(tokenAddress, provider);
+
+  return {amount: formatUnits(balance, decimals), symbol};
+};

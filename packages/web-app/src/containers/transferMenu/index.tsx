@@ -9,10 +9,10 @@ import {NewDeposit} from 'utils/paths';
 import {useTransferModalContext} from 'context/transfersModal';
 
 const TransferMenu: React.FC = () => {
+  const {isTransferOpen, close} = useTransferModalContext();
   const {t} = useTranslation();
   const navigate = useNavigate();
   const {isConnected} = useWallet();
-  const {isOpen, close} = useTransferModalContext();
 
   const handleNewDepositClick = () => {
     // TODO: change alert to proper error reporting mechanism,
@@ -25,7 +25,7 @@ const TransferMenu: React.FC = () => {
 
   return (
     <Modal
-      open={isOpen}
+      open={isTransferOpen}
       onClose={close}
       title={t('TransferModal.newTransfer') as string}
       data-testid="walletCard"

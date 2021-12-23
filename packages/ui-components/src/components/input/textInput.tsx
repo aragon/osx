@@ -11,7 +11,7 @@ export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   /**
    * Wheter the icon is left or right of the input
    */
-  side: 'left' | 'right';
+  side?: 'left' | 'right';
 };
 
 /** Simple input with variable styling (depending on mode) */

@@ -67,6 +67,11 @@ const NewDeposit: React.FC = () => {
     isConnected() ? open() : connect('injected');
   }, [connect, isConnected, open]);
 
+  /**
+   * TODO: The text input should replace with a
+   * drop down input
+   */
+
   return (
     <>
       <NavigationBar>
