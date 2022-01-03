@@ -1,5 +1,5 @@
 import React from 'react';
-import {TokenCard} from '@aragon/ui-components';
+import {CardToken} from '@aragon/ui-components';
 import {formatUnits} from 'ethers/lib/utils';
 import {useTranslation} from 'react-i18next';
 
@@ -28,7 +28,7 @@ const TokenList: React.FC<TokenListProps> = ({tokens}) => {
   return (
     <div className="space-y-1.5" data-testid="tokenList">
       {tokens.map(token => (
-        <TokenCard
+        <CardToken
           key={token.address}
           tokenName={token.name}
           tokenCount={numberFormatter.format(

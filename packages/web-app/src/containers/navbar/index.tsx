@@ -2,7 +2,7 @@ import {
   ButtonIcon,
   ButtonText,
   ButtonWallet,
-  DaoCard,
+  CardDao,
   DaoSelector,
   IconClose,
   IconMenu,
@@ -192,7 +192,7 @@ const Navbar: React.FC = () => {
         onClose={handleHideMobileMenu}
       >
         <div className="space-y-3">
-          <DaoCard
+          <CardDao
             daoAddress="bushido.aragonid.eth"
             daoName="Bushido DAO"
             onClick={handleHideMobileMenu}

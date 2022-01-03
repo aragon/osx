@@ -1,13 +1,13 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
-import {TokenCard, TokenCardProps} from '../src';
+import {CardToken, CardTokenProps} from '../src';
 
 export default {
-  title: 'Components/Token',
-  component: TokenCard,
+  title: 'Components/Card/Token',
+  component: CardToken,
 } as Meta;
 
-const Template: Story<TokenCardProps> = args => <TokenCard {...args} />;
+const Template: Story<CardTokenProps> = args => <CardToken {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
@@ -30,4 +30,13 @@ WithFallback.args = {
   tokenCount: '15,000,230.2323',
   tokenUSDValue: 'Value unknown',
   treasuryShare: 'Value unknown',
+};
+
+export const Transfer = Template.bind({});
+Transfer.args = {
+  tokenName: 'DAI',
+  tokenImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
+  tokenSymbol: 'DAI',
+  tokenCount: '15,000,230.2323',
+  treasuryShare: '$15,000,230.23',
 };

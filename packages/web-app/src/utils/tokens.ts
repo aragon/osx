@@ -23,7 +23,10 @@ export function sortTokens<K extends keyof TreasuryToken>(
   reverse = false
 ) {
   function sorter(a: TreasuryToken, b: TreasuryToken) {
-    if (!a[criteria]) return 1; // ensure that undefined fields are placed last.
+    // ensure that undefined fields are placed last.
+    if (!a[criteria]) return 1;
+    if (!b[criteria]) return -1;
+
     if (a[criteria] < b[criteria]) {
       return -1;
     }
@@ -33,7 +36,10 @@ export function sortTokens<K extends keyof TreasuryToken>(
     return 0;
   }
   function reverseSorter(a: TreasuryToken, b: TreasuryToken) {
-    if (!a[criteria]) return 1; // ensure that undefined fields are placed last.
+    // ensure that undefined fields are placed last.
+    if (!a[criteria]) return 1;
+    if (!b[criteria]) return -1;
+
     if (a[criteria] > b[criteria]) {
       return -1;
     }

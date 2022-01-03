@@ -1,13 +1,13 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
-import {DaoCard, DaoCardProps} from '../src';
+import {CardDao, CardDaoProps} from '../src';
 
 export default {
-  title: 'Components/DaoCard',
-  component: DaoCard,
+  title: 'Components/Card/Dao',
+  component: CardDao,
 } as Meta;
 
-const Template: Story<DaoCardProps> = args => <DaoCard {...args} />;
+const Template: Story<CardDaoProps> = args => <CardDao {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {

@@ -4,7 +4,7 @@ import {Meta, Story} from '@storybook/react';
 import {AvatarWallet, AvatarWalletProps} from '../src/components/avatar';
 
 export default {
-  title: 'Components/Avatar/AvatarWallet',
+  title: 'Components/Avatar/Wallet',
   component: AvatarWallet,
 } as Meta;
 

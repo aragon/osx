@@ -6,7 +6,7 @@ import {IconCopy} from '../icons';
 import {ButtonText} from '../button';
 import {shortenAddress} from '../../utils/addresses';
 
-export type WalletCardProps = {
+export type CardWalletProps = {
   /**
    * wallet ENS name or wallet eth address
    */
@@ -28,7 +28,7 @@ export type WalletCardProps = {
 /**
  * WalletCard UI component
  */
-export const WalletCard: React.FC<WalletCardProps> = ({
+export const CardWallet: React.FC<CardWalletProps> = ({
   src,
   name,
   address,
@@ -39,7 +39,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
   };
 
   return (
-    <Card {...{wide}} data-testid="walletCard">
+    <Card {...{wide}} data-testid="cardWallet">
       <Content>
         <Avatar size={'default'} src={src || ''} />
         <TextContainer>
@@ -59,7 +59,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
   );
 };
 
-type ContainerProps = Pick<WalletCardProps, 'wide'>;
+type ContainerProps = Pick<CardWalletProps, 'wide'>;
 const Card = styled.div.attrs(({wide}: ContainerProps) => ({
   className: `flex items-center ${
     wide && 'w-full justify-between'

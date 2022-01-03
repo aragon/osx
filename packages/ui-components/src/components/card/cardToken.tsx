@@ -4,7 +4,7 @@ import React, {SyntheticEvent} from 'react';
 import {Badge} from '../badge';
 import FallbackImg from '../../assets/avatar-token.svg';
 
-export type TokenCardProps = {
+export type CardTokenProps = {
   tokenName: string;
   tokenSymbol: string;
   tokenImageUrl: string;
@@ -12,17 +12,24 @@ export type TokenCardProps = {
   tokenCount: string;
   tokenUSDValue: string;
   treasuryShare: string;
+  type?: 'vault' | 'transfer';
+  bgWhite?: boolean;
   changeType?: 'Positive' | 'Negative';
   changeDuringInterval?: string;
   percentageChangeDuringInterval?: string;
 };
 
-export const TokenCard: React.FC<TokenCardProps> = ({
+// TODO: when refactoring, separate returns for vault and transfer
+export const CardToken: React.FC<CardTokenProps> = ({
+  type = 'vault',
+  bgWhite = false,
   changeType = 'Positive',
   ...props
 }) => {
+  const isVault = type === 'vault';
+
   return (
-    <Card data-testid="tokenCard">
+    <Card data-testid="cardToken" bgWhite={bgWhite}>
       <CoinDetailsWithImage>
         <CoinImage
           src={props.tokenImageUrl}
@@ -34,43 +41,65 @@ export const TokenCard: React.FC<TokenCardProps> = ({
           <CoinNameAndAllocation>
             <CoinName>{props.tokenName}</CoinName>
             <ToggleMobileVisibility visible={false}>
-              {props.treasurySharePercentage && (
+              {props.treasurySharePercentage && isVault && (
                 <Badge label={props.treasurySharePercentage} />
               )}
             </ToggleMobileVisibility>
           </CoinNameAndAllocation>
-          <SecondaryCoinDetails>
-            <span>
-              {props.tokenCount} {props.tokenSymbol}
-            </span>
-            <ToggleMobileVisibility visible={false}>
-              <span>•</span>
-              <span>{` ${props.tokenUSDValue}`}</span>
-            </ToggleMobileVisibility>
-          </SecondaryCoinDetails>
+          {isVault && (
+            <SecondaryCoinDetails>
+              <span>
+                {props.tokenCount} {props.tokenSymbol}
+              </span>
+              {props.tokenUSDValue && (
+                <ToggleMobileVisibility visible={false}>
+                  <span>•</span>
+                  <span> {props.tokenUSDValue}</span>
+                </ToggleMobileVisibility>
+              )}
+            </SecondaryCoinDetails>
+          )}
         </CoinDetails>
       </CoinDetailsWithImage>
       <MarketProperties>
-        <FiatValue>{props.treasuryShare}</FiatValue>
-        <SecondaryFiatDetails>
-          {props.changeDuringInterval && (
-            <ToggleMobileVisibility visible={false}>
-              <span
-                className={
-                  changeType === 'Positive'
-                    ? 'text-success-800'
-                    : 'text-critical-800'
-                }
-              >
-                {props.changeDuringInterval}
-              </span>
-            </ToggleMobileVisibility>
+        <FiatValue>
+          {isVault ? (
+            props.treasuryShare
+          ) : (
+            <>
+              <span>{props.tokenCount}</span>
+              <span className="tablet:hidden">{` ${props.tokenSymbol}`}</span>
+            </>
           )}
-          {props.percentageChangeDuringInterval && (
-            <Badge
-              label={props.percentageChangeDuringInterval}
-              colorScheme={changeType === 'Positive' ? 'success' : 'critical'}
-            />
+        </FiatValue>
+
+        <SecondaryFiatDetails>
+          {isVault ? (
+            <>
+              {props.changeDuringInterval && (
+                <ToggleMobileVisibility visible={false}>
+                  <span
+                    className={
+                      changeType === 'Positive'
+                        ? 'text-success-800'
+                        : 'text-critical-800'
+                    }
+                  >
+                    {props.changeDuringInterval}
+                  </span>
+                </ToggleMobileVisibility>
+              )}
+              {props.percentageChangeDuringInterval && (
+                <Badge
+                  label={props.percentageChangeDuringInterval}
+                  colorScheme={
+                    changeType === 'Positive' ? 'success' : 'critical'
+                  }
+                />
+              )}
+            </>
+          ) : (
+            props.treasuryShare
           )}
         </SecondaryFiatDetails>
       </MarketProperties>
@@ -78,10 +107,13 @@ export const TokenCard: React.FC<TokenCardProps> = ({
   );
 };
 
-const Card = styled.div.attrs({
-  className:
-    'flex justify-between items-center py-2.5 px-3 bg-ui-0 rounded-xl font-normal',
-})``;
+type CardProps = Pick<CardTokenProps, 'bgWhite'>;
+
+const Card = styled.div.attrs(({bgWhite}: CardProps) => ({
+  className: `flex justify-between items-center py-2.5 px-3 ${
+    bgWhite ? 'bg-ui-50' : 'bg-ui-0'
+  } rounded-xl font-normal`,
+}))<CardProps>``;
 
 const CoinDetailsWithImage = styled.div.attrs({
   className: 'flex items-center',

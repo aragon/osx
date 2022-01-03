@@ -5,7 +5,7 @@ import {Meta, Story} from '@storybook/react';
 import {AvatarDao, AvatarDaoProps} from '../src/components/avatar';
 
 export default {
-  title: 'Components/Avatar/AvatarDao',
+  title: 'Components/Avatar/Dao',
   component: AvatarDao,
 } as Meta;
 

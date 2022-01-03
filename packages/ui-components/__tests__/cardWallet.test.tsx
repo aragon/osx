@@ -1,12 +1,12 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Default as WalletCard} from '../stories/walletCard.stories';
+import {Default as CardWallet} from '../stories/cardWallet.stories';
 
-describe('WalletCard', () => {
+describe('CardWallet', () => {
   function setup(args: any) {
-    render(<WalletCard {...args} />);
-    return screen.getByTestId('walletCard');
+    render(<CardWallet {...args} />);
+    return screen.getByTestId('cardWallet');
   }
 
   test('should render without crashing', () => {

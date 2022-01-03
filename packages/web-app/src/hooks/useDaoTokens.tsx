@@ -41,7 +41,7 @@ export const useDaoTokens = (daoAddress: Address) => {
 // count should NOT be formatted with decimals yet
 const TEMP_TOKEN_ADDR: TokenBalance[] = [
   {address: 'randomAddress', count: BigInt('6650000000000000000000')},
-  {address: constants.AddressZero, count: BigInt('5124533680000000001')},
+  {address: constants.AddressZero, count: BigInt('6224533680000000001')},
   {
     address: '0xa117000000f279d81a1d3cc75430faa017fa5a2e',
     count: BigInt('4350000000000000000000'),
@@ -60,6 +60,6 @@ const TEMP_TOKEN_ADDR: TokenBalance[] = [
   },
   {
     address: '0x0f5d2fb29fb7d3cfee444a200298f468908cc942',
-    count: BigInt('12342870270000000000'),
+    count: BigInt('5210342870270000000000'),
   },
 ];

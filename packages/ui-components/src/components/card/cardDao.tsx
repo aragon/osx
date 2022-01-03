@@ -6,7 +6,7 @@ import {Avatar, AvatarProps} from '../avatar';
 import {ButtonIcon} from '../button/buttonIcon';
 import {IconSwitch} from '../icons';
 
-export type DaoCardProps = {
+export type CardDaoProps = {
   daoName: string;
   /** Dao's ethereum address **or** ENS name */
   daoAddress: Address;
@@ -33,17 +33,17 @@ export type DaoCardProps = {
  * > Note: This component is currently only designed for mobile. It may still be
  * > used for larger devices, though.
  */
-export const DaoCard: React.FC<DaoCardProps> = ({
+export const CardDao: React.FC<CardDaoProps> = ({
   daoName,
   daoAddress,
   includeSwitch = true,
   onClick,
   wide = false,
   src,
-}: DaoCardProps) => {
+}: CardDaoProps) => {
   return (
     <Card
-      data-testid="daoCard"
+      data-testid="cardDao"
       includeSwitch={includeSwitch}
       wide={wide}
       {...(!includeSwitch && {onClick})}

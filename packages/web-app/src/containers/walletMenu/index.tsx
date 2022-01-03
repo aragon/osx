@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import {WalletCard, ActionListItem, IconTurnOff} from '@aragon/ui-components';
+import {ActionListItem, CardWallet, IconTurnOff} from '@aragon/ui-components';
 
 import BottomSheet from '../../components/bottomSheet';
 import {useWalletMenuContext} from 'context/walletMenu';
@@ -24,7 +24,7 @@ const WalletMenu: React.FC = () => {
       data-testid="walletCard"
     >
       <Container>
-        <WalletCard
+        <CardWallet
           wide
           src={ensAvatarUrl || account}
           name={ensName}

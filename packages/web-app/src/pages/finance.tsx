@@ -53,7 +53,7 @@ const Finance: React.FC = () => {
   const {data: treasury} = useDaoTreasury('0xMyDaoAddress', TimeFilter.day);
 
   sortTokens(treasury.tokens, 'treasurySharePercentage', true);
-  const diplayedTokens: TreasuryToken[] = treasury.tokens.slice(0, 5);
+  const displayedTokens: TreasuryToken[] = treasury.tokens.slice(0, 5);
 
   return (
     <div className={'m-auto mt-4 w-8/12'}>
@@ -74,7 +74,7 @@ const Finance: React.FC = () => {
         <div className={'h-4'} />
         <TokenSectionWrapper title={t('finance.tokenSection')}>
           <div className="py-2 space-y-2 border-solid">
-            <TokenList tokens={diplayedTokens} />
+            <TokenList tokens={displayedTokens} />
           </div>
         </TokenSectionWrapper>
         <div className={'h-4'} />
