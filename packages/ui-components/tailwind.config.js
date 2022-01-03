@@ -66,6 +66,7 @@ module.exports = {
       },
       // extends spacing accorging to design system
       spacing: {
+        0.25: '2px',
         0.5: '4px',
         0.75: '6px',
         1: '8px',
@@ -144,5 +145,5 @@ module.exports = {
     },
     fluidType: ['responsive'],
   },
-  plugins: [require('tailwindcss-fluid-type')],
+  plugins: [require('tailwindcss-fluid-type')]
 };
