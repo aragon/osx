@@ -30,13 +30,13 @@ export type TransferListItemProps = {
 
 const Icons: {[key: string]: JSX.Element} = {
   Deposit: (
-    <IconDeposit className="h-1.5 w-1.5 desktop:h-2 desktop:w-2 text-success-600" />
+    <IconDeposit className="w-1.5 desktop:w-2 h-1.5 desktop:h-2 text-success-600" />
   ),
   Pending: (
-    <IconSpinner className="h-1.5 w-1.5 desktop:h-2 desktop:w-2 text-primary-500" />
+    <IconSpinner className="w-1.5 desktop:w-2 h-1.5 desktop:h-2 text-primary-500" />
   ),
   Withdraw: (
-    <IconWithdraw className="h-1.5 w-1.5 desktop:h-2 desktop:w-2 text-warning-600" />
+    <IconWithdraw className="w-1.5 desktop:w-2 h-1.5 desktop:h-2 text-warning-600" />
   ),
 };
 

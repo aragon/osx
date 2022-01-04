@@ -20,6 +20,7 @@ const RadioProvider: React.FC<RadioGroupProps> = ({
 }) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
 
+  // eslint-disable-next-line
   const onChange = (nextValue: string) => {
     setSelectedValue(nextValue);
     if (onChangeCallback) {
@@ -27,6 +28,8 @@ const RadioProvider: React.FC<RadioGroupProps> = ({
     }
   };
 
+  // TODO This is basically useless so long as onChange is not in a callback.
+  // That being said, I'm not sure memoizng is worth it here in the first place.
   const value = useMemo(
     () => ({
       selectedValue,

@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {RadioGroup, Radio} from '../src';
 
 describe('Radio Group', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(
       <RadioGroup defaultValue="USD" {...args}>

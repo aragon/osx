@@ -9,6 +9,7 @@ export type ActionListItemProps = {
   /**
    * Icon to display to the right of the item text
    */
+  // eslint-disable-next-line
   icon: any; // TODO: Set proper type
   /**
    * Action subtitle
@@ -19,12 +20,12 @@ export type ActionListItemProps = {
    */
   title: string;
   /**
-  * Background color
-  */
+   * Background color
+   */
   background?: string;
   /**
-  * Define if the border show or hide
-  */
+   * Define if the border show or hide
+   */
   bordered?: boolean;
   onClick?: () => void;
 };
@@ -58,20 +59,22 @@ export const ActionListItem: React.FC<ActionListItemProps> = ({
 // TODO: Investigate group flexibility when children have different styles based
 // on parent state
 type ContainerProps = Pick<ActionListItemProps, 'background' | 'bordered'>;
-const Container = styled.button.attrs(({background, bordered}: ContainerProps) => ({
-  className: `w-full flex justify-between items-center py-1.5 
+const Container = styled.button.attrs(
+  ({background, bordered}: ContainerProps) => ({
+    className: `w-full flex justify-between items-center py-1.5 
   px-2 space-x-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 
   box-border border-ui-100 active:border-ui-800 hover:border-ui-300 
   disabled:border-ui-200 disabled:bg-ui-100 rounded-xl
   ${background && `bg-${background}`} ${bordered && 'border-2'} `,
-}))``;
+  })
+)``;
 
 const TextContainer = styled.div.attrs({
   className: 'text-left',
 })``;
 
 const Title = styled.p.attrs({
-  className:'font-bold'
+  className: 'font-bold',
 })`
   color: #52606d; //UI-600
 

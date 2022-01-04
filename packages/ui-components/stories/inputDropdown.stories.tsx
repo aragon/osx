@@ -13,5 +13,5 @@ export const Dropdown = Template.bind({});
 Dropdown.args = {
   mode: 'default',
   placeholder: 'Select item...',
-  disabled: false
+  disabled: false,
 };

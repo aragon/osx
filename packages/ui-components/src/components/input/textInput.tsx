@@ -29,24 +29,31 @@ export const TextInput: React.FC<TextInputProps> = ({
 }) => {
   return (
     <Container data-testid="input" {...{mode, disabled, side, clickable}}>
-      <StyledInput disabled={clickable || disabled} clickable={clickable} {...props} />
+      <StyledInput
+        disabled={clickable || disabled}
+        clickable={clickable}
+        {...props}
+      />
       {adornment}
     </Container>
   );
 };
 
-type StyledCotainerProps = Pick<TextInputProps, 'mode' | 'disabled' | 'side' | 'clickable'>;
+type StyledCotainerProps = Pick<
+  TextInputProps,
+  'mode' | 'disabled' | 'side' | 'clickable'
+>;
 type StyledInputProps = Pick<TextInputProps, 'clickable' | 'disabled'>;
 
 export const Container = styled.div.attrs(
   ({mode, disabled, side, clickable}: StyledCotainerProps) => {
-    let className = `${disabled ? 'bg-ui-100' : 'bg-ui-0'} flex space-x-1.5 space-x-1.5
+    let className = `${
+      disabled ? 'bg-ui-100' : 'bg-ui-0'
+    } flex space-x-1.5 space-x-1.5
     focus:outline-none focus-within:ring-2 focus-within:ring-primary-500 py-1.5 px-2
     rounded-xl hover:border-ui-300 border-2 active:border-primary-500 items-center 
     ${side === 'left' && 'flex-row-reverse space-x-reverse'} ${
-      (clickable && !disabled) 
-      && 
-      'cursor-pointer'
+      clickable && !disabled && 'cursor-pointer'
     }  `;
 
     if (mode === 'default') {
@@ -63,8 +70,13 @@ export const Container = styled.div.attrs(
   }
 )<StyledCotainerProps>``;
 
-export const StyledInput = styled.input.attrs(({clickable, disabled}: StyledInputProps) => {
-  let myClassName: string | undefined =
-    `w-full bg-transparent focus:outline-none ${(clickable && !disabled) && 'cursor-pointer'}`;
-  return {className: myClassName};
-})<React.InputHTMLAttributes<HTMLInputElement> & StyledInputProps>``;
+export const StyledInput = styled.input.attrs(
+  ({clickable, disabled}: StyledInputProps) => {
+    const myClassName:
+      | string
+      | undefined = `w-full bg-transparent focus:outline-none ${
+      clickable && !disabled && 'cursor-pointer'
+    }`;
+    return {className: myClassName};
+  }
+)<React.InputHTMLAttributes<HTMLInputElement> & StyledInputProps>``;

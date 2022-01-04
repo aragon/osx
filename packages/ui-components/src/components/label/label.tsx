@@ -13,7 +13,7 @@ export const Label: React.FC<LabelProps> = ({
   label,
   helpText,
   isOptional = false,
-  badgeLabel
+  badgeLabel,
 }) => {
   return (
     <VStack data-testid="label">
@@ -27,17 +27,17 @@ export const Label: React.FC<LabelProps> = ({
 };
 
 const VStack = styled.div.attrs({
-  className: "space-y-0.5",
+  className: 'space-y-0.5',
 })``;
 
 const LabelLine = styled.div.attrs({
-  className: "flex space-x-1.5",
+  className: 'flex space-x-1.5',
 })``;
 
 const Heading = styled.p.attrs({
-  className: "font-bold text-ui-800",
+  className: 'font-bold text-ui-800',
 })``;
 
 const HelpText = styled.p.attrs({
-  className: "text-sm font-normal text-ui-600",
+  className: 'text-sm font-normal text-ui-600',
 })``;

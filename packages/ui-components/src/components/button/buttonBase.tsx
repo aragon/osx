@@ -72,8 +72,7 @@ type SizeProps = {
 };
 
 const BaseStyledButton = styled.button.attrs(({size = 'medium'}: SizeProps) => {
-  let className: string | undefined;
-  className = `${sizeStyles[size]} ${fontStyles[size]} flex justify-start items-center font-bold focus:outline-none focus:ring-2 focus:ring-primary-500`;
+  const className = `${sizeStyles[size]} ${fontStyles[size]} flex justify-start items-center font-bold focus:outline-none focus:ring-2 focus:ring-primary-500`;
   return {className};
 })<SizeProps>``;
 
@@ -88,7 +87,6 @@ const Label = styled.span.attrs(({visible}: LabelProps) => {
 })<LabelProps>``;
 
 const IconContainer = styled.span.attrs(({size = 'medium'}: SizeProps) => {
-  let className: string | undefined;
-  className = `flex items-center ${iconStyles[size]}`;
+  const className = `flex items-center ${iconStyles[size]}`;
   return {className};
 })<SizeProps>``;

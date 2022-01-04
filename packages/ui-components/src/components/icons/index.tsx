@@ -6,6 +6,7 @@ export type IconType = ({
   width,
   ...props
 }: {
+  // eslint-disable-next-line
   [x: string]: any;
   height?: number | undefined;
   width?: number | undefined;

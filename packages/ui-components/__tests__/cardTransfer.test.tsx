@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {CardTransfer} from '../src';
 
 describe('CardTransfer', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(<CardTransfer {...args} />);
     return screen.getByTestId('cardTransfer');

@@ -9,14 +9,16 @@ export type SpinnerProps = HTMLAttributes<HTMLElement> & {
   /**
    * Styles
    */
-  color?: string; 
-}
+  color?: string;
+};
 
 /**
  * Spinner UI component
  */
 export const Spinner: React.FC<SpinnerProps> = ({size = 'small', color}) => {
-  return <StyledSpinner data-testid="spinner" {...{size,color}}></StyledSpinner>;
+  return (
+    <StyledSpinner data-testid="spinner" {...{size, color}}></StyledSpinner>
+  );
 };
 
 type SizesType = Record<SpinnerProps['size'], string>;
@@ -27,7 +29,7 @@ const StyledSpinner = styled.div.attrs(({size}: SpinnerProps) => {
     default: 'w-5 h-5',
     big: 'w-6 h-6',
   };
-  const className: string = `rounded-full 
+  const className = `rounded-full 
         ease-linear border-2
         border-t-2 border-ui-0
         ${sizes[size]}
@@ -35,7 +37,7 @@ const StyledSpinner = styled.div.attrs(({size}: SpinnerProps) => {
 
   return {className};
 })<SpinnerProps>`
-  border-top-color: ${({color}) => (color || '#003bf5')};
+  border-top-color: ${({color}) => color || '#003bf5'};
   -webkit-animation: spinner 1s linear infinite;
   animation: spinner 1s linear infinite;
   @-webkit-keyframes spinner {

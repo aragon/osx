@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {Circle as Avatar} from '../stories/avatar.stories';
 
 describe('Avatar', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(<Avatar {...args} />);
     return screen.getByRole('img');

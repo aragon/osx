@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {Default as Modal} from '../stories/modal.stories';
 
 describe('Modal', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(<Modal {...args}>{args.children}</Modal>);
     return screen.getByTestId('modal-content');

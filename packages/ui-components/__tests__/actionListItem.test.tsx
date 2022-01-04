@@ -4,6 +4,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import {Default as ActionListItem} from '../stories/actionListItem.stories';
 
 describe('ActionListItem', () => {
+  // eslint-disable-next-line
   function setup(args?: any) {
     render(<ActionListItem {...args} />);
     return screen.getByTestId('actionListItem');

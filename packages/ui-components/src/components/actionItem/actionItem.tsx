@@ -10,6 +10,7 @@ export type ActionItemProps = {
   /**
    * Icon to prepend to the button text
    */
+  // eslint-disable-next-line
   icon: any; // TODO: set proper type
 
   /**

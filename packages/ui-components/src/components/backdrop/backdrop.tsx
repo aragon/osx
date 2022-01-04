@@ -1,5 +1,5 @@
 import React, {ReactNode} from 'react';
-import styled from 'styled-components';
+import styled, {CSSProperties} from 'styled-components';
 
 export interface BackdropProps {
   /**
@@ -46,8 +46,7 @@ const StyledBackdrop = styled.div.attrs(({visible}: StyledBackdropProps) => {
   const className: string = visible
     ? 'visible opacity-100'
     : 'invisible opacity-0';
-
-  const style: any = {
+  const style: CSSProperties = {
     position: 'fixed',
     top: 0,
     left: 0,

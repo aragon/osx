@@ -4,6 +4,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import {Default as DaoSelector} from '../stories/daoSelector.stories';
 
 describe('DaoSelector', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(<DaoSelector label="test" {...args} />);
     return screen.getByTestId('daoSelector');

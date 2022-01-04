@@ -14,7 +14,7 @@ export const IconRadioDefault: IconType = ({
       viewBox="0 0 16 16"
       {...props}
     >
-      <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" />
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
 };

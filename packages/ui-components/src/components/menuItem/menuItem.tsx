@@ -5,7 +5,7 @@ export type MenuItemProps = {
   /**
    * Icon to prepend to the Menu item text
    */
-
+  // eslint-disable-next-line
   icon: any; // TODO: set up proper type
 
   /**

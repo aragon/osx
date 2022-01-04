@@ -8,10 +8,12 @@ export default {
   component: TextareaSimple,
 } as Meta;
 
-const Template: Story<TextareaSimpleProps> = args => <TextareaSimple {...args} />;
+const Template: Story<TextareaSimpleProps> = args => (
+  <TextareaSimple {...args} />
+);
 
 export const Simple = Template.bind({});
 Simple.args = {
-  placeholder: "Placeholder",
-  disabled: false
+  placeholder: 'Placeholder',
+  disabled: false,
 };

@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {Default as TokenListItem} from '../stories/TokenListItem.stories';
 
 describe('TokenListITem', () => {
+  // eslint-disable-next-line
   function setup(args?: any) {
     render(<TokenListItem {...args} />);
     return screen.getByTestId('tokenListItem');

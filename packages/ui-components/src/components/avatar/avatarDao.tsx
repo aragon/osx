@@ -31,6 +31,8 @@ export const AvatarDao: React.FC<AvatarDaoProps> = ({
     ) : (
       <Avatar src={src} alt="dao avatar" onError={() => setError(true)} />
     );
+    //TODO: @Fabrice, check the dependency array [VR 04-01-2022]
+    // eslint-disable-next-line
   }, [error, label, src]);
 
   return (

@@ -13,5 +13,5 @@ export const Default = Template.bind({});
 Default.args = {
   label: 'Label',
   helpText: 'HelpText',
-  isOptional: false
+  isOptional: false,
 };

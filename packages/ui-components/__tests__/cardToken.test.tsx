@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {CardToken} from '../src';
 
 describe('CardToken', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(<CardToken {...args} />);
     return screen.getByTestId('cardToken');

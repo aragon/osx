@@ -13,7 +13,7 @@ export default {
 const InterfaceList: Story = args => (
   <IconListContainer>
     {Object.entries(interface_icons).map(([name, Icon]) => (
-      <IconContainer>
+      <IconContainer key={name}>
         <Icon {...args} />
         <span>{name}</span>
       </IconContainer>
@@ -24,7 +24,7 @@ const InterfaceList: Story = args => (
 const ModuleList: Story = args => (
   <IconListContainer>
     {Object.entries(module_icons).map(([name, Icon]) => (
-      <IconContainer>
+      <IconContainer key={name}>
         <Icon {...args} />
         <span>{name}</span>
       </IconContainer>

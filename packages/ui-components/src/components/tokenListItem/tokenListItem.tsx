@@ -4,16 +4,16 @@ import {Avatar} from '../avatar';
 
 export type TokenListItemProps = {
   /**
-  * name of the token
-  */
+   * name of the token
+   */
   tokenName: string;
   /**
-  * Symbol of the token
-  */
+   * Symbol of the token
+   */
   tokenSymbol: string;
   /**
-  * Amount of the token
-  */
+   * Amount of the token
+   */
   tokenAmount: string | number;
   /**
    * src of token logo
@@ -24,8 +24,8 @@ export type TokenListItemProps = {
    */
   disabled?: boolean;
   /**
-  *  change the background
-  */
+   *  change the background
+   */
   bgWhite?: boolean;
   onClick?: () => void;
 };
@@ -40,15 +40,10 @@ export const TokenListItem: React.FC<TokenListItemProps> = ({
   onClick,
 }) => {
   return (
-    <Container
-      {...{onClick,disabled,bgWhite}}
-       data-testid="tokenListItem"
-    >
+    <Container {...{onClick, disabled, bgWhite}} data-testid="tokenListItem">
       <TextWrapper>
         <Avatar src={tokenLogo} size={'small'} />
-        <Name>
-          {tokenName}
-        </Name>
+        <Name>{tokenName}</Name>
       </TextWrapper>
       <AmountWrapper>
         {tokenAmount} {tokenSymbol}
@@ -59,8 +54,8 @@ export const TokenListItem: React.FC<TokenListItemProps> = ({
 
 type StyledContentProps = Pick<TokenListItemProps, 'bgWhite'>;
 
-const Container = styled.button.attrs(({bgWhite}: StyledContentProps)=> ({
-  className:`w-full flex justify-between items-center py-1.5
+const Container = styled.button.attrs(({bgWhite}: StyledContentProps) => ({
+  className: `w-full flex justify-between items-center py-1.5
   px-2 hover:text-ui-800 hover:bg-ui-100 active:text-ui-800
   text-ui-600 active:bg-ui-200 disabled:text-ui-300 
   disabled:text-ui-300 disabled:bg-ui-100 rounded-xl
@@ -68,13 +63,13 @@ const Container = styled.button.attrs(({bgWhite}: StyledContentProps)=> ({
 }))``;
 
 const AmountWrapper = styled.h3.attrs({
-  className:'font-normal text-base',
+  className: 'font-normal text-base',
 })``;
 
 const TextWrapper = styled.div.attrs({
-  className:'flex space-x-2',
+  className: 'flex space-x-2',
 })``;
 
 const Name = styled.h2.attrs({
-  className:'font-bold text-base',
+  className: 'font-bold text-base',
 })``;

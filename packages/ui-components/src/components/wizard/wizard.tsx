@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { LinearProgress } from '../progress';
+import {LinearProgress} from '../progress';
 
 export type WizardProps = {
   processName: string;
@@ -8,23 +8,27 @@ export type WizardProps = {
   totalSteps: number;
   title: string;
   description: string;
-}
+};
 
-export const Wizard: React.FC<WizardProps> = ({processName, currentStep, totalSteps, title, description}) => {
+export const Wizard: React.FC<WizardProps> = ({
+  processName,
+  currentStep,
+  totalSteps,
+  title,
+  description,
+}) => {
   return (
     <StepCard data-testid="wizard">
       <CenteredFlex>
-        <p className="font-bold text-primary-500">
-          {processName}
-        </p>
+        <p className="font-bold text-primary-500">{processName}</p>
         {/* TODO: Check how to do i18n for the Step x of y format */}
-        <p className="text-ui-400">Step {currentStep} of {totalSteps}</p>
+        <p className="text-ui-400">
+          Step {currentStep} of {totalSteps}
+        </p>
       </CenteredFlex>
       <LinearProgress max={totalSteps} value={currentStep} />
       <StepTitle>{title}</StepTitle>
-      <StepSubTitle>
-        {description}
-      </StepSubTitle>
+      <StepSubTitle>{description}</StepSubTitle>
     </StepCard>
   );
 };

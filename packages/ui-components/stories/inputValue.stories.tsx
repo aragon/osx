@@ -1,6 +1,6 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
-import {ValueInput,ValueInputProps} from '../src';
+import {ValueInput, ValueInputProps} from '../src';
 
 export default {
   title: 'Components/Input/Value',

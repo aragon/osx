@@ -15,5 +15,6 @@ Default.args = {
   currentStep: 1,
   totalSteps: 3,
   title: 'Configure Deposit',
-  description: 'Enter the desired token and its number for transmission. Furthermore, a reception address is necessary.'
+  description:
+    'Enter the desired token and its number for transmission. Furthermore, a reception address is necessary.',
 };

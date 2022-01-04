@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {Search as SearchInput} from '../stories/inputSearch.stories';
 
 describe('SearchInput', () => {
+  // eslint-disable-next-line
   function setup(args: any) {
     render(<SearchInput {...args} />);
     return screen.getByTestId('search-input');
