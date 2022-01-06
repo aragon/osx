@@ -1,17 +1,16 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
-import {DropdownInput, SearchInputProps} from '../src';
+import {DropdownInput, DropDownInputProps} from '../src';
 
 export default {
   title: 'Components/Input/Dropdown',
   component: DropdownInput,
 } as Meta;
 
-const Template: Story<SearchInputProps> = args => <DropdownInput {...args} />;
+const Template: Story<DropDownInputProps> = args => <DropdownInput {...args} />;
 
 export const Dropdown = Template.bind({});
 Dropdown.args = {
   mode: 'default',
-  placeholder: 'Select item...',
   disabled: false,
 };
