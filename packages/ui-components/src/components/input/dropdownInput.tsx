@@ -11,7 +11,6 @@ export const DropdownInput: React.FC<SearchInputProps> = ({...props}) => {
       data-testid="search-input"
       adornment={<IconChevronDown className="text-ui-600" />}
       side={'right'}
-      clickable
       {...props}
     />
   );

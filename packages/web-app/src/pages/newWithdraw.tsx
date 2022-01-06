@@ -9,18 +9,18 @@ import {
 } from '@aragon/ui-components';
 import styled from 'styled-components';
 import {Address} from '@aragon/ui-components/dist/utils/addresses';
-import {useForm} from 'react-hook-form';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
+import {useForm} from 'react-hook-form';
 
+import {useWalletMenuContext} from 'context/walletMenu';
 import {useWallet} from 'context/augmentedWallet';
-import DepositForm from 'containers/depositForm';
+import {TransferTypes} from 'utils/constants';
 import {useStepper} from 'hooks/useStepper';
 import {NavigationBar} from 'containers/navbar';
-import {TransferTypes} from 'utils/constants';
 import {useWalletProps} from 'containers/walletMenu';
-import {useWalletMenuContext} from 'context/walletMenu';
+import ConfigureWithdrawForm from 'containers/configureWithdraw';
 
 export type FormData = {
   amount: number;
@@ -34,7 +34,9 @@ export type FormData = {
 
 const steps = {
   configure: 1,
-  review: 2,
+  setupVoting: 2,
+  defineProposal: 3,
+  reviewProposal: 4,
 };
 
 const TOTAL_STEPS = Object.keys(steps).length;
@@ -46,31 +48,18 @@ const defaultValues = {
   tokenSymbol: '',
 };
 
-const NewDeposit: React.FC = () => {
+const NewWithdraw: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useWalletMenuContext();
   const {currentStep, prev, next} = useStepper(TOTAL_STEPS);
-  const {control, watch, setValue} = useForm<FormData>({defaultValues});
+  const {control} = useForm<FormData>({defaultValues});
   const {connect, isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
     useWallet();
 
-  useEffect(() => {
-    if (account) {
-      setValue('from', account);
-      setValue('type', TransferTypes.Deposit);
-    }
-  }, [account, setValue]);
-
   /** Toggle wallet */
   const handleWalletButtonClick = useCallback(() => {
-    console.log('trigger');
     isConnected() ? open() : connect('injected');
   }, [connect, isConnected, open]);
-
-  /**
-   * TODO: The text input should replace with a
-   * drop down input
-   */
 
   return (
     <>
@@ -103,15 +92,15 @@ const NewDeposit: React.FC = () => {
 
       <Layout>
         <Wizard
-          title={t('newDeposit.configureDeposit')}
-          processName={t('newDeposit.depositAssets')}
-          description={t('newDeposit.configureDepositSubtitle')}
+          processName={t('newWithdraw.withdrawAssets')}
+          title={t('newWithdraw.configureWithdraw.title')}
+          description={t('newWithdraw.configureWithdraw.subtitle')}
           totalSteps={TOTAL_STEPS}
           currentStep={currentStep}
         />
         <FormLayout>
           {currentStep === steps.configure ? (
-            <DepositForm control={control} />
+            <ConfigureWithdrawForm control={control} />
           ) : (
             <h1>Review Deposit</h1>
           )}
@@ -133,16 +122,12 @@ const NewDeposit: React.FC = () => {
             />
           </FormFooter>
         </FormLayout>
-        {/* View form values; to be removed later */}
-        <pre className="mt-2">
-          Form values: {JSON.stringify(watch(), null, 2)}
-        </pre>
       </Layout>
     </>
   );
 };
 
-export default withTransaction('NewDeposit', 'component')(NewDeposit);
+export default withTransaction('NewWithdraw', 'component')(NewWithdraw);
 
 const Layout = styled.div.attrs({
   className: 'm-auto mt-3 w-8/12 font-medium text-ui-600',

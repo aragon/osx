@@ -5,7 +5,7 @@ import {useTranslation} from 'react-i18next';
 import {Modal, ActionListItem, IconChevronRight} from '@aragon/ui-components';
 
 import {useWallet} from 'context/augmentedWallet';
-import {NewDeposit} from 'utils/paths';
+import {NewDeposit, NewWithDraw} from 'utils/paths';
 import {useTransferModalContext} from 'context/transfersModal';
 
 const TransferMenu: React.FC = () => {
@@ -19,6 +19,15 @@ const TransferMenu: React.FC = () => {
     // Move to proper placing
     if (isConnected()) {
       navigate(NewDeposit);
+      close();
+    } else alert('Please connect your wallet');
+  };
+
+  const handleNewWithdrawClick = () => {
+    // TODO: change alert to proper error reporting mechanism,
+    if (isConnected()) {
+      // TODO: Check if wallet address is authorized to access new withdraw page and then navigate
+      navigate(NewWithDraw);
       close();
     } else alert('Please connect your wallet');
   };
@@ -45,6 +54,7 @@ const TransferMenu: React.FC = () => {
           icon={<IconChevronRight />}
           background="white"
           bordered={false}
+          onClick={handleNewWithdrawClick}
         />
       </Container>
     </Modal>
@@ -54,5 +64,5 @@ const TransferMenu: React.FC = () => {
 export default TransferMenu;
 
 const Container = styled.div.attrs({
-  className: 'space-y-3 pb-4 pt-1',
+  className: 'space-y-1.5 pb-3',
 })``;

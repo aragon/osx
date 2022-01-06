@@ -24,6 +24,7 @@ const CommunityPage = lazy(() => import('pages/community'));
 const TransfersPage = lazy(() => import('pages/transfers'));
 const GovernancePage = lazy(() => import('pages/governance'));
 const NewDepositPage = lazy(() => import('pages/newDeposit'));
+const NewWithdrawPage = lazy(() => import('pages/newWithdraw'));
 
 function App() {
   const {pathname} = useLocation();
@@ -39,6 +40,7 @@ function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path={paths.NewDeposit} element={<NewDepositPage />} />
+            <Route path={paths.NewWithDraw} element={<NewWithdrawPage />} />
 
             <Route element={<Layout />}>
               <Route path={paths.Dashboard} element={<HomePage />} />
