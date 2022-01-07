@@ -1,4 +1,5 @@
 export {IconAdd} from './icon_add';
+export {IconCalendar} from './icon_calendar';
 export {IconCheckboxDefault} from './icon_checkbox_default';
 export {IconCheckboxMulti} from './icon_checkbox_multi';
 export {IconCheckboxSelected} from './icon_checkbox_selected';
