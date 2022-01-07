@@ -90,7 +90,7 @@ const TokenMenu: React.FC = () => {
 export default TokenMenu;
 
 const Container = styled.div.attrs({
-  className: 'space-y-3 pb-4 pt-3',
+  className: 'space-y-3',
 })``;
 
 const TokensWrapper = styled.div.attrs({

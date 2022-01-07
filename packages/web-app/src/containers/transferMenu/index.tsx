@@ -44,16 +44,12 @@ const TransferMenu: React.FC = () => {
           title={t('TransferModal.item1Title') as string}
           subtitle={t('TransferModal.item1Subtitle') as string}
           icon={<IconChevronRight />}
-          background="white"
-          bordered={false}
           onClick={handleNewDepositClick}
         />
         <ActionListItem
           title={t('TransferModal.item2Title') as string}
           subtitle={t('TransferModal.item2Subtitle') as string}
           icon={<IconChevronRight />}
-          background="white"
-          bordered={false}
           onClick={handleNewWithdrawClick}
         />
       </Container>
@@ -64,5 +60,5 @@ const TransferMenu: React.FC = () => {
 export default TransferMenu;
 
 const Container = styled.div.attrs({
-  className: 'space-y-1.5 pb-3',
+  className: 'space-y-1.5',
 })``;

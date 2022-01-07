@@ -23,10 +23,6 @@ export type ActionListItemProps = {
    * Background color
    */
   background?: string;
-  /**
-   * Define if the border show or hide
-   */
-  bordered?: boolean;
   onClick?: () => void;
 };
 
@@ -40,11 +36,10 @@ export const ActionListItem: React.FC<ActionListItemProps> = ({
   title,
   onClick,
   background,
-  bordered = true,
 }) => {
   return (
     <Container
-      {...{onClick, disabled, background, bordered}}
+      {...{onClick, disabled, background}}
       data-testid="actionListItem"
     >
       <TextContainer>
@@ -58,16 +53,14 @@ export const ActionListItem: React.FC<ActionListItemProps> = ({
 
 // TODO: Investigate group flexibility when children have different styles based
 // on parent state
-type ContainerProps = Pick<ActionListItemProps, 'background' | 'bordered'>;
-const Container = styled.button.attrs(
-  ({background, bordered}: ContainerProps) => ({
-    className: `w-full flex justify-between items-center py-1.5 
+type ContainerProps = Pick<ActionListItemProps, 'background'>;
+const Container = styled.button.attrs(({background}: ContainerProps) => ({
+  className: `w-full flex justify-between items-center py-1.5 
   px-2 space-x-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 
   box-border border-ui-100 active:border-ui-800 hover:border-ui-300 
   disabled:border-ui-200 disabled:bg-ui-100 rounded-xl
-  ${background && `bg-${background}`} ${bordered && 'border-2'} `,
-  })
-)``;
+  ${background && `bg-${background}`} `,
+}))``;
 
 const TextContainer = styled.div.attrs({
   className: 'text-left',
@@ -80,6 +73,10 @@ const Title = styled.p.attrs({
 
   ${Container}:active & {
     color: #323f4b; //UI-800
+  }
+
+  ${Container}:hover & {
+    color: #003bf5; //PRIMARY-800
   }
 
   ${Container}:disabled & {
