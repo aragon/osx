@@ -63,5 +63,5 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 };
 
 const HStack = styled.div.attrs({
-  className: 'bg-ui-50 rounded-xl p-0.5 w-max',
+  className: 'flex bg-ui-50 rounded-xl p-0.5 w-max',
 })``;

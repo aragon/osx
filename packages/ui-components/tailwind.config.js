@@ -93,6 +93,7 @@ module.exports = {
         14: '112px',
         18: '144px',
         25: '200px',
+        30: '240px',
       },
     },
     fontWeight: {
