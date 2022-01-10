@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Default as TokenListItem} from '../stories/TokenListItem.stories';
+import {Default as TokenListItem} from '../stories/tokenListItem.stories';
 
 describe('TokenListITem', () => {
   // eslint-disable-next-line
