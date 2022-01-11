@@ -1,4 +1,5 @@
-import {ethers, providers as EthersProviders} from 'ethers';
+/* eslint-disable no-empty */
+import {constants, ethers, providers as EthersProviders} from 'ethers';
 import {erc20TokenABI} from 'abis/erc20TokenABI';
 import {BaseTokenInfo, TreasuryToken} from './types';
 import {formatUnits} from 'utils/library';
@@ -112,12 +113,34 @@ export async function getTokenInfo(
   address: string,
   provider: EthersProviders.Provider
 ) {
+  let decimals = null,
+    symbol = null,
+    name = null;
+
+  // is Ether
+  if (address === constants.AddressZero) {
+    return {
+      name: 'Ethereum',
+      symbol: constants.EtherSymbol,
+      decimals: 18,
+    };
+  }
+
   const contract = new ethers.Contract(address, erc20TokenABI, provider);
-  const [decimals, name, symbol] = await Promise.all([
-    contract.decimals(),
-    contract.name(),
-    contract.symbol(),
-  ]);
+  try {
+    const values = await Promise.all([
+      contract.decimals(),
+      contract.name(),
+      contract.symbol(),
+    ]);
+
+    decimals = values[0];
+    name = values[1];
+    symbol = values[2];
+  } catch (error) {
+    console.error('Error, getting token info from contract');
+  }
+
   return {
     decimals,
     name,
@@ -129,16 +152,22 @@ export async function getTokenInfo(
  * @param tokenAddress address of token contract
  * @param ownerAddress owner address / wallet address
  * @param provider interface to node
+ * @param shouldFormat whether value is returned in human readable format
  * @returns a promise that will return a balance amount
  */
 export const fetchBalance = async (
   tokenAddress: string,
   ownerAddress: string,
-  provider: EthersProviders.Provider
+  provider: EthersProviders.Provider,
+  shouldFormat = true
 ) => {
   const contract = new ethers.Contract(tokenAddress, erc20TokenABI, provider);
   const balance = await contract.balanceOf(ownerAddress);
-  const {decimals, symbol} = await getTokenInfo(tokenAddress, provider);
 
-  return {amount: formatUnits(balance, decimals), symbol};
+  if (shouldFormat) {
+    const {decimals} = await getTokenInfo(tokenAddress, provider);
+    return formatUnits(balance, decimals);
+  }
+
+  return balance;
 };

@@ -8,6 +8,8 @@ export type DropDownInputProps = {
   mode?: 'default' | 'success' | 'warning' | 'critical';
   disabled?: boolean;
   value?: string;
+  name?: string;
+  placeholder?: string;
   onClick: () => void;
 };
 /** Dropdown input with variable styling (depending on mode) */
@@ -16,11 +18,16 @@ export const DropdownInput: React.FC<DropDownInputProps> = ({
   mode = 'default',
   disabled,
   value,
+  name,
+  placeholder,
   onClick,
 }) => {
   return (
-    <Container data-testid="dropdown-input" {...{mode, disabled, onClick}}>
-      {value || <Placeholder>Select...</Placeholder>}
+    <Container
+      data-testid="dropdown-input"
+      {...{mode, name, disabled, onClick}}
+    >
+      {value || <Placeholder>{placeholder}</Placeholder>}
       <StyledIconChevronDown {...{disabled}} />
     </Container>
   );

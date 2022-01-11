@@ -10,7 +10,7 @@ import {identifyUser} from 'services/analytics';
 import {updateAPMContext, useAPM} from './elasticAPM';
 import {INFURA_PROJECT_ID} from 'utils/constants';
 
-type WalletAugmented = Wallet & {
+export type WalletAugmented = Wallet & {
   provider: EthersProviders.Provider;
 };
 // Any is a workaround so TS doesn't ask for a filled out default

@@ -1,6 +1,8 @@
 import {useCallback, useEffect, useState} from 'react';
 
+import {useWallet} from 'context/augmentedWallet';
 import useIsMounted from './useIsMounted';
+import {getTokenInfo} from 'utils/tokens';
 import {fetchTokenData} from 'services/prices';
 import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
 
@@ -11,6 +13,7 @@ import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
  */
 export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
   const isMounted = useIsMounted();
+  const {provider} = useWallet();
   const [error, setError] = useState<Error>();
   const [tokenInfo, setTokenInfo] = useState<BaseTokenInfo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -18,17 +21,6 @@ export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
   /*************************************************
    *           Callbacks and Functions             *
    *************************************************/
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function fetchBlockchainTokenInfo(_address: string) {
-    // TODO: TEMPORARY; getTokenInfo from chain using ethers
-    // Keep in mind there is no need to get Ethereum info: can just get from constants
-    return Promise.resolve({
-      name: 'Patito Dao Token',
-      symbol: 'PDT',
-      decimals: 18,
-    });
-  }
-
   const fetchAllTokenData = useCallback(async () => {
     setIsLoading(true);
 
@@ -42,7 +34,7 @@ export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
 
       const allTokenDataPromise = Promise.all(
         fetched.map((value, index) =>
-          fetchBlockchainTokenInfo(tokenBalances[index].address).then(info => {
+          getTokenInfo(tokenBalances[index].address, provider).then(info => {
             const count = tokenBalances[index].count;
             const address = tokenBalances[index].address;
             if (value) return {...value, count, decimals: info.decimals};
@@ -60,7 +52,7 @@ export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
       if (isMounted()) setError(error as Error);
       console.error(error);
     }
-  }, [isMounted, tokenBalances]);
+  }, [isMounted, provider, tokenBalances]);
 
   /*************************************************
    *                      Hooks                    *

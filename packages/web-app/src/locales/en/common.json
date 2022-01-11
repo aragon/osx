@@ -24,10 +24,13 @@
     "seeAllTokens": "See All Tokens",
     "seeAllTransfers": "See All Transfers",
     "to": "To",
+    "from": "From",
     "token": "Token",
     "amount": "Amount",
     "reference": "Reference",
-    "paste": "Paste"
+    "address": "Token Contract Address",
+    "paste": "Paste",
+    "maxBalance": "Max Balance"
   },
   "placeHolders": {
     "selectToken": "Select a Token ...",
@@ -60,7 +63,6 @@
     "item2Subtitle": "Propose to withdraw assets from the DAO treasury"
   },
   "TokenModal": {
-    "yourTokens": "Your Token",
     "tokenNotFoundTitle": "Token not found",
     "tokenNotFoundSubtitle": "Add custom token to deposit"
   },
@@ -70,6 +72,7 @@
     "configureDepositSubtitle": "Enter the desired token and its number for transmission. Furthermore, a reception address is necessary.",
     "toSubtitle": "The recipient of the tokens is the DAO in which you are currently operating.",
     "tokenSubtitle": "Select Token to deposit in DAO",
+    "contractAddressSubtitle": "You have selected a custom token. Enter the contract address of this token to interact with it.",
     "amountSubtitle": "Define amount to deposit",
     "referenceSubtitle": "Add a reference copy to identify this transaction later on"
   },

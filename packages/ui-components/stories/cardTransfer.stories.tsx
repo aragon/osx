@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {CardTransfer, CardTransferProps} from '../src';
 
 export default {
-  title: 'Components/Card/Transfer',
+  title: 'Components/Cards/Transfer',
   component: CardTransfer,
 } as Meta;
 

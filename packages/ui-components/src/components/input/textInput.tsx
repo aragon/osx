@@ -9,7 +9,7 @@ export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
    */
   adornment?: ReactNode;
   /**
-   * Wheter the icon is left or right of the input
+   * Whether the icon is left or right of the input
    */
   side?: 'left' | 'right';
   disabled?: boolean;

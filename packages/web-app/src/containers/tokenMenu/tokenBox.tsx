@@ -1,47 +1,29 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import {Avatar} from '@aragon/ui-components';
-
-import {useWallet} from 'context/augmentedWallet';
-import {fetchBalance} from 'utils/tokens';
+import {AvatarToken} from '@aragon/ui-components';
 
 export type TokenProps = {
-  tokenAddress: string;
   tokenName: string;
   tokenLogo: string;
+  tokenSymbol: string;
+  tokenBalance: string;
 };
 
 export default function TokenBox({
-  tokenAddress,
   tokenName,
   tokenLogo,
+  tokenSymbol,
+  tokenBalance,
 }: TokenProps) {
-  const [balance, setBalance] = useState<string | null>(null);
-  const [symbol, setSymbol] = useState<string | null>(null);
-  const {account, provider} = useWallet();
-
-  useEffect(() => {
-    // Fetch balance amount for each token
-    fetchBalance(tokenAddress, account as string, provider).then(
-      tokenBalance => {
-        setBalance(tokenBalance.amount);
-        setSymbol(tokenBalance.symbol);
-      }
-    );
-  }, [account, provider, tokenAddress]);
-
-  // This condition will change later with skeleton loading integration
-  // TODO: We should hide the 0 balance tokens later (it depends on
-  // if we can fetch user token list or not)
-  return balance ? (
+  return (
     <Box>
       <TokenNameWrapper>
-        <Avatar size="small" src={tokenLogo} />
+        <AvatarToken size="medium" src={tokenLogo} />
         <Name>{tokenName}</Name>
       </TokenNameWrapper>
-      <Price>{balance ? `${balance} ${symbol}` : '-'}</Price>
+      <Price>{tokenBalance ? `${tokenBalance} ${tokenSymbol}` : '-'}</Price>
     </Box>
-  ) : null;
+  );
 }
 
 const Box = styled.div.attrs({

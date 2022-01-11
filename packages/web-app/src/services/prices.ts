@@ -96,4 +96,28 @@ async function fetchTokenData(address: Address): FetchedTokenData {
   }
 }
 
-export {fetchTokenMarketData, fetchTokenData};
+/**
+ * Get simple token price
+ * @param address Token contract address
+ * @returns a USD price as a number
+ */
+async function fetchTokenPrice(address: Address) {
+  const isEth = address === constants.AddressZero;
+  const endPoint =
+    '/simple/token_price/ethereum?vs_currencies=usd&contract_addresses=';
+
+  const url = isEth
+    ? `${BASE_URL}/simple/price?ids=ethereum$vs_currencies=usd`
+    : `${BASE_URL}${endPoint}${address}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    return Object.values(data as object)[0]?.usd as number;
+  } catch (error) {
+    console.error('Error fetching token price', error);
+  }
+}
+
+export {fetchTokenMarketData, fetchTokenData, fetchTokenPrice};

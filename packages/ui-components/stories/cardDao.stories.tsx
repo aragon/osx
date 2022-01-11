@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {CardDao, CardDaoProps} from '../src';
 
 export default {
-  title: 'Components/Card/Dao',
+  title: 'Components/Cards/Dao',
   component: CardDao,
 } as Meta;
 

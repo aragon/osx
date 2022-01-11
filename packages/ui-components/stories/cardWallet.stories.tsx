@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {CardWallet, CardWalletProps} from '../src';
 
 export default {
-  title: 'Components/Card/Wallet',
+  title: 'Components/Cards/Wallet',
   component: CardWallet,
 } as Meta;
 

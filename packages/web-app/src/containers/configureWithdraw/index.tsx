@@ -1,21 +1,35 @@
-import React from 'react';
-import styled from 'styled-components';
-import {useTranslation} from 'react-i18next';
-import {Control, Controller} from 'react-hook-form';
 import {
   DropdownInput,
   Label,
   TextInput,
   ValueInput,
 } from '@aragon/ui-components';
+import styled from 'styled-components';
+import {useTranslation} from 'react-i18next';
+import React, {useCallback} from 'react';
+import {Controller, useFormContext} from 'react-hook-form';
 
-import {FormData} from 'pages/newDeposit';
 import {useTransferModalContext} from 'context/transfersModal';
 
-type ConfigureWithdrawProps = {control: Control<FormData>};
-const ConfigureWithdrawForm: React.FC<ConfigureWithdrawProps> = ({control}) => {
+const ConfigureWithdrawForm: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useTransferModalContext();
+  const {control} = useFormContext();
+
+  const handleClipboardActions = useCallback(
+    async (currentValue: string, onChange: (value: string) => void) => {
+      if (currentValue) {
+        await navigator.clipboard.writeText(currentValue);
+
+        // TODO: change to proper mechanism
+        alert('Copied');
+      } else {
+        const textFromClipboard = await navigator.clipboard.readText();
+        onChange(textFromClipboard);
+      }
+    },
+    []
+  );
 
   return (
     <>
@@ -24,24 +38,49 @@ const ConfigureWithdrawForm: React.FC<ConfigureWithdrawProps> = ({control}) => {
           label={t('labels.to')}
           helpText={t('newWithdraw.configureWithdraw.toSubtitle')}
         />
-        <ValueInput
-          placeholder={t('placeHolders.walletOrEns')}
-          adornmentText={t('labels.paste')}
-          onAdornmentClick={() => navigator.clipboard.readText().then(alert)}
+        <Controller
+          name="to"
+          control={control}
+          render={({
+            field: {name, onBlur, onChange, value},
+            fieldState: {error},
+          }) => (
+            <ValueInput
+              mode={error ? 'critical' : 'default'}
+              name={name}
+              value={value}
+              onBlur={onBlur}
+              onChange={onChange}
+              placeholder={t('placeHolders.walletOrEns')}
+              adornmentText={value ? 'Copy' : 'Paste'}
+              onAdornmentClick={() => handleClipboardActions(value, onChange)}
+            />
+          )}
         />
       </FormItem>
 
+      {/* Select token */}
       <FormItem>
         <Label
           label={t('labels.token')}
           helpText={t('newWithdraw.configureWithdraw.tokenSubtitle')}
         />
-        <DropdownInput
-          placeholder={t('placeHolders.selectToken')}
-          onClick={() => open('token')}
+        <Controller
+          name="tokenSymbol"
+          control={control}
+          render={({field: {name, value}, fieldState: {error}}) => (
+            <DropdownInput
+              name={name}
+              mode={error ? 'critical' : 'default'}
+              value={value}
+              onClick={() => open('token')}
+              placeholder={t('placeHolders.selectToken')}
+            />
+          )}
         />
       </FormItem>
 
+      {/* Token amount */}
       <FormItem>
         <Label
           label={t('labels.amount')}
@@ -50,8 +89,12 @@ const ConfigureWithdrawForm: React.FC<ConfigureWithdrawProps> = ({control}) => {
         <Controller
           name="amount"
           control={control}
-          render={({field: {name, onBlur, onChange, value}}) => (
+          render={({
+            field: {name, onBlur, onChange, value},
+            fieldState: {error},
+          }) => (
             <TextInput
+              mode={error ? 'critical' : 'default'}
               side="left"
               name={name}
               value={value}

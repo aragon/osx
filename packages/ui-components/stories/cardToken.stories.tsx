@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {CardToken, CardTokenProps} from '../src';
 
 export default {
-  title: 'Components/Card/Token',
+  title: 'Components/Cards/Token',
   component: CardToken,
 } as Meta;
 
