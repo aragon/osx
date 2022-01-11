@@ -83,7 +83,10 @@
       "subtitle": "Enter the desired token and its number for transmission. Furthermore, a reception address is necessary.",
       "toSubtitle": "Define receiver of tokens",
       "tokenSubtitle": "Select token you'd like to withdraw",
-      "amountSubtitle": "Define amount to withdraw"
+      "amountSubtitle": "Define amount to withdraw",
+      "utcMenu": {
+        "title": "Select a UTC Timezone"
+      }
     }
   }
 }

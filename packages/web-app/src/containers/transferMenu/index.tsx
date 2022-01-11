@@ -14,12 +14,13 @@ const TransferMenu: React.FC = () => {
   const navigate = useNavigate();
   const {isConnected} = useWallet();
 
+  /* TODO: Those should be one method with an argument. */
   const handleNewDepositClick = () => {
     // TODO: change alert to proper error reporting mechanism,
     // Move to proper placing
     if (isConnected()) {
       navigate(NewDeposit);
-      close();
+      close('default');
     } else alert('Please connect your wallet');
   };
 
@@ -28,14 +29,14 @@ const TransferMenu: React.FC = () => {
     if (isConnected()) {
       // TODO: Check if wallet address is authorized to access new withdraw page and then navigate
       navigate(NewWithDraw);
-      close();
+      close('default');
     } else alert('Please connect your wallet');
   };
 
   return (
     <Modal
       open={isTransferOpen}
-      onClose={close}
+      onClose={() => close('default')}
       title={t('TransferModal.newTransfer') as string}
       data-testid="walletCard"
     >

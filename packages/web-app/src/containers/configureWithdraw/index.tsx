@@ -65,6 +65,20 @@ const ConfigureWithdrawForm: React.FC = () => {
           label={t('labels.token')}
           helpText={t('newWithdraw.configureWithdraw.tokenSubtitle')}
         />
+        <DropdownInput
+          onClick={() => open('token')}
+          placeholder={t('placeHolders.selectToken')}
+        />
+      </FormItem>
+
+      {/* TODO This is just a reference for development and can savely be
+          removed once the page is actually assembled */}
+      <FormItem>
+        <Label label={'UTC'} />
+        <DropdownInput placeholder={'utc+2'} onClick={() => open('utc')} />
+      </FormItem>
+
+      <FormItem>
         <Controller
           name="tokenSymbol"
           control={control}
