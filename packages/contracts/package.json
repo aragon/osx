@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "hardhat test",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "flatten": "hardhat flatten"
   },
   "repository": {
     "type": "git",
