@@ -1,6 +1,10 @@
+import {TextareaHTMLAttributes} from 'react';
 import styled from 'styled-components';
 
-export type TextareaSimpleProps = {};
+export type TextareaSimpleProps = Omit<
+  TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'className'
+>;
 
 export const TextareaSimple = styled.textarea.attrs({
   className: `py-1.5 px-2 rounded-xl resize-none w-full border-2 border-ui-100 hover:border-ui-300 

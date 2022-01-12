@@ -1,5 +1,6 @@
 export * from './interface';
 export * from './module';
+export * from './markdown';
 
 export type IconType = ({
   height,

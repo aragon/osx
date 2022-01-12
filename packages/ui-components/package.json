@@ -74,6 +74,10 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
+    "@tiptap/extension-link": "^2.0.0-beta.35",
+    "@tiptap/extension-placeholder": "^2.0.0-beta.46",
+    "@tiptap/react": "^2.0.0-beta.104",
+    "@tiptap/starter-kit": "^2.0.0-beta.168",
     "tailwindcss-fluid-type": "^1.3.1"
   }
 }

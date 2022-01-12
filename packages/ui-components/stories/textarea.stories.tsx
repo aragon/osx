@@ -4,7 +4,7 @@ import {Meta, Story} from '@storybook/react';
 import {TextareaSimple, TextareaSimpleProps} from '../src';
 
 export default {
-  title: 'Components/TextArea',
+  title: 'Components/TextArea/Simple',
   component: TextareaSimple,
 } as Meta;
 
