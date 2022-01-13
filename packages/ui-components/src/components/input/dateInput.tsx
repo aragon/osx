@@ -9,7 +9,7 @@ export type DateInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 export const DateInput: React.FC<DateInputProps> = ({disabled, ...props}) => {
   const isFF = navigator.userAgent.indexOf('Firefox') !== -1;
-  console.log(isFF);
+
   return (
     <InputContainer data-testid="date-input" disabled={disabled}>
       <StyledInput type={'date'} required disabled={disabled} {...props} />

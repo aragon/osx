@@ -12,6 +12,7 @@ export * from './components/input';
 export * from './components/listItem';
 export * from './components/menuItem';
 export * from './components/label';
+export * from './components/link';
 export * from './components/modal';
 export * from './components/popover';
 export * from './components/progress';
