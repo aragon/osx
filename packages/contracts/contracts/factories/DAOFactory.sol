@@ -77,7 +77,7 @@ contract DAOFactory {
 
         dao = DAO(createProxy(daoBase, bytes("")));
         
-        registry.register(name, dao, msg.sender);
+        registry.register(name, dao, msg.sender, token);
         
         dao.initialize(
             _metadata,

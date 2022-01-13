@@ -48,7 +48,7 @@ abstract contract IDAO {
     /// @dev If one acction fails, all will be reverted.
     /// @param _actions The aray of actions
     function execute(Action[] memory _actions) virtual external;
-    event Executed(address indexed actor, Action[] indexed actions, bytes[] execResults);
+    event Executed(address indexed actor, Action[] actions, bytes[] execResults);
 
     /// @notice Deposit ETH or any token to this contract with a reference string
     /// @dev Deposit ETH (token address == 0) or any token with a reference
