@@ -7,7 +7,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "./../../../core/processes/voting/VotingProcess.sol";
 import "./../../../core/DAO.sol";
-import "./TimeHelpers.sol";
+import "../../../utils/TimeHelpers.sol";
 
 contract SimpleVoting is VotingProcess, TimeHelpers {
     bytes32 public constant MODIFY_SUPPORT_ROLE = keccak256("MODIFY_SUPPORT_ROLE");
