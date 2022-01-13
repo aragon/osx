@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
 import "./acl/ACL.sol";
 import "./IDAO.sol";
@@ -17,7 +18,7 @@ import "./IDAO.sol";
 /// @author Samuel Furter - Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and use to use public interface.
 /// @dev Public API of the Aragon DAO framework
-contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
+contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165 {
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -26,12 +27,15 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     bytes32 public constant DAO_CONFIG_ROLE = keccak256("DAO_CONFIG_ROLE");
     bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
+    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
 
      // Error msg's
     string internal constant ERROR_ACTION_CALL_FAILED = "ACTION_CALL_FAILED";
     string internal constant ERROR_DEPOSIT_AMOUNT_ZERO = "DEPOSIT_AMOUNT_ZERO";
     string internal constant ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH = "ETH_DEPOSIT_AMOUNT_MISMATCH";
     string internal constant ERROR_ETH_WITHDRAW_FAILED = "ETH_WITHDRAW_FAILED";
+
+    ERC1271 signatureValidator;
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
@@ -40,6 +44,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         address initialOwner
     ) public initializer {
         _registerStandard(DAO_INTERFACE_ID);
+        _registerStandard(type(ERC1271).interfaceId);
         this.setMetadata(_metadata);
         ACL.initACL(initialOwner);
     }
@@ -134,5 +139,20 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         }
         
         emit Withdrawn(_token, _to, _amount, _reference);
+    }
+
+    /// @notice Setter to set the signature validator contract of ERC1271
+    /// @param _signatureValidator ERC1271 SignatureValidator
+    function setSignatureValidator(ERC1271 _signatureValidator) external auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE) {
+        signatureValidator = _signatureValidator;
+    }
+
+    /// @notice Method to validate the signature as described in ERC1271
+    /// @param _hash Hash of the data to be signed
+    /// @param _signature Signature byte array associated with _hash
+    /// @return bytes4
+    function isValidSignature(bytes32 _hash, bytes memory _signature) override public view returns (bytes4) {
+        if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
+        return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 } 
