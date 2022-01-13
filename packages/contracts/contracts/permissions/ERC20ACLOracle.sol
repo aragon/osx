@@ -11,7 +11,12 @@ import "../core/acl/IACLOracle.sol";
 contract ERC20ACLOracle is Component, IACLOracle {
     IERC20 public token;
 
-    function willPerform(address _where, address _who, bytes32 _role, bytes calldata _data) external view override returns(bool allowed) {
+    function willPerform(
+        address /* _where */, 
+        address _who, 
+        bytes32 /* _role */, 
+        bytes calldata /* _data */
+    ) external view override returns(bool allowed) {
         return token.balanceOf(_who) > 0;
     }
 }
