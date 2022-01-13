@@ -11,10 +11,19 @@ import "./../Process.sol";
 /// @notice This contract can be used to implement concrete voting governance primitives and being fully compatible with the DAO framework and UI of Aragon
 /// @dev You only have to define the specific custom logic of your needs in _vote, _start, and _execute
 abstract contract VotingProcess is Process {
+    bytes4 internal constant VOTING_PROCESS_INTERFACE_ID = PROCESS_INTERFACE_ID ^ type(VotingProcess).interfaceId;
+
     event VotedOnProcess(Execution execution, bytes data, uint256 indexed executionId);
 
     // Roles
     bytes32 public constant PROCESS_VOTE_ROLE = keccak256("PROCESS_VOTE_ROLE");
+
+    /// @dev Used for UUPS upgradability pattern
+    /// @param _allowedActions A dynamic bytes array to define the allowed actions. Addr + funcSig byte strings.
+    function initialize(IDAO _dao, bytes[] calldata _allowedActions) public virtual override initializer {
+        _initProcess(_dao, _allowedActions);
+        _registerStandard(VOTING_PROCESS_INTERFACE_ID);
+    }
 
     /// @notice If called a new vote does get added.
     /// @param executionId The identifier of the current execution
@@ -33,4 +42,3 @@ abstract contract VotingProcess is Process {
     /// @param data The arbitrary custom data used for the concrete implementation
     function _vote(uint256 executionId, bytes calldata data) internal virtual;
 }
-

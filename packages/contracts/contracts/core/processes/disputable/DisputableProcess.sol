@@ -11,12 +11,21 @@ import "./../stoppable/StoppableProcess.sol";
 /// @notice This contract can be used to implement concrete disputable governance processes and being fully compatible with the DAO framework and UI of Aragon
 /// @dev You only have to define the specific custom logic of your needs in _start, _execute, _halt, and _forward
 abstract contract DisputableProcess is StoppableProcess {
+    bytes4 internal constant DISPUTABLE_PROCESS_INTERFACE_ID = STOPPABLE_PROCESS_INTERFACE_ID ^ type(DisputableProcess).interfaceId;
+
     event ProcessHalted(Execution execution, uint256 indexed executionId);
     event ProcessForwarded(Execution execution, uint256 indexed executionId);
 
     // Roles
     bytes32 public constant PROCESS_HALT_ROLE = keccak256("PROCESS_HALT_ROLE");
     bytes32 public constant PROCESS_FORWARD_ROLE = keccak256("PROCESS_FORWARD_ROLE");
+
+    /// @dev Used for UUPS upgradability pattern
+    /// @param _allowedActions A dynamic bytes array to define the allowed actions. Addr + funcSig byte strings.
+    function initialize(IDAO _dao, bytes[] calldata _allowedActions) public virtual override initializer {
+        _initProcess(_dao, _allowedActions);
+        _registerStandard(DISPUTABLE_PROCESS_INTERFACE_ID);
+    }
 
     /// @notice If called the execution is halted.
     /// @dev The state of the container does get changed to HALTED and the concrete implementation in _halt called.
