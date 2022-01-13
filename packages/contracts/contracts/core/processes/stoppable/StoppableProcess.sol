@@ -11,11 +11,13 @@ import "./../Process.sol";
 /// @notice This contract can be used to implement concrete stoppable governance processes and being fully compatible with the DAO framework and UI of Aragon
 /// @dev You only have to define the specific custom logic for your needs in _start, _execute, and _stop
 abstract contract StoppableProcess is Process {
+    /// @notice Used in ERC165
     bytes4 internal constant STOPPABLE_PROCESS_INTERFACE_ID = PROCESS_INTERFACE_ID ^ type(StoppableProcess).interfaceId;
 
+    /// @notice Emitted as soon as the process does get stopped
     event ProcessStopped(Execution indexed execution, uint256 indexed executionId);
 
-    // Roles
+    /// @notice The role identifier to stop a process
     bytes32 public constant PROCESS_STOP_ROLE = keccak256("PROCESS_STOP_ROLE");
 
     /// @dev Used for UUPS upgradability pattern
@@ -27,21 +29,21 @@ abstract contract StoppableProcess is Process {
 
     /// @notice If called the execution is stopped.
     /// @dev The state of the container does get changed to STOPPED and the concrete implementation in _stop called.
-    /// @param executionId The identifier of the current execution
-    /// @param data The arbitrary custom data used for the concrete implementation
-    function stop(uint256 executionId, bytes calldata data) public auth(PROCESS_STOP_ROLE) {
-        Execution storage execution = _getExecution(executionId);
+    /// @param _executionId The identifier of the current execution
+    /// @param _data The arbitrary custom data used for the concrete implementation
+    function stop(uint256 _executionId, bytes calldata _data) public auth(PROCESS_STOP_ROLE) {
+        Execution storage execution = _getExecution(_executionId);
 
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
     
         execution.state = State.STOPPED;
         
-        _stop(data);
+        _stop(_data);
 
-        emit ProcessStopped(execution, executionId);
+        emit ProcessStopped(execution, _executionId);
     }
 
-    // @dev The concrete implementation of stop.
-    /// @param data The arbitrary custom data used for the concrete implementation
-    function _stop(bytes calldata data) internal virtual;
+    /// @dev The concrete implementation of stop.
+    /// @param _data The arbitrary custom data used for the concrete implementation
+    function _stop(bytes calldata _data) internal virtual;
 }

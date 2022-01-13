@@ -11,13 +11,17 @@ import "./../stoppable/StoppableProcess.sol";
 /// @notice This contract can be used to implement concrete disputable governance processes and being fully compatible with the DAO framework and UI of Aragon
 /// @dev You only have to define the specific custom logic of your needs in _start, _execute, _halt, and _forward
 abstract contract DisputableProcess is StoppableProcess {
+    /// @notice Used in ERC165
     bytes4 internal constant DISPUTABLE_PROCESS_INTERFACE_ID = STOPPABLE_PROCESS_INTERFACE_ID ^ type(DisputableProcess).interfaceId;
 
+    /// @notice Emitted as soon as the process got paused
     event ProcessHalted(Execution execution, uint256 indexed executionId);
+    /// @notice Emittes as soon as the process got started again
     event ProcessForwarded(Execution execution, uint256 indexed executionId);
 
-    // Roles
+    /// @notice The role identifier to halt a process
     bytes32 public constant PROCESS_HALT_ROLE = keccak256("PROCESS_HALT_ROLE");
+    /// @notice The role identifier to forward a process
     bytes32 public constant PROCESS_FORWARD_ROLE = keccak256("PROCESS_FORWARD_ROLE");
 
     /// @dev Used for UUPS upgradability pattern
@@ -29,41 +33,41 @@ abstract contract DisputableProcess is StoppableProcess {
 
     /// @notice If called the execution is halted.
     /// @dev The state of the container does get changed to HALTED and the concrete implementation in _halt called.
-    /// @param executionId The identifier of the current execution
-    /// @param data The arbitrary custom data used for the concrete implementation
-    function halt(uint256 executionId, bytes calldata data) public auth(PROCESS_HALT_ROLE) {
-        Execution storage execution = _getExecution(executionId);
+    /// @param _executionId The identifier of the current execution
+    /// @param _data The arbitrary custom data used for the concrete implementation
+    function halt(uint256 _executionId, bytes calldata _data) public auth(PROCESS_HALT_ROLE) {
+        Execution storage execution = _getExecution(_executionId);
         
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG); 
         
         execution.state = State.HALTED;
 
-        _halt(data);
+        _halt(_data);
 
-        emit ProcessHalted(execution, executionId);
+        emit ProcessHalted(execution, _executionId);
     }
 
     /// @notice If called the execution does get forwarded.
     /// @dev The state of the container does get changed to RUNNING and the concrete implementation in _forward called.
-    /// @param executionId The identifier of the current execution
-    /// @param data The arbitrary custom data used for the concrete implementation
-    function forward(uint256 executionId, bytes calldata data) public auth(PROCESS_FORWARD_ROLE) {
-        Execution storage execution = _getExecution(executionId);
+    /// @param _executionId The identifier of the current execution
+    /// @param _data The arbitrary custom data used for the concrete implementation
+    function forward(uint256 _executionId, bytes calldata _data) public auth(PROCESS_FORWARD_ROLE) {
+        Execution storage execution = _getExecution(_executionId);
 
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
         
         execution.state = State.RUNNING;
 
-        _forward(data);
+        _forward(_data);
 
-        emit ProcessForwarded(execution, executionId);
+        emit ProcessForwarded(execution, _executionId);
     }
 
     /// @dev The concrete implementation of halt.
-    /// @param data The arbitrary custom data used for the concrete implementation
-    function _halt(bytes calldata data) internal virtual;
+    /// @param _data The arbitrary custom data used for the concrete implementation
+    function _halt(bytes calldata _data) internal virtual;
 
     /// @dev The concrete implementation of forward.
-    /// @param data The arbitrary custom data used for the concrete implementation
-    function _forward(bytes calldata data) internal virtual; 
+    /// @param _data The arbitrary custom data used for the concrete implementation
+    function _forward(bytes calldata _data) internal virtual; 
 }
