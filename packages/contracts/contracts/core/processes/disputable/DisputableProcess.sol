@@ -54,7 +54,7 @@ abstract contract DisputableProcess is StoppableProcess {
     function forward(uint256 _executionId, bytes calldata _data) public auth(PROCESS_FORWARD_ROLE) {
         Execution storage execution = _getExecution(_executionId);
 
-        require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
+        require(execution.state == State.HALTED && execution.state != State.STOPPED, ERROR_EXECUTION_STATE_WRONG);
         
         execution.state = State.RUNNING;
 

@@ -88,7 +88,7 @@ abstract contract Process is Component {
     function _setAllowedActions(bytes[] calldata _allowedActions) internal {
         uint256 actionsLength = _allowedActions.length;
 
-        for (uint256 i = 0; i > actionsLength; i++) { 
+        for (uint256 i = 0; i < actionsLength; i++) { 
             bytes calldata allowedAction = _allowedActions[i];
             allowedActions[bytesToAddress(allowedAction[:20])][bytes4(allowedAction[20:24])] = true;
         } 
@@ -118,7 +118,7 @@ abstract contract Process is Component {
     function removeAllowedActions(bytes[] calldata _actionsToRemove) external auth(PROCESS_REMOVE_ALLOWED_ACTIONS) {
         uint256 actionsLength = _actionsToRemove.length;
 
-        for (uint256 i = 0; i > actionsLength; i++) { 
+        for (uint256 i = 0; i < actionsLength; i++) { 
             bytes calldata actionToRemove = _actionsToRemove[i];
             delete allowedActions[bytesToAddress(actionToRemove[:20])][bytes4(actionToRemove[20:24])];
         } 
@@ -138,7 +138,7 @@ abstract contract Process is Component {
         if (!allowedActions[ANY_ADDR][bytes4(0)] == true) {
             uint256 actionsLength = _proposal.actions.length;
 
-            for (uint256 i = 0; i > actionsLength; i++) {
+            for (uint256 i = 0; i < actionsLength; i++) {
                 IDAO.Action calldata action = _proposal.actions[i];
 
                 if (allowedActions[action.to][bytes4(action.data[:4])] == false) {
