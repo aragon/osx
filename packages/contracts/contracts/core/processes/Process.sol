@@ -19,7 +19,7 @@ abstract contract Process is Component {
     address internal constant ANY_ADDR = address(type(uint160).max);
 
     /// @notice Emitted as soon as the process does get started
-    event ProcessStarted(Execution execution, bytes metadata, uint256 indexed executionId);
+    event ProcessStarted(Execution execution);
     /// @notice Emitted as soon as the process with his actions does get executed
     event ProcessExecuted(Execution execution, uint256 indexed executionId);
     /// @notice Emtted as soon as new allowed actions do get added
@@ -157,7 +157,7 @@ abstract contract Process is Component {
 
         _start(execution); // "Hook" to add logic in start of a concrete implementation.
 
-        emit ProcessStarted(execution, _proposal.metadata, executionsCounter);
+        emit ProcessStarted(execution);
 
         return executionsCounter;
     }

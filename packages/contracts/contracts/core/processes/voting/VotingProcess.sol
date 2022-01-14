@@ -15,7 +15,7 @@ abstract contract VotingProcess is Process {
     bytes4 internal constant VOTING_PROCESS_INTERFACE_ID = PROCESS_INTERFACE_ID ^ type(VotingProcess).interfaceId;
 
     /// @notice Emitted as soon as new vote does get casted
-    event VotedOnProcess(Execution execution, bytes data, uint256 indexed executionId);
+    event VotedOnProcess(Execution execution, bytes data);
 
     /// @notice The role identifier to vote
     bytes32 public constant PROCESS_VOTE_ROLE = keccak256("PROCESS_VOTE_ROLE");
@@ -37,7 +37,7 @@ abstract contract VotingProcess is Process {
 
         _vote(_executionId, _data);
 
-        emit VotedOnProcess(execution, _data, _executionId);
+        emit VotedOnProcess(execution, _data);
     }
 
     /// @dev The concrete implementation of vote.

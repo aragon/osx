@@ -15,7 +15,7 @@ abstract contract StoppableProcess is Process {
     bytes4 internal constant STOPPABLE_PROCESS_INTERFACE_ID = PROCESS_INTERFACE_ID ^ type(StoppableProcess).interfaceId;
 
     /// @notice Emitted as soon as the process does get stopped
-    event ProcessStopped(Execution indexed execution, uint256 indexed executionId);
+    event ProcessStopped(Execution execution);
 
     /// @notice The role identifier to stop a process
     bytes32 public constant PROCESS_STOP_ROLE = keccak256("PROCESS_STOP_ROLE");
@@ -40,7 +40,7 @@ abstract contract StoppableProcess is Process {
         
         _stop(_data);
 
-        emit ProcessStopped(execution, _executionId);
+        emit ProcessStopped(execution);
     }
 
     /// @dev The concrete implementation of stop.
