@@ -34,4 +34,9 @@ abstract contract Component is UUPSUpgradeable, Initializable, AdaptiveERC165 {
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_ROLE) { }
+
+    /// @dev Fallback to handle future versions of the ERC165 standard.
+    fallback () external {
+        _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
+    }
 }
