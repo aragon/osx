@@ -1,6 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import styled from 'styled-components';
-import {Radio, RadioGroup} from '../radioGroup';
+import {Option, ButtonGroup} from '../button/buttonGroup';
 
 export type valueType = {time: string; midday: 'pm' | 'am'};
 
@@ -61,10 +61,14 @@ export const TimeInput: React.FC<TimeInputProps> = ({
       {/* TODO: This Radio button need to be customized. For now we used a
           default Radio button but it should update soon
       */}
-      <RadioGroup defaultValue={'am'} onChange={e => onChange(e, 'midday')}>
-        <Radio value="am">AM</Radio>
-        <Radio value="pm">PM</Radio>
-      </RadioGroup>
+      <ButtonGroup
+        bgWhite
+        defaultValue={'am'}
+        onChange={e => onChange(e, 'midday')}
+      >
+        <Option value="am" label="AM" />
+        <Option value="pm" label="PM" />
+      </ButtonGroup>
     </Container>
   );
 };

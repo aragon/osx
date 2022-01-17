@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import React, {useState} from 'react';
 import {withTransaction} from '@elastic/apm-rum-react';
-import {Radio, RadioGroup, SearchInput} from '@aragon/ui-components';
+import {Option, ButtonGroup, SearchInput} from '@aragon/ui-components';
 
 import TransferList from 'components/transferList';
 import {PageWrapper} from 'components/wrappers';
@@ -51,12 +51,16 @@ const Transfers: React.FC = () => {
       >
         <div className="space-y-1.5">
           <SearchInput placeholder="Type to filter" />
-          <RadioGroup defaultValue="All" onChange={handleButtonGroupChange}>
-            <Radio value="All">All</Radio>
-            <Radio value="Deposit">Deposit</Radio>
-            <Radio value="Withdraw">Withdraw</Radio>
-            <Radio value="External Contract">External Contract</Radio>
-          </RadioGroup>
+          <ButtonGroup
+            bgWhite
+            defaultValue="All"
+            onChange={handleButtonGroupChange}
+          >
+            <Option value="All">All</Option>
+            <Option value="Deposit">Deposit</Option>
+            <Option value="Withdraw">Withdraw</Option>
+            <Option value="External Contract">External Contract</Option>
+          </ButtonGroup>
         </div>
         <SectionContainer>
           <TransferSectionWrapper title={t('allTransfer.thisWeek') as string}>

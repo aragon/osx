@@ -1,24 +1,26 @@
 import React from 'react';
 import {Meta, Story} from '@storybook/react';
-import {Radio, RadioGroup, RadioGroupProps} from '../src';
+import {Option, ButtonGroup, ButtonGroupProps} from '../src';
 
 export default {
   title: 'Components/Buttons/Group',
-  component: RadioGroup,
+  component: ButtonGroup,
 } as Meta;
 
-const Template: Story<RadioGroupProps> = args => (
-  <RadioGroup {...args}>
-    <Radio value="1D">1D</Radio>
-    <Radio value="1W">1W</Radio>
-    <Radio value="1M">1M</Radio>
-    <Radio value="1Y">1Y</Radio>
-    <Radio value="Max">Max</Radio>
-  </RadioGroup>
+const Template: Story<ButtonGroupProps> = args => (
+  <ButtonGroup {...args}>
+    <Option value="1D" label="1D" />
+    <Option value="1W" label="1W" />
+    <Option value="1M" label="1M" />
+    <Option value="1Y" label="1Y" />
+    <Option value="Max" label="Max" />
+  </ButtonGroup>
 );
 
 export const Default = Template.bind({});
 Default.args = {
+  bgWhite: true,
   defaultValue: 'Max',
   onChange: value => console.log(value),
+  fullWidth: false,
 };

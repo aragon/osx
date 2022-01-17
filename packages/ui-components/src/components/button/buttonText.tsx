@@ -9,6 +9,7 @@ export type ButtonTextProps = Omit<ButtonBaseProps, 'label' | 'iconOnly'> & {
   bgWhite?: boolean;
   label: string;
   isActive?: boolean;
+  className?: string;
 };
 
 export const ButtonText: React.FC<ButtonTextProps> = ({
@@ -17,6 +18,7 @@ export const ButtonText: React.FC<ButtonTextProps> = ({
   isActive = false,
   mode = 'primary',
   size = 'medium',
+  className,
   ...props
 }) => {
   return (
@@ -27,6 +29,7 @@ export const ButtonText: React.FC<ButtonTextProps> = ({
       isActive={isActive}
       mode={mode}
       size={size}
+      inputClassName={className}
     />
   );
 };
@@ -42,9 +45,16 @@ type StyledButtonProps = {
   isActive: boolean;
   mode: ButtonBaseProps['mode'];
   size: ButtonBaseProps['size'];
+  inputClassName?: string;
 };
 const StyledButton = styled(ButtonBase).attrs(
-  ({bgWhite, isActive, mode, size = 'medium'}: StyledButtonProps) => {
+  ({
+    bgWhite,
+    isActive,
+    mode,
+    size = 'medium',
+    inputClassName,
+  }: StyledButtonProps) => {
     let className: string | undefined;
 
     switch (mode) {
@@ -72,6 +82,6 @@ const StyledButton = styled(ButtonBase).attrs(
         } text-ui-0 hover:bg-primary-500 active:bg-primary-700 disabled:text-primary-300 disabled:bg-primary-100`;
     }
 
-    return {className};
+    return {className: `${className} ${inputClassName}`};
   }
 )<StyledButtonProps>``;
