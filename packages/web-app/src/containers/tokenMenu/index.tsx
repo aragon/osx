@@ -10,6 +10,15 @@ import {useTokenInfo} from 'hooks/useTokenInformation';
 import {useTransferModalContext} from 'context/transfersModal';
 import {BaseTokenInfo, TokenBalance} from 'utils/types';
 
+const customToken = {
+  address: '',
+  count: BigInt(0),
+  decimals: 18,
+  imgUrl: '',
+  symbol: '',
+  name: '',
+};
+
 type TokenMenuProps = {
   isWallet?: boolean;
   tokenBalances: TokenBalance[];
@@ -62,10 +71,23 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
         ))}
       </>
     ) : (
-      <NoTokenWrapper>
-        <TokenTitle>{t('TokenModal.tokenNotFoundTitle')}</TokenTitle>
-        <TokenSubtitle>{t('TokenModal.tokenNotFoundSubtitle')}</TokenSubtitle>
-      </NoTokenWrapper>
+      <>
+        <NoTokenWrapper>
+          <TokenTitle>{t('TokenModal.tokenNotFoundTitle')}</TokenTitle>
+          <TokenSubtitle>{t('TokenModal.tokenNotFoundSubtitle')}</TokenSubtitle>
+        </NoTokenWrapper>
+        {isWallet && (
+          <WideButton
+            mode="secondary"
+            size="large"
+            label="Add Custom Token"
+            iconLeft={<IconAdd />}
+            onClick={() =>
+              handleTokenClick({...customToken, symbol: searchValue})
+            }
+          />
+        )}
+      </>
     );
   };
 
@@ -85,24 +107,6 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
           onChange={e => setSearchValue(e.target.value)}
         />
         <TokensWrapper>{renderTokens()}</TokensWrapper>
-        {isWallet && (
-          <WideButton
-            mode="secondary"
-            size="large"
-            label="Add Custom Token"
-            iconLeft={<IconAdd />}
-            onClick={() =>
-              handleTokenClick({
-                address: '',
-                count: BigInt(0),
-                decimals: 18,
-                imgUrl: '',
-                symbol: searchValue,
-                name: '',
-              })
-            }
-          />
-        )}
       </Container>
     </Modal>
   );
@@ -131,5 +135,5 @@ const WideButton = styled(ButtonText).attrs({
 })``;
 
 const NoTokenWrapper = styled.div.attrs({
-  className: 'space-y-0.5',
+  className: 'space-y-0.5 mb-3',
 })``;
