@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {CardText, CardToken, CardTransfer} from '@aragon/ui-components';
 
 import {useWallet} from 'context/augmentedWallet';
-import {fetchTokenData, fetchTokenPrice} from 'services/prices';
+import {fetchTokenPrice} from 'services/prices';
 
 const ReviewDeposit: React.FC = () => {
   const {t} = useTranslation();
@@ -16,18 +16,6 @@ const ReviewDeposit: React.FC = () => {
 
   useEffect(() => {
     async function getPrice() {
-      // TODO: move metadata fetching to validate for contractAddress
-      if (values.isCustomToken) {
-        const data = await fetchTokenData(values.tokenAddress);
-        if (data) {
-          setValue('tokenName', data.name);
-          setValue('tokenSymbol', data.symbol);
-          setValue('tokenAddress', data.address);
-          setValue('tokenImgUrl', data.imgUrl);
-        }
-      }
-      // <----------------------------------------------------------------->
-
       const tokenPrice = await fetchTokenPrice(values.tokenAddress);
       if (tokenPrice) {
         setPrice(

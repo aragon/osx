@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import {Address} from '@aragon/ui-components/dist/utils/addresses';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
-import {useForm, FormProvider} from 'react-hook-form';
+import {useForm, useFormState, FormProvider} from 'react-hook-form';
 import React, {useCallback, useEffect, useState} from 'react';
 
 import TokenMenu from 'containers/tokenMenu';
@@ -36,7 +36,7 @@ const steps = {
 const TOTAL_STEPS = Object.keys(steps).length;
 
 export type FormData = {
-  amount: number;
+  amount: string;
   isCustomToken: boolean;
   reference?: string;
   type: TransferTypes;
@@ -50,7 +50,7 @@ export type FormData = {
 };
 
 const defaultValues = {
-  amount: 0,
+  amount: '',
   reference: '',
   tokenName: '',
   tokenImgUrl: '',
@@ -69,9 +69,18 @@ const NewDeposit: React.FC = () => {
     isConnected,
     provider,
   }: useWalletProps = useWallet();
+
+  const formMethods = useForm<FormData>({
+    defaultValues,
+    mode: 'onChange',
+  });
+
+  const {isValid} = useFormState({
+    control: formMethods.control,
+  });
+
   const {t} = useTranslation();
   const {open} = useWalletMenuContext();
-  const formMethods = useForm<FormData>({defaultValues});
   const {currentStep, prev, next} = useStepper(TOTAL_STEPS);
   const [walletTokens, setWalletTokens] = useState<TokenBalance[]>([]);
 
@@ -131,23 +140,29 @@ const NewDeposit: React.FC = () => {
   }, [connect, isConnected, open]);
 
   const handleTokenSelect = (token: BaseTokenInfo) => {
+    formMethods.setValue('tokenSymbol', token.symbol);
+
+    // custom token selected, should reset all fields
+    // save the symbol and clear any error pertaining to the amount
     if (token.address === '') {
       formMethods.setValue('isCustomToken', true);
-      formMethods.setValue('tokenBalance', '');
-    } else {
-      formMethods.setValue('isCustomToken', false);
-
-      // Don't set the wallet balance if no address is provided yet
-      formMethods.setValue(
-        'tokenBalance',
-        formatUnits(token.count, token.decimals)
-      );
+      formMethods.resetField('tokenName');
+      formMethods.resetField('tokenImgUrl');
+      formMethods.resetField('tokenAddress');
+      formMethods.resetField('tokenBalance');
+      formMethods.clearErrors('amount');
+      return;
     }
 
+    // fill form with curated token values
+    formMethods.setValue('isCustomToken', false);
     formMethods.setValue('tokenName', token.name);
     formMethods.setValue('tokenImgUrl', token.imgUrl);
-    formMethods.setValue('tokenSymbol', token.symbol);
     formMethods.setValue('tokenAddress', token.address);
+    formMethods.setValue(
+      'tokenBalance',
+      formatUnits(token.count, token.decimals)
+    );
   };
 
   /*************************************************
@@ -198,19 +213,23 @@ const NewDeposit: React.FC = () => {
               <ReviewDeposit />
             )}
             <FormFooter>
-              {/* Should change this to secondary on gray which is unsupported now */}
               <ButtonText
-                label="Back"
                 mode="secondary"
                 size="large"
+                label={t('labels.back')}
                 onClick={prev}
                 disabled={currentStep === 1}
                 iconLeft={<IconChevronLeft />}
               />
               <ButtonText
-                label="Continue"
+                label={
+                  currentStep === 1
+                    ? t('labels.continue')
+                    : t('labels.submitDeposit')
+                }
                 size="large"
                 onClick={next}
+                disabled={!isValid}
                 iconRight={<IconChevronRight />}
               />
             </FormFooter>
@@ -220,11 +239,6 @@ const NewDeposit: React.FC = () => {
           onTokenSelect={handleTokenSelect}
           tokenBalances={walletTokens}
         />
-
-        {/* View form values; to be removed later */}
-        <pre className="mt-2">
-          Form values: {JSON.stringify(formMethods.watch(), null, 2)}
-        </pre>
       </Layout>
     </>
   );
