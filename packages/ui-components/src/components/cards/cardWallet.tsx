@@ -79,5 +79,5 @@ const Title = styled.p.attrs({
 })``;
 
 const Subtitle = styled.p.attrs({
-  className: 'text-sm text-ui-500 font-medium',
+  className: 'text-sm text-ui-500',
 })``;

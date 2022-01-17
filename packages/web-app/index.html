@@ -1,61 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/public/favicon.svg" />
 
-    <!-- TODO: remove once fonts have been downloaded and set in stone -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/src/public/favicon.svg" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zaragoza</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
-    <script>
-      !(function () {
-        // TODO: add key to pipeline
-        const analyticsKey = '%VITE_REACT_APP_ANALYTICS_KEY%';
-        if (!analyticsKey.includes('undefined')) {
-          rudderAnalytics = window.rudderanalytics = [];
-          for (
-            var methods = [
-                'load',
-                'page',
-                'track',
-                'identify',
-                'alias',
-                'group',
-                'ready',
-                'reset',
-                'getAnonymousId',
-                'setAnonymousId',
-              ],
-              i = 0;
-            i < methods.length;
-            i++
-          ) {
-            var method = methods[i];
-            rudderAnalytics[method] = (function (a) {
-              return function () {
-                rudderAnalytics.push(
-                  [a].concat(Array.prototype.slice.call(arguments))
-                );
-              };
-            })(method);
-          }
-          rudderAnalytics.load(analyticsKey, 'https://rudderstack.aragon.org');
-          rudderAnalytics.page();
+  <!-- TODO: remove once fonts have been downloaded and set in stone -->
+  <link
+    href="'https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&display=swap'"
+    rel="stylesheet" />
+  <style>
+    p,
+    span {
+      font-weight: 500;
+    }
+  </style>
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zaragoza</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+  <script>
+    !(function () {
+      const analyticsKey = '%VITE_REACT_APP_ANALYTICS_KEY%';
+      if (!analyticsKey.includes('undefined')) {
+        rudderAnalytics = window.rudderanalytics = [];
+        for (
+          var methods = [
+            'load',
+            'page',
+            'track',
+            'identify',
+            'alias',
+            'group',
+            'ready',
+            'reset',
+            'getAnonymousId',
+            'setAnonymousId',
+          ],
+          i = 0;
+          i < methods.length;
+          i++
+        ) {
+          var method = methods[i];
+          rudderAnalytics[method] = (function (a) {
+            return function () {
+              rudderAnalytics.push(
+                [a].concat(Array.prototype.slice.call(arguments))
+              );
+            };
+          })(method);
         }
-      })();
-    </script>
-    <script
-      async
-      src="https://cdn.rudderlabs.com/v1/rudder-analytics.min.js"
-    ></script>
-  </body>
+        rudderAnalytics.load(analyticsKey, 'https://rudderstack.aragon.org');
+        rudderAnalytics.page();
+      }
+    })();
+  </script>
+  <script async src="https://cdn.rudderlabs.com/v1/rudder-analytics.min.js"></script>
+</body>
+
 </html>

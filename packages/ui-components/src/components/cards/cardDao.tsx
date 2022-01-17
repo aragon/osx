@@ -93,5 +93,5 @@ const DaoName = styled.p.attrs({
 
 // FIXME: temporarily changed font weight
 const DaoAddress = styled.p.attrs({
-  className: 'text-ui-400 font-medium text-sm',
+  className: 'text-ui-400 text-sm',
 })``;
