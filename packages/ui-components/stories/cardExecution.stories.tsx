@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {CardExecution, CardExecutionProps} from '../src';
 
 export default {
-  title: 'Components/Card/execution',
+  title: 'Components/Cards/execution',
   component: CardExecution,
 } as Meta;
 

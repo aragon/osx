@@ -72,7 +72,9 @@ type SizeProps = {
 };
 
 const BaseStyledButton = styled.button.attrs(({size = 'medium'}: SizeProps) => {
-  const className = `${sizeStyles[size]} ${fontStyles[size]} flex justify-start items-center font-bold focus:outline-none focus:ring-2 focus:ring-primary-500`;
+  const className = `${sizeStyles[size]} ${fontStyles[size]} 
+  flex justify-center items-center font-bold focus:outline-none 
+  focus:ring-2 focus:ring-primary-500`;
   return {className};
 })<SizeProps>``;
 
