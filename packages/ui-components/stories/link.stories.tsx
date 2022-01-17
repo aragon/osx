@@ -12,21 +12,21 @@ const Template: Story<LinkProps> = args => <Link {...args} />;
 export const Default = Template.bind({});
 Default.args = {
   label: 'Link text',
-  href: 'https://url.com',
+  href: 'https://aragon.org/',
 };
 
 export const IconRight = Template.bind({});
 IconRight.args = {
   iconRight: <IconChevronDown />,
   label: 'Link text',
-  href: 'https://abc.com',
+  href: 'https://aragon.org/',
 };
 
 export const IconLeft = Template.bind({});
 IconLeft.args = {
   iconLeft: <IconChevronDown />,
   label: 'Link text',
-  href: 'https://abc.com',
+  href: 'https://aragon.org/',
   active: true,
   disabled: true,
 };
