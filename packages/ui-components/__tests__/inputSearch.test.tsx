@@ -3,7 +3,7 @@ import {render, screen} from '@testing-library/react';
 
 import {Search as SearchInput} from '../stories/inputSearch.stories';
 
-describe('SearchInput', () => {
+describe('inputSearch', () => {
   // eslint-disable-next-line
   function setup(args: any) {
     render(<SearchInput {...args} />);

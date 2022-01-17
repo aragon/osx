@@ -5,42 +5,43 @@ export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   /** Changes a input's color schema */
   mode?: 'default' | 'success' | 'warning' | 'critical';
   /**
-   * adornment
+   * left adornment
    */
-  adornment?: ReactNode;
+  leftAdornment?: ReactNode;
   /**
-   * Whether the icon is left or right of the input
+   * right adornment
    */
-  side?: 'left' | 'right';
+  rightAdornment?: ReactNode;
   disabled?: boolean;
 };
 
 /** Simple input with variable styling (depending on mode) */
 export const TextInput: React.FC<TextInputProps> = ({
   mode = 'default',
-  side = 'right',
   disabled,
-  adornment,
+  leftAdornment,
+  rightAdornment,
   ...props
 }) => {
   return (
-    <Container data-testid="input" {...{mode, disabled, side}}>
+    <Container data-testid="input" {...{mode, disabled}}>
+      {leftAdornment}
       <StyledInput disabled={disabled} {...props} />
-      {adornment}
+      {rightAdornment}
     </Container>
   );
 };
 
-type StyledContainerProps = Pick<TextInputProps, 'mode' | 'side' | 'disabled'>;
+type StyledContainerProps = Pick<TextInputProps, 'mode' | 'disabled'>;
 
 export const Container = styled.div.attrs(
-  ({mode, disabled, side}: StyledContainerProps) => {
+  ({mode, disabled}: StyledContainerProps) => {
     let className = `${
       disabled ? 'bg-ui-100' : 'bg-ui-0'
-    } flex space-x-1.5 space-x-1.5
-    focus:outline-none focus-within:ring-2 focus-within:ring-primary-500 py-1.5 px-2
-    rounded-xl hover:border-ui-300 border-2 active:border-primary-500 items-center 
-    ${side === 'left' && 'flex-row-reverse space-x-reverse'} `;
+    } flex items-center space-x-1.5 space-x-1.5 py-1.5 px-2
+    focus:outline-none focus-within:ring-2 focus-within:ring-primary-500
+    rounded-xl hover:border-ui-300 border-2
+    active:border-primary-500 `;
 
     if (mode === 'default') {
       className += 'border-ui-100';

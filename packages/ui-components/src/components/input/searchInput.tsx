@@ -1,24 +1,54 @@
 import React from 'react';
 import {TextInput, TextInputProps} from './textInput';
-import {IconSearch} from '../icons';
-
-/** Simple input with variable styling (depending on mode) */
-/**
- * TODO: the drop down should be a select element and We will update
- * it with new designs
- */
+import {IconSearch, IconClose} from '../icons';
+import {Spinner} from '../spinner';
 
 export type SearchInputProps = Omit<
   TextInputProps,
-  'adornment' | 'side' | 'clickable'
->;
+  'leftAdornment' | 'rightAdornment'
+> & {
+  /**
+   * Change input state into isLoading...
+   */
+  isLoading?: boolean;
+};
 
-export const SearchInput: React.FC<SearchInputProps> = ({...props}) => {
+export const SearchInput: React.FC<SearchInputProps> = ({
+  isLoading = false,
+  value,
+  onChange,
+  ...props
+}) => {
   return (
     <TextInput
       data-testid="search-input"
-      adornment={<IconSearch className="text-ui-300" />}
-      side={'left'}
+      leftAdornment={
+        isLoading ? (
+          <Spinner size={'small'} />
+        ) : (
+          <IconSearch className="text-ui-300" />
+        )
+      }
+      value={value}
+      onChange={onChange}
+      rightAdornment={
+        value !== '' && (
+          <button
+            style={{cursor: 'pointer'}}
+            onClick={() => {
+              if (onChange) {
+                onChange({
+                  target: {
+                    value: '',
+                  },
+                } as React.ChangeEvent<HTMLInputElement>);
+              }
+            }}
+          >
+            <IconClose className="text-ui-300" />
+          </button>
+        )
+      }
       {...props}
     />
   );
