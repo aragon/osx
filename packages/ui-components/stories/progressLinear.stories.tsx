@@ -3,7 +3,7 @@ import {Meta, Story} from '@storybook/react';
 import {LinearProgress} from '../src';
 
 export default {
-  title: 'Components/LinearProgress',
+  title: 'Components/Progress/Linear',
   component: LinearProgress,
 } as Meta;
 

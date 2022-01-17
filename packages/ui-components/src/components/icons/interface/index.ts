@@ -1,4 +1,5 @@
 export {IconAdd} from './icon_add';
+export {IconBlock} from './icon_block';
 export {IconCalendar} from './icon_calendar';
 export {IconCheckboxDefault} from './icon_checkbox_default';
 export {IconCheckboxMulti} from './icon_checkbox_multi';
@@ -17,6 +18,8 @@ export {IconInfo} from './icon_info';
 export {IconLinkExternal} from './icon_link_external';
 export {IconMenu} from './icon_menu';
 export {IconPerson} from './icon_person';
+export {IconRadioDefault} from './icon_radio_default';
+export {IconRadioCancel} from './radio';
 export {IconRemove} from './icon_remove';
 export {IconSearch} from './icon_search';
 export {IconSettings} from './icon_settings';

@@ -1,1 +1,2 @@
-export * from './linearProgress';
+export * from './linear';
+export * from './status';
