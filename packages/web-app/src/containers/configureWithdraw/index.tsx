@@ -109,7 +109,6 @@ const ConfigureWithdrawForm: React.FC = () => {
           }) => (
             <TextInput
               mode={error ? 'critical' : 'default'}
-              side="left"
               name={name}
               value={value}
               onBlur={onBlur}
