@@ -39,7 +39,8 @@
   },
   "placeHolders": {
     "selectToken": "Select a Token ...",
-    "walletOrEns": "Type wallet address or ENS ..."
+    "walletOrEns": "Type wallet address or ENS ...",
+    "searchTokens": "Type to search ..."
   },
   "finance": {
     "tokenSection": "Tokens",
