@@ -21,3 +21,4 @@ export * from './components/transferListItem';
 export * from './components/wizard';
 export * from './components/tokenListItem';
 export * from './components/textarea';
+export * from './components/table';

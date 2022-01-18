@@ -53,13 +53,13 @@ const Transfers: React.FC = () => {
           <SearchInput placeholder="Type to filter" />
           <ButtonGroup
             bgWhite
-            defaultValue="All"
+            defaultValue="all"
             onChange={handleButtonGroupChange}
           >
-            <Option value="All">All</Option>
-            <Option value="Deposit">Deposit</Option>
-            <Option value="Withdraw">Withdraw</Option>
-            <Option value="External Contract">External Contract</Option>
+            <Option value="all" label="All" />
+            <Option value="deposit" label="Deposit" />
+            <Option value="withdraw" label="Withdraw" />
+            <Option value="externalContract" label="External Contract" />
           </ButtonGroup>
         </div>
         <SectionContainer>
