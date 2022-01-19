@@ -163,6 +163,10 @@ const NewDeposit: React.FC = () => {
       'tokenBalance',
       formatUnits(token.count, token.decimals)
     );
+
+    if (formMethods.formState.dirtyFields.amount) {
+      formMethods.trigger('tokenAddress');
+    }
   };
 
   /*************************************************

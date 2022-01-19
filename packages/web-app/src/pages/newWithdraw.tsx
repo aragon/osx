@@ -12,8 +12,8 @@ import {Address} from '@aragon/ui-components/dist/utils/addresses';
 import {constants} from 'ethers';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
-import {useForm, FormProvider} from 'react-hook-form';
 import React, {useCallback, useEffect} from 'react';
+import {useForm, FormProvider, useFormState} from 'react-hook-form';
 
 import TokenMenu from 'containers/tokenMenu';
 import {useWallet} from 'context/augmentedWallet';
@@ -28,7 +28,7 @@ import ConfigureWithdrawForm from 'containers/configureWithdraw';
 import {useWalletMenuContext} from 'context/walletMenu';
 
 export type FormData = {
-  amount: number;
+  amount: string;
   reference?: string;
   type: TransferTypes;
   from: Address;
@@ -36,6 +36,7 @@ export type FormData = {
   tokenName: string;
   tokenSymbol: string;
   tokenImgUrl: string;
+  tokenDecimals: number;
   tokenAddress: Address;
   tokenBalance: string;
 };
@@ -50,7 +51,7 @@ const steps = {
 const TOTAL_STEPS = Object.keys(steps).length;
 
 const defaultValues = {
-  amount: 0,
+  amount: '',
   reference: '',
   tokenAddress: '',
   tokenSymbol: '',
@@ -61,7 +62,8 @@ const defaultValues = {
 const NewWithdraw: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useWalletMenuContext();
-  const formMethods = useForm<FormData>({defaultValues});
+  const formMethods = useForm<FormData>({defaultValues, mode: 'onChange'});
+  const {isValid} = useFormState({control: formMethods.control});
   const {data: tokens} = useDaoTokens('myDaoAddress');
   const {currentStep, prev, next} = useStepper(TOTAL_STEPS);
   const {connect, isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
@@ -87,6 +89,7 @@ const NewWithdraw: React.FC = () => {
     formMethods.setValue('tokenImgUrl', token.imgUrl);
     formMethods.setValue('tokenSymbol', token.symbol);
     formMethods.setValue('tokenAddress', token.address);
+    formMethods.setValue('tokenDecimals', token.decimals);
     formMethods.setValue(
       'tokenBalance',
       formatUnits(token.count, token.decimals)
@@ -143,17 +146,22 @@ const NewWithdraw: React.FC = () => {
             <FormFooter>
               {/* Should change this to secondary on gray which is unsupported now */}
               <ButtonText
-                label="Back"
                 mode="secondary"
                 size="large"
+                label={t('labels.back')}
                 onClick={prev}
                 disabled={currentStep === 1}
                 iconLeft={<IconChevronLeft />}
               />
               <ButtonText
-                label="Continue"
+                label={
+                  currentStep === steps.reviewProposal
+                    ? t('labels.submitWithdraw')
+                    : t('labels.continue')
+                }
                 size="large"
                 onClick={next}
+                disabled={!isValid}
                 iconRight={<IconChevronRight />}
               />
             </FormFooter>
@@ -164,11 +172,6 @@ const NewWithdraw: React.FC = () => {
           tokenBalances={tokens}
           onTokenSelect={handleTokenSelect}
         />
-
-        {/* View form values; to be removed later */}
-        <pre className="mt-2">
-          Form values: {JSON.stringify(formMethods.watch(), null, 2)}
-        </pre>
       </Layout>
     </>
   );

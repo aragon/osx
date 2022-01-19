@@ -32,12 +32,13 @@ export async function validateTokenAddress(
  *
  * @param amount token amount
  * @param decimals token decimals
+ * @param balance optional balance to verify against
  * @returns true when valid, or an error message when invalid
  */
 export function validateTokenAmount(
   amount: string,
   decimals: number,
-  balance = '0'
+  balance = ''
 ) {
   // A token with no decimals (they do exist in the wild)
   if (!decimals) {
@@ -59,9 +60,11 @@ export function validateTokenAmount(
   if (BigNumber.from(parseUnits(amount, decimals)).lte(0))
     return i18n.t('errors.lteZero') as string;
 
-  // Amount is greater than wallet/dao balance
-  if (BigNumber.from(parseUnits(amount, decimals)).gt(parseUnits(balance)))
-    return i18n.t('errors.insufficientBalance') as string;
+  if (balance !== '') {
+    if (BigNumber.from(parseUnits(amount, decimals)).gt(parseUnits(balance)))
+      // Amount is greater than wallet/dao balance
+      return i18n.t('errors.insufficientBalance') as string;
+  }
 
   return true;
 }

@@ -19,28 +19,29 @@ import React, {useCallback, useEffect} from 'react';
 
 import {useWallet} from 'context/augmentedWallet';
 import {fetchTokenData} from 'services/prices';
+import {handleClipboardActions} from 'utils/library';
 import {useTransferModalContext} from 'context/transfersModal';
 import {fetchBalance, getTokenInfo, isETH} from 'utils/tokens';
 import {validateTokenAddress, validateTokenAmount} from 'utils/validators';
 
-// TODO: Add form validation errors to locale strings
-// TODO: Change valueInput to type number and hide steppers
 const DepositForm: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useTransferModalContext();
   const {account, balance: walletBalance, provider} = useWallet();
-  const [isCustomToken, tokenBalance, tokenSymbol, tokenAddress] = useWatch({
-    name: ['isCustomToken', 'tokenBalance', 'tokenSymbol', 'tokenAddress'],
-  });
-
-  const {control, resetField, setValue, trigger} = useFormContext();
+  const {control, resetField, setValue, trigger, getValues} = useFormContext();
   const {errors, dirtyFields} = useFormState({control});
+
+  const [isCustomToken, tokenBalance, tokenSymbol] = useWatch({
+    name: ['isCustomToken', 'tokenBalance', 'tokenSymbol'],
+  });
 
   /*************************************************
    *                    Hooks                      *
    *************************************************/
   useEffect(() => {
     if (!account) return;
+
+    const tokenAddress = getValues('tokenAddress');
 
     const fetchTokenInfo = async () => {
       if (errors.tokenAddress !== undefined) {
@@ -87,10 +88,10 @@ const DepositForm: React.FC = () => {
     account,
     dirtyFields.amount,
     errors.tokenAddress,
+    getValues,
     isCustomToken,
     provider,
     setValue,
-    tokenAddress,
     trigger,
     walletBalance,
   ]);
@@ -119,6 +120,11 @@ const DepositForm: React.FC = () => {
 
   const amountValidator = useCallback(
     async (amount: string) => {
+      const [tokenAddress, tokenBalance] = getValues([
+        'tokenAddress',
+        'tokenBalance',
+      ]);
+
       // check if a token is selected using it's address
       if (tokenAddress === '') return t('errors.noTokenSelected');
 
@@ -136,35 +142,21 @@ const DepositForm: React.FC = () => {
         return t('errors.defaultAmountValidationError');
       }
     },
-    [errors.tokenAddress, provider, t, tokenAddress, tokenBalance]
+    [errors.tokenAddress, getValues, provider, t]
   );
 
   /*************************************************
    *             Callbacks and Handlers            *
    *************************************************/
   const handleMaxClicked = useCallback(
-    (onChange: (event: unknown[]) => void) => {
-      if (tokenBalance) {
+    (onChange: React.ChangeEventHandler<HTMLInputElement>) => {
+      const tokenBalance = getValues('tokenBalance');
+
+      if (tokenBalance !== '') {
         onChange(tokenBalance);
       }
     },
-    [tokenBalance]
-  );
-
-  // TODO: This should probably come with the input ui-component
-  const handleClipboardActions = useCallback(
-    async (currentValue: string, onChange: (value: string) => void) => {
-      if (currentValue) {
-        await navigator.clipboard.writeText(currentValue);
-
-        // TODO: change to proper mechanism
-        alert('Copied');
-      } else {
-        const textFromClipboard = await navigator.clipboard.readText();
-        onChange(textFromClipboard);
-      }
-    },
-    []
+    [getValues]
   );
 
   /*************************************************

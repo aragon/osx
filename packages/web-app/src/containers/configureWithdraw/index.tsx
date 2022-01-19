@@ -1,4 +1,5 @@
 import {
+  AlertInline,
   DropdownInput,
   Label,
   TextInput,
@@ -9,30 +10,37 @@ import {useTranslation} from 'react-i18next';
 import React, {useCallback} from 'react';
 import {Controller, useFormContext} from 'react-hook-form';
 
+import {handleClipboardActions} from 'utils/library';
 import {useTransferModalContext} from 'context/transfersModal';
+import {validateAddress, validateTokenAmount} from 'utils/validators';
 
 const ConfigureWithdrawForm: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useTransferModalContext();
-  const {control} = useFormContext();
+  const {control, getValues} = useFormContext();
 
-  const handleClipboardActions = useCallback(
-    async (currentValue: string, onChange: (value: string) => void) => {
-      if (currentValue) {
-        await navigator.clipboard.writeText(currentValue);
+  /*************************************************
+   *                Field Validators               *
+   *************************************************/
+  const amountValidator = useCallback(() => {
+    const [amount, tokenAddress, tokenDecimals] = getValues([
+      'amount',
+      'tokenAddress',
+      'tokenDecimals',
+    ]);
 
-        // TODO: change to proper mechanism
-        alert('Copied');
-      } else {
-        const textFromClipboard = await navigator.clipboard.readText();
-        onChange(textFromClipboard);
-      }
-    },
-    []
-  );
+    // check if a token is selected using its address
+    if (tokenAddress === '') return t('errors.noTokenSelected');
 
+    return validateTokenAmount(amount, tokenDecimals);
+  }, [getValues, t]);
+
+  /*************************************************
+   *                    Render                     *
+   *************************************************/
   return (
     <>
+      {/* Recipient (to) */}
       <FormItem>
         <Label
           label={t('labels.to')}
@@ -41,20 +49,29 @@ const ConfigureWithdrawForm: React.FC = () => {
         <Controller
           name="to"
           control={control}
+          rules={{
+            required: t('errors.required.recipient'),
+            validate: validateAddress,
+          }}
           render={({
             field: {name, onBlur, onChange, value},
             fieldState: {error},
           }) => (
-            <ValueInput
-              mode={error ? 'critical' : 'default'}
-              name={name}
-              value={value}
-              onBlur={onBlur}
-              onChange={onChange}
-              placeholder={t('placeHolders.walletOrEns')}
-              adornmentText={value ? 'Copy' : 'Paste'}
-              onAdornmentClick={() => handleClipboardActions(value, onChange)}
-            />
+            <>
+              <ValueInput
+                mode={error ? 'critical' : 'default'}
+                name={name}
+                value={value}
+                onBlur={onBlur}
+                onChange={onChange}
+                placeholder={t('placeHolders.walletOrEns')}
+                adornmentText={value ? t('labels.copy') : t('labels.paste')}
+                onAdornmentClick={() => handleClipboardActions(value, onChange)}
+              />
+              {error?.message && (
+                <AlertInline label={error.message} mode="critical" />
+              )}
+            </>
           )}
         />
       </FormItem>
@@ -65,31 +82,23 @@ const ConfigureWithdrawForm: React.FC = () => {
           label={t('labels.token')}
           helpText={t('newWithdraw.configureWithdraw.tokenSubtitle')}
         />
-        <DropdownInput
-          onClick={() => open('token')}
-          placeholder={t('placeHolders.selectToken')}
-        />
-      </FormItem>
-
-      {/* TODO This is just a reference for development and can savely be
-          removed once the page is actually assembled */}
-      <FormItem>
-        <Label label={'UTC'} />
-        <DropdownInput placeholder={'utc+2'} onClick={() => open('utc')} />
-      </FormItem>
-
-      <FormItem>
         <Controller
           name="tokenSymbol"
           control={control}
+          rules={{required: t('errors.required.token')}}
           render={({field: {name, value}, fieldState: {error}}) => (
-            <DropdownInput
-              name={name}
-              mode={error ? 'critical' : 'default'}
-              value={value}
-              onClick={() => open('token')}
-              placeholder={t('placeHolders.selectToken')}
-            />
+            <>
+              <DropdownInput
+                name={name}
+                mode={error ? 'critical' : 'default'}
+                value={value}
+                onClick={() => open('token')}
+                placeholder={t('placeHolders.selectToken')}
+              />
+              {error?.message && (
+                <AlertInline label={error.message} mode="critical" />
+              )}
+            </>
           )}
         />
       </FormItem>
@@ -103,17 +112,27 @@ const ConfigureWithdrawForm: React.FC = () => {
         <Controller
           name="amount"
           control={control}
+          rules={{
+            required: t('errors.required.amount'),
+            validate: amountValidator,
+          }}
           render={({
             field: {name, onBlur, onChange, value},
             fieldState: {error},
           }) => (
-            <TextInput
-              mode={error ? 'critical' : 'default'}
-              name={name}
-              value={value}
-              onBlur={onBlur}
-              onChange={onChange}
-            />
+            <>
+              <StyledInput
+                mode={error ? 'critical' : 'default'}
+                name={name}
+                type="number"
+                value={value}
+                onBlur={onBlur}
+                onChange={onChange}
+              />
+              {error?.message && (
+                <AlertInline label={error.message} mode="critical" />
+              )}
+            </>
           )}
         />
       </FormItem>
@@ -126,3 +145,12 @@ export default ConfigureWithdrawForm;
 const FormItem = styled.div.attrs({
   className: 'space-y-1.5',
 })``;
+
+const StyledInput = styled(TextInput)`
+  ::-webkit-inner-spin-button,
+  ::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  -moz-appearance: textfield;
+`;
