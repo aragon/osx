@@ -20,5 +20,5 @@ abstract contract ERC1271 {
     /// @param _hash Keccak256 hash of arbitrary length data signed on the behalf of address(this)
     /// @param _signature Signature byte array associated with _data
     /// @return magicValue The bytes4 magic value 0x1626ba7e when function passes
-    function isValidSignature(bytes32 _hash, bytes memory _signature) virtual public view returns (bytes4 magicValue);
+    function isValidSignature(bytes32 _hash, bytes memory _signature) virtual external view returns (bytes4 magicValue);
 }

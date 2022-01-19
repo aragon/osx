@@ -42,7 +42,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function initialize(
         bytes calldata _metadata,
         address initialOwner
-    ) public initializer {
+    ) external initializer {
         _registerStandard(DAO_INTERFACE_ID);
         _registerStandard(type(ERC1271).interfaceId);
         this.setMetadata(_metadata);
@@ -58,7 +58,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _who Who is calling this method
     /// @param _role Which role is required to call this
     /// @param _data Additional data used in the ACLOracle
-    function hasPermission(address _where, address _who, bytes32 _role, bytes memory _data) public override returns(bool) {
+    function hasPermission(address _where, address _who, bytes32 _role, bytes memory _data) external override returns(bool) {
         return willPerform(_where, _who, _role, _data);
     }
 
@@ -135,7 +135,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _to The target address to send tokens or ETH
     /// @param _amount The amount of tokens to deposit
     /// @param _reference The deposit reference describing the reason of it
-    function withdraw(address _token, address _to, uint256 _amount, string memory _reference) public override auth(address(this), WITHDRAW_ROLE) {
+    function withdraw(address _token, address _to, uint256 _amount, string memory _reference) external override auth(address(this), WITHDRAW_ROLE) {
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
             require(ok, ERROR_ETH_WITHDRAW_FAILED);
@@ -156,7 +156,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _hash Hash of the data to be signed
     /// @param _signature Signature byte array associated with _hash
     /// @return bytes4
-    function isValidSignature(bytes32 _hash, bytes memory _signature) override public view returns (bytes4) {
+    function isValidSignature(bytes32 _hash, bytes memory _signature) override external view returns (bytes4) {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
