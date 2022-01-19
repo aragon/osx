@@ -82,8 +82,9 @@ contract DAOFactory {
         dao.initialize(
             _metadata,
             address(this)
-        );
+        );  
 
+        bytes[] memory allowedActions;
         voting = SimpleVoting(
             createProxy(
                 votingBase,
@@ -91,7 +92,8 @@ contract DAOFactory {
                     SimpleVoting.initialize.selector,
                     dao,
                     token,
-                    _votingSettings
+                    _votingSettings,
+                    allowedActions // TODO: maybe we can directly pass allowed actions here
                 )
             )
         );
@@ -116,6 +118,18 @@ contract DAOFactory {
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.ROOT_ROLE(), address(this));
 
         dao.bulk(address(dao), items);
+
+        // give voting AND executing capabilities to anyone on the voting process
+        items = new ACLData.BulkItem[](4);
+
+        address ANY_ADDR = address(type(uint160).max);
+        
+        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.PROCESS_VOTE_ROLE(), ANY_ADDR);
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.PROCESS_EXECUTE_ROLE(), ANY_ADDR);
+        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.PROCESS_START_ROLE(), ANY_ADDR);
+        items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.MODIFY_CONFIG(), address(dao));
+
+        dao.bulk(address(voting), items);
     }
     
     // @dev Internal helper method to set up the required base contracts on DAOFactory deployment.

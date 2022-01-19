@@ -10,8 +10,7 @@ import "./../../../core/DAO.sol";
 import "../../../utils/TimeHelpers.sol";
 
 contract SimpleVoting is VotingProcess, TimeHelpers {
-    bytes32 public constant MODIFY_SUPPORT_ROLE = keccak256("MODIFY_SUPPORT_ROLE");
-    bytes32 public constant MODIFY_QUORUM_ROLE = keccak256("MODIFY_QUORUM_ROLE");
+    bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
     uint64 public constant PCT_BASE = 10 ** 18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
@@ -51,12 +50,16 @@ contract SimpleVoting is VotingProcess, TimeHelpers {
     event StartVote(uint256 indexed voteId, address indexed creator, string description);
     event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports, uint256 stake);
     event ExecuteVote(uint256 indexed voteId);
-    event ChangeSupportRequired(uint64 supportRequiredPct);
-    event ChangeMinQuorum(uint64 minAcceptQuorumPct);
+    event ChangeConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
-    function initialize(DAO _dao, ERC20VotesUpgradeable _token, uint64[3] calldata _votingSettings) public initializer { 
+    function initialize(
+        DAO _dao, 
+        ERC20VotesUpgradeable _token, 
+        uint64[3] calldata _votingSettings,
+        bytes[] calldata _allowedActions
+    ) public initializer { 
         token = _token;
 
         require(_votingSettings[0] <= _votingSettings[1], ERROR_INIT_PCTS);
@@ -66,30 +69,22 @@ contract SimpleVoting is VotingProcess, TimeHelpers {
         supportRequiredPct = _votingSettings[1]; 
         voteTime = _votingSettings[2];
 
-        Component.initialize(_dao);
+        VotingProcess.initialize(_dao, _allowedActions);
     }
 
     /**
-    * @notice Change required support to `@formatPct(_supportRequiredPct)`%
+    * @notice Change required support and minQuorum
     * @param _supportRequiredPct New required support
-    */
-    function changeSupportRequiredPct(uint64 _supportRequiredPct) external auth(MODIFY_SUPPORT_ROLE) {
-        require(minAcceptQuorumPct <= _supportRequiredPct, ERROR_CHANGE_SUPPORT_PCTS);
-        require(_supportRequiredPct < PCT_BASE, ERROR_CHANGE_SUPPORT_TOO_BIG);
-        supportRequiredPct = _supportRequiredPct;
-
-        emit ChangeSupportRequired(_supportRequiredPct);
-    }
-
-    /**
-    * @notice Change minimum acceptance quorum to `@formatPct(_minAcceptQuorumPct)`%
     * @param _minAcceptQuorumPct New acceptance quorum
     */
-    function changeMinAcceptQuorumPct(uint64 _minAcceptQuorumPct) external auth(MODIFY_QUORUM_ROLE) {
-        require(_minAcceptQuorumPct <= supportRequiredPct, ERROR_CHANGE_QUORUM_PCTS);
-        minAcceptQuorumPct = _minAcceptQuorumPct;
+    function changeVoteConfig(uint64 _supportRequiredPct, uint64 _minAcceptQuorumPct) external auth(MODIFY_CONFIG) {
+        require(_minAcceptQuorumPct <= _supportRequiredPct, ERROR_CHANGE_SUPPORT_PCTS);
+        require(_supportRequiredPct < PCT_BASE, ERROR_CHANGE_SUPPORT_TOO_BIG);
 
-        emit ChangeMinQuorum(_minAcceptQuorumPct);
+        minAcceptQuorumPct = _minAcceptQuorumPct;
+        supportRequiredPct = _supportRequiredPct;
+
+        emit ChangeConfig(supportRequiredPct, minAcceptQuorumPct);
     }
 
     /**
@@ -179,8 +174,10 @@ contract SimpleVoting is VotingProcess, TimeHelpers {
     * @dev Internal override function hook to check if vote can be executed. Does gets called from VotingProcess.
     * @param execution current execution data 
     */
-    function _execute(Execution memory execution) internal view override {
+    function _execute(Execution memory execution) internal override {
         require(_canExecute(execution.id), ERROR_CAN_NOT_EXECUTE);
+
+        dao.execute(execution.proposal.actions);
     }
     
     /**
@@ -200,6 +197,16 @@ contract SimpleVoting is VotingProcess, TimeHelpers {
     */
     function canVote(uint256 _voteId, address _voter) public view returns (bool) {
        return _canVote(_voteId, _voter);
+    }
+
+    /**
+    * @notice Tells whether a vote #`_voteId` can be executed or not
+    * @dev Initialization check is implicitly provided by `voteExists()` as new votes can only be
+    *      created via `newVote(),` which requires initialization
+    * @return True if the given vote can be executed, false otherwise
+    */
+    function canExecute(uint256 _voteId) public view returns (bool) {
+        return _canExecute(_voteId);
     }
 
     /**
@@ -264,7 +271,7 @@ contract SimpleVoting is VotingProcess, TimeHelpers {
     * @return True if the given vote is open, false otherwise
     */
     function _isVoteOpen(Vote storage vote_, uint256 voteId) internal view returns (bool) {
-        return getTimestamp64() < vote_.startDate + voteTime && _isVoteExecuted(voteId);
+        return getTimestamp64() < vote_.startDate + voteTime && !_isVoteExecuted(voteId);
     }
 
     /**

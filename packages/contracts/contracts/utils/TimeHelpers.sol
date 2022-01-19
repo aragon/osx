@@ -8,13 +8,13 @@ import "./Uint256Helpers.sol";
 
 contract TimeHelpers {
     using Uint256Helpers for uint256;
-
+    
     /**
     * @dev Returns the current block number.
     *      Using a function rather than `block.number` allows us to easily mock the block number in
     *      tests.
     */
-    function getBlockNumber() internal view returns (uint256) {
+    function getBlockNumber() internal virtual view returns (uint256) {
         return block.number;
     }
 
@@ -23,7 +23,7 @@ contract TimeHelpers {
     *      Using a function rather than `block.number` allows us to easily mock the block number in
     *      tests.
     */
-    function getBlockNumber64() internal view returns (uint64) {
+    function getBlockNumber64() internal virtual view returns (uint64) {
         return getBlockNumber().toUint64();
     }
 
@@ -32,7 +32,7 @@ contract TimeHelpers {
     *      Using a function rather than `block.timestamp` allows us to easily mock it in
     *      tests.
     */
-    function getTimestamp() internal view returns (uint256) {
+    function getTimestamp() internal virtual view returns (uint256) {
         return block.timestamp; // solium-disable-line security/no-block-members
     }
 
@@ -41,7 +41,7 @@ contract TimeHelpers {
     *      Using a function rather than `block.timestamp` allows us to easily mock it in
     *      tests.
     */
-    function getTimestamp64() internal view returns (uint64) {
+    function getTimestamp64() internal virtual view returns (uint64) {
         return getTimestamp().toUint64();
     }
 }

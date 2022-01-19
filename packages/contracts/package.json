@@ -9,6 +9,7 @@
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
+    "coverage": "hardhat coverage --temp artifacts",
     "flatten": "hardhat flatten"
   },
   "repository": {

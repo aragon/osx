@@ -131,22 +131,21 @@ abstract contract Process is Component {
     /// @param _proposal The proposal for execution submitted by the user.
     /// @return executionId The id of the newly created execution.
     function start(Proposal calldata _proposal) 
-        external 
-        auth(PROCESS_START_ROLE) 
+        external
+        auth(PROCESS_START_ROLE)
         returns (uint256 executionId) 
     {
         if (!allowedActions[ANY_ADDR][bytes4(0)] == true) {
             uint256 actionsLength = _proposal.actions.length;
-
+            
             for (uint256 i = 0; i < actionsLength; i++) {
                 IDAO.Action calldata action = _proposal.actions[i];
-
                 if (allowedActions[action.to][bytes4(action.data[:4])] == false) {
                     revert("Not allowed action passed!");
                 }
             }
         }
-
+        
         executionsCounter++;
 
         // the reason behind this - https://matrix.to/#/!poXqlbVpQfXKWGseLY:gitter.im/$6IhWbfjcTqmLoqAVMopWFuIhlQwsoaIRxmsXhhmsaSs?via=gitter.im&via=matrix.org&via=ekpyron.org
@@ -170,9 +169,9 @@ abstract contract Process is Component {
         
         require(execution.state == State.RUNNING, ERROR_EXECUTION_STATE_WRONG);
         
-        execution.state = State.EXECUTED;
-
         _execute(execution); 
+
+        execution.state = State.EXECUTED;
         
         emit ProcessExecuted(execution, _executionId);
     }

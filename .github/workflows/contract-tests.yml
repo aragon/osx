@@ -16,12 +16,16 @@ jobs:
         working-directory: ${{env.working-directory}}
     steps:
       - uses: actions/checkout@v2
+      - name: Install yarn
+        run: npm i -G yarn
       - name: Install dependencies
-        run: npm install
+        run: yarn
+      - name: Compile contracts
+        run: yarn run compile
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true
-        run: npm run test
+        run: yarn run test
 
   test-slither-echidna:
     runs-on: ubuntu-latest
@@ -30,8 +34,10 @@ jobs:
         working-directory: ${{env.working-directory}}
     steps:
       - uses: actions/checkout@v2
+      - name: Install yarn
+        run: npm i -G yarn
       - name: Install dependencies
-        run: npm install
+        run: yarn
       - uses: actions/setup-python@v2
         with:
           python-version: 3.6

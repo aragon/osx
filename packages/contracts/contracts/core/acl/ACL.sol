@@ -29,7 +29,6 @@ contract ACL is Initializable {
 
     // "Access" flags
     address internal constant UNSET_ROLE = address(0);
-    address internal constant FREEZE_FLAG = address(1); // Also used as "who"
     address internal constant ALLOW_FLAG = address(2);
         
     // hash(where, who, role) => Access flag(unset or allow) or ACLOracle (any other address denominates auth via ACLOracle)
@@ -42,11 +41,16 @@ contract ACL is Initializable {
     event Revoked(bytes32 indexed role, address indexed actor, address indexed who, address where);
     event Frozen(bytes32 indexed role, address indexed actor, address where);
 
-    /// @dev The modifier used within the DAO framework to check permissions
+    /// @dev The modifier used within the DAO framework to check permissions.
+    //       Allows to set ROOT roles on specific contract or on the main, overal DAO.
     /// @param _where The contract that will be called
     /// @param _role The role required to call the method this modifier is applied
     modifier auth(address _where, bytes32 _role) {
-        require(willPerform(_where, msg.sender, _role, msg.data), "acl: auth");
+        require(
+            willPerform(_where, msg.sender, _role, msg.data) ||
+            willPerform(address(this), msg.sender, _role, msg.data), 
+            "acl: auth"
+        );
         _;
     }
 
@@ -168,8 +172,6 @@ contract ACL is Initializable {
     /// @param _where The address of the contract
     /// @param _role The hash of the role identifier
     function _freeze(address _where, bytes32 _role) internal {
-        require(!isFrozen(_where,_role), "acl: frozen");
-
         bytes32 permission = freezeHash(_where, _role);
         require(!freezePermissions[permission], "acl: role already freeze");
         freezePermissions[freezeHash(_where, _role)] = true;
@@ -186,7 +188,7 @@ contract ACL is Initializable {
     function _checkRole(address _where, address _who, bytes32 _role, bytes memory _data) internal returns (bool) {
         address accessFlagOrAclOracle = authPermissions[permissionHash(_where, _who, _role)];
         
-        if (accessFlagOrAclOracle != UNSET_ROLE) return false;
+        if (accessFlagOrAclOracle == UNSET_ROLE) return false;
         if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
 
         // Since it's not a flag, assume it's an ACLOracle and try-catch to skip failures

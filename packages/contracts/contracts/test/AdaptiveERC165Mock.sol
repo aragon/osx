@@ -24,7 +24,7 @@ contract AdaptiveERC165MockHelper {
 
     event ReceivedCallback(bytes32 b);
 
-    constructor(address _addr) public {
+    constructor(address _addr) {
         addr = _addr;
     }
 
