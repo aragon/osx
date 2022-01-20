@@ -9,7 +9,7 @@ import {
 } from '../icons';
 import {LabelProps} from '../label';
 
-type ModeType = 'active' | 'failed' | 'done' | 'succeeded' | 'upcoming';
+export type ModeType = 'active' | 'failed' | 'done' | 'succeeded' | 'upcoming';
 export type ProgressStatusProps = {
   /**
    * The mode is the state of a progress' status. Simple, init? ;)

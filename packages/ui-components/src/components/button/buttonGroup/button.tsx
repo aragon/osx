@@ -1,5 +1,5 @@
 import React from 'react';
-import {ButtonText} from '..';
+import {ButtonText} from '../buttonText';
 import {useButtonGroupContext} from './buttonGroup';
 
 export type OptionProps = {

@@ -22,3 +22,4 @@ export * from './components/wizard';
 export * from './components/tokenListItem';
 export * from './components/textarea';
 export * from './components/table';
+export * from './components/widgets';

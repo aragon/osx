@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import {TableCell} from '.';
+import {TableCell} from './tableCell';
 import {Badge} from '../badge';
 import {IconChevronDown} from '../icons';
 import {Link} from '../link';
