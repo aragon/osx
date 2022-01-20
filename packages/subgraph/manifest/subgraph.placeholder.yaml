@@ -1,0 +1,175 @@
+{{info}}
+specVersion: 0.0.2
+description: A template for Aragon subgraphs
+repository: https://github.com/aragon/zaragoza
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Registry
+    network: {{network}}
+    source:
+      abi: Registry
+      address: '{{dataSources.Registry.address}}'
+      startBlock: {{dataSources.Registry.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Dao
+      abis:
+        - name: Registry
+          file: ./../contracts/artifacts/contracts/registry/Registry.sol/Registry.json
+      eventHandlers:
+        - event: NewDAORegistered(indexed address,indexed address,indexed address,string)
+          handler: handleNewDAORegistered
+      file: ./src/registry.ts
+# templates
+templates:
+  # DAO
+  - name: DAO
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: DAO
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/dao.ts
+      entities:
+        - Dao
+      abis:
+        - name: DAO
+          file: ./../contracts/artifacts/contracts/core/DAO.sol/DAO.json
+      eventHandlers:
+        - event: ProcessAdded(indexed address)
+          handler: handleProcessAdded
+        - event: ProcessRemoved(indexed address)
+          handler: handleProcessRemoved
+        - event: SetMetadata(indexed bytes)
+          handler: handleSetMetadata
+        - event : Executed(indexed address,(address,uint256,bytes)[],bytes[])
+          handler: handleExecuted
+        - event: Deposited(indexed address,indexed address,uint256,string)
+          handler: handleDeposited
+        - event: ETHDeposited(address,uint256)
+          handler: handleETHDeposited
+        - event: Withdrawn(indexed address,indexed address,uint256,string)
+          handler: handleWithdrawn
+  # Processes (core)
+  - name: Process
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: Process
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/process.ts
+      entities:
+        - Execution
+        - Process
+      abis:
+        - name: Process
+          file: ./../contracts/artifacts/contracts/core/processes/Process.sol/Process.json
+      eventHandlers:
+        - event: AllowedActionsAdded(bytes[])
+          handler: handleAllowedActionsAdded
+        - event: AllowedActionsRemoved(bytes[])
+          handler: handleAllowedActionsRemoved
+        - event: ProcessExecuted((uint256,((address,uint256,bytes)[],bytes,bytes),uint8),indexed uint256)
+          handler: handleProcessExecuted
+        - event: ProcessStarted((uint256,((address,uint256,bytes)[],bytes,bytes),uint8),bytes,indexed uint256)
+          handler: handleProcessStarted
+  - name: DisputableProcess
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: DisputableProcess
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/process.ts
+      entities:
+        - Execution
+        - Process
+      abis:
+        - name: DisputableProcess
+          file: ./../contracts/artifacts/contracts/core/processes/disputable/DisputableProcess.sol/DisputableProcess.json
+      eventHandlers:
+        - event: ProcessForwarded((uint256,((address,uint256,bytes)[],bytes,bytes),uint8),indexed uint256)
+          handler: handleProcessForwarded
+        - event: ProcessHalted((uint256,((address,uint256,bytes)[],bytes,bytes),uint8),indexed uint256)
+          handler: handleProcessHalted
+        - event: ProcessStopped((indexed uint256,((address,uint256,bytes)[],bytes,bytes),uint8),indexed uint256)
+          handler: handleProcessStopped
+  - name: StoppableProcess
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: StoppableProcess
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/process.ts
+      entities:
+        - Execution
+        - Process
+      abis:
+        - name: StoppableProcess
+          file: ./../contracts/artifacts/contracts/core/processes/stoppable/StoppableProcess.sol/StoppableProcess.json
+      eventHandlers:
+        - event: ProcessStopped((indexed uint256,((address,uint256,bytes)[],bytes,bytes),uint8),indexed uint256)
+          handler: handleProcessStopped
+  - name: VotingProcess
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: VotingProcess
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/process.ts
+      entities:
+        - Execution
+        - Process
+      abis:
+        - name: VotingProcess
+          file: ./../contracts/artifacts/contracts/core/processes/voting/VotingProcess.sol/VotingProcess.json
+      eventHandlers:
+        - event: VotedOnProcess((uint256,((address,uint256,bytes)[],bytes,bytes),uint8),bytes,indexed uint256)
+          handler: handleVotedOnProcess
+  # Voting (package process)
+  - name: SimpleVoting
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: SimpleVoting
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/process.ts
+      entities:
+        - Execution
+        - Process
+      abis:
+        - name: SimpleVoting
+          file: ./../contracts/artifacts/contracts/processes/votings/simple/SimpleVoting.sol/SimpleVoting.json
+      eventHandlers:
+        - event: CastVote(indexed uint256,indexed address,bool,uint256)
+          handler: handleCastVote
+        - event: ChangeMinQuorum(uint64)
+          handler: handleChangeMinQuorum
+        - event: ChangeSupportRequired(uint64)
+          handler: handleChangeSupportRequired
+        - event: ExecuteVote(indexed uint256)
+          handler: handleExecuteVote
+        - event: StartVote(indexed uint256,indexed address,string)
+          handler: handleStartVote

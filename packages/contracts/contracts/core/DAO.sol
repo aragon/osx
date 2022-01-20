@@ -29,7 +29,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
 
-     // Error msg's
+    // Error msg's
     string internal constant ERROR_ACTION_CALL_FAILED = "ACTION_CALL_FAILED";
     string internal constant ERROR_DEPOSIT_AMOUNT_ZERO = "DEPOSIT_AMOUNT_ZERO";
     string internal constant ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH = "ETH_DEPOSIT_AMOUNT_MISMATCH";
@@ -39,10 +39,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
-    function initialize(
-        bytes calldata _metadata,
-        address initialOwner
-    ) external initializer {
+    function initialize(bytes calldata _metadata, address initialOwner) external initializer {
         _registerStandard(DAO_INTERFACE_ID);
         _registerStandard(type(ERC1271).interfaceId);
         this.setMetadata(_metadata);
@@ -50,7 +47,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) { }
+    function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
 
     /// @notice Checks if the current callee has the permissions for.
     /// @dev Wrapper for the willPerform method of ACL to later on be able to use it in the modifier of the sub components of this DAO.
@@ -58,7 +55,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _who Who is calling this method
     /// @param _role Which role is required to call this
     /// @param _data Additional data used in the ACLOracle
-    function hasPermission(address _where, address _who, bytes32 _role, bytes memory _data) external override returns(bool) {
+    function hasPermission(
+        address _where,
+        address _who,
+        bytes32 _role,
+        bytes memory _data
+    ) external override returns (bool) {
         return willPerform(_where, _who, _role, _data);
     }
 
@@ -93,7 +95,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         bytes[] memory execResults = new bytes[](_actions.length);
 
         for (uint256 i = 0; i < _actions.length; i++) {
-            (bool success, bytes memory response) = _actions[i].to.call{ value: _actions[i].value }(_actions[i].data);
+            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
 
             require(success, ERROR_ACTION_CALL_FAILED);
 
@@ -104,12 +106,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
-    receive () external payable {
+    receive() external payable {
         emit ETHDeposited(msg.sender, msg.value);
     }
-    
+
     /// @dev Fallback to handle future versions of the ERC165 standard.
-    fallback () external {
+    fallback() external {
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 
@@ -118,7 +120,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _token The address of the token and in case of ETH address(0)
     /// @param _amount The amount of tokens to deposit
     /// @param _reference The deposit reference describing the reason of it
-    function deposit(address _token, uint256 _amount, string calldata _reference) external override payable {
+    function deposit(
+        address _token,
+        uint256 _amount,
+        string calldata _reference
+    ) external payable override {
         require(_amount > 0, ERROR_DEPOSIT_AMOUNT_ZERO);
 
         if (_token == address(0)) {
@@ -135,20 +141,28 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _to The target address to send tokens or ETH
     /// @param _amount The amount of tokens to deposit
     /// @param _reference The deposit reference describing the reason of it
-    function withdraw(address _token, address _to, uint256 _amount, string memory _reference) external override auth(address(this), WITHDRAW_ROLE) {
+    function withdraw(
+        address _token,
+        address _to,
+        uint256 _amount,
+        string memory _reference
+    ) external override auth(address(this), WITHDRAW_ROLE) {
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
             require(ok, ERROR_ETH_WITHDRAW_FAILED);
         } else {
             ERC20(_token).safeTransfer(_to, _amount);
         }
-        
+
         emit Withdrawn(_token, _to, _amount, _reference);
     }
 
     /// @notice Setter to set the signature validator contract of ERC1271
     /// @param _signatureValidator ERC1271 SignatureValidator
-    function setSignatureValidator(ERC1271 _signatureValidator) external auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE) {
+    function setSignatureValidator(ERC1271 _signatureValidator)
+        external
+        auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE)
+    {
         signatureValidator = _signatureValidator;
     }
 
@@ -156,8 +170,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _hash Hash of the data to be signed
     /// @param _signature Signature byte array associated with _hash
     /// @return bytes4
-    function isValidSignature(bytes32 _hash, bytes memory _signature) override external view returns (bytes4) {
+    function isValidSignature(bytes32 _hash, bytes memory _signature) external view override returns (bytes4) {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
-} 
+}

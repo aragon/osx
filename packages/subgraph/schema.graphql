@@ -1,0 +1,96 @@
+# Enums
+enum ExecutionState {
+  RUNNING
+  STOPPED
+  HALTED
+  EXECUTED
+}
+
+# Types
+
+# Processes
+type Action @entity {
+  id: ID!
+  to: Bytes!
+  value: BigInt!
+  data: Bytes!
+  proposal: Proposal!
+  execResult: Bytes
+}
+
+type Proposal @entity {
+  id: ID!
+  dao: Dao!
+  process: Process!
+  metadata: Bytes!
+  additionalArguments: Bytes
+  actions: [Action!]! @derivedFrom(field: "proposal")
+}
+
+type AllowedAction @entity {
+  id: ID!
+  allowedAction: Bytes!
+  process: Process!
+}
+
+type Process @entity {
+  id: ID!
+  daos: [ProcessDao!]! @derivedFrom(field: "process")
+  allowedActions: [AllowedAction!]! @derivedFrom(field: "process")
+  proposals: [Proposal!]! @derivedFrom(field: "process")
+}
+
+type ProcessDao @entity {
+  id: ID! # Set to `${process.id}_${dao.id}`
+  process: Process!
+  dao: Dao!
+}
+
+type Execution @entity {
+  id: ID!
+  dao: Dao!
+  executionId: BigInt!
+  proposal: Proposal!
+  state: ExecutionState!
+}
+
+# Vault
+type VaultWithdraw @entity {
+  id: ID!
+  dao: Dao!
+  token: Bytes
+  to: Bytes!
+  amount: BigInt!
+  reason: String!
+}
+
+type VaultEthDeposit @entity {
+  id: ID!
+  dao: Dao!
+  sender: Bytes!
+  amount: BigInt!
+}
+
+type VaultDeposit @entity {
+  id: ID!
+  dao: Dao!
+  token: Bytes!
+  sender: Bytes!
+  amount: BigInt!
+  reason: String!
+}
+
+# Daos
+type Dao @entity {
+  id: ID!
+  name: String!
+  creator: Bytes!
+  metadata: String!
+  token: Bytes!
+  processes: [ProcessDao!]! @derivedFrom(field: "dao")
+  proposals: [Proposal!]! @derivedFrom(field: "dao")
+  ethDeposits: [VaultEthDeposit!]! @derivedFrom(field: "dao")
+  tokenDeposits: [VaultDeposit!]! @derivedFrom(field: "dao")
+  withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
+  executions: [Execution!]! @derivedFrom(field: "dao")
+}

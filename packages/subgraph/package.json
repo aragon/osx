@@ -1,0 +1,25 @@
+{
+  "name": "@aragon/zaragoza-subgraph",
+  "version": "0.0.1",
+  "description": "Aragon V2 Subgraph",
+  "homepage": "https://github.com/aragon/zaragoza",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy-arbitrum-rinkeby": "scripts/deploy.sh aragon zaragoza arbitrum-rinkeby",
+    "deploy-local": "LOCAL=true scripts/deploy.sh aragon zaragoza arbitrum-rinkeby",
+    "create-local": "graph create aragon/aragon-zaragoza-arbitrum-rinkeby --node http://localhost:8020",
+    "test": "rm -r tests/.bin; graph test",
+    "coverage": "graph test -c",
+    "manifest-arbitrum-rinkeby": "scripts/build-manifest.sh arbitrum-rinkeby"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.24.1",
+    "@graphprotocol/graph-ts": "^0.24.1",
+    "mustache": "^4.2.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "^0.2.1"
+  }
+}
