@@ -72,6 +72,9 @@
       "token": "Token is required"
     }
   },
+  "warnings": {
+    "amountGtDaoToken": "Withdraw amount is greater than the current token balance"
+  },
   "allTransfer": {
     "thisWeek": "This Week",
     "tokens": "Tokens",
