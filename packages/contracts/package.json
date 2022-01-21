@@ -11,7 +11,8 @@
     "compile": "hardhat compile",
     "coverage": "hardhat coverage --temp artifacts",
     "flatten": "hardhat flatten",
-    "analyze": "mythx analyze"
+    "analyze": "mythx analyze",
+    "deploy": "hardhat deploy"
   },
   "repository": {
     "type": "git",
@@ -46,11 +47,13 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.1",
     "hardhat": "^2.6.8",
+    "hardhat-deploy": "^0.9.26",
     "hardhat-gas-reporter": "^1.0.4",
     "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17",
+    "tmp-promise": "^3.0.3",
     "ts-node": "^10.4.0",
     "typechain": "^5.2.0",
     "typescript": "^4.4.4"
