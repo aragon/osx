@@ -10,6 +10,7 @@ dist
 dist-ssr
 *.local
 .cache
+storybook-static
 
 # misc
 .vscode

@@ -1,0 +1,23 @@
+name: Storybook Deploy
+on:
+  push:
+    paths:
+      - 'packages/ui-components/**'
+    branches:
+      - 'main'
+
+env:
+  working-directory: packages/ui-components
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{env.working-directory}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Deploy
+        run: yarn deploy-storybook --ci --host-token-env-variable=GITHUB_TOKEN
