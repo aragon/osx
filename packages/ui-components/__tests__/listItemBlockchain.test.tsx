@@ -1,17 +1,17 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {WidgetStatus} from '../src';
+import {ListItemBlockchain} from '../src';
 
-describe('WidgetStatus', () => {
+describe('ListItemBlockchain', () => {
   // eslint-disable-next-line
   function setup(args: any) {
-    render(<WidgetStatus {...args} />);
-    return screen.getByTestId('widgetStatus');
+    render(<ListItemBlockchain {...args} />);
+    return screen.getByTestId(/blockchain/i);
   }
 
   test('should render without crashing', () => {
-    const element = setup({steps: []});
+    const element = setup({logo: ''});
     expect(element).toBeInTheDocument;
   });
 });

@@ -21,6 +21,7 @@ export {IconPerson} from './icon_person';
 export {IconRadioDefault} from './icon_radio_default';
 export {IconRadioSelected} from './icon_radio_selected';
 export {IconRadioCancel} from './radio';
+export {IconRadioSelected} from './icon_radio_selected';
 export {IconRemove} from './icon_remove';
 export {IconSearch} from './icon_search';
 export {IconSettings} from './icon_settings';
