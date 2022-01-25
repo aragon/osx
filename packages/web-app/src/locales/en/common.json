@@ -54,6 +54,29 @@
       "from": "from"
     }
   },
+  "governance": {
+    "proposals": {
+      "publishedBy" : "Published by",
+      "pending":"Starts in {{days}} days {{hours}} hours",
+      "active":"{{days}} days {{hours}} hours left",
+      "voteTitle":"Winning Option",
+      "states":{
+        "draft":"Draft",
+        "pending":"Pending",
+        "active":"Active",
+        "executed":"Executed",
+        "succeeded":"Succeeded",
+        "defeated":"Defeated"
+      },
+      "buttons":{
+        "read":"Read Proposal",
+        "vote":"Vote now",
+        "execute":"Execute Now",
+        "edit":"Edit Proposal"
+      }
+    },
+    "noProposals": "No proposals found!"
+  },
   "errors": {
     "amountWithInvalidToken": "Cannot validate amount with invalid token address",
     "defaultAmountValidationError": "Error validating amount",

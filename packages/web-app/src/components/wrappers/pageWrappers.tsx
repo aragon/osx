@@ -70,5 +70,5 @@ const PageTitle = styled.p.attrs({
 })``;
 
 const ContentWrapper = styled.div.attrs({
-  className: 'flex flex-col',
+  className: 'flex flex-col space-y-2',
 })``;

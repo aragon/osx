@@ -65,6 +65,20 @@ export type Transfer = {
   isPending?: boolean;
 };
 
+/** A proposal */
+export type Proposal = {
+  type: 'draft' | 'pending' | 'active' | 'succeeded' | 'executed' | 'defeated';
+  title: string;
+  description: string;
+  publisherAddress: string;
+  voteProgress?: string | number;
+  voteLabel?: string;
+  tokenAmount?: string;
+  tokenSymbol?: string;
+  startAt?: string;
+  endAt?: string;
+};
+
 /** Return type for data hooks */
 export type HookData<T> = {
   data: T;

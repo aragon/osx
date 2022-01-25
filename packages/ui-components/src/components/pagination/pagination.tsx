@@ -53,6 +53,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             onClick={() => setPage(i)}
             {...(bgWhite && {bgWhite})}
             label={`${i}`}
+            key={i}
           />
         );
       }
@@ -69,6 +70,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             onClick={() => setPage(i)}
             {...(bgWhite && {bgWhite})}
             label={`${i}`}
+            key={i}
           />
         );
       }
@@ -97,6 +99,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             onClick={() => setPage(i)}
             {...(bgWhite && {bgWhite})}
             label={`${i}`}
+            key={i}
           />
         );
       }
@@ -124,6 +127,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           onClick={() => setPage(i)}
           {...(bgWhite && {bgWhite})}
           label={`${i}`}
+          key={i}
         />
       );
     }
