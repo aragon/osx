@@ -19,7 +19,6 @@ export {IconLinkExternal} from './icon_link_external';
 export {IconMenu} from './icon_menu';
 export {IconPerson} from './icon_person';
 export {IconRadioDefault} from './icon_radio_default';
-export {IconRadioSelected} from './icon_radio_selected';
 export {IconRadioCancel} from './radio';
 export {IconRadioSelected} from './icon_radio_selected';
 export {IconRemove} from './icon_remove';

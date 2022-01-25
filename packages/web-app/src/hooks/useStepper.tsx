@@ -20,5 +20,5 @@ export const useStepper = (totalSteps: number) => {
     }
   }, [currentStep]);
 
-  return {currentStep, prev: gotoPreviousStep, next: gotoNextStep};
+  return {currentStep, prev: gotoPreviousStep, next: gotoNextStep, setStep};
 };
