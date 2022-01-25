@@ -39,7 +39,7 @@ const ConfigureWithdrawForm: React.FC = () => {
     // Insufficient data to calculate warning
     if (!decimals || !balance || amount === '') return null;
 
-    if (BigNumber.from(parseUnits(amount, decimals)).gt(parseUnits(balance)))
+    if (Number(amount) > Number(balance))
       return (
         <AlertInline label={t('warnings.amountGtDaoToken')} mode="warning" />
       );

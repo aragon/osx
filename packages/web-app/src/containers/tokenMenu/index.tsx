@@ -73,20 +73,17 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
     ) : (
       <>
         <NoTokenWrapper>
-          <TokenTitle>{t('TokenModal.tokenNotFoundTitle')}</TokenTitle>
-          <TokenSubtitle>{t('TokenModal.tokenNotFoundSubtitle')}</TokenSubtitle>
+          <TokenTitle>
+            {isWallet
+              ? t('TokenModal.tokenNotFoundTitle')
+              : t('TokenModal.noTokens')}
+          </TokenTitle>
+          {isWallet && (
+            <TokenSubtitle>
+              {t('TokenModal.tokenNotFoundSubtitle')}
+            </TokenSubtitle>
+          )}
         </NoTokenWrapper>
-        {isWallet && (
-          <WideButton
-            mode="secondary"
-            size="large"
-            label="Add Custom Token"
-            iconLeft={<IconAdd />}
-            onClick={() =>
-              handleTokenClick({...customToken, symbol: searchValue})
-            }
-          />
-        )}
       </>
     );
   };
@@ -108,6 +105,17 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
           placeholder={t('placeHolders.searchTokens')}
         />
         <TokensWrapper>{renderTokens()}</TokensWrapper>
+        {isWallet && (
+          <WideButton
+            mode="secondary"
+            size="large"
+            label="Add Custom Token"
+            iconLeft={<IconAdd />}
+            onClick={() =>
+              handleTokenClick({...customToken, symbol: searchValue})
+            }
+          />
+        )}
       </Container>
     </Modal>
   );

@@ -115,6 +115,7 @@
     "item2Subtitle": "Propose to withdraw assets from the DAO treasury"
   },
   "TokenModal": {
+    "noTokens": "No tokens available",
     "tokenNotFoundTitle": "Token not found",
     "tokenNotFoundSubtitle": "Add custom token to deposit"
   },
