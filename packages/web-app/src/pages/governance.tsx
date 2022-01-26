@@ -6,28 +6,31 @@ import styled from 'styled-components';
 import {PageWrapper} from 'components/wrappers';
 import ProposalList from 'components/proposalList';
 import {useDaoProposals} from '../hooks/useDaoProposals';
-import {Proposal} from 'utils/types';
+import {ProposalData} from 'utils/types';
 
 const Governance: React.FC = () => {
   const [filterValue, setFilterValue] = useState<string>('all');
   const [page, setPage] = useState(1);
   const {data: daoProposals} = useDaoProposals('0x0000000000');
-  let displayedProposals: Proposal[] = [];
   // The number of proposals displayed on each page
   const ProposalsPerPage = 6;
 
   // This sort function should implement on graph side!
-  function sortProposals(a: Proposal, b: Proposal): number {
+  function sortProposals(a: ProposalData, b: ProposalData): number {
     if (filterValue === 'active') {
-      return parseInt(a.startAt as string) - parseInt(b.startAt as string);
+      return (
+        parseInt(a.vote.start as string) - parseInt(b.vote.start as string)
+      );
     } else if (filterValue !== 'draft') {
-      return parseInt(a.endAt as string) - parseInt(b.endAt as string);
+      return parseInt(a.vote.end as string) - parseInt(b.vote.end as string);
     }
     return 1;
   }
 
   // TODO: this filter / sort function should implement using graph queries
-  if (filterValue) {
+
+  let displayedProposals: ProposalData[] = [];
+  if (daoProposals.length > 0 && filterValue) {
     displayedProposals = daoProposals.filter(
       t => t.type === filterValue || filterValue === 'all'
     );
