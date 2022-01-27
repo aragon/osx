@@ -1,10 +1,16 @@
+import {
+  Modal,
+  SearchInput,
+  ButtonText,
+  IconAdd,
+  IconStorage,
+} from '@aragon/ui-components';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import React, {useCallback, useState} from 'react';
-import {Modal, SearchInput, ButtonText, IconAdd} from '@aragon/ui-components';
 
 import TokenBox from './tokenBox';
-
+import {sortTokens} from 'utils/tokens';
 import {formatUnits} from 'utils/library';
 import {useTokenInfo} from 'hooks/useTokenInformation';
 import {useTransferModalContext} from 'context/transfersModal';
@@ -56,36 +62,53 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
 
   const renderTokens = () => {
     const tokenList = tokens.filter(filterValidator);
+    sortTokens(tokenList, 'name');
 
-    return tokenList.length !== 0 ? (
-      <>
-        {tokenList.map(token => (
-          <div key={token.address} onClick={() => handleTokenClick(token)}>
-            <TokenBox
-              tokenName={token.name}
-              tokenLogo={token.imgUrl}
-              tokenSymbol={token.symbol}
-              tokenBalance={formatUnits(token.count, token.decimals)}
-            />
-          </div>
-        ))}
-      </>
-    ) : (
-      <>
-        <NoTokenWrapper>
-          <TokenTitle>
-            {isWallet
-              ? t('TokenModal.tokenNotFoundTitle')
-              : t('TokenModal.noTokens')}
-          </TokenTitle>
-          {isWallet && (
+    if (tokenList.length === 0 && searchValue === '') {
+      return (
+        <>
+          <NoTokenContainer>
+            <IconWrapper>
+              <IconStorage height={24} width={24} />
+            </IconWrapper>
+            <TokenTitle>{t('TokenModal.tokenNotAvailable')}</TokenTitle>
+            <TokenDescription>
+              {isWallet
+                ? t('TokenModal.tokenNotAvailableSubtitle')
+                : t('TokenModal.tokenNotAvailableSubtitleDao')}
+            </TokenDescription>
+          </NoTokenContainer>
+        </>
+      );
+    } else if (tokenList.length === 0) {
+      return (
+        <>
+          <NoTokenWrapper>
+            <TokenTitle>{t('TokenModal.tokenNotFoundTitle')}</TokenTitle>
             <TokenSubtitle>
-              {t('TokenModal.tokenNotFoundSubtitle')}
+              {isWallet
+                ? t('TokenModal.tokenNotFoundSubtitle')
+                : t('TokenModal.tokenNotFoundSubtitleDao')}
             </TokenSubtitle>
-          )}
-        </NoTokenWrapper>
-      </>
-    );
+          </NoTokenWrapper>
+        </>
+      );
+    } else {
+      return (
+        <>
+          {tokenList.map(token => (
+            <div key={token.address} onClick={() => handleTokenClick(token)}>
+              <TokenBox
+                tokenName={token.name}
+                tokenLogo={token.imgUrl}
+                tokenSymbol={token.symbol}
+                tokenBalance={formatUnits(token.count, token.decimals)}
+              />
+            </div>
+          ))}
+        </>
+      );
+    }
   };
 
   /*************************************************
@@ -101,21 +124,21 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
       <Container>
         <SearchInput
           value={searchValue}
-          onChange={e => setSearchValue(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchValue(e.target.value)
+          }
           placeholder={t('placeHolders.searchTokens')}
         />
         <TokensWrapper>{renderTokens()}</TokensWrapper>
-        {isWallet && (
-          <WideButton
-            mode="secondary"
-            size="large"
-            label="Add Custom Token"
-            iconLeft={<IconAdd />}
-            onClick={() =>
-              handleTokenClick({...customToken, symbol: searchValue})
-            }
-          />
-        )}
+        <WideButton
+          mode="secondary"
+          size="large"
+          label="Add Custom Token"
+          iconLeft={<IconAdd />}
+          onClick={() =>
+            handleTokenClick({...customToken, symbol: searchValue})
+          }
+        />
       </Container>
     </Modal>
   );
@@ -136,7 +159,11 @@ const TokenTitle = styled.h2.attrs({
 })``;
 
 const TokenSubtitle = styled.h2.attrs({
-  className: 'text-sm',
+  className: 'text-sm text-ui-600',
+})``;
+
+const TokenDescription = styled.h2.attrs({
+  className: 'text-sm text-center text-ui-600',
 })``;
 
 const WideButton = styled(ButtonText).attrs({
@@ -145,4 +172,13 @@ const WideButton = styled(ButtonText).attrs({
 
 const NoTokenWrapper = styled.div.attrs({
   className: 'space-y-0.5 mb-3',
+})``;
+
+const NoTokenContainer = styled.div.attrs({
+  className: `flex flex-col items-center mb-3
+    justify-center bg-ui-100 py-3 px-2 rounded-xl`,
+})``;
+
+const IconWrapper = styled.div.attrs({
+  className: 'mb-1.5',
 })``;

@@ -20,13 +20,13 @@ import DepositForm from 'containers/depositForm';
 import {useStepper} from 'hooks/useStepper';
 import {formatUnits} from 'utils/library';
 import ReviewDeposit from 'containers/reviewDeposit';
-import {fetchBalance} from 'utils/tokens';
+import {fetchBalance, isETH} from 'utils/tokens';
 import {NavigationBar} from 'containers/navbar';
 import {TransferTypes} from 'utils/constants';
-import {curatedTokens} from 'utils/network';
 import {useWalletProps} from 'containers/walletMenu';
 import {useWalletMenuContext} from 'context/walletMenu';
 import {BaseTokenInfo, TokenBalance} from 'utils/types';
+import {constants} from 'ethers';
 
 const steps = {
   configure: 1,
@@ -68,6 +68,8 @@ const NewDeposit: React.FC = () => {
     ensName,
     isConnected,
     provider,
+    getTokenList,
+    balance,
   }: useWalletProps = useWallet();
 
   const formMethods = useForm<FormData>({
@@ -98,39 +100,34 @@ const NewDeposit: React.FC = () => {
   // fetch curated tokens and corresponding balance on wallet
   useEffect(() => {
     async function fetchWalletTokens() {
-      if (account === null) return;
+      if (account === null) {
+        setWalletTokens([]);
+        return;
+      }
 
-      // get curated tokens
-      const curatedTokenBalances = Object.entries(
-        curatedTokens[chainId || 4].curatedTokens
-      ).map(
-        value =>
-          ({
-            address: value[1],
-            count: BigInt(0),
-          } as TokenBalance)
-      );
+      const tokenList = await getTokenList();
+      if (Number(balance) !== -1 && Number(balance) !== 0)
+        await tokenList.push(constants.AddressZero);
 
       // get curated tokens balance from wallet
-      const allPromise = Promise.all(
-        curatedTokenBalances.map(({address}) =>
-          fetchBalance(address, account, provider, false)
-        )
+      const balances = await Promise.all(
+        tokenList.map(address => {
+          if (isETH(address)) return formatUnits(balance, 18)?.slice(0, 4);
+          else return fetchBalance(address, account, provider, false);
+        })
       );
-
-      const balances = await allPromise;
 
       // map tokens with their balance
       setWalletTokens(
-        curatedTokenBalances.map((token, index) => ({
-          ...token,
+        tokenList.map((token, index) => ({
+          address: token,
           count: balances[index],
         }))
       );
     }
 
     fetchWalletTokens();
-  }, [account, chainId, provider]);
+  }, [account, balance, chainId, getTokenList, provider]);
 
   /*************************************************
    *             Callbacks and Handlers            *

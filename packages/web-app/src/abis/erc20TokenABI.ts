@@ -7,4 +7,5 @@ export const erc20TokenABI = [
   'function decimals() view returns (uint8)',
   'function name() view returns (string)',
   'function symbol() public view returns (string)',
+  'event Transfer(address indexed from, address indexed to, uint256 value)',
 ];
