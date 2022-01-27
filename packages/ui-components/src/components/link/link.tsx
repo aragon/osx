@@ -13,7 +13,6 @@ export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   iconLeft?: React.FunctionComponentElement<IconType>;
   /** optional label for the link, defaults to the href if value not provided */
   label?: string;
-  size?: 'small' | 'default' | 'large';
 };
 
 /** Default link component */
@@ -25,7 +24,6 @@ export const Link: React.FC<LinkProps> = ({
   iconRight,
   label,
   href,
-  size = 'default',
   ...props
 }) => {
   return (
@@ -40,7 +38,7 @@ export const Link: React.FC<LinkProps> = ({
     >
       <div className="inline-flex justify-start items-center space-x-1.5">
         {iconLeft && iconLeft}
-        <Label {...{size}}>{label || href}</Label>
+        <Label>{label || href}</Label>
         {!iconLeft && iconRight && iconRight}
       </div>
     </StyledLink>
@@ -49,7 +47,7 @@ export const Link: React.FC<LinkProps> = ({
 
 type StyledLinkProps = {disabled: boolean; active: boolean};
 const StyledLink = styled.a.attrs(({active, disabled}: StyledLinkProps) => {
-  let className = `overflow-hidden text-primary-500 hover:text-primary-700 rounded 
+  let className = `overflow-hidden hover:text-primary-700 rounded 
      focus:ring-2 focus:ring-primary-500 focus:outline-none`;
 
   className += ` ${
@@ -59,13 +57,6 @@ const StyledLink = styled.a.attrs(({active, disabled}: StyledLinkProps) => {
   return {className};
 })<StyledLinkProps>``;
 
-type LabelType = Pick<LinkProps, 'size'>;
-const Label = styled.span.attrs(({size = 'default'}: LabelType) => {
-  const sizes = {
-    small: 'text-sm',
-    default: 'text-base',
-    large: 'text-lg',
-  };
-  const className = `${sizes[size]} font-bold`;
-  return {className};
-})<LabelType>``;
+const Label = styled.span.attrs({
+  className: 'font-bold',
+})``;

@@ -155,7 +155,7 @@ export const CardProposal: React.FC<CardProposalProps> = ({
             external
             label={shortenAddress(publisherAddress || '')}
             href={`${explorers[chainId]}${publisherAddress}`}
-            size="small"
+            className="text-sm"
           />
         </Publisher>
       </TextContent>
