@@ -4,6 +4,8 @@ import {useTranslation} from 'react-i18next';
 import {translateProposalDate} from '../../utils/date';
 import {useNavigate} from 'react-router-dom';
 import {ProposalData, VotingData} from 'utils/types';
+import {useWalletProps} from 'containers/walletMenu';
+import {useWallet} from 'context/augmentedWallet';
 
 // types will come from subgraph and will need to be refactored.
 type ProposalListProps = {
@@ -13,6 +15,7 @@ type ProposalListProps = {
 const ProposalList: React.FC<ProposalListProps> = ({proposals}) => {
   const {t} = useTranslation();
   const navigate = useNavigate();
+  const {chainId}: useWalletProps = useWallet();
 
   if (proposals.length === 0)
     return <p data-testid="proposalList">{t('governance.noProposals')}</p>;
@@ -32,6 +35,7 @@ const ProposalList: React.FC<ProposalListProps> = ({proposals}) => {
               navigate('proposals/' + proposal.id);
             }}
             state={proposal.type}
+            chainId={chainId}
             voteTitle={t('governance.proposals.voteTitle') as string}
             {...(proposal.type === 'active' && {
               voteProgress: getVoteResults(proposal.vote).toString(),

@@ -13,6 +13,7 @@ export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   iconLeft?: React.FunctionComponentElement<IconType>;
   /** optional label for the link, defaults to the href if value not provided */
   label?: string;
+  size?: 'small' | 'default' | 'large';
 };
 
 /** Default link component */
@@ -24,6 +25,7 @@ export const Link: React.FC<LinkProps> = ({
   iconRight,
   label,
   href,
+  size = 'default',
   ...props
 }) => {
   return (
@@ -38,7 +40,7 @@ export const Link: React.FC<LinkProps> = ({
     >
       <div className="inline-flex justify-start items-center space-x-1.5">
         {iconLeft && iconLeft}
-        <Label>{label || href}</Label>
+        <Label {...{size}}>{label || href}</Label>
         {!iconLeft && iconRight && iconRight}
       </div>
     </StyledLink>
@@ -57,6 +59,13 @@ const StyledLink = styled.a.attrs(({active, disabled}: StyledLinkProps) => {
   return {className};
 })<StyledLinkProps>``;
 
-const Label = styled.span.attrs({
-  className: 'text-base font-bold',
-})``;
+type LabelType = Pick<LinkProps, 'size'>;
+const Label = styled.span.attrs(({size = 'default'}: LabelType) => {
+  const sizes = {
+    small: 'text-sm',
+    default: 'text-base',
+    large: 'text-lg',
+  };
+  const className = `${sizes[size]} font-bold`;
+  return {className};
+})<LabelType>``;

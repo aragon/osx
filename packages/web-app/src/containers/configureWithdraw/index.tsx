@@ -5,8 +5,6 @@ import {
   ValueInput,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
-import {BigNumber} from 'ethers';
-import {parseUnits} from 'ethers/lib/utils';
 import {useTranslation} from 'react-i18next';
 import React, {useCallback} from 'react';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
