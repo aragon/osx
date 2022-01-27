@@ -51,7 +51,7 @@ export const TableCell: React.FC<TableCellProps> = ({
           rightAligned ? 'text-right' : 'text-left'
         }`}
       >
-        <p className="font-bold cursor-pointer text-primary-500">{children}</p>
+        <p className="font-bold text-primary-500 cursor-pointer">{children}</p>
       </td>
     );
   } else if (type === 'tag') {

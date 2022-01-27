@@ -10,7 +10,7 @@ export const IconBlock: IconType = ({height = 16, width = 16, ...props}) => {
       viewBox="0 0 16 16"
       {...props}
     >
-      <g clip-path="url(#clip0_433_16)">
+      <g clipPath="url(#clip0_433_16)">
         <path
           fillRule="evenodd"
           clipRule="evenodd"

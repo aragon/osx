@@ -21,17 +21,16 @@ export const ListItemLink: React.FC<ListItemLinkProps> = ({
 }) => {
   return (
     <Container>
-      <TitleContainer>
-        <Link
-          rel="noopener noreferrer"
-          {...props}
-          {...(external ? {target: '_blank'} : {})}
-          data-testid="listItem-link"
-        >
-          {props.label ? props.label : props.href}
-        </Link>
-        <IconLinkExternal className="w-1.5 h-1.5" />
-      </TitleContainer>
+      <Link
+        rel="noopener noreferrer"
+        {...props}
+        {...(external ? {target: '_blank'} : {})}
+        data-testid="listItem-link"
+      >
+        <Title>{props.label ? props.label : props.href}</Title>
+        <Icon />
+      </Link>
+
       {props.label && <Subtitle>{props.href}</Subtitle>}
     </Container>
   );
@@ -42,12 +41,14 @@ const Container = styled.div.attrs({
 })``;
 
 const Link = styled.a.attrs({
-  className: 'truncate' as string,
+  className: 'flex items-center min-w-0 text-primary-500' as string,
 })``;
 
-const TitleContainer = styled.div.attrs({
-  className: 'flex items-center space-x-1 font-bold text-primary-500',
+const Title = styled.p.attrs({
+  className: 'overflow-hidden font-bold truncate whitespace-nowrap',
 })``;
+
+const Icon = styled(IconLinkExternal).attrs({className: 'ml-1 w-1.5 h-1.5'})``;
 
 const Subtitle = styled.p.attrs({
   className: 'text-sm text-ui-500 truncate',
