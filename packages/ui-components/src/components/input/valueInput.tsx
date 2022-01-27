@@ -13,27 +13,25 @@ export type ValueInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   mode?: 'default' | 'success' | 'warning' | 'critical';
 };
 
-export const ValueInput: React.FC<ValueInputProps> = ({
-  adornmentText,
-  onAdornmentClick,
-  mode = 'default',
-  disabled = false,
-  ...props
-}) => {
-  return (
+// HACK: Doing this to pass the ref down. Might not work for normal references
+// TODO: Properly investigate ref issues with functional components
+export const ValueInput = React.forwardRef<HTMLInputElement, ValueInputProps>(
+  ({mode = 'default', disabled = false, ...props}, ref) => (
     <Container data-testid="input-value" {...{mode, disabled}}>
-      <StyledInput disabled={disabled} {...props} />
+      <StyledInput disabled={disabled} {...props} ref={ref} />
       <ButtonText
-        label={adornmentText}
+        label={props.adornmentText}
         size="small"
         mode="secondary"
         bgWhite={true}
         disabled={disabled}
-        onClick={() => onAdornmentClick()}
+        onClick={props.onAdornmentClick}
       />
     </Container>
-  );
-};
+  )
+);
+
+ValueInput.displayName = 'ValueInput';
 
 type StyledContainerProps = Pick<ValueInputProps, 'mode' | 'disabled'>;
 

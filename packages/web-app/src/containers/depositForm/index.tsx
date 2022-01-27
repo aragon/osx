@@ -28,20 +28,22 @@ const DepositForm: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useTransferModalContext();
   const {account, balance: walletBalance, provider} = useWallet();
-  const {control, resetField, setValue, trigger, getValues} = useFormContext();
+  const {control, resetField, setValue, setFocus, trigger, getValues} =
+    useFormContext();
   const {errors, dirtyFields} = useFormState({control});
-
-  const [isCustomToken, tokenBalance, tokenSymbol] = useWatch({
-    name: ['isCustomToken', 'tokenBalance', 'tokenSymbol'],
+  const [tokenAddress, isCustomToken, tokenBalance, tokenSymbol] = useWatch({
+    name: ['tokenAddress', 'isCustomToken', 'tokenBalance', 'tokenSymbol'],
   });
 
   /*************************************************
    *                    Hooks                      *
    *************************************************/
   useEffect(() => {
-    if (!account) return;
+    if (isCustomToken) setFocus('tokenAddress');
+  }, [isCustomToken, setFocus]);
 
-    const tokenAddress = getValues('tokenAddress');
+  useEffect(() => {
+    if (!account || !isCustomToken || !tokenAddress) return;
 
     const fetchTokenInfo = async () => {
       if (errors.tokenAddress !== undefined) {
@@ -77,21 +79,20 @@ const DepositForm: React.FC = () => {
          * Also, double safeguard. Should not actually fall into here since
          * tokenAddress should be valid in the first place for balance to be fetched.
          */
+        console.error(error);
       }
       if (dirtyFields.amount) trigger(['amount', 'tokenSymbol']);
     };
 
-    if (tokenAddress) {
-      fetchTokenInfo();
-    }
+    fetchTokenInfo();
   }, [
     account,
     dirtyFields.amount,
     errors.tokenAddress,
-    getValues,
     isCustomToken,
     provider,
     setValue,
+    tokenAddress,
     trigger,
     walletBalance,
   ]);
@@ -218,12 +219,13 @@ const DepositForm: React.FC = () => {
               validate: addressValidator,
             }}
             render={({
-              field: {name, onBlur, onChange, value},
+              field: {name, onBlur, onChange, value, ref},
               fieldState: {error},
             }) => (
               <>
                 <ValueInput
                   mode={error ? 'critical' : 'default'}
+                  ref={ref}
                   name={name}
                   value={value}
                   onBlur={onBlur}

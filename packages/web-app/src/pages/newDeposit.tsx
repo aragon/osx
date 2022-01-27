@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import {Address} from '@aragon/ui-components/dist/utils/addresses';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
-import {useForm, useFormState, FormProvider} from 'react-hook-form';
+import {useForm, FormProvider} from 'react-hook-form';
 import React, {useCallback, useEffect, useState} from 'react';
 
 import TokenMenu from 'containers/tokenMenu';
@@ -72,17 +72,9 @@ const NewDeposit: React.FC = () => {
     balance,
   }: useWalletProps = useWallet();
 
-  const formMethods = useForm<FormData>({
-    defaultValues,
-    mode: 'onChange',
-  });
-
-  const {isValid} = useFormState({
-    control: formMethods.control,
-  });
-
   const {t} = useTranslation();
   const {open} = useWalletMenuContext();
+  const formMethods = useForm<FormData>({defaultValues, mode: 'onChange'});
   const {currentStep, prev, next} = useStepper(TOTAL_STEPS);
   const [walletTokens, setWalletTokens] = useState<TokenBalance[]>([]);
 
@@ -97,7 +89,7 @@ const NewDeposit: React.FC = () => {
     }
   }, [account, formMethods]);
 
-  // fetch curated tokens and corresponding balance on wallet
+  // fetch tokens and corresponding balance on wallet
   useEffect(() => {
     async function fetchWalletTokens() {
       if (account === null) {
@@ -109,7 +101,7 @@ const NewDeposit: React.FC = () => {
       if (Number(balance) !== -1 && Number(balance) !== 0)
         await tokenList.push(constants.AddressZero);
 
-      // get curated tokens balance from wallet
+      // get tokens balance from wallet
       const balances = await Promise.all(
         tokenList.map(address => {
           if (isETH(address)) return formatUnits(balance, 18)?.slice(0, 4);
@@ -230,7 +222,7 @@ const NewDeposit: React.FC = () => {
                 }
                 size="large"
                 onClick={next}
-                disabled={!isValid}
+                disabled={!formMethods.formState.isValid}
                 iconRight={<IconChevronRight />}
               />
             </FormFooter>
