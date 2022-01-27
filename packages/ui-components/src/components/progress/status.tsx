@@ -4,10 +4,10 @@ import {
   IconBlock,
   IconRadioCancel,
   IconRadioDefault,
-  IconSpinner,
   IconSuccess,
 } from '../icons';
 import {LabelProps} from '../label';
+import {Spinner} from '../spinner';
 
 export type ModeType = 'active' | 'failed' | 'done' | 'succeeded' | 'upcoming';
 export type ProgressStatusProps = {
@@ -114,7 +114,7 @@ const iconColors: Record<ModeType, string> = {
 const Icon: React.FC<ModeProps> = ({mode}) => {
   switch (mode) {
     case 'active':
-      return <IconSpinner className={iconColors[mode]} />;
+      return <Spinner size={'xs'} className={iconColors[mode]} />;
     case 'upcoming':
       return <IconRadioDefault className={iconColors[mode]} />;
     case 'failed':
