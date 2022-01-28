@@ -10,7 +10,7 @@ start by running `yarn install` in the root.
 
 ### Dependencies
 
-Most of the UI components used in the web-app are defined in a separate package called ui-components. Since the repo was set up as yarn workspace, all the linking is done automatically. The only thing you need to run the web-app is a build of that package. To do that `cd packages/ui-component` and then simply `yarn build`.
+Most of the UI components used in the web-app are defined in a separate package called ui-components. Since the repo was set up as yarn workspace, all the linking is done automatically. The only thing you need to run the web-app is a build of that package. To do that `cd packages/ui-components` and then simply `yarn build`.
 
 ### Web-app
 
