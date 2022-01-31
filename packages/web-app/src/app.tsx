@@ -28,6 +28,7 @@ const GovernancePage = lazy(() => import('pages/governance'));
 const ProposalsPage = lazy(() => import('pages/proposals'));
 const NewDepositPage = lazy(() => import('pages/newDeposit'));
 const NewWithdrawPage = lazy(() => import('pages/newWithdraw'));
+const CreateDAOPage = lazy(() => import('pages/createDAO'));
 
 function App() {
   const {pathname} = useLocation();
@@ -44,6 +45,7 @@ function App() {
           <Routes>
             <Route path={paths.NewDeposit} element={<NewDepositPage />} />
             <Route path={paths.NewWithDraw} element={<NewWithdrawPage />} />
+            <Route path={paths.CreateDAO} element={<CreateDAOPage />} />
 
             <Route element={<Layout />}>
               <Route path={paths.Dashboard} element={<HomePage />} />

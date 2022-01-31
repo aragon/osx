@@ -8,3 +8,4 @@ export const AllTransfers = '/finance/transfers';
 export const NewDeposit = 'finance/new-deposit';
 export const NewWithDraw = 'finance/new-withdraw';
 export const Proposals = 'governance/proposals/:id';
+export const CreateDAO = 'create-dao';

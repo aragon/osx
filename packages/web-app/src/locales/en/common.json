@@ -143,5 +143,32 @@
         "title": "Select a UTC Timezone"
       }
     }
+  },
+  "createDAO": {
+    "title": "Create your DAO",
+    "overview": {
+      "title": "Get started with your DAO",
+      "description": "Create your own DAO in 4 easy steps + [TBD more helptext] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum scelerisque quam a quam molestie, vel euismod massa maximus. Duis mattis justo risus, nec sollicitudin leo mollis ac. Nulla orci tellus, hendrerit eu metus eget, dictum placerat sapien."
+    },
+    "step1": {
+      "label": "Step 1",
+      "title": "Select Blockchain",
+      "description": "Decide which blockchain the DAO should be at home on."
+    },
+    "step2": {
+      "label": "Step 2",
+      "title": "Define Metadata",
+      "description": "Define important data for the DAO so that it can be easily found."
+    },
+    "step3": {
+      "label": "Step 3",
+      "title": "Setup Community",
+      "description": "Who is eligible to participate in the DAO? Create a token if needed."
+    },
+    "step4": {
+      "label": "Step 4",
+      "title": "Configure Governance",
+      "description": "How are decisions made in the DAO? How long may a proposal be open for voting?"
+    }
   }
 }

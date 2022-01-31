@@ -2,9 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
+import {ButtonText} from '@aragon/ui-components';
+import {useNavigate} from 'react-router-dom';
 
 const Home: React.FC = () => {
   const {t} = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -14,6 +17,13 @@ const Home: React.FC = () => {
           <Title>{t('title.part1')}</Title>
           <Subtitle>{t('title.part2')}</Subtitle>
         </div>
+      </div>
+      <div className="flex justify-center">
+        <ButtonText
+          label="Create DAO"
+          size="large"
+          onClick={() => navigate('/create-dao')}
+        />
       </div>
     </>
   );

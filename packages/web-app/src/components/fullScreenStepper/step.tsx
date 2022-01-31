@@ -1,9 +1,12 @@
-import React from 'react';
+import React, {ReactElement} from 'react';
 
 export type StepProps = {
-  wizardTitle: string;
-  wizardDescription: string;
+  wizardTitle?: string;
+  wizardDescription?: string;
   hideWizard?: boolean;
+  fullWidth?: boolean;
+  customHeader?: ReactElement;
+  customFooter?: ReactElement;
   backButtonLabel?: string;
   nextButtonLabel?: string;
   isNextButtonDisabled?: boolean;
