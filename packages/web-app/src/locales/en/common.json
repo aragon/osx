@@ -37,12 +37,19 @@
     "continue": "Continue",
     "submitDeposit": "Submit Deposit",
     "resources": "Resources",
-    "submitWithdraw": "Publish Proposal"
+    "submitWithdraw": "Publish Proposal",
+    "daoName": "Name",
+    "description": "Summary",
+    "links": "Links",
+    "logo": "Logo",
+    "optional": "Optional"
   },
   "placeHolders": {
     "selectToken": "Select a Token ...",
     "walletOrEns": "Type wallet address or ENS ...",
-    "searchTokens": "Type to search ..."
+    "searchTokens": "Type to search ...",
+    "daoName": "Type your DAOs name ...",
+    "daoDescription": "Type your summary ..."
   },
   "finance": {
     "tokenSection": "Tokens",
@@ -87,6 +94,8 @@
     "required": {
       "address": "Token address is required",
       "amount": "Token amount is required",
+      "label": "Label is mandatory",
+      "link": "Link is mandatory",
       "recipient": "Recipient address is required",
       "token": "Token is required"
     }
@@ -158,7 +167,11 @@
     "step2": {
       "label": "Step 2",
       "title": "Define Metadata",
-      "description": "Define important data for the DAO so that it can be easily found."
+      "description": "Define important data for the DAO so that it can be easily found.",
+      "nameSubtitle": "Define a custom title if needed",
+      "logoSubtitle": "This is the logo which represents your DAO. Supports SVG, JPG, PNG or GIFs with max 3MB in size and must be 1:1 ratio. Suggested dimensions 1024x1024.",
+      "descriptionSubtitle": "Describe your DAO in 2-3 short sentences as a summary. This information will be presented in the sharing, in the overview, and helps people to understand what's your DAO about.",
+      "linksSubtitle": "Link to external resources, such as documents, forum links, chats or similar."
     },
     "step3": {
       "label": "Step 3",

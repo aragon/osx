@@ -8,6 +8,7 @@ import {
   OverviewDAOHeader,
   OverviewDAOStep,
 } from 'containers/daoOverview';
+import DefineMetadata from 'containers/defineMetadata';
 
 const CreateDAO: React.FC = () => {
   const {t} = useTranslation();
@@ -29,10 +30,16 @@ const CreateDAO: React.FC = () => {
           <OverviewDAOStep />
         </Step>
         <Step
-          wizardTitle="Select Blockchain"
-          wizardDescription="Decide which blockchain the DAO should be at home on."
+          wizardTitle={t('createDAO.step1.title')}
+          wizardDescription={t('createDAO.step1.description')}
         >
-          <h1>Step 2</h1>
+          <h1>Step 1</h1>
+        </Step>
+        <Step
+          wizardTitle={t('createDAO.step2.title')}
+          wizardDescription={t('createDAO.step2.description')}
+        >
+          <DefineMetadata />
         </Step>
       </FullScreenStepper>
     </FormProvider>
