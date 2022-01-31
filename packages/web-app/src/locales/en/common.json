@@ -48,11 +48,7 @@
     "tokenSection": "Tokens",
     "transferSection": "Transfers",
     "unknownUSDValue": "Value unknown",
-    "tokens": "Tokens",
-    "labels": {
-      "to": "to",
-      "from": "from"
-    }
+    "tokens": "Tokens"
   },
   "governance": {
     "proposals": {
@@ -127,6 +123,8 @@
     "depositAssets": "Deposit Assets",
     "configureDeposit": "Configure Deposit",
     "configureDepositSubtitle": "Enter the desired token and its number for transmission. Furthermore, a reception address is necessary.",
+    "reviewTransfer": "Review Transfer",
+    "reviewTransferSubtitle": "Check your details and make sure everything is correct. After confirmation, no more changes can be made and your token will be transferred.",
     "toSubtitle": "The recipient of the tokens is the DAO in which you are currently operating.",
     "tokenSubtitle": "Select Token to deposit in DAO",
     "contractAddressSubtitle": "You have selected a custom token. Enter the contract address of this token to interact with it.",

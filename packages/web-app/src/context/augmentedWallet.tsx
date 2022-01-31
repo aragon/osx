@@ -20,7 +20,7 @@ import {erc20TokenABI} from '../abis/erc20TokenABI';
 
 export type WalletAugmented = Wallet & {
   provider: EthersProviders.Provider;
-  getTokenList: () => string[];
+  getTokenList: () => Promise<string[]>;
 };
 // Any is a workaround so TS doesn't ask for a filled out default
 const WalletAugmentedContext = React.createContext<WalletAugmented | any>({});
@@ -32,12 +32,20 @@ function useWalletAugmented(): WalletAugmented {
 const WalletAugmented: React.FC<unknown> = ({children}) => {
   const wallet = useWallet();
   const ethereum: any = wallet.ethereum;
-  const fallbackProvider = new EthersProviders.InfuraProvider(
+  const defaultProvider = new EthersProviders.InfuraProvider(
     wallet.chainId, // set provider based on wallet chain id
     INFURA_PROJECT_ID
   );
   const [provider, setProvider] =
-    useState<EthersProviders.Provider>(fallbackProvider);
+    useState<EthersProviders.Provider>(defaultProvider);
+
+  useEffect(() => {
+    const infuraProvider = new EthersProviders.InfuraProvider(
+      wallet.chainId,
+      INFURA_PROJECT_ID
+    );
+    setProvider(infuraProvider);
+  }, [wallet.chainId]);
 
   const injectedProvider: any = useMemo(
     () => (ethereum ? new EthersProviders.Web3Provider(ethereum) : null),

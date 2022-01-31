@@ -34,7 +34,7 @@ const StyledBadge = styled.div.attrs(({colorScheme}: StyledBadgeProps) => {
   } else if (colorScheme === 'info') {
     colorCode = 'bg-info-200 text-info-800';
   } else {
-    colorCode = 'bg-ui-50 text-ui-600';
+    colorCode = 'bg-ui-100 text-ui-600';
   }
 
   const className = `inline-flex text-sm px-0.5 font-bold rounded ${colorCode}`;
