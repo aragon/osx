@@ -9,7 +9,9 @@ export default {
 } as Meta;
 
 const Template: Story<TextareaWYSIWYGProps> = args => (
-  <TextareaWYSIWYG {...args} />
+  <div style={{width: '60%'}}>
+    <TextareaWYSIWYG {...args} />
+  </div>
 );
 
 export const WYSIWYG = Template.bind({});
