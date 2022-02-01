@@ -12,7 +12,6 @@ import "./../tokens/GovernanceERC20.sol";
 import "./../tokens/GovernanceWrappedERC20.sol";
 import "./../registry/Registry.sol";
 import "./../core/DAO.sol";
-
 import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
 import "./TokenFactory.sol";
