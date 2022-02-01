@@ -1,6 +1,5 @@
 import chai, { expect } from 'chai';
 import { ethers, waffle } from 'hardhat';
-import { defaultAbiCoder, BytesLike } from 'ethers/lib/utils';
 import chaiUtils from '../test-utils';
 
 chai.use(chaiUtils);
@@ -18,8 +17,6 @@ const ERRORS = {
     ERROR_CHANGE_SUPPORT_PCTS: "VOTING_CHANGE_SUPPORT_PCTS",
     ERROR_CHANGE_SUPPORT_TOO_BIG: "VOTING_CHANGE_SUPP_TOO_BIG",
     ERROR_CAN_NOT_EXECUTE: "VOTING_CAN_NOT_EXECUTE",
-    ERROR_EXECUTION_STATE_WRONG: "ERROR_EXECUTION_STATE_WRONG",
-    NOT_ALLOWED_ACTION: 'Not allowed action passed!',
     ALREADY_INITIALIZED: 'Initializable: contract is already initialized'
 };
 
@@ -36,37 +33,6 @@ const EVENTS = {
   CAST_VOTE: 'CastVote',
   EXECUTED: 'Executed'
 };
-
-function createProposal(
-    {actions, metadata, description, castVote, executeIfDecided}: 
-    {actions?: any, metadata?: string, description?: string, castVote?: boolean, executeIfDecided?: boolean}
-) {
-    const proposal = {
-        actions : actions || [],
-        metadata: metadata || '0x',
-        additionalArguments: defaultAbiCoder.encode([
-            'string',
-            'bool',
-            'bool'
-        ],[
-            description || '0x',
-            executeIfDecided || false,
-            castVote || false,
-        ])
-    };
-
-    return proposal;
-}
-
-function createVoteData(supports: boolean, executeIfDecided: boolean) {
-    return defaultAbiCoder.encode([
-        'bool',
-        'bool'
-    ],[
-        supports,
-        executeIfDecided
-    ]);
-}
 
 describe('Voting: SimpleVoting', function () {
     let signers: any;
@@ -97,27 +63,33 @@ describe('Voting: SimpleVoting', function () {
         voting = await SimpleVoting.deploy();
     })
 
-    function initializeVoting(voteSettings: any, allowedActions: BytesLike[]) {
-        return voting['initialize(address,address,uint64[3],bytes[])']
+    function initializeVoting(
+        minAcceptQuorum: any,
+        supportRequired: any,
+        voteTime: any
+    ) {
+        // @ts-ignore
+        return voting['initialize(address,address,uint64,uint64,uint64)']
             (
                 daoMock.address, 
                 erc20VoteMock.address, 
-                voteSettings, 
-                allowedActions
+                minAcceptQuorum,
+                supportRequired,
+                voteTime
             );
     }
 
     describe("initialize: ", async () => {
         it("reverts if quorom is less than support required", async () => {
             await expect(
-                initializeVoting([2, 1,3],[])
+                initializeVoting(2, 1, 3)
             ).to.be.revertedWith(ERRORS.ERROR_INIT_PCTS);
         })
         it("reverts if trying to re-initialize", async () => {
-            await initializeVoting([1, 2, 3],[]);
+            await initializeVoting(1, 2, 3);
 
             await expect(
-                initializeVoting([2, 1,3],[])
+                initializeVoting(2, 1, 3)
             ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
         })
         it("should initialize dao on the component", async () => {
@@ -131,7 +103,7 @@ describe('Voting: SimpleVoting', function () {
 
     describe("changeConfig: ", async () => {
         beforeEach(async () => {
-            await initializeVoting([1, 2, 3], []);
+            await initializeVoting(1, 2, 3);
         });
         it("reverts if wrong config is set", async () => {
             await expect(
@@ -152,42 +124,25 @@ describe('Voting: SimpleVoting', function () {
 
     describe("StartVote", async () => {
         beforeEach(async () => {
-            await initializeVoting([1, 2, 3], []);
-        })
-
-        it("reverts if allowed action is not passed through proposal", async () => {
-            const proposal = createProposal({ actions: dummyActions });
-            await expect(
-                voting.start(proposal)
-            ).to.be.revertedWith(ERRORS.NOT_ALLOWED_ACTION);
+            await initializeVoting(1, 2, 3);
         })
 
         it("reverts total token supply while creating a vote is 0", async () => {
-            const proposal = createProposal({});
             await erc20VoteMock.mock.getPastTotalSupply.returns(0);
             await expect(
-                voting.start(proposal)
+                voting.newVote('0x00', [], false, false)
             ).to.be.revertedWith(ERRORS.ERROR_NO_VOTING_POWER);
         })
 
         it("should create a vote successfully, but not vote", async () => {
-            const proposal = createProposal({ 
-                actions: dummyActions, 
-                description: 'vote!'
-            });
-
-            let allowedActions = [ownerAddress + '00000000'];
-
-            await voting.addAllowedActions(allowedActions);
-            
             await erc20VoteMock.mock.getPastTotalSupply.returns(1);
             await erc20VoteMock.mock.getPastVotes.returns(0);
 
-            expect(await voting.start(proposal))
+            expect(await voting.newVote('0x00', dummyActions, false, false))
                 .to.emit(voting, EVENTS.START_VOTE)
-                .withArgs(1, ownerAddress, "vote!");
+                .withArgs(0, ownerAddress, "0x00");
 
-            const vote = await voting.getVote(1);
+            const vote = await voting.getVote(0);
             expect(vote.open).to.equal(true);
             expect(vote.executed).to.equal(false);
             expect(vote.supportRequired).to.equal(2);
@@ -201,33 +156,23 @@ describe('Voting: SimpleVoting', function () {
             expect(vote.actions).to.eql([
                 [
                     dummyActions[0].to,
-                    ethers.BigNumber.from(dummyActions[0].value),
+                    toBn(dummyActions[0].value),
                     dummyActions[0].data,
                 ]
             ]);
         })
 
         it("should create a vote and cast a vote immediatelly", async () => {
-            const proposal = createProposal({
-                actions: dummyActions,
-                description: 'vote!',
-                castVote: true
-            });
-
-            let allowedActions = [ownerAddress + '00000000'];
-
-            await voting.addAllowedActions(allowedActions);
-            
             await erc20VoteMock.mock.getPastTotalSupply.returns(1);
             await erc20VoteMock.mock.getPastVotes.returns(1);
 
-            expect(await voting.start(proposal))
+            expect(await voting.newVote('0x00', dummyActions, false, true))
                 .to.emit(voting, EVENTS.START_VOTE)
-                .withArgs(1, ownerAddress, "vote!")
+                .withArgs(0, ownerAddress, "0x00")
                 .to.emit(voting, EVENTS.CAST_VOTE)
-                .withArgs(1, ownerAddress, true, 1);
+                .withArgs(0, ownerAddress, true, 1);
 
-            const vote = await voting.getVote(1);
+            const vote = await voting.getVote(0);
             expect(vote.open).to.equal(true);
             expect(vote.executed).to.equal(false);
             expect(vote.supportRequired).to.equal(2);
@@ -245,43 +190,38 @@ describe('Voting: SimpleVoting', function () {
         let votingPower = 100;
 
         beforeEach(async () => {
-            await initializeVoting([minimumQuorom, supportRequired, voteTime], []);
+            await initializeVoting(minimumQuorom, supportRequired, voteTime);
 
             // set voting power to 100
             await erc20VoteMock.mock.getPastTotalSupply.returns(votingPower);
             
-            const proposal = createProposal({ actions: dummyActions });
-            let allowedActions = [ownerAddress + '00000000'];
 
-            await voting.addAllowedActions(allowedActions);
-            await voting.start(proposal);
+            await voting.newVote('0x00', dummyActions, false, false);
         })
 
         it("should not be able to vote if user has 0 token", async () => {
             await erc20VoteMock.mock.getPastVotes.returns(0);
 
             await expect(
-                voting.vote(1, createVoteData(true, false))
+                voting.vote(0, true, false)
             ).to.be.revertedWith(ERRORS.ERROR_CAN_NOT_VOTE);
         })
 
         it("increases the yea or nay count and emit correct events", async () => {
             await erc20VoteMock.mock.getPastVotes.returns(1);
 
-            const data1 = createVoteData(true, false);
-            expect(await voting.vote(1, data1))
+            expect(await voting.vote(0, true, false))
                 .to.emit(voting, EVENTS.CAST_VOTE)
-                .withArgs(1, ownerAddress, true, 1);
+                .withArgs(0, ownerAddress, true, 1);
 
-            let vote = await voting.getVote(1);
+            let vote = await voting.getVote(0);
             expect(vote.yea).to.equal(1);
 
-            const data2 = createVoteData(false, false);
-            expect(await voting.vote(1, data2))
+            expect(await voting.vote(0, false, false))
                 .to.emit(voting, EVENTS.CAST_VOTE)
-                .withArgs(1, ownerAddress, false, 1);
+                .withArgs(0, ownerAddress, false, 1);
 
-            vote = await voting.getVote(1);
+            vote = await voting.getVote(0);
             expect(vote.nay).to.equal(1);
         })
 
@@ -290,16 +230,14 @@ describe('Voting: SimpleVoting', function () {
 
             // yea still ends up to be 1 here even after voting
             // 2 times from the same wallet.
-            const data1 = createVoteData(true, false);
-            await voting.vote(1, data1);
-            await voting.vote(1, data1);
+            await voting.vote(0, true, false);
+            await voting.vote(0, true, false);
 
             // yea gets removed, nay ends up as 1.
-            const data2 = createVoteData(false, false);
-            await voting.vote(1, data2);
-            await voting.vote(1, data2);
+            await voting.vote(0, false, false);
+            await voting.vote(0, false, false);
 
-            const vote = await voting.getVote(1);
+            const vote = await voting.getVote(0);
 
             expect(vote.yea).to.equal(0);
             expect(vote.nay).to.equal(1);
@@ -311,16 +249,15 @@ describe('Voting: SimpleVoting', function () {
             // is set to supportRequired = 51. 
             await erc20VoteMock.mock.getPastVotes.returns(50);
 
-            const data = createVoteData(true, false);
-            await voting.vote(1, data);
-            expect(await voting.canExecute(1)).to.equal(false);
+            await voting.vote(0, true, false);
+            expect(await voting.canExecute(0)).to.equal(false);
 
             // vote with yea as 1 voting stake from another wallet, 
             // which becomes 51 total and enough
             await erc20VoteMock.mock.getPastVotes.returns(1);
-            await voting.connect(signers[1]).vote(1, data);
+            await voting.connect(signers[1]).vote(0, true, false);
 
-            expect(await voting.canExecute(1)).to.equal(true);
+            expect(await voting.canExecute(0)).to.equal(true);
         })
         
         it("returns executable if enough yea is given depending on yea + nay total", async () => {
@@ -329,18 +266,18 @@ describe('Voting: SimpleVoting', function () {
             // its duration length.
             await erc20VoteMock.mock.getPastVotes.returns(50);
             // supports
-            await voting.vote(1, createVoteData(true, false));
+            await voting.vote(0, true, false);
 
             // vote with nay with 30 voting stake.
             await erc20VoteMock.mock.getPastVotes.returns(30);
             // not supports
-            await voting.connect(signers[1]).vote(1, createVoteData(false, false));
+            await voting.connect(signers[1]).vote(0, false, false);
             
             // makes the voting closed.
             await ethers.provider.send('evm_increaseTime', [voteTime + 10]);
             await ethers.provider.send('evm_mine', []);
 
-            expect(await voting.canExecute(1)).to.equal(true);
+            expect(await voting.canExecute(0)).to.equal(true);
         })
 
         it("makes NON-executable if enough yea isn't given depending on yea + nay total", async () => {
@@ -348,18 +285,18 @@ describe('Voting: SimpleVoting', function () {
             //to make vote executable while vote is open or even after it's closed.
             await erc20VoteMock.mock.getPastVotes.returns(20);
             // supports
-            await voting.vote(1, createVoteData(true, false));
+            await voting.vote(0, true, false);
 
             // vote with nay with 30 voting stake.
             await erc20VoteMock.mock.getPastVotes.returns(30);
             // not supports
-            await voting.connect(signers[1]).vote(1, createVoteData(false, false));
+            await voting.connect(signers[1]).vote(0, false, false);
             
             // makes the voting closed.
             await ethers.provider.send('evm_increaseTime', [voteTime + 10]);
             await ethers.provider.send('evm_mine', []);
 
-            expect(await voting.canExecute(1)).to.equal(false);
+            expect(await voting.canExecute(0)).to.equal(false);
         })  
 
         it("executes the vote immediatelly while final yea is given", async () => {
@@ -368,7 +305,7 @@ describe('Voting: SimpleVoting', function () {
             await erc20VoteMock.mock.getPastVotes.returns(51);
 
             // supports and should execute right away.
-            expect(await voting.vote(1, createVoteData(true, true)))
+            expect(await voting.vote(0, true, true))
                 .to.emit(daoMock, EVENTS.EXECUTED)
                 .withArgs(
                     voting.address, 
@@ -382,19 +319,19 @@ describe('Voting: SimpleVoting', function () {
                     []
                 );
 
-            const vote = await voting.getVote(1);
+            const vote = await voting.getVote(0);
 
             expect(vote.executed).to.equal(true);
 
             // calling execute again should fail
             await expect(
-                voting.execute(1)
-            ).to.be.revertedWith(ERRORS.ERROR_EXECUTION_STATE_WRONG);
+                voting.execute(0)
+            ).to.be.revertedWith(ERRORS.ERROR_CAN_NOT_EXECUTE);
         })
 
         it("reverts if vote is executed while enough yea is not given ", async () => {
             await expect(
-                voting.execute(1)
+                voting.execute(0)
             ).to.be.revertedWith(ERRORS.ERROR_CAN_NOT_EXECUTE);
         })
     })

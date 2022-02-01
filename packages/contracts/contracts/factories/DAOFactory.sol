@@ -7,10 +7,9 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "./../processes/votings/simple/SimpleVoting.sol";
+import "./../votings/simple/SimpleVoting.sol";
 import "./../tokens/GovernanceERC20.sol";
 import "./../tokens/GovernanceWrappedERC20.sol";
-import "./../core/processes/Process.sol";
 import "./../registry/Registry.sol";
 import "./../core/DAO.sol";
 
@@ -103,9 +102,6 @@ contract DAOFactory {
         // Grant factory DAO_CONFIG_ROLE to add a process
         dao.grant(address(dao), address(this), dao.DAO_CONFIG_ROLE());
 
-        // Add voting process
-        dao.addProcess(voting);
-
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
 
         // Grant DAO all the permissions required
@@ -115,20 +111,18 @@ contract DAOFactory {
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.ROOT_ROLE(), address(dao));
         items[4] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.SET_SIGNATURE_VALIDATOR_ROLE(), address(dao));
 
+        // Grant voting execution permissions
+        items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.EXEC_ROLE(), address(voting));
+
         // Revoke permissions from factory
-        items[5] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.DAO_CONFIG_ROLE(), address(this));
-        items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.ROOT_ROLE(), address(this));
+        items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.DAO_CONFIG_ROLE(), address(this));
+        items[7] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.ROOT_ROLE(), address(this));
 
         dao.bulk(address(dao), items);
 
         // give voting AND executing capabilities to anyone on the voting process
         items = new ACLData.BulkItem[](4);
 
-        address ANY_ADDR = address(type(uint160).max);
-
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.PROCESS_VOTE_ROLE(), ANY_ADDR);
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.PROCESS_EXECUTE_ROLE(), ANY_ADDR);
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.PROCESS_START_ROLE(), ANY_ADDR);
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, voting.MODIFY_CONFIG(), address(dao));
 
         dao.bulk(address(voting), items);

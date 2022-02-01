@@ -29,14 +29,6 @@ contract DAOMock is IDAO, ACL {
 
     }
 
-    function addProcess(Process /* _process */) external override {
-
-    }
-
-    function removeProcess(Process /* _process */) external override {
-        
-    }
-
     function execute(Action[] memory  _actions) external override {
         bytes[] memory results;
         emit Executed(msg.sender, _actions, results);

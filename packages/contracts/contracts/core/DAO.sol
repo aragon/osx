@@ -71,22 +71,6 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         emit SetMetadata(_metadata);
     }
 
-    /// @notice Add new process to DAO
-    /// @dev Grants the new process execution rights and amits the related event.
-    /// @param _process The address of the new process
-    function addProcess(Process _process) external override auth(address(this), DAO_CONFIG_ROLE) {
-        _grant(address(this), address(_process), EXEC_ROLE);
-        emit ProcessAdded(_process);
-    }
-
-    /// @notice Remove process from DAO
-    /// @dev Revokes the execution rights from the process and emits the related event.
-    /// @param _process The address of the new process
-    function removeProcess(Process _process) external override auth(address(this), DAO_CONFIG_ROLE) {
-        _revoke(address(this), address(_process), EXEC_ROLE);
-        emit ProcessRemoved(_process);
-    }
-
     /// @notice If called, the list of provided actions will be executed.
     /// @dev It run a loop through the array of acctions and execute one by one.
     /// @dev If one acction fails, all will be reverted.

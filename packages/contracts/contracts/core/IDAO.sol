@@ -4,8 +4,6 @@
 
 pragma solidity 0.8.10;
 
-import "./processes/Process.sol";
-
 /// @title The interface required to have a DAO contract within the Aragon DAO framework
 /// @author Samuel Furter - Aragon Association - 2022
 abstract contract IDAO {
@@ -30,18 +28,6 @@ abstract contract IDAO {
     /// @param _metadata The IPFS hash of the new metadata object
     function setMetadata(bytes calldata _metadata) virtual external;
     event SetMetadata(bytes indexed metadata);
-
-    /// @notice Add new process to DAO
-    /// @dev Grants the new process execution rights and amits the related event.
-    /// @param _process The address of the new process
-    function addProcess(Process _process) virtual external;
-    event ProcessAdded(Process indexed process);
-
-    /// @notice Remove process from DAO
-    /// @dev Revokes the execution rights from the process and emits the related event.
-    /// @param _process The address of the new process
-    function removeProcess(Process _process) virtual external;
-    event ProcessRemoved(Process indexed process);
 
     /// @notice If called, the list of provided actions will be executed.
     /// @dev It run a loop through the array of acctions and execute one by one.
