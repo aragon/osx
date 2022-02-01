@@ -53,7 +53,7 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
     (token: BaseTokenInfo) => {
       if (searchValue !== '') {
         const re = new RegExp(searchValue, 'i');
-        return token.name.match(re) || token.symbol.match(re);
+        return token?.name?.match(re) || token?.symbol?.match(re);
       }
       return true;
     },
