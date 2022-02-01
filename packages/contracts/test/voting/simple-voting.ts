@@ -28,7 +28,7 @@ const EVENTS = {
   REGISTERED_CALLBACK: 'RegisteredCallback',
   REGISTERED_STANDARD: 'RegisteredStandard',
   RECEIVED_CALLBACK: 'ReceivedCallback',
-  CHANGE_CONFIG: 'ChangeConfig',
+  UPDATE_CONFIG: 'UpdateConfig',
   START_VOTE: 'StartVote',
   CAST_VOTE: 'CastVote',
   EXECUTED: 'Executed'
@@ -101,7 +101,7 @@ describe('Voting: SimpleVoting', function () {
         })
     })
 
-    describe("changeConfig: ", async () => {
+    describe("UpdateConfig: ", async () => {
         beforeEach(async () => {
             await initializeVoting(1, 2, 3);
         });
@@ -117,7 +117,7 @@ describe('Voting: SimpleVoting', function () {
 
         it("should change config successfully", async () => {
             expect(await voting.changeVoteConfig(20, 10))
-                .to.emit(voting, EVENTS.CHANGE_CONFIG)
+                .to.emit(voting, EVENTS.UPDATE_CONFIG)
                 .withArgs(20, 10);
         })
     })

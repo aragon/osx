@@ -52,7 +52,7 @@ contract SimpleVoting is Component, TimeHelpers {
     event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
     event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports, uint256 stake);
     event ExecuteVote(uint256 indexed voteId);
-    event ChangeConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
+    event UpdateConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
@@ -70,7 +70,10 @@ contract SimpleVoting is Component, TimeHelpers {
         minAcceptQuorumPct = _minAcceptQuorumPct;
         supportRequiredPct = _supportRequiredPct; 
         voteTime = _voteTime;
+
         Component.initialize(_dao);
+        
+        emit UpdateConfig(_supportRequiredPct, _minAcceptQuorumPct);
     }
 
     /**
@@ -85,7 +88,7 @@ contract SimpleVoting is Component, TimeHelpers {
         minAcceptQuorumPct = _minAcceptQuorumPct;
         supportRequiredPct = _supportRequiredPct;
 
-        emit ChangeConfig(supportRequiredPct, minAcceptQuorumPct);
+        emit UpdateConfig(supportRequiredPct, minAcceptQuorumPct);
     }
 
     /**

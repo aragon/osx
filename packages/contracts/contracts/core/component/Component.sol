@@ -22,7 +22,7 @@ abstract contract Component is UUPSUpgradeable, Initializable, AdaptiveERC165 {
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _role The hash of the role identifier
     modifier auth(bytes32 _role)  {
-        require(dao.hasPermission(address(this), msg.sender, _role, msg.data), "auth: check");
+        require(dao.hasPermission(address(this), msg.sender, _role, msg.data), "component: auth");
         _;
     }
 
