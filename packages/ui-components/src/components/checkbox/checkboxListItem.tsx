@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {
   IconCheckboxDefault,
@@ -27,7 +27,7 @@ export type CheckboxListItemProps = {
   multiSelect: boolean;
   disabled?: boolean;
   state?: 'default' | 'active' | 'multi';
-  onClick: (nextState: string) => void;
+  onClick?: React.MouseEventHandler;
 };
 
 export const CheckboxListItem: React.FC<CheckboxListItemProps> = ({
@@ -38,28 +38,16 @@ export const CheckboxListItem: React.FC<CheckboxListItemProps> = ({
   state = 'default',
   onClick,
 }) => {
-  const [checkboxState, setCheckboxState] = useState(state);
-
-  useEffect(() => {
-    setCheckboxState(state);
-  }, [state]);
-
-  const handleClick = () => {
-    const nextState = checkboxState === 'default' ? 'active' : 'default';
-    setCheckboxState(nextState);
-    onClick(nextState);
-  };
-
   return (
     <Container
       data-testid="checkboxListItem"
+      state={state}
       disabled={disabled}
-      state={checkboxState}
-      onClick={handleClick}
+      {...(disabled ? {} : {onClick})}
     >
-      <HStack disabled={disabled} state={checkboxState}>
+      <HStack disabled={disabled} state={state}>
         <p className="font-bold">{label}</p>
-        {Icons[multiSelect ? 'multiSelect' : 'radio'][checkboxState]}
+        {Icons[multiSelect ? 'multiSelect' : 'radio'][state]}
       </HStack>
       <Helptext>{helptext}</Helptext>
     </Container>
@@ -72,10 +60,10 @@ type ContainerTypes = {
 };
 
 const Container = styled.div.attrs(({disabled, state}: ContainerTypes) => ({
-  className: `py-1.5 px-2 rounded-xl border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 cursor-pointer ${
+  className: `py-1.5 px-2 rounded-xl border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
     disabled
       ? 'bg-ui-100 border-ui-300'
-      : `bg-ui-0 group hover:border-primary-500 ${
+      : `bg-ui-0 group hover:border-primary-500 cursor-pointer ${
           state !== 'default' ? 'border-primary-500' : 'border-ui-100'
         }`
   }`,
