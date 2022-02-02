@@ -1,5 +1,6 @@
 import {
   AlertInline,
+  InputImageSingle,
   Label,
   TextareaSimple,
   TextInput,
@@ -7,11 +8,20 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
-import {Controller, useFormContext} from 'react-hook-form';
+import {Controller, useFormContext, useFormState} from 'react-hook-form';
 
 const DefineMetadata: React.FC = () => {
   const {t} = useTranslation();
-  const {control} = useFormContext();
+  const {errors} = useFormState();
+  const {control, clearErrors, setError, setValue} = useFormContext();
+
+  const handleImageError = (error: {code: string; message: string}) => {
+    setError('daoLogo', {type: 'manual', message: error.message});
+  };
+  const handleImageChange = (value: File | null) => {
+    setValue('daoLogo', value);
+    clearErrors('daoLogo');
+  };
 
   return (
     <>
@@ -25,9 +35,19 @@ const DefineMetadata: React.FC = () => {
         <Controller
           name="daoName"
           control={control}
-          render={({field, fieldState: {error}}) => (
+          defaultValue=""
+          render={({
+            field: {onBlur, onChange, value, name},
+            fieldState: {error},
+          }) => (
             <>
-              <TextInput {...field} placeholder={t('placeHolders.daoName')} />
+              <TextInput
+                name={name}
+                value={value}
+                onBlur={onBlur}
+                onChange={onChange}
+                placeholder={t('placeHolders.daoName')}
+              />
               {error?.message && (
                 <AlertInline label={error.message} mode="critical" />
               )}
@@ -44,21 +64,17 @@ const DefineMetadata: React.FC = () => {
           isOptional
           badgeLabel={t('labels.optional')}
         />
-        <Controller
-          name="daoLogo"
-          control={control}
-          render={({fieldState: {error}}) => (
-            <>
-              {/* TODO: replace with proper logo component */}
-              <div className="flex justify-center items-center w-8 h-8 bg-ui-0 rounded-xl border-2 border-dashed">
-                +
-              </div>
-              {error?.message && (
-                <AlertInline label={error.message} mode="critical" />
-              )}
-            </>
-          )}
-        />
+
+        <LogoContainer>
+          <InputImageSingle
+            onError={handleImageError}
+            onChange={handleImageChange}
+            maxFileSize={3000000}
+          />
+        </LogoContainer>
+        {errors?.daoLogo?.message && (
+          <AlertInline label={errors?.daoLogo?.message} mode="critical" />
+        )}
       </FormItem>
 
       {/* Summary */}
@@ -106,4 +122,8 @@ export default DefineMetadata;
 
 const FormItem = styled.div.attrs({
   className: 'space-y-1.5',
+})``;
+
+const LogoContainer = styled.div.attrs({
+  className: 'pt-0.5',
 })``;
