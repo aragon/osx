@@ -1,12 +1,12 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 
-import {Image as InputImage} from '../stories/inputImage.stories';
+import {Single as InputImageSingle} from '../stories/inputImageSingle.stories';
 
-describe('inputImage', () => {
+describe('inputImageSingle', () => {
   // eslint-disable-next-line
   function setup(args: any) {
-    render(<InputImage {...args} />);
+    render(<InputImageSingle {...args} />);
     return screen.getByTestId('input-image');
   }
 

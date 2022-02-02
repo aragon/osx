@@ -9,12 +9,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-
 import "../core/erc165/AdaptiveERC165.sol";
-import "../permissions/DAOPermissionHandler.sol";
+import "../core/component/Permissions.sol";
 import "../core/IDAO.sol";
 
-contract GovernanceERC20 is Initializable, AdaptiveERC165, DAOPermissionHandler, ERC20VotesUpgradeable {
+contract GovernanceERC20 is AdaptiveERC165, Permissions, ERC20VotesUpgradeable {
 
      /// @notice The role identifier to mint new tokens
     bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
@@ -26,7 +25,7 @@ contract GovernanceERC20 is Initializable, AdaptiveERC165, DAOPermissionHandler,
     ) external initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
-        __Initialize_DAO_Permission(_dao);
+        Permissions.initialize(_dao);
 
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);

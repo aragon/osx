@@ -8,10 +8,10 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../core/IDAO.sol";
-import "../permissions/DAOPermissionHandler.sol";
+import "../core/component/Permissions.sol";
 import "./MerkleDistributor.sol";
 
-contract MerkleMinter is Initializable, DAOPermissionHandler {
+contract MerkleMinter is Permissions {
     using Clones for address;
 
     bytes32 constant public MERKLE_MINTER_ROLE = keccak256("MERKLE_MINTER_ROLE");
@@ -28,7 +28,7 @@ contract MerkleMinter is Initializable, DAOPermissionHandler {
     ) external initializer {
         token = _token;
         distributorBase = address(_distributorBase);
-        DAOPermissionHandler.__Initialize_DAO_Permission(_dao);
+        Permissions.initialize(_dao);
     }
 
     function merkleMint(

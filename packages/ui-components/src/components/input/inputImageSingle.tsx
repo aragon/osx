@@ -6,7 +6,7 @@ import {IconAdd, IconClose} from '../icons/interface';
 import {Spinner} from '../spinner';
 import {ButtonIcon} from '../button';
 
-export type InputImageProps = {
+export type InputImageSingleProps = {
   /**
    * onChange Event will fires after uploading a valid image
    */
@@ -29,7 +29,7 @@ export type InputImageProps = {
   maxFileSize: number;
 };
 
-export const InputImage: React.FC<InputImageProps> = ({
+export const InputImageSingle: React.FC<InputImageSingleProps> = ({
   onChange,
   maxDimension = 2400,
   minDimension = 256,
