@@ -37,14 +37,14 @@ contract GovernanceERC20 is AdaptiveERC165, Permissions, ERC20VotesUpgradeable {
         _mint(to, amount);
     }
 
-    // TODO: https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
-    function delegates(address account) public view virtual override returns (address) {
-        return account;
-    }
-
     // The functions below are overrides required by Solidity.
+    // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
     function _afterTokenTransfer(address from, address to, uint256 amount) internal override {
         super._afterTokenTransfer(from, to, amount);
+        // reduce _delegate calls only when minting
+        if(from == address(0) && to != address(0)) {
+            _delegate(to, to);
+        }
     }
 
     function _mint(address to, uint256 amount) internal override {

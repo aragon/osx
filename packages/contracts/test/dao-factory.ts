@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { createProposal, createVoteData } from "./utils/voting";
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',

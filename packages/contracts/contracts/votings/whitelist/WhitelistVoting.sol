@@ -9,8 +9,9 @@ import "./../../core/component/Component.sol";
 import "./../../core/IDAO.sol";
 import "./../../utils/TimeHelpers.sol";
 
-contract SimpleVoting is Component, TimeHelpers {
+contract WhitelistVoting is Component, TimeHelpers {
     bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
+    bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
     uint64 public constant PCT_BASE = 10 ** 18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
@@ -19,12 +20,10 @@ contract SimpleVoting is Component, TimeHelpers {
     struct Vote {
         bool executed;
         uint64 startDate;
-        uint64 snapshotBlock;
         uint64 supportRequiredPct;
-        uint64 minAcceptQuorumPct;
+        uint64 votingPower;
         uint256 yea;
         uint256 nay;
-        uint256 votingPower;
         mapping (address => VoterState) voters;
         IDAO.Action[] actions;
     }
@@ -32,63 +31,86 @@ contract SimpleVoting is Component, TimeHelpers {
     mapping (uint256 => Vote) internal votes;
 
     uint64 public supportRequiredPct;
-    uint64 public minAcceptQuorumPct;
     uint64 public voteTime;
+    uint64 private whitelistedLength;
     uint256 public votesLength;
 
-    ERC20VotesUpgradeable public token;
+    mapping(address => bool) public whitelisted;
     
     string private constant ERROR_NO_VOTE = "VOTING_NO_VOTE";
     string private constant ERROR_INIT_PCTS = "VOTING_INIT_PCTS";
     string private constant ERROR_CHANGE_SUPPORT_PCTS = "VOTING_CHANGE_SUPPORT_PCTS";
-    string private constant ERROR_CHANGE_QUORUM_PCTS = "VOTING_CHANGE_QUORUM_PCTS";
     string private constant ERROR_INIT_SUPPORT_TOO_BIG = "VOTING_INIT_SUPPORT_TOO_BIG";
     string private constant ERROR_CHANGE_SUPPORT_TOO_BIG = "VOTING_CHANGE_SUPP_TOO_BIG";
     string private constant ERROR_CAN_NOT_VOTE = "VOTING_CAN_NOT_VOTE";
     string private constant ERROR_CAN_NOT_EXECUTE = "VOTING_CAN_NOT_EXECUTE";
-    string private constant ERROR_CAN_NOT_FORWARD = "VOTING_CAN_NOT_FORWARD";
-    string private constant ERROR_NO_VOTING_POWER = "VOTING_NO_VOTING_POWER";
+    string private constant ERROR_CAN_NOT_CREATE_VOTE = "VOTING_CAN_NOT_CREATE_VOTE";
 
     event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
-    event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports, uint256 stake);
+    event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports);
     event ExecuteVote(uint256 indexed voteId);
-    event UpdateConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
+    event UpdateConfig(uint64 supportRequiredPct);
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
     function initialize(
         IDAO _dao, 
-        ERC20VotesUpgradeable _token,
-        uint64 _minAcceptQuorumPct,
+        address[] calldata _whitelisted,
         uint64 _supportRequiredPct,
         uint64 _voteTime
     ) public initializer { 
-        require(_minAcceptQuorumPct <= _supportRequiredPct, ERROR_INIT_PCTS);
         require(_supportRequiredPct < PCT_BASE, ERROR_INIT_SUPPORT_TOO_BIG);
 
-        token = _token;
-        minAcceptQuorumPct = _minAcceptQuorumPct;
         supportRequiredPct = _supportRequiredPct; 
         voteTime = _voteTime;
+        
+        // add whitelisted users.
+        for(uint256 i = 0; i < _whitelisted.length; i++) {
+            whitelisted[_whitelisted[i]] = true;
+        }
+
+        whitelistedLength = uint64(_whitelisted.length);
 
         Component.initialize(_dao);
         
-        emit UpdateConfig(_supportRequiredPct, _minAcceptQuorumPct);
+        emit UpdateConfig(_supportRequiredPct);
+    }
+
+
+    /**
+    * @notice add new users to the whitelist.
+    * @param _users addresses of users to add
+    */
+    function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
+        for(uint256 i = 0; i < _users.length; i++) {
+            whitelisted[_users[i]] = true;
+        }
+
+        whitelistedLength += uint64(_users.length);
+    }
+
+    /**
+    * @notice remove new users to the whitelist.
+    * @param _users addresses of users to remove
+    */
+    function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
+        for(uint256 i = 0; i < _users.length; i++) {
+            whitelisted[_users[i]] = false;
+        }
+
+        whitelistedLength -= uint64(_users.length);
     }
 
     /**
     * @notice Change required support and minQuorum
     * @param _supportRequiredPct New required support
-    * @param _minAcceptQuorumPct New acceptance quorum
     */
-    function changeVoteConfig(uint64 _supportRequiredPct, uint64 _minAcceptQuorumPct) external auth(MODIFY_CONFIG) {
-        require(_minAcceptQuorumPct <= _supportRequiredPct, ERROR_CHANGE_SUPPORT_PCTS);
+    function changeVoteConfig(uint64 _supportRequiredPct) external auth(MODIFY_CONFIG) {
         require(_supportRequiredPct < PCT_BASE, ERROR_CHANGE_SUPPORT_TOO_BIG);
 
-        minAcceptQuorumPct = _minAcceptQuorumPct;
         supportRequiredPct = _supportRequiredPct;
 
-        emit UpdateConfig(supportRequiredPct, minAcceptQuorumPct);
+        emit UpdateConfig(supportRequiredPct);
     }
 
     /**
@@ -103,19 +125,14 @@ contract SimpleVoting is Component, TimeHelpers {
         bool executeIfDecided, 
         bool castVote
     ) external returns (uint256 voteId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1; 
+        require(whitelisted[msg.sender], ERROR_CAN_NOT_CREATE_VOTE);
         
-        uint256 votingPower = token.getPastTotalSupply(snapshotBlock);
-        require(votingPower > 0, ERROR_NO_VOTING_POWER);
-
         voteId = votesLength++;
 
         Vote storage vote_ = votes[voteId];
         vote_.startDate = getTimestamp64();
-        vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
-        vote_.minAcceptQuorumPct = minAcceptQuorumPct;
-        vote_.votingPower = votingPower;
+        vote_.votingPower = whitelistedLength;
 
         for (uint256 i; i < _actions.length; i++) {
             vote_.actions.push(_actions[i]);
@@ -148,26 +165,24 @@ contract SimpleVoting is Component, TimeHelpers {
     function _vote(uint256 _voteId, bool _supports, address _voter, bool _executesIfDecided) internal {
         Vote storage vote_ = votes[_voteId];
 
-        // This could re-enter, though we can assume the governance token is not malicious
-        uint256 voterStake = token.getPastVotes(_voter, vote_.snapshotBlock);
         VoterState state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoterState.Yea) {
-            vote_.yea = vote_.yea - voterStake;
+            vote_.yea = vote_.yea - 1;
         } else if (state == VoterState.Nay) {
-            vote_.nay = vote_.nay - voterStake;
+            vote_.nay = vote_.nay - 1;
         }
 
         if (_supports) {
-            vote_.yea = vote_.yea + voterStake;
+            vote_.yea = vote_.yea + 1;
         } else {
-            vote_.nay = vote_.nay + voterStake;
+            vote_.nay = vote_.nay + 1;
         }
 
         vote_.voters[_voter] = _supports ? VoterState.Yea : VoterState.Nay;
 
-        emit CastVote(_voteId, _voter, _supports, voterStake);
+        emit CastVote(_voteId, _voter, _supports);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
            _execute(_voteId);
@@ -230,12 +245,10 @@ contract SimpleVoting is Component, TimeHelpers {
     * @return open Vote open status
     * @return executed Vote executed status
     * @return startDate start date
-    * @return snapshotBlock snapshot block
     * @return supportRequired support required
-    * @return minAcceptQuorum minimum acceptance quorum
+    * @return votingPower power
     * @return yea yeas amount
     * @return nay nays amount
-    * @return votingPower power
     * @return actions Actions
     */
     function getVote(uint256 _voteId)
@@ -245,12 +258,10 @@ contract SimpleVoting is Component, TimeHelpers {
             bool open,
             bool executed,
             uint64 startDate,
-            uint64 snapshotBlock,
             uint64 supportRequired,
-            uint64 minAcceptQuorum,
+            uint64 votingPower,
             uint256 yea,
             uint256 nay,
-            uint256 votingPower,
             IDAO.Action[] memory actions
         )
     {
@@ -259,12 +270,10 @@ contract SimpleVoting is Component, TimeHelpers {
         open = _isVoteOpen(vote_);
         executed = vote_.executed;
         startDate = vote_.startDate;
-        snapshotBlock = vote_.snapshotBlock;
         supportRequired = vote_.supportRequiredPct;
-        minAcceptQuorum = vote_.minAcceptQuorumPct;
+        votingPower = vote_.votingPower;
         yea = vote_.yea;
         nay = vote_.nay;
-        votingPower = vote_.votingPower;
         actions = vote_.actions;
     }
 
@@ -276,7 +285,7 @@ contract SimpleVoting is Component, TimeHelpers {
     */
     function _canVote(uint256 _voteId, address _voter) internal view returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && token.getPastVotes(_voter, vote_.snapshotBlock) > 0;
+        return _isVoteOpen(vote_) && whitelisted[_voter];
     }
 
     /**
@@ -309,18 +318,14 @@ contract SimpleVoting is Component, TimeHelpers {
         if (_isVoteOpen(vote_)) {
             return false;
         }
+        
         // Has enough support?
         uint256 totalVotes = vote_.yea + vote_.nay;
-        if (!_isValuePct(vote_.yea, totalVotes, vote_.supportRequiredPct)) {
-            return false;
+        if (_isValuePct(vote_.yea, totalVotes, vote_.supportRequiredPct)) {
+            return true;
         }
 
-        // Has min quorum?
-        if (!_isValuePct(vote_.yea, vote_.votingPower, vote_.minAcceptQuorumPct)) {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     /**

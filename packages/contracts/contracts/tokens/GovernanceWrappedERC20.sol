@@ -24,6 +24,11 @@ import "../core/IDAO.sol";
 // IMPORTANT: In this token, no need to have mint functionality, 
 // as it's the wrapped token's responsibility to mint whenever needed
 
+// Inheritance Chain -> 
+// [
+//    GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
+//    EIP712Upgradeable => ERC20Upgradeable => Initializable
+// ]
 contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgradeable, ERC20WrapperUpgradeable {
 
     function initialize(
@@ -39,15 +44,15 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
-
-    // TODO: https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
-    function delegates(address account) public view virtual override returns (address) {
-        return account;
-    }
     
     // The functions below are overrides required by Solidity.
+    // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
     function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._afterTokenTransfer(from, to, amount);
+        // reduce _delegate calls only when minting
+        if(from == address(0) && to != address(0)) {
+            _delegate(to, to);
+        }
     }
 
     function _mint(address to, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
