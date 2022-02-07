@@ -42,7 +42,13 @@
     "description": "Summary",
     "links": "Links",
     "logo": "Logo",
-    "optional": "Optional"
+    "optional": "Optional",
+    "membership": "Who is eligible to participate in your DAO?",
+    "communityToken": "Does your community have a token?",
+    "addExistingToken": "Add existing Token",
+    "existingTokenName": "Name",
+    "existingTokenSymbol": "Symbol",
+    "existingTokenSupply": "Supply"
   },
   "placeHolders": {
     "selectToken": "Select a Token ...",
@@ -102,6 +108,9 @@
   },
   "warnings": {
     "amountGtDaoToken": "Withdraw amount is greater than the current token balance"
+  },
+  "success": {
+    "contract": "Smart Contract Validated"
   },
   "allTransfer": {
     "thisWeek": "This Week",
@@ -176,7 +185,19 @@
     "step3": {
       "label": "Step 3",
       "title": "Setup Community",
-      "description": "Who is eligible to participate in the DAO? Create a token if needed."
+      "newToken": "No",
+      "newTokenSubtitle": "No, I would like to create a token.",
+      "existingToken": "Yes",
+      "existingTokenSubtitle": "Yes, we already have a token.",
+      "description": "Who is eligible to participate in the DAO? Create a token if needed.",
+      "tokenMembership": "Token Holders",
+      "tokenMembershipSubtitle": "All those who have a token are entitled to participate. 1 token equals 1 vote.",
+      "walletMemberShip": "Authorized Wallets",
+      "walletMemberShipSubtitle": "Only authorised wallets are entitled to particpiate. 1 Wallet equals 1 vote (coming soon).",
+      "addExistingTokenHelptext": "Hinterlege einen bestehenden Token, welcher deine Community für die Governance verwendet. To learn more about what it’s important if you use an existing Token, read first the ",
+      "tokenHelptextLink": "Token Distribution Guide",
+      "tokenContractSubtitlePart1": "Copy the contract address directly from the ",
+      "tokenContractSubtitlePart2": "This way you can ensure that the address is correct."
     },
     "step4": {
       "label": "Step 4",
