@@ -8,7 +8,7 @@ import {
   IconRadioSelected,
 } from '../icons';
 
-const Icons = {
+export const Icons = {
   multiSelect: {
     active: <IconCheckboxSelected />,
     multi: <IconCheckboxMulti />,

@@ -96,6 +96,9 @@ module.exports = {
         16: '128px',
         25: '200px',
       },
+      borderRadius: {
+        larger: '10px',
+      },
     },
     // overrides screen breakpoints according to design system
     screens: {
