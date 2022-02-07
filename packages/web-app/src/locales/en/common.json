@@ -94,7 +94,9 @@
         "read": "Read Proposal",
         "vote": "Vote now",
         "execute": "Execute Now",
-        "edit": "Edit Proposal"
+        "edit": "Edit Proposal",
+        "readFullProposal": "Read Full Proposal",
+        "closeFullProposal": "Close Full Proposal"
       }
     },
     "noProposals": "No proposals found!"

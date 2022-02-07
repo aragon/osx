@@ -9,6 +9,7 @@ import {
   ButtonText,
   CardExecution,
   IconChevronDown,
+  IconChevronUp,
   ProgressStatusProps,
   WidgetStatus,
 } from '@aragon/ui-components';
@@ -72,7 +73,7 @@ const Proposal: React.FC = () => {
       {!expandedProposal && (
         <ButtonText
           className="mt-3 w-full tablet:w-max"
-          label="Read Full Proposal"
+          label={t('governance.proposals.buttons.readFullProposal')}
           mode="secondary"
           iconRight={<IconChevronDown />}
           onClick={() => setExpandedProposal(true)}
@@ -104,6 +105,13 @@ const Proposal: React.FC = () => {
                 ante sagittis egestas. Duis et tortor id enim ullamcorper
                 bibendum eget sed dolor.
               </p>
+              <ButtonText
+                className="mt-3 w-full tablet:w-max"
+                label={t('governance.proposals.buttons.closeFullProposal')}
+                mode="secondary"
+                iconRight={<IconChevronUp />}
+                onClick={() => setExpandedProposal(false)}
+              />
             </>
           )}
 
