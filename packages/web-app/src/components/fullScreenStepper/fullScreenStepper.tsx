@@ -9,7 +9,7 @@ import {
 } from '@aragon/ui-components';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
-import React, {createContext, useCallback, useContext} from 'react';
+import React, {createContext, useCallback, useContext, useMemo} from 'react';
 
 import {useWallet} from 'context/augmentedWallet';
 import {useStepper} from 'hooks/useStepper';
@@ -23,6 +23,7 @@ export type FullScreenStepperProps = {
   navbarLabel: string;
   navbarBackUrl: string;
   wizardProcessName: string;
+  totalFormSteps?: number;
   children: React.FunctionComponentElement<StepProps>[];
 };
 
@@ -43,6 +44,7 @@ export const useFormStep = () =>
 export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
   navbarLabel,
   navbarBackUrl,
+  totalFormSteps,
   wizardProcessName,
   children,
 }) => {
@@ -72,6 +74,12 @@ export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
   } = children[currentIndex].props;
 
   const value = {currentStep, setStep, prev, next};
+
+  const currentFormStep = useMemo(() => {
+    return !totalFormSteps || totalFormSteps === children.length
+      ? currentStep
+      : currentStep - (children.length - totalFormSteps);
+  }, [children.length, currentStep, totalFormSteps]);
 
   return (
     <FullScreenStepperContext.Provider value={value}>
@@ -108,8 +116,8 @@ export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
             processName={wizardProcessName}
             title={wizardTitle || ''}
             description={wizardDescription || ''}
-            totalSteps={children.length}
-            currentStep={currentStep}
+            totalSteps={totalFormSteps || children.length}
+            currentStep={currentFormStep}
           />
         )}
         {customHeader}
@@ -148,7 +156,7 @@ export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
 };
 
 const Layout = styled.div.attrs({
-  className: 'm-auto mt-3 w-8/12 font-medium text-ui-600',
+  className: 'tablet:m-auto tablet:mt-3 tablet:w-8/12 font-medium text-ui-600',
 })``;
 
 type FormLayoutProps = {
@@ -156,7 +164,9 @@ type FormLayoutProps = {
 };
 
 const FormLayout = styled.div.attrs(({fullWidth}: FormLayoutProps) => ({
-  className: `my-8 mx-auto space-y-5 ${!fullWidth && 'w-3/4'}`,
+  className: `my-5 px-2 tablet:px-0 tablet:my-8 tablet:mx-auto space-y-5 ${
+    !fullWidth && 'tablet:w-3/4'
+  }`,
 }))<FormLayoutProps>``;
 
 const HStack = styled.div.attrs({
