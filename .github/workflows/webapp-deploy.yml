@@ -31,6 +31,10 @@ jobs:
         working-directory: ${{env.working-directory}}
     steps:
       - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
       - name: Build ui-components
         run: |
           cd ../ui-components
