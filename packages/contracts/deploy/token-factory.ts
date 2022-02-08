@@ -7,14 +7,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const registry = await deployments.get('Registry');
-
-  await deploy('DAOFactory', {
+  await deploy('TokenFactory', {
     from: deployer,
-    args: [registry.address],
     log: true,
   });
 };
 export default func;
-func.tags = ['DAOFactory'];
+func.tags = ['TokenFactory'];
 func.dependencies = ['Registry'];

@@ -5,21 +5,21 @@
   "homepage": "https://github.com/aragon/zaragoza",
   "license": "MIT",
   "scripts": {
-    "codegen": "graph codegen",
-    "build": "graph build",
-    "deploy-arbitrum-rinkeby": "scripts/deploy.sh aragon zaragoza arbitrum-rinkeby",
-    "deploy-local": "LOCAL=true scripts/deploy.sh aragon zaragoza arbitrum-rinkeby",
-    "create-local": "graph create aragon/aragon-zaragoza-arbitrum-rinkeby --node http://localhost:8020",
-    "test": "rm -r tests/.bin; graph test",
-    "coverage": "graph test -c",
-    "manifest-arbitrum-rinkeby": "scripts/build-manifest.sh arbitrum-rinkeby"
-  },
-  "dependencies": {
-    "@graphprotocol/graph-cli": "^0.24.1",
-    "@graphprotocol/graph-ts": "^0.24.1",
-    "mustache": "^4.2.0"
+    "build:contracts": "lerna run --scope=@aragon/zaragoza-contracts --stream compile",
+    "manifest": "scripts/build-manifest.sh",
+    "build": "scripts/build-subgraph.sh",
+    "deploy": "scripts/deploy-subgraph.sh",
+    "create:local": "graph create aragon/aragon-zaragoza-rinkeby --node http://localhost:8020",
+    "deploy:local": "LOCAL=true scripts/deploy-subgraph.sh",
+    "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
+    "stop:dev": "docker-compose -f docker/docker-compose.yml down",
+    "test": "rm -r tests/.bin/**; graph test",
+    "coverage": "graph test -c"
   },
   "devDependencies": {
-    "matchstick-as": "^0.2.1"
+    "@graphprotocol/graph-cli": "^0.25.1",
+    "@graphprotocol/graph-ts": "^0.24.1",
+    "mustache": "^4.2.0",
+    "matchstick-as": "^0.2.2"
   }
 }

@@ -39,27 +39,40 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ).address
   );
 
+  const TokenFactoryContract = await ethers.getContractAt(
+    'TokenFactory',
+    (
+      await deployments.get('TokenFactory')
+    ).address
+  );
+
   console.log('Verifying main contracts');
 
   await verifyContract(RegistryContract.address, []);
-  await verifyContract(DAOFactoryContract.address, [RegistryContract.address]);
+  await verifyContract(TokenFactoryContract.address, []);
+  await verifyContract(DAOFactoryContract.address, [
+    RegistryContract.address,
+    TokenFactoryContract.address,
+  ]);
 
   console.log('Verifying base contracts');
 
   const votingBase = await DAOFactoryContract.votingBase();
   const daoBase = await DAOFactoryContract.daoBase();
-  const governanceERC20Base = await DAOFactoryContract.governanceERC20Base();
+  const governanceERC20Base = await TokenFactoryContract.governanceERC20Base();
   const governanceWrappedERC20Base =
-    await DAOFactoryContract.governanceWrappedERC20Base();
+    await TokenFactoryContract.governanceWrappedERC20Base();
+  const merkleMinterBase = await TokenFactoryContract.merkleMinterBase();
 
   await verifyContract(votingBase, []);
   await verifyContract(daoBase, []);
   await verifyContract(governanceERC20Base, []);
   await verifyContract(governanceWrappedERC20Base, []);
+  await verifyContract(merkleMinterBase, []);
 };
 export default func;
 func.runAtTheEnd = true;
-func.dependencies = ['DAOFactory'];
+func.dependencies = ['Registry', 'DAOFactory', 'TokenFactory'];
 func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(
     hre.network.name === 'localhost' ||
