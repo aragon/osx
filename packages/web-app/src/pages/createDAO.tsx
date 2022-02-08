@@ -10,6 +10,7 @@ import {
 } from 'containers/daoOverview';
 import SelectChain from 'containers/selectChainForm';
 import DefineMetadata from 'containers/defineMetadata';
+import ConfigureCommunity from 'containers/configureCommunity';
 import SetupCommunity from 'containers/setupCommunity';
 
 type FormData = {
@@ -62,7 +63,7 @@ const CreateDAO: React.FC = () => {
           wizardTitle={t('createDAO.step4.title')}
           wizardDescription={t('createDAO.step4.description')}
         >
-          <div>Configure Governance</div>
+          <ConfigureCommunity />
         </Step>
       </FullScreenStepper>
     </FormProvider>

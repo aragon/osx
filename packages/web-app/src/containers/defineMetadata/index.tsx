@@ -72,6 +72,9 @@ const DefineMetadata: React.FC = () => {
             onError={handleImageError}
             onChange={handleImageChange}
             maxFileSize={3000000}
+            maxDimension={2400}
+            minDimension={256}
+            onlySquare
           />
         </LogoContainer>
         {errors?.daoLogo?.message && (

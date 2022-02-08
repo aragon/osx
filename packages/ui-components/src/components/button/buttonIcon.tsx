@@ -36,9 +36,9 @@ export const ButtonIcon: React.FC<ButtonIconProps> = ({
 };
 
 const paddingStyles = {
-  small: 'p-1',
-  medium: 'p-1.5',
-  large: 'p-2',
+  small: 'w-4 p-1',
+  medium: 'w-5 p-1.5',
+  large: 'w-6 p-2',
 };
 
 type StyledButtonProps = {
