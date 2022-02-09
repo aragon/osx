@@ -1,0 +1,41 @@
+name: Subgraph Tests
+on:
+  push:
+    paths:
+      - 'packages/subgraph/**'
+      - '.github/workflows/subgraph-*.yml'
+
+env:
+  working-directory: packages/subgraph
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        network: ['localhost', 'rinkeby', 'arbitrum-rinkeby']
+    defaults:
+      run:
+        working-directory: ${{env.working-directory}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install yarn
+        run: npm i -G yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Build contracts
+        run: yarn run build:contracts
+      - name: Build manifest
+        run: yarn run manifest
+        env:
+          NETWORK_NAME: ${{matrix.network}}
+      - name: Build
+        run: yarn run build
+      - name: Run Tests
+        run: yarn run test
+        
