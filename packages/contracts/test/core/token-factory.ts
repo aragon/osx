@@ -74,9 +74,31 @@ describe('Core: TokenFactory', () => {
       dao.hasPermission.returns(true);
     });
 
-    it('should create a GovernanceWrappedERC20 clone', async () => {
+    it('should fail if token addr is no ERC20 contract', async () => {
+      const dummyContractFactory = await ethers.getContractFactory('DummyContract')
+      const dummyContract = await dummyContractFactory.deploy()
       const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000001',
+        addr: dummyContract.address,
+        name: 'FakeToken',
+        symbol: 'FT',
+      };
+
+      const mintConfig: MintConfig = {
+        receivers: ['0x0000000000000000000000000000000000000002'],
+        amounts: [1],
+      };
+
+      await expect(tokenFactory.callStatic.newToken(
+        dao.address,
+        config,
+        mintConfig
+      )).to.revertedWith('Address: low-level call failed');
+    })
+
+    it('should create a GovernanceWrappedERC20 clone', async () => {
+      const erc20Contract = await smock.fake<GovernanceERC20>('GovernanceERC20');
+      const config: TokenConfig = {
+        addr: erc20Contract.address,
         name: 'FakeToken',
         symbol: 'FT',
       };
@@ -96,8 +118,9 @@ describe('Core: TokenFactory', () => {
     });
 
     it('should return MerkleMinter with 0x0', async () => {
+      const erc20Contract = await smock.fake<GovernanceERC20>('GovernanceERC20');
       const config: TokenConfig = {
-        addr: '0x0000000000000000000000000000000000000001',
+        addr: erc20Contract.address,
         name: 'FakeToken',
         symbol: 'FT',
       };
