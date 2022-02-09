@@ -107,12 +107,12 @@ const MenuBar: React.FC<MenuBarProps> = ({
 };
 
 export type TextareaWYSIWYGProps = {
-  placeholder: string;
+  placeholder?: string;
   disabled?: boolean;
 };
 
 export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
-  placeholder,
+  placeholder = '',
   disabled = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -130,12 +130,18 @@ export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
     [disabled]
   );
 
+  const body = document.querySelector('body');
+
   if (isExpanded) {
     document.onkeydown = e => {
       if (e.key === 'Escape' && isExpanded) {
         setIsExpanded(!isExpanded);
       }
     };
+
+    if (body) {
+      body.style.overflow = 'hidden';
+    }
 
     let portalNode = document.querySelector('#fullscreen-editor');
     if (!portalNode) {
@@ -161,6 +167,10 @@ export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
     return ReactDOM.createPortal(fullScreenEditor, portalNode);
   }
 
+  if (body) {
+    body.style.overflow = 'auto';
+  }
+
   return (
     <Container disabled={disabled}>
       <MenuBar
@@ -180,9 +190,9 @@ type Props = {
 };
 
 const Container = styled.div.attrs(({disabled, fullScreen = false}: Props) => ({
-  className: `w-full text-ui-600 ${
+  className: `w-full text-ui-600 overflow-auto ${
     fullScreen
-      ? 'h-screen flex flex-col'
+      ? 'h-screen flex flex-col fixed top-0'
       : 'rounded-xl border-2 border-ui-100 hover:border-ui-300'
   } ${disabled ? 'bg-ui-100 border-ui-200' : 'bg-white'}`,
 }))<Props>`
@@ -209,13 +219,13 @@ const Container = styled.div.attrs(({disabled, fullScreen = false}: Props) => ({
 `;
 
 const StyledMenuBar = styled.div.attrs(({disabled, fullScreen}: Props) => ({
-  className: `bg-ui-50 px-2 py-1.5 flex justify-between ${
-    !fullScreen && 'rounded-t-xl'
-  } ${disabled && 'bg-ui-100'}`,
+  className: `bg-ui-50 px-2 py-1.5 flex flex-wrap justify-between ${
+    fullScreen ? 'sticky top-0 z-10' : 'rounded-t-xl'
+  } ${disabled ? 'bg-ui-100' : ''}`,
 }))<Props>``;
 
 const Toolgroup = styled.div.attrs({
-  className: 'flex space-x-1.5',
+  className: 'flex flex-wrap space-x-1.5',
 })``;
 
 const StyledEditorContent = styled(EditorContent)`

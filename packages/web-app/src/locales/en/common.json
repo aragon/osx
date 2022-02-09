@@ -37,6 +37,7 @@
     "continue": "Continue",
     "submitDeposit": "Submit Deposit",
     "resources": "Resources",
+    "resourcesHelptext": "Link to external resources, such as documents, forum links, chats or similar.",
     "submitWithdraw": "Publish Proposal",
     "sortBy": "Sort by",
     "mainNet": "Main Net",
@@ -64,7 +65,8 @@
     "addExistingToken": "Add existing Token",
     "existingTokenName": "Name",
     "existingTokenSymbol": "Symbol",
-    "existingTokenSupply": "Supply"
+    "existingTokenSupply": "Supply",
+    "author": "Author"
   },
   "placeHolders": {
     "selectToken": "Select a Token ...",
@@ -181,6 +183,18 @@
       "utcMenu": {
         "title": "Select a UTC Timezone"
       }
+    },
+    "defineProposal": {
+      "heading": "Define Proposal",
+      "description": "A proposal is necessary so that the community understands why you want to execute this withdraw. Fill in the necessary fields and be as detailed but as concise as possible.",
+      "title": "Title",
+      "titleHelptext": "Define a custom title if needed",
+      "titlePlaceholder": "Type meaningful title",
+      "summary": "Summary",
+      "summaryHelptext": "Describe this proposal in 2-3 short sentences as a summary. This information will be presented in the sharing and overview.",
+      "summaryPlaceholder": "Type your description ...",
+      "proposal": "Proposal",
+      "proposalPlaceholder": "Type your proposal ..."
     }
   },
   "createDAO": {

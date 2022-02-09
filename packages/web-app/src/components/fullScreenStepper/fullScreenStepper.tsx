@@ -186,5 +186,5 @@ const InsetButtonText = styled.div.attrs({
 })``;
 
 const FormFooter = styled.div.attrs({
-  className: 'flex justify-between mt-8',
+  className: 'flex justify-between pt-8',
 })``;
