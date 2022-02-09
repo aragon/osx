@@ -39,7 +39,7 @@ function App() {
   }, [pathname]);
 
   return (
-    <div className="bg-primary-50">
+    <div className="bg-ui-50">
       <div className="min-h-screen">
         <Suspense fallback={null}>
           <Routes>

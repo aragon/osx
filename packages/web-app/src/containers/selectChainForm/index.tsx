@@ -82,19 +82,19 @@ const SelectChainForm: React.FC = () => {
               <DropdownContent>
                 <ListItemText
                   name="cost"
-                  mode="default"
+                  mode={sortFilter === 'cost' ? 'selected' : 'default'}
                   title={t('labels.networkCost')}
                   onClick={handleFilterChanged}
                 />
                 <ListItemText
                   name="popularity"
-                  mode="default"
+                  mode={sortFilter === 'popularity' ? 'selected' : 'default'}
                   title={t('labels.popularity')}
                   onClick={handleFilterChanged}
                 />
                 <ListItemText
                   name="security"
-                  mode="default"
+                  mode={sortFilter === 'security' ? 'selected' : 'default'}
                   title={t('labels.security')}
                   onClick={handleFilterChanged}
                 />
@@ -105,6 +105,7 @@ const SelectChainForm: React.FC = () => {
               label={labels[sortFilter].title}
               mode="secondary"
               size="large"
+              isActive={isOpen}
               iconRight={<IconChevronDown />}
             />
           </Popover>
