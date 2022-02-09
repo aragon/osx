@@ -4,6 +4,7 @@ import {useTranslation} from 'react-i18next';
 import {withTransaction} from '@elastic/apm-rum-react';
 import {ButtonText} from '@aragon/ui-components';
 import {useNavigate} from 'react-router-dom';
+import {VotingTerminal} from 'containers/votingTerminal';
 
 const Home: React.FC = () => {
   const {t} = useTranslation();
@@ -24,6 +25,11 @@ const Home: React.FC = () => {
           size="large"
           onClick={() => navigate('/create-dao')}
         />
+      </div>
+
+      {/* This is just a demo, will be removed before merging */}
+      <div className="my-4 mx-auto w-11/12 tablet:w-1/2">
+        <VotingTerminal />
       </div>
     </>
   );

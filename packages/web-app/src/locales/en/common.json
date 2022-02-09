@@ -248,5 +248,33 @@
         "minimumApprovalAlert": "{{amount}} {{symbol}} tokens"
       }
     }
+  },
+  "votingTerminal": {
+    "title": "Voting",
+    "breakdown": "Breakdown",
+    "voters": "Voters",
+    "info": "Info",
+    "yes": "Yes",
+    "no": "No",
+    "yesHelptext": "Your choice will be counted for option yes",
+    "noHelptext": "Your choice will be counted for option no",
+    "token": "Token",
+    "inputPlaceholder": "Type Address, ENS or E-Mail",
+    "options": "Options",
+    "yes+no": "Yes + No",
+    "strategy": "Strategy",
+    "tokenVoting": "1 Token -> 1 Vote",
+    "minimumApproval": "Minimum Approval",
+    "participation": "Participation",
+    "uniqueVoters": "Unique Voters",
+    "duration": "Duration",
+    "start": "Start",
+    "end": "End",
+    "chooseOption": "Choose your option",
+    "chooseOptionHelptext": "To vote, you must select one of the following options. Afterwards, a confirmation with your wallet is necessary. Once the transaction is completed, your vote will be counted and displayed.",
+    "submit": "Submit your vote",
+    "cancel": "Cancel",
+    "remainingTime": "Remaining time",
+    "voteNow": "Vote now"
   }
 }

@@ -24,7 +24,7 @@ export const Icons = {
 export type CheckboxListItemProps = {
   label: string;
   helptext: string;
-  multiSelect: boolean;
+  multiSelect?: boolean;
   disabled?: boolean;
   state?: 'default' | 'active' | 'multi';
   onClick?: React.MouseEventHandler;
@@ -33,7 +33,7 @@ export type CheckboxListItemProps = {
 export const CheckboxListItem: React.FC<CheckboxListItemProps> = ({
   label,
   helptext,
-  multiSelect,
+  multiSelect = false,
   disabled = false,
   state = 'default',
   onClick,
@@ -60,7 +60,7 @@ type ContainerTypes = {
 };
 
 const Container = styled.div.attrs(({disabled, state}: ContainerTypes) => ({
-  className: `py-1.5 px-2 rounded-xl border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+  className: `w-full py-1.5 px-2 rounded-xl border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
     disabled
       ? 'bg-ui-100 border-ui-300'
       : `bg-ui-0 group hover:border-primary-500 cursor-pointer ${
@@ -81,5 +81,5 @@ const HStack = styled.div.attrs(({disabled, state}: ContainerTypes) => ({
 }))<ContainerTypes>``;
 
 const Helptext = styled.p.attrs({
-  className: 'text-sm text-ui-500 mt-0.25',
+  className: 'text-sm text-ui-500 mt-0.25 mr-3.5',
 })``;
