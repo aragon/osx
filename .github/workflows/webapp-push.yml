@@ -19,6 +19,10 @@ jobs:
         working-directory: ${{env.working-directory}}
     steps:
       - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
       - name: Build ui-components
         run: |
           cd ../ui-components
@@ -33,3 +37,8 @@ jobs:
         run: yarn lint
       - name: Test
         run: yarn test
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

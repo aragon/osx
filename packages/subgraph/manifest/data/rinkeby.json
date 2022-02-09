@@ -1,0 +1,11 @@
+{
+  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
+  "network": "rinkeby",
+  "dataSources": {
+    "Registry": {
+      "name": "Registry",
+      "address": "0x73Cdcb80049E7F4bfdD9A13e7b866adeFa44fb7d",
+      "startBlock": 10127160
+    }
+  }
+}

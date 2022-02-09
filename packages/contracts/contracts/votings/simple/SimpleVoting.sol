@@ -314,6 +314,7 @@ contract SimpleVoting is Component, TimeHelpers {
         if (!_isValuePct(vote_.yea, totalVotes, vote_.supportRequiredPct)) {
             return false;
         }
+
         // Has min quorum?
         if (!_isValuePct(vote_.yea, vote_.votingPower, vote_.minAcceptQuorumPct)) {
             return false;

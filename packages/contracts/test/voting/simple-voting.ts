@@ -25,16 +25,13 @@ const bigExp = (x:number, y:number) => toBn(x).mul(toBn(10).pow(toBn(y)));
 const pct16 = (x: number) => bigExp(x, 16);
 
 const EVENTS = {
-  REGISTERED_CALLBACK: 'RegisteredCallback',
-  REGISTERED_STANDARD: 'RegisteredStandard',
-  RECEIVED_CALLBACK: 'ReceivedCallback',
   UPDATE_CONFIG: 'UpdateConfig',
   START_VOTE: 'StartVote',
   CAST_VOTE: 'CastVote',
   EXECUTED: 'Executed'
 };
 
-describe('Voting: SimpleVoting', function () {
+describe('SimpleVoting', function () {
     let signers: any;
     let voting: SimpleVoting;
     let daoMock: any;

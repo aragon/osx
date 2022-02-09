@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
    ************************************/
   const {t} = useTranslation();
   const breadcrumbs = useBreadcrumbs(undefined, {
-    excludePaths: [Dashboard, NotFound],
+    excludePaths: [Dashboard, NotFound, 'governance/proposals'],
   });
 
   const {open} = useWalletMenuContext();

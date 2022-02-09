@@ -48,7 +48,7 @@ export const ButtonBase: React.FC<ButtonBaseProps> = ({
  **********************************/
 const sizeStyles = {
   small: 'h-4 space-x-1 rounded-lg',
-  medium: 'h-5 space-x-1.5 rounded-lg', // FIXME: borderRadius 10px
+  medium: 'h-5 space-x-1.5 rounded-larger',
   large: 'h-6 space-x-1.5 rounded-xl',
 };
 

@@ -1,11 +1,11 @@
 {
-  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest-[network-name]",
+  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
   "network": "arbitrum-rinkeby",
   "dataSources": {
     "Registry": {
       "name": "Registry",
-      "address": "0x5661e6E7A1E5B6f885906a9e55aCeDAF070F5EDB",
-      "startBlock": 9932280
+      "address": "0x279b81CF8FAbe87A4eb58269d11dF2eA97CD0B69",
+      "startBlock": 9318520
     }
   }
 }

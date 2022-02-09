@@ -75,7 +75,7 @@ const Container = styled.button.attrs(({mode}: InputContainerProps) => {
         const hoverClasses = 'hover:text-primary-500';
         const activeClasses =
           'active:bg-ui-100 active:outline-none active:ring-0';
-        className += ` bg-ui-50 text-ui-600 ${activeClasses} ${focusClasses} ${hoverClasses} `;
+        className += ` bg-transparent text-ui-600 ${activeClasses} ${focusClasses} ${hoverClasses} `;
       }
       break;
   }

@@ -29,7 +29,7 @@ const properties = {
   publisherAddress: '0x374d444487A4602750CA00EFdaC5d22B21F130E1',
   buttonLabel: ['Read Proposal', 'Vote now', 'Execute Now', 'Edit Proposal'],
   AlertMessage: ['Starts in x days y hours', 'x days y hours left'],
-  StatusLabel: [
+  StateLabel: [
     'Draft',
     'Pending',
     'Active',

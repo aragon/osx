@@ -1,15 +1,28 @@
 {
-	"name": "@aragon/zaragoza",
-	"version": "0.1.0",
-	"description": "Human-centered Dao infrastructure",
-	"repository": "https://github.com/aragon/Zaragoza",
-	"author": "Aragon Association",
-	"license": "MIT",
-	"private": true,
-	"workspaces": [
-		"packages/*"
-	],
-	"devDependencies": {
-		"lerna": "^3.22.1"
+  "name": "@aragon/zaragoza",
+  "version": "0.1.0",
+  "description": "Aragon DAO Framework",
+  "repository": "https://github.com/aragon/zaragoza",
+  "author": "Aragon Association",
+  "license": "MIT",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@graphprotocol/graph-ts",
+      "**/@graphprotocol/graph-ts/**",
+      "**/@graphprotocol/graph-cli",
+      "**/@graphprotocol/graph-cli/**",
+      "**/matchstick-as",
+      "**/matchstick-as/**"
+    ]
+  },
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  },
+	"engines": {
+		"node": ">=14 <15.0.0"
 	}
 }

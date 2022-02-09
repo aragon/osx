@@ -54,7 +54,6 @@ export type ButtonGroupProps = {
   bgWhite: boolean;
   defaultValue: string;
   onChange?: (value: string) => void;
-  fullWidth?: boolean;
   children: React.FunctionComponentElement<OptionProps>[];
 };
 
@@ -62,7 +61,6 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   bgWhite,
   defaultValue,
   onChange,
-  fullWidth = false,
   children,
 }) => {
   return (
@@ -71,7 +69,7 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
       defaultValue={defaultValue}
       onChange={onChange}
     >
-      <HStack data-testid="buttonGroup" fullWidth={fullWidth} bgWhite={bgWhite}>
+      <HStack data-testid="buttonGroup" bgWhite={bgWhite}>
         {children}
       </HStack>
     </ButtonProvider>
@@ -80,12 +78,10 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
 
 type HStackProps = {
   bgWhite: boolean;
-  fullWidth: boolean;
 };
 
-const HStack = styled.div.attrs(({bgWhite, fullWidth}: HStackProps) => ({
+const HStack = styled.div.attrs(({bgWhite}: HStackProps) => ({
   className: `flex rounded-xl p-0.5 space-x-1.5 
     ${bgWhite ? 'bg-ui-50' : 'bg-ui-0'}
-    ${fullWidth ? 'w-full' : 'w-max'}
   `,
 }))<HStackProps>``;

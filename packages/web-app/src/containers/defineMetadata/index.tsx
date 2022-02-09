@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {Controller, useFormContext, useFormState} from 'react-hook-form';
 
+import AddLinks from 'components/addLinks';
+
 const DefineMetadata: React.FC = () => {
   const {t} = useTranslation();
   const {errors} = useFormState();
@@ -70,6 +72,9 @@ const DefineMetadata: React.FC = () => {
             onError={handleImageError}
             onChange={handleImageChange}
             maxFileSize={3000000}
+            maxDimension={2400}
+            minDimension={256}
+            onlySquare
           />
         </LogoContainer>
         {errors?.daoLogo?.message && (
@@ -105,14 +110,9 @@ const DefineMetadata: React.FC = () => {
         <Label
           label={t('labels.links')}
           helpText={t('createDAO.step2.linksSubtitle')}
+          isOptional
         />
-        <>
-          {/* TODO: replace with proper logo component */}
-          <div className="h-25 bg-ui-0 rounded-xl">
-            Placeholder links component
-          </div>
-          {/* <AlertInline label="Wire up field error message" mode="critical" /> */}
-        </>
+        <AddLinks />
       </FormItem>
     </>
   );

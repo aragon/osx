@@ -35,3 +35,4 @@ deployments
 # generated
 generated
 subgraph.yaml
+.bin

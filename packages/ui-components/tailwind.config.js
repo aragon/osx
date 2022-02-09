@@ -86,6 +86,7 @@ module.exports = {
         2: '16px',
         2.5: '20px',
         3: '24px',
+        3.5: '28px',
         4: '32px',
         5: '40px',
         6: '48px',
@@ -93,9 +94,13 @@ module.exports = {
         10: '80px',
         14: '112px',
         18: '144px',
+        20: '160px',
         25: '200px',
         30: '240px',
         84: '672px',
+      },
+      borderRadius: {
+        larger: '10px',
       },
     },
     fontWeight: {

@@ -5,13 +5,15 @@ import {Badge} from '../badge';
 import {IconChevronDown} from '../icons';
 import {Link} from '../link';
 
+export type VoterType = {
+  wallet: string;
+  option: 'Yes' | 'No';
+  votingPower: string;
+  tokenAmount: string;
+};
+
 export type VotersTableProps = {
-  voters: Array<{
-    wallet: string;
-    option: 'Yes' | 'No';
-    votingPower: string;
-    tokenAmount: string;
-  }>;
+  voters: Array<VoterType>;
   onLoadMore: () => void;
 };
 
@@ -63,7 +65,8 @@ export const VotersTable: React.FC<VotersTableProps> = ({
 };
 
 export const Table = styled.table.attrs({
-  className: 'border-separate',
+  className:
+    'border-separate w-full block tablet:table overflow-x-auto whitespace-nowrap',
 })`
   border-spacing: 0;
 

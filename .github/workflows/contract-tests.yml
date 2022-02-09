@@ -16,6 +16,10 @@ jobs:
         working-directory: ${{env.working-directory}}
     steps:
       - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
       - name: Install yarn
         run: npm i -G yarn
       - name: Install dependencies

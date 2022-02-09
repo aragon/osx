@@ -23,11 +23,13 @@ contract TokenFactory {
     using Address for address;
     using Clones for address;
 
-    address private governanceERC20Base;
-    address private governanceWrappedERC20Base;
-    address private merkleMinterBase;
+    address public governanceERC20Base;
+    address public governanceWrappedERC20Base;
+    address public merkleMinterBase;
 
-    MerkleDistributor private distributorBase;
+    MerkleDistributor public distributorBase;
+
+    event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
 
     struct TokenConfig {
         address addr;
@@ -39,8 +41,6 @@ contract TokenFactory {
         address[] receivers;
         uint256[] amounts;
     }
-
-    event DAOCreated(string name, address indexed token, address indexed voting);
 
     constructor() {
         setupBases();
@@ -91,6 +91,13 @@ contract TokenFactory {
             _dao,
             GovernanceERC20(token),
             distributorBase
+        );
+
+        // emit event for new token
+        emit TokenCreated(
+            IERC20Upgradeable(token),
+            MerkleMinter(merkleMinter),
+            MerkleDistributor(distributorBase)
         );
 
         bytes32 tokenMinterRole  = GovernanceERC20(token).TOKEN_MINTER_ROLE();

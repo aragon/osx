@@ -54,7 +54,7 @@ export type CardProposalProps = {
   StateLabel: string[];
 };
 
-const explorers: {
+export const explorers: {
   [key: number]: string;
 } = {
   1: 'https://etherscan.io/address/',
