@@ -116,13 +116,15 @@ export async function getTokenInfo(
 ) {
   let decimals = null,
     symbol = null,
-    name = null;
+    name = null,
+    totalSupply = null;
 
   if (isETH(address)) {
     return {
       name: 'Ethereum',
       symbol: constants.EtherSymbol,
       decimals: 18,
+      totalSupply,
     };
   }
 
@@ -132,11 +134,13 @@ export async function getTokenInfo(
       contract.decimals(),
       contract.name(),
       contract.symbol(),
+      contract.totalSupply(),
     ]);
 
     decimals = values[0];
     name = values[1];
     symbol = values[2];
+    totalSupply = values[3];
   } catch (error) {
     console.error('Error, getting token info from contract');
   }
@@ -145,6 +149,7 @@ export async function getTokenInfo(
     decimals,
     name,
     symbol,
+    totalSupply,
   };
 }
 

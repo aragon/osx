@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {CheckboxListItem, Label} from '@aragon/ui-components';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
+
 import ExistingTokenPartialForm from './addExistingToken';
 
 const SetupCommunityForm: React.FC = () => {
@@ -40,6 +41,9 @@ const SetupCommunityForm: React.FC = () => {
       </FormItem>
 
       {/* Token creation */}
+      {/* TODO: when validating, the two list items should be either wrapped in a component that takes care of the state
+        or manually call setValue() onChange and get rid of the controller so that required validation can be done
+      */}
       <FormItem>
         <Label label={t('labels.communityToken')} />
         <Controller
