@@ -6,7 +6,7 @@ import App from './app';
 import {WalletProvider} from 'context/augmentedWallet';
 import {APMProvider} from 'context/elasticAPM';
 import {WalletMenuProvider} from 'context/walletMenu';
-import {TransferModalsProvider} from 'context/transfersModal';
+import {GlobalModalsProvider} from 'context/globalModals';
 import 'tailwindcss/tailwind.css';
 
 ReactDOM.render(
@@ -14,11 +14,11 @@ ReactDOM.render(
     <APMProvider>
       <WalletProvider>
         <WalletMenuProvider>
-          <TransferModalsProvider>
+          <GlobalModalsProvider>
             <Router>
               <App />
             </Router>
-          </TransferModalsProvider>
+          </GlobalModalsProvider>
         </WalletMenuProvider>
       </WalletProvider>
     </APMProvider>

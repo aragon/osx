@@ -10,7 +10,7 @@ import {
 import TokenList from 'components/tokenList';
 import TransferList from 'components/transferList';
 import {useDaoTreasury} from 'hooks/useDaoTreasury';
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
 import {TimeFilter, TransferTypes} from 'utils/constants';
 
 import type {Transfer, TreasuryToken} from 'utils/types';
@@ -49,7 +49,7 @@ const TEMP_TRANSFERS: Transfer[] = [
 
 const Finance: React.FC = () => {
   const {t} = useTranslation();
-  const {open} = useTransferModalContext();
+  const {open} = useGlobalModalContext();
   const {data: treasury} = useDaoTreasury('0xMyDaoAddress', TimeFilter.day);
 
   sortTokens(treasury.tokens, 'treasurySharePercentage', true);

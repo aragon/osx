@@ -9,14 +9,16 @@ type InputProps = {
   children?: ReactNode;
   isOpen: boolean;
   onClose: () => void;
-  onOpen: () => void;
+  title?: string;
+  subtitle?: string;
 };
 
 export default function BottomSheet({
   children,
   isOpen,
   onClose,
-  onOpen,
+  title,
+  subtitle,
 }: InputProps) {
   const prevIsOpen = usePrevious(isOpen);
   const controls = useAnimation();
@@ -30,7 +32,6 @@ export default function BottomSheet({
       onClose();
     } else {
       controls.start('visible');
-      onOpen();
     }
   }
   // For Run animation on each state change
@@ -62,16 +63,22 @@ export default function BottomSheet({
         dragConstraints={{top: 0}}
         dragElastic={0.2}
       >
-        <Content>{children}</Content>
+        {title && (
+          <ModalTitleContainer>
+            <ModalTitle>{title}</ModalTitle>
+            {subtitle && <ModalSubtitle>{subtitle}</ModalSubtitle>}
+          </ModalTitleContainer>
+        )}
+        {children}
       </StyledMotionContainer>
     </>
   );
 }
 
 const StyledMotionContainer = styled(motion.div).attrs({
-  className: 'block fixed bottom-0 bg-white w-full',
+  className:
+    'bg-ui-50 block fixed bottom-0 tablet:bottom-3 w-full tablet:w-max rounded-t-xl tablet:rounded-xl tablet:left-0 tablet:right-0 tablet:mx-auto',
 })`
-  border-radius: 12px 12px 0px 0px;
   &:before {
     content: '';
     display: inline-block;
@@ -87,6 +94,14 @@ const StyledMotionContainer = styled(motion.div).attrs({
   }
 `;
 
-const Content = styled.div.attrs({
-  className: 'px-2 pt-2.5 pb-5',
+const ModalTitleContainer = styled.div.attrs({
+  className: 'bg-white rounded-xl p-3 space-y-0.5 text-center',
+})``;
+
+const ModalTitle = styled.h1.attrs({
+  className: 'font-bold text-ui-800',
+})``;
+
+const ModalSubtitle = styled.div.attrs({
+  className: 'text-sm text-ui-500',
 })``;

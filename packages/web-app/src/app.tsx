@@ -10,6 +10,7 @@ import WalletMenu from 'containers/walletMenu';
 // import TokenMenu from 'containers/tokenMenu';
 import TransferMenu from 'containers/transferMenu';
 import UtcMenu from 'containers/utcMenu';
+import TransactionModal, {TransactionState} from 'containers/transactionModal';
 import {trackPage} from 'services/analytics';
 import '../i18n.config';
 
@@ -67,6 +68,14 @@ function App() {
       {/* TODO remove this from here and add this to the page(s) on which it is
       actually needed */}
       <UtcMenu />
+      <TransactionModal
+        title="Sign Deposit"
+        subtitle="To register your deposit, you need to submit a transaction which costs you following."
+        footerButtonLabel="Sign Deposit"
+        state={TransactionState.SUCCESS}
+        callback={console.log}
+        approveStepNeeded
+      />
       {/* <TokenMenu /> */}
     </div>
   );

@@ -8,15 +8,15 @@ export interface ModalProps {
   /**
    * The controlled open state of the Modal.
    */
-  open?: boolean;
-  /**
-   * Event handler called when the open state of the Modal changes.
-   */
-  onOpenChange?: (open: boolean) => void;
+  isOpen?: boolean;
   /**
    * Modal title. if the title exists close button will appear
    */
   title?: string;
+  /**
+   * Modal subtitle
+   */
+  subtitle?: string;
   /**
    * Content
    */
@@ -36,17 +36,17 @@ export interface ModalProps {
  */
 export const Modal: React.FC<ModalProps> = ({
   title,
+  subtitle,
   children,
-  open = true,
-  onOpenChange,
+  isOpen = true,
   onClose,
   ...props
 }) => {
   return (
     <>
-      <Root {...{open, onOpenChange}}>
+      <Root open={isOpen}>
         <Portal>
-          <Backdrop visible={open} />
+          <Backdrop visible={isOpen} />
           <ModalContainer
             data-testid="modal-content"
             onInteractOutside={onClose}
@@ -55,13 +55,16 @@ export const Modal: React.FC<ModalProps> = ({
           >
             {title && (
               <ModalHeader>
-                <ModalTitle>{title}</ModalTitle>
+                <ModalTitleContainer>
+                  <ModalTitle>{title}</ModalTitle>
+                  {subtitle && <ModalSubtitle>{subtitle}</ModalSubtitle>}
+                </ModalTitleContainer>
                 <ModalClose onClick={onClose}>
                   <IconClose height={10} width={10} className="mx-auto" />
                 </ModalClose>
               </ModalHeader>
             )}
-            <ModalChildren>{children}</ModalChildren>
+            {children}
           </ModalContainer>
         </Portal>
       </Root>
@@ -92,17 +95,23 @@ const ModalContainer = styled(Content).attrs(({style}: StyledContentProps) => {
 })<StyledContentProps>``;
 
 const ModalHeader = styled.div.attrs({
-  className: 'flex justify-between items-center bg-white rounded-xl p-3',
+  className:
+    'flex justify-between items-start bg-white rounded-xl p-3 space-x-3',
+})``;
+
+const ModalTitleContainer = styled.div.attrs({
+  className: 'space-y-0.5',
 })``;
 
 const ModalTitle = styled(Title).attrs({
   className: 'font-bold text-ui-800',
 })``;
 
-const ModalClose = styled(Close).attrs({
-  className: 'text-ui-500 w-4 h-4 rounded-lg bg-ui-50 outline:none',
+const ModalSubtitle = styled.div.attrs({
+  className: 'text-sm text-ui-500',
 })``;
 
-const ModalChildren = styled.div.attrs({
-  className: 'p-3',
+const ModalClose = styled(Close).attrs({
+  className:
+    'flex-shrink-0 text-ui-500 w-4 h-4 rounded-lg bg-ui-50 outline:none',
 })``;

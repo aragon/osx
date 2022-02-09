@@ -1,1 +1,1 @@
-export * from './cancle';
+export * from './cancel';

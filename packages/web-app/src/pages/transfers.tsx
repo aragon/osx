@@ -8,11 +8,11 @@ import TransferList from 'components/transferList';
 import {PageWrapper} from 'components/wrappers';
 import useCategorizedTransfers from 'hooks/useCategorizedTransfers';
 import {TransferSectionWrapper} from 'components/wrappers';
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
 
 const Transfers: React.FC = () => {
   const {t} = useTranslation();
-  const {open} = useTransferModalContext();
+  const {open} = useGlobalModalContext();
   const [filterValue, setFilterValue] = useState('');
   const {data: categorizedTransfers} = useCategorizedTransfers();
 

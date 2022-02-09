@@ -22,12 +22,12 @@ import {
 import {useWallet} from 'context/augmentedWallet';
 import {fetchTokenData} from 'services/prices';
 import {getTokenInfo, isETH} from 'utils/tokens';
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
 import {formatUnits, handleClipboardActions} from 'utils/library';
 
 const ConfigureWithdrawForm: React.FC = () => {
   const {t} = useTranslation();
-  const {open} = useTransferModalContext();
+  const {open} = useGlobalModalContext();
   const {account, provider} = useWallet();
   const {control, getValues, trigger, resetField, setFocus, setValue} =
     useFormContext();
