@@ -1,0 +1,27 @@
+name: Pull Request Review Request Removed
+on:
+  pull_request:
+    types:
+      - review_request_removed
+
+jobs:
+  review-request-removed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find Comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: "@${{ github.event.requested_reviewer.login }} thanks for your future review."
+      - name: Delete Comment
+        uses: actions/github-script@v5
+        if: steps.fc.outputs.comment-id != 0
+        with:
+          script: |
+            github.rest.issues.deleteComment({
+              comment_id: ${{ steps.fc.outputs.comment-id }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
