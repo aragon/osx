@@ -247,7 +247,7 @@ const ConfigureWithdrawForm: React.FC = () => {
             name="tokenAddress"
             control={control}
             rules={{
-              required: t('errors.required.address'),
+              required: t('errors.required.tokenAddress'),
               validate: addressValidator,
             }}
             render={({

@@ -5,6 +5,7 @@ import {CheckboxListItem, Label} from '@aragon/ui-components';
 import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
 import ExistingTokenPartialForm from './addExistingToken';
+import CreateNewToken from './createNewToken';
 
 const SetupCommunityForm: React.FC = () => {
   const {t} = useTranslation();
@@ -78,7 +79,7 @@ const SetupCommunityForm: React.FC = () => {
 
       {/* Add existing token */}
 
-      {isCustomToken && <div>Create Token</div>}
+      {isCustomToken === true && <CreateNewToken />}
 
       {isCustomToken === false && <ExistingTokenPartialForm />}
     </>
