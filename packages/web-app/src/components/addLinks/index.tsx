@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import {ButtonText, IconAdd} from '@aragon/ui-components';
 import {useTranslation} from 'react-i18next';
+import {ButtonText, IconAdd} from '@aragon/ui-components';
 import {useFormContext, useFieldArray} from 'react-hook-form';
 
 import Row from './row';
@@ -28,21 +28,16 @@ const AddLinks: React.FC<AddLinks> = ({buttonPlusIcon, buttonLabel}) => {
         <ListGroup>
           <Header />
           {fields.map((field, index) => (
-            <Row
-              key={field.id}
-              index={index}
-              control={control}
-              onDelete={() => remove(index)}
-            />
+            <Row key={field.id} index={index} onDelete={() => remove(index)} />
           ))}
         </ListGroup>
       )}
       <ButtonText
         label={buttonLabel || t('labels.addLink')}
-        iconLeft={buttonPlusIcon ? <IconAdd /> : undefined}
         mode="secondary"
         size="large"
         onClick={handleAddLink}
+        {...(buttonPlusIcon ? {iconLeft: <IconAdd />} : {})}
       />
     </Container>
   );

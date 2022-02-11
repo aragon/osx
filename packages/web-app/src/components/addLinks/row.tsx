@@ -7,26 +7,82 @@ import {
   Popover,
   TextInput,
 } from '@aragon/ui-components';
-import React from 'react';
+import React, {useCallback} from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
-import {Control, Controller, FieldValues} from 'react-hook-form';
+import {Controller, useFormContext, useFormState} from 'react-hook-form';
+
+import {EMAIL_PATTERN, URL_PATTERN} from 'utils/constants';
 
 type LinkRowProps = {
-  control: Control<FieldValues, object>;
   index: number;
   onDelete?: (index: number) => void;
 };
 
-const LinkRow: React.FC<LinkRowProps> = ({control, index, onDelete}) => {
+const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
   const {t} = useTranslation();
+  const {control, clearErrors, getValues, trigger} = useFormContext();
+  const {errors} = useFormState();
 
+  /*************************************************
+   *                Field Validators               *
+   *************************************************/
+  const linkedFieldsAreValid = useCallback(
+    (currentValue: string, linkedField: string) => {
+      const linkedFieldValue = getValues(linkedField);
+
+      // both empty return no errors
+      if (currentValue === '' && linkedFieldValue === '') {
+        clearErrors(linkedField);
+        return true;
+      }
+
+      // linked field is empty and has no errors already
+      if (linkedFieldValue === '' && errors[linkedField] === undefined) {
+        trigger(linkedField);
+      }
+
+      // further validation necessary
+      return false;
+    },
+    [clearErrors, errors, getValues, trigger]
+  );
+
+  const labelValidator = useCallback(
+    (label: string, index: number) => {
+      if (linkedFieldsAreValid(label, `links.${index}.link`)) return;
+
+      return label === '' ? t('errors.required.label') : true;
+    },
+    [linkedFieldsAreValid, t]
+  );
+
+  const linkValidator = useCallback(
+    (url: string, index: number) => {
+      if (linkedFieldsAreValid(url, `links.${index}.label`)) return;
+
+      if (url === '') return t('errors.required.link');
+
+      return new RegExp(URL_PATTERN).test(url) ||
+        new RegExp(EMAIL_PATTERN).test(url)
+        ? true
+        : t('errors.invalidURL');
+    },
+    [linkedFieldsAreValid, t]
+  );
+
+  /*************************************************
+   *                    Render                     *
+   *************************************************/
   return (
     <Container data-testid="link-row">
       <LabelContainer>
         <Controller
-          name={`links.${index}.label`}
           control={control}
+          name={`links.${index}.label`}
+          rules={{
+            validate: value => labelValidator(value, index),
+          }}
           render={({field, fieldState: {error}}) => (
             <>
               <LabelWrapper>
@@ -80,6 +136,9 @@ const LinkRow: React.FC<LinkRowProps> = ({control, index, onDelete}) => {
         <Controller
           name={`links.${index}.link`}
           control={control}
+          rules={{
+            validate: value => linkValidator(value, index),
+          }}
           render={({field, fieldState: {error}}) => (
             <>
               <LabelWrapper>
