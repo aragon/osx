@@ -52,6 +52,7 @@
     "description": "Summary",
     "addLink": "Add Link",
     "removeLink": "Remove Link",
+    "addResource": "Add Resource",
     "link": "Link",
     "links": "Links",
     "label": "Label",
@@ -127,7 +128,9 @@
       "label": "Label is mandatory",
       "link": "Link is mandatory",
       "recipient": "Recipient address is required",
-      "token": "Token is required"
+      "token": "Token is required",
+      "title": "Title is required",
+      "summary": "Summary is required"
     }
   },
   "alert": {

@@ -9,9 +9,10 @@ import Header from './header';
 
 export type AddLinks = {
   buttonPlusIcon?: boolean;
+  buttonLabel?: string;
 };
 
-const AddLinks: React.FC<AddLinks> = ({buttonPlusIcon}) => {
+const AddLinks: React.FC<AddLinks> = ({buttonPlusIcon, buttonLabel}) => {
   const {t} = useTranslation();
   const {control} = useFormContext();
   const {fields, append, remove} = useFieldArray({name: 'links', control});
@@ -37,7 +38,7 @@ const AddLinks: React.FC<AddLinks> = ({buttonPlusIcon}) => {
         </ListGroup>
       )}
       <ButtonText
-        label={t('labels.addLink')}
+        label={buttonLabel || t('labels.addLink')}
         iconLeft={buttonPlusIcon ? <IconAdd /> : undefined}
         mode="secondary"
         size="large"
