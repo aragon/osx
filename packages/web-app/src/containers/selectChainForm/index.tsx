@@ -13,13 +13,14 @@ import {Controller, useFormContext} from 'react-hook-form';
 import React, {useCallback, useState} from 'react';
 
 import {i18n} from '../../../i18n.config';
+import useScreen from 'hooks/useScreen';
 import {useWallet} from 'context/augmentedWallet';
 import {CHAIN_METADATA} from 'utils/constants';
 
 type NetworkType = 'main' | 'test';
 type SortFilter = 'cost' | 'popularity' | 'security';
 
-function getDefaultNetworkType(id: number | undefined) {
+function getNetworkType(id: number | undefined) {
   if (!id) return 'main';
 
   try {
@@ -32,12 +33,13 @@ function getDefaultNetworkType(id: number | undefined) {
 
 const SelectChainForm: React.FC = () => {
   const {t} = useTranslation();
-  const {control} = useFormContext();
+  const {isMobile} = useScreen();
   const {account, chainId} = useWallet();
   const [isOpen, setIsOpen] = useState(false);
+  const {control, getValues} = useFormContext();
   const [sortFilter, setFilter] = useState<SortFilter>('cost');
   const [networkType, setNetworkType] = useState<NetworkType>(() =>
-    getDefaultNetworkType(chainId)
+    getNetworkType(getValues('blockchain') || chainId)
   );
 
   const handleFilterChanged = useCallback(
@@ -58,19 +60,21 @@ const SelectChainForm: React.FC = () => {
         <NetworkTypeSwitcher>
           <ButtonText
             mode="secondary"
+            size={isMobile ? 'small' : 'medium'}
             label={t('labels.mainNet')}
             isActive={networkType === 'main'}
             onClick={() => setNetworkType('main')}
           />
           <ButtonText
             mode="secondary"
+            size={isMobile ? 'small' : 'medium'}
             label={t('labels.testNet')}
             isActive={networkType === 'test'}
             onClick={() => setNetworkType('test')}
           />
         </NetworkTypeSwitcher>
         <SortFilter>
-          <Label label={t('labels.sortBy')} />
+          {!isMobile && <Label label={t('labels.sortBy')} />}
           {/* TODO: replace with proper dropdown */}
           <Popover
             side="bottom"
@@ -104,7 +108,7 @@ const SelectChainForm: React.FC = () => {
             <ButtonText
               label={labels[sortFilter].title}
               mode="secondary"
-              size="large"
+              size={isMobile ? 'small' : 'large'}
               isActive={isOpen}
               iconRight={<IconChevronDown />}
             />

@@ -126,13 +126,14 @@ export const connectors = [
   {
     id: 'injected',
     properties: {
-      chainId: [1, 4],
+      // Add the following when the arbitrum situation is fixed: 42161, 421611
+      chainId: [1, 4, 137, 80001],
     },
   },
   {
     id: 'frame',
     properties: {
-      chainId: 1,
+      chainId: [1, 4, 137, 80001],
     },
   },
 ];

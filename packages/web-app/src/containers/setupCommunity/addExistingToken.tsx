@@ -73,16 +73,19 @@ const AddExistingToken: React.FC = () => {
 
     const fetchContractInfo = async () => {
       // have to include this to "debounce" network calls
-      if (!isAddress(address)) return;
+      if (!isAddress(address) || errors.tokenAddress) return;
 
       try {
         const {decimals, name, symbol, totalSupply} = await getTokenInfo(
           address,
           provider
         );
-        setValue('tokenName', name);
-        setValue('tokenSymbol', symbol);
-        setValue('tokenTotalSupply', formatUnits(totalSupply, decimals));
+
+        if (decimals) {
+          setValue('tokenName', name);
+          setValue('tokenSymbol', symbol);
+          setValue('tokenTotalSupply', formatUnits(totalSupply, decimals));
+        }
       } catch (error) {
         console.error('Error fetching token information', error);
         resetTokenFields();
@@ -98,10 +101,10 @@ const AddExistingToken: React.FC = () => {
     account,
     address,
     errors.tokenAddress,
-    tokenName,
     provider,
     resetField,
     setValue,
+    tokenName,
   ]);
 
   return (
