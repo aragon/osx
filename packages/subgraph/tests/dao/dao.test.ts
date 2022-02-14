@@ -23,7 +23,7 @@ import {
   handleETHDeposited,
   handleDeposited,
   handleWithdrawn
-} from '../../src/dao';
+} from '../../src/dao/dao';
 
 test('Run dao (handleSetMetadata) mappings with mock event', () => {
   // create event and run it's handler

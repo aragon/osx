@@ -4,8 +4,11 @@ import {
   SetMetadata,
   ETHDeposited,
   Deposited,
-  Withdrawn
-} from '../../generated/templates/DAO/DAO';
+  Withdrawn,
+  Granted,
+  Revoked,
+  Frozen
+} from '../../generated/templates/DaoTemplate/DAO';
 import {createMockGetter} from '../utils';
 
 export function createNewSetMetadataEvent(
@@ -157,4 +160,135 @@ export function getBalanceOf(
   )
     .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
+}
+
+export function createNewGrantedEvent(
+  role: Bytes,
+  actor: string,
+  who: string,
+  where: string,
+  oracle: string,
+  contractAddress: string
+): Granted {
+  let newGrantedEvent = changetype<Granted>(newMockEvent());
+
+  newGrantedEvent.address = Address.fromString(contractAddress);
+  newGrantedEvent.parameters = new Array();
+
+  let roleParam = new ethereum.EventParam(
+    'role',
+    ethereum.Value.fromBytes(role)
+  );
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
+  );
+  let whereParam = new ethereum.EventParam(
+    'where',
+    ethereum.Value.fromAddress(Address.fromString(where))
+  );
+  let oracleParam = new ethereum.EventParam(
+    'oracle',
+    ethereum.Value.fromAddress(Address.fromString(oracle))
+  );
+
+  newGrantedEvent.parameters.push(roleParam);
+  newGrantedEvent.parameters.push(actorParam);
+  newGrantedEvent.parameters.push(whoParam);
+  newGrantedEvent.parameters.push(whereParam);
+  newGrantedEvent.parameters.push(oracleParam);
+
+  return newGrantedEvent;
+}
+
+export function createNewRevokedEvent(
+  role: Bytes,
+  actor: string,
+  who: string,
+  where: string,
+  contractAddress: string
+): Revoked {
+  let newGrantedEvent = changetype<Revoked>(newMockEvent());
+
+  newGrantedEvent.address = Address.fromString(contractAddress);
+  newGrantedEvent.parameters = new Array();
+
+  let roleParam = new ethereum.EventParam(
+    'role',
+    ethereum.Value.fromBytes(role)
+  );
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
+  );
+  let whereParam = new ethereum.EventParam(
+    'where',
+    ethereum.Value.fromAddress(Address.fromString(where))
+  );
+
+  newGrantedEvent.parameters.push(roleParam);
+  newGrantedEvent.parameters.push(actorParam);
+  newGrantedEvent.parameters.push(whoParam);
+  newGrantedEvent.parameters.push(whereParam);
+
+  return newGrantedEvent;
+}
+
+export function createNewFrozenEvent(
+  role: Bytes,
+  actor: string,
+  where: string,
+  contractAddress: string
+): Frozen {
+  let newFrozenEvent = changetype<Frozen>(newMockEvent());
+
+  newFrozenEvent.address = Address.fromString(contractAddress);
+  newFrozenEvent.parameters = new Array();
+
+  let roleParam = new ethereum.EventParam(
+    'role',
+    ethereum.Value.fromBytes(role)
+  );
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let whereParam = new ethereum.EventParam(
+    'where',
+    ethereum.Value.fromAddress(Address.fromString(where))
+  );
+
+  newFrozenEvent.parameters.push(roleParam);
+  newFrozenEvent.parameters.push(actorParam);
+  newFrozenEvent.parameters.push(whereParam);
+
+  return newFrozenEvent;
+}
+
+export function getEXEC_ROLE(contractAddress: string, returns: Bytes): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'EXEC_ROLE',
+    'EXEC_ROLE():(bytes32)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromBytes(returns)]);
+}
+
+export function getEXEC_ROLEreverted(contractAddress: string): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'EXEC_ROLE',
+    'EXEC_ROLE():(bytes32)'
+  )
+    .withArgs([])
+    .reverts();
 }

@@ -1,6 +1,20 @@
 # Types
 
+# Packages
+
+type DaoPackage @entity {
+  id: ID! # Dao + Package
+  pkg: Package!
+  dao: Dao!
+}
+
+type Package @entity {
+  id: ID! # address
+  daos: [DaoPackage!] @derivedFrom(field: "pkg")
+}
+
 # Token
+
 type ERC20Token @entity {
   id: ID! # use address as id
   name: String!
@@ -17,6 +31,28 @@ type Balance @entity {
 }
 
 # Dao
+
+# ACL
+
+type Role @entity {
+  id: ID! # where + role
+  dao: Dao!
+  where: Bytes!
+  role: Bytes!
+  frozen: Boolean!
+}
+
+type Permission @entity {
+  "no need to store granted as we can delete permission when revoked"
+  id: ID! # where + role + who
+  dao: Dao!
+  where: Bytes!
+  role: Role!
+  who: Bytes!
+  actor: Bytes!
+  oracle: Bytes!
+}
+
 type Action @entity {
   id: ID!
   to: Bytes!
@@ -56,4 +92,7 @@ type Dao @entity {
   deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
   withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
+  roles: [Role!]! @derivedFrom(field: "dao")
+  permissions: [Permission!]! @derivedFrom(field: "dao")
+  packages: [DaoPackage!] @derivedFrom(field: "dao")
 }

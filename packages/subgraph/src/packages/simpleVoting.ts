@@ -1,16 +1,11 @@
 import {
   CastVote,
-  ChangeMinQuorum,
-  ChangeSupportRequired,
-  StartVote
+  StartVote,
+  ExecuteVote
 } from '../../generated/templates/SimpleVoting/SimpleVoting';
 
 export function handleCastVote(event: CastVote): void {}
 
-export function handleChangeMinQuorum(event: ChangeMinQuorum): void {}
-
-export function handleChangeSupportRequired(
-  event: ChangeSupportRequired
-): void {}
-
 export function handleStartVote(event: StartVote): void {}
+
+export function handleExecuteVote(event: ExecuteVote): void {}

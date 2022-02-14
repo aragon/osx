@@ -1,20 +1,29 @@
 import {
+  DAO as DAOContract,
   SetMetadata,
   Executed,
   Deposited,
   ETHDeposited,
-  Withdrawn
-} from '../generated/templates/DAO/DAO';
-import {GovernanceWrappedERC20} from '../generated/templates/DAO/GovernanceWrappedERC20';
+  Withdrawn,
+  Granted,
+  Frozen,
+  Revoked
+} from '../../generated/templates/DaoTemplate/DAO';
 import {
   Dao,
   VaultDeposit,
   VaultWithdraw,
-  ERC20Token,
-  Balance
-} from '../generated/schema';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
-import {ADDRESS_ZERO} from './utils/constants';
+  Role,
+  Permission
+} from '../../generated/schema';
+import {Address, store} from '@graphprotocol/graph-ts';
+import {ADDRESS_ZERO} from '../utils/constants';
+import {
+  updateBalance,
+  handleERC20Token,
+  addPackage,
+  removePackage
+} from './utils';
 
 export function handleSetMetadata(event: SetMetadata): void {
   let id = event.address.toHexString();
@@ -27,73 +36,6 @@ export function handleSetMetadata(event: SetMetadata): void {
 
 export function handleExecuted(event: Executed): void {
   // TODO:
-}
-
-function updateBalance(
-  balanceId: string,
-  daoAddress: Address,
-  token: Address,
-  amount: BigInt,
-  isDeposit: boolean,
-  timestamp: BigInt
-): void {
-  let daoId = daoAddress.toHexString();
-  let entity = Balance.load(balanceId);
-
-  if (!entity) {
-    entity = new Balance(balanceId);
-    entity.token = token.toHexString();
-    entity.dao = daoId;
-  }
-
-  if (token.toHexString() == ADDRESS_ZERO) {
-    // ETH
-    entity.balance = isDeposit
-      ? entity.balance.plus(amount)
-      : entity.balance.minus(amount);
-  } else {
-    // ERC20 token
-    let tokenContract = GovernanceWrappedERC20.bind(token);
-    let daoBalance = tokenContract.try_balanceOf(daoAddress);
-    if (!daoBalance.reverted) {
-      entity.balance = daoBalance.value;
-    }
-  }
-
-  entity.lastUpdated = timestamp;
-  entity.save();
-}
-
-function handleERC20Token(token: Address): void {
-  let entity = ERC20Token.load(token.toHexString());
-  if (!entity) {
-    entity = new ERC20Token(token.toHexString());
-
-    if (token.toHexString() == ADDRESS_ZERO) {
-      entity.name = 'Ethereum (Canonical)';
-      entity.symbol = 'ETH';
-      entity.decimals = BigInt.fromString('18');
-      entity.save();
-      return;
-    }
-
-    let tokenContract = GovernanceWrappedERC20.bind(token);
-    let tokenName = tokenContract.try_name();
-    let tokenSymbol = tokenContract.try_symbol();
-    let tokenDecimals = tokenContract.try_decimals();
-
-    if (
-      !tokenName.reverted &&
-      !tokenSymbol.reverted &&
-      !tokenDecimals.reverted
-    ) {
-      entity.name = tokenName.value;
-      entity.symbol = tokenSymbol.value;
-      entity.decimals = BigInt.fromString(tokenDecimals.value.toString());
-    }
-
-    entity.save();
-  }
 }
 
 export function handleDeposited(event: Deposited): void {
@@ -205,4 +147,77 @@ export function handleWithdrawn(event: Withdrawn): void {
   entity.reference = event.params._reference;
   entity.createdAt = event.block.timestamp;
   entity.save();
+}
+
+export function handleGranted(event: Granted): void {
+  // Role
+  let daoId = event.address.toHexString();
+  let roleEntityId =
+    event.params.where.toHexString() + '_' + event.params.role.toHexString();
+  let roleEntity = Role.load(roleEntityId);
+  if (!roleEntity) {
+    roleEntity = new Role(roleEntityId);
+    roleEntity.dao = daoId;
+    roleEntity.where = event.params.where;
+    roleEntity.role = event.params.role;
+    roleEntity.frozen = false;
+    roleEntity.save();
+  }
+
+  // Permission
+  let permissionId = roleEntityId + '_' + event.params.who.toHexString();
+  let permissionEntity = new Permission(permissionId);
+  permissionEntity.dao = daoId;
+  permissionEntity.role = roleEntityId;
+  permissionEntity.where = event.params.where;
+  permissionEntity.who = event.params.who;
+  permissionEntity.actor = event.params.actor;
+  permissionEntity.oracle = event.params.oracle;
+  permissionEntity.save();
+
+  // Package
+  // TODO: rethink this once the market place is ready
+  let daoContract = DAOContract.bind(event.address);
+  let executionRole = daoContract.try_EXEC_ROLE();
+  if (!executionRole.reverted && event.params.role == executionRole.value) {
+    addPackage(daoId, event.params.who.toHexString());
+  }
+}
+
+export function handleRevoked(event: Revoked): void {
+  // permission
+  let permissionId =
+    event.params.where.toHexString() +
+    '_' +
+    event.params.role.toHexString() +
+    '_' +
+    event.params.who.toHexString();
+  let permissionEntity = Permission.load(permissionId);
+  if (permissionEntity) {
+    store.remove('Permission', permissionId);
+  }
+
+  // Package
+  // TODO: rethink this once the market place is ready
+  let daoId = event.address.toHexString();
+  let daoContract = DAOContract.bind(event.address);
+  let executionRole = daoContract.try_EXEC_ROLE();
+  if (!executionRole.reverted && event.params.role == executionRole.value) {
+    removePackage(daoId, event.params.who.toHexString());
+  }
+}
+
+export function handleFrozen(event: Frozen): void {
+  let daoId = event.address.toHexString();
+  let roleEntityId =
+    event.params.where.toHexString() + '_' + event.params.role.toHexString();
+  let roleEntity = Role.load(roleEntityId);
+  if (!roleEntity) {
+    roleEntity = new Role(roleEntityId);
+    roleEntity.dao = daoId;
+    roleEntity.where = event.params.where;
+    roleEntity.role = event.params.role;
+  }
+  roleEntity.frozen = true;
+  roleEntity.save();
 }
