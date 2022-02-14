@@ -1,0 +1,65 @@
+name: Delete Preview
+on:
+  pull_request:
+     types:
+       - unlabeled
+       - closed
+
+jobs:
+  remove_preview:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'preview') || github.event.label.name == 'preview'
+    steps:
+      - name: install pyyaml
+        run: |
+          pip install --user pyyaml packaging
+      - name: Install ipfs-cluster-ctl
+        run: |
+          wget https://dist.ipfs.io/ipfs-cluster-ctl/v0.14.1/ipfs-cluster-ctl_v0.14.1_linux-amd64.tar.gz
+          tar xvfz ipfs-cluster-ctl_v0.14.1_linux-amd64.tar.gz
+      - name: Find Previous WebApp Deployment
+        uses: peter-evans/find-comment@v1
+        id: fcwebapp
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "WebApp IPFS Hash: "
+      - name: Unpin Webapp
+        if: steps.fcwebapp.outputs.comment-id != 0
+        run: |
+          COMMENT='${{ steps.fcwebapp.outputs.comment-body }}'
+          IFS=" " read -ra array <<< "$COMMENT"
+          hash=${array[3]}
+          ./ipfs-cluster-ctl/ipfs-cluster-ctl --basic-auth '${{ secrets.IPFS_BASIC_AUTH }}' --host '${{ secrets.IPFS_HOST }}' pin rm $hash
+      - name: Delete Comment
+        uses: actions/github-script@v5
+        if: steps.fcwebapp.outputs.comment-id != 0
+        with:
+          script: |
+            github.rest.issues.deleteComment({
+              comment_id: ${{ steps.fcwebapp.outputs.comment-id }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+      - name: Find Previous UI-Components Deployment
+        uses: peter-evans/find-comment@v1
+        id: fcui
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "Storybook IPFS Hash: "
+      - name: Unpin UI-Components
+        if: steps.fcui.outputs.comment-id != 0
+        run: |
+          COMMENT='${{ steps.fcui.outputs.comment-body }}'
+          IFS=" " read -ra array <<< "$COMMENT"
+          hash=${array[3]}
+          ./ipfs-cluster-ctl/ipfs-cluster-ctl --basic-auth '${{ secrets.IPFS_BASIC_AUTH }}' --host '${{ secrets.IPFS_HOST }}' pin rm $hash
+      - name: Delete Comment
+        uses: actions/github-script@v5
+        if: steps.fcui.outputs.comment-id != 0
+        with:
+          script: |
+            github.rest.issues.deleteComment({
+              comment_id: ${{ steps.fcui.outputs.comment-id }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })

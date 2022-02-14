@@ -1,0 +1,76 @@
+name: Pull Request Storybook Preview
+on:
+  pull_request:
+    paths:
+      - 'packages/ui-components/**'
+    types:
+      - labeled
+      - synchronize
+
+jobs:
+  storybook-preview:
+    if: contains(github.event.pull_request.labels.*.name, 'preview')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/ui-components
+    steps:
+      - name: Find Previous Deployment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "Storybook IPFS Hash: "
+      - name: Delete Comment
+        continue-on-error: true
+        uses: actions/github-script@v5
+        if: steps.fc.outputs.comment-id != 0
+        with:
+          script: |
+            github.rest.issues.deleteComment({
+              comment_id: ${{ steps.fc.outputs.comment-id }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Build ui-components
+        run: |
+          cd ../ui-components
+          yarn install --pure-lockfile
+          yarn build-storybook
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+      - name: install pyyaml
+        run: |
+          pip install --user pyyaml packaging
+      - name: Install ipfs-cluster-ctl
+        run: |
+          wget https://dist.ipfs.io/ipfs-cluster-ctl/v0.14.1/ipfs-cluster-ctl_v0.14.1_linux-amd64.tar.gz
+          tar xvfz ipfs-cluster-ctl_v0.14.1_linux-amd64.tar.gz
+      - name: Unpin
+        continue-on-error: true
+        if: steps.fc.outputs.comment-id != 0
+        run: |
+          COMMENT='${{ steps.fc.outputs.comment-body }}'
+          IFS=" " read -ra array <<< "$COMMENT"
+          hash=${array[3]}
+          ./ipfs-cluster-ctl/ipfs-cluster-ctl --basic-auth '${{ secrets.IPFS_BASIC_AUTH }}' --host '${{ secrets.IPFS_HOST }}' pin rm $hash
+      - name: Pin on IPFS
+        id: ipfsPin
+        run: |
+          ipfsResult="$(./ipfs-cluster-ctl/ipfs-cluster-ctl --basic-auth '${{ secrets.IPFS_BASIC_AUTH }}' --host '${{ secrets.IPFS_HOST }}' add -r './storybook-static' | tail -1)"
+          IFS=" " read -ra array <<< "$ipfsResult"
+          echo "::set-output name=ipfsHash::${array[1]}"
+      - name: Echo url
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Storybook IPFS Hash: ${{ steps.ipfsPin.outputs.ipfsHash }}
+            UI-Components deployed to https://ipfs.eth.aragon.network/ipfs/${{ steps.ipfsPin.outputs.ipfsHash }}/
