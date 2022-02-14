@@ -20,13 +20,13 @@ import React, {useCallback, useEffect} from 'react';
 import {useWallet} from 'context/augmentedWallet';
 import {fetchTokenData} from 'services/prices';
 import {handleClipboardActions} from 'utils/library';
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
 import {fetchBalance, getTokenInfo, isETH} from 'utils/tokens';
 import {validateTokenAddress, validateTokenAmount} from 'utils/validators';
 
 const DepositForm: React.FC = () => {
   const {t} = useTranslation();
-  const {open} = useTransferModalContext();
+  const {open} = useGlobalModalContext();
   const {account, balance: walletBalance, provider} = useWallet();
   const {control, resetField, setValue, setFocus, trigger, getValues} =
     useFormContext();
@@ -215,7 +215,7 @@ const DepositForm: React.FC = () => {
             name="tokenAddress"
             control={control}
             rules={{
-              required: t('errors.required.address'),
+              required: t('errors.required.tokenAddress'),
               validate: addressValidator,
             }}
             render={({

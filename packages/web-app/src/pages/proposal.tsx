@@ -16,6 +16,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {Link} from '@aragon/ui-components';
 import ResourceList from 'components/resourceList';
+import {VotingTerminal} from 'containers/votingTerminal';
 
 // TODO: This is just some mock data. Remove this while integration
 const publishedDone: ProgressStatusProps = {
@@ -115,9 +116,8 @@ const Proposal: React.FC = () => {
             </>
           )}
 
-          <div className="p-4 h-96 bg-white rounded-xl">
-            Voting table placeholder
-          </div>
+          <VotingTerminal />
+
           <CardExecution
             title="Execution"
             description="These smart actions are executed when the proposal reaches sufficient support. Find out which actions are executed."

@@ -2,14 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 import {useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import {Modal, ActionListItem, IconChevronRight} from '@aragon/ui-components';
+import {ActionListItem, IconChevronRight} from '@aragon/ui-components';
 
 import {useWallet} from 'context/augmentedWallet';
 import {NewDeposit, NewWithDraw} from 'utils/paths';
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
+import ModalBottomSheetSwitcher from 'components/modalBottomSheetSwitcher';
 
 const TransferMenu: React.FC = () => {
-  const {isTransferOpen, close} = useTransferModalContext();
+  const {isTransferOpen, close} = useGlobalModalContext();
   const {t} = useTranslation();
   const navigate = useNavigate();
   const {isConnected} = useWallet();
@@ -34,11 +35,10 @@ const TransferMenu: React.FC = () => {
   };
 
   return (
-    <Modal
-      open={isTransferOpen}
+    <ModalBottomSheetSwitcher
+      isOpen={isTransferOpen}
       onClose={() => close('default')}
       title={t('TransferModal.newTransfer') as string}
-      data-testid="walletCard"
     >
       <Container>
         <ActionListItem
@@ -54,12 +54,12 @@ const TransferMenu: React.FC = () => {
           onClick={handleNewWithdrawClick}
         />
       </Container>
-    </Modal>
+    </ModalBottomSheetSwitcher>
   );
 };
 
 export default TransferMenu;
 
 const Container = styled.div.attrs({
-  className: 'space-y-1.5',
+  className: 'space-y-1.5 p-3',
 })``;

@@ -62,6 +62,13 @@ contract TokenFactory {
 
         // deploy token
         if(token != address(0)) {
+            // Validate if token is ERC20
+            // Not Enough Checks, but better than nothing.
+            token.functionCall(abi.encodeWithSelector(
+                IERC20Upgradeable.balanceOf.selector, 
+                address(this)
+            )); 
+            
             token = governanceWrappedERC20Base.clone();
             // user already has a token. we need to wrap it in 
             // GovernanceWrappedERC20 in order to make the token

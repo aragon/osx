@@ -6,19 +6,18 @@ import React, {
   ReactNode,
 } from 'react';
 
-const TransferModalContext = createContext<TransferModalContextType | null>(
-  null
-);
+const GlobalModalsContext = createContext<GlobalModalsContextType | null>(null);
 
-type TransferModalContextType = {
+type GlobalModalsContextType = {
   isTransferOpen: boolean;
   isTokenOpen: boolean;
   isUtcOpen: boolean;
+  isTransactionOpen: boolean;
   open: (arg?: MenuTypes) => void;
   close: (arg?: MenuTypes) => void;
 };
 
-type MenuTypes = 'token' | 'utc' | 'default';
+type MenuTypes = 'token' | 'utc' | 'transaction' | 'default';
 
 type Props = Record<'children', ReactNode>;
 
@@ -26,13 +25,15 @@ type Props = Record<'children', ReactNode>;
 instead of one boolean state for each of the menus. This can be done based on a
 type like MenuType. Then this context can be extended simply by adding a new
 type to MenuTypes. */
-const TransferModalsProvider: React.FC<Props> = ({children}) => {
+const GlobalModalsProvider: React.FC<Props> = ({children}) => {
   const [isTransferOpen, setIsTransferOpen] =
-    useState<TransferModalContextType['isTransferOpen']>(false);
+    useState<GlobalModalsContextType['isTransferOpen']>(false);
   const [isTokenOpen, setIsTokenOpen] =
-    useState<TransferModalContextType['isTokenOpen']>(false);
+    useState<GlobalModalsContextType['isTokenOpen']>(false);
   const [isUtcOpen, setIsUtcOpen] =
-    useState<TransferModalContextType['isUtcOpen']>(false);
+    useState<GlobalModalsContextType['isUtcOpen']>(false);
+  const [isTransactionOpen, setIsTransactionOpen] =
+    useState<GlobalModalsContextType['isTransactionOpen']>(false);
 
   const open = (type?: MenuTypes) => {
     switch (type) {
@@ -41,6 +42,9 @@ const TransferModalsProvider: React.FC<Props> = ({children}) => {
         break;
       case 'utc':
         setIsUtcOpen(true);
+        break;
+      case 'transaction':
+        setIsTransactionOpen(true);
         break;
       default:
         setIsTransferOpen(true);
@@ -55,6 +59,9 @@ const TransferModalsProvider: React.FC<Props> = ({children}) => {
         break;
       case 'utc':
         setIsUtcOpen(false);
+        break;
+      case 'transaction':
+        setIsTransactionOpen(false);
         break;
       default:
         setIsTransferOpen(false);
@@ -72,25 +79,26 @@ const TransferModalsProvider: React.FC<Props> = ({children}) => {
   // extend. [VR 10-01-2022]
 
   const value = useMemo(
-    (): TransferModalContextType => ({
+    (): GlobalModalsContextType => ({
       isTransferOpen,
       isTokenOpen,
       isUtcOpen,
+      isTransactionOpen,
       open,
       close,
     }),
-    [isTransferOpen, isTokenOpen, isUtcOpen]
+    [isTransferOpen, isTokenOpen, isUtcOpen, isTransactionOpen]
   );
 
   return (
-    <TransferModalContext.Provider value={value}>
+    <GlobalModalsContext.Provider value={value}>
       {children}
-    </TransferModalContext.Provider>
+    </GlobalModalsContext.Provider>
   );
 };
 
-function useTransferModalContext(): TransferModalContextType {
-  return useContext(TransferModalContext) as TransferModalContextType;
+function useGlobalModalContext(): GlobalModalsContextType {
+  return useContext(GlobalModalsContext) as GlobalModalsContextType;
 }
 
-export {useTransferModalContext, TransferModalsProvider};
+export {useGlobalModalContext, GlobalModalsProvider};

@@ -27,4 +27,5 @@ export const Default = Template.bind({});
 Default.args = {
   children: TestContent,
   title: 'Test Modal',
+  subtitle: 'Subtitle',
 };

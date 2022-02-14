@@ -1,18 +1,12 @@
-import {
-  ethereum,
-  Bytes,
-  Address,
-  bigInt,
-  BigInt,
-  BigDecimal
-} from '@graphprotocol/graph-ts';
-import {newMockEvent} from 'matchstick-as/assembly/index';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {
   SetMetadata,
   ETHDeposited,
   Deposited,
   Withdrawn
 } from '../../generated/templates/DAO/DAO';
+import {createMockGetter} from '../utils';
 
 export function createNewSetMetadataEvent(
   metadata: string,
@@ -130,4 +124,37 @@ export function createNewWithdrawnEvent(
   newEvent.parameters.push(referenceParam);
 
   return newEvent;
+}
+
+export function getTokenInfo(
+  contractAddress: string,
+  name: string,
+  symbol: string,
+  decimals: string
+): void {
+  createMockGetter(contractAddress, 'name', 'name():(string)', [
+    ethereum.Value.fromString(name)
+  ]);
+
+  createMockGetter(contractAddress, 'symbol', 'symbol():(string)', [
+    ethereum.Value.fromString(symbol)
+  ]);
+
+  createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
+  ]);
+}
+
+export function getBalanceOf(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'balanceOf',
+    'balanceOf(address):(uint256)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }

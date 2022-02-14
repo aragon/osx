@@ -109,15 +109,24 @@ const MenuBar: React.FC<MenuBarProps> = ({
 export type TextareaWYSIWYGProps = {
   placeholder?: string;
   disabled?: boolean;
+  onBlur?: (html: string) => void;
+  onChange?: (html: string) => void;
+  name?: string;
+  value?: string;
 };
 
 export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
   placeholder = '',
   disabled = false,
+  onBlur,
+  onChange,
+  name = '',
+  value = '',
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const editor = useEditor(
     {
+      content: value,
       editable: !disabled,
       extensions: [
         StarterKit,
@@ -126,6 +135,16 @@ export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
           placeholder,
         }),
       ],
+      onBlur: ({editor}) => {
+        if (onBlur) {
+          onBlur(editor.getHTML());
+        }
+      },
+      onUpdate: ({editor}) => {
+        if (onChange) {
+          onChange(editor.getHTML());
+        }
+      },
     },
     [disabled]
   );
@@ -160,7 +179,7 @@ export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
         />
-        <StyledEditorContent editor={editor} />
+        <StyledEditorContent name={name} editor={editor} />
       </Container>
     );
 
@@ -179,7 +198,7 @@ export const TextareaWYSIWYG: React.FC<TextareaWYSIWYGProps> = ({
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
       />
-      <StyledEditorContent editor={editor} />
+      <StyledEditorContent name={name} editor={editor} />
     </Container>
   );
 };

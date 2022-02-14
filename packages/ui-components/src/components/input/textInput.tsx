@@ -40,7 +40,7 @@ export const Container = styled.div.attrs(
       disabled ? 'bg-ui-100 border-ui-200 border-2' : 'bg-ui-0'
     } flex items-center space-x-1.5 space-x-1.5 py-1.5 px-2
     focus:outline-none focus-within:ring-2 focus-within:ring-primary-500
-    rounded-xl hover:border-ui-300 border-2
+    rounded-xl hover:border-ui-300 border-2 h-6
     active:border-primary-500 `;
 
     if (mode === 'default') {

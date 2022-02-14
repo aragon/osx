@@ -2,17 +2,17 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {
-  Modal,
   IconChevronRight,
   ListItemText,
   SearchInput,
 } from '@aragon/ui-components';
 
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
 import {timezones} from './utcData';
+import ModalBottomSheetSwitcher from 'components/modalBottomSheetSwitcher';
 
 const UtcMenu: React.FC = () => {
-  const {isUtcOpen, close} = useTransferModalContext();
+  const {isUtcOpen, close} = useGlobalModalContext();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const {t} = useTranslation();
 
@@ -31,11 +31,10 @@ const UtcMenu: React.FC = () => {
   });
 
   return (
-    <Modal
-      open={isUtcOpen}
+    <ModalBottomSheetSwitcher
+      isOpen={isUtcOpen}
       onClose={() => close('utc')}
       title={t('newWithdraw.configureWithdraw.utcMenu.title') as string}
-      data-testid="walletCard"
     >
       <ModalBody>
         <SearchInput
@@ -59,13 +58,13 @@ const UtcMenu: React.FC = () => {
           </ScrollableDiv>
         </Container>
       </ModalBody>
-    </Modal>
+    </ModalBottomSheetSwitcher>
   );
 };
 
 export default UtcMenu;
 
-const ModalBody = styled.div.attrs({className: 'space-y-1'})``;
+const ModalBody = styled.div.attrs({className: 'space-y-1 p-3'})``;
 
 const Container = styled.div.attrs({
   className: 'space-y-1 overflow-y-auto',

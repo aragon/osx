@@ -43,6 +43,8 @@ templates:
       abis:
         - name: DAO
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
+        - name: GovernanceWrappedERC20
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/tokens/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
       eventHandlers:
         - event: SetMetadata(indexed bytes)
           handler: handleSetMetadata

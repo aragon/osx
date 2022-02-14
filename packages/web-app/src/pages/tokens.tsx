@@ -9,12 +9,12 @@ import {TimeFilter} from 'utils/constants';
 import {PageWrapper} from 'components/wrappers';
 import {filterTokens} from 'utils/tokens';
 import {useDaoTreasury} from 'hooks/useDaoTreasury';
-import {useTransferModalContext} from 'context/transfersModal';
+import {useGlobalModalContext} from 'context/globalModals';
 import type {TreasuryToken} from 'utils/types';
 
 const Tokens: React.FC = () => {
   const {t} = useTranslation();
-  const {open} = useTransferModalContext();
+  const {open} = useGlobalModalContext();
   const {data: treasury} = useDaoTreasury('0xMyDaoAddress', TimeFilter.day);
 
   const [searchTerm, setSearchTerm] = useState('');

@@ -51,7 +51,12 @@
     "daoName": "Name",
     "description": "Summary",
     "addLink": "Add Link",
+    "addWallet": "Add Wallet",
     "removeLink": "Remove Link",
+    "removeWallet": "Delete This Address",
+    "resetDistribution": "Reset Token Distribution",
+    "deleteAllAddresses": "Delete All Addresses",
+    "addResource": "Add Resource",
     "link": "Link",
     "links": "Links",
     "label": "Label",
@@ -63,10 +68,22 @@
     "membership": "Who is eligible to participate in your DAO?",
     "communityToken": "Does your community have a token?",
     "addExistingToken": "Add existing Token",
+    "tokenName": "Name",
+    "tokenSymbol": "Symbol",
     "existingTokenName": "Name",
     "existingTokenSymbol": "Symbol",
     "existingTokenSupply": "Supply",
-    "author": "Author"
+    "distributeTokens": "Distribute Tokens",
+    "createToken": "Create Token",
+    "walletList": {
+      "address": "Address",
+      "addresses": "{{count}} Addresses"
+    },
+    "author": "Author",
+    "sec": "sec",
+    "ago": "ago",
+    "step": "Step",
+    "of": "of"
   },
   "placeHolders": {
     "selectToken": "Select a Token ...",
@@ -113,17 +130,29 @@
     "includeDecimals": "Include decimals, e.g. 10.0",
     "includeExactAmount": "The token doesn't contain decimals. Please enter the exact amount",
     "insufficientBalance": "Insufficient balance",
+    "invalidURL": "Invalid URL",
+    "invalidImage": "Invalid image",
+    "invalidImageType": "Invalid file type. Please provide either a SVG, JPG, PNG or GIF",
+    "imageDimensions": "Please provide a squared image with size between {{minDimension}}px and {{maxDimension}}px on each side",
+    "imageTooLarge": "Please provide an image of max {{maxFileSize}}MB in size",
     "invalidAddress": "Invalid address",
     "lteZero": "The amount must be greater than zero",
     "notERC20Token": "Token address is not ERC20 compliant",
     "noTokenSelected": "A token must be selected",
+    "duplicateAddress": "You can't enter a address twice",
     "required": {
-      "address": "Token address is required",
+      "tokenAddress": "Token address is required",
+      "tokenName": "Token name is required",
+      "tokenSymbol": "Token symbol is required",
+      "walletAddress": "Wallet address is required",
       "amount": "Token amount is required",
       "label": "Label is mandatory",
       "link": "Link is mandatory",
       "recipient": "Recipient address is required",
-      "token": "Token is required"
+      "token": "Token is required",
+      "name": "DAO name is mandatory",
+      "title": "Title is required",
+      "summary": "Summary is required"
     }
   },
   "alert": {
@@ -159,6 +188,18 @@
     "tokenNotFoundSubtitleDao": "Add custom token to withdraw",
     "tokenNotAvailableSubtitle": "Check your wallet, update the tokens or add a custom token to transfer",
     "tokenNotAvailableSubtitleDao": "Update the tokens or add a custom token to transfer."
+  },
+  "TransactionModal": {
+    "estimatedFees": "Estimated Gas Fees",
+    "synced": "Synced {{time}} sec ag",
+    "totalCost": "Total Cost",
+    "approveToken": "Approve token",
+    "signDeposit": "Sign Deposit",
+    "approveSubtitle": "To sign your first transaction, you must approve Aragon Zaragoza to make a transaction with your token.",
+    "dismiss": "Dismiss",
+    "tryAgain": "Try Again",
+    "errorLabel": "Error while confirmation",
+    "successLabel": "Transaction successful"
   },
   "newDeposit": {
     "depositAssets": "Deposit Assets",
@@ -229,10 +270,15 @@
       "tokenMembershipSubtitle": "All those who have a token are entitled to participate. 1 token equals 1 vote.",
       "walletMemberShip": "Authorized Wallets",
       "walletMemberShipSubtitle": "Only authorised wallets are entitled to particpiate. 1 Wallet equals 1 vote (coming soon).",
+      "nameSubtitle": "The full name of the token eg. Aragon",
+      "symbolSubtitle": "The symbol of your token e.g. ANT (good practice is to use 3-4 letters)",
       "addExistingTokenHelptext": "Hinterlege einen bestehenden Token, welcher deine Community für die Governance verwendet. To learn more about what it’s important if you use an existing Token, read first the ",
       "tokenHelptextLink": "Token Distribution Guide",
       "tokenContractSubtitlePart1": "Copy the contract address directly from the ",
-      "tokenContractSubtitlePart2": "This way you can ensure that the address is correct."
+      "tokenContractSubtitlePart2": "This way you can ensure that the address is correct.",
+      "distributeTokensHelpertext": "Determine who receives how many tokens. Unless otherwise specified, the treasury receives the rest tokens for the future distribution of tokens (these tokens have no voting rights and do not influence the quorum).",
+      "createTokenHelptext": "Mint a community token on a variable or fixed supply. To learn more about how to mint the token and how to use it, read the ",
+      "createTokenHelplink": "Token Minting Guide"
     },
     "step4": {
       "label": "Step 4",
