@@ -1,8 +1,8 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address} from '@graphprotocol/graph-ts';
-
 import {runHandleNewDAORegistered} from './utils';
 import {daoAddress, addressOne, daiAddress} from '../constants';
+import {createTokenCalls} from '../utils';
 
 test('Run registry mappings with mock event', () => {
   // create event and run it's handler

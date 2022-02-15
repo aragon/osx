@@ -19,6 +19,8 @@ dataSources:
       entities:
         - Dao
       abis:
+        - name: ERC20
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: Registry
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/Registry.sol/Registry.json
       eventHandlers:
@@ -43,13 +45,13 @@ templates:
       abis:
         - name: DAO
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
-        - name: GovernanceWrappedERC20
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/tokens/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json
+        - name: ERC20
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: SimpleVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/simple/SimpleVoting.sol/SimpleVoting.json
       eventHandlers:
-        - event: SetMetadata(indexed bytes)
+        - event: SetMetadata(bytes)
           handler: handleSetMetadata
-        - event : Executed(indexed address,(address,uint256,bytes)[],bytes[])
-          handler: handleExecuted
         - event: Deposited(indexed address,indexed address,uint256,string)
           handler: handleDeposited
         - event: ETHDeposited(address,uint256)
@@ -62,7 +64,7 @@ templates:
           handler: handleRevoked
         - event: Frozen(indexed bytes32,indexed address,address)
           handler: handleFrozen
-  # SimpleVoting (app package)
+  # SimpleVoting (package)
   - name: SimpleVoting
     kind: ethereum/contract
     network: {{network}}
@@ -72,7 +74,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/simpleVoting.ts
+      file: ./src/packages/SimpleVoting/simpleVoting.ts
       entities:
         - Dao
       abis:
@@ -81,7 +83,7 @@ templates:
       eventHandlers:
         - event: CastVote(indexed uint256,indexed address,bool,uint256)
           handler: handleCastVote
-        - event: ExecuteVote(indexed uint256)
+        - event: ExecuteVote(indexed uint256,bytes[])
           handler: handleExecuteVote
         - event: StartVote(indexed uint256,indexed address,bytes)
           handler: handleStartVote

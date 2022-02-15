@@ -9,7 +9,6 @@ import {
   Revoked,
   Frozen
 } from '../../generated/templates/DaoTemplate/DAO';
-import {createMockGetter} from '../utils';
 
 export function createNewSetMetadataEvent(
   metadata: string,
@@ -127,25 +126,6 @@ export function createNewWithdrawnEvent(
   newEvent.parameters.push(referenceParam);
 
   return newEvent;
-}
-
-export function getTokenInfo(
-  contractAddress: string,
-  name: string,
-  symbol: string,
-  decimals: string
-): void {
-  createMockGetter(contractAddress, 'name', 'name():(string)', [
-    ethereum.Value.fromString(name)
-  ]);
-
-  createMockGetter(contractAddress, 'symbol', 'symbol():(string)', [
-    ethereum.Value.fromString(symbol)
-  ]);
-
-  createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
-  ]);
 }
 
 export function getBalanceOf(
@@ -291,4 +271,60 @@ export function getEXEC_ROLEreverted(contractAddress: string): void {
   )
     .withArgs([])
     .reverts();
+}
+
+export function getSupportRequiredPct(
+  contractAddress: string,
+  returns: BigInt
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'supportRequiredPct',
+    'supportRequiredPct():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getMinAcceptQuorumPct(
+  contractAddress: string,
+  returns: BigInt
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'minAcceptQuorumPct',
+    'minAcceptQuorumPct():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getVoteTime(contractAddress: string, returns: BigInt): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'voteTime',
+    'voteTime():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getVotesLength(contractAddress: string, returns: BigInt): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'votesLength',
+    'votesLength():(uint256)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getSVToken(contractAddress: string, returns: string): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'token',
+    'token():(address)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }
