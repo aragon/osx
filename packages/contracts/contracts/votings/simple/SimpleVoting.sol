@@ -51,7 +51,7 @@ contract SimpleVoting is Component, TimeHelpers {
 
     event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
     event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports, uint256 stake);
-    event ExecuteVote(uint256 indexed voteId);
+    event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
     event UpdateConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
 
     /// @dev Used for UUPS upgradability pattern
@@ -188,11 +188,11 @@ contract SimpleVoting is Component, TimeHelpers {
     * @param _voteId the vote Id
     */
     function _execute(uint256 _voteId) internal {
-        dao.execute(votes[_voteId].actions);
+        bytes[] memory execResults = dao.execute(votes[_voteId].actions);
 
         votes[_voteId].executed = true;
 
-        emit ExecuteVote(_voteId);
+        emit ExecuteVote(_voteId, execResults);
     }
     
     /**

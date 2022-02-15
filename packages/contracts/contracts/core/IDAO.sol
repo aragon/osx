@@ -27,13 +27,13 @@ abstract contract IDAO {
     /// @dev Sets a new IPFS hash
     /// @param _metadata The IPFS hash of the new metadata object
     function setMetadata(bytes calldata _metadata) virtual external;
-    event SetMetadata(bytes indexed metadata);
+    event SetMetadata(bytes metadata);
 
     /// @notice If called, the list of provided actions will be executed.
     /// @dev It run a loop through the array of acctions and execute one by one.
     /// @dev If one acction fails, all will be reverted.
     /// @param _actions The aray of actions
-    function execute(Action[] memory _actions) virtual external;
+    function execute(Action[] memory _actions) virtual external returns (bytes[] memory);
     event Executed(address indexed actor, Action[] actions, bytes[] execResults);
 
     /// @notice Deposit ETH or any token to this contract with a reference string

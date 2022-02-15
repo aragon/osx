@@ -1,11 +1,12 @@
 # Types
 
 # Token
+
 type ERC20Token @entity {
   id: ID! # use address as id
-  name: String!
-  symbol: String!
-  decimals: BigInt!
+  name: String
+  symbol: String
+  decimals: BigInt
 }
 
 type Balance @entity {
@@ -17,19 +18,46 @@ type Balance @entity {
 }
 
 # Dao
+
+# ACL
+
+type Role @entity {
+  id: ID! # where + role
+  dao: Dao!
+  where: Bytes!
+  role: Bytes!
+  frozen: Boolean!
+}
+
+type Permission @entity {
+  "no need to store granted as we can delete permission when revoked"
+  id: ID! # where + role + who
+  dao: Dao!
+  where: Bytes!
+  role: Role!
+  who: Bytes!
+  actor: Bytes!
+  oracle: Bytes!
+}
+
+# Executions
+
 type Action @entity {
   id: ID!
   to: Bytes!
   value: BigInt!
   data: Bytes!
   dao: Dao!
+  proposal: Proposal!
   execResult: Bytes
 }
+
+# Treasury
 
 type VaultWithdraw @entity {
   id: ID!
   dao: Dao!
-  token: Bytes
+  token: ERC20Token
   to: Bytes!
   amount: BigInt!
   reference: String!
@@ -39,21 +67,98 @@ type VaultWithdraw @entity {
 type VaultDeposit @entity {
   id: ID!
   dao: Dao!
-  token: Bytes!
+  token: ERC20Token!
   sender: Bytes!
   amount: BigInt!
   reference: String!
   createdAt: BigInt!
 }
 
+# Dao
+
 type Dao @entity {
   id: ID! # use address as id
   name: String!
   creator: Bytes!
   metadata: String!
-  token: Bytes!
+  token: ERC20Token!
   actions: [Action!]! @derivedFrom(field: "dao")
   deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
   withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
+  roles: [Role!]! @derivedFrom(field: "dao")
+  permissions: [Permission!]! @derivedFrom(field: "dao")
+  packages: [DaoPackage!] @derivedFrom(field: "dao")
+  proposals: [Proposal!] @derivedFrom(field: "dao")
+}
+
+# Packages
+
+type DaoPackage @entity {
+  id: ID! # Dao + Package
+  pkg: Package!
+  dao: Dao!
+}
+
+interface Package {
+  id: ID! # address
+  daos: [DaoPackage!] @derivedFrom(field: "pkg")
+}
+
+# Proposal
+
+interface Proposal {
+  id: ID! # package + voteId
+  dao: Dao!
+  createdAt: BigInt!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  pkg: Package!
+}
+
+# ERC20 Voting (Simple Voting)
+
+type EVPackage implements Package @entity {
+  id: ID!
+  daos: [DaoPackage!] @derivedFrom(field: "pkg")
+  proposals: [EVProposal!]! @derivedFrom(field: "evPkg")
+  supportRequiredPct: BigInt
+  minAcceptQuorumPct: BigInt
+  voteTime: BigInt
+  votesLength: BigInt
+  token: ERC20Token
+}
+
+type EVVoter @entity {
+  id: ID! # address
+  proposals: [EVVoterProposal!]! @derivedFrom(field: "voter")
+}
+
+type EVVoterProposal @entity {
+  id: ID! # voter + proposal
+  voter: EVVoter!
+  proposal: EVProposal!
+  vote: Boolean!
+  stake: BigInt!
+  createdAt: BigInt!
+}
+
+type EVProposal implements Proposal @entity {
+  id: ID! # package + voteId
+  dao: Dao!
+  createdAt: BigInt!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  pkg: Package!
+  evPkg: EVPackage!
+  voteId: BigInt!
+  creator: Bytes!
+  description: String!
+  startDate: BigInt!
+  snapshotBlock: BigInt!
+  supportRequiredPct: BigInt!
+  minAcceptQuorumPct: BigInt!
+  yea: BigInt
+  nay: BigInt
+  votingPower: BigInt!
+  voters: [EVVoterProposal!]! @derivedFrom(field: "proposal")
+  executed: Boolean!
 }

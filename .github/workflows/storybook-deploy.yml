@@ -24,4 +24,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: yarn deploy-storybook --ci --host-token-env-variable=GITHUB_TOKEN

@@ -4,9 +4,11 @@ import {
   SetMetadata,
   ETHDeposited,
   Deposited,
-  Withdrawn
-} from '../../generated/templates/DAO/DAO';
-import {createMockGetter} from '../utils';
+  Withdrawn,
+  Granted,
+  Revoked,
+  Frozen
+} from '../../generated/templates/DaoTemplate/DAO';
 
 export function createNewSetMetadataEvent(
   metadata: string,
@@ -126,25 +128,6 @@ export function createNewWithdrawnEvent(
   return newEvent;
 }
 
-export function getTokenInfo(
-  contractAddress: string,
-  name: string,
-  symbol: string,
-  decimals: string
-): void {
-  createMockGetter(contractAddress, 'name', 'name():(string)', [
-    ethereum.Value.fromString(name)
-  ]);
-
-  createMockGetter(contractAddress, 'symbol', 'symbol():(string)', [
-    ethereum.Value.fromString(symbol)
-  ]);
-
-  createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
-  ]);
-}
-
 export function getBalanceOf(
   contractAddress: string,
   account: string,
@@ -157,4 +140,191 @@ export function getBalanceOf(
   )
     .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
+}
+
+export function createNewGrantedEvent(
+  role: Bytes,
+  actor: string,
+  who: string,
+  where: string,
+  oracle: string,
+  contractAddress: string
+): Granted {
+  let newGrantedEvent = changetype<Granted>(newMockEvent());
+
+  newGrantedEvent.address = Address.fromString(contractAddress);
+  newGrantedEvent.parameters = new Array();
+
+  let roleParam = new ethereum.EventParam(
+    'role',
+    ethereum.Value.fromBytes(role)
+  );
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
+  );
+  let whereParam = new ethereum.EventParam(
+    'where',
+    ethereum.Value.fromAddress(Address.fromString(where))
+  );
+  let oracleParam = new ethereum.EventParam(
+    'oracle',
+    ethereum.Value.fromAddress(Address.fromString(oracle))
+  );
+
+  newGrantedEvent.parameters.push(roleParam);
+  newGrantedEvent.parameters.push(actorParam);
+  newGrantedEvent.parameters.push(whoParam);
+  newGrantedEvent.parameters.push(whereParam);
+  newGrantedEvent.parameters.push(oracleParam);
+
+  return newGrantedEvent;
+}
+
+export function createNewRevokedEvent(
+  role: Bytes,
+  actor: string,
+  who: string,
+  where: string,
+  contractAddress: string
+): Revoked {
+  let newGrantedEvent = changetype<Revoked>(newMockEvent());
+
+  newGrantedEvent.address = Address.fromString(contractAddress);
+  newGrantedEvent.parameters = new Array();
+
+  let roleParam = new ethereum.EventParam(
+    'role',
+    ethereum.Value.fromBytes(role)
+  );
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
+  );
+  let whereParam = new ethereum.EventParam(
+    'where',
+    ethereum.Value.fromAddress(Address.fromString(where))
+  );
+
+  newGrantedEvent.parameters.push(roleParam);
+  newGrantedEvent.parameters.push(actorParam);
+  newGrantedEvent.parameters.push(whoParam);
+  newGrantedEvent.parameters.push(whereParam);
+
+  return newGrantedEvent;
+}
+
+export function createNewFrozenEvent(
+  role: Bytes,
+  actor: string,
+  where: string,
+  contractAddress: string
+): Frozen {
+  let newFrozenEvent = changetype<Frozen>(newMockEvent());
+
+  newFrozenEvent.address = Address.fromString(contractAddress);
+  newFrozenEvent.parameters = new Array();
+
+  let roleParam = new ethereum.EventParam(
+    'role',
+    ethereum.Value.fromBytes(role)
+  );
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let whereParam = new ethereum.EventParam(
+    'where',
+    ethereum.Value.fromAddress(Address.fromString(where))
+  );
+
+  newFrozenEvent.parameters.push(roleParam);
+  newFrozenEvent.parameters.push(actorParam);
+  newFrozenEvent.parameters.push(whereParam);
+
+  return newFrozenEvent;
+}
+
+export function getEXEC_ROLE(contractAddress: string, returns: Bytes): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'EXEC_ROLE',
+    'EXEC_ROLE():(bytes32)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromBytes(returns)]);
+}
+
+export function getEXEC_ROLEreverted(contractAddress: string): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'EXEC_ROLE',
+    'EXEC_ROLE():(bytes32)'
+  )
+    .withArgs([])
+    .reverts();
+}
+
+export function getSupportRequiredPct(
+  contractAddress: string,
+  returns: BigInt
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'supportRequiredPct',
+    'supportRequiredPct():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getMinAcceptQuorumPct(
+  contractAddress: string,
+  returns: BigInt
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'minAcceptQuorumPct',
+    'minAcceptQuorumPct():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getVoteTime(contractAddress: string, returns: BigInt): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'voteTime',
+    'voteTime():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getVotesLength(contractAddress: string, returns: BigInt): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'votesLength',
+    'votesLength():(uint256)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromSignedBigInt(returns)]);
+}
+
+export function getSVToken(contractAddress: string, returns: string): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'token',
+    'token():(address)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }

@@ -3,9 +3,6 @@ on:
   push:
     paths:
       - 'packages/web-app/**'
-    branches-ignore:
-      - 'develop'
-      - 'main'
 
 env:
   working-directory: packages/web-app
@@ -39,6 +36,13 @@ jobs:
         run: yarn test
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: ./packages/web-app/
+          args: >
+            -Dsonar.organization=aragon
+            -Dsonar.projectKey=aragon_zaragoza
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
+            -Dsonar.sources=src/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
