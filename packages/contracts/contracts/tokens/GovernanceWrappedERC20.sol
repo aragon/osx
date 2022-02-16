@@ -72,7 +72,7 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
     function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._afterTokenTransfer(from, to, amount);
         // reduce _delegate calls only when minting
-        if(from == address(0) && to != address(0)) {
+        if(from == address(0) && to != address(0) && delegates(to) == address(0)) {
             _delegate(to, to);
         }
     }
