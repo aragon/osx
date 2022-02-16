@@ -5,6 +5,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+
 import "./../../core/component/Component.sol";
 import "./../../core/IDAO.sol";
 import "./../../utils/TimeHelpers.sol";
@@ -54,11 +55,17 @@ contract SimpleVoting is Component, TimeHelpers {
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
     event UpdateConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
 
+    /// @dev describes the version and contract for GSN compatibility.
+    function versionRecipient() external override virtual view returns (string memory){
+        return "0.0.1+opengsn.recipient.SimpleVoting";
+    }
+    
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
     function initialize(
         IDAO _dao, 
         ERC20VotesUpgradeable _token,
+        address _gsnForwarder,
         uint64 _minAcceptQuorumPct,
         uint64 _supportRequiredPct,
         uint64 _voteTime
@@ -71,7 +78,7 @@ contract SimpleVoting is Component, TimeHelpers {
         supportRequiredPct = _supportRequiredPct; 
         voteTime = _voteTime;
 
-        Component.initialize(_dao);
+        Component.initialize(_dao, _gsnForwarder);
         
         emit UpdateConfig(_supportRequiredPct, _minAcceptQuorumPct);
     }
@@ -121,10 +128,10 @@ contract SimpleVoting is Component, TimeHelpers {
             vote_.actions.push(_actions[i]);
         }
 
-        emit StartVote(voteId, msg.sender, proposalMetadata);
+        emit StartVote(voteId, _msgSender(), proposalMetadata);
     
-        if (castVote && canVote(voteId, msg.sender)) {
-            _vote(voteId, true, msg.sender, executeIfDecided);
+        if (castVote && canVote(voteId, _msgSender())) {
+            _vote(voteId, true, _msgSender(), executeIfDecided);
         }
     }
 
@@ -135,8 +142,8 @@ contract SimpleVoting is Component, TimeHelpers {
     * @param _executesIfDecided Whether the vote should execute its action if it becomes decided
     */
     function vote(uint256 _voteId, bool _supports, bool _executesIfDecided) external {
-        require(_canVote(_voteId, msg.sender), ERROR_CAN_NOT_VOTE);
-        _vote(_voteId, _supports, msg.sender, _executesIfDecided);
+        require(_canVote(_voteId, _msgSender()), ERROR_CAN_NOT_VOTE);
+        _vote(_voteId, _supports, _msgSender(), _executesIfDecided);
     }
 
     /**

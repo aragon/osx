@@ -66,10 +66,11 @@ describe('SimpleVoting', function () {
         voteTime: any
     ) {
         // @ts-ignore
-        return voting['initialize(address,address,uint64,uint64,uint64)']
+        return voting['initialize(address,address,address,uint64,uint64,uint64)']
             (
                 daoMock.address, 
                 erc20VoteMock.address, 
+                ethers.constants.AddressZero,
                 minAcceptQuorum,
                 supportRequired,
                 voteTime

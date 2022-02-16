@@ -127,7 +127,8 @@ describe('DAOFactory: ', function () {
                 receivers: [ownerAddress],
                 amounts: [mintAmount]
             },
-            dummyVoteSettings
+            dummyVoteSettings,
+            zeroAddress
         );
 
         // get block that tx was mined

@@ -53,10 +53,16 @@ contract WhitelistVoting is Component, TimeHelpers {
     event AddUsers(address[] users);
     event RemoveUsers(address[] users);
 
+    /// @dev describes the version and contract for GSN compatibility.
+    function versionRecipient() external virtual override view returns (string memory) {
+        return "0.0.1+opengsn.recipient.WhitelistVoting";
+    }
+
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
     function initialize(
         IDAO _dao,
+        address _gsnForwarder,
         address[] calldata _whitelisted,
         uint64 _supportRequiredPct,
         uint64 _voteTime
@@ -69,11 +75,10 @@ contract WhitelistVoting is Component, TimeHelpers {
         // add whitelisted users.
         _addWhitelistedUsers(_whitelisted);
 
-        Component.initialize(_dao);
-
+        Component.initialize(_dao, _gsnForwarder);
+        
         emit UpdateConfig(_supportRequiredPct);
     }
-
 
     /**
     * @notice add new users to the whitelist.

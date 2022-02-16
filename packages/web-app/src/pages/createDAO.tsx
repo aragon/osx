@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {withTransaction} from '@elastic/apm-rum-react';
 import {useTranslation} from 'react-i18next';
-import {FormProvider, useForm} from 'react-hook-form';
+import {FormProvider, useForm, useFormState} from 'react-hook-form';
 import {FullScreenStepper, Step} from 'components/fullScreenStepper';
 import {
   OverviewDAOFooter,
@@ -14,6 +14,9 @@ import ConfigureCommunity from 'containers/configureCommunity';
 import SetupCommunity from 'containers/setupCommunity';
 
 type FormData = {
+  daoLogo: string;
+  daoName: string;
+  daoSummary: string;
   tokenName: string;
   tokenSymbol: string;
   tokenTotalSupply: string;
@@ -30,7 +33,31 @@ const defaultValues = {
 const CreateDAO: React.FC = () => {
   const {t} = useTranslation();
   const formMethods = useForm<FormData>({mode: 'onChange', defaultValues});
+  const {errors, dirtyFields} = useFormState({control: formMethods.control});
 
+  /*************************************************
+   *             Step Validation States            *
+   *************************************************/
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const daoMetadataIsValid = useMemo(() => {
+    // required fields not dirty
+    if (!dirtyFields.daoName || !dirtyFields.daoSummary) return false;
+
+    return errors.daoLogo || errors.daoName || errors.links || errors.daoSummary
+      ? false
+      : true;
+  }, [
+    dirtyFields.daoName,
+    dirtyFields.daoSummary,
+    errors.daoLogo,
+    errors.daoName,
+    errors.daoSummary,
+    errors.links,
+  ]);
+
+  /*************************************************
+   *                    Render                     *
+   *************************************************/
   return (
     <FormProvider {...formMethods}>
       <FullScreenStepper
@@ -56,6 +83,7 @@ const CreateDAO: React.FC = () => {
         <Step
           wizardTitle={t('createDAO.step2.title')}
           wizardDescription={t('createDAO.step2.description')}
+          // isNextButtonDisabled={!daoMetadataIsValid} Enable me for page validation
         >
           <DefineMetadata />
         </Step>
