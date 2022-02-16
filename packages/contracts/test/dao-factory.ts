@@ -164,7 +164,7 @@ describe('DAOFactory: ', function () {
         tx = tx.to.emit(dao, EVENTS.SetMetadata)
             .withArgs(daoDummyMetadata)
             .to.emit(SimpleVoting, EVENTS.UpdateConfig)
-            .withArgs(dummyVoteSettings[1], dummyVoteSettings[0])
+            .withArgs(dummyVoteSettings[0], dummyVoteSettings[1], dummyVoteSettings[2])
         
 
         // @ts-ignore
@@ -211,7 +211,7 @@ describe('DAOFactory: ', function () {
         ).to.be.revertedWith(ERRORS.ACLAuth);
         
         await expect(
-            SimpleVoting.changeVoteConfig(1, 2)
+            SimpleVoting.changeVoteConfig(1, 2, 3)
         ).to.be.revertedWith(ERRORS.ComponentAuth);
 
         const actions = [
@@ -228,18 +228,18 @@ describe('DAOFactory: ', function () {
                 value: 0,
                 data: SimpleVoting.interface.encodeFunctionData(
                     'changeVoteConfig',
-                    [5, 4]
+                    [3, 4, 5]
                 )
             }
         ];
 
-        await SimpleVoting.newVote("0x", actions, false, false);
+        await SimpleVoting.newVote("0x", actions, 0, 0, false, false);
         
         expect(await SimpleVoting.vote(0, true, true))
             .to.emit(dao, EVENTS.EXECUTED)
             .withArgs(SimpleVoting.address, [], [])
             .to.emit(SimpleVoting, EVENTS.UpdateConfig)
-            .withArgs(5, 4);
+            .withArgs(3, 4, 5);
 
         expect(await actionExecuteContract.test()).to.equal(true);
     })

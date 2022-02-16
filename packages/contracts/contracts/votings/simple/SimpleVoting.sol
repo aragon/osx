@@ -20,6 +20,7 @@ contract SimpleVoting is Component, TimeHelpers {
     struct Vote {
         bool executed;
         uint64 startDate;
+        uint64 endDate;
         uint64 snapshotBlock;
         uint64 supportRequiredPct;
         uint64 minAcceptQuorumPct;
@@ -34,7 +35,7 @@ contract SimpleVoting is Component, TimeHelpers {
 
     uint64 public supportRequiredPct;
     uint64 public minAcceptQuorumPct;
-    uint64 public voteTime;
+    uint64 public minDuration;
     uint256 public votesLength;
 
     ERC20VotesUpgradeable public token;
@@ -43,6 +44,8 @@ contract SimpleVoting is Component, TimeHelpers {
     string private constant ERROR_INIT_PCTS = "VOTING_INIT_PCTS";
     string private constant ERROR_CHANGE_SUPPORT_PCTS = "VOTING_CHANGE_SUPPORT_PCTS";
     string private constant ERROR_CHANGE_QUORUM_PCTS = "VOTING_CHANGE_QUORUM_PCTS";
+    string private constant ERROR_VOTE_DATES_WRONG = "VOTING_DURATION_TIME_WRONG";
+    string private constant ERROR_CHANGE_MIN_DURATION_NO_ZERO = "VOTING_CHANGE_MIN_DURATION_NO_ZERO";
     string private constant ERROR_INIT_SUPPORT_TOO_BIG = "VOTING_INIT_SUPPORT_TOO_BIG";
     string private constant ERROR_CHANGE_SUPPORT_TOO_BIG = "VOTING_CHANGE_SUPP_TOO_BIG";
     string private constant ERROR_CAN_NOT_VOTE = "VOTING_CAN_NOT_VOTE";
@@ -53,7 +56,7 @@ contract SimpleVoting is Component, TimeHelpers {
     event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
     event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports, uint256 stake);
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
-    event UpdateConfig(uint64 supportRequiredPct, uint64 minAcceptQuorumPct);
+    event UpdateConfig(uint64 minAcceptQuorumPct, uint64 supportRequiredPct, uint64 minDuration);
 
     /// @dev describes the version and contract for GSN compatibility.
     function versionRecipient() external override virtual view returns (string memory){
@@ -68,47 +71,60 @@ contract SimpleVoting is Component, TimeHelpers {
         address _gsnForwarder,
         uint64 _minAcceptQuorumPct,
         uint64 _supportRequiredPct,
-        uint64 _voteTime
+        uint64 _minDuration
     ) public initializer { 
         require(_minAcceptQuorumPct <= _supportRequiredPct, ERROR_INIT_PCTS);
         require(_supportRequiredPct < PCT_BASE, ERROR_INIT_SUPPORT_TOO_BIG);
+        require(_minDuration > 0, ERROR_CHANGE_MIN_DURATION_NO_ZERO);
 
         token = _token;
         minAcceptQuorumPct = _minAcceptQuorumPct;
         supportRequiredPct = _supportRequiredPct; 
-        voteTime = _voteTime;
+        minDuration = _minDuration;
 
         Component.initialize(_dao, _gsnForwarder);
         
-        emit UpdateConfig(_supportRequiredPct, _minAcceptQuorumPct);
+        emit UpdateConfig(_minAcceptQuorumPct, _supportRequiredPct, _minDuration);
     }
 
     /**
     * @notice Change required support and minQuorum
     * @param _supportRequiredPct New required support
     * @param _minAcceptQuorumPct New acceptance quorum
+    * @param _minDuration each vote's minimum duration
     */
-    function changeVoteConfig(uint64 _supportRequiredPct, uint64 _minAcceptQuorumPct) external auth(MODIFY_CONFIG) {
+    function changeVoteConfig(
+        uint64 _minAcceptQuorumPct, 
+        uint64 _supportRequiredPct,
+        uint64 _minDuration
+    ) external auth(MODIFY_CONFIG) {
         require(_minAcceptQuorumPct <= _supportRequiredPct, ERROR_CHANGE_SUPPORT_PCTS);
         require(_supportRequiredPct < PCT_BASE, ERROR_CHANGE_SUPPORT_TOO_BIG);
-
+        require(_minDuration > 0, ERROR_CHANGE_MIN_DURATION_NO_ZERO);
+        
         minAcceptQuorumPct = _minAcceptQuorumPct;
         supportRequiredPct = _supportRequiredPct;
+        minDuration = _minDuration;
 
-        emit UpdateConfig(supportRequiredPct, minAcceptQuorumPct);
+        emit UpdateConfig(_minAcceptQuorumPct, _supportRequiredPct, _minDuration);
     }
 
     /**
     * @notice Create a new vote on this concrete implementation
-    * @param proposalMetadata The IPFS hash pointing to the proposal metadata
-    * @param executeIfDecided Configuration to enable automatic execution on the last required vote
-    * @param castVote Configuration to cast vote as "YES" on creation of it
+    * @param _proposalMetadata The IPFS hash pointing to the proposal metadata
+    * @param _actions the actions that will be executed after vote passes
+    * @param _startDate state date of the vote. If 0, uses current timestamp
+    * @param _endDate end date of the vote. If 0, uses _start + minDuration
+    * @param _executeIfDecided Configuration to enable automatic execution on the last required vote
+    * @param _castVote Configuration to cast vote as "YES" on creation of it
     */
     function newVote(
-        bytes calldata proposalMetadata,
+        bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
-        bool executeIfDecided, 
-        bool castVote
+        uint64 _startDate,
+        uint64 _endDate,
+        bool _executeIfDecided,
+        bool _castVote
     ) external returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1; 
         
@@ -116,9 +132,23 @@ contract SimpleVoting is Component, TimeHelpers {
         require(votingPower > 0, ERROR_NO_VOTING_POWER);
 
         voteId = votesLength++;
+        
+        // calculate start and end time for the vote
+        uint64 currentTimestamp = getTimestamp64();
 
+        if(_startDate == 0) _startDate = currentTimestamp;
+        if(_endDate == 0) _endDate = _startDate + minDuration;
+        
+        require(
+            _endDate - _startDate >= minDuration ||
+            _startDate >= currentTimestamp,
+            ERROR_VOTE_DATES_WRONG
+        );
+
+        // create a vote.
         Vote storage vote_ = votes[voteId];
-        vote_.startDate = getTimestamp64();
+        vote_.startDate = _startDate;
+        vote_.endDate = _endDate;
         vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.minAcceptQuorumPct = minAcceptQuorumPct;
@@ -128,10 +158,10 @@ contract SimpleVoting is Component, TimeHelpers {
             vote_.actions.push(_actions[i]);
         }
 
-        emit StartVote(voteId, _msgSender(), proposalMetadata);
+        emit StartVote(voteId, _msgSender(), _proposalMetadata);
     
-        if (castVote && canVote(voteId, _msgSender())) {
-            _vote(voteId, true, _msgSender(), executeIfDecided);
+        if (_castVote && canVote(voteId, _msgSender())) {
+            _vote(voteId, true, _msgSender(), _executeIfDecided);
         }
     }
 
@@ -237,6 +267,7 @@ contract SimpleVoting is Component, TimeHelpers {
     * @return open Vote open status
     * @return executed Vote executed status
     * @return startDate start date
+    * @return endDate end date
     * @return snapshotBlock snapshot block
     * @return supportRequired support required
     * @return minAcceptQuorum minimum acceptance quorum
@@ -252,6 +283,7 @@ contract SimpleVoting is Component, TimeHelpers {
             bool open,
             bool executed,
             uint64 startDate,
+            uint64 endDate,
             uint64 snapshotBlock,
             uint64 supportRequired,
             uint64 minAcceptQuorum,
@@ -266,6 +298,7 @@ contract SimpleVoting is Component, TimeHelpers {
         open = _isVoteOpen(vote_);
         executed = vote_.executed;
         startDate = vote_.startDate;
+        endDate = vote_.endDate;
         snapshotBlock = vote_.snapshotBlock;
         supportRequired = vote_.supportRequiredPct;
         minAcceptQuorum = vote_.minAcceptQuorumPct;
@@ -292,7 +325,7 @@ contract SimpleVoting is Component, TimeHelpers {
     * @return True if the given vote is open, false otherwise
     */
     function _isVoteOpen(Vote storage vote_) internal view returns (bool) {
-        return getTimestamp64() < vote_.startDate + voteTime && !vote_.executed;
+        return getTimestamp64() < vote_.endDate && !vote_.executed;
     }
 
     /**
