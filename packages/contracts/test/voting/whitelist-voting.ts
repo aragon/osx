@@ -62,9 +62,10 @@ describe('WhitelistVoting', function () {
         supportRequired: any, 
         voteTime: any,
     ) {
-        return voting['initialize(address,address[],uint64,uint64)']
+        return voting['initialize(address,address,address[],uint64,uint64)']
             (
                 daoMock.address, 
+                ethers.constants.AddressZero,
                 whitelisted,
                 supportRequired,
                 voteTime

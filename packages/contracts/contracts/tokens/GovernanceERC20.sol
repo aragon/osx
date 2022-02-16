@@ -13,10 +13,16 @@ import "../core/erc165/AdaptiveERC165.sol";
 import "../core/component/Permissions.sol";
 import "../core/IDAO.sol";
 
-contract GovernanceERC20 is AdaptiveERC165, Permissions, ERC20VotesUpgradeable {
+
+contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
 
      /// @notice The role identifier to mint new tokens
     bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
+
+    /// @dev describes the version and contract for GSN compatibility.
+    function versionRecipient() external virtual override view returns (string memory) {
+        return "0.0.1+opengsn.recipient.GovernanceERC20";
+    }
 
     function initialize(
         IDAO _dao, 
@@ -30,8 +36,23 @@ contract GovernanceERC20 is AdaptiveERC165, Permissions, ERC20VotesUpgradeable {
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
+    }   
+
+    /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
+    /// we have to override it and activate GSN's _msgSender. 
+    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
+    /// ends up first and that's what gets called by super._msgSender
+    function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (address) {
+        return super._msgSender();
     }
-    
+
+    /// @dev Since 2 base classes end up having _msgData(OZ + GSN), 
+    /// we have to override it and activate GSN's _msgData. 
+    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
+    /// ends up first and that's what gets called by super._msgData
+    function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (bytes calldata) {
+        return super._msgData();
+    }
 
     function mint(address to, uint256 amount) external auth(TOKEN_MINTER_ROLE) {
         _mint(to, amount);
