@@ -1,4 +1,5 @@
 import {i18n} from '../../i18n.config';
+
 import {ProposalData, VotingData} from './types';
 /**
  * Note: This function will return a list of timestamp that we can use to categorize transfers
@@ -25,6 +26,136 @@ export function getDateSections(): {
     lastMonth,
     lastYear,
   };
+}
+
+export function daysToMills(days: number): number {
+  return days * 24 * 60 * 60 * 1000;
+}
+
+export function hoursToMills(hours: number): number {
+  return hours * 60 * 60 * 1000;
+}
+
+export function minutesToMills(minutes: number): number {
+  return minutes * 60 * 1000;
+}
+
+type Offset = {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+};
+
+function offsetToMills(offset: Offset) {
+  return (
+    (offset.days ? daysToMills(offset.days) : 0) +
+    (offset.hours ? hoursToMills(offset.hours) : 0) +
+    (offset.minutes ? minutesToMills(offset.minutes) : 0)
+  );
+}
+
+/**
+ * Returns the either:
+ *
+ *  - the current date
+ *  - or the current date + the number of days passed as offset
+ *
+ * as a string with the following format: "yyyy-mm-dd".
+ *
+ * Note that the offset may be negative. This will return a date in the past.
+ *
+ * This date format is necessary when working with html inputs of type "date".
+ */
+export function getCanonicalDate(offset?: Offset): string {
+  const currDate = new Date();
+
+  //add offset
+  const offsetMills = offset ? offsetToMills(offset) : 0;
+  const offsetTime = currDate.getTime() + offsetMills;
+  const offsetDateTime = new Date(offsetTime);
+
+  //format date
+  const month = offsetDateTime.getMonth() + 1;
+  const formattedMonth = month > 9 ? '' + month : '0' + month;
+  const day = offsetDateTime.getDate();
+  const formattedDay = day > 9 ? '' + day : '0' + day;
+  return (
+    '' +
+    offsetDateTime.getFullYear() +
+    '-' +
+    formattedMonth +
+    '-' +
+    formattedDay
+  );
+}
+
+/**
+ * Returns the current time as a string with the following format:
+ * "hh:mm".
+ *
+ * This time format is necessary when working with html inputs of type "time".
+ */
+export function getCanonicalTime(offset?: Offset): string {
+  const currDate = new Date();
+
+  //add offset
+  const offsetMills = offset ? offsetToMills(offset) : 0;
+  const offsetTime = currDate.getTime() + offsetMills;
+  const offsetDateTime = new Date(offsetTime);
+
+  //format time
+  const currHours = offsetDateTime.getHours();
+  const currMinutes = offsetDateTime.getMinutes();
+  const formattedHours = currHours > 9 ? '' + currHours : '0' + currHours;
+  const formattedMinutes =
+    currMinutes > 9 ? '' + currMinutes : '0' + currMinutes;
+
+  return '' + formattedHours + ':' + formattedMinutes;
+}
+
+/**
+ * This method returns a UTC offset with the following format:
+ * "[+|-]hh:mm".
+ *
+ * This format is necessary to construct dates based on a particular timezone
+ * offset using the date-fns library.
+ *
+ * If a formatted offset is provided, it will be mapped to its canonical form.
+ * If none is provided, the current timezone offset will be used.
+ */
+export function getCanonicalUtcOffset(formattedUtcOffset?: string): string {
+  const formattedOffset = formattedUtcOffset || getFormattedUtcOffset();
+  const noLettersOffset = formattedOffset.slice(3);
+  const sign = noLettersOffset.slice(0, 1);
+  const time = noLettersOffset.slice(1);
+  let canonicalOffset;
+  if (time.includes(':')) {
+    // if colon present only hours might need padding
+    const [hours, minutes] = time.split(':');
+    canonicalOffset = (hours.length === 1 && '0') + hours + ':' + minutes;
+  } else {
+    // if no colon, need to add :00 and maybe padding to hours
+    canonicalOffset = (time.length === 1 && '0') + time + ':00';
+  }
+  return sign + canonicalOffset;
+}
+
+/**
+ * This method returns the user's UTC offset with the following format:
+ * "UTC[+|-](h)?h(:mm)?" (E.g., either UTC+10, UTC-9:30).
+ *
+ * This format is used to display offsets in the UI.
+ */
+export function getFormattedUtcOffset(): string {
+  const currDate = new Date();
+  let decimalOffset = currDate.getTimezoneOffset() / 60;
+  const isNegative = decimalOffset < 0;
+  decimalOffset = Math.abs(decimalOffset);
+  const hourOffset = Math.floor(decimalOffset);
+  const minuteOffset = Math.round((decimalOffset - hourOffset) * 60);
+  let formattedOffset = 'UTC' + (isNegative ? '+' : '-') + hourOffset;
+  formattedOffset += minuteOffset > 0 ? ':' + minuteOffset : '';
+  return formattedOffset;
 }
 
 /**

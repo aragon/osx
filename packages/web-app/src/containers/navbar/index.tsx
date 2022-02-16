@@ -83,7 +83,6 @@ const Navbar: React.FC = () => {
   }, []);
 
   const handleWalletButtonClick = () => {
-    console.log('trigger');
     isConnected() ? open() : connect('injected');
   };
 

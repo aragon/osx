@@ -37,6 +37,10 @@
     "continue": "Continue",
     "submitDeposit": "Submit Deposit",
     "resources": "Resources",
+    "start": "Start",
+    "end": "End",
+    "days": "Days",
+    "dateTime": "Date + Time",
     "resourcesHelptext": "Link to external resources, such as documents, forum links, chats or similar.",
     "submitWithdraw": "Publish Proposal",
     "sortBy": "Sort by",
@@ -123,9 +127,15 @@
     },
     "noProposals": "No proposals found!"
   },
+  "infos": {
+    "voteDuration": "The minimum duration of 5 days is defined by DAO Governance Settings",
+    "newVotinTypes": "New voting types will be released soon"
+  },
   "errors": {
     "amountWithInvalidToken": "Cannot validate amount with invalid token address",
     "defaultAmountValidationError": "Error validating amount",
+    "durationTooShort": "Duration must be at least 5 days",
+    "endPast": "End date must be more then 5 days from the start",
     "exceedsFractionalParts": "The number of decimals in the amount must not exceed the number of decimals of the token({{decimals}})",
     "includeDecimals": "Include decimals, e.g. 10.0",
     "includeExactAmount": "The token doesn't contain decimals. Please enter the exact amount",
@@ -146,14 +156,20 @@
       "tokenSymbol": "Token symbol is required",
       "walletAddress": "Wallet address is required",
       "amount": "Token amount is required",
+      "date": "Date is required",
+      "duration": "Duration is required",
+      "endDate": "End date is required",
       "label": "Label is mandatory",
       "link": "Link is mandatory",
       "recipient": "Recipient address is required",
       "token": "Token is required",
+      "time": "Time is required",
+      "timezone": "Timezone is required",
       "name": "DAO name is mandatory",
       "title": "Title is required",
       "summary": "Summary is required"
-    }
+    },
+    "startPast": "Process must not start in the past"
   },
   "alert": {
     "durationAlert": "We recommend a minimum duration of 1 day if it does not have to be a quick financial decision."
@@ -224,6 +240,19 @@
       "utcMenu": {
         "title": "Select a UTC Timezone"
       }
+    },
+    "setupVoting": {
+      "title": "Setup Voting",
+      "description": "For a withdraw, a vote is necessary so that the majority can determine whether your proposal is legitimate. For this, you need this configuration.",
+      "optionLabel": {
+        "title": "Options",
+        "helptext": "This is a placeholder"
+      },
+      "yesNoLabel": {
+        "title": "Yes & No",
+        "helptext": "Let users vote for or against."
+      },
+      "endDescription": "Define how long the voting should last in days or exact date and time."
     },
     "defineProposal": {
       "heading": "Define Proposal",

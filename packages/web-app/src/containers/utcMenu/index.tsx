@@ -11,12 +11,17 @@ import {useGlobalModalContext} from 'context/globalModals';
 import {timezones} from './utcData';
 import ModalBottomSheetSwitcher from 'components/modalBottomSheetSwitcher';
 
-const UtcMenu: React.FC = () => {
+type UtcMenuProps = {
+  onTimezoneSelect: (timezone: string) => void;
+};
+
+const UtcMenu: React.FC<UtcMenuProps> = ({onTimezoneSelect}) => {
   const {isUtcOpen, close} = useGlobalModalContext();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const {t} = useTranslation();
 
-  const handleUtcClick = () => {
+  const handleUtcClick = (tz: string) => {
+    onTimezoneSelect(tz);
     close('utc');
   };
 
@@ -34,7 +39,7 @@ const UtcMenu: React.FC = () => {
     <ModalBottomSheetSwitcher
       isOpen={isUtcOpen}
       onClose={() => close('utc')}
-      title={t('newWithdraw.configureWithdraw.utcMenu.title') as string}
+      title={t('newWithdraw.configureWithdraw.utcMenu.title')}
     >
       <ModalBody>
         <SearchInput
@@ -51,7 +56,7 @@ const UtcMenu: React.FC = () => {
                   key={tz}
                   title={tz}
                   iconRight={<IconChevronRight />}
-                  onClick={() => handleUtcClick()}
+                  onClick={() => handleUtcClick(tz)}
                 />
               );
             })}

@@ -34,8 +34,7 @@ allows for hover and active when disabled. */
 type InputContainerProps = Pick<DateInputProps, 'disabled'>;
 
 const InputContainer = styled.div.attrs(({disabled}: InputContainerProps) => {
-  const baseClasses =
-    'flex items-center py-1.5 px-2 rounded-xl border-2 font-normal';
+  const baseClasses = 'flex items-center p-1 rounded-xl border-2 font-normal';
   let className = `${baseClasses}`;
 
   if (disabled) {
@@ -55,7 +54,12 @@ const StyledInput = styled.input.attrs(() => {
   const className = `${baseClasses}`;
 
   return {className};
-})<DateInputProps>``;
+})<DateInputProps>`
+  ::-webkit-calendar-picker-indicator {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+`;
 
 const IconContainer = styled.div.attrs(({disabled}: InputContainerProps) => {
   return {className: ` p-1 rounded-xl ${disabled ? 'bg-ui-100' : 'bg-ui-50'}`};
