@@ -20,6 +20,7 @@ contract WhitelistVoting is Component, TimeHelpers {
     struct Vote {
         bool executed;
         uint64 startDate;
+        uint64 endDate;
         uint64 supportRequiredPct;
         uint64 votingPower;
         uint256 yea;
@@ -31,8 +32,9 @@ contract WhitelistVoting is Component, TimeHelpers {
     mapping (uint256 => Vote) internal votes;
 
     uint64 public supportRequiredPct;
-    uint64 public voteTime;
     uint64 private whitelistedLength;
+    uint64 public minDuration;
+
     uint256 public votesLength;
 
     mapping(address => bool) public whitelisted;
@@ -42,6 +44,8 @@ contract WhitelistVoting is Component, TimeHelpers {
     string private constant ERROR_CHANGE_SUPPORT_PCTS = "VOTING_CHANGE_SUPPORT_PCTS";
     string private constant ERROR_INIT_SUPPORT_TOO_BIG = "VOTING_INIT_SUPPORT_TOO_BIG";
     string private constant ERROR_CHANGE_SUPPORT_TOO_BIG = "VOTING_CHANGE_SUPP_TOO_BIG";
+    string private constant ERROR_VOTE_DATES_WRONG = "VOTING_DURATION_TIME_WRONG";
+    string private constant ERROR_CHANGE_MIN_DURATION_NO_ZERO = "VOTING_CHANGE_MIN_DURATION_NO_ZERO";
     string private constant ERROR_CAN_NOT_VOTE = "VOTING_CAN_NOT_VOTE";
     string private constant ERROR_CAN_NOT_EXECUTE = "VOTING_CAN_NOT_EXECUTE";
     string private constant ERROR_CAN_NOT_CREATE_VOTE = "VOTING_CAN_NOT_CREATE_VOTE";
@@ -49,7 +53,7 @@ contract WhitelistVoting is Component, TimeHelpers {
     event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
     event CastVote(uint256 indexed voteId, address indexed voter, bool voterSupports);
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
-    event UpdateConfig(uint64 supportRequiredPct);
+    event UpdateConfig(uint64 supportRequiredPct, uint64 minDuration);
     event AddUsers(address[] users);
     event RemoveUsers(address[] users);
 
@@ -65,19 +69,20 @@ contract WhitelistVoting is Component, TimeHelpers {
         address _gsnForwarder,
         address[] calldata _whitelisted,
         uint64 _supportRequiredPct,
-        uint64 _voteTime
+        uint64 _minDuration
     ) public initializer {
         require(_supportRequiredPct < PCT_BASE, ERROR_INIT_SUPPORT_TOO_BIG);
+        require(_minDuration > 0, ERROR_CHANGE_MIN_DURATION_NO_ZERO);
 
         supportRequiredPct = _supportRequiredPct;
-        voteTime = _voteTime;
+        minDuration = _minDuration;
 
         // add whitelisted users.
         _addWhitelistedUsers(_whitelisted);
 
         Component.initialize(_dao, _gsnForwarder);
         
-        emit UpdateConfig(_supportRequiredPct);
+        emit UpdateConfig(_supportRequiredPct, _minDuration);
     }
 
     /**
@@ -119,33 +124,54 @@ contract WhitelistVoting is Component, TimeHelpers {
     /**
     * @notice Change required support and minQuorum
     * @param _supportRequiredPct New required support
+    * @param _minDuration each vote's minimum duration
     */
-    function changeVoteConfig(uint64 _supportRequiredPct) external auth(MODIFY_CONFIG) {
+    function changeVoteConfig(uint64 _supportRequiredPct, uint64 _minDuration) external auth(MODIFY_CONFIG) {
         require(_supportRequiredPct < PCT_BASE, ERROR_CHANGE_SUPPORT_TOO_BIG);
+        require(_minDuration > 0, ERROR_CHANGE_MIN_DURATION_NO_ZERO);
 
         supportRequiredPct = _supportRequiredPct;
 
-        emit UpdateConfig(supportRequiredPct);
+        emit UpdateConfig(_supportRequiredPct, _minDuration);
     }
 
-    /**
+     /**
     * @notice Create a new vote on this concrete implementation
-    * @param proposalMetadata The IPFS hash pointing to the proposal metadata
-    * @param executeIfDecided Configuration to enable automatic execution on the last required vote
-    * @param castVote Configuration to cast vote as "YES" on creation of it
+    * @param _proposalMetadata The IPFS hash pointing to the proposal metadata
+    * @param _actions the actions that will be executed after vote passes
+    * @param _startDate state date of the vote. If 0, uses current timestamp
+    * @param _endDate end date of the vote. If 0, uses _start + minDuration
+    * @param _executeIfDecided Configuration to enable automatic execution on the last required vote
+    * @param _castVote Configuration to cast vote as "YES" on creation of it
     */
     function newVote(
-        bytes calldata proposalMetadata,
+        bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
-        bool executeIfDecided,
-        bool castVote
+        uint64 _startDate,
+        uint64 _endDate,
+        bool _executeIfDecided,
+        bool _castVote
     ) external returns (uint256 voteId) {
         require(whitelisted[msg.sender], ERROR_CAN_NOT_CREATE_VOTE);
 
+        // calculate start and end time for the vote
+        uint64 currentTimestamp = getTimestamp64();
+
+        if(_startDate == 0) _startDate = currentTimestamp;
+        if(_endDate == 0) _endDate = _startDate + minDuration;
+        
+        require(
+            _endDate - _startDate >= minDuration ||
+            _startDate >= currentTimestamp,
+            ERROR_VOTE_DATES_WRONG
+        );
+
         voteId = votesLength++;
 
+         // create a vote.
         Vote storage vote_ = votes[voteId];
-        vote_.startDate = getTimestamp64();
+        vote_.startDate = _startDate;
+        vote_.endDate = _endDate;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.votingPower = whitelistedLength;
 
@@ -153,10 +179,10 @@ contract WhitelistVoting is Component, TimeHelpers {
             vote_.actions.push(_actions[i]);
         }
 
-        emit StartVote(voteId, msg.sender, proposalMetadata);
+        emit StartVote(voteId, msg.sender, _proposalMetadata);
 
-        if (castVote && canVote(voteId, msg.sender)) {
-            _vote(voteId, true, msg.sender, executeIfDecided);
+        if (_castVote && canVote(voteId, msg.sender)) {
+            _vote(voteId, true, msg.sender, _executeIfDecided);
         }
     }
 
@@ -260,6 +286,7 @@ contract WhitelistVoting is Component, TimeHelpers {
     * @return open Vote open status
     * @return executed Vote executed status
     * @return startDate start date
+    * @return endDate end date
     * @return supportRequired support required
     * @return votingPower power
     * @return yea yeas amount
@@ -273,6 +300,7 @@ contract WhitelistVoting is Component, TimeHelpers {
             bool open,
             bool executed,
             uint64 startDate,
+            uint64 endDate,
             uint64 supportRequired,
             uint64 votingPower,
             uint256 yea,
@@ -285,6 +313,7 @@ contract WhitelistVoting is Component, TimeHelpers {
         open = _isVoteOpen(vote_);
         executed = vote_.executed;
         startDate = vote_.startDate;
+        endDate = vote_.endDate;
         supportRequired = vote_.supportRequiredPct;
         votingPower = vote_.votingPower;
         yea = vote_.yea;
@@ -309,7 +338,7 @@ contract WhitelistVoting is Component, TimeHelpers {
     * @return True if the given vote is open, false otherwise
     */
     function _isVoteOpen(Vote storage vote_) internal view returns (bool) {
-        return getTimestamp64() < vote_.startDate + voteTime && !vote_.executed;
+        return getTimestamp64() < vote_.endDate && !vote_.executed;
     }
 
     /**

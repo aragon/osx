@@ -54,7 +54,9 @@ const Container = styled.button.attrs(
 
     return {className};
   }
-)``;
+)`
+  height: fit-content;
+`;
 
 export type StyledChevronDownProps = Pick<StyledContainerProps, 'disabled'>;
 

@@ -14,6 +14,7 @@ import {TransferTypes} from 'utils/constants';
 import {useWalletProps} from 'containers/walletMenu';
 import ConfigureWithdrawForm from 'containers/configureWithdraw';
 import {FullScreenStepper, Step} from 'components/fullScreenStepper';
+import SetupVotingForm from 'containers/setupVotingForm';
 import DefineProposal from 'containers/defineProposal';
 
 export type TransferData = {
@@ -21,6 +22,13 @@ export type TransferData = {
   from: Address;
   to: Address;
   reference?: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  duration: number;
+  startUtc: string;
+  endUtc: string;
 };
 
 export type TokenFormData = {
@@ -43,6 +51,7 @@ export type WithdrawFormData = TransferFormData & {
 };
 
 const defaultValues = {
+  to: '0x8367dc645e31321CeF3EeD91a10a5b7077e21f70',
   amount: '',
   reference: '',
   tokenAddress: '',
@@ -50,6 +59,13 @@ const defaultValues = {
   tokenName: '',
   tokenImgUrl: '',
   isCustomToken: false,
+  duration: 5,
+  startDate: '',
+  startTime: '',
+  endDate: '',
+  endTime: '',
+  startUtc: '',
+  endUtc: '',
 };
 
 const NewWithdraw: React.FC = () => {
@@ -106,6 +122,9 @@ const NewWithdraw: React.FC = () => {
         navbarBackUrl="/#/finance"
         wizardProcessName={t('newWithdraw.withdrawAssets')}
       >
+        {/* FIXME: Each step needs to be able to disable the back
+        button. Otherwise, if the user leaves step x in an invalid state and
+        goes back to a step < x, they won't be able to move forward. */}
         <Step
           wizardTitle={t('newWithdraw.configureWithdraw.title')}
           wizardDescription={t('newWithdraw.configureWithdraw.subtitle')}
@@ -114,14 +133,12 @@ const NewWithdraw: React.FC = () => {
           <ConfigureWithdrawForm />
         </Step>
         <Step
-          wizardTitle={t('newDeposit.reviewTransfer')}
-          wizardDescription={t('newDeposit.reviewTransferSubtitle')}
+          wizardTitle={t('newWithdraw.setupVoting.title')}
+          wizardDescription={t('newWithdraw.setupVoting.description')}
           nextButtonLabel={t('labels.submitDeposit')}
+          isNextButtonDisabled={!formMethods.formState.isValid}
         >
-          <div>Voting setup form comes here.</div>
-          {/* TODO create form for second withdrawl step (analoguosly to
-            ConfigureWithdrawlForm above) is created. (DAO-621) */}
-          {/* <SetupVotingForm /> */}
+          <SetupVotingForm />
         </Step>
         <Step
           wizardTitle={t('newWithdraw.defineProposal.heading')}

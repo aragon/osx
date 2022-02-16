@@ -9,6 +9,8 @@ import { WhitelistVoting } from '../../typechain';
 const ERRORS = {
     ERROR_INIT_PCTS: "VOTING_INIT_PCTS",
     ERROR_INIT_SUPPORT_TOO_BIG: "VOTING_INIT_SUPPORT_TOO_BIG",
+    ERROR_CHANGE_MIN_DURATION_NO_ZERO: "VOTING_CHANGE_MIN_DURATION_NO_ZERO",
+    ERROR_VOTE_DATES_WRONG: "VOTING_DURATION_TIME_WRONG",
     ERROR_NO_VOTING_POWER: "VOTING_NO_VOTING_POWER",
     ERROR_CAN_NOT_VOTE: "VOTING_CAN_NOT_VOTE",
     ERROR_CHANGE_SUPPORT_PCTS: "VOTING_CHANGE_SUPPORT_PCTS",
@@ -60,7 +62,7 @@ describe('WhitelistVoting', function () {
     function initializeVoting(
         whitelisted: Array<string>,
         supportRequired: any, 
-        voteTime: any,
+        minDuration: any
     ) {
         return voting['initialize(address,address,address[],uint64,uint64)']
             (
@@ -68,7 +70,7 @@ describe('WhitelistVoting', function () {
                 ethers.constants.AddressZero,
                 whitelisted,
                 supportRequired,
-                voteTime
+                minDuration
             );
     }
 
@@ -80,6 +82,13 @@ describe('WhitelistVoting', function () {
                 initializeVoting([], 1, 3)
             ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
         })
+
+        it("reverts if min duration is 0", async () => {
+            await expect(
+                initializeVoting([], 2, 0)
+            ).to.be.revertedWith(ERRORS.ERROR_CHANGE_MIN_DURATION_NO_ZERO);
+        })
+
         it("should initialize dao on the component", async () => {
             // TODO: Waffle's calledOnContractWith is not supported by Hardhat
             // await voting['initialize(address,address,uint64[3],bytes[])']
@@ -118,30 +127,42 @@ describe('WhitelistVoting', function () {
         });
         it("reverts if wrong config is set", async () => {
             await expect(
-                voting.changeVoteConfig(pct16(1000))
+                voting.changeVoteConfig(pct16(1000), 1)
             ).to.be.revertedWith(ERRORS.ERROR_CHANGE_SUPPORT_TOO_BIG);
+
+            await expect(
+                voting.changeVoteConfig(20, 0)
+            ).to.be.revertedWith(ERRORS.ERROR_CHANGE_MIN_DURATION_NO_ZERO);
         })
 
         it("should change config successfully", async () => {
-            expect(await voting.changeVoteConfig(20))
+            expect(await voting.changeVoteConfig(20, 2))
                 .to.emit(voting, EVENTS.UPDATE_CONFIG)
-                .withArgs(20);
+                .withArgs(20, 2);
         })
     })
 
     describe("StartVote", async () => {
+        let minDuration = 3
         beforeEach(async () => {
             await initializeVoting([ownerAddress], 2, 3);
         })
 
         it("reverts if user is not whitelisted to create a vote", async () => {
             await expect(
-                voting.connect(signers[1]).newVote('0x00', [], false, false)
+                voting.connect(signers[1]).newVote('0x00', [], 0, 0, false, false)
             ).to.be.revertedWith(ERRORS.ERROR_CAN_NOT_CREATE_VOTE);
         })
 
+        it("reverts if vote duration is less than minDuration", async () => {
+            const block = await ethers.provider.getBlock('latest');
+            await expect(
+                voting.newVote('0x00', [], block.timestamp, block.timestamp + (minDuration - 1), false, false)
+            ).to.be.revertedWith(ERRORS.ERROR_VOTE_DATES_WRONG);
+        })
+
         it("should create a vote successfully, but not vote", async () => {
-            expect(await voting.newVote('0x00', dummyActions, false, false))
+            expect(await voting.newVote('0x00', dummyActions, 0, 0, false, false))
                 .to.emit(voting, EVENTS.START_VOTE)
                 .withArgs(0, ownerAddress, "0x00");
 
@@ -151,6 +172,8 @@ describe('WhitelistVoting', function () {
             expect(vote.supportRequired).to.equal(2);
             expect(vote.yea).to.equal(0);
             expect(vote.nay).to.equal(0);
+
+            expect(vote.startDate.add(minDuration)).to.equal(vote.endDate)
 
             expect(await voting.canVote(0, ownerAddress)).to.equal(true);
             expect(await voting.canVote(0, user1)).to.equal(false);
@@ -165,7 +188,7 @@ describe('WhitelistVoting', function () {
         })
 
         it("should create a vote and cast a vote immediatelly", async () => {
-            expect(await voting.newVote('0x00', dummyActions, false, true))
+            expect(await voting.newVote('0x00', dummyActions, 0, 0, false, true))
                 .to.emit(voting, EVENTS.START_VOTE)
                 .withArgs(0, ownerAddress, "0x00")
                 .to.emit(voting, EVENTS.CAST_VOTE)
@@ -182,7 +205,7 @@ describe('WhitelistVoting', function () {
     })
 
     describe("Vote + Execute:", async () => {
-        let voteTime = 500;
+        let minDuration = 500;
         let supportRequired = pct16(29);
 
         beforeEach(async () => {
@@ -195,9 +218,9 @@ describe('WhitelistVoting', function () {
 
             // voting will be initialized with 10 whitelisted addresses
             // Which means votingPower = 10 at this point.
-            await initializeVoting(addresses, supportRequired, voteTime);
+            await initializeVoting(addresses, supportRequired, minDuration);
             
-            await voting.newVote('0x00', dummyActions, false, false);
+            await voting.newVote('0x00', dummyActions, 0, 0, false, false);
         })
 
         it("increases the yea or nay count and emit correct events", async () => {
@@ -259,7 +282,7 @@ describe('WhitelistVoting', function () {
             expect(await voting.canExecute(0)).to.equal(false);
 
             // makes the voting closed.
-            await ethers.provider.send('evm_increaseTime', [voteTime + 10]);
+            await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
             await ethers.provider.send('evm_mine', []);
             
             // 3 voted no, 2 voted yea. Enough to surpass supportedRequired percentage
