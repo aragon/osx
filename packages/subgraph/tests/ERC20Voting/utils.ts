@@ -5,7 +5,7 @@ import {
   CastVote,
   ExecuteVote,
   UpdateConfig
-} from '../../generated/templates/SimpleVoting/SimpleVoting';
+} from '../../generated/templates/ERC20Voting/ERC20Voting';
 
 export function createNewStartVoteEvent(
   voteId: string,
@@ -97,6 +97,7 @@ export function createNewExecuteVoteEvent(
 export function createNewUpdateConfigEvent(
   supportRequiredPct: string,
   minAcceptQuorumPct: string,
+  minDuration: string,
   contractAddress: string
 ): UpdateConfig {
   let newUpdateConfigEvent = changetype<UpdateConfig>(newMockEvent());
@@ -104,17 +105,22 @@ export function createNewUpdateConfigEvent(
   newUpdateConfigEvent.address = Address.fromString(contractAddress);
   newUpdateConfigEvent.parameters = new Array();
 
-  let supportRequiredPctParam = new ethereum.EventParam(
-    'supportRequiredPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequiredPct))
-  );
   let minAcceptQuorumPctParam = new ethereum.EventParam(
     'minAcceptQuorumPct',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minAcceptQuorumPct))
   );
+  let supportRequiredPctParam = new ethereum.EventParam(
+    'supportRequiredPct',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequiredPct))
+  );
+  let minDurationParam = new ethereum.EventParam(
+    'minDuration',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
+  );
 
-  newUpdateConfigEvent.parameters.push(supportRequiredPctParam);
   newUpdateConfigEvent.parameters.push(minAcceptQuorumPctParam);
+  newUpdateConfigEvent.parameters.push(supportRequiredPctParam);
+  newUpdateConfigEvent.parameters.push(minDurationParam);
 
   return newUpdateConfigEvent;
 }
@@ -125,6 +131,7 @@ export function createGetVoteCall(
   open: boolean,
   executed: boolean,
   startDate: string,
+  endDate: string,
   snapshotBlock: string,
   supportRequired: string,
   minAcceptQuorum: string,
@@ -136,13 +143,14 @@ export function createGetVoteCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getVote',
-    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
+    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
   )
     .withArgs([ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))])
     .returns([
       ethereum.Value.fromBoolean(open),
       ethereum.Value.fromBoolean(executed),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(startDate)),
+      ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(snapshotBlock)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequired)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(minAcceptQuorum)),

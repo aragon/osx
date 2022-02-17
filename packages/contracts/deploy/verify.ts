@@ -63,12 +63,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const governanceWrappedERC20Base =
     await TokenFactoryContract.governanceWrappedERC20Base();
   const merkleMinterBase = await TokenFactoryContract.merkleMinterBase();
+  const distributorBase = await TokenFactoryContract.distributorBase();
 
   await verifyContract(votingBase, []);
   await verifyContract(daoBase, []);
   await verifyContract(governanceERC20Base, []);
   await verifyContract(governanceWrappedERC20Base, []);
   await verifyContract(merkleMinterBase, []);
+  await verifyContract(distributorBase, []);
 };
 export default func;
 func.runAtTheEnd = true;

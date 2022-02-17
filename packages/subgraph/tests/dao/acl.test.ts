@@ -10,18 +10,18 @@ import {
   getSupportRequiredPct,
   getSVToken,
   getVotesLength,
-  getVoteTime
+  getMinDuration
 } from './utils';
 import {
-  daoAddress,
-  addressOne,
-  daiAddress,
-  oneEth,
-  dataString,
-  halfEth,
-  addressZero,
-  votingAddress,
-  addressTwo
+  DAO_ADDRESS,
+  ADDRESS_ONE,
+  DAO_TOKEN_ADDRESS,
+  ONE_ETH,
+  STRING_DATA,
+  HALF_ETH,
+  ADDRESS_ZERO,
+  ERC20_VOTING_ADDRESS,
+  ADDRESS_TWO
 } from '../constants';
 import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
 import {crypto} from '@graphprotocol/graph-ts';
@@ -34,21 +34,21 @@ test('Run dao (handleGranted) mappings with mock event', () => {
   );
   let grantedEvent = createNewGrantedEvent(
     role,
-    addressOne,
-    votingAddress,
-    daoAddress,
-    addressTwo,
-    daoAddress
+    ADDRESS_ONE,
+    ERC20_VOTING_ADDRESS,
+    DAO_ADDRESS,
+    ADDRESS_TWO,
+    DAO_ADDRESS
   );
 
   // launch calls
-  createTokenCalls(daiAddress, 'Dai Token', 'DAI', '6');
-  getEXEC_ROLE(daoAddress, role);
-  getSupportRequiredPct(votingAddress, BigInt.fromString(oneEth));
-  getMinAcceptQuorumPct(votingAddress, BigInt.fromString(oneEth));
-  getVoteTime(votingAddress, BigInt.fromString(oneEth));
-  getVotesLength(votingAddress, BigInt.fromString(oneEth));
-  getSVToken(votingAddress, daiAddress);
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+  getEXEC_ROLE(DAO_ADDRESS, role);
+  getSupportRequiredPct(ERC20_VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
+  getMinAcceptQuorumPct(ERC20_VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
+  getMinDuration(ERC20_VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
+  getVotesLength(ERC20_VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
+  getSVToken(ERC20_VOTING_ADDRESS, DAO_TOKEN_ADDRESS);
 
   // handle event
   handleGranted(grantedEvent);
@@ -56,27 +56,27 @@ test('Run dao (handleGranted) mappings with mock event', () => {
   // checks
   // role
   let roleEntityID =
-    Address.fromString(daoAddress).toHexString() + '_' + role.toHexString();
+    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
 
   assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
   assert.fieldEquals(
     'Role',
     roleEntityID,
     'dao',
-    Address.fromString(daoAddress).toHexString()
+    Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
     'Role',
     roleEntityID,
     'where',
-    Address.fromString(daoAddress).toHexString()
+    Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals('Role', roleEntityID, 'role', role.toHexString());
   assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
 
   // permission
   let permissionEntityID =
-    roleEntityID + '_' + Address.fromString(votingAddress).toHexString();
+    roleEntityID + '_' + Address.fromString(ERC20_VOTING_ADDRESS).toHexString();
 
   assert.fieldEquals(
     'Permission',
@@ -87,9 +87,9 @@ test('Run dao (handleGranted) mappings with mock event', () => {
 
   // governance
   let daoPackageEntityID =
-    Address.fromString(daoAddress).toHexString() +
+    Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    Address.fromString(votingAddress).toHexString();
+    Address.fromString(ERC20_VOTING_ADDRESS).toHexString();
 
   assert.fieldEquals(
     'DaoPackage',
@@ -108,16 +108,16 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   );
   let grantedEvent = createNewGrantedEvent(
     role,
-    addressOne,
-    votingAddress,
-    daoAddress,
-    addressTwo,
-    daoAddress
+    ADDRESS_ONE,
+    ERC20_VOTING_ADDRESS,
+    DAO_ADDRESS,
+    ADDRESS_TWO,
+    DAO_ADDRESS
   );
 
   // launch calls
-  createTokenCalls(daiAddress, 'Dai Token', 'DAI', '6');
-  getEXEC_ROLEreverted(daoAddress);
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+  getEXEC_ROLEreverted(DAO_ADDRESS);
 
   // handle event
   handleGranted(grantedEvent);
@@ -125,15 +125,15 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   // checks
   // role
   let roleEntityID =
-    Address.fromString(daoAddress).toHexString() + '_' + role.toHexString();
+    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
 
   assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
 
   // governance
   let daoPackageEntityID =
-    Address.fromString(daoAddress).toHexString() +
+    Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    Address.fromString(votingAddress).toHexString();
+    Address.fromString(ERC20_VOTING_ADDRESS).toHexString();
 
   assert.notInStore('DaoPackage', daoPackageEntityID);
 
@@ -148,15 +148,15 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   // first Grant a permission
   let grantedEvent = createNewGrantedEvent(
     role,
-    addressOne,
-    votingAddress,
-    daoAddress,
-    addressTwo,
-    daoAddress
+    ADDRESS_ONE,
+    ERC20_VOTING_ADDRESS,
+    DAO_ADDRESS,
+    ADDRESS_TWO,
+    DAO_ADDRESS
   );
   // launch calls
-  createTokenCalls(daiAddress, 'Dai Token', 'DAI', '6');
-  getEXEC_ROLE(daoAddress, role);
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+  getEXEC_ROLE(DAO_ADDRESS, role);
 
   // handle event
   handleGranted(grantedEvent);
@@ -164,10 +164,10 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   // checks
   // role
   let roleEntityID =
-    Address.fromString(daoAddress).toHexString() + '_' + role.toHexString();
+    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
   // permission
   let permissionEntityID =
-    roleEntityID + '_' + Address.fromString(votingAddress).toHexString();
+    roleEntityID + '_' + Address.fromString(ERC20_VOTING_ADDRESS).toHexString();
 
   assert.fieldEquals(
     'Permission',
@@ -179,10 +179,10 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   // create event and run it's handler
   let revokedEvent = createNewRevokedEvent(
     role,
-    addressOne,
-    votingAddress,
-    daoAddress,
-    daoAddress
+    ADDRESS_ONE,
+    ERC20_VOTING_ADDRESS,
+    DAO_ADDRESS,
+    DAO_ADDRESS
   );
 
   // handle event
@@ -203,15 +203,15 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   // first Grant a permission
   let grantedEvent = createNewGrantedEvent(
     role,
-    addressOne,
-    votingAddress,
-    daoAddress,
-    addressTwo,
-    daoAddress
+    ADDRESS_ONE,
+    ERC20_VOTING_ADDRESS,
+    DAO_ADDRESS,
+    ADDRESS_TWO,
+    DAO_ADDRESS
   );
   // launch calls
-  createTokenCalls(daiAddress, 'Dai Token', 'DAI', '6');
-  getEXEC_ROLE(daoAddress, role);
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+  getEXEC_ROLE(DAO_ADDRESS, role);
 
   // handle event
   handleGranted(grantedEvent);
@@ -219,7 +219,7 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   // checks
   // role
   let roleEntityID =
-    Address.fromString(daoAddress).toHexString() + '_' + role.toHexString();
+    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
 
   assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
   assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
@@ -227,9 +227,9 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   // create event and run it's handler
   let frozenEvent = createNewFrozenEvent(
     role,
-    addressOne,
-    daoAddress,
-    daoAddress
+    ADDRESS_ONE,
+    DAO_ADDRESS,
+    DAO_ADDRESS
   );
 
   // handle event

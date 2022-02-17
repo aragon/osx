@@ -10,7 +10,7 @@ import "./../../core/component/Component.sol";
 import "./../../core/IDAO.sol";
 import "./../../utils/TimeHelpers.sol";
 
-contract SimpleVoting is Component, TimeHelpers {
+contract ERC20Voting is Component, TimeHelpers {
     bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
     uint64 public constant PCT_BASE = 10 ** 18; // 0% = 0; 1% = 10^16; 100% = 10^18
