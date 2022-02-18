@@ -14,6 +14,7 @@ export {IconCopy} from './icon_copy';
 export {IconDeposit} from './icon_deposit';
 export {IconFavoriteDefault} from './icon_favorite_default';
 export {IconFavoriteSelected} from './icon_favorite_selected';
+export {IconHome} from './icon_home';
 export {IconInfo} from './icon_info';
 export {IconLinkExternal} from './icon_link_external';
 export {IconMenu} from './icon_menu';
