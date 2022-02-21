@@ -44,7 +44,22 @@ const MenuBar: React.FC<MenuBarProps> = ({
       return;
     }
 
-    editor?.chain().focus().extendMarkRange('link').setLink({href: url}).run();
+    // TODO: All possible url validations should be done here instead of just checking for protocol
+    if (url.indexOf('http://') === -1 && url.indexOf('https://') === -1) {
+      editor
+        ?.chain()
+        .focus()
+        .extendMarkRange('link')
+        .setLink({href: `http://${url}`})
+        .run();
+    } else {
+      editor
+        ?.chain()
+        .focus()
+        .extendMarkRange('link')
+        .setLink({href: url})
+        .run();
+    }
   }, [editor]);
 
   if (!editor) {

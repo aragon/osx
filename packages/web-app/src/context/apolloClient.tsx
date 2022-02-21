@@ -58,7 +58,11 @@ const persistor = new CachePersistor({
   },
 });
 
-await persistor.restore();
+const restoreApolloCache = async () => {
+  await persistor.restore();
+};
+
+restoreApolloCache();
 
 export const client = new ApolloClient({
   cache,

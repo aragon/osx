@@ -50,7 +50,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
 
   const labelValidator = useCallback(
     (label: string, index: number) => {
-      if (linkedFieldsAreValid(label, `links.${index}.link`)) return;
+      if (linkedFieldsAreValid(label, `links.${index}.href`)) return;
 
       return label === '' ? t('errors.required.label') : true;
     },
@@ -107,7 +107,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
 
       <LinkContainer>
         <Controller
-          name={`links.${index}.link`}
+          name={`links.${index}.href`}
           control={control}
           rules={{
             validate: value => linkValidator(value, index),

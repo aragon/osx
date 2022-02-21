@@ -126,7 +126,7 @@ async function fetchTokenPrice(address: Address) {
     '/simple/token_price/ethereum?vs_currencies=usd&contract_addresses=';
 
   const url = isEth
-    ? `${BASE_URL}/simple/price?ids=ethereum$vs_currencies=usd`
+    ? `${BASE_URL}/simple/price?ids=ethereum&vs_currencies=usd`
     : `${BASE_URL}${endPoint}${address}`;
 
   try {
