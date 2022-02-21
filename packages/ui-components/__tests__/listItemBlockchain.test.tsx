@@ -11,7 +11,7 @@ describe('ListItemBlockchain', () => {
   }
 
   test('should render without crashing', () => {
-    const element = setup({logo: ''});
+    const element = setup({logo: 'abd'});
     expect(element).toBeInTheDocument;
   });
 });

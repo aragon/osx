@@ -3,7 +3,7 @@ import {
   ButtonIcon,
   IconMenuVertical,
   Label,
-  ListItemText,
+  ListItemAction,
   Popover,
   TextInput,
 } from '@aragon/ui-components';
@@ -144,11 +144,12 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
           width={156}
           content={
             <div className="p-1.5">
-              <ListItemText
+              <ListItemAction
                 title={t('labels.removeLink')}
                 {...(typeof onDelete === 'function'
-                  ? {mode: 'default', onClick: () => onDelete(index)}
+                  ? {onClick: () => onDelete(index)}
                   : {mode: 'disabled'})}
+                bgWhite
               />
             </div>
           }

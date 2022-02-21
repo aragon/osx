@@ -2,8 +2,8 @@ import {
   ButtonText,
   IconChevronDown,
   Label,
+  ListItemAction,
   ListItemBlockchain,
-  ListItemText,
   Popover,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
@@ -84,23 +84,26 @@ const SelectChainForm: React.FC = () => {
             onOpenChange={value => setIsOpen(value)}
             content={
               <DropdownContent>
-                <ListItemText
+                <ListItemAction
                   name="cost"
                   mode={sortFilter === 'cost' ? 'selected' : 'default'}
                   title={t('labels.networkCost')}
                   onClick={handleFilterChanged}
+                  bgWhite
                 />
-                <ListItemText
+                <ListItemAction
                   name="popularity"
                   mode={sortFilter === 'popularity' ? 'selected' : 'default'}
                   title={t('labels.popularity')}
                   onClick={handleFilterChanged}
+                  bgWhite
                 />
-                <ListItemText
+                <ListItemAction
                   name="security"
                   mode={sortFilter === 'security' ? 'selected' : 'default'}
                   title={t('labels.security')}
                   onClick={handleFilterChanged}
+                  bgWhite
                 />
               </DropdownContent>
             }

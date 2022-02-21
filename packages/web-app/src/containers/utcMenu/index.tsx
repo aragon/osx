@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {
   IconChevronRight,
-  ListItemText,
+  ListItemAction,
   SearchInput,
 } from '@aragon/ui-components';
 
@@ -51,7 +51,7 @@ const UtcMenu: React.FC<UtcMenuProps> = ({onTimezoneSelect}) => {
           <ScrollableDiv>
             {filteredTimezones.map((tz: string) => {
               return (
-                <ListItemText
+                <ListItemAction
                   mode="default"
                   key={tz}
                   title={tz}
