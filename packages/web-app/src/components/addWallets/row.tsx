@@ -3,7 +3,7 @@ import {
   ButtonIcon,
   IconMenuVertical,
   Label,
-  ListItemText,
+  ListItemAction,
   Popover,
   TextInput,
   NumberInput,
@@ -114,14 +114,15 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
         <Popover
           side="bottom"
           align="end"
-          width={156}
+          width={240}
           content={
             <div className="p-1.5">
-              <ListItemText
+              <ListItemAction
                 title={t('labels.removeWallet')}
                 {...(typeof onDelete === 'function'
-                  ? {mode: 'default', onClick: () => onDelete(index)}
+                  ? {onClick: () => onDelete(index)}
                   : {mode: 'disabled'})}
+                bgWhite
               />
             </div>
           }

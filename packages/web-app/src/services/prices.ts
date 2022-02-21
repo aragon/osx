@@ -3,6 +3,8 @@ import {constants} from 'ethers';
 
 import {TokenPricePercentages} from 'utils/types';
 import {BASE_URL, DEFAULT_CURRENCY} from 'utils/constants';
+import {client} from 'context/apolloClient';
+import {gql} from '@apollo/client';
 
 type TokenPrices = {
   [key: string]: {
@@ -76,24 +78,41 @@ type FetchedTokenData = Promise<TokenData | undefined>;
  */
 async function fetchTokenData(address: Address): FetchedTokenData {
   const endPoint = '/coins/ethereum';
-  let url = `${BASE_URL}${endPoint}`;
+  const arg =
+    address !== constants.AddressZero
+      ? `${endPoint}/contract/${address}`
+      : `${endPoint}`;
 
-  if (address !== constants.AddressZero) url += `/contract/${address}`;
+  const TOKEN_DATA_QUERY = gql`
+    query TokenData {
+      tokenData(address: ${JSON.stringify(arg)})
+        @rest(
+          type: "TokenData"
+          path: "{args.address}"
+          method: "GET"
+        ) {
+        id
+        name
+        symbol
+        image {
+          large
+        }
+        address
+      }
+    }
+  `;
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.id)
-      return {
-        id: data.id,
-        name: data.name,
-        symbol: (data.symbol as string).toUpperCase(),
-        imgUrl: data.image.large,
-        address: address,
-      };
-  } catch (error) {
-    console.error('Error fetching token data', error);
+  const {data, error} = await client.query({query: TOKEN_DATA_QUERY});
+  if (!error && data.tokenData) {
+    return {
+      id: data.tokenData.id,
+      name: data.tokenData.name,
+      symbol: (data.tokenData.symbol as string).toUpperCase(),
+      imgUrl: data.tokenData.image.large,
+      address: address,
+    };
   }
+  console.error('Error fetching token price', error);
 }
 
 /**
@@ -107,7 +126,7 @@ async function fetchTokenPrice(address: Address) {
     '/simple/token_price/ethereum?vs_currencies=usd&contract_addresses=';
 
   const url = isEth
-    ? `${BASE_URL}/simple/price?ids=ethereum$vs_currencies=usd`
+    ? `${BASE_URL}/simple/price?ids=ethereum&vs_currencies=usd`
     : `${BASE_URL}${endPoint}${address}`;
 
   try {

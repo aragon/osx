@@ -4,7 +4,7 @@ import chaiUtils from '../test-utils';
 
 chai.use(chaiUtils);
 
-import { SimpleVoting } from '../../typechain';
+import { ERC20Voting } from '../../typechain';
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 
 const { deployMockContract } = waffle;
@@ -33,9 +33,9 @@ const EVENTS = {
   EXECUTED: 'Executed'
 };
 
-describe('SimpleVoting', function () {
+describe('ERC20Voting', function () {
     let signers: any;
-    let voting: SimpleVoting;
+    let voting: ERC20Voting;
     let daoMock: any;
     let erc20VoteMock: any;
     let ownerAddress: string;
@@ -58,8 +58,8 @@ describe('SimpleVoting', function () {
     beforeEach(async () => {
         erc20VoteMock = await deployMockContract(signers[0], ERC20Governance.abi);
         
-        const SimpleVoting = await ethers.getContractFactory('SimpleVoting');
-        voting = await SimpleVoting.deploy();
+        const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
+        voting = await ERC20Voting.deploy();
     })
 
     function initializeVoting(

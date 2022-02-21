@@ -5,6 +5,7 @@ export * from './components/avatar';
 export * from './components/backdrop';
 export * from './components/badge';
 export * from './components/button';
+export * from './components/breadcrumb';
 export * from './components/cards';
 export * from './components/daoSelector';
 export * from './components/icons';

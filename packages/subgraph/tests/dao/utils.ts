@@ -299,11 +299,11 @@ export function getMinAcceptQuorumPct(
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getVoteTime(contractAddress: string, returns: BigInt): void {
+export function getMinDuration(contractAddress: string, returns: BigInt): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'voteTime',
-    'voteTime():(uint64)'
+    'minDuration',
+    'minDuration():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

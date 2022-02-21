@@ -65,10 +65,14 @@ export const VotersTable: React.FC<VotersTableProps> = ({
 };
 
 export const Table = styled.table.attrs({
-  className:
-    'border-separate w-full block tablet:table overflow-x-auto whitespace-nowrap',
+  className: 'border-separate block overflow-auto whitespace-nowrap',
 })`
   border-spacing: 0;
+
+  th,
+  td {
+    width: 100%;
+  }
 
   tr th,
   tr td {

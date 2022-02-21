@@ -3,7 +3,7 @@ import {
   ButtonIcon,
   IconMenuVertical,
   Label,
-  ListItemText,
+  ListItemAction,
   Popover,
   TextInput,
 } from '@aragon/ui-components';
@@ -50,7 +50,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
 
   const labelValidator = useCallback(
     (label: string, index: number) => {
-      if (linkedFieldsAreValid(label, `links.${index}.link`)) return;
+      if (linkedFieldsAreValid(label, `links.${index}.href`)) return;
 
       return label === '' ? t('errors.required.label') : true;
     },
@@ -107,7 +107,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
 
       <LinkContainer>
         <Controller
-          name={`links.${index}.link`}
+          name={`links.${index}.href`}
           control={control}
           rules={{
             validate: value => linkValidator(value, index),
@@ -144,11 +144,12 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
           width={156}
           content={
             <div className="p-1.5">
-              <ListItemText
+              <ListItemAction
                 title={t('labels.removeLink')}
                 {...(typeof onDelete === 'function'
-                  ? {mode: 'default', onClick: () => onDelete(index)}
+                  ? {onClick: () => onDelete(index)}
                   : {mode: 'disabled'})}
+                bgWhite
               />
             </div>
           }

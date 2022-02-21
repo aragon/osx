@@ -189,10 +189,7 @@ const SetupVotingForm: React.FC = () => {
     <>
       {/* Voting Type Selection */}
       <FormSection>
-        <Label
-          label={t('newWithdraw.setupVoting.optionLabel.title')}
-          helpText={t('newWithdraw.setupVoting.optionLabel.helptext')}
-        />
+        <Label label={t('newWithdraw.setupVoting.optionLabel.title')} />
         <>
           <CheckboxListItem
             label={t('newWithdraw.setupVoting.yesNoLabel.title')}
@@ -200,7 +197,7 @@ const SetupVotingForm: React.FC = () => {
             state="active"
             multiSelect={false}
           />
-          <AlertInline label={t('infos.voteDuration')} mode="neutral" />
+          <AlertInline label={t('infos.newVotingTypes')} mode="neutral" />
         </>
       </FormSection>
 

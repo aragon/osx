@@ -103,6 +103,12 @@
     "tokens": "Tokens"
   },
   "governance": {
+    "emptyState": {
+      "title": "Create your very first proposal now",
+      "subtitleLine1": "By creating a proposal, your community can vote and participate in this DAO.",
+      "subtitleLine2": "Learn more in",
+      "proposalGuide": "our Proposal Guide."
+    },
     "proposals": {
       "publishedBy": "Published by",
       "pending": "Starts in {{days}} days {{hours}} hours",
@@ -125,11 +131,15 @@
         "closeFullProposal": "Close Full Proposal"
       }
     },
-    "noProposals": "No proposals found!"
+    "noProposals": "No proposals found!",
+    "executionCard": {
+      "title": "Execution",
+      "description": "These smart actions are executed when the proposal reaches sufficient support. Find out which actions are executed."
+    }
   },
   "infos": {
     "voteDuration": "The minimum duration of 5 days is defined by DAO Governance Settings",
-    "newVotinTypes": "New voting types will be released soon"
+    "newVotingTypes": "New voting types will be released soon"
   },
   "errors": {
     "amountWithInvalidToken": "Cannot validate amount with invalid token address",
@@ -245,8 +255,7 @@
       "title": "Setup Voting",
       "description": "For a withdraw, a vote is necessary so that the majority can determine whether your proposal is legitimate. For this, you need this configuration.",
       "optionLabel": {
-        "title": "Options",
-        "helptext": "This is a placeholder"
+        "title": "Options"
       },
       "yesNoLabel": {
         "title": "Yes & No",
@@ -265,6 +274,10 @@
       "summaryPlaceholder": "Type your description ...",
       "proposal": "Proposal",
       "proposalPlaceholder": "Type your proposal ..."
+    },
+    "reviewProposal": {
+      "heading": "Review Proposal",
+      "description": "A proposal is necessary so that the community understands why you want to execute this withdraw. Fill in the necessary fields and be as detailed but as concise as possible."
     }
   },
   "createDAO": {

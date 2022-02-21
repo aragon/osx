@@ -40,10 +40,6 @@ export const useDaoTokens = (daoAddress: Address) => {
 // TEMPORARY, should eventually be obtained from a subgraph
 // count should NOT be formatted with decimals yet
 const TEMP_TOKEN_ADDR: TokenBalance[] = [
-  {
-    address: '0x35d36f7d2a376143fb8eab3c41bf389eba82e17c',
-    count: BigInt('6650000000000000000000'),
-  },
   {address: constants.AddressZero, count: BigInt('6224533680000000001')},
   {
     address: '0xa117000000f279d81a1d3cc75430faa017fa5a2e',

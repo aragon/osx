@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {
   ButtonText,
   Popover,
-  ListItemText,
+  ListItemAction,
   IconMenuVertical,
   ButtonIcon,
 } from '@aragon/ui-components';
@@ -71,21 +71,21 @@ const AddWallets: React.FC = () => {
         <Popover
           side="bottom"
           align="end"
-          width={156}
+          width={264}
           content={
-            <div className="p-1.5">
-              <ListItemText
-                mode="default"
+            <div className="p-1.5 space-y-0.5">
+              <ListItemAction
                 title={t('labels.resetDistribution')}
                 onClick={resetDistribution}
+                bgWhite
               />
-              <ListItemText
-                mode="default"
+              <ListItemAction
                 title={t('labels.deleteAllAddresses')}
                 onClick={() => {
                   remove();
                   append([{address: 'DAO Treasury', amount: '0'}]);
                 }}
+                bgWhite
               />
             </div>
           }

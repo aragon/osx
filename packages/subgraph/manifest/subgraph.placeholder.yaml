@@ -47,8 +47,8 @@ templates:
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
-        - name: SimpleVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/simple/SimpleVoting.sol/SimpleVoting.json
+        - name: ERC20Voting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
         - event: SetMetadata(bytes)
           handler: handleSetMetadata
@@ -64,22 +64,22 @@ templates:
           handler: handleRevoked
         - event: Frozen(indexed bytes32,indexed address,address)
           handler: handleFrozen
-  # SimpleVoting (package)
-  - name: SimpleVoting
+  # ERC20Voting (package)
+  - name: ERC20Voting
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: SimpleVoting
+      abi: ERC20Voting
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/SimpleVoting/simpleVoting.ts
+      file: ./src/packages/ERC20Voting/erc20Voting.ts
       entities:
         - Dao
       abis:
-        - name: SimpleVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/simple/SimpleVoting.sol/SimpleVoting.json
+        - name: ERC20Voting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
         - event: CastVote(indexed uint256,indexed address,bool,uint256)
           handler: handleCastVote
@@ -87,5 +87,5 @@ templates:
           handler: handleExecuteVote
         - event: StartVote(indexed uint256,indexed address,bytes)
           handler: handleStartVote
-        - event: UpdateConfig(uint64,uint64)
+        - event: UpdateConfig(uint64,uint64,uint64)
           handler: handleUpdateConfig

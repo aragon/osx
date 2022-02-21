@@ -108,6 +108,7 @@ module.exports = {
     // overrides screen breakpoints according to design system
     screens: {
       tablet: '768px',
+      lg: '1280px',
       desktop: '1440px',
       wide: '1920px',
     },

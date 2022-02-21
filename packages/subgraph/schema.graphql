@@ -110,55 +110,60 @@ interface Package {
 interface Proposal {
   id: ID! # package + voteId
   dao: Dao!
-  createdAt: BigInt!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: Package!
 }
 
-# ERC20 Voting (Simple Voting)
+# Voter
 
-type EVPackage implements Package @entity {
+interface Voter {
+  id: ID! # address
+}
+
+# ERC20Voting
+
+type ERC20VotingPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  proposals: [EVProposal!]! @derivedFrom(field: "evPkg")
+  proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
   supportRequiredPct: BigInt
   minAcceptQuorumPct: BigInt
-  voteTime: BigInt
+  minDuration: BigInt
   votesLength: BigInt
   token: ERC20Token
 }
 
-type EVVoter @entity {
+type ERC20VotingVoter implements Voter @entity {
   id: ID! # address
-  proposals: [EVVoterProposal!]! @derivedFrom(field: "voter")
+  proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
 }
 
-type EVVoterProposal @entity {
+type ERC20Vote @entity {
+  "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
-  voter: EVVoter!
-  proposal: EVProposal!
+  voter: ERC20VotingVoter!
+  proposal: ERC20VotingProposal!
   vote: Boolean!
   stake: BigInt!
   createdAt: BigInt!
 }
 
-type EVProposal implements Proposal @entity {
+type ERC20VotingProposal implements Proposal @entity {
   id: ID! # package + voteId
   dao: Dao!
-  createdAt: BigInt!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: Package!
-  evPkg: EVPackage!
+  pkg: ERC20VotingPackage!
   voteId: BigInt!
   creator: Bytes!
   description: String!
   startDate: BigInt!
+  endDate: BigInt!
   snapshotBlock: BigInt!
   supportRequiredPct: BigInt!
   minAcceptQuorumPct: BigInt!
   yea: BigInt
   nay: BigInt
   votingPower: BigInt!
-  voters: [EVVoterProposal!]! @derivedFrom(field: "proposal")
+  voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
   executed: Boolean!
+  createdAt: BigInt!
 }
