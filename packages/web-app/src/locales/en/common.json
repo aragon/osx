@@ -103,6 +103,12 @@
     "tokens": "Tokens"
   },
   "governance": {
+    "emptyState": {
+      "title": "Create your very first proposal now",
+      "subtitleLine1": "By creating a proposal, your community can vote and participate in this DAO.",
+      "subtitleLine2": "Learn more in",
+      "proposalGuide": "our Proposal Guide."
+    },
     "proposals": {
       "publishedBy": "Published by",
       "pending": "Starts in {{days}} days {{hours}} hours",
