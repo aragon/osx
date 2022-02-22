@@ -1,20 +1,23 @@
 import chai, { expect } from 'chai';
 import { ethers } from 'hardhat';
 import chaiUtils from '../test-utils';
+import { VoterState } from '../test-utils/voting'
 
 chai.use(chaiUtils);
 
 import { WhitelistVoting } from '../../typechain';
 
+
 const ERRORS = {
     ERROR_INIT_PCTS: "VOTING_INIT_PCTS",
     ERROR_INIT_SUPPORT_TOO_BIG: "VOTING_INIT_SUPPORT_TOO_BIG",
-    ERROR_CHANGE_MIN_DURATION_NO_ZERO: "VOTING_CHANGE_MIN_DURATION_NO_ZERO",
+    ERROR_MIN_DURATION_NO_ZERO: "VOTING_MIN_DURATION_NO_ZERO",
     ERROR_VOTE_DATES_WRONG: "VOTING_DURATION_TIME_WRONG",
     ERROR_NO_VOTING_POWER: "VOTING_NO_VOTING_POWER",
     ERROR_CAN_NOT_VOTE: "VOTING_CAN_NOT_VOTE",
     ERROR_CHANGE_SUPPORT_PCTS: "VOTING_CHANGE_SUPPORT_PCTS",
-    ERROR_CHANGE_SUPPORT_TOO_BIG: "VOTING_CHANGE_SUPP_TOO_BIG",
+    ERROR_SUPPORT_TOO_BIG: "VOTING_SUPPORT_TOO_BIG",
+    ERROR_PARTICIPATION_TOO_BIG: "VOTING_PARTICIPATION_TOO_BIG",
     ERROR_CAN_NOT_EXECUTE: "VOTING_CAN_NOT_EXECUTE",
     ERROR_CAN_NOT_CREATE_VOTE: "VOTING_CAN_NOT_CREATE_VOTE",
     ALREADY_INITIALIZED: 'Initializable: contract is already initialized'
@@ -61,14 +64,16 @@ describe('WhitelistVoting', function () {
 
     function initializeVoting(
         whitelisted: Array<string>,
+        participationRequired: any,
         supportRequired: any, 
         minDuration: any
     ) {
-        return voting['initialize(address,address,address[],uint64,uint64)']
+        return voting['initialize(address,address,address[],uint64,uint64,uint64)']
             (
                 daoMock.address, 
                 ethers.constants.AddressZero,
                 whitelisted,
+                participationRequired,
                 supportRequired,
                 minDuration
             );
@@ -76,17 +81,17 @@ describe('WhitelistVoting', function () {
 
     describe("initialize: ", async () => {
         it("reverts if trying to re-initialize", async () => {
-            await initializeVoting([], 2, 3);
+            await initializeVoting([], 1, 2, 3);
 
             await expect(
-                initializeVoting([], 1, 3)
+                initializeVoting([], 1, 2, 3)
             ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
         })
 
         it("reverts if min duration is 0", async () => {
             await expect(
-                initializeVoting([], 2, 0)
-            ).to.be.revertedWith(ERRORS.ERROR_CHANGE_MIN_DURATION_NO_ZERO);
+                initializeVoting([], 1, 2, 0)
+            ).to.be.revertedWith(ERRORS.ERROR_MIN_DURATION_NO_ZERO);
         })
 
         it("should initialize dao on the component", async () => {
@@ -100,7 +105,7 @@ describe('WhitelistVoting', function () {
 
     describe("WhitelistingUsers: ", async () => {
         beforeEach(async () => {
-            await initializeVoting([], 2, 3);
+            await initializeVoting([], 1, 2, 3);
         });
         it("should return fasle, if user is not whitelisted", async () => {
            expect(await voting.whitelisted(ownerAddress)).to.equal(false);
@@ -123,29 +128,33 @@ describe('WhitelistVoting', function () {
 
     describe("UpdateConfig: ", async () => {
         beforeEach(async () => {
-            await initializeVoting([], 2, 3);
+            await initializeVoting([], 1, 2, 3);
         });
         it("reverts if wrong config is set", async () => {
             await expect(
-                voting.changeVoteConfig(pct16(1000), 1)
-            ).to.be.revertedWith(ERRORS.ERROR_CHANGE_SUPPORT_TOO_BIG);
+                voting.changeVoteConfig(1, pct16(1000), 3)
+            ).to.be.revertedWith(ERRORS.ERROR_SUPPORT_TOO_BIG);
 
             await expect(
-                voting.changeVoteConfig(20, 0)
-            ).to.be.revertedWith(ERRORS.ERROR_CHANGE_MIN_DURATION_NO_ZERO);
+                voting.changeVoteConfig(pct16(1000), 2, 3)
+            ).to.be.revertedWith(ERRORS.ERROR_PARTICIPATION_TOO_BIG);
+
+            await expect(
+                voting.changeVoteConfig(1, 2, 0)
+            ).to.be.revertedWith(ERRORS.ERROR_MIN_DURATION_NO_ZERO);
         })
 
         it("should change config successfully", async () => {
-            expect(await voting.changeVoteConfig(20, 2))
+            expect(await voting.changeVoteConfig(2, 4, 8))
                 .to.emit(voting, EVENTS.UPDATE_CONFIG)
-                .withArgs(20, 2);
+                .withArgs(2, 4, 8);
         })
     })
 
     describe("StartVote", async () => {
         let minDuration = 3
         beforeEach(async () => {
-            await initializeVoting([ownerAddress], 2, 3);
+            await initializeVoting([ownerAddress], 1, 2, 3);
         })
 
         it("reverts if user is not whitelisted to create a vote", async () => {
@@ -157,7 +166,14 @@ describe('WhitelistVoting', function () {
         it("reverts if vote duration is less than minDuration", async () => {
             const block = await ethers.provider.getBlock('latest');
             await expect(
-                voting.newVote('0x00', [], block.timestamp, block.timestamp + (minDuration - 1), false, false)
+                voting.newVote(
+                    '0x00', 
+                    [], 
+                    block.timestamp, 
+                    block.timestamp + (minDuration - 1), 
+                    false, 
+                    false
+                )
             ).to.be.revertedWith(ERRORS.ERROR_VOTE_DATES_WRONG);
         })
 
@@ -170,6 +186,7 @@ describe('WhitelistVoting', function () {
             expect(vote.open).to.equal(true);
             expect(vote.executed).to.equal(false);
             expect(vote.supportRequired).to.equal(2);
+            expect(vote.participationRequired).to.equal(1);
             expect(vote.yea).to.equal(0);
             expect(vote.nay).to.equal(0);
 
@@ -192,12 +209,13 @@ describe('WhitelistVoting', function () {
                 .to.emit(voting, EVENTS.START_VOTE)
                 .withArgs(0, ownerAddress, "0x00")
                 .to.emit(voting, EVENTS.CAST_VOTE)
-                .withArgs(0, ownerAddress, true);
+                .withArgs(0, ownerAddress, VoterState.Yea);
 
             const vote = await voting.getVote(0);
             expect(vote.open).to.equal(true);
             expect(vote.executed).to.equal(false);
             expect(vote.supportRequired).to.equal(2);
+            expect(vote.participationRequired).to.equal(1);
            
             expect(vote.yea).to.equal(1);
             expect(vote.nay).to.equal(0);
@@ -207,6 +225,7 @@ describe('WhitelistVoting', function () {
     describe("Vote + Execute:", async () => {
         let minDuration = 500;
         let supportRequired = pct16(29);
+        let minimumQuorom = pct16(19);
 
         beforeEach(async () => {
             const addresses = [];
@@ -218,41 +237,50 @@ describe('WhitelistVoting', function () {
 
             // voting will be initialized with 10 whitelisted addresses
             // Which means votingPower = 10 at this point.
-            await initializeVoting(addresses, supportRequired, minDuration);
+            await initializeVoting(addresses, minimumQuorom, supportRequired, minDuration);
             
             await voting.newVote('0x00', dummyActions, 0, 0, false, false);
         })
 
+        // VoterState.Yea
         it("increases the yea or nay count and emit correct events", async () => {
-            expect(await voting.vote(0, true, false))
+            expect(await voting.vote(0, VoterState.Yea, false))
                 .to.emit(voting, EVENTS.CAST_VOTE)
-                .withArgs(0, ownerAddress, true);
+                .withArgs(0, ownerAddress, VoterState.Yea);
 
             let vote = await voting.getVote(0);
             expect(vote.yea).to.equal(1);
 
-            expect(await voting.vote(0, false, false))
+            expect(await voting.vote(0, VoterState.Nay, false))
                 .to.emit(voting, EVENTS.CAST_VOTE)
-                .withArgs(0, ownerAddress, false);
+                .withArgs(0, ownerAddress, VoterState.Nay);
 
             vote = await voting.getVote(0);
             expect(vote.nay).to.equal(1);
+
+            expect(await voting.vote(0, VoterState.Abstain, false))
+                .to.emit(voting, EVENTS.CAST_VOTE)
+                .withArgs(0, ownerAddress, VoterState.Abstain);
+
+            vote = await voting.getVote(0);
+            expect(vote.abstain).to.equal(1);
         })
 
         it("voting multiple times should not increase yea or nay multiple times", async () => {
             // yea still ends up to be 1 here even after voting
             // 2 times from the same wallet.
-            await voting.vote(0, true, false);
-            await voting.vote(0, true, false);
+            await voting.vote(0, VoterState.Yea, false);
+            await voting.vote(0, VoterState.Yea, false);
+            expect((await voting.getVote(0)).yea).to.equal(1)
 
             // yea gets removed, nay ends up as 1.
-            await voting.vote(0, false, false);
-            await voting.vote(0, false, false);
+            await voting.vote(0, VoterState.Nay, false);
+            await voting.vote(0, VoterState.Nay, false);
+            expect((await voting.getVote(0)).nay).to.equal(1)
 
-            const vote = await voting.getVote(0);
-
-            expect(vote.yea).to.equal(0);
-            expect(vote.nay).to.equal(1);
+            await voting.vote(0, VoterState.Abstain, false);
+            await voting.vote(0, VoterState.Abstain, false);
+            expect((await voting.getVote(0)).abstain).to.equal(1)
         })
 
         it("makes executable if enough yea is given from on voting power", async () => {
@@ -260,24 +288,29 @@ describe('WhitelistVoting', function () {
             // whitelised is 10 addresses, voting yea 
             // from 3 addresses should be enough to 
             // make vote executable
-            await voting.vote(0, true, false);
-            await voting.connect(signers[1]).vote(0, true, false);
+            await voting.vote(0, VoterState.Yea, false);
+            await voting.connect(signers[1]).vote(0, VoterState.Yea, false);
 
             // // only 2 voted, not enough for 30%
             expect(await voting.canExecute(0)).to.equal(false);
             // // 3rd votes, enough.
-            await voting.connect(signers[2]).vote(0, true, false);
+            await voting.connect(signers[2]).vote(0, VoterState.Yea, false);
             
             expect(await voting.canExecute(0)).to.equal(true);
         })
         
         it("makes executable if enough yea is given depending on yea + nay total", async () => {
-            // 1 supports
-            await voting.vote(0, true, false);
+            // 2 supports
+            await voting.connect(signers[0]).vote(0, VoterState.Yea, false);
+            await voting.connect(signers[1]).vote(0, VoterState.Yea, false);
 
             // 2 not supports
-            await voting.connect(signers[1]).vote(0, false, false);
-            await voting.connect(signers[2]).vote(0, false, false);
+            await voting.connect(signers[2]).vote(0, VoterState.Nay, false);
+            await voting.connect(signers[3]).vote(0, VoterState.Nay, false);
+
+            // 2 abstain 
+            await voting.connect(signers[4]).vote(0, VoterState.Abstain, false);
+            await voting.connect(signers[5]).vote(0, VoterState.Abstain, false);
 
             expect(await voting.canExecute(0)).to.equal(false);
 
@@ -285,17 +318,18 @@ describe('WhitelistVoting', function () {
             await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
             await ethers.provider.send('evm_mine', []);
             
-            // 3 voted no, 2 voted yea. Enough to surpass supportedRequired percentage
+            // 2 voted yea, 2 voted yea. 2 voted abstain.
+            // Enough to surpass supportedRequired percentage
             expect(await voting.canExecute(0)).to.equal(true);
         })
         
         it("executes the vote immediatelly while final yea is given", async () => {
             // 2 votes in favor of yea
-            await voting.connect(signers[0]).vote(0, true, false);
-            await voting.connect(signers[1]).vote(0, true, false);
+            await voting.connect(signers[0]).vote(0, VoterState.Yea, false);
+            await voting.connect(signers[1]).vote(0, VoterState.Yea, false);
             
             // 3th supports(which is enough) and should execute right away.
-            expect(await voting.connect(signers[3]).vote(0, true, true))
+            expect(await voting.connect(signers[3]).vote(0, VoterState.Yea, true))
                 .to.emit(daoMock, EVENTS.EXECUTED)
                 .withArgs(
                     voting.address, 

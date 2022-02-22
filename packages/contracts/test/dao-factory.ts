@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import { VoterState } from './test-utils/voting'
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
@@ -238,7 +239,7 @@ describe('DAOFactory: ', function () {
 
     await ERC20Voting.newVote('0x', actions, 0, 0, false, false);
 
-    expect(await ERC20Voting.vote(0, true, true))
+    expect(await ERC20Voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
       .withArgs(ERC20Voting.address, [], [])
       .to.emit(ERC20Voting, EVENTS.UpdateConfig)
