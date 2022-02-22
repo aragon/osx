@@ -227,6 +227,17 @@
     "errorLabel": "Error while confirmation",
     "successLabel": "Transaction successful"
   },
+  "AddActionModal": {
+    "title": "Add Action",
+    "addRemoveAddresses": "Add or Remove Addresses",
+    "addRemoveAddressesSubtitle": "Propose to add or remove addresses to this DAO",
+    "mintTokens": "Mint Tokens",
+    "mintTokensSubtitle": "Mint new tokens and distribute",
+    "withdrawAssets": "Withdraw Assets",
+    "withdrawAssetsSubtitle": "Propose to withdraw assets from the DAO treasury",
+    "externalContract": "External Contract",
+    "externalContractSubtitle": "Interact with any contract on the blockchain and access any functionality"
+  },
   "newDeposit": {
     "depositAssets": "Deposit Assets",
     "configureDeposit": "Configure Deposit",
@@ -335,6 +346,19 @@
       "alerts": {
         "minimumApprovalAlert": "{{amount}} {{symbol}} tokens"
       }
+    }
+  },
+  "newProposal": {
+    "title": "New Proposal",
+    "configureActions": {
+      "heading": "Configure Actions",
+      "description": "If the response is to execute a transaction, store your desired actions at the corresponding response. These can be simple transactions or any smart contract methods you can find (e.g. Uniswap or similar).",
+      "yesOption": "Yes",
+      "yesOptionSubtitle": "If the option “yes” wins the voting, perform the following actions.",
+      "addFirstActionTitle": "Add your very first action",
+      "addFirstActionSubtitle": "Add optional actions if you wish to perform on-chain executions",
+      "addFirstAction": "Add First Action",
+      "actionsInfo": "Based on the voting options setup, it is only possible to add actions to the option \"Yes\"."
     }
   },
   "votingTerminal": {

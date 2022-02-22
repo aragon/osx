@@ -13,11 +13,12 @@ type GlobalModalsContextType = {
   isTokenOpen: boolean;
   isUtcOpen: boolean;
   isTransactionOpen: boolean;
+  isAddActionOpen: boolean;
   open: (arg?: MenuTypes) => void;
   close: (arg?: MenuTypes) => void;
 };
 
-type MenuTypes = 'token' | 'utc' | 'transaction' | 'default';
+type MenuTypes = 'token' | 'utc' | 'transaction' | 'addAction' | 'default';
 
 type Props = Record<'children', ReactNode>;
 
@@ -34,6 +35,8 @@ const GlobalModalsProvider: React.FC<Props> = ({children}) => {
     useState<GlobalModalsContextType['isUtcOpen']>(false);
   const [isTransactionOpen, setIsTransactionOpen] =
     useState<GlobalModalsContextType['isTransactionOpen']>(false);
+  const [isAddActionOpen, setIsAddActionOpen] =
+    useState<GlobalModalsContextType['isAddActionOpen']>(false);
 
   const open = (type?: MenuTypes) => {
     switch (type) {
@@ -45,6 +48,9 @@ const GlobalModalsProvider: React.FC<Props> = ({children}) => {
         break;
       case 'transaction':
         setIsTransactionOpen(true);
+        break;
+      case 'addAction':
+        setIsAddActionOpen(true);
         break;
       default:
         setIsTransferOpen(true);
@@ -62,6 +68,9 @@ const GlobalModalsProvider: React.FC<Props> = ({children}) => {
         break;
       case 'transaction':
         setIsTransactionOpen(false);
+        break;
+      case 'addAction':
+        setIsAddActionOpen(false);
         break;
       default:
         setIsTransferOpen(false);
@@ -84,10 +93,11 @@ const GlobalModalsProvider: React.FC<Props> = ({children}) => {
       isTokenOpen,
       isUtcOpen,
       isTransactionOpen,
+      isAddActionOpen,
       open,
       close,
     }),
-    [isTransferOpen, isTokenOpen, isUtcOpen, isTransactionOpen]
+    [isTransferOpen, isTokenOpen, isUtcOpen, isTransactionOpen, isAddActionOpen]
   );
 
   return (
