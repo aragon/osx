@@ -86,12 +86,7 @@ const NewDeposit: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper
-        navbarLabel={t('allTransfer.newTransfer')}
-        //TODO shouldn't this simply go back in router hisory?
-        navbarBackUrl="/#/finance"
-        wizardProcessName={t('newDeposit.depositAssets')}
-      >
+      <FullScreenStepper wizardProcessName={t('newDeposit.depositAssets')}>
         <Step
           wizardTitle={t('newDeposit.configureDeposit')}
           wizardDescription={t('newDeposit.configureDepositSubtitle')}

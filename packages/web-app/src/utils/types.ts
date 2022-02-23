@@ -123,3 +123,5 @@ export type HookData<T> = {
 };
 
 export type SupportedChainId = 1 | 4;
+
+export type NetworkIndicatorStatus = 'default' | 'testnet' | 'unsupported';

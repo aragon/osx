@@ -123,11 +123,7 @@ const NewWithdraw: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper
-        navbarLabel={t('allTransfer.newTransfer')}
-        navbarBackUrl="/#/finance"
-        wizardProcessName={t('newWithdraw.withdrawAssets')}
-      >
+      <FullScreenStepper wizardProcessName={t('newWithdraw.withdrawAssets')}>
         {/* FIXME: Each step needs to be able to disable the back
         button. Otherwise, if the user leaves step x in an invalid state and
         goes back to a step < x, they won't be able to move forward. */}

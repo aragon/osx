@@ -2,12 +2,10 @@ import React, {useEffect, lazy, Suspense} from 'react';
 
 // FIXME: Change route to ApmRoute once package has been updated to be
 // compatible with react-router-dom v6
-import {Navigate, Routes, Route, useLocation, Outlet} from 'react-router-dom';
+import {Navigate, Routes, Route, useLocation} from 'react-router-dom';
 
-import Footer from 'containers/footer';
 import Navbar from 'containers/navbar';
 import WalletMenu from 'containers/walletMenu';
-// import TokenMenu from 'containers/tokenMenu';
 import TransferMenu from 'containers/transferMenu';
 import TransactionModal, {TransactionState} from 'containers/transactionModal';
 import {trackPage} from 'services/analytics';
@@ -40,30 +38,27 @@ function App() {
   }, [pathname]);
 
   return (
-    <div className="bg-ui-50">
-      <div className="min-h-screen">
+    <div className="flex flex-col pb-12 tablet:pb-4 bg-ui-50">
+      <Navbar />
+      <main className="min-h-screen">
         <Suspense fallback={null}>
           <Routes>
             <Route path={paths.NewDeposit} element={<NewDepositPage />} />
             <Route path={paths.NewWithDraw} element={<NewWithdrawPage />} />
             <Route path={paths.CreateDAO} element={<CreateDAOPage />} />
+            <Route path={paths.Dashboard} element={<HomePage />} />
+            <Route path={paths.Community} element={<CommunityPage />} />
+            <Route path={paths.Finance} element={<FinancePage />} />
+            <Route path={paths.Governance} element={<GovernancePage />} />
             <Route path={paths.NewProposal} element={<NewProposalPage />} />
-
-            <Route element={<Layout />}>
-              <Route path={paths.Dashboard} element={<HomePage />} />
-              <Route path={paths.Community} element={<CommunityPage />} />
-              <Route path={paths.Finance} element={<FinancePage />} />
-              <Route path={paths.Governance} element={<GovernancePage />} />
-              <Route path={paths.Proposal} element={<ProposalPage />} />
-              <Route path={paths.AllTokens} element={<TokensPage />} />
-              <Route path={paths.AllTransfers} element={<TransfersPage />} />
-              <Route path={paths.NotFound} element={<NotFoundPage />} />
-              <Route path="*" element={<Navigate to={paths.NotFound} />} />
-            </Route>
+            <Route path={paths.Proposal} element={<ProposalPage />} />
+            <Route path={paths.AllTokens} element={<TokensPage />} />
+            <Route path={paths.AllTransfers} element={<TransfersPage />} />
+            <Route path={paths.NotFound} element={<NotFoundPage />} />
+            <Route path="*" element={<Navigate to={paths.NotFound} />} />
           </Routes>
         </Suspense>
-      </div>
-      <Footer />
+      </main>
       <WalletMenu />
       <TransferMenu />
       <TransactionModal
@@ -74,18 +69,8 @@ function App() {
         callback={console.log}
         approveStepNeeded
       />
-      {/* <TokenMenu /> */}
     </div>
   );
 }
 
 export default App;
-
-const Layout: React.FC = () => {
-  return (
-    <>
-      <Navbar />
-      <Outlet />
-    </>
-  );
-};

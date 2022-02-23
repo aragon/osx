@@ -18,11 +18,7 @@ const NewProposal: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper
-        navbarLabel={t('newProposal.title')}
-        navbarBackUrl="/#/governance"
-        wizardProcessName={t('newProposal.title')}
-      >
+      <FullScreenStepper wizardProcessName={t('newProposal.title')}>
         <Step
           wizardTitle={t('newWithdraw.defineProposal.heading')}
           wizardDescription={t('newWithdraw.defineProposal.description')}

@@ -34,7 +34,7 @@ export const Wizard: React.FC<WizardProps> = ({
 };
 
 const StepCard = styled.div.attrs({
-  className: 'py-3 px-2 tablet:px-3 lg:px-6 lg:py-6 rounded-xl bg-ui-0',
+  className: 'py-3 px-2 tablet:px-3 lg:px-6 lg:py-6 tablet:rounded-xl bg-ui-0',
 })``;
 
 const StepTitle = styled.h1.attrs({
