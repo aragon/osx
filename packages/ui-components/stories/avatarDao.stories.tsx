@@ -14,12 +14,10 @@ const Template: Story<AvatarDaoProps> = args => <AvatarDao {...args} />;
 export const WithIcon = Template.bind({});
 WithIcon.args = {
   src: 'https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg',
-  domain: 'name.dao.eth',
-  label: 'DAO Name',
-  contentMode: 'none',
+  daoName: 'DAO Name',
 };
 
 export const NoIcon = Template.bind({});
 NoIcon.args = {
-  label: 'DAO Abc',
+  daoName: 'DAO Abc',
 };

@@ -192,7 +192,6 @@ const Navbar: React.FC = () => {
             daoName="Bushido DAO"
             onClick={handleHideMobileMenu}
             src={TEMP_ICON}
-            wide
           />
           <NavLinks isDropdown onItemClick={handleHideMobileMenu} />
         </div>
