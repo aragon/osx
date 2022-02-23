@@ -156,12 +156,17 @@ module.exports = {
         '5xl': [6, 1.2],
       },
     },
+    outline: {
+      primary: ['2px solid #003BF5'],
+    },
   },
   variants: {
     extend: {
       backgroundColor: ['active', 'disabled'],
       textColor: ['active', 'disabled'],
       borderColor: ['active', 'disabled'],
+      outline: ['focus-visible'],
+      rounded: ['focus-visible'],
     },
     fluidType: ['responsive'],
   },
