@@ -1,7 +1,7 @@
 import {
   Breadcrumb,
   ButtonIcon,
-  Crumbs,
+  CrumbType,
   IconClose,
   IconMenu,
   Popover,
@@ -12,7 +12,8 @@ import NavLinks from 'components/navLinks';
 
 type BreadcrumbDropdownProps = {
   open: boolean;
-  crumbs: Crumbs;
+  icon: JSX.Element;
+  crumbs: CrumbType[];
   onClose?: () => void;
   onCrumbClick: (path: string) => void;
   onOpenChange?: (open: boolean) => void;
@@ -36,7 +37,11 @@ export const BreadcrumbDropdown: React.FC<BreadcrumbDropdownProps> = props => {
           isActive={props.open}
         />
       </Popover>
-      <Breadcrumb crumbs={props.crumbs} onClick={props.onCrumbClick} />
+      <Breadcrumb
+        icon={props.icon}
+        crumbs={props.crumbs}
+        onClick={props.onCrumbClick}
+      />
     </>
   );
 };

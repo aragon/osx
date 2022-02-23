@@ -3,6 +3,10 @@ import {
   ButtonIcon,
   ButtonWallet,
   CardDao,
+  IconCommunity,
+  IconDashboard,
+  IconFinance,
+  IconGovernance,
   IconMenuVertical,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
@@ -16,10 +20,17 @@ import {useWallet} from 'context/augmentedWallet';
 import {useWalletProps} from 'containers/walletMenu';
 import NetworkIndicator from './networkIndicator';
 import {BreadcrumbDropdown} from './breadcrumbDropdown';
-import {Dashboard, NotFound} from 'utils/paths';
 import {NetworkIndicatorStatus} from 'utils/types';
+import {Community, Dashboard, Finance, Governance, NotFound} from 'utils/paths';
 
 const MIN_ROUTE_DEPTH_FOR_BREADCRUMBS = 2;
+
+const basePathIcons: {[key: string]: JSX.Element} = {
+  [Dashboard]: <IconDashboard />,
+  [Community]: <IconCommunity />,
+  [Finance]: <IconFinance />,
+  [Governance]: <IconGovernance />,
+};
 
 type DesktopNavProp = {
   status?: NetworkIndicatorStatus;
@@ -54,8 +65,7 @@ const DesktopNav: React.FC<DesktopNavProp> = props => {
         <Menu>
           <ProcessMenuItems>
             <Breadcrumb
-              process
-              crumbs={[{label: props.processLabel!, path: props.returnURL!}]}
+              crumbs={{label: props.processLabel!, path: props.returnURL!}}
               onClick={(path: string) => navigate(path)}
             />
             <ButtonIcon
@@ -87,7 +97,6 @@ const DesktopNav: React.FC<DesktopNavProp> = props => {
               daoName="DAO Name"
               daoAddress="patito.eth.dao"
               onClick={() => null}
-              src="https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg"
             />
           </div>
           <LinksWrapper>
@@ -96,6 +105,7 @@ const DesktopNav: React.FC<DesktopNavProp> = props => {
             ) : (
               <BreadcrumbDropdown
                 open={showCrumbMenu}
+                icon={basePathIcons[breadcrumbs[0].path]}
                 crumbs={breadcrumbs}
                 onClose={() => setShowCrumbMenu(false)}
                 onOpenChange={setShowCrumbMenu}

@@ -1,5 +1,6 @@
 import {
   AvatarDao,
+  Breadcrumb,
   ButtonIcon,
   ButtonText,
   ButtonWallet,
@@ -7,6 +8,7 @@ import {
   IconMenuVertical,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
+import {useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import React, {useMemo, useState} from 'react';
 
@@ -26,6 +28,7 @@ type MobileNavProps = {
 
 const MobileNav: React.FC<MobileNavProps> = props => {
   const {t} = useTranslation();
+  const navigate = useNavigate();
   const {isMobile} = useScreen();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const {isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
@@ -39,7 +42,10 @@ const MobileNav: React.FC<MobileNavProps> = props => {
   if (isProcess) {
     return (
       <ProcessMenuItems>
-        <div>Add Process Breadcrumb</div>
+        <Breadcrumb
+          crumbs={{label: props.processLabel!, path: props.returnURL!}}
+          onClick={(path: string) => navigate(path)}
+        />
         <ButtonIcon mode="secondary" size="large" icon={<IconMenuVertical />} />
       </ProcessMenuItems>
     );
@@ -67,10 +73,7 @@ const MobileNav: React.FC<MobileNavProps> = props => {
             )}
           </FlexOne>
           <FlexOne className="justify-center">
-            <AvatarDao
-              src="https://banner2.cleanpng.com/20180325/sxw/kisspng-computer-icons-avatar-avatar-5ab7529a8e4e14.9936310115219636745829.jpg"
-              daoName="DAO Name"
-            />
+            <AvatarDao daoName="DAO Name" />
           </FlexOne>
           <FlexOne className="justify-end">
             <ButtonWallet
