@@ -4,12 +4,18 @@
 
 pragma solidity 0.8.10;
 
+import "../utils/TimeHelpers.sol";
 import "./Paymaster.sol";
 
 /// @title todo
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice todo
-abstract contract IStreamPaymaster is Paymaster {
+abstract contract IStreamPaymaster is Paymaster, TimeHelpers {
+
+    mapping (address => uint64) cooldown;
+
+    error CooldownNotOver(uint64 expected);
+
 
     function streamActive() virtual public view returns (bool);
     function streamBalance() virtual public view returns (uint256);
@@ -38,6 +44,14 @@ abstract contract IStreamPaymaster is Paymaster {
             ),
             ERROR_NOT_SPONSORED
         );
+
+        // check cooldown
+        uint64 currentTime = getTimestamp64();
+
+        if(cooldown[relayRequest.request.from] > currentTime)
+            revert CooldownNotOver(cooldown[relayRequest.request.from]);
+
+        cooldown[relayRequest.request.from] = currentTime + 5 minutes;
 
         if(streamActive()){
             withdrawFromStream();
