@@ -90,7 +90,11 @@ const ReviewWithdraw: React.FC = () => {
             </>
           )}
 
-          <VotingTerminal />
+          {/*
+            TODO: All the values inside the voting terminal is hardcoded.
+            The info tab needs to display data from the form context & graph query
+          */}
+          <VotingTerminal breakdownTabDisabled votersTabDisabled />
 
           <CardExecution
             title={t('governance.executionCard.title')}
