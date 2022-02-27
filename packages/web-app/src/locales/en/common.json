@@ -67,6 +67,8 @@
     "logo": "Logo",
     "optional": "Optional",
     "minimumApproval": "Minimum approval",
+    "minimumSupport": "Minimum support",
+    "minimumDuration": "Minimum duration",
     "support": "Support",
     "duration": "Duration",
     "membership": "Who is eligible to participate in your DAO?",
@@ -74,14 +76,21 @@
     "addExistingToken": "Add existing Token",
     "tokenName": "Name",
     "tokenSymbol": "Symbol",
-    "existingTokenName": "Name",
-    "existingTokenSymbol": "Symbol",
-    "existingTokenSupply": "Supply",
+    "supply": "Supply",
     "distributeTokens": "Distribute Tokens",
     "createToken": "Create Token",
     "walletList": {
       "address": "Address",
       "addresses": "{{count}} Addresses"
+    },
+    "review": {
+      "blockchain": "Blockchain",
+      "daoMetadata": "DAO Metadata",
+      "community": "Community",
+      "governance": "Governance",
+      "network": "Network",
+      "eligibleMembers": "Eligible Members",
+      "distribution": "Distribution"
     },
     "author": "Author",
     "sec": "sec",
@@ -161,6 +170,7 @@
     "notERC20Token": "Token address is not ERC20 compliant",
     "noTokenSelected": "A token must be selected",
     "duplicateAddress": "You can't enter a address twice",
+    "totalSupplyZero": "Total token supply can not be 0",
     "required": {
       "tokenAddress": "Token address is required",
       "tokenName": "Token name is required",
@@ -298,7 +308,8 @@
     "title": "Create your DAO",
     "overview": {
       "title": "Get started with your DAO",
-      "description": "Create your own DAO in 4 easy steps + [TBD more helptext] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum scelerisque quam a quam molestie, vel euismod massa maximus. Duis mattis justo risus, nec sollicitudin leo mollis ac. Nulla orci tellus, hendrerit eu metus eget, dictum placerat sapien."
+      "description": "Create your own DAO in 4 easy steps + [TBD more helptext] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum scelerisque quam a quam molestie, vel euismod massa maximus. Duis mattis justo risus, nec sollicitudin leo mollis ac. Nulla orci tellus, hendrerit eu metus eget, dictum placerat sapien.",
+      "button": "Setup your DAO"
     },
     "step1": {
       "label": "Step 1",
@@ -349,6 +360,16 @@
       "alerts": {
         "minimumApprovalAlert": "{{amount}} {{symbol}} tokens"
       }
+    },
+    "review": {
+      "title": "Go Live",
+      "description": " Take your DAO public by completing the final review and cross-checking the values.",
+      "network": "{{network}} net",
+      "distributionLink": "See {{count}} Addresses",
+      "days": "{{days}} Days",
+      "hours": "{{hours}} Hours",
+      "minutes": "{{minutes}} Minutes",
+      "button": "Publish your DAO"
     }
   },
   "newProposal": {

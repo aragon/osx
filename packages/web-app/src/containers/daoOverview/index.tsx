@@ -58,13 +58,14 @@ export const OverviewDAOStep: React.FC = () => {
 
 export const OverviewDAOFooter: React.FC = () => {
   const {next} = useFormStep();
+  const {t} = useTranslation();
 
   return (
     <div className="flex justify-center pt-3">
       <ButtonText
         size="large"
         iconRight={<IconChevronRight />}
-        label="Setup your DAO"
+        label={t('createDAO.overview.button')}
         onClick={next}
       />
     </div>

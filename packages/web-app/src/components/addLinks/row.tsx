@@ -112,10 +112,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
                 <Label label={t('labels.label')} />
               </LabelWrapper>
               <TextInput
-                name={field.name}
-                value={field.value}
-                onBlur={field.onBlur}
-                onChange={field.onChange}
+                {...field}
                 mode={error?.message ? 'critical' : 'default'}
               />
               {error?.message && (

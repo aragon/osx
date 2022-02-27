@@ -94,7 +94,7 @@ const ConfigureCommunity: React.FC = () => {
         />
         <DurationContainer>
           <Controller
-            name="days"
+            name="durationDays"
             control={control}
             defaultValue="1"
             render={({
@@ -119,7 +119,7 @@ const ConfigureCommunity: React.FC = () => {
           />
 
           <Controller
-            name="hours"
+            name="durationHours"
             control={control}
             defaultValue="0"
             render={({
@@ -145,7 +145,7 @@ const ConfigureCommunity: React.FC = () => {
           />
 
           <Controller
-            name="minutes"
+            name="durationMinutes"
             control={control}
             defaultValue="0"
             render={({

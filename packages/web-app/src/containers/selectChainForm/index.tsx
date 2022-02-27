@@ -34,7 +34,7 @@ function getNetworkType(id: number | undefined) {
 const SelectChainForm: React.FC = () => {
   const {t} = useTranslation();
   const {isMobile} = useScreen();
-  const {account, chainId} = useWallet();
+  const {account, chainId, networkName} = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const {control, getValues} = useFormContext();
   const [sortFilter, setFilter] = useState<SortFilter>('cost');
@@ -119,17 +119,24 @@ const SelectChainForm: React.FC = () => {
         </SortFilter>
       </Header>
       <FormItem>
-        {networks[networkType][sortFilter].map(({id, ...rest}, index) => (
+        {networks[networkType][sortFilter].map(({id, name, ...rest}, index) => (
           <Controller
             key={id}
             name="blockchain"
             rules={{required: true}}
             control={control}
-            defaultValue={(account && chainId) || 1}
+            defaultValue={{
+              id: (account && chainId) || 1,
+              label: (account && networkName) || 'Ethereum',
+              network: networkType,
+            }}
             render={({field}) => (
               <ListItemBlockchain
-                onClick={() => field.onChange(id)}
-                selected={id === field.value}
+                onClick={() =>
+                  field.onChange({id: id, label: name, network: networkType})
+                }
+                selected={id === field.value.id}
+                {...{name}}
                 {...(index === 0 ? {tag: labels[sortFilter].tag} : {})}
                 {...rest}
               />
@@ -171,6 +178,7 @@ const labels = {
   },
 };
 
+// Note: Default Network name in polygon network is different than Below list
 const networks = {
   main: {
     cost: [

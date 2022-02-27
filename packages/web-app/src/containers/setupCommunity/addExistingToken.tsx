@@ -45,9 +45,9 @@ const AddExistingToken: React.FC = () => {
   );
 
   const explorer = useMemo(() => {
-    if (chainId) {
+    if (chainId.id) {
       const {explorerUrl} = chains.getChainInformation(
-        chainId
+        chainId.id
       ) as ChainInformation;
       return explorerUrl || DEFAULT_BLOCK_EXPLORER;
     }
@@ -155,15 +155,15 @@ const AddExistingToken: React.FC = () => {
         {tokenName && (
           <TokenInfoContainer>
             <InfoContainer>
-              <Label label={t('labels.existingTokenName')} />
+              <Label label={t('labels.tokenName')} />
               <TextInput disabled value={tokenName} />
             </InfoContainer>
             <InfoContainer>
-              <Label label={t('labels.existingTokenSymbol')} />
+              <Label label={t('labels.tokenSymbol')} />
               <TextInput disabled value={tokenSymbol} />
             </InfoContainer>
             <InfoContainer>
-              <Label label={t('labels.existingTokenSupply')} />
+              <Label label={t('labels.supply')} />
               <TextInput
                 disabled
                 value={new Intl.NumberFormat('en-US', {

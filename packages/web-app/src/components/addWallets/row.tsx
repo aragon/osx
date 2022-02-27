@@ -18,7 +18,7 @@ import {handleClipboardActions} from 'utils/library';
 import {useWallet} from 'context/augmentedWallet';
 import {validateAddress} from 'utils/validators';
 
-type LinkRowProps = {
+type WalletRowProps = {
   index: number;
   onDelete?: (index: number) => void;
 };
@@ -29,14 +29,14 @@ export type WalletField = {
   amount: string;
 };
 
-const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
+const WalletRow: React.FC<WalletRowProps> = ({index, onDelete}) => {
   const {t} = useTranslation();
   const [isDuplicate, setIsDuplicate] = useState<boolean>(false);
   const {account} = useWallet();
   const {control, getValues, setValue, trigger} = useFormContext();
   const walletFieldArray = getValues('wallets');
 
-  const totalTokenSupply = (value: number) => {
+  const calculateTotalTokenSupply = (value: number) => {
     let totalSupply = 0;
     if (walletFieldArray) {
       walletFieldArray.forEach(
@@ -44,7 +44,6 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
           (totalSupply = parseInt(wallet.amount) + totalSupply)
       );
     }
-    setValue('totalTokenSupply', totalSupply);
     return totalSupply && Math.floor((value / totalSupply) * 100) + '%';
   };
 
@@ -63,9 +62,14 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
   };
 
   const amountValidation = (index: number) => {
+    let totalSupply = 0;
     const address = getValues(`wallets.${index}.address`);
     if (address === '') trigger(`wallets.${index}.address`);
-    return true;
+    walletFieldArray.forEach((wallet: WalletField) => {
+      totalSupply = parseInt(wallet.amount) + totalSupply;
+    });
+    setValue('tokenTotalSupply', totalSupply);
+    return totalSupply === 0 ? t('errors.totalSupplyZero') : true;
   };
 
   return (
@@ -110,7 +114,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
         />
       </LabelContainer>
 
-      <LinkContainer>
+      <WalletMenuContainer>
         <Popover
           side="bottom"
           align="end"
@@ -135,7 +139,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
             data-testid="trigger"
           />
         </Popover>
-      </LinkContainer>
+      </WalletMenuContainer>
 
       <Break />
 
@@ -171,15 +175,10 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
             <InputWrapper>
               <TextInput
                 name={field.name}
-                value={totalTokenSupply(field.value)}
+                value={calculateTotalTokenSupply(field.value)}
                 mode="default"
                 disabled
               />
-              {error?.message && (
-                <ErrorContainer>
-                  <AlertInline label={error.message} mode="critical" />
-                </ErrorContainer>
-              )}
             </InputWrapper>
           </>
         )}
@@ -188,7 +187,7 @@ const LinkRow: React.FC<LinkRowProps> = ({index, onDelete}) => {
   );
 };
 
-export default LinkRow;
+export default WalletRow;
 
 const Container = styled.div.attrs({
   className: 'flex flex-wrap gap-x-2 gap-y-1.5 p-2 bg-ui-0',
@@ -207,7 +206,7 @@ const InputWrapper = styled.div.attrs({
     'flex items-end tablet:items-start tablet:order-3 tablet:pt-0 w-10',
 })``;
 
-const LinkContainer = styled.div.attrs({
+const WalletMenuContainer = styled.div.attrs({
   className:
     'flex items-start tablet:items-start tablet:order-4 mt-3 tablet:mt-0',
 })``;
