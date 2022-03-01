@@ -1,0 +1,59 @@
+name: Contracts Deploy
+on:
+  push:
+    paths:
+      - 'packages/contracts/**'
+    branches:
+      - 'develop'
+      - 'main'
+
+jobs:
+  set-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.envdev.outputs.environment }}${{ steps.envprod.outputs.environment }}
+      tags:  ${{ steps.envdev.outputs.tags }}${{ steps.envprod.outputs.tags }}
+    steps:
+      - name: Set environment to staging
+        if: endsWith(github.ref, '/develop')
+        id: envdev
+        run: |
+          echo "::set-output name=environment::staging"
+          echo "::set-output name=tags::Registry"
+      - name: Set environment to prod
+        if: endsWith(github.ref, '/main')
+        id: envprod
+        run: |
+          echo "::set-output name=environment::production"
+          echo "::set-output name=tags::Registry"
+  build-deploy:
+    runs-on: ubuntu-latest
+    needs: [set-environment]
+    if: needs.set-environment.outputs.environment != ''
+    environment: ${{ needs.set-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Compile
+        run: yarn compile
+      - name: Test
+        run: yarn test
+      - name: Deploy
+        run: npx hardhat run scripts/deploy.ts --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.set-environment.outputs.tags }}"
+        env:
+          RINKEBY_URL: "https://rinkeby.eth.aragon.network/"
+          MAINNET_URL: "https://mainnet.eth.aragon.network/"
+          ETH_KEY: ${{ secrets.ETH_KEY }}
+          NETWORK: ${{ secrets.NETWORK_NAME }}
+          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
+      - name: Commit changes
+        run: |
+          git config --global user.name "$GITHUB_ACTOR"
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git commit -am "Updates files with deployed contract addresses"
+          git push
