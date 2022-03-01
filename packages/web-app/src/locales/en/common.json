@@ -79,6 +79,9 @@
     "supply": "Supply",
     "distributeTokens": "Distribute Tokens",
     "createToken": "Create Token",
+    "duplicateAction": "Duplicate Action",
+    "resetAction": "Reset Action",
+    "removeEntireAction": "Remove Entire Action",
     "walletList": {
       "address": "Address",
       "addresses": "{{count}} Addresses"
@@ -248,6 +251,7 @@
     "mintTokensSubtitle": "Mint new tokens and distribute",
     "withdrawAssets": "Withdraw Assets",
     "withdrawAssetsSubtitle": "Propose to withdraw assets from the DAO treasury",
+    "withdrawAssetsActionSubtitle": "Withdraw assets from the DAO treasury",
     "externalContract": "External Contract",
     "externalContractSubtitle": "Interact with any contract on the blockchain and access any functionality"
   },
@@ -382,6 +386,7 @@
       "addFirstActionTitle": "Add your very first action",
       "addFirstActionSubtitle": "Add optional actions if you wish to perform on-chain executions",
       "addFirstAction": "Add First Action",
+      "addAction": "Add Action",
       "actionsInfo": "Based on the voting options setup, it is only possible to add actions to the option \"Yes\"."
     }
   },

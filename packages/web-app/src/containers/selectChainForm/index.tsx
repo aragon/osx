@@ -81,7 +81,7 @@ const SelectChainForm: React.FC = () => {
             open={isOpen}
             align="start"
             width={264}
-            onOpenChange={value => setIsOpen(value)}
+            onOpenChange={(value: boolean) => setIsOpen(value)}
             content={
               <DropdownContent>
                 <ListItemAction

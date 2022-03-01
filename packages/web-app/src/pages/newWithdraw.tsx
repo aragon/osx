@@ -52,7 +52,7 @@ export type WithdrawFormData = TransferFormData & {
   tokenDecimals: number;
 };
 
-const defaultValues = {
+export const defaultValues = {
   to: '',
   amount: '',
   tokenAddress: '',

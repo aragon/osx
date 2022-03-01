@@ -32,8 +32,6 @@ const Governance: React.FC = () => {
     durationDays,
   } = getValues();
 
-  console.log('duration', durationMinutes, durationHours, durationDays);
-
   return (
     <Card>
       <Header>

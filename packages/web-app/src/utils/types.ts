@@ -124,4 +124,26 @@ export type HookData<T> = {
 
 export type SupportedChainId = 1 | 4;
 
+/**
+ * Allowed Actions for each dao
+ */
+export type ActionsTypes =
+  | 'add_remove_address'
+  | 'withdraw_assets'
+  | 'mint_token'
+  | 'external_contract';
+
+export type ParamType = {
+  type: string;
+  name?: string;
+  value: string;
+};
+
+/**
+ *  Inputs prop is using for custom smart contract methods that have unknown fields
+ */
+export type ActionItem = {
+  name: ActionsTypes;
+  inputs?: ParamType[];
+};
 export type NetworkIndicatorStatus = 'default' | 'testnet' | 'unsupported';
