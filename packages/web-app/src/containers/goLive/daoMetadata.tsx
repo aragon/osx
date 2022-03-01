@@ -36,7 +36,7 @@ const DaoMetadata: React.FC = () => {
         <Title>{t('labels.review.daoMetadata')}</Title>
       </Header>
       <Body>
-        <Row>
+        <LogoRow>
           <LabelWrapper>
             <Label>{t('labels.logo')}</Label>
           </LabelWrapper>
@@ -46,7 +46,7 @@ const DaoMetadata: React.FC = () => {
               src={daoLogo ? URL.createObjectURL(daoLogo) : ''}
             />
           )}
-        </Row>
+        </LogoRow>
         <Row>
           <LabelWrapper>
             <Label>{t('labels.daoName')}</Label>
@@ -108,6 +108,10 @@ const ContentWrapper = styled.div.attrs({
 
 const DescriptionContent = styled.p.attrs({
   className: 'w-9/12',
+})``;
+
+const LogoRow = styled.div.attrs({
+  className: 'block tablet:flex tablet:items-center mb-2 w-full',
 })``;
 
 export default DaoMetadata;

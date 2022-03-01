@@ -44,7 +44,8 @@ const WalletRow: React.FC<WalletRowProps> = ({index, onDelete}) => {
           (totalSupply = parseInt(wallet.amount) + totalSupply)
       );
     }
-    return totalSupply && Math.floor((value / totalSupply) * 100) + '%';
+    const CalculateNaN = Math.floor((value / totalSupply) * 100);
+    return totalSupply && !isNaN(CalculateNaN) ? CalculateNaN + '%' : '';
   };
 
   const addressValidator = (address: string, index: number) => {
@@ -124,7 +125,16 @@ const WalletRow: React.FC<WalletRowProps> = ({index, onDelete}) => {
               <ListItemAction
                 title={t('labels.removeWallet')}
                 {...(typeof onDelete === 'function'
-                  ? {onClick: () => onDelete(index)}
+                  ? {
+                      onClick: () => {
+                        const [totalSupply, amount] = getValues([
+                          'tokenTotalSupply',
+                          `wallets.${index}.amount`,
+                        ]);
+                        setValue('tokenTotalSupply', totalSupply - amount);
+                        onDelete(index);
+                      },
+                    }
                   : {mode: 'disabled'})}
                 bgWhite
               />
@@ -147,6 +157,7 @@ const WalletRow: React.FC<WalletRowProps> = ({index, onDelete}) => {
         name={`wallets.${index}.amount`}
         control={control}
         rules={{
+          required: t('errors.required.amount'),
           validate: () => amountValidation(index),
         }}
         render={({field, fieldState: {error}}) => (

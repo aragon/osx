@@ -26,7 +26,13 @@ import {validateTokenAddress} from 'utils/validators';
 
 const DEFAULT_BLOCK_EXPLORER = 'https://etherscan.io/';
 
-const AddExistingToken: React.FC = () => {
+type AddExistingTokenType = {
+  resetTokenFields: () => void;
+};
+
+const AddExistingToken: React.FC<AddExistingTokenType> = ({
+  resetTokenFields,
+}) => {
   const {t} = useTranslation();
   const {account, provider} = useWallet();
   const {control, resetField, setValue} = useFormContext();
@@ -53,7 +59,7 @@ const AddExistingToken: React.FC = () => {
     }
 
     return DEFAULT_BLOCK_EXPLORER;
-  }, [chainId]);
+  }, [chainId.id]);
 
   /*************************************************
    *                    Hooks                      *
@@ -64,12 +70,6 @@ const AddExistingToken: React.FC = () => {
       alert('Please connect your wallet');
       return;
     }
-
-    const resetTokenFields = () => {
-      resetField('tokenName');
-      resetField('tokenSymbol');
-      resetField('tokenTotalSupply');
-    };
 
     const fetchContractInfo = async () => {
       // have to include this to "debounce" network calls
@@ -103,6 +103,7 @@ const AddExistingToken: React.FC = () => {
     errors.tokenAddress,
     provider,
     resetField,
+    resetTokenFields,
     setValue,
     tokenName,
   ]);

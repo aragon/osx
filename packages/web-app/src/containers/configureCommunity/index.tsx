@@ -2,14 +2,14 @@ import {AlertInline, Label, NumberInput} from '@aragon/ui-components';
 import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
-import {Controller, useFormContext} from 'react-hook-form';
-
-//TODO: This one gonna remove later
-const totalTokens = 1000;
+import {Controller, useFormContext, useWatch} from 'react-hook-form';
 
 const ConfigureCommunity: React.FC = () => {
   const {t} = useTranslation();
   const {control} = useFormContext();
+  const [tokenTotalSupply, tokenSymbol] = useWatch({
+    name: ['tokenTotalSupply', 'tokenSymbol'],
+  });
 
   return (
     <>
@@ -41,8 +41,8 @@ const ConfigureCommunity: React.FC = () => {
               </FormWrapper>
               <AlertInline
                 label={t('createDAO.step4.alerts.minimumApprovalAlert', {
-                  amount: Math.round(totalTokens * (value / 100)),
-                  symbol: 'ANT',
+                  amount: Math.round(tokenTotalSupply * (value / 100)),
+                  symbol: tokenSymbol?.toUpperCase(),
                 })}
                 mode="neutral"
               />

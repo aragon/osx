@@ -13,7 +13,6 @@ import {StepProps} from './step';
 
 export type FullScreenStepperProps = {
   wizardProcessName: string;
-  totalFormSteps?: number;
   children: React.FunctionComponentElement<StepProps>[];
 };
 
@@ -32,12 +31,10 @@ export const useFormStep = () =>
   useContext(FullScreenStepperContext) as FullScreenStepperContextType;
 
 export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
-  totalFormSteps,
   wizardProcessName,
   children,
 }) => {
   const {t} = useTranslation();
-
   const {currentStep, prev, next, setStep} = useStepper(children.length);
 
   const currentIndex = currentStep - 1;
@@ -55,13 +52,19 @@ export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
     onNextButtonClicked,
   } = children[currentIndex].props;
 
+  const totalSteps = useMemo(() => {
+    let total = 0;
+    children.forEach((_, index) => {
+      if (!children[index].props.hideWizard) total++;
+    });
+    return total;
+  }, [children]);
+
   const value = {currentStep, setStep, prev, next};
 
   const currentFormStep = useMemo(() => {
-    return !totalFormSteps || totalFormSteps === children.length
-      ? currentStep
-      : currentStep - (children.length - totalFormSteps);
-  }, [children.length, currentStep, totalFormSteps]);
+    return hideWizard ? currentStep : currentStep - 1;
+  }, [currentStep, hideWizard]);
 
   return (
     <FullScreenStepperContext.Provider value={value}>
@@ -71,7 +74,7 @@ export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
             processName={wizardProcessName}
             title={wizardTitle || ''}
             description={wizardDescription || ''}
-            totalSteps={totalFormSteps || children.length}
+            totalSteps={totalSteps}
             currentStep={currentFormStep}
           />
         )}

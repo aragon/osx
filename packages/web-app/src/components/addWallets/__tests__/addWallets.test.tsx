@@ -32,6 +32,6 @@ describe('AddWallets', () => {
     fireEvent.click(element);
 
     const rows = screen.getAllByTestId('wallet-row');
-    expect(rows.length).toBe(3);
+    expect(rows.length).toBe(1);
   });
 });
