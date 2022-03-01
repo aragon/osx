@@ -13,8 +13,8 @@
     "community": "Community"
   },
   "daoSwitcher": {
-    "title": "Explore",
-    "subtitle": "Find other DAOs to join"
+    "title": "Select your DAO",
+    "subtitle": "Explore other DAOs"
   },
   "navButtons": {
     "connectWallet": "Login"

@@ -16,6 +16,7 @@ import '../i18n.config';
 // work properly on the pages.
 import HomePage from 'pages/home';
 import * as paths from 'utils/paths';
+import DaoSelectMenu from 'containers/navbar/daoSelectMenu';
 
 const TokensPage = lazy(() => import('pages/tokens'));
 const FinancePage = lazy(() => import('pages/finance'));
@@ -41,7 +42,8 @@ function App() {
     <div className="flex flex-col pb-12 tablet:pb-4 bg-ui-50">
       <Navbar />
       <main className="min-h-screen">
-        <Suspense fallback={null}>
+        {/* TODO: replace with loading indicator */}
+        <Suspense fallback={<p>Loading...</p>}>
           <Routes>
             <Route path={paths.NewDeposit} element={<NewDepositPage />} />
             <Route path={paths.NewWithDraw} element={<NewWithdrawPage />} />
@@ -61,6 +63,7 @@ function App() {
       </main>
       <WalletMenu />
       <TransferMenu />
+      <DaoSelectMenu />
       <TransactionModal
         title="Sign Deposit"
         subtitle="To register your deposit, you need to submit a transaction which costs you following."

@@ -20,6 +20,7 @@ import {useWallet} from 'context/augmentedWallet';
 import {useWalletProps} from 'containers/walletMenu';
 import NetworkIndicator from './networkIndicator';
 import {BreadcrumbDropdown} from './breadcrumbDropdown';
+import {useGlobalModalContext} from 'context/globalModals';
 import {NetworkIndicatorStatus} from 'utils/types';
 import {Community, Dashboard, Finance, Governance, NotFound} from 'utils/paths';
 
@@ -41,6 +42,7 @@ type DesktopNavProp = {
 
 const DesktopNav: React.FC<DesktopNavProp> = props => {
   const {t} = useTranslation();
+  const {open} = useGlobalModalContext();
   const navigate = useNavigate();
   const [showCrumbMenu, setShowCrumbMenu] = useState(false);
   const {isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
@@ -60,13 +62,13 @@ const DesktopNav: React.FC<DesktopNavProp> = props => {
 
   if (isProcess) {
     return (
-      <Container>
+      <Container data-testid="navbar">
         <NetworkIndicator status={props.status} />
         <Menu>
           <ProcessMenuItems>
             <Breadcrumb
               crumbs={{label: props.processLabel!, path: props.returnURL!}}
-              onClick={(path: string) => navigate(path)}
+              onClick={navigate}
             />
             <ButtonIcon
               mode="secondary"
@@ -92,25 +94,31 @@ const DesktopNav: React.FC<DesktopNavProp> = props => {
       <NetworkIndicator status={props.status} />
       <Menu>
         <Content>
-          <div>
-            <CardDao
-              daoName="DAO Name"
-              daoAddress="patito.eth.dao"
-              onClick={() => null}
-            />
-          </div>
+          <CardDao
+            daoName="DAO Name"
+            daoAddress="patito.eth.dao"
+            onClick={() => open('selectDao')}
+          />
+
           <LinksWrapper>
             {breadcrumbs.length < MIN_ROUTE_DEPTH_FOR_BREADCRUMBS ? (
               <NavLinks />
             ) : (
-              <BreadcrumbDropdown
-                open={showCrumbMenu}
-                icon={basePathIcons[breadcrumbs[0].path]}
-                crumbs={breadcrumbs}
-                onClose={() => setShowCrumbMenu(false)}
-                onOpenChange={setShowCrumbMenu}
-                onCrumbClick={path => navigate(path)}
-              />
+              <>
+                <BreadcrumbDropdown
+                  open={showCrumbMenu}
+                  icon={basePathIcons[breadcrumbs[0].path]}
+                  crumbs={breadcrumbs}
+                  onClose={() => setShowCrumbMenu(false)}
+                  onCrumbClick={navigate}
+                  onOpenChange={setShowCrumbMenu}
+                />
+                <Breadcrumb
+                  icon={basePathIcons[breadcrumbs[0].path]}
+                  crumbs={breadcrumbs}
+                  onClick={navigate}
+                />
+              </>
             )}
           </LinksWrapper>
         </Content>
@@ -136,8 +144,15 @@ const Container = styled.header.attrs({
 
 const Menu = styled.nav.attrs({
   className: `flex mx-auto justify-between items-center max-w-screen-wide
-     px-5 py-3 bg-gradient-to-b from-ui-50 to-transparent backdrop-blur-xl`,
-})``;
+     px-5 py-3`,
+})`
+  background: linear-gradient(
+    180deg,
+    rgba(245, 247, 250, 1) 0%,
+    rgba(245, 247, 250, 0) 100%
+  );
+  backdrop-filter: blur(24px);
+`;
 
 const Content = styled.div.attrs({
   className: 'flex items-center space-x-6',

@@ -12,7 +12,7 @@ export const OverviewDAOHeader: React.FC = () => {
   const {t} = useTranslation();
 
   return (
-    <div className="p-6 bg-ui-0 rounded-xl">
+    <div className="p-6 bg-ui-0 tablet:rounded-xl">
       <h1 className="text-3xl font-bold text-ui-800">
         {t('createDAO.overview.title')}
       </h1>

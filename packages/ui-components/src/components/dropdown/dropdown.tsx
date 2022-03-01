@@ -7,7 +7,7 @@ import styled from 'styled-components';
 // simplifies triggering action off of a menu item. Instead of having to watch
 // for changes on a state handled by the parent and take action based on that
 // state changing. Maybe I'm wrong, though. We can always add value/setValue
-// props controlled by the parent's later, if that proves more usefull.
+// props controlled by the parent's later, if that proves more useful.
 // [VR 21-02-2022]
 
 export type ListItemProps = {
@@ -41,6 +41,7 @@ export type DropdownProps = CustomDropdownContentProps & {
 export const Dropdown: React.FC<DropdownProps> = ({
   trigger,
   listItems,
+  ...rest
 }: DropdownProps) => {
   return (
     <DropdownMenu.Root>
@@ -48,14 +49,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
         {trigger}
       </DropdownMenu.Trigger>
 
-      <StyledContent>
+      <StyledContent {...rest}>
         <DropdownMenu.Group className="space-y-0.5">
-          {listItems?.map(li => (
-            <StyledItem
-              key={li.component?.toString()}
-              onSelect={li.callback}
-              style={{}}
-            >
+          {listItems?.map((li, index) => (
+            <StyledItem key={index} onSelect={li.callback} style={{}}>
               {li.component}
             </StyledItem>
           ))}
@@ -67,7 +64,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 };
 
 const StyledContent = styled(DropdownMenu.Content).attrs({
-  className: 'bg-ui-0 rounded-lg p-2 shadow-xl' || undefined,
+  className: 'bg-ui-0 rounded-lg p-2 shadow-xl' as string | undefined,
 })``;
 
 const StyledItem = styled(DropdownMenu.Item).attrs({

@@ -1,3 +1,11 @@
+import {
+  IconCommunity,
+  IconDashboard,
+  IconFinance,
+  IconGovernance,
+} from '@aragon/ui-components';
+
+import {i18n} from '../../i18n.config';
 import {Dashboard, Community, Finance, Governance} from './paths';
 
 export const BASE_URL = 'https://api.coingecko.com/api/v3';
@@ -14,10 +22,22 @@ export const enum TimeFilter {
 }
 
 export const NAV_LINKS = [
-  {label: 'Dashboard', path: Dashboard},
-  {label: 'Governance', path: Governance},
-  {label: 'Finance', path: Finance},
-  {label: 'Community', path: Community},
+  {
+    label: i18n.t('navLinks.dashboard'),
+    path: Dashboard,
+    icon: IconDashboard,
+  },
+  {
+    label: i18n.t('navLinks.governance'),
+    path: Governance,
+    icon: IconGovernance,
+  },
+  {label: i18n.t('navLinks.finance'), path: Finance, icon: IconFinance},
+  {
+    label: i18n.t('navLinks.community'),
+    path: Community,
+    icon: IconCommunity,
+  },
 ];
 
 export const enum TransferTypes {

@@ -1,14 +1,16 @@
 import {
-  Breadcrumb,
   ButtonIcon,
   CrumbType,
+  Dropdown,
   IconClose,
   IconMenu,
-  Popover,
+  ListItemAction,
 } from '@aragon/ui-components';
 import React from 'react';
+import styled from 'styled-components';
 
-import NavLinks from 'components/navLinks';
+import NavLink from 'components/navLink';
+import {NAV_LINKS} from 'utils/constants';
 
 type BreadcrumbDropdownProps = {
   open: boolean;
@@ -21,27 +23,39 @@ type BreadcrumbDropdownProps = {
 
 export const BreadcrumbDropdown: React.FC<BreadcrumbDropdownProps> = props => {
   return (
-    <>
-      <Popover
-        side="bottom"
-        align="start"
-        width={240}
-        open={props.open}
-        onOpenChange={props.onOpenChange}
-        content={<NavLinks parent="dropdown" onItemClick={props.onClose} />}
-      >
+    <StyledDropdown
+      align="start"
+      trigger={
         <ButtonIcon
           mode="secondary"
           size="large"
           icon={props.open ? <IconClose /> : <IconMenu />}
           isActive={props.open}
         />
-      </Popover>
-      <Breadcrumb
-        icon={props.icon}
-        crumbs={props.crumbs}
-        onClick={props.onCrumbClick}
-      />
-    </>
+      }
+      sideOffset={8}
+      listItems={NAV_LINKS.map(item => ({
+        component: (
+          <NavLink
+            to={item.path}
+            matchEnd={false}
+            render={selected => (
+              <ListItemAction
+                bgWhite
+                title={item.label}
+                mode={selected ? 'selected' : 'default'}
+                iconLeft={<item.icon />}
+              />
+            )}
+          />
+        ),
+
+        callback: () => props.onCrumbClick(item.path),
+      }))}
+    />
   );
 };
+
+const StyledDropdown = styled(Dropdown).attrs({
+  className: 'p-1.5 w-30 rounded-xl',
+})``;
