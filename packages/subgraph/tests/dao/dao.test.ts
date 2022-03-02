@@ -1,11 +1,11 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address} from '@graphprotocol/graph-ts';
+import {assert, clearStore, test, logStore} from 'matchstick-as/assembly/index';
+import {Address, Bytes} from '@graphprotocol/graph-ts';
 import {
   createNewSetMetadataEvent,
   createNewETHDepositedEvent,
   createNewDepositedEvent,
-  createNewWithdrawnEvent,
-  getBalanceOf
+  getBalanceOf,
+  createNewExecutedEvent
 } from './utils';
 import {
   DAO_ADDRESS,
@@ -14,16 +14,19 @@ import {
   ONE_ETH,
   STRING_DATA,
   HALF_ETH,
-  ADDRESS_ZERO
+  ADDRESS_ZERO,
+  VOTING_ADDRESS
 } from '../constants';
 import {runHandleNewDAORegistered} from '../registry/utils';
 import {
   handleSetMetadata,
   handleETHDeposited,
   handleDeposited,
-  handleWithdrawn
+  handleExecuted
+  // handleWithdrawn
 } from '../../src/dao/dao';
-import {createTokenCalls} from '../utils';
+import {createDummyAcctions, createTokenCalls} from '../utils';
+import {Dao, ERC20VotingProposal} from '../../generated/schema';
 
 test('Run dao (handleSetMetadata) mappings with mock event', () => {
   // create event and run it's handler
@@ -185,176 +188,82 @@ test('Run dao (handleDeposited) for Token mappings with mock event', () => {
   clearStore();
 });
 
-test('Run dao (handleWithdrawn) mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
+test('Run dao (handleDeposited) for Token mappings with mock event', () => {
+  // create state
+  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
+  daoEntity.save();
+
+  let proposalId =
+    Address.fromHexString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
+  let proposalEntity = new ERC20VotingProposal(proposalId);
+  proposalEntity.save();
+
+  // create token calls
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+  getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, HALF_ETH);
 
   // create event
-  let newEvent = createNewWithdrawnEvent(
-    DAO_TOKEN_ADDRESS,
-    ADDRESS_ONE,
-    ONE_ETH,
-    STRING_DATA,
-    DAO_ADDRESS
+  let callData =
+    '0x4f0656320000000000000000000000006b175474e89094c44da98b954eedeac495271d0f0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000014536f6d6520537472696e672044617461202e2e2e000000000000000000000000';
+  let actions = createDummyAcctions(DAO_ADDRESS, '0', callData);
+  let event = createNewExecutedEvent(
+    Address.fromHexString(VOTING_ADDRESS).toHexString(),
+    '0',
+    actions,
+    [Bytes.fromUTF8('')],
+    Address.fromHexString(DAO_ADDRESS).toHexString()
   );
 
-  let entityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    newEvent.transaction.hash.toHexString() +
-    '_' +
-    newEvent.transactionLogIndex.toHexString();
-
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   // handle event
-  handleWithdrawn(newEvent);
+  handleExecuted(event);
 
   // checks
+  let entityID =
+    Address.fromHexString(DAO_ADDRESS).toHexString() +
+    '_' +
+    event.transaction.hash.toHexString() +
+    '_' +
+    event.transactionLogIndex.toHexString() +
+    '_' +
+    '0';
   assert.fieldEquals('VaultWithdraw', entityID, 'id', entityID);
   assert.fieldEquals(
     'VaultWithdraw',
     entityID,
     'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
+    Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
     'VaultWithdraw',
     entityID,
     'token',
-    Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
+    Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString()
   );
-  assert.fieldEquals('VaultWithdraw', entityID, 'to', ADDRESS_ONE);
-  assert.fieldEquals('VaultWithdraw', entityID, 'amount', ONE_ETH);
-  assert.fieldEquals('VaultWithdraw', entityID, 'reference', STRING_DATA);
-
-  clearStore();
-});
-
-test('Run dao (handleDeposited and handleWithdrawn for ETH)', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
-  // deposit Eth
-  // create and handle deposit event
-  let newDepositEvent = createNewETHDepositedEvent(
-    ADDRESS_ONE,
-    ONE_ETH,
-    DAO_ADDRESS
-  );
-  createTokenCalls(ADDRESS_ZERO, 'Ethereum', 'ETH', '18');
-  handleETHDeposited(newDepositEvent);
-
-  // check balance
   assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(ADDRESS_ZERO).toHexString(),
-    'balance',
-    ONE_ETH
+    'VaultWithdraw',
+    entityID,
+    'to',
+    Address.fromHexString(ADDRESS_ONE).toHexString()
   );
-
-  // create event
-  let newEvent = createNewWithdrawnEvent(
-    ADDRESS_ZERO,
-    ADDRESS_ONE,
-    HALF_ETH,
-    STRING_DATA,
-    DAO_ADDRESS
-  );
-
-  let entityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    newEvent.transaction.hash.toHexString() +
-    '_' +
-    newEvent.transactionLogIndex.toHexString();
-
-  // handle event
-  createTokenCalls(ADDRESS_ZERO, 'Ethereum', 'ETH', '18');
-  handleWithdrawn(newEvent);
-
-  // check deposit
-  assert.fieldEquals('VaultDeposit', entityID, 'reference', 'Eth deposit');
-  // checks withdraw
-  assert.fieldEquals('VaultWithdraw', entityID, 'id', entityID);
-  assert.fieldEquals('VaultWithdraw', entityID, 'amount', HALF_ETH);
-  // check balance again
-  // check balance
+  assert.fieldEquals('VaultWithdraw', entityID, 'amount', '1');
   assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(ADDRESS_ZERO).toHexString(),
-    'balance',
-    HALF_ETH
+    'VaultWithdraw',
+    entityID,
+    'reference',
+    Bytes.fromUTF8(STRING_DATA).toString()
   );
-
-  clearStore();
-});
-
-test('Run dao (handleDeposite and handleWithdrawn for token)', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
-
-  // create event
-  let newDepositEvent = createNewDepositedEvent(
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    ONE_ETH,
-    STRING_DATA,
-    DAO_ADDRESS
-  );
-
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-  getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ONE_ETH);
-  // handle event
-  handleDeposited(newDepositEvent);
-
+  assert.fieldEquals('VaultWithdraw', entityID, 'proposal', proposalId);
   assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString(),
-    'balance',
-    ONE_ETH
+    'VaultWithdraw',
+    entityID,
+    'transaction',
+    event.transaction.hash.toHexString()
   );
-
-  // create event
-  let newWithdrawEvent = createNewWithdrawnEvent(
-    DAO_TOKEN_ADDRESS,
-    ADDRESS_ONE,
-    HALF_ETH,
-    STRING_DATA,
-    DAO_ADDRESS
-  );
-
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-  getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, HALF_ETH);
-  // handle event
-  handleWithdrawn(newWithdrawEvent);
-
   assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString(),
-    'balance',
-    HALF_ETH
+    'VaultWithdraw',
+    entityID,
+    'createdAt',
+    event.block.timestamp.toString()
   );
 
   clearStore();

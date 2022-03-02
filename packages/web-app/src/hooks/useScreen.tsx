@@ -10,7 +10,7 @@ const reportScreenWidth: () => useScreenType = () => {
   if (w < 768) {
     return {isMobile: true, isTablet: false, isDesktop: false};
   }
-  if (w < 1024) {
+  if (w < 1280) {
     return {isMobile: false, isTablet: true, isDesktop: false};
   }
   return {isMobile: false, isTablet: false, isDesktop: true};

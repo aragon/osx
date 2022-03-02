@@ -31,7 +31,7 @@ const Tokens: React.FC = () => {
   return (
     <Layout>
       <PageWrapper
-        title={t('TransferModal.allTransfers') as string}
+        title={t('labels.allTokens') as string}
         buttonLabel={t('TransferModal.newTransfer') as string}
         subtitle={`${new Intl.NumberFormat('en-US', {
           style: 'currency',

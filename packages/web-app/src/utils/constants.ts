@@ -1,3 +1,11 @@
+import {
+  IconCommunity,
+  IconDashboard,
+  IconFinance,
+  IconGovernance,
+} from '@aragon/ui-components';
+
+import {i18n} from '../../i18n.config';
 import {Dashboard, Community, Finance, Governance} from './paths';
 
 export const BASE_URL = 'https://api.coingecko.com/api/v3';
@@ -14,10 +22,22 @@ export const enum TimeFilter {
 }
 
 export const NAV_LINKS = [
-  {label: 'Dashboard', path: Dashboard},
-  {label: 'Governance', path: Governance},
-  {label: 'Finance', path: Finance},
-  {label: 'Community', path: Community},
+  {
+    label: i18n.t('navLinks.dashboard'),
+    path: Dashboard,
+    icon: IconDashboard,
+  },
+  {
+    label: i18n.t('navLinks.governance'),
+    path: Governance,
+    icon: IconGovernance,
+  },
+  {label: i18n.t('navLinks.finance'), path: Finance, icon: IconFinance},
+  {
+    label: i18n.t('navLinks.community'),
+    path: Community,
+    icon: IconCommunity,
+  },
 ];
 
 export const enum TransferTypes {
@@ -26,7 +46,10 @@ export const enum TransferTypes {
 }
 
 export const URL_PATTERN =
-  /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/g;
+  /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i;
+
+export const URL_WITH_PROTOCOL_PATTERN =
+  /^(http:\/\/|https:\/\/)[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i;
 
 export const EMAIL_PATTERN =
   /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;

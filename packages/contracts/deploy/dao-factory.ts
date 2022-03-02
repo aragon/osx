@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {getContractAddress} from './helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -7,16 +8,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const registry = await deployments.get('Registry');
-
-  const token = await deployments.get('TokenFactory');
+  let registryAddr: string = '';
+  while (!registryAddr) {
+    try {
+      registryAddr = await getContractAddress('Registry', hre);
+    } catch (e) {
+      console.log('no Registry address found...');
+      throw e;
+    }
+  }
+  const tokenAddr = await getContractAddress('TokenFactory', hre);
 
   await deploy('DAOFactory', {
     from: deployer,
-    args: [registry.address, token.address],
+    args: [registryAddr, tokenAddr],
     log: true,
   });
 };
 export default func;
+func.runAtTheEnd = true;
 func.tags = ['DAOFactory'];
-func.dependencies = ['Registry', 'TokenFactory'];

@@ -6,7 +6,7 @@
   "author": "Aragon Association",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --sourcemap true",
     "serve": "vite preview",
     "test": "jest",
     "lint": "eslint src --max-warnings=0 && yarn check-types",

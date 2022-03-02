@@ -21,27 +21,39 @@ abstract contract IDAO {
     /// @param _role The hash of the role identifier
     /// @param _data The optional data passed to the ACLOracle registered.
     /// @return bool
-    function hasPermission(address _where, address _who, bytes32 _role, bytes memory _data) virtual external returns(bool);
+    function hasPermission(
+        address _where,
+        address _who,
+        bytes32 _role,
+        bytes memory _data
+    ) external virtual returns (bool);
 
     /// @notice Update the DAO metadata
     /// @dev Sets a new IPFS hash
     /// @param _metadata The IPFS hash of the new metadata object
-    function setMetadata(bytes calldata _metadata) virtual external;
+    function setMetadata(bytes calldata _metadata) external virtual;
+
     event SetMetadata(bytes metadata);
 
     /// @notice If called, the list of provided actions will be executed.
     /// @dev It run a loop through the array of acctions and execute one by one.
     /// @dev If one acction fails, all will be reverted.
     /// @param _actions The aray of actions
-    function execute(Action[] memory _actions) virtual external returns (bytes[] memory);
-    event Executed(address indexed actor, Action[] actions, bytes[] execResults);
+    function execute(uint256 callId, Action[] memory _actions) external virtual returns (bytes[] memory);
+
+    event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
 
     /// @notice Deposit ETH or any token to this contract with a reference string
     /// @dev Deposit ETH (token address == 0) or any token with a reference
     /// @param _token The address of the token and in case of ETH address(0)
     /// @param _amount The amount of tokens to deposit
     /// @param _reference The deposit reference describing the reason of it
-    function deposit(address _token, uint256 _amount, string calldata _reference) virtual external payable;
+    function deposit(
+        address _token,
+        uint256 _amount,
+        string calldata _reference
+    ) external payable virtual;
+
     event Deposited(address indexed sender, address indexed token, uint256 amount, string _reference);
     // ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
     // with `send/transfer`, receive function can still be executed without reverting due to gas cost
@@ -54,6 +66,12 @@ abstract contract IDAO {
     /// @param _to The target address to send tokens or ETH
     /// @param _amount The amount of tokens to deposit
     /// @param _reference The deposit reference describing the reason of it
-    function withdraw(address _token, address _to, uint256 _amount, string memory _reference) virtual external;
+    function withdraw(
+        address _token,
+        address _to,
+        uint256 _amount,
+        string memory _reference
+    ) external virtual;
+
     event Withdrawn(address indexed token, address indexed to, uint256 amount, string _reference);
 }

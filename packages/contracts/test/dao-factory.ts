@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {VoterState} from './test-utils/voting';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
@@ -214,7 +215,7 @@ describe('DAOFactory: ', function () {
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by ERC20Voting
-    await expect(dao.execute([])).to.be.revertedWith(ERRORS.ACLAuth);
+    await expect(dao.execute(0, [])).to.be.revertedWith(ERRORS.ACLAuth);
 
     await expect(ERC20Voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
       ERRORS.ComponentAuth
@@ -238,9 +239,9 @@ describe('DAOFactory: ', function () {
 
     await ERC20Voting.newVote('0x', actions, 0, 0, false, false);
 
-    expect(await ERC20Voting.vote(0, true, true))
+    expect(await ERC20Voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
-      .withArgs(ERC20Voting.address, [], [])
+      .withArgs(ERC20Voting.address, 0, [], [])
       .to.emit(ERC20Voting, EVENTS.UpdateConfig)
       .withArgs(3, 4, 5);
 

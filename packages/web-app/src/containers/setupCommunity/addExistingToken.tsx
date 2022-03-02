@@ -26,7 +26,13 @@ import {validateTokenAddress} from 'utils/validators';
 
 const DEFAULT_BLOCK_EXPLORER = 'https://etherscan.io/';
 
-const AddExistingToken: React.FC = () => {
+type AddExistingTokenType = {
+  resetTokenFields: () => void;
+};
+
+const AddExistingToken: React.FC<AddExistingTokenType> = ({
+  resetTokenFields,
+}) => {
   const {t} = useTranslation();
   const {account, provider} = useWallet();
   const {control, resetField, setValue} = useFormContext();
@@ -45,15 +51,15 @@ const AddExistingToken: React.FC = () => {
   );
 
   const explorer = useMemo(() => {
-    if (chainId) {
+    if (chainId.id) {
       const {explorerUrl} = chains.getChainInformation(
-        chainId
+        chainId.id
       ) as ChainInformation;
       return explorerUrl || DEFAULT_BLOCK_EXPLORER;
     }
 
     return DEFAULT_BLOCK_EXPLORER;
-  }, [chainId]);
+  }, [chainId.id]);
 
   /*************************************************
    *                    Hooks                      *
@@ -64,12 +70,6 @@ const AddExistingToken: React.FC = () => {
       alert('Please connect your wallet');
       return;
     }
-
-    const resetTokenFields = () => {
-      resetField('tokenName');
-      resetField('tokenSymbol');
-      resetField('tokenTotalSupply');
-    };
 
     const fetchContractInfo = async () => {
       // have to include this to "debounce" network calls
@@ -103,6 +103,7 @@ const AddExistingToken: React.FC = () => {
     errors.tokenAddress,
     provider,
     resetField,
+    resetTokenFields,
     setValue,
     tokenName,
   ]);
@@ -155,15 +156,15 @@ const AddExistingToken: React.FC = () => {
         {tokenName && (
           <TokenInfoContainer>
             <InfoContainer>
-              <Label label={t('labels.existingTokenName')} />
+              <Label label={t('labels.tokenName')} />
               <TextInput disabled value={tokenName} />
             </InfoContainer>
             <InfoContainer>
-              <Label label={t('labels.existingTokenSymbol')} />
+              <Label label={t('labels.tokenSymbol')} />
               <TextInput disabled value={tokenSymbol} />
             </InfoContainer>
             <InfoContainer>
-              <Label label={t('labels.existingTokenSupply')} />
+              <Label label={t('labels.supply')} />
               <TextInput
                 disabled
                 value={new Intl.NumberFormat('en-US', {

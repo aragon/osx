@@ -12,7 +12,8 @@ import {
   ERC20VotingVoter,
   ERC20Vote
 } from '../../../generated/schema';
-import {BigInt, ByteArray, crypto, dataSource} from '@graphprotocol/graph-ts';
+import {dataSource} from '@graphprotocol/graph-ts';
+import {VOTER_STATE} from '../../utils/constants';
 
 export function handleStartVote(event: StartVote): void {
   let context = dataSource.context();
@@ -37,16 +38,16 @@ export function _handleStartVote(event: StartVote, daoId: string): void {
   let vote = contract.try_getVote(event.params.voteId);
 
   if (!vote.reverted) {
+    proposalEntity.executed = vote.value.value1;
     proposalEntity.startDate = vote.value.value2;
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
     proposalEntity.supportRequiredPct = vote.value.value5;
-    proposalEntity.minAcceptQuorumPct = vote.value.value6;
-    proposalEntity.votingPower = vote.value.value9;
-    proposalEntity.executed = vote.value.value1;
+    proposalEntity.participationRequiredPct = vote.value.value6;
+    proposalEntity.votingPower = vote.value.value7;
 
     // actions
-    let actions = vote.value.value10;
+    let actions = vote.value.value11;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -90,7 +91,7 @@ export function handleCastVote(event: CastVote): void {
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
-  voterProposalEntity.vote = event.params.voterSupports;
+  voterProposalEntity.vote = VOTER_STATE.get(event.params.voterState);
   voterProposalEntity.stake = event.params.stake;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
@@ -108,8 +109,9 @@ export function handleCastVote(event: CastVote): void {
     let contract = ERC20Voting.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
-      proposalEntity.yea = vote.value.value7;
-      proposalEntity.nay = vote.value.value8;
+      proposalEntity.yea = vote.value.value8;
+      proposalEntity.nay = vote.value.value9;
+      proposalEntity.abstain = vote.value.value10;
       proposalEntity.save();
     }
   }
@@ -128,10 +130,8 @@ export function handleExecuteVote(event: ExecuteVote): void {
   let contract = ERC20Voting.bind(event.address);
   let vote = contract.try_getVote(event.params.voteId);
   if (!vote.reverted) {
-    let actions = vote.value.value9;
+    let actions = vote.value.value11;
     for (let index = 0; index < actions.length; index++) {
-      const action = actions[index];
-
       let actionId =
         event.address.toHexString() +
         '_' +
@@ -152,7 +152,8 @@ export function handleUpdateConfig(event: UpdateConfig): void {
   let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.supportRequiredPct = event.params.supportRequiredPct;
-    packageEntity.minAcceptQuorumPct = event.params.minAcceptQuorumPct;
+    packageEntity.participationRequiredPct =
+      event.params.participationRequiredPct;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }

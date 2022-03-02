@@ -36,7 +36,15 @@ const voters: Array<VoterType> = [
   },
 ];
 
-export const VotingTerminal: React.FC = () => {
+type VotingTerminalProps = {
+  breakdownTabDisabled?: boolean;
+  votersTabDisabled?: boolean;
+};
+
+export const VotingTerminal: React.FC<VotingTerminalProps> = ({
+  breakdownTabDisabled = false,
+  votersTabDisabled = false,
+}) => {
   const [buttonGroupState, setButtonGroupState] = useState('info');
   const [votingInProcess, setVotingInProcess] = useState(false);
   const {t} = useTranslation();
@@ -50,8 +58,16 @@ export const VotingTerminal: React.FC = () => {
           defaultValue={buttonGroupState}
           onChange={setButtonGroupState}
         >
-          <Option value="breakdown" label={t('votingTerminal.breakdown')} />
-          <Option value="voters" label={t('votingTerminal.voters')} />
+          <Option
+            value="breakdown"
+            label={t('votingTerminal.breakdown')}
+            disabled={breakdownTabDisabled}
+          />
+          <Option
+            value="voters"
+            label={t('votingTerminal.voters')}
+            disabled={votersTabDisabled}
+          />
           <Option value="info" label={t('votingTerminal.info')} />
         </ButtonGroup>
       </Header>

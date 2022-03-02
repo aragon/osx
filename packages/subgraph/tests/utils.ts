@@ -1,4 +1,4 @@
-import {Address, BigInt, ethereum} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction} from 'matchstick-as/assembly/index';
 
 export function createMockGetter(
@@ -33,4 +33,18 @@ export function createTokenCalls(
   createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
   ]);
+}
+
+export function createDummyAcctions(
+  address: string,
+  value: string,
+  data: string
+): ethereum.Tuple[] {
+  let tuple = new ethereum.Tuple();
+
+  tuple.push(ethereum.Value.fromAddress(Address.fromString(address)));
+  tuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString(value)));
+  tuple.push(ethereum.Value.fromBytes(Bytes.fromHexString(data) as Bytes));
+
+  return [tuple];
 }

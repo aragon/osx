@@ -41,7 +41,7 @@ export function createNewStartVoteEvent(
 export function createNewCastVoteEvent(
   voteId: string,
   voter: string,
-  voterSupports: boolean,
+  voterState: string,
   stake: string,
   contractAddress: string
 ): CastVote {
@@ -58,9 +58,9 @@ export function createNewCastVoteEvent(
     'voter',
     ethereum.Value.fromAddress(Address.fromString(voter))
   );
-  let voterSupportsParam = new ethereum.EventParam(
-    'voterSupports',
-    ethereum.Value.fromBoolean(voterSupports)
+  let voterStateParam = new ethereum.EventParam(
+    'voterState',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voterState))
   );
   let stakeParam = new ethereum.EventParam(
     'stake',
@@ -69,7 +69,7 @@ export function createNewCastVoteEvent(
 
   newCastVoteEvent.parameters.push(voteIdParam);
   newCastVoteEvent.parameters.push(voterParam);
-  newCastVoteEvent.parameters.push(voterSupportsParam);
+  newCastVoteEvent.parameters.push(voterStateParam);
   newCastVoteEvent.parameters.push(stakeParam);
 
   return newCastVoteEvent;
@@ -88,15 +88,20 @@ export function createNewExecuteVoteEvent(
     'voteId',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
   );
+  let execResultsParam = new ethereum.EventParam(
+    'execResults',
+    ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
+  );
 
   newExecuteVoteEvent.parameters.push(voteIdParam);
+  newExecuteVoteEvent.parameters.push(execResultsParam);
 
   return newExecuteVoteEvent;
 }
 
 export function createNewUpdateConfigEvent(
   supportRequiredPct: string,
-  minAcceptQuorumPct: string,
+  participationRequiredPct: string,
   minDuration: string,
   contractAddress: string
 ): UpdateConfig {
@@ -105,9 +110,9 @@ export function createNewUpdateConfigEvent(
   newUpdateConfigEvent.address = Address.fromString(contractAddress);
   newUpdateConfigEvent.parameters = new Array();
 
-  let minAcceptQuorumPctParam = new ethereum.EventParam(
-    'minAcceptQuorumPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(minAcceptQuorumPct))
+  let participationRequiredPctParam = new ethereum.EventParam(
+    'participationRequiredPct',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequiredPct))
   );
   let supportRequiredPctParam = new ethereum.EventParam(
     'supportRequiredPct',
@@ -118,7 +123,7 @@ export function createNewUpdateConfigEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newUpdateConfigEvent.parameters.push(minAcceptQuorumPctParam);
+  newUpdateConfigEvent.parameters.push(participationRequiredPctParam);
   newUpdateConfigEvent.parameters.push(supportRequiredPctParam);
   newUpdateConfigEvent.parameters.push(minDurationParam);
 
@@ -134,16 +139,17 @@ export function createGetVoteCall(
   endDate: string,
   snapshotBlock: string,
   supportRequired: string,
-  minAcceptQuorum: string,
+  participationRequired: string,
+  votingPower: string,
   yea: string,
   nay: string,
-  votingPower: string,
+  abstain: string,
   actions: ethereum.Tuple[]
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
     'getVote',
-    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
+    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,uint256,(address,uint256,bytes)[])'
   )
     .withArgs([ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))])
     .returns([
@@ -153,26 +159,13 @@ export function createGetVoteCall(
       ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(snapshotBlock)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequired)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(minAcceptQuorum)),
+      ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequired)),
+      ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(yea)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(nay)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower)),
+      ethereum.Value.fromSignedBigInt(BigInt.fromString(abstain)),
       ethereum.Value.fromTupleArray(actions)
     ]);
-}
-
-export function createDummyAcctions(
-  address: string,
-  value: string,
-  data: string
-): ethereum.Tuple[] {
-  let tuple = new ethereum.Tuple();
-
-  tuple.push(ethereum.Value.fromAddress(Address.fromString(address)));
-  tuple.push(ethereum.Value.fromSignedBigInt(BigInt.fromString(value)));
-  tuple.push(ethereum.Value.fromBytes(Bytes.fromUTF8(data)));
-
-  return [tuple];
 }
 
 export function getVotesLengthCall(

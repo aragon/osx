@@ -2,6 +2,7 @@ import React, {useMemo} from 'react';
 import {withTransaction} from '@elastic/apm-rum-react';
 import {useTranslation} from 'react-i18next';
 import {FormProvider, useForm, useFormState} from 'react-hook-form';
+
 import {FullScreenStepper, Step} from 'components/fullScreenStepper';
 import {
   OverviewDAOFooter,
@@ -12,6 +13,8 @@ import SelectChain from 'containers/selectChainForm';
 import DefineMetadata from 'containers/defineMetadata';
 import ConfigureCommunity from 'containers/configureCommunity';
 import SetupCommunity from 'containers/setupCommunity';
+import GoLive, {GoLiveHeader, GoLiveFooter} from 'containers/goLive';
+import {WalletField} from '../components/addWallets/row';
 
 type FormData = {
   daoLogo: string;
@@ -19,21 +22,35 @@ type FormData = {
   daoSummary: string;
   tokenName: string;
   tokenSymbol: string;
-  tokenTotalSupply: string;
+  tokenTotalSupply: number;
+  isCustomToken: boolean;
   links: {label: string; link: string}[];
+  wallets: WalletField[];
+  tokenAddress: string;
+  durationMinutes: string;
+  durationHours: string;
+  durationDays: string;
 };
 
 const defaultValues = {
   tokenName: '',
   tokenSymbol: '',
-  tokenTotalSupply: '',
-  links: [{label: '', link: ''}],
+  tokenTotalSupply: 0,
+  links: [{label: '', href: ''}],
+  wallets: [
+    {address: 'DAO Treasury', amount: '0'},
+    {address: 'My Wallet', amount: '0'},
+  ],
 };
 
 const CreateDAO: React.FC = () => {
   const {t} = useTranslation();
   const formMethods = useForm<FormData>({mode: 'onChange', defaultValues});
   const {errors, dirtyFields} = useFormState({control: formMethods.control});
+  const [isCustomToken, tokenTotalSupply] = formMethods.getValues([
+    'isCustomToken',
+    'tokenTotalSupply',
+  ]);
 
   /*************************************************
    *             Step Validation States            *
@@ -55,17 +72,43 @@ const CreateDAO: React.FC = () => {
     errors.links,
   ]);
 
+  const daoSetupCommunityIsValid = useMemo(() => {
+    // required fields not dirty
+    if (isCustomToken === true) {
+      if (
+        !dirtyFields.tokenName ||
+        !dirtyFields.wallets ||
+        !dirtyFields.tokenSymbol ||
+        errors.wallets ||
+        tokenTotalSupply === 0
+      )
+        return false;
+      return errors.tokenName || errors.tokenSymbol || errors.wallets
+        ? false
+        : true;
+    } else {
+      if (!dirtyFields.tokenAddress || errors.tokenAddress) return false;
+      return true;
+    }
+  }, [
+    dirtyFields.tokenAddress,
+    dirtyFields.tokenName,
+    dirtyFields.tokenSymbol,
+    dirtyFields.wallets,
+    errors.tokenAddress,
+    errors.tokenName,
+    errors.tokenSymbol,
+    errors.wallets,
+    isCustomToken,
+    tokenTotalSupply,
+  ]);
+
   /*************************************************
    *                    Render                     *
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper
-        navbarBackUrl="/"
-        navbarLabel={t('createDAO.title')}
-        totalFormSteps={4}
-        wizardProcessName={t('createDAO.title')}
-      >
+      <FullScreenStepper wizardProcessName={t('createDAO.title')}>
         <Step
           hideWizard
           fullWidth
@@ -83,13 +126,14 @@ const CreateDAO: React.FC = () => {
         <Step
           wizardTitle={t('createDAO.step2.title')}
           wizardDescription={t('createDAO.step2.description')}
-          // isNextButtonDisabled={!daoMetadataIsValid} Enable me for page validation
+          isNextButtonDisabled={!daoMetadataIsValid}
         >
           <DefineMetadata />
         </Step>
         <Step
           wizardTitle={t('createDAO.step3.title')}
           wizardDescription={t('createDAO.step3.description')}
+          isNextButtonDisabled={!daoSetupCommunityIsValid}
         >
           <SetupCommunity />
         </Step>
@@ -98,6 +142,14 @@ const CreateDAO: React.FC = () => {
           wizardDescription={t('createDAO.step4.description')}
         >
           <ConfigureCommunity />
+        </Step>
+        <Step
+          hideWizard
+          fullWidth
+          customHeader={<GoLiveHeader />}
+          customFooter={<GoLiveFooter />}
+        >
+          <GoLive />
         </Step>
       </FullScreenStepper>
     </FormProvider>

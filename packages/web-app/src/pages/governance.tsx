@@ -7,6 +7,7 @@ import {
   ButtonText,
   IconAdd,
 } from '@aragon/ui-components';
+import {useNavigate} from 'react-router-dom';
 import styled from 'styled-components';
 
 import {PageWrapper} from 'components/wrappers';
@@ -24,6 +25,7 @@ const Governance: React.FC = () => {
   const [page, setPage] = useState(1);
   const {data: daoProposals} = useDaoProposals('0x0000000000');
   const {t} = useTranslation();
+  const navigate = useNavigate();
   // The number of proposals displayed on each page
   const ProposalsPerPage = 6;
 
@@ -67,6 +69,7 @@ const Governance: React.FC = () => {
             label="New Proposal"
             iconLeft={<IconAdd />}
             className="mt-4"
+            onClick={() => navigate('/new-proposal')}
           />
         </EmptyStateContainer>
 
@@ -87,7 +90,7 @@ const Governance: React.FC = () => {
         title={'Proposals'}
         buttonLabel={'New Proposal'}
         subtitle={'1 active Proposal'}
-        onClick={() => null}
+        onClick={() => navigate('/new-proposal')}
       >
         <div className="mt-8 space-y-1.5">
           <ButtonGroup

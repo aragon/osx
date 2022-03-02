@@ -9,8 +9,18 @@ import CreateNewToken from './createNewToken';
 
 const SetupCommunityForm: React.FC = () => {
   const {t} = useTranslation();
-  const {control} = useFormContext();
+  const {control, resetField, setValue} = useFormContext();
   const isCustomToken = useWatch({name: 'isCustomToken'});
+
+  const resetTokenFields = () => {
+    resetField('tokenName');
+    resetField('tokenSymbol');
+    resetField('tokenTotalSupply');
+    setValue('wallets', [
+      {address: 'DAO Treasury', amount: '0'},
+      {address: 'My Wallet', amount: '0'},
+    ]);
+  };
 
   return (
     <>
@@ -56,7 +66,10 @@ const SetupCommunityForm: React.FC = () => {
               label={t('createDAO.step3.newToken')}
               helptext={t('createDAO.step3.newTokenSubtitle')}
               multiSelect={false}
-              onClick={() => onChange(true)}
+              onClick={() => {
+                resetTokenFields();
+                onChange(true);
+              }}
               state={value ? 'active' : 'default'}
             />
           )}
@@ -71,7 +84,10 @@ const SetupCommunityForm: React.FC = () => {
               helptext={t('createDAO.step3.existingTokenSubtitle')}
               state={value === false ? 'active' : 'default'}
               multiSelect={false}
-              onClick={() => onChange(false)}
+              onClick={() => {
+                onChange(false);
+                resetTokenFields();
+              }}
             />
           )}
         />
@@ -81,7 +97,9 @@ const SetupCommunityForm: React.FC = () => {
 
       {isCustomToken === true && <CreateNewToken />}
 
-      {isCustomToken === false && <ExistingTokenPartialForm />}
+      {isCustomToken === false && (
+        <ExistingTokenPartialForm {...{resetTokenFields}} />
+      )}
     </>
   );
 };

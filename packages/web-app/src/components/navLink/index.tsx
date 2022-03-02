@@ -1,42 +1,19 @@
-import React, {useCallback} from 'react';
-import {useMatch, useNavigate, useResolvedPath} from 'react-router-dom';
+import {matchRoutes, useLocation} from 'react-router-dom';
 
 type NavLinkProps = {
+  matchEnd?: boolean;
   to: string;
-  component: React.FunctionComponentElement<{
-    isSelected: boolean;
-    onClick?: () => void;
-  }>;
-  selected?: string;
-  onClick?: () => void;
+  render: (selected: boolean) => React.ReactElement;
 };
 
-const NavLink: React.FC<NavLinkProps> = ({
-  to,
-  onClick,
-  selected,
-  component,
-}) => {
-  const resolved = useResolvedPath(to);
-  const isMatch = useMatch({path: resolved.pathname, end: true});
-  const navigate = useNavigate();
+const NavLink = ({to, matchEnd = true, ...props}: NavLinkProps) => {
+  const {pathname} = useLocation();
 
-  const getSelected = useCallback(() => {
-    return (selected ? selected === to : isMatch) as boolean;
-  }, [isMatch, selected, to]);
+  const matches = matchEnd
+    ? matchRoutes([{path: to}], pathname) !== null
+    : matchRoutes([{path: to}], '/' + pathname.split('/')[1]) !== null;
 
-  const handleClick = () => {
-    if (onClick) onClick();
-    navigate(to);
-  };
-  return (
-    <>
-      {React.cloneElement(component, {
-        isSelected: getSelected(),
-        onClick: handleClick,
-      })}
-    </>
-  );
+  return props.render(matches);
 };
 
 export default NavLink;

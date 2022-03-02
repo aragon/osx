@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useMemo} from 'react';
 import {Meta, Story} from '@storybook/react';
 import {InputImageSingle, InputImageSingleProps} from '../src';
 
@@ -7,9 +7,21 @@ export default {
   component: InputImageSingle,
 } as Meta;
 
-const Template: Story<InputImageSingleProps> = args => (
-  <InputImageSingle {...args} />
-);
+const Template: Story<InputImageSingleProps> = args => {
+  const [preview, setPreview] = useState<File | null>(null);
+
+  const PreviewSrc: string | null = useMemo(() => {
+    return preview ? URL.createObjectURL(preview) : '';
+  }, [preview]);
+
+  return (
+    <InputImageSingle
+      {...args}
+      preview={PreviewSrc}
+      onChange={(file: File | null) => setPreview(file)}
+    />
+  );
+};
 
 export const Single = Template.bind({});
 Single.args = {

@@ -1,82 +1,86 @@
-import React from 'react';
+import React, {ReactComponentElement} from 'react';
 import styled from 'styled-components';
 
 import Crumb from './crumb';
 import {BadgeProps} from '../badge';
 import {ButtonIcon} from '../button';
-import {IconChevronLeft, IconChevronRight} from '../icons';
+import {IconChevronLeft, IconChevronRight, IconType} from '../icons';
 
-// TODO: Use discrimination unions when refactoring
-export type Crumbs = {
+export type CrumbType = {
   label: string;
   path: string;
-}[];
+};
 
-export type BreadcrumbProps = {
+export type DefaultCrumbProps = {
   /**
    * Array of breadcrumbs to be displayed; each breadcrumb should
    * include a label and its corresponding path
    */
-  crumbs: Crumbs;
+  crumbs: CrumbType[];
 
-  /**
-   * Whether breadcrumbs are being displayed in a process flow.
-   * If more than one breadcrumb is given when inside a process flow,
-   * only the first crumb will be shown
-   */
-  process?: boolean;
+  /** Base path icon to be displayed */
+  icon: ReactComponentElement<IconType>;
+};
 
+export type ProcessCrumbProps = {
+  crumbs: CrumbType;
+  icon?: ReactComponentElement<IconType>;
+};
+
+export type BreadcrumbProps = {
   /** Tag shown at the end of the list of breadcrumbs */
   tag?: React.FunctionComponentElement<BadgeProps>;
 
   /** Callback returning the path value of the breadcrumb clicked */
   onClick?: (path: string) => void;
-};
+} & (ProcessCrumbProps | DefaultCrumbProps);
 
 /** Component displaying given list as breadcrumbs. */
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   crumbs,
-  process,
+  icon,
   tag,
   onClick,
 }) => {
-  if (process) {
+  if (Array.isArray(crumbs)) {
+    let isLast: boolean;
+
+    return (
+      <Container data-testid="breadcrumbs">
+        {crumbs.map(({label, path}, index) => {
+          isLast = index === crumbs.length - 1;
+          return (
+            <>
+              <Crumb
+                first={index === 0}
+                icon={icon}
+                label={label}
+                last={isLast}
+                tag={tag}
+                {...(isLast ? {} : {onClick: () => onClick?.(path)})}
+              />
+              {!isLast && <IconChevronRight className="text-ui-300" />}
+            </>
+          );
+        })}
+      </Container>
+    );
+  } else {
     return (
       <ProcessContainer data-testid="breadcrumbs">
         <ProcessCrumbContainer>
           <ButtonIcon
             mode="secondary"
             icon={<IconChevronLeft />}
-            onClick={() => onClick?.(crumbs[0].path)}
+            onClick={() => onClick?.(crumbs.path)}
             bgWhite
           />
-          <p>{crumbs[0].label}</p>
+          <p>{crumbs.label}</p>
           {tag}
         </ProcessCrumbContainer>
       </ProcessContainer>
     );
   }
-
-  let isLast: boolean;
-  return (
-    <Container data-testid="breadcrumbs">
-      {crumbs.map(({label, path}, index) => {
-        isLast = index === crumbs.length - 1;
-        return (
-          <>
-            <Crumb
-              first={index === 0}
-              label={label}
-              last={isLast}
-              tag={tag}
-              {...(isLast ? {} : {onClick: () => onClick?.(path)})}
-            />
-            {!isLast && <IconChevronRight className="text-ui-300" />}
-          </>
-        );
-      })}
-    </Container>
-  );
 };
 
 const Container = styled.div.attrs({

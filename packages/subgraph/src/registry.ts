@@ -9,6 +9,7 @@ export function handleNewDAORegistered(event: NewDAORegistered): void {
 
   entity.name = event.params.name;
   entity.creator = event.params.creator;
+  entity.createdAt = event.block.timestamp;
 
   let tokenId = handleERC20Token(event.params.token);
 

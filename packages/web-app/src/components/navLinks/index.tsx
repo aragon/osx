@@ -1,115 +1,71 @@
-import {
-  ActionItem,
-  MenuItem,
-  IconFinance,
-  IconCommunity,
-  IconDashboard,
-  IconGovernance,
-} from '@aragon/ui-components';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
+import styled from 'styled-components';
+import {useNavigate} from 'react-router-dom';
+import {ListItemAction} from '@aragon/ui-components';
 
 import NavLink from 'components/navLink';
-import {Dashboard, Community, Finance, Governance} from 'utils/paths';
+import useScreen from 'hooks/useScreen';
+import {NAV_LINKS} from 'utils/constants';
 
 type NavLinksProps = {
-  isDropdown?: boolean;
-  selected?: string;
   onItemClick?: () => void;
 };
 
-const NavLinks: React.FC<NavLinksProps> = ({
-  isDropdown = false,
-  selected,
-  onItemClick,
-}) => {
-  const {t} = useTranslation();
+const NavLinks: React.FC<NavLinksProps> = ({onItemClick}) => {
+  const navigate = useNavigate();
+  const {isDesktop} = useScreen();
 
-  // TODO: Investigate string interpolation with react-i18next
+  const handleOnClick = (to: string) => {
+    onItemClick?.();
+    navigate(to);
+  };
+
   return (
-    <div
-      data-testid="navLinks"
-      className={
-        isDropdown
-          ? 'flex flex-col space-y-1.5'
-          : 'flex space-x-1.5 items-center'
-      }
-    >
-      <NavLink
-        to={Dashboard}
-        onClick={onItemClick}
-        selected={selected}
-        component={
-          isDropdown ? (
-            <ActionItem
-              wide
-              icon={<IconDashboard />}
-              label={t('navLinks.dashboard')}
-            />
-          ) : (
-            <MenuItem
-              icon={<IconDashboard />}
-              label={t('navLinks.dashboard')}
-            />
-          )
-        }
-      />
-      <NavLink
-        to={Governance}
-        onClick={onItemClick}
-        selected={selected}
-        component={
-          isDropdown ? (
-            <ActionItem
-              wide
-              icon={<IconGovernance />}
-              label={t('navLinks.governance')}
-            />
-          ) : (
-            <MenuItem
-              icon={<IconGovernance />}
-              label={t('navLinks.governance')}
-            />
-          )
-        }
-      />
-      <NavLink
-        to={Finance}
-        onClick={onItemClick}
-        selected={selected}
-        component={
-          isDropdown ? (
-            <ActionItem
-              wide
-              icon={<IconFinance />}
-              label={t('navLinks.finance')}
-            />
-          ) : (
-            <MenuItem icon={<IconFinance />} label={t('navLinks.finance')} />
-          )
-        }
-      />
-      <NavLink
-        to={Community}
-        onClick={onItemClick}
-        selected={selected}
-        component={
-          isDropdown ? (
-            <ActionItem
-              wide
-              icon={<IconCommunity />}
-              label={t('navLinks.community')}
-            />
-          ) : (
-            <MenuItem
-              icon={<IconCommunity />}
-              label={t('navLinks.community')}
-            />
-          )
-        }
-      />
-    </div>
+    <StyledNavList data-testid="navLinks">
+      {NAV_LINKS.map(item => (
+        <li key={item.label}>
+          <NavLink
+            to={item.path}
+            matchEnd={isDesktop}
+            render={isSelected =>
+              isDesktop ? (
+                <NavItem
+                  isSelected={isSelected}
+                  onClick={() => handleOnClick(item.path)}
+                >
+                  {item.label}
+                </NavItem>
+              ) : (
+                <ListItemAction
+                  title={item.label}
+                  iconLeft={<item.icon />}
+                  onClick={() => handleOnClick(item.path)}
+                  mode={isSelected ? 'selected' : 'default'}
+                />
+              )
+            }
+          />
+        </li>
+      ))}
+    </StyledNavList>
   );
 };
+
+const StyledNavList = styled.ul.attrs({
+  className:
+    'space-y-1 desktop:space-y-0 desktop:flex desktop:space-x-1.5 desktop:items-center',
+})``;
+
+const NavItem = styled.button.attrs(({isSelected}: {isSelected: boolean}) => {
+  let className =
+    'py-1.5 px-2 rounded-xl font-bold hover:text-primary-500 ' +
+    'active:text-primary-700 disabled:text-ui-300 disabled:bg-ui-50' +
+    ' focus:ring-2 focus:ring-primary-500 focus:outline-none ';
+
+  if (isSelected) className += 'text-primary-500 bg-ui-0';
+  else className += 'text-ui-600';
+
+  return {className};
+})<{isSelected: boolean}>``;
 
 export default NavLinks;

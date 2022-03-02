@@ -93,21 +93,24 @@ const DefineMetadata: React.FC = () => {
         <Controller
           name="daoLogo"
           control={control}
-          render={({field: {onChange}, fieldState: {error}}) => (
-            <>
-              <LogoContainer>
-                <InputImageSingle
-                  {...{DAO_LOGO}}
-                  onError={handleImageError}
-                  onChange={onChange}
-                  onlySquare
-                />
-              </LogoContainer>
-              {error?.message && (
-                <AlertInline label={error.message} mode="critical" />
-              )}
-            </>
-          )}
+          render={({field: {value, onChange}, fieldState: {error}}) => {
+            const preview = value ? URL.createObjectURL(value) : '';
+            return (
+              <>
+                <LogoContainer>
+                  <InputImageSingle
+                    {...{DAO_LOGO, preview}}
+                    onError={handleImageError}
+                    onChange={onChange}
+                    onlySquare
+                  />
+                </LogoContainer>
+                {error?.message && (
+                  <AlertInline label={error.message} mode="critical" />
+                )}
+              </>
+            );
+          }}
         />
       </FormItem>
 
