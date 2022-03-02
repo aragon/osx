@@ -1,0 +1,45 @@
+name: Subgraph Deploy
+on:
+  push:
+    paths:
+      - 'packages/subgraph/**'
+    branches:
+      - 'develop'
+      - 'main'
+
+jobs:
+  set-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.envdev.outputs.environment }}${{ steps.envprod.outputs.environment }}
+    steps:
+      - name: Set environment to staging
+        if: endsWith(github.ref, '/develop')
+        id: envdev
+        run: echo "::set-output name=environment::staging"
+      - name: Set environment to prod
+        if: endsWith(github.ref, '/main')
+        id: envprod
+        run: echo "::set-output name=environment::production"
+  build-deploy:
+    runs-on: ubuntu-latest
+    needs: [set-environment]
+    if: needs.set-environment.outputs.environment != ''
+    environment: ${{ needs.set-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Build Contracts
+        run: cd ./packages/contracts/ && yarn run compile
+      - name: Deploy Subgraph
+        run: cd ./packages/subgraph/ && yarn run deploy
+        env:
+          NETWORK_NAME: ${{ secrets.NETWORK_NAME }}
+          THEGRAPH_USERNAME: aragon
+          SUBGRAPH_NAME: zaragoza
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}

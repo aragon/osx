@@ -23,7 +23,7 @@ jobs:
       - name: Set environment to prod
         if: endsWith(github.ref, '/main')
         id: envprod
-        run: echo "::set-output name=environment::prod"
+        run: echo "::set-output name=environment::production"
   build-deploy:
     runs-on: ubuntu-latest
     container: fleek/create-react-app:node-16

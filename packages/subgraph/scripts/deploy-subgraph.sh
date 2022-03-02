@@ -3,9 +3,6 @@
 if [ -f .env ]
 then
   export $(cat .env | sed 's/#.*//g' | xargs)
-else
-  echo 'no .env found'
-  exit -1
 fi
 
 if [ -z "$NETWORK_NAME" ] || [ -z "$THEGRAPH_USERNAME" ] || [ -z "$SUBGRAPH_NAME" ] || [ -z "$GRAPH_KEY" ]
