@@ -4,8 +4,10 @@ import {
   StartVote,
   CastVote,
   ExecuteVote,
-  UpdateConfig
-} from '../../generated/templates/ERC20Voting/ERC20Voting';
+  UpdateConfig,
+  AddUsers,
+  RemoveUsers
+} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
 
 export function createNewStartVoteEvent(
   voteId: string,
@@ -42,7 +44,6 @@ export function createNewCastVoteEvent(
   voteId: string,
   voter: string,
   voterState: string,
-  stake: string,
   contractAddress: string
 ): CastVote {
   let newCastVoteEvent = changetype<CastVote>(newMockEvent());
@@ -62,15 +63,10 @@ export function createNewCastVoteEvent(
     'voterState',
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voterState))
   );
-  let stakeParam = new ethereum.EventParam(
-    'stake',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(stake))
-  );
 
   newCastVoteEvent.parameters.push(voteIdParam);
   newCastVoteEvent.parameters.push(voterParam);
   newCastVoteEvent.parameters.push(voterStateParam);
-  newCastVoteEvent.parameters.push(stakeParam);
 
   return newCastVoteEvent;
 }
@@ -100,8 +96,8 @@ export function createNewExecuteVoteEvent(
 }
 
 export function createNewUpdateConfigEvent(
-  supportRequiredPct: string,
   participationRequiredPct: string,
+  supportRequiredPct: string,
   minDuration: string,
   contractAddress: string
 ): UpdateConfig {
@@ -130,6 +126,44 @@ export function createNewUpdateConfigEvent(
   return newUpdateConfigEvent;
 }
 
+export function createNewAddUsersEvent(
+  addresses: Address[],
+  contractAddress: string
+): AddUsers {
+  let newAddUsersEvent = changetype<AddUsers>(newMockEvent());
+
+  newAddUsersEvent.address = Address.fromString(contractAddress);
+  newAddUsersEvent.parameters = new Array();
+
+  let usersParam = new ethereum.EventParam(
+    'users',
+    ethereum.Value.fromAddressArray(addresses)
+  );
+
+  newAddUsersEvent.parameters.push(usersParam);
+
+  return newAddUsersEvent;
+}
+
+export function createNewRemoveUsersEvent(
+  addresses: Address[],
+  contractAddress: string
+): RemoveUsers {
+  let newRemoveUsersEvent = changetype<RemoveUsers>(newMockEvent());
+
+  newRemoveUsersEvent.address = Address.fromString(contractAddress);
+  newRemoveUsersEvent.parameters = new Array();
+
+  let usersParam = new ethereum.EventParam(
+    'users',
+    ethereum.Value.fromAddressArray(addresses)
+  );
+
+  newRemoveUsersEvent.parameters.push(usersParam);
+
+  return newRemoveUsersEvent;
+}
+
 export function createGetVoteCall(
   contractAddress: string,
   voteId: string,
@@ -137,7 +171,6 @@ export function createGetVoteCall(
   executed: boolean,
   startDate: string,
   endDate: string,
-  snapshotBlock: string,
   supportRequired: string,
   participationRequired: string,
   votingPower: string,
@@ -149,7 +182,7 @@ export function createGetVoteCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getVote',
-    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,uint256,(address,uint256,bytes)[])'
+    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
   )
     .withArgs([ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))])
     .returns([
@@ -157,7 +190,6 @@ export function createGetVoteCall(
       ethereum.Value.fromBoolean(executed),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(startDate)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(snapshotBlock)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequired)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequired)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower)),

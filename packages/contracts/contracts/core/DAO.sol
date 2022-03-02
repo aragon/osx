@@ -75,7 +75,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @dev It run a loop through the array of acctions and execute one by one.
     /// @dev If one acction fails, all will be reverted.
     /// @param _actions The aray of actions
-    function execute(Action[] memory _actions)
+    function execute(uint256 callId, Action[] memory _actions)
         external
         override
         auth(address(this), EXEC_ROLE)
@@ -91,7 +91,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
             execResults[i] = response;
         }
 
-        emit Executed(msg.sender, _actions, execResults);
+        emit Executed(msg.sender, callId, _actions, execResults);
 
         return execResults;
     }

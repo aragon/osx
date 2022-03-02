@@ -49,6 +49,8 @@ templates:
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json
+        - name: WhitelistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
       eventHandlers:
         - event: SetMetadata(bytes)
           handler: handleSetMetadata
@@ -56,8 +58,8 @@ templates:
           handler: handleDeposited
         - event: ETHDeposited(address,uint256)
           handler: handleETHDeposited
-        - event: Withdrawn(indexed address,indexed address,uint256,string)
-          handler: handleWithdrawn
+        - event: Executed(indexed address,uint256,(address,uint256,bytes)[],bytes[])
+          handler: handleExecuted
         - event: Granted(indexed bytes32,indexed address,indexed address,address,address)
           handler: handleGranted
         - event: Revoked(indexed bytes32,indexed address,indexed address,address)
@@ -81,7 +83,7 @@ templates:
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
-        - event: CastVote(indexed uint256,indexed address,bool,uint256)
+        - event: CastVote(indexed uint256,indexed address,uint8,uint256)
           handler: handleCastVote
         - event: ExecuteVote(indexed uint256,bytes[])
           handler: handleExecuteVote
@@ -89,3 +91,32 @@ templates:
           handler: handleStartVote
         - event: UpdateConfig(uint64,uint64,uint64)
           handler: handleUpdateConfig
+  # WhitelistVoting (package)
+  - name: WhitelistVoting
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: WhitelistVoting
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/whitelist/whitelistVoting.ts
+      entities:
+        - Dao
+      abis:
+        - name: WhitelistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
+      eventHandlers:
+        - event: CastVote(indexed uint256,indexed address,uint8)
+          handler: handleCastVote
+        - event: ExecuteVote(indexed uint256,bytes[])
+          handler: handleExecuteVote
+        - event: StartVote(indexed uint256,indexed address,bytes)
+          handler: handleStartVote
+        - event: UpdateConfig(uint64,uint64,uint64)
+          handler: handleUpdateConfig
+        - event: AddUsers(address[])
+          handler: handleAddUsers
+        - event: RemoveUsers(address[])
+          handler: handleRemoveUsers

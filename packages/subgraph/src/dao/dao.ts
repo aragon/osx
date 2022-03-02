@@ -16,9 +16,17 @@ import {
   Role,
   Permission
 } from '../../generated/schema';
-import {Address, store} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  ethereum,
+  log,
+  store
+} from '@graphprotocol/graph-ts';
 import {ADDRESS_ZERO} from '../utils/constants';
-import {addPackage, removePackage} from './utils';
+import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
 
 export function handleSetMetadata(event: SetMetadata): void {
@@ -59,6 +67,7 @@ export function handleDeposited(event: Deposited): void {
   entity.sender = event.params.sender;
   entity.amount = event.params.amount;
   entity.reference = event.params._reference;
+  entity.transaction = event.transaction.hash.toHexString();
   entity.createdAt = event.block.timestamp;
   entity.save();
 }
@@ -92,57 +101,81 @@ export function handleETHDeposited(event: ETHDeposited): void {
   entity.sender = event.params.sender;
   entity.amount = event.params.amount;
   entity.reference = 'Eth deposit';
+  entity.transaction = event.transaction.hash.toHexString();
   entity.createdAt = event.block.timestamp;
   entity.save();
 }
 
-export function handleWithdrawn(event: Withdrawn): void {
+export function handleExecuted(event: Executed): void {
   let daoId = event.address.toHexString();
-  let id =
-    event.address.toHexString() +
-    '_' +
-    event.transaction.hash.toHexString() +
-    '_' +
-    event.transactionLogIndex.toHexString();
+  let actions = event.params.actions;
+  for (let index = 0; index < actions.length; index++) {
+    const action = actions[index];
 
-  let token = event.params.token;
-  let entity = new VaultWithdraw(id);
+    // check for withdraw
+    let methodSig = action.data.toHexString().slice(0, 10);
 
-  if (token.toHexString() == ADDRESS_ZERO) {
-    // update Eth balance
-    let balanceId = daoId + '_' + ADDRESS_ZERO;
-    updateBalance(
-      balanceId,
-      event.address,
-      Address.fromString(ADDRESS_ZERO),
-      event.params.amount,
-      false,
-      event.block.timestamp
-    );
-  } else {
-    // update balance
-    let balanceId = daoId + '_' + token.toHexString();
-    updateBalance(
-      balanceId,
-      event.address,
-      token,
-      event.params.amount,
-      false,
-      event.block.timestamp
-    );
+    if (methodSig == '0x4f065632') {
+      // then decode params
+      let callParams = action.data.toHexString().slice(10);
+      let withdrawParams = decodeWithdrawParams(
+        Bytes.fromHexString('0x' + callParams)
+      );
+
+      // handle token
+      let tokenId = handleERC20Token(withdrawParams.token);
+      // update balance
+      if (withdrawParams.token.toHexString() == ADDRESS_ZERO) {
+        // update Eth balance
+        let balanceId = daoId + '_' + ADDRESS_ZERO;
+        updateBalance(
+          balanceId,
+          event.address,
+          Address.fromString(ADDRESS_ZERO),
+          withdrawParams.amount,
+          false,
+          event.block.timestamp
+        );
+      } else {
+        // update token balance
+        let balanceId = daoId + '_' + tokenId;
+        updateBalance(
+          balanceId,
+          event.address,
+          withdrawParams.token,
+          withdrawParams.amount,
+          false,
+          event.block.timestamp
+        );
+      }
+
+      let proposalId =
+        event.params.actor.toHexString() +
+        '_' +
+        event.params.callId.toHexString();
+
+      // create a withdraw entity
+      let withdrawId =
+        daoId +
+        '_' +
+        event.transaction.hash.toHexString() +
+        '_' +
+        event.transactionLogIndex.toHexString() +
+        '_' +
+        index.toString();
+
+      let vaultWithdrawEntity = new VaultWithdraw(withdrawId);
+      vaultWithdrawEntity.dao = daoId;
+      vaultWithdrawEntity.token = tokenId;
+      vaultWithdrawEntity.to = withdrawParams.to;
+      vaultWithdrawEntity.amount = withdrawParams.amount;
+      vaultWithdrawEntity.reference = withdrawParams.reference;
+      vaultWithdrawEntity.proposal = proposalId;
+      vaultWithdrawEntity.transaction = event.transaction.hash.toHexString();
+      vaultWithdrawEntity.createdAt = event.block.timestamp;
+      vaultWithdrawEntity.save();
+    }
   }
-
-  // handle token
-  // in case the original deposit was not via deposit funtion of the dao
-  let tokenId = handleERC20Token(token);
-
-  entity.dao = daoId;
-  entity.token = tokenId;
-  entity.to = event.params.to;
-  entity.amount = event.params.amount;
-  entity.reference = event.params._reference;
-  entity.createdAt = event.block.timestamp;
-  entity.save();
 }
 
 export function handleGranted(event: Granted): void {
@@ -172,8 +205,8 @@ export function handleGranted(event: Granted): void {
   permissionEntity.save();
 
   // Package
-  // TODO: rethink this once the market place is ready
   let daoContract = DAOContract.bind(event.address);
+  // TODO: perhaps hardcoding exec role will be more efficient.
   let executionRole = daoContract.try_EXEC_ROLE();
   if (!executionRole.reverted && event.params.role == executionRole.value) {
     addPackage(daoId, event.params.who);

@@ -1,4 +1,10 @@
-import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {
+  ethereum,
+  Bytes,
+  Address,
+  BigInt,
+  ByteArray
+} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {
   SetMetadata,
@@ -7,7 +13,8 @@ import {
   Withdrawn,
   Granted,
   Revoked,
-  Frozen
+  Frozen,
+  Executed
 } from '../../generated/templates/DaoTemplate/DAO';
 
 export function createNewSetMetadataEvent(
@@ -85,43 +92,6 @@ export function createNewDepositedEvent(
 
   newEvent.parameters.push(senderParam);
   newEvent.parameters.push(tokenParam);
-  newEvent.parameters.push(amountParam);
-  newEvent.parameters.push(referenceParam);
-
-  return newEvent;
-}
-
-export function createNewWithdrawnEvent(
-  token: string,
-  to: string,
-  amount: string,
-  reference: string,
-  contractAddress: string
-): Withdrawn {
-  let newEvent = changetype<Withdrawn>(newMockEvent());
-
-  newEvent.address = Address.fromString(contractAddress);
-  newEvent.parameters = new Array();
-
-  let tokenParam = new ethereum.EventParam(
-    'token',
-    ethereum.Value.fromAddress(Address.fromString(token))
-  );
-  let toParam = new ethereum.EventParam(
-    'to',
-    ethereum.Value.fromAddress(Address.fromString(to))
-  );
-  let amountParam = new ethereum.EventParam(
-    'amount',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(amount))
-  );
-  let referenceParam = new ethereum.EventParam(
-    '_reference',
-    ethereum.Value.fromString(reference)
-  );
-
-  newEvent.parameters.push(tokenParam);
-  newEvent.parameters.push(toParam);
   newEvent.parameters.push(amountParam);
   newEvent.parameters.push(referenceParam);
 
@@ -286,14 +256,14 @@ export function getSupportRequiredPct(
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getMinAcceptQuorumPct(
+export function getParticipationRequiredPct(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'minAcceptQuorumPct',
-    'minAcceptQuorumPct():(uint64)'
+    'participationRequiredPct',
+    'participationRequiredPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -327,4 +297,68 @@ export function getSVToken(contractAddress: string, returns: string): void {
   )
     .withArgs([])
     .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
+}
+
+export function getWhiteListed(
+  contractAddress: string,
+  address: string,
+  returns: boolean
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'whitelisted',
+    'whitelisted(address):(bool)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(address))])
+    .returns([ethereum.Value.fromBoolean(returns)]);
+}
+
+export function getWhitelistedLength(
+  contractAddress: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'whitelistedLength',
+    'whitelistedLength():(uint64)'
+  )
+    .withArgs([])
+    .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(returns))]);
+}
+
+export function createNewExecutedEvent(
+  actor: string,
+  callId: string,
+  actions: ethereum.Tuple[],
+  execResults: Bytes[],
+  contractAddress: string
+): Executed {
+  let newExecutedEvent = changetype<Executed>(newMockEvent());
+
+  newExecutedEvent.address = Address.fromString(contractAddress);
+  newExecutedEvent.parameters = new Array();
+
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let callIdParam = new ethereum.EventParam(
+    'callId',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(callId))
+  );
+  let actionsParam = new ethereum.EventParam(
+    'actions',
+    ethereum.Value.fromTupleArray(actions)
+  );
+  let execResultsParams = new ethereum.EventParam(
+    'execResults',
+    ethereum.Value.fromBytesArray(execResults)
+  );
+
+  newExecutedEvent.parameters.push(actorParam);
+  newExecutedEvent.parameters.push(callIdParam);
+  newExecutedEvent.parameters.push(actionsParam);
+  newExecutedEvent.parameters.push(execResultsParams);
+
+  return newExecutedEvent;
 }
