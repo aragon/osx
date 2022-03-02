@@ -41,8 +41,10 @@ jobs:
         run: yarn install --pure-lockfile
       - name: Compile
         run: cd packages/contracts && yarn run compile
-      - name: Test
-        run: yarn test
+      - name: Run Hardhat Tests
+        env:
+          REPORT_GAS: true
+        run: cd packages/contracts && yarn run test
       - name: Deploy
         run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.set-environment.outputs.tags }}"
         env:
