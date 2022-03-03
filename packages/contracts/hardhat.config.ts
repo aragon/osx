@@ -47,6 +47,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
+      gas: 'auto'
     },
     ...networks,
   },
