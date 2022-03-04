@@ -9,6 +9,7 @@ on:
 
 jobs:
   test:
+    if: github.actor != 'arabot-1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -71,6 +72,8 @@ jobs:
     needs: ['build-deploy']
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ARABOT_PAT }}
       - uses: actions/download-artifact@v3
         with:
           path: artefacts

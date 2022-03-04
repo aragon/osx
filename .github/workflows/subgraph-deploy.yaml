@@ -1,12 +1,5 @@
 name: Subgraph Deploy
 on:
-  workflow_run:
-    workflows: [Contracts Deploy]
-    types: [completed]
-    branches: 
-      - develop
-      - main
-
   push:
     paths:
       - 'packages/subgraph/**'
