@@ -54,15 +54,13 @@ const NewDeposit: React.FC = () => {
   const handleTokenSelect = (token: BaseTokenInfo) => {
     formMethods.setValue('tokenSymbol', token.symbol);
 
-    // custom token selected, should reset all fields
-    // save the symbol and clear any error pertaining to the amount
+    // custom token selected, should reset all fields save amount.
     if (token.address === '') {
       formMethods.setValue('isCustomToken', true);
       formMethods.resetField('tokenName');
       formMethods.resetField('tokenImgUrl');
       formMethods.resetField('tokenAddress');
       formMethods.resetField('tokenBalance');
-      formMethods.clearErrors('amount');
       return;
     }
 
@@ -77,7 +75,7 @@ const NewDeposit: React.FC = () => {
     );
 
     if (formMethods.formState.dirtyFields.amount) {
-      formMethods.trigger('tokenAddress');
+      formMethods.trigger('amount');
     }
   };
 

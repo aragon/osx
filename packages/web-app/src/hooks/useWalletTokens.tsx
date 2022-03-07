@@ -28,7 +28,7 @@ export function useWalletTokens() {
       // get tokens balance from wallet
       const balances = await Promise.all(
         tokenList.map(address => {
-          if (isETH(address)) return formatUnits(balance, 18)?.slice(0, 4);
+          if (isETH(address)) return formatUnits(balance, 18);
           else return fetchBalance(address, account, provider, false);
         })
       );

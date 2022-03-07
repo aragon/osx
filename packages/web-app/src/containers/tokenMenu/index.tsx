@@ -102,7 +102,10 @@ const TokenMenu: React.FC<TokenMenuProps> = ({
                 tokenName={token.name}
                 tokenLogo={token.imgUrl}
                 tokenSymbol={token.symbol}
-                tokenBalance={formatUnits(token.count, token.decimals)}
+                tokenBalance={formatUnits(token.count, token.decimals).slice(
+                  0,
+                  6
+                )}
               />
             </div>
           ))}
