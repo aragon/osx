@@ -6,8 +6,9 @@ import React, {
   ReactNode,
   useCallback,
 } from 'react';
-
+import {useFieldArray, useFormContext} from 'react-hook-form';
 import {Address} from '@aragon/ui-components/dist/utils/addresses';
+
 import {ActionItem} from 'utils/types';
 
 const ActionsContext = createContext<ActionsContextType | null>(null);
@@ -15,6 +16,8 @@ const ActionsContext = createContext<ActionsContextType | null>(null);
 type ActionsContextType = {
   daoAddress: Address;
   actions: ActionItem[];
+  actionsCounter: number;
+  setActionsCounter: (index: number) => void;
   addAction: (value: ActionItem) => void;
   duplicateAction: (index: number) => void;
   removeAction: (index: number) => void;
@@ -31,6 +34,11 @@ const ActionsProvider: React.FC<Props> = ({children}) => {
   const [daoAddress, setDaoAddress] =
     useState<ActionsContextType['daoAddress']>('');
   const [actions, setActions] = useState<ActionsContextType['actions']>([]);
+  const [actionsCounter, setActionsCounter] =
+    useState<ActionsContextType['actionsCounter']>(0);
+
+  const {control} = useFormContext();
+  const {remove} = useFieldArray({control, name: 'actions'});
 
   const addAction = useCallback(newAction => {
     setActions((oldActions: ActionsContextType['actions']) => [
@@ -43,8 +51,10 @@ const ActionsProvider: React.FC<Props> = ({children}) => {
     (index: number) => {
       const newActions = actions.filter((_, oldIndex) => oldIndex !== index);
       setActions(newActions);
+
+      remove(index);
     },
-    [actions]
+    [actions, remove]
   );
 
   const duplicateAction = useCallback((index: number) => {
@@ -62,8 +72,17 @@ const ActionsProvider: React.FC<Props> = ({children}) => {
       addAction,
       removeAction,
       duplicateAction,
+      actionsCounter,
+      setActionsCounter,
     }),
-    [actions, addAction, daoAddress, duplicateAction, removeAction]
+    [
+      daoAddress,
+      actions,
+      addAction,
+      removeAction,
+      duplicateAction,
+      actionsCounter,
+    ]
   );
 
   return (
