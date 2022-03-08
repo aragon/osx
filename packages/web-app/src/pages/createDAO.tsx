@@ -15,6 +15,10 @@ import ConfigureCommunity from 'containers/configureCommunity';
 import SetupCommunity from 'containers/setupCommunity';
 import GoLive, {GoLiveHeader, GoLiveFooter} from 'containers/goLive';
 import {WalletField} from '../components/addWallets/row';
+import {useWallet} from 'context/augmentedWallet';
+import {BigNumberish, ethers} from 'ethers';
+import DAOFactoryABI from '../abis/DAOFactory.json';
+import {DAOFactory} from 'typechain';
 
 type FormData = {
   daoLogo: string;
@@ -43,6 +47,11 @@ const defaultValues = {
   ],
 };
 
+const zeroAddress = ethers.constants.AddressZero;
+const daoDummyName = "Rakesh's Syndicate";
+const daoDummyMetadata = '0x00000000000000000000000000';
+const dummyVoteSettings: [BigNumberish, BigNumberish, BigNumberish] = [1, 2, 3];
+
 const CreateDAO: React.FC = () => {
   const {t} = useTranslation();
   const formMethods = useForm<FormData>({mode: 'onChange', defaultValues});
@@ -51,6 +60,7 @@ const CreateDAO: React.FC = () => {
     'isCustomToken',
     'tokenTotalSupply',
   ]);
+  const {provider} = useWallet();
 
   /*************************************************
    *             Step Validation States            *
@@ -140,6 +150,34 @@ const CreateDAO: React.FC = () => {
         <Step
           wizardTitle={t('createDAO.step4.title')}
           wizardDescription={t('createDAO.step4.description')}
+          onNextButtonClicked={async () => {
+            const contract = new ethers.Contract(
+              '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+              DAOFactoryABI,
+              provider
+            ) as DAOFactory;
+
+            console.log(
+              'NewDAO Gas:',
+              await contract.estimateGas.newDAO(
+                {
+                  name: daoDummyName,
+                  metadata: daoDummyMetadata,
+                },
+                {
+                  addr: zeroAddress,
+                  name: 'TokenName',
+                  symbol: 'TokenSymbol',
+                },
+                {
+                  receivers: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+                  amounts: [100],
+                },
+                dummyVoteSettings,
+                zeroAddress
+              )
+            );
+          }}
         >
           <ConfigureCommunity />
         </Step>

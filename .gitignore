@@ -11,6 +11,7 @@ dist-ssr
 *.local
 .cache
 storybook-static
+typechain
 
 # misc
 .vscode
