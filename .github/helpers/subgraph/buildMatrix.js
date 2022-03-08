@@ -11,7 +11,7 @@ async function main(ref) {
   const matrix = {network: []};
 
   for (const manifest of manifests) {
-    if (manifest.name.endsWith('.json')) {
+    if (manifest.name.endsWith('.json') && !manifest.name.includes('localhost')) {
       matrix.network.push(manifest.name.split('.')[0]);
     }
   }

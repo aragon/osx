@@ -25,7 +25,7 @@
       "gasPrice": 40000000000,
       "chainId": 137
     },
-    "polygon-mumbai": {
+    "mumbai": {
       "url": "https://polygon-mumbai.infura.io/v3/1011d31bf5b34d68b94895caa2d2da58",
       "isTestnet": true,
       "gasPrice": 40000000000,
