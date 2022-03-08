@@ -13,6 +13,7 @@ import {BaseTokenInfo} from 'utils/types';
 import {useWalletTokens} from 'hooks/useWalletTokens';
 import {FullScreenStepper, Step} from 'components/fullScreenStepper';
 import {TransferFormData} from './newWithdraw';
+import {Finance} from 'utils/paths';
 
 export type DepositFormData = TransferFormData;
 
@@ -84,7 +85,11 @@ const NewDeposit: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper wizardProcessName={t('newDeposit.depositAssets')}>
+      <FullScreenStepper
+        navLabel={t('allTransfer.newTransfer')}
+        returnPath={Finance}
+        wizardProcessName={t('newDeposit.depositAssets')}
+      >
         <Step
           wizardTitle={t('newDeposit.configureDeposit')}
           wizardDescription={t('newDeposit.configureDepositSubtitle')}

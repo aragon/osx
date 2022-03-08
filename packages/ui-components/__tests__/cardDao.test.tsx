@@ -6,7 +6,7 @@ import {Default as CardDao} from '../stories/cardDao.stories';
 describe('CardDao', () => {
   // eslint-disable-next-line
   function setup(args: any) {
-    render(<CardDao {...args} />);
+    render(<CardDao {...args} daoName={'daoName'} />);
     return screen.getByTestId('cardDao');
   }
 

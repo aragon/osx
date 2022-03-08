@@ -4,20 +4,18 @@ import {useTranslation} from 'react-i18next';
 import {FormProvider, useForm, useFormState} from 'react-hook-form';
 
 import {FullScreenStepper, Step} from 'components/fullScreenStepper';
-import {
-  OverviewDAOFooter,
-  OverviewDAOHeader,
-  OverviewDAOStep,
-} from 'containers/daoOverview';
+import {OverviewDAOFooter, OverviewDAOStep} from 'containers/daoOverview';
 import SelectChain from 'containers/selectChainForm';
 import DefineMetadata from 'containers/defineMetadata';
 import ConfigureCommunity from 'containers/configureCommunity';
 import SetupCommunity from 'containers/setupCommunity';
 import GoLive, {GoLiveHeader, GoLiveFooter} from 'containers/goLive';
 import {WalletField} from '../components/addWallets/row';
+import {Dashboard} from 'utils/paths';
 import {useWallet} from 'context/augmentedWallet';
 import {BigNumberish, ethers} from 'ethers';
 import DAOFactoryABI from '../abis/DAOFactory.json';
+
 import {DAOFactory} from 'typechain';
 
 type FormData = {
@@ -118,11 +116,16 @@ const CreateDAO: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper wizardProcessName={t('createDAO.title')}>
+      <FullScreenStepper
+        wizardProcessName={t('createDAO.title')}
+        navLabel={t('createDAO.title')}
+        returnPath={Dashboard}
+      >
         <Step
-          hideWizard
           fullWidth
-          customHeader={<OverviewDAOHeader />}
+          includeStepper={false}
+          wizardTitle={t('createDAO.overview.title')}
+          wizardDescription={t('createDAO.overview.description')}
           customFooter={<OverviewDAOFooter />}
         >
           <OverviewDAOStep />

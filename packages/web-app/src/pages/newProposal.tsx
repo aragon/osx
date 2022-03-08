@@ -13,6 +13,7 @@ import AddActionMenu from 'containers/addActionMenu';
 import {useWallet} from 'context/augmentedWallet';
 import {useWalletProps} from 'containers/walletMenu';
 import {TransferTypes} from 'utils/constants';
+import {Governance} from 'utils/paths';
 import {ActionsProvider} from 'context/actions';
 
 const NewProposal: React.FC = () => {
@@ -22,6 +23,7 @@ const NewProposal: React.FC = () => {
   });
   const {account}: useWalletProps = useWallet();
 
+  // TODO: Sepehr, is this still necessary?
   useEffect(() => {
     if (account) {
       // TODO: Change from to proper address
@@ -36,7 +38,11 @@ const NewProposal: React.FC = () => {
   return (
     <FormProvider {...formMethods}>
       <ActionsProvider>
-        <FullScreenStepper wizardProcessName={t('newProposal.title')}>
+        <FullScreenStepper
+          wizardProcessName={t('newProposal.title')}
+          navLabel={t('newProposal.title')}
+          returnPath={Governance}
+        >
           <Step
             wizardTitle={t('newWithdraw.defineProposal.heading')}
             wizardDescription={t('newWithdraw.defineProposal.description')}
@@ -59,7 +65,6 @@ const NewProposal: React.FC = () => {
 
         <AddActionMenu />
       </ActionsProvider>
-      <pre>{JSON.stringify(formMethods.watch(), null, 2)}</pre>
     </FormProvider>
   );
 };

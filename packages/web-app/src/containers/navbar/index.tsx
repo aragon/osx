@@ -79,7 +79,7 @@ const Navbar: React.FC = () => {
   ) : (
     <MobileNav
       status={status}
-      {...(processName ? {...processes[processName]} : {})}
+      isProcess={processName !== undefined}
       onWalletClick={handleWalletButtonClick}
     />
   );

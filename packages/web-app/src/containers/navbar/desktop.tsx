@@ -1,13 +1,11 @@
 import {
   Breadcrumb,
-  ButtonIcon,
   ButtonWallet,
   CardDao,
   IconCommunity,
   IconDashboard,
   IconFinance,
   IconGovernance,
-  IconMenuVertical,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
 import NavLinks from 'components/navLinks';
@@ -65,17 +63,11 @@ const DesktopNav: React.FC<DesktopNavProp> = props => {
       <Container data-testid="navbar">
         <NetworkIndicator status={props.status} />
         <Menu>
-          <ProcessMenuItems>
-            <Breadcrumb
-              crumbs={{label: props.processLabel!, path: props.returnURL!}}
-              onClick={navigate}
-            />
-            <ButtonIcon
-              mode="secondary"
-              size="large"
-              icon={<IconMenuVertical />}
-            />
-          </ProcessMenuItems>
+          <Breadcrumb
+            crumbs={{label: props.processLabel!, path: props.returnURL!}}
+            onClick={navigate}
+          />
+
           <ButtonWallet
             src={ensAvatarUrl || account}
             onClick={props.onWalletClick}
@@ -156,10 +148,6 @@ const Menu = styled.nav.attrs({
 
 const Content = styled.div.attrs({
   className: 'flex items-center space-x-6',
-})``;
-
-const ProcessMenuItems = styled.div.attrs({
-  className: 'flex space-x-1.5',
 })``;
 
 const LinksWrapper = styled.div.attrs({

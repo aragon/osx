@@ -18,6 +18,7 @@ import SetupVotingForm from 'containers/setupVotingForm';
 import DefineProposal from 'containers/defineProposal';
 import ReviewWithdraw from 'containers/reviewWithdraw';
 import {fetchTokenPrice} from 'services/prices';
+import {Finance} from 'utils/paths';
 
 export type TransferData = {
   amount: string;
@@ -123,7 +124,11 @@ const NewWithdraw: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper wizardProcessName={t('newWithdraw.withdrawAssets')}>
+      <FullScreenStepper
+        wizardProcessName={t('newWithdraw.withdrawAssets')}
+        navLabel={t('allTransfer.newTransfer')}
+        returnPath={Finance}
+      >
         {/* FIXME: Each step needs to be able to disable the back
         button. Otherwise, if the user leaves step x in an invalid state and
         goes back to a step < x, they won't be able to move forward. */}
