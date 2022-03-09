@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -10,7 +10,7 @@ import {
 import {useFormContext} from 'react-hook-form';
 
 import {useActionsContext} from 'context/actions';
-import ConfigureWithdrawForm from '../configureWithdraw';
+import WithdrawActionForm from './withdrawActionForm';
 
 type Props = {
   index: number;
@@ -18,14 +18,18 @@ type Props = {
 
 const WithdrawAction: React.FC<Props> = ({index}) => {
   const {t} = useTranslation();
+  const [openMenu, setOpenMenu] = useState<boolean>(false);
   const {removeAction, duplicateAction} = useActionsContext();
-  const {setValue, resetField} = useFormContext();
+  const {setValue, clearErrors} = useFormContext();
 
   const resetWithdrawFields = () => {
-    setValue('to', '');
-    resetField('tokenSymbol');
-    setValue('tokenAddress', '');
-    setValue('amount', '');
+    clearErrors(`actions.${index}`);
+    setValue(`actions.${index}`, {
+      to: '',
+      amount: '',
+      tokenAddress: '',
+      tokenSymbol: '',
+    });
   };
 
   return (
@@ -38,6 +42,8 @@ const WithdrawAction: React.FC<Props> = ({index}) => {
           </Description>
         </HCWrapper>
         <Popover
+          open={openMenu}
+          onOpenChange={setOpenMenu}
           side="bottom"
           align="end"
           width={264}
@@ -45,17 +51,26 @@ const WithdrawAction: React.FC<Props> = ({index}) => {
             <div className="p-1.5 space-y-0.5">
               <ListItemAction
                 title={t('labels.duplicateAction')}
-                onClick={() => duplicateAction(index)}
+                onClick={() => {
+                  duplicateAction(index);
+                  setOpenMenu(false);
+                }}
                 bgWhite
               />
               <ListItemAction
                 title={t('labels.resetAction')}
-                onClick={resetWithdrawFields}
+                onClick={() => {
+                  resetWithdrawFields();
+                  setOpenMenu(false);
+                }}
                 bgWhite
               />
               <ListItemAction
                 title={t('labels.removeEntireAction')}
-                onClick={() => removeAction(index)}
+                onClick={() => {
+                  removeAction(index);
+                  setOpenMenu(false);
+                }}
                 bgWhite
               />
             </div>
@@ -70,7 +85,7 @@ const WithdrawAction: React.FC<Props> = ({index}) => {
         </Popover>
       </Header>
       <Body>
-        <ConfigureWithdrawForm />
+        <WithdrawActionForm index={index} />
       </Body>
     </Container>
   );

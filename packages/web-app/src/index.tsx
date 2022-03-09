@@ -7,26 +7,26 @@ import {WalletProvider} from 'context/augmentedWallet';
 import {APMProvider} from 'context/elasticAPM';
 import {WalletMenuProvider} from 'context/walletMenu';
 import {GlobalModalsProvider} from 'context/globalModals';
-import {ActionsProvider} from 'context/actions';
 import {ApolloProvider} from '@apollo/client';
 import {client} from 'context/apolloClient';
 import 'tailwindcss/tailwind.css';
+import {ProvidersProvider} from 'context/providers';
 
 ReactDOM.render(
   <React.StrictMode>
     <APMProvider>
       <WalletProvider>
-        <WalletMenuProvider>
-          <GlobalModalsProvider>
-            <ActionsProvider>
+        <ProvidersProvider>
+          <WalletMenuProvider>
+            <GlobalModalsProvider>
               <Router>
                 <ApolloProvider client={client}>
                   <App />
                 </ApolloProvider>
               </Router>
-            </ActionsProvider>
-          </GlobalModalsProvider>
-        </WalletMenuProvider>
+            </GlobalModalsProvider>
+          </WalletMenuProvider>
+        </ProvidersProvider>
       </WalletProvider>
     </APMProvider>
   </React.StrictMode>,

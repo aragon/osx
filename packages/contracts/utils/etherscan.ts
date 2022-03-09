@@ -1,16 +1,7 @@
 import HRE from 'hardhat';
 import fs from 'fs';
 import {file} from 'tmp-promise';
-
-export const SUPPORTED_ETHERSCAN_NETWORKS = [
-  'mainnet',
-  'rinkeby',
-  'ropsten',
-  'arbitrum',
-  'arbitrum_rinkeby',
-  'polygon',
-  'polygon_mumbai',
-];
+import path from 'path';
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -22,9 +13,16 @@ export const verifyContract = async (
 ) => {
   const currentNetwork = HRE.network.name;
 
-  if (!SUPPORTED_ETHERSCAN_NETWORKS.includes(currentNetwork)) {
+  const networks = await fs.promises.readFile(
+    path.join(__dirname, '../networks.json'),
+    'utf8'
+  );
+  const networksJSON = JSON.parse(networks.toString());
+  if (!Object.keys(networksJSON).includes(currentNetwork)) {
     throw Error(
-      `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${SUPPORTED_ETHERSCAN_NETWORKS.toString()}`
+      `Current network ${currentNetwork} not supported. Please change to one of the next networks: ${Object.keys(
+        networksJSON
+      ).join(',')}`
     );
   }
 

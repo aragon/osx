@@ -1,1 +1,17 @@
-{}
+{
+  "arbitrum-rinkeby": {
+    "DAOFactory": "0xE978942c691e43f65c1B7c7F8f1dc8cDF061B13f",
+    "Registry": "0x5B3B36BdC9470963A2734D6a0d2F6a64C21C159f",
+    "TokenFactory": "0x96E54098317631641703404C06A5afAD89da7373"
+  },
+  "rinkeby": {
+    "DAOFactory": "0xfb6e7E592FA18C3c549EB6678282ce8D15c21966",
+    "Registry": "0x70080B0775C0898327F9557b03a9Ff7B10238429",
+    "TokenFactory": "0x228A972f9e074bC887D19e97fd5C449856eB37a7"
+  },
+  "mumbai": {
+    "DAOFactory": "0x622DB36633643E4A4075ecc3A309a4f0B942922a",
+    "Registry": "0xC7B9Dc9545df7B0042B5D91D7dF3DFEcf291F811",
+    "TokenFactory": "0x12B5df0105c88c3b33f340a66c655A063A39fB5A"
+  }
+}

@@ -8,6 +8,8 @@ export type WizardProps = {
   totalSteps: number;
   title: string;
   description: string;
+  includeStepper?: boolean;
+  nav: React.ReactNode;
 };
 
 export const Wizard: React.FC<WizardProps> = ({
@@ -16,35 +18,54 @@ export const Wizard: React.FC<WizardProps> = ({
   totalSteps,
   title,
   description,
+  includeStepper = true,
+  nav,
 }) => {
   return (
     <StepCard data-testid="wizard">
-      <CenteredFlex>
-        <p className="font-bold text-primary-500">{processName}</p>
-        {/* TODO: Check how to do i18n for the Step x of y format */}
-        <p className="text-ui-400">
-          Step {currentStep} of {totalSteps}
-        </p>
-      </CenteredFlex>
-      <LinearProgress max={totalSteps} value={currentStep} />
-      <StepTitle>{title}</StepTitle>
-      <StepSubTitle>{description}</StepSubTitle>
+      <div className="desktop:hidden">{nav}</div>
+
+      {/* Stepper */}
+      {includeStepper && (
+        <Wrapper>
+          <CenteredFlex>
+            <p className="font-bold text-ui-800 desktop:text-primary-500">
+              {processName}
+            </p>
+            <p className="text-ui-400">
+              Step {currentStep} of {totalSteps}
+            </p>
+          </CenteredFlex>
+          <LinearProgress max={totalSteps} value={currentStep} />
+        </Wrapper>
+      )}
+
+      {/* Main */}
+      <Wrapper>
+        <StepTitle>{title}</StepTitle>
+        <StepSubTitle>{description}</StepSubTitle>
+      </Wrapper>
     </StepCard>
   );
 };
 
 const StepCard = styled.div.attrs({
-  className: 'py-3 px-2 tablet:px-3 lg:px-6 lg:py-6 tablet:rounded-xl bg-ui-0',
+  className:
+    'flex flex-col px-2 pt-2 pb-3 tablet:p-3 desktop:p-6 tablet:rounded-xl gap-y-3 bg-ui-0',
 })``;
 
-const StepTitle = styled.h1.attrs({
-  className: 'mt-4 text-2xl lg:text-3xl font-bold text-ui-800',
+const Wrapper = styled.div.attrs({
+  className: 'space-y-1',
+})``;
+
+const StepTitle = styled.p.attrs({
+  className: 'text-2xl desktop:text-3xl text-ui-800 font-bold',
 })``;
 
 const StepSubTitle = styled.p.attrs({
-  className: 'mt-2 text-base lg:text-lg',
+  className: 'text-ui-600 desktop:text-lg',
 })``;
 
 const CenteredFlex = styled.div.attrs({
-  className: 'flex justify-between items-baseline text-sm lg:text-base mb-1',
+  className: 'flex justify-between text-sm desktop:text-base',
 })``;

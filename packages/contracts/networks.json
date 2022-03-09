@@ -1,0 +1,34 @@
+{
+    "mainnet": {
+      "url": "https://mainnet.eth.aragon.network/",
+      "isTestnet": false,
+      "chainId": 1
+    },
+    "rinkeby": {
+      "url": "https://rinkeby.eth.aragon.network/",
+      "isTestnet": true,
+      "chainId": 4
+    },
+    "arbitrum": {
+      "url": "https://arbitrum-mainnet.infura.io/v3/92aa62d2bb5449cfafe04b83ca8636f1",
+      "isTestnet": false,
+      "chainId": 42161
+    },
+    "arbitrum-rinkeby": {
+      "url": "https://arbitrum-rinkeby.infura.io/v3/92aa62d2bb5449cfafe04b83ca8636f1",
+      "isTestnet": true,
+      "chainId": 421611
+    },
+    "polygon": {
+      "url": "https://polygon-mainnet.infura.io/v3/1011d31bf5b34d68b94895caa2d2da58",
+      "isTestnet": false,
+      "gasPrice": 40000000000,
+      "chainId": 137
+    },
+    "mumbai": {
+      "url": "https://polygon-mumbai.infura.io/v3/1011d31bf5b34d68b94895caa2d2da58",
+      "isTestnet": true,
+      "gasPrice": 40000000000,
+      "chainId": 80001
+    }
+  }

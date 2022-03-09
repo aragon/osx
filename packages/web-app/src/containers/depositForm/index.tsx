@@ -18,16 +18,18 @@ import {constants, utils} from 'ethers';
 import React, {useCallback, useEffect} from 'react';
 
 import {useWallet} from 'context/augmentedWallet';
+import {useGlobalModalContext} from 'context/globalModals';
+import {useProviders} from 'context/providers';
 import {fetchTokenData} from 'services/prices';
 import {handleClipboardActions} from 'utils/library';
-import {useGlobalModalContext} from 'context/globalModals';
 import {fetchBalance, getTokenInfo, isETH} from 'utils/tokens';
 import {validateTokenAddress, validateTokenAmount} from 'utils/validators';
 
 const DepositForm: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useGlobalModalContext();
-  const {account, balance: walletBalance, provider} = useWallet();
+  const {account, balance: walletBalance} = useWallet();
+  const {infura: provider} = useProviders();
   const {control, resetField, setValue, setFocus, trigger, getValues} =
     useFormContext();
   const {errors, dirtyFields} = useFormState({control});
@@ -277,11 +279,12 @@ const DepositForm: React.FC = () => {
                   <AlertInline label={error.message} mode="critical" />
                 )}
 
-                {tokenBalance && (
+                {!error?.message && tokenBalance && (
                   <TokenBalance>
-                    {`${t(
-                      'labels.maxBalance'
-                    )}: ${tokenBalance} ${tokenSymbol}`}
+                    {`${t('labels.maxBalance')}: ${tokenBalance.slice(
+                      0,
+                      6
+                    )} ${tokenSymbol}`}
                   </TokenBalance>
                 )}
               </div>

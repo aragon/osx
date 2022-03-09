@@ -8,29 +8,9 @@ on:
       - 'main'
 
 jobs:
-  set-environment:
+  test:
+    if: github.actor != 'arabot-1'
     runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.envdev.outputs.environment }}${{ steps.envprod.outputs.environment }}
-      tags:  ${{ steps.envdev.outputs.tags }}${{ steps.envprod.outputs.tags }}
-    steps:
-      - name: Set environment to staging
-        if: endsWith(github.ref, '/develop')
-        id: envdev
-        run: |
-          echo "::set-output name=environment::staging"
-          echo "::set-output name=tags::Registry"
-      - name: Set environment to prod
-        if: endsWith(github.ref, '/main')
-        id: envprod
-        run: |
-          echo "::set-output name=environment::production"
-          echo "::set-output name=tags::Registry"
-  build-deploy:
-    runs-on: ubuntu-latest
-    needs: [set-environment]
-    if: needs.set-environment.outputs.environment != ''
-    environment: ${{ needs.set-environment.outputs.environment }}
     steps:
       - uses: actions/checkout@v2
       - name: Install node
@@ -41,20 +21,76 @@ jobs:
         run: yarn install --pure-lockfile
       - name: Compile
         run: cd packages/contracts && yarn run compile
-      - name: Test
-        run: yarn test
-      - name: Deploy
-        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.set-environment.outputs.tags }}"
+      - name: Run Hardhat Tests
         env:
-          RINKEBY_URL: "https://rinkeby.eth.aragon.network/"
-          MAINNET_URL: "https://mainnet.eth.aragon.network/"
+          REPORT_GAS: true
+        run: cd packages/contracts && yarn run test
+  prepare:
+    needs: [test]
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.prepare.outputs.environment }}
+      tags: ${{ steps.prepare.outputs.tags }}
+      matrix: ${{ steps.prepare.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare
+        id: prepare
+        run: node .github/helpers/contracts/prepare.js '${{ github.ref }}'
+  build-deploy:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    environment: ${{ needs.prepare.outputs.environment }}
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Compile
+        run: cd packages/contracts && yarn run compile
+      - name: Deploy
+        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.prepare.outputs.tags }}"
+        env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
-          NETWORK: ${{ secrets.NETWORK_NAME }}
+          NETWORK: ${{ matrix.network }}
           ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
+          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
+          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{matrix.network}}
+          path: ./packages/contracts/deployments/*
+          retention-days: 1
+  conclude:
+    runs-on: ubuntu-latest
+    needs: ['build-deploy']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ARABOT_PAT }}
+      - uses: actions/download-artifact@v3
+        with:
+          path: artefacts
+      - name: Update Releases.md
+        run: node .github/helpers/contracts/updateReleasesMD.js
+      - name: Update active_contracts.json
+        run: node .github/helpers/contracts/updateActiveContractsJSON.js
+      - name: Update Subgraph manifests
+        run: node .github/helpers/subgraph/updateManifest.js
       - name: Commit changes
         run: |
-          git config --global user.name "$GITHUB_ACTOR"
-          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add .
+          git fetch
+          git pull
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
+          git add active_contracts.json
+          git add packages/contracts/Releases.md
+          git add ./packages/subgraph/	
           git commit -am "Updates files with deployed contract addresses"
           git push

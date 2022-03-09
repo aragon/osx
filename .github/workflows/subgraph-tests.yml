@@ -4,17 +4,29 @@ on:
     paths:
       - 'packages/subgraph/**'
       - '.github/workflows/subgraph-*.yml'
+      - 'packages/subgraph/**'
 
 env:
   working-directory: packages/subgraph
 
 jobs:
-  test:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.prepare.outputs.environment }}
+      matrix: ${{ steps.prepare.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare
+        id: prepare
+        run: node .github/helpers/subgraph/buildMatrix.js '${{ github.ref }}'
+  test:
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.prepare.outputs.environment }}
     strategy:
       fail-fast: false
-      matrix:
-        network: ['localhost', 'rinkeby', 'arbitrum-rinkeby']
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     defaults:
       run:
         working-directory: ${{env.working-directory}}

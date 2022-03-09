@@ -1,0 +1,45 @@
+name: Subgraph Deploy
+on:
+  push:
+    paths:
+      - 'packages/subgraph/**'
+    branches:
+      - 'develop'
+      - 'main'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.prepare.outputs.environment }}
+      matrix: ${{ steps.prepare.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare
+        id: prepare
+        run: node .github/helpers/subgraph/buildMatrix.js '${{ github.ref }}'
+  build-deploy:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    if: needs.prepare.outputs.environment != ''
+    environment: ${{ needs.prepare.outputs.environment }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Build Contracts
+        run: cd ./packages/contracts/ && yarn run compile
+      - name: Deploy Subgraph
+        run: cd ./packages/subgraph/ && yarn run deploy
+        env:
+          NETWORK_NAME: ${{ matrix.network }}
+          THEGRAPH_USERNAME: aragon
+          SUBGRAPH_NAME: zaragoza
+          GRAPH_KEY: ${{ secrets.GRAPH_KEY }}

@@ -1,16 +1,13 @@
 import {
   AvatarDao,
-  Breadcrumb,
   ButtonIcon,
   ButtonText,
   ButtonWallet,
   IconMenu,
-  IconMenuVertical,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
-import {useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import React, {useMemo, useState} from 'react';
+import React, {useState} from 'react';
 
 import useScreen from 'hooks/useScreen';
 import MobileMenu from './mobileMenu';
@@ -19,38 +16,28 @@ import {useWalletProps} from 'containers/walletMenu';
 import NetworkIndicator from './networkIndicator';
 import {useGlobalModalContext} from 'context/globalModals';
 import {NetworkIndicatorStatus} from 'utils/types';
+
 type MobileNavProps = {
   status?: NetworkIndicatorStatus;
-  returnURL?: string;
-  processLabel?: string;
+  isProcess?: boolean;
   onWalletClick: () => void;
 };
 
 const MobileNav: React.FC<MobileNavProps> = props => {
   const {t} = useTranslation();
   const {open} = useGlobalModalContext();
-  const navigate = useNavigate();
   const {isMobile} = useScreen();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const {isConnected, account, ensName, ensAvatarUrl}: useWalletProps =
     useWallet();
 
-  const isProcess = useMemo(
-    () => props.returnURL && props.processLabel,
-    [props.processLabel, props.returnURL]
-  );
-
-  if (isProcess) {
+  if (props.isProcess)
     return (
-      <ProcessMenuItems data-testid="navbar">
-        <Breadcrumb
-          crumbs={{label: props.processLabel!, path: props.returnURL!}}
-          onClick={(path: string) => navigate(path)}
-        />
-        <ButtonIcon mode="secondary" size="large" icon={<IconMenuVertical />} />
-      </ProcessMenuItems>
+      <Container>
+        <NetworkIndicator status={props.status} />
+      </Container>
     );
-  }
+
   return (
     <>
       <Container data-testid="navbar">
@@ -127,9 +114,4 @@ const DaoContainer = styled.div.attrs({
 
 const DaoName = styled.p.attrs({
   className: 'hidden tablet:block text-sm font-bold text-ui-800',
-})``;
-
-const ProcessMenuItems = styled.nav.attrs({
-  className:
-    'flex justify-between items-center px-2 pt-2 pb-0.25 tablet:pb-2 bg-ui-0',
 })``;

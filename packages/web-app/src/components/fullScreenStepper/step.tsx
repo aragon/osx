@@ -1,6 +1,7 @@
 import React, {ReactElement} from 'react';
 
 export type StepProps = {
+  includeStepper?: boolean;
   wizardTitle?: string;
   wizardDescription?: string;
   hideWizard?: boolean;

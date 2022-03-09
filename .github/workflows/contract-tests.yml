@@ -10,6 +10,7 @@ env:
 
 jobs:
   test-hardhat:
+    if: github.actor != 'arabot-1'
     runs-on: ubuntu-latest
     defaults:
       run:

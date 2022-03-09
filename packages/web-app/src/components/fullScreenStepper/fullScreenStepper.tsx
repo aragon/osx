@@ -3,6 +3,7 @@ import {
   Wizard,
   ButtonText,
   IconChevronRight,
+  Breadcrumb,
 } from '@aragon/ui-components';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
@@ -10,8 +11,11 @@ import React, {createContext, useContext, useMemo} from 'react';
 
 import {useStepper} from 'hooks/useStepper';
 import {StepProps} from './step';
+import {useNavigate} from 'react-router-dom';
 
 export type FullScreenStepperProps = {
+  navLabel: string;
+  returnPath: string;
   wizardProcessName: string;
   children: React.FunctionComponentElement<StepProps>[];
 };
@@ -33,12 +37,17 @@ export const useFormStep = () =>
 export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
   wizardProcessName,
   children,
+  navLabel,
+  returnPath,
 }) => {
   const {t} = useTranslation();
+  const navigate = useNavigate();
+
   const {currentStep, prev, next, setStep} = useStepper(children.length);
 
   const currentIndex = currentStep - 1;
   const {
+    includeStepper = true,
     wizardTitle,
     wizardDescription,
     hideWizard,
@@ -71,11 +80,18 @@ export const FullScreenStepper: React.FC<FullScreenStepperProps> = ({
       <Layout>
         {!hideWizard && (
           <Wizard
+            includeStepper={includeStepper}
             processName={wizardProcessName}
             title={wizardTitle || ''}
             description={wizardDescription || ''}
             totalSteps={totalSteps}
             currentStep={currentFormStep}
+            nav={
+              <Breadcrumb
+                crumbs={{label: navLabel, path: returnPath}}
+                onClick={(path: string) => navigate(path)}
+              />
+            }
           />
         )}
         {customHeader}

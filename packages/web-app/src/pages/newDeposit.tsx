@@ -13,6 +13,7 @@ import {BaseTokenInfo} from 'utils/types';
 import {useWalletTokens} from 'hooks/useWalletTokens';
 import {FullScreenStepper, Step} from 'components/fullScreenStepper';
 import {TransferFormData} from './newWithdraw';
+import {Finance} from 'utils/paths';
 
 export type DepositFormData = TransferFormData;
 
@@ -33,7 +34,7 @@ const NewDeposit: React.FC = () => {
     defaultValues,
     mode: 'onChange',
   });
-  const walletTokens = useWalletTokens();
+  const {data: walletTokens} = useWalletTokens();
 
   /*************************************************
    *                    Hooks                      *
@@ -54,15 +55,13 @@ const NewDeposit: React.FC = () => {
   const handleTokenSelect = (token: BaseTokenInfo) => {
     formMethods.setValue('tokenSymbol', token.symbol);
 
-    // custom token selected, should reset all fields
-    // save the symbol and clear any error pertaining to the amount
+    // custom token selected, should reset all fields save amount.
     if (token.address === '') {
       formMethods.setValue('isCustomToken', true);
       formMethods.resetField('tokenName');
       formMethods.resetField('tokenImgUrl');
       formMethods.resetField('tokenAddress');
       formMethods.resetField('tokenBalance');
-      formMethods.clearErrors('amount');
       return;
     }
 
@@ -77,7 +76,7 @@ const NewDeposit: React.FC = () => {
     );
 
     if (formMethods.formState.dirtyFields.amount) {
-      formMethods.trigger('tokenAddress');
+      formMethods.trigger('amount');
     }
   };
 
@@ -86,7 +85,11 @@ const NewDeposit: React.FC = () => {
    *************************************************/
   return (
     <FormProvider {...formMethods}>
-      <FullScreenStepper wizardProcessName={t('newDeposit.depositAssets')}>
+      <FullScreenStepper
+        navLabel={t('allTransfer.newTransfer')}
+        returnPath={Finance}
+        wizardProcessName={t('newDeposit.depositAssets')}
+      >
         <Step
           wizardTitle={t('newDeposit.configureDeposit')}
           wizardDescription={t('newDeposit.configureDepositSubtitle')}
