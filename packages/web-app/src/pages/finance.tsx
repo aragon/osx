@@ -69,7 +69,6 @@ const Finance: React.FC = () => {
           signDisplay: 'always',
         }).format(treasury.totalAssetChange)}
         onClick={open}
-        primary
       >
         <div className={'h-4'} />
         <TokenSectionWrapper title={t('finance.tokenSection')}>

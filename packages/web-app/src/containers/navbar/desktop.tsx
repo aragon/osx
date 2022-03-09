@@ -24,7 +24,7 @@ import {Community, Dashboard, Finance, Governance, NotFound} from 'utils/paths';
 
 const MIN_ROUTE_DEPTH_FOR_BREADCRUMBS = 2;
 
-const basePathIcons: {[key: string]: JSX.Element} = {
+export const basePathIcons: {[key: string]: JSX.Element} = {
   [Dashboard]: <IconDashboard />,
   [Community]: <IconCommunity />,
   [Finance]: <IconFinance />,

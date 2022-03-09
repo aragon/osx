@@ -24,7 +24,7 @@ const Crumb: React.FC<CrumbProps> = props => {
         React.cloneElement(props.icon, {
           className: 'desktop:w-2.5 desktop:h-2.5',
         })}
-      <p>{props.label}</p>
+      <p className="font-bold">{props.label}</p>
       {props.last && props.tag}
     </CrumbContainer>
   );

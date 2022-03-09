@@ -1,20 +1,24 @@
-import React, {useState} from 'react';
-import styled from 'styled-components';
-import {withTransaction} from '@elastic/apm-rum-react';
-import {useNavigate, useParams} from 'react-router-dom';
-
-import * as paths from 'utils/paths';
 import {
   Badge,
+  Breadcrumb,
   ButtonText,
   CardExecution,
   IconChevronDown,
+  IconGovernance,
   IconChevronUp,
+  Link,
   ProgressStatusProps,
   WidgetStatus,
 } from '@aragon/ui-components';
+import styled from 'styled-components';
+import useScreen from 'hooks/useScreen';
+import useBreadcrumbs from 'use-react-router-breadcrumbs';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@aragon/ui-components';
+import {withTransaction} from '@elastic/apm-rum-react';
+import {useNavigate, useParams} from 'react-router-dom';
+import React, {useMemo, useState} from 'react';
+
+import * as paths from 'utils/paths';
 import ResourceList from 'components/resourceList';
 import {VotingTerminal} from 'containers/votingTerminal';
 
@@ -35,51 +39,79 @@ const stepDataRunning: ProgressStatusProps[] = [
   },
 ];
 
+const proposalTags = ['Finance', 'Withdraw'];
+//////////////////////////////////////////////////////////////////////
+
 const Proposal: React.FC = () => {
   const [expandedProposal, setExpandedProposal] = useState(false);
   const {t} = useTranslation();
-  const navigate = useNavigate();
   const {id} = useParams();
+  const navigate = useNavigate();
+  const {isDesktop} = useScreen();
+
+  const publisher = useMemo(() => {
+    // if (publisherAddress === account) return 'you';
+    // return shortenAddress(publisherAddress);
+    return 'you';
+  }, []);
+
   if (!id) {
     navigate(paths.NotFound);
   }
 
+  const breadcrumbs = useBreadcrumbs(undefined, {
+    excludePaths: [paths.Dashboard, paths.NotFound, 'governance/proposals'],
+  }).map(item => ({
+    path: item.match.pathname,
+    label: item.breadcrumb as string,
+  }));
+
   return (
     <Content>
-      <Header>Proposal {id}</Header>
-      <BadgeContainer>
-        <div className="flex space-x-1.5">
-          <Badge label="Finance" />
-          <Badge label="Withdraw" />
-        </div>
-        <ProposerLink>
-          {t('governance.proposals.publishedBy')}{' '}
-          <Link
-            external
-            label={'you'}
-            // label={shortenAddress(publisherAddress || '')}
-            // href={`${explorers[chainId]}${publisherAddress}`}
+      {/* Proposal Header */}
+      <HeaderContainer>
+        {!isDesktop && (
+          <Breadcrumb
+            onClick={navigate}
+            crumbs={breadcrumbs}
+            icon={<IconGovernance />}
           />
-        </ProposerLink>
-      </BadgeContainer>
+        )}
+        <ProposalTitle>Proposal {id}</ProposalTitle>
+        <ContentWrapper>
+          <BadgeContainer>
+            {proposalTags.map(tag => (
+              <Badge label={tag} key={tag} />
+            ))}
+          </BadgeContainer>
+          <ProposerLink>
+            {t('governance.proposals.publishedBy')}{' '}
+            <Link
+              external
+              label={publisher}
+              // href={`${explorers[chainId]}${publisherAddress}`}
+            />
+          </ProposerLink>
+        </ContentWrapper>
+        <SummaryText>
+          As most community members know, Aragon has strived to deploy its
+          products to more cost-efficient blockchain networks to facilitate more
+          adoption. Since Aragon is building products on Arbitrum which will use
+          Aragon Court, it seems to be a natural chain of choice for L2
+          deployment.
+        </SummaryText>
 
-      <SummaryText>
-        As most community members know, Aragon has strived to deploy its
-        products to more cost-efficient blockchain networks to facilitate more
-        adoption. Since Aragon is building products on Arbitrum which will use
-        Aragon Court, it seems to be a natural chain of choice for L2
-        deployment.
-      </SummaryText>
-
-      {!expandedProposal && (
-        <ButtonText
-          className="mt-3 w-full tablet:w-max"
-          label={t('governance.proposals.buttons.readFullProposal')}
-          mode="secondary"
-          iconRight={<IconChevronDown />}
-          onClick={() => setExpandedProposal(true)}
-        />
-      )}
+        {!expandedProposal && (
+          <ButtonText
+            className="w-full tablet:w-max"
+            size="large"
+            label={t('governance.proposals.buttons.readFullProposal')}
+            mode="secondary"
+            iconRight={<IconChevronDown />}
+            onClick={() => setExpandedProposal(true)}
+          />
+        )}
+      </HeaderContainer>
 
       <ContentContainer expandedProposal={expandedProposal}>
         <ProposalContainer>
@@ -159,18 +191,28 @@ const Content = styled.div.attrs({
   className: 'tablet:w-4/5 mx-auto px-2 pt-3 pb-14',
 })``;
 
-const Header = styled.p.attrs({className: 'font-bold text-ui-800 text-3xl'})``;
+const HeaderContainer = styled.div.attrs({
+  className: 'flex flex-col gap-y-2 desktop:p-0 px-2 tablet:px-3 pt-2',
+})``;
+
+const ProposalTitle = styled.p.attrs({
+  className: 'font-bold text-ui-800 text-3xl',
+})``;
+
+const ContentWrapper = styled.div.attrs({
+  className: 'flex flex-col tablet:flex-row gap-x-3 gap-y-1.5',
+})``;
 
 const BadgeContainer = styled.div.attrs({
-  className: 'tablet:flex items-baseline mt-3 tablet:space-x-3',
+  className: 'flex flex-wrap gap-x-1.5',
 })``;
 
 const ProposerLink = styled.p.attrs({
-  className: 'mt-1.5 tablet:mt-0 text-ui-500',
+  className: 'text-ui-500',
 })``;
 
 const SummaryText = styled.p.attrs({
-  className: 'text-lg text-ui-600 mt-3',
+  className: 'text-lg text-ui-600',
 })``;
 
 const ProposalContainer = styled.div.attrs({
