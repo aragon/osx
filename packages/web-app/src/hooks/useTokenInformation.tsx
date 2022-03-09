@@ -1,9 +1,9 @@
 import {useCallback, useEffect, useState} from 'react';
 
-import {useWallet} from 'context/augmentedWallet';
 import useIsMounted from './useIsMounted';
-import {getTokenInfo} from 'utils/tokens';
+import {useProviders} from 'context/providers';
 import {fetchTokenData} from 'services/prices';
+import {getTokenInfo} from 'utils/tokens';
 import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
 
 /**
@@ -13,7 +13,7 @@ import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
  */
 export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
   const isMounted = useIsMounted();
-  const {provider} = useWallet();
+  const {infura: provider} = useProviders();
   const [error, setError] = useState<Error>();
   const [tokenInfo, setTokenInfo] = useState<BaseTokenInfo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,7 +26,7 @@ export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
 
     try {
       const allFetchPromise = Promise.all(
-        tokenBalances.map(tokenBalance => fetchTokenData(tokenBalance.address))
+        tokenBalances?.map(tokenBalance => fetchTokenData(tokenBalance.address))
       );
 
       // Await all promises

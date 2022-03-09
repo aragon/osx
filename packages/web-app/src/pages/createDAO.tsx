@@ -12,11 +12,11 @@ import SetupCommunity from 'containers/setupCommunity';
 import GoLive, {GoLiveHeader, GoLiveFooter} from 'containers/goLive';
 import {WalletField} from '../components/addWallets/row';
 import {Dashboard} from 'utils/paths';
-import {useWallet} from 'context/augmentedWallet';
 import {BigNumberish, ethers} from 'ethers';
-import DAOFactoryABI from '../abis/DAOFactory.json';
+import DAOFactoryABI from 'abis/DAOFactory.json';
 
 import {DAOFactory} from 'typechain';
+import {useProviders} from 'context/providers';
 
 type FormData = {
   daoLogo: string;
@@ -58,7 +58,7 @@ const CreateDAO: React.FC = () => {
     'isCustomToken',
     'tokenTotalSupply',
   ]);
-  const {provider} = useWallet();
+  const {infura: provider} = useProviders();
 
   /*************************************************
    *             Step Validation States            *

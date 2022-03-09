@@ -122,6 +122,8 @@ export type HookData<T> = {
   error?: Error;
 };
 
+export type Nullable<T> = T | null;
+
 export type SupportedChainId = 1 | 4;
 
 /**

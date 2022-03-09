@@ -34,7 +34,7 @@ const NewDeposit: React.FC = () => {
     defaultValues,
     mode: 'onChange',
   });
-  const walletTokens = useWalletTokens();
+  const {data: walletTokens} = useWalletTokens();
 
   /*************************************************
    *                    Hooks                      *

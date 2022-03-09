@@ -1,18 +1,18 @@
-import {useTranslation} from 'react-i18next';
-import {useFormContext} from 'react-hook-form';
-import React, {useEffect, useState} from 'react';
 import {CardText, CardToken, CardTransfer} from '@aragon/ui-components';
+import React, {useEffect, useState} from 'react';
+import {useFormContext} from 'react-hook-form';
+import {useTranslation} from 'react-i18next';
 
-import {useWallet} from 'context/augmentedWallet';
+import {useProviders} from 'context/providers';
 import {fetchTokenPrice} from 'services/prices';
 
 const ReviewDeposit: React.FC = () => {
   const {t} = useTranslation();
+  const {infura: provider} = useProviders();
+
   const [price, setPrice] = useState<string>();
   const {getValues, setValue} = useFormContext();
   const values = getValues();
-
-  const {provider} = useWallet();
 
   useEffect(() => {
     async function getPrice() {

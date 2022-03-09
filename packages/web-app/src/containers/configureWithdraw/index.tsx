@@ -14,21 +14,23 @@ import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import React, {useCallback, useEffect} from 'react';
 
+import {useWallet} from 'context/augmentedWallet';
+import {useProviders} from 'context/providers';
+import {useGlobalModalContext} from 'context/globalModals';
+import {fetchTokenData} from 'services/prices';
+import {formatUnits, handleClipboardActions} from 'utils/library';
+import {getTokenInfo, isETH} from 'utils/tokens';
 import {
   validateAddress,
   validateTokenAddress,
   validateTokenAmount,
 } from 'utils/validators';
-import {useWallet} from 'context/augmentedWallet';
-import {fetchTokenData} from 'services/prices';
-import {getTokenInfo, isETH} from 'utils/tokens';
-import {useGlobalModalContext} from 'context/globalModals';
-import {formatUnits, handleClipboardActions} from 'utils/library';
 
 const ConfigureWithdrawForm: React.FC = () => {
   const {t} = useTranslation();
   const {open} = useGlobalModalContext();
-  const {account, provider} = useWallet();
+  const {account} = useWallet();
+  const {infura: provider} = useProviders();
   const {control, getValues, trigger, resetField, setFocus, setValue} =
     useFormContext();
   const {errors, dirtyFields} = useFormState({control});
