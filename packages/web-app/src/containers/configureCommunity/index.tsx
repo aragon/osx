@@ -11,6 +11,10 @@ const ConfigureCommunity: React.FC = () => {
     name: ['tokenTotalSupply', 'tokenSymbol'],
   });
 
+  const percentageInputValidator = (value: string | number) => {
+    return value <= 100 && value >= 0 ? true : t('errors.percentage');
+  };
+
   return (
     <>
       {/* Minimum approval */}
@@ -24,32 +28,37 @@ const ConfigureCommunity: React.FC = () => {
           name="minimumApproval"
           control={control}
           defaultValue="15"
+          rules={{
+            validate: value => percentageInputValidator(value),
+          }}
           render={({
             field: {onBlur, onChange, value, name},
             fieldState: {error},
           }) => (
-            <ApprovalWrapper>
-              <FormWrapper>
-                <NumberInput
-                  name={name}
-                  value={value}
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  placeholder={t('placeHolders.daoName')}
-                  percentage={true}
+            <>
+              <ApprovalWrapper>
+                <FormWrapper>
+                  <NumberInput
+                    name={name}
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    placeholder={t('placeHolders.daoName')}
+                    percentage={true}
+                  />
+                </FormWrapper>
+                <AlertInline
+                  label={t('createDAO.step4.alerts.minimumApprovalAlert', {
+                    amount: Math.round(tokenTotalSupply * (value / 100)),
+                    symbol: tokenSymbol?.toUpperCase(),
+                  })}
+                  mode="neutral"
                 />
-              </FormWrapper>
-              <AlertInline
-                label={t('createDAO.step4.alerts.minimumApprovalAlert', {
-                  amount: Math.round(tokenTotalSupply * (value / 100)),
-                  symbol: tokenSymbol?.toUpperCase(),
-                })}
-                mode="neutral"
-              />
+              </ApprovalWrapper>
               {error?.message && (
                 <AlertInline label={error.message} mode="critical" />
               )}
-            </ApprovalWrapper>
+            </>
           )}
         />
       </FormItem>
@@ -65,23 +74,28 @@ const ConfigureCommunity: React.FC = () => {
           name="support"
           control={control}
           defaultValue="50"
+          rules={{
+            validate: value => percentageInputValidator(value),
+          }}
           render={({
             field: {onBlur, onChange, value, name},
             fieldState: {error},
           }) => (
-            <FormWrapper>
-              <NumberInput
-                name={name}
-                value={value}
-                onBlur={onBlur}
-                onChange={onChange}
-                placeholder={t('placeHolders.daoName')}
-                percentage
-              />
+            <>
+              <FormWrapper>
+                <NumberInput
+                  name={name}
+                  value={value}
+                  onBlur={onBlur}
+                  onChange={onChange}
+                  placeholder={t('placeHolders.daoName')}
+                  percentage
+                />
+              </FormWrapper>
               {error?.message && (
                 <AlertInline label={error.message} mode="critical" />
               )}
-            </FormWrapper>
+            </>
           )}
         />
       </FormItem>
@@ -97,6 +111,10 @@ const ConfigureCommunity: React.FC = () => {
             name="durationDays"
             control={control}
             defaultValue="1"
+            rules={{
+              validate: value =>
+                value >= 0 ? true : t('errors.distributionDays'),
+            }}
             render={({
               field: {onBlur, onChange, value, name},
               fieldState: {error},
@@ -122,6 +140,12 @@ const ConfigureCommunity: React.FC = () => {
             name="durationHours"
             control={control}
             defaultValue="0"
+            rules={{
+              validate: value =>
+                value <= 23 && value >= 0
+                  ? true
+                  : t('errors.distributionHours'),
+            }}
             render={({
               field: {onBlur, onChange, value, name},
               fieldState: {error},
@@ -148,6 +172,12 @@ const ConfigureCommunity: React.FC = () => {
             name="durationMinutes"
             control={control}
             defaultValue="0"
+            rules={{
+              validate: value =>
+                value <= 59 && value >= 0
+                  ? true
+                  : t('errors.distributionMinutes'),
+            }}
             render={({
               field: {onBlur, onChange, value, name},
               fieldState: {error},

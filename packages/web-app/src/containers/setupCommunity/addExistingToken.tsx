@@ -5,20 +5,13 @@ import {
   SearchInput,
   TextInput,
 } from '@aragon/ui-components';
-import React, {useEffect, useMemo} from 'react';
-import {
-  Controller,
-  useFormContext,
-  useFormState,
-  useWatch,
-} from 'react-hook-form';
-import {useTranslation} from 'react-i18next';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {Controller, useFormContext, useWatch} from 'react-hook-form';
 import styled from 'styled-components';
 import {chains} from 'use-wallet';
-
+import {useTranslation} from 'react-i18next';
 import {useWallet} from 'context/augmentedWallet';
 import {useProviders} from 'context/providers';
-import {isAddress} from 'ethers/lib/utils';
 import {ChainInformation} from 'use-wallet/dist/cjs/types';
 import {formatUnits} from 'utils/library';
 import {getTokenInfo} from 'utils/tokens';
@@ -34,13 +27,12 @@ const AddExistingToken: React.FC<AddExistingTokenType> = ({
   resetTokenFields,
 }) => {
   const {t} = useTranslation();
-  const {account} = useWallet();
+  const {isConnected, chainId, networkName} = useWallet();
   const {infura: provider} = useProviders();
-  const {control, resetField, setValue} = useFormContext();
-  const {errors} = useFormState({control});
+  const {control, setValue, trigger} = useFormContext();
 
-  const [address, chainId, tokenName, tokenSymbol, tokenTotalSupply] = useWatch(
-    {
+  const [tokenAddress, blockchain, tokenName, tokenSymbol, tokenTotalSupply] =
+    useWatch({
       name: [
         'tokenAddress',
         'blockchain',
@@ -48,66 +40,76 @@ const AddExistingToken: React.FC<AddExistingTokenType> = ({
         'tokenSymbol',
         'tokenTotalSupply',
       ],
-    }
-  );
+    });
 
   const explorer = useMemo(() => {
-    if (chainId.id) {
+    if (blockchain.id) {
       const {explorerUrl} = chains.getChainInformation(
-        chainId.id
+        blockchain.id
       ) as ChainInformation;
       return explorerUrl || DEFAULT_BLOCK_EXPLORER;
     }
 
     return DEFAULT_BLOCK_EXPLORER;
-  }, [chainId.id]);
+  }, [blockchain.id]);
+
+  // Trigger address validation on network change
+  useEffect(() => {
+    if (blockchain.id === chainId && tokenAddress !== '' && !tokenSymbol) {
+      trigger('tokenAddress');
+    }
+  }, [blockchain.id, chainId, tokenAddress, tokenSymbol, trigger]);
 
   /*************************************************
-   *                    Hooks                      *
+   *            Functions and Callbacks            *
    *************************************************/
-  useEffect(() => {
-    // (Temporary) complain about wallet
-    if (!account) {
-      alert('Please connect your wallet');
-      return;
-    }
-
-    const fetchContractInfo = async () => {
-      // have to include this to "debounce" network calls
-      if (!isAddress(address) || errors.tokenAddress) return;
-
-      try {
-        const {decimals, name, symbol, totalSupply} = await getTokenInfo(
-          address,
-          provider
-        );
-
-        if (decimals) {
-          setValue('tokenName', name);
-          setValue('tokenSymbol', symbol);
-          setValue('tokenTotalSupply', formatUnits(totalSupply, decimals));
-        }
-      } catch (error) {
-        console.error('Error fetching token information', error);
-        resetTokenFields();
+  const addressValidator = useCallback(
+    async contractAddress => {
+      // No wallet
+      if (!isConnected()) {
+        alert('Connect Wallet');
+        return 'Connect Wallet'; // Temporary
       }
-    };
 
-    if (errors.tokenAddress !== undefined && tokenName !== '') {
-      resetTokenFields();
-    } else {
-      fetchContractInfo();
-    }
-  }, [
-    account,
-    address,
-    errors.tokenAddress,
-    provider,
-    resetField,
-    resetTokenFields,
-    setValue,
-    tokenName,
-  ]);
+      // Wrong network
+      if (blockchain.id !== chainId) {
+        alert(
+          `Chain mismatch: Selected - ${blockchain?.label} but connected to ${networkName}`
+        );
+        return 'Switch Chain'; // Temporary
+      }
+
+      const isValid = await validateTokenAddress(contractAddress, provider);
+
+      if (isValid) {
+        try {
+          const res = await getTokenInfo(contractAddress, provider);
+
+          setValue('tokenName', res.name);
+          setValue('tokenSymbol', res.symbol);
+          setValue(
+            'tokenTotalSupply',
+            formatUnits(res.totalSupply, res.decimals)
+          );
+        } catch (error) {
+          console.error('Error fetching token information', error);
+          resetTokenFields();
+        }
+      }
+
+      return isValid;
+    },
+    [
+      blockchain.id,
+      blockchain?.label,
+      chainId,
+      isConnected,
+      networkName,
+      provider,
+      resetTokenFields,
+      setValue,
+    ]
+  );
 
   return (
     <>
@@ -134,7 +136,7 @@ const AddExistingToken: React.FC<AddExistingTokenType> = ({
           defaultValue=""
           rules={{
             required: t('errors.required.tokenAddress'),
-            validate: async value => validateTokenAddress(value, provider),
+            validate: addressValidator,
           }}
           render={({
             field: {name, value, onBlur, onChange},
@@ -148,7 +150,7 @@ const AddExistingToken: React.FC<AddExistingTokenType> = ({
               {error?.message && (
                 <AlertInline label={error.message} mode="critical" />
               )}
-              {!invalid && isDirty && (
+              {!invalid && isDirty && tokenSymbol && (
                 <AlertInline label={t('success.contract')} mode="success" />
               )}
             </>

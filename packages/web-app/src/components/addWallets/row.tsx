@@ -83,27 +83,34 @@ const WalletRow: React.FC<WalletRowProps> = ({index, onDelete}) => {
             required: t('errors.required.walletAddress') as string,
             validate: value => addressValidator(value, index),
           }}
-          render={({field, fieldState: {error}}) => (
+          render={({
+            field: {name, value, onBlur, onChange},
+            fieldState: {error},
+          }) => (
             <>
               <LabelWrapper>
                 <Label label={t('labels.walletList.address')} />
               </LabelWrapper>
               <ValueInput
                 mode={error ? 'critical' : 'default'}
-                name={field.name}
-                value={field.value === account ? 'My Wallet' : field.value}
-                onBlur={field.onBlur}
-                onChange={field.onChange}
+                name={name}
+                value={value === account ? 'My Wallet' : value}
+                onBlur={onBlur}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onChange(
+                    e.target.value === account ? 'My Wallet' : e.target.value
+                  );
+                }}
                 disabled={index === 0}
-                adornmentText={
-                  field.value ? t('labels.copy') : t('labels.paste')
-                }
-                onAdornmentClick={() =>
+                adornmentText={value ? t('labels.copy') : t('labels.paste')}
+                onAdornmentClick={() => {
                   handleClipboardActions(
-                    field.value === account ? account : field.value,
-                    field.onChange
-                  )
-                }
+                    value === 'My Wallet' ? account : value,
+                    (newValue: string) => {
+                      onChange(newValue === account ? 'My Wallet' : newValue);
+                    }
+                  );
+                }}
               />
               {error?.message && (
                 <ErrorContainer>

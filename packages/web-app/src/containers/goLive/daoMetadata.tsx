@@ -40,12 +40,10 @@ const DaoMetadata: React.FC = () => {
           <LabelWrapper>
             <Label>{t('labels.logo')}</Label>
           </LabelWrapper>
-          {daoLogo && (
-            <AvatarDao
-              {...{daoName}}
-              src={daoLogo ? URL.createObjectURL(daoLogo) : ''}
-            />
-          )}
+          <AvatarDao
+            {...{daoName}}
+            {...(daoLogo && {src: URL.createObjectURL(daoLogo)})}
+          />
         </LogoRow>
         <Row>
           <LabelWrapper>
@@ -59,23 +57,27 @@ const DaoMetadata: React.FC = () => {
           </LabelWrapper>
           <DescriptionContent>{daoSummary}</DescriptionContent>
         </Row>
-        <Row>
-          <LabelWrapper>
-            <Label>{t('labels.links')}</Label>
-          </LabelWrapper>
-          <ContentWrapper>
-            {links.map(
-              ({label, href}: {label: string; href: string}, index: number) => {
-                console.log(links);
-                return (
-                  href !== '' && (
-                    <ListItemLink key={index} {...{label, href}} external />
-                  )
-                );
-              }
-            )}
-          </ContentWrapper>
-        </Row>
+        {links[0].href !== '' && (
+          <Row>
+            <LabelWrapper>
+              <Label>{t('labels.links')}</Label>
+            </LabelWrapper>
+            <ContentWrapper>
+              {links.map(
+                (
+                  {label, href}: {label: string; href: string},
+                  index: number
+                ) => {
+                  return (
+                    href !== '' && (
+                      <ListItemLink key={index} {...{label, href}} external />
+                    )
+                  );
+                }
+              )}
+            </ContentWrapper>
+          </Row>
+        )}
       </Body>
       <Footer>
         <ActionWrapper>

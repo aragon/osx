@@ -9,12 +9,16 @@ import CreateNewToken from './createNewToken';
 
 const SetupCommunityForm: React.FC = () => {
   const {t} = useTranslation();
+
   const {control, resetField, setValue} = useFormContext();
-  const isCustomToken = useWatch({name: 'isCustomToken'});
+  const isNewToken = useWatch({
+    name: 'isCustomToken',
+  });
 
   const resetTokenFields = () => {
     resetField('tokenName');
     resetField('tokenSymbol');
+    resetField('tokenAddress');
     resetField('tokenTotalSupply');
     setValue('wallets', [
       {address: 'DAO Treasury', amount: '0'},
@@ -95,9 +99,9 @@ const SetupCommunityForm: React.FC = () => {
 
       {/* Add existing token */}
 
-      {isCustomToken === true && <CreateNewToken />}
+      {isNewToken === true && <CreateNewToken />}
 
-      {isCustomToken === false && (
+      {isNewToken === false && (
         <ExistingTokenPartialForm {...{resetTokenFields}} />
       )}
     </>
