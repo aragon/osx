@@ -26,8 +26,10 @@ import {
   validateTokenAddress,
   validateTokenAmount,
 } from 'utils/validators';
+import {useApolloClient} from 'context/apolloClient';
 
 const WithdrawActionForm: React.FC<{index: number}> = ({index}) => {
+  const client = useApolloClient();
   const {t} = useTranslation();
   const {open} = useGlobalModalContext();
   const {setActionsCounter} = useActionsContext();
@@ -68,7 +70,7 @@ const WithdrawActionForm: React.FC<{index: number}> = ({index}) => {
           isETH(tokenAddress)
             ? formatUnits('4242424242400000000000', 18) //provider.getBalance(DAOVaultAddress)
             : formatUnits('4242424242400000000000', 18), //fetchBalance(tokenAddress, DAOVaultAddress, provider),
-          fetchTokenData(tokenAddress),
+          fetchTokenData(tokenAddress, client),
         ]);
 
         // use blockchain if api data unavailable
@@ -107,6 +109,7 @@ const WithdrawActionForm: React.FC<{index: number}> = ({index}) => {
     setValue,
     tokenAddress,
     trigger,
+    client,
   ]);
 
   /*************************************************

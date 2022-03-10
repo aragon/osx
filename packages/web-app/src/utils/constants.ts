@@ -8,6 +8,22 @@ import {
 import {i18n} from '../../i18n.config';
 import {Dashboard, Community, Finance, Governance} from './paths';
 
+type SubgraphNetworkUrl = {
+  [key: string]: string | undefined;
+};
+
+export const SUBGRAPH_API_URL: SubgraphNetworkUrl = {
+  main: undefined,
+  rinkeby:
+    'https://api.thegraph.com/subgraphs/name/aragon/aragon-zaragoza-rinkeby',
+  polygon: undefined,
+  mumbai:
+    'https://api.thegraph.com/subgraphs/name/aragon/aragon-zaragoza-mumbai',
+  arbitrum: undefined,
+  arbitrumTest:
+    'https://api.thegraph.com/subgraphs/name/aragon/aragon-zaragoza-arbitrum-rinkeby',
+};
+
 export const BASE_URL = 'https://api.coingecko.com/api/v3';
 export const DEFAULT_CURRENCY = 'usd';
 export const INFURA_PROJECT_ID = '7a03fcb37be7479da06f92c5117afd47';
