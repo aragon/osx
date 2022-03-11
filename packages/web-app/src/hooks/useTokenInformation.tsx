@@ -5,6 +5,7 @@ import {useProviders} from 'context/providers';
 import {fetchTokenData} from 'services/prices';
 import {getTokenInfo} from 'utils/tokens';
 import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
+import {useApolloClient} from 'context/apolloClient';
 
 /**
  * Hook that fetches information for given list of tokens.
@@ -12,6 +13,7 @@ import {BaseTokenInfo, HookData, TokenBalance} from 'utils/types';
  * @returns List of token information as well as the hook state.
  */
 export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
+  const client = useApolloClient();
   const isMounted = useIsMounted();
   const {infura: provider} = useProviders();
   const [error, setError] = useState<Error>();
@@ -26,7 +28,9 @@ export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
 
     try {
       const allFetchPromise = Promise.all(
-        tokenBalances?.map(tokenBalance => fetchTokenData(tokenBalance.address))
+        tokenBalances?.map(tokenBalance =>
+          fetchTokenData(tokenBalance.address, client)
+        )
       );
 
       // Await all promises
@@ -52,7 +56,7 @@ export const useTokenInfo = (tokenBalances: TokenBalance[]) => {
       if (isMounted()) setError(error as Error);
       console.error(error);
     }
-  }, [isMounted, provider, tokenBalances]);
+  }, [isMounted, provider, tokenBalances, client]);
 
   /*************************************************
    *                      Hooks                    *

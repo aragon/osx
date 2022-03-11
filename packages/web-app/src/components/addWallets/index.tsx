@@ -16,7 +16,7 @@ import Footer from './footer';
 
 const AddWallets: React.FC = () => {
   const {t} = useTranslation();
-  const {control, watch, setValue, resetField} = useFormContext();
+  const {control, watch, setValue, resetField, trigger} = useFormContext();
   const watchFieldArray = watch('wallets');
   const {fields, append, remove} = useFieldArray({name: 'wallets', control});
 
@@ -34,12 +34,14 @@ const AddWallets: React.FC = () => {
     resetField('tokenTotalSupply');
   };
 
-  // TODO: research focus after input refactor
+  // setTimeout added because instant trigger not working
   const handleAddWallet = () => {
     append({address: '', amount: '0'});
+    setTimeout(() => {
+      trigger(`wallets.${controlledFields.length}.address`);
+    }, 50);
   };
 
-  //TODO: restrict user from going to next step with validation errors on this step
   return (
     <Container data-testid="add-wallets">
       <ListGroup>

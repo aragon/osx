@@ -45,11 +45,12 @@ const Link = styled.a.attrs({
 })``;
 
 const Title = styled.p.attrs({
-  className: 'overflow-hidden font-bold truncate whitespace-nowrap',
+  className:
+    'tablet:max-w-xs max-w-full overflow-hidden font-bold truncate whitespace-nowrap',
 })``;
 
 const Icon = styled(IconLinkExternal).attrs({className: 'ml-1 w-1.5 h-1.5'})``;
 
 const Subtitle = styled.p.attrs({
-  className: 'text-sm text-ui-500 truncate',
+  className: 'tablet:w-50 w-full text-sm text-ui-500 truncate',
 })``;

@@ -68,16 +68,18 @@ const Community: React.FC = () => {
             <Badge label="Fixed" colorScheme="neutral" />
           </BadgeWrapper>
         </Row>
-        <Row>
-          <LabelWrapper>
-            <Label>{t('labels.review.distribution')}</Label>
-          </LabelWrapper>
-          <Link
-            label={t('createDAO.review.distributionLink', {
-              count: wallets?.length,
-            })}
-          />
-        </Row>
+        {isCustomToken && (
+          <Row>
+            <LabelWrapper>
+              <Label>{t('labels.review.distribution')}</Label>
+            </LabelWrapper>
+            <Link
+              label={t('createDAO.review.distributionLink', {
+                count: wallets?.length,
+              })}
+            />
+          </Row>
+        )}
       </Body>
       <Footer>
         <ActionWrapper>

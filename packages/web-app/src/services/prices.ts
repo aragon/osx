@@ -3,8 +3,7 @@ import {constants} from 'ethers';
 
 import {TokenPricePercentages} from 'utils/types';
 import {BASE_URL, DEFAULT_CURRENCY} from 'utils/constants';
-import {client} from 'context/apolloClient';
-import {gql} from '@apollo/client';
+import {ApolloClient, ApolloClientOptions, gql} from '@apollo/client';
 
 type TokenPrices = {
   [key: string]: {
@@ -76,7 +75,10 @@ type FetchedTokenData = Promise<TokenData | undefined>;
  * @param address Token contract address
  * @returns Basic information about the token or undefined if data could not be fetched
  */
-async function fetchTokenData(address: Address): FetchedTokenData {
+async function fetchTokenData(
+  address: Address,
+  client: ApolloClient<ApolloClientOptions<string | undefined>>
+): FetchedTokenData {
   const endPoint = '/coins/ethereum';
   const arg =
     address !== constants.AddressZero

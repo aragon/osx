@@ -2,9 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import {useTranslation} from 'react-i18next';
 import {useFormContext} from 'react-hook-form';
+import {BigNumberish, ethers} from 'ethers';
+import {DAOFactory} from 'typechain';
 import {Breadcrumb, ButtonText, IconChevronRight} from '@aragon/ui-components';
 
-import {useFormStep} from 'components/fullScreenStepper';
 import Blockchain from './blockchain';
 import DaoMetadata from './daoMetadata';
 import Community from './community';
@@ -12,6 +13,9 @@ import Governance from './governance';
 import goLive from 'public/goLive.svg';
 import {useNavigate} from 'react-router-dom';
 import {Dashboard} from 'utils/paths';
+import DAOFactoryABI from 'abis/DAOFactory.json';
+
+import {useProviders} from 'context/providers';
 
 export const GoLiveHeader: React.FC = () => {
   const {t} = useTranslation();
@@ -52,10 +56,16 @@ const GoLive: React.FC = () => {
 };
 
 export const GoLiveFooter: React.FC = () => {
-  const {next} = useFormStep();
   const {watch} = useFormContext();
   const {reviewCheck} = watch();
   const {t} = useTranslation();
+  const zeroAddress = ethers.constants.AddressZero;
+  const daoDummyName = "Rakesh's Syndicate";
+  const daoDummyMetadata = '0x00000000000000000000000000';
+  const dummyVoteSettings: [BigNumberish, BigNumberish, BigNumberish] = [
+    1, 2, 3,
+  ];
+  const {infura: provider} = useProviders();
 
   const IsButtonDisabled = () =>
     !Object.values(reviewCheck).every(v => v === true);
@@ -66,7 +76,34 @@ export const GoLiveFooter: React.FC = () => {
         size="large"
         iconRight={<IconChevronRight />}
         label={t('createDAO.review.button')}
-        onClick={next}
+        onClick={async () => {
+          const contract = new ethers.Contract(
+            '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+            DAOFactoryABI,
+            provider
+          ) as DAOFactory;
+
+          console.log(
+            'NewDAO Gas:',
+            await contract.estimateGas.newDAO(
+              {
+                name: daoDummyName,
+                metadata: daoDummyMetadata,
+              },
+              {
+                addr: zeroAddress,
+                name: 'TokenName',
+                symbol: 'TokenSymbol',
+              },
+              {
+                receivers: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+                amounts: [100],
+              },
+              dummyVoteSettings,
+              zeroAddress
+            )
+          );
+        }}
         disabled={IsButtonDisabled()}
       />
     </div>
