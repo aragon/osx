@@ -12,7 +12,7 @@ import "./../IDAO.sol";
 /// @title Abstract implementation of the DAO permissions
 /// @author Samuel Furter - Aragon Association - 2022
 /// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
-/// @dev When your contract inherits from this, it's important to call __Initialize_DAO_Permission with the dao address.
+/// @dev When your contract inherits from this, it's important to call __Permission_init with the dao address.
 abstract contract Permissions is Initializable, BaseRelayRecipient {
     
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
@@ -25,7 +25,7 @@ abstract contract Permissions is Initializable, BaseRelayRecipient {
         _;
     }
 
-    function initialize(IDAO _dao) public virtual initializer {
+    function __Permission_init(IDAO _dao) internal virtual initializer {
         dao = _dao;
     }
 }

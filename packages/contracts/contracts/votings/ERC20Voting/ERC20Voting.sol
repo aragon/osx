@@ -79,12 +79,12 @@ contract ERC20Voting is Component, TimeHelpers {
         require(_participationRequiredPct <= PCT_BASE, ERROR_PARTICIPATION_TOO_BIG);
         require(_minDuration > 0, ERROR_MIN_DURATION_NO_ZERO);
 
+        __Component_init(_dao, _gsnForwarder);
+        
         token = _token;
         participationRequiredPct = _participationRequiredPct;
         supportRequiredPct = _supportRequiredPct;
         minDuration = _minDuration;
-
-        Component.initialize(_dao, _gsnForwarder);
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }

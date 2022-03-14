@@ -71,8 +71,7 @@ describe('ERC20Voting', function () {
     supportRequired: any,
     minDuration: any
   ) {
-    // @ts-ignore
-    return voting['initialize(address,address,address,uint64,uint64,uint64)'](
+    return voting.initialize(
       daoMock.address,
       erc20VoteMock.address,
       ethers.constants.AddressZero,

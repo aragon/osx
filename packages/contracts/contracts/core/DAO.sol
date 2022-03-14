@@ -43,7 +43,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _registerStandard(DAO_INTERFACE_ID);
         _registerStandard(type(ERC1271).interfaceId);
         _setMetadata(_metadata);
-        ACL.initACL(initialOwner);
+        __ACL_init(initialOwner);
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ

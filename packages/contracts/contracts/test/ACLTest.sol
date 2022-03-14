@@ -8,7 +8,7 @@ import '../core/acl/ACL.sol';
 
 contract ACLTest is ACL {
     function init(address _who) public {
-        super.initACL(_who);
+        super.__ACL_init(_who);
     }
 
     function getAuthPermission(

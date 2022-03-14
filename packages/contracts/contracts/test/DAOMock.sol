@@ -12,7 +12,7 @@ contract DAOMock is IDAO, ACL {
     mapping(address => mapping(uint256 => uint256)) public pastVotes;
 
     constructor(address initialOwner) {
-        ACL.initACL(initialOwner);
+        ACL.__ACL_init(initialOwner);
     }
 
     function hasPermission(
