@@ -31,7 +31,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
     ) external initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
-        Permissions.initialize(_dao);
+        __Permission_init(_dao);
 
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);

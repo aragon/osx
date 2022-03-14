@@ -82,14 +82,14 @@ contract WhitelistVoting is Component, TimeHelpers {
         require(_participationRequiredPct <= PCT_BASE, ERROR_PARTICIPATION_TOO_BIG);
         require(_minDuration > 0, ERROR_MIN_DURATION_NO_ZERO);
 
+        __Component_init(_dao, _gsnForwarder);
+        
         supportRequiredPct = _supportRequiredPct;
         participationRequiredPct = _participationRequiredPct;
         minDuration = _minDuration;
 
         // add whitelisted users.
         _addWhitelistedUsers(_whitelisted);
-
-        Component.initialize(_dao, _gsnForwarder);
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }

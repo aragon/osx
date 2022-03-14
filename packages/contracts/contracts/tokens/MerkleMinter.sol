@@ -33,7 +33,7 @@ contract MerkleMinter is Permissions {
     ) external initializer {
         token = _token;
         distributorBase = address(_distributorBase);
-        Permissions.initialize(_dao);
+        __Permission_init(_dao);
     }
     
     function merkleMint(
