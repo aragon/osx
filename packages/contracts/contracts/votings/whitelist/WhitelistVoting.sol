@@ -5,7 +5,9 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Checkpoints.sol";
 import "./../../core/component/Component.sol";
+
 import "./../../core/IDAO.sol";
 import "./../../utils/TimeHelpers.sol";
 
@@ -28,6 +30,7 @@ contract WhitelistVoting is Component, TimeHelpers {
         bool executed;
         uint64 startDate;
         uint64 endDate;
+        uint64 snapshotBlock;
         uint64 supportRequiredPct;
         uint64 participationRequiredPct;
         uint64 votingPower;
@@ -93,6 +96,9 @@ contract WhitelistVoting is Component, TimeHelpers {
 
         // add whitelisted users.
         _whitelistUsers(_whitelisted, true);
+        if(_whitelisted.length > 0) {
+            emit AddUsers(_whitelisted);
+        }
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
@@ -102,7 +108,9 @@ contract WhitelistVoting is Component, TimeHelpers {
      * @param _users addresses of users to add
      */
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        _whitelistUsers(_users);
+        _whitelistUsers(_users, true);
+
+        emit AddUsers(_users);
     }
 
     /**
@@ -111,6 +119,8 @@ contract WhitelistVoting is Component, TimeHelpers {
      */
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _whitelistUsers(_users, false);
+
+        emit RemoveUsers(_users);
     }
 
     /**
@@ -155,7 +165,7 @@ contract WhitelistVoting is Component, TimeHelpers {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         require(
-            isUserWhitelisted(msg.sender, snapshotBlock), 
+            isUserWhitelisted(_msgSender(), snapshotBlock), 
             ERROR_CAN_NOT_CREATE_VOTE
         );
 
@@ -173,18 +183,19 @@ contract WhitelistVoting is Component, TimeHelpers {
         Vote storage vote_ = votes[voteId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
+        vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = WhitelistedUserCount(snapshotBlock);
+        vote_.votingPower = uint64(whitelistedUserCount(snapshotBlock));
 
         for (uint256 i; i < _actions.length; i++) {
             vote_.actions.push(_actions[i]);
         }
 
-        emit StartVote(voteId, msg.sender, _proposalMetadata);
+        emit StartVote(voteId, _msgSender(), _proposalMetadata);
 
-        if (_castVote && canVote(voteId, msg.sender)) {
-            _vote(voteId, VoterState.Yea, msg.sender, _executeIfDecided);
+        if (_castVote && canVote(voteId, _msgSender())) {
+            _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
         }
     }
 
@@ -199,8 +210,8 @@ contract WhitelistVoting is Component, TimeHelpers {
         VoterState _outcome,
         bool _executesIfDecided
     ) external {
-        require(_canVote(_voteId, msg.sender), ERROR_CAN_NOT_VOTE);
-        _vote(_voteId, _outcome, msg.sender, _executesIfDecided);
+        require(_canVote(_voteId, _msgSender()), ERROR_CAN_NOT_VOTE);
+        _vote(_voteId, _outcome, _msgSender(), _executesIfDecided);
     }
 
     /**
@@ -304,19 +315,22 @@ contract WhitelistVoting is Component, TimeHelpers {
     function isUserWhitelisted(
         address account, 
         uint256 blockNumber
-    ) public view virtual override returns (uint256) {
-        return _checkpoints[account].getAtBlock(blockNumber);
+    ) public view returns (bool) {
+        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+        
+        return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
     /**
     *  @dev returns total count of users that are whitelisted at specific block
-    *  @param blockNumber
-    *  @return How many are whitelisted
+    *  @param blockNumber specific block to get count from
+    *  @return count of users that are whitelisted blockNumber or prior to it.
     */
-    function WhitelistedUserCount(
+    function whitelistedUserCount(
         uint256 blockNumber
-    ) public view virtual override returns (uint256) {
-        require(blockNumber < block.number, "Votes: block not yet mined");
+    ) public view returns (uint256) {
+        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+        
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 
@@ -327,6 +341,7 @@ contract WhitelistVoting is Component, TimeHelpers {
      * @return executed Vote executed status
      * @return startDate start date
      * @return endDate end date
+     * @return snapshotBlock snapshot block
      * @return supportRequired support required
      * @return participationRequired minimum participation required
      * @return votingPower power
@@ -343,6 +358,7 @@ contract WhitelistVoting is Component, TimeHelpers {
             bool executed,
             uint64 startDate,
             uint64 endDate,
+            uint64 snapshotBlock,
             uint64 supportRequired,
             uint64 participationRequired,
             uint64 votingPower,
@@ -358,6 +374,7 @@ contract WhitelistVoting is Component, TimeHelpers {
         executed = vote_.executed;
         startDate = vote_.startDate;
         endDate = vote_.endDate;
+        snapshotBlock = vote_.snapshotBlock;
         supportRequired = vote_.supportRequiredPct;
         participationRequired = vote_.participationRequiredPct;
         votingPower = vote_.votingPower;
@@ -388,20 +405,18 @@ contract WhitelistVoting is Component, TimeHelpers {
     }
 
     /**
-        @dev Adds or removes users from whitelist
-        @param users add
-    
-     */
+    *  @dev Adds or removes users from whitelist
+    *  @param _users user addresses
+    *  @param _enabled whether to add or remove from whitelist
+    */
     function _whitelistUsers(
         address[] calldata _users, 
         bool _enabled
-    ) internal {
-        uint128 blockNumber = SafeCastUpgradeable.toUint32(block.number);
-        uint224 isEnabled = _enabled ? 1 : 0;
-
-        _totalCheckpoints.push(isEnabled ? add : sub, _users.length);
+    ) internal {        
+        _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
+        
         for(uint i = 0; i < _users.length; i++) {
-            _checkpoints[_users[i]].push(isEnabled);
+            _checkpoints[_users[i]].push(_enabled ? 1 : 0);
         }
     }
 
@@ -440,6 +455,14 @@ contract WhitelistVoting is Component, TimeHelpers {
         }
 
         return true;
+    }
+
+    function _add(uint256 a, uint256 b) private pure returns(uint256) {
+        unchecked { return a + b; }
+    }
+
+    function _sub(uint256 a, uint256 b) private pure returns(uint256) {
+        unchecked { return a - b; }
     }
 
     /**

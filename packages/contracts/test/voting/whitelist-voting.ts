@@ -112,16 +112,31 @@ describe('WhitelistVoting', function () {
 
     it('should add new users in the whitelist', async () => {
       await voting.addWhitelistedUsers([ownerAddress, user1]);
-      expect(await voting.whitelisted(ownerAddress)).to.equal(true);
-      expect(await voting.whitelisted(user1)).to.equal(true);
+
+      const block = await ethers.provider.getBlock('latest');
+
+      await ethers.provider.send('evm_mine', []);
+    
+      expect(await voting.isUserWhitelisted(ownerAddress, block.number)).to.equal(true);
+      expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isUserWhitelisted(user1, 0)).to.equal(true);
     });
 
     it('should remove users from the whitelist', async () => {
       await voting.addWhitelistedUsers([ownerAddress]);
-      expect(await voting.whitelisted(ownerAddress)).to.equal(true);
+      
+      const block1 = await ethers.provider.getBlock('latest');
+      await ethers.provider.send('evm_mine', []);
+      expect(await voting.isUserWhitelisted(ownerAddress, block1.number)).to.equal(true);
+      expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(true);
+
 
       await voting.removeWhitelistedUsers([ownerAddress]);
-      expect(await voting.whitelisted(ownerAddress)).to.equal(false);
+
+      const block2 = await ethers.provider.getBlock('latest');
+      await ethers.provider.send('evm_mine', []);
+      expect(await voting.isUserWhitelisted(ownerAddress, block2.number)).to.equal(false);
+      expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(false);
     });
   });
 

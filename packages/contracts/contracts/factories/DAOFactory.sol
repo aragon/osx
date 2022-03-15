@@ -58,7 +58,8 @@ contract DAOFactory {
     /// @param _mintConfig the addresses and amounts to where to mint tokens.
     /// @param _votingSettings settings for the voting contract.
     /// @return dao DAO address.
-    /// @return voting The ERC20Voting address
+    /// @return erc20Voting address
+    /// @return whitelistVoting address
     /// @return token The token address(wrapped one or the new one)
     /// @return minter Merkle Minter contract address
     function newDAO(
@@ -93,47 +94,27 @@ contract DAOFactory {
         // register dao with its name and token to the registry
         // TODO: shall we add minter as well ?
         registry.register(_daoConfig.name, dao, msg.sender, address(token));
-
-        // create and initialize ERC20Voting.
-        erc20Voting = ERC20Voting(
-            createProxy(
-                erc20VotingBase,
-                abi.encodeWithSelector(
-                    ERC20Voting.initialize.selector,
-                    dao,
-                    token,
-                    _gsnForwarder,
-                    _votingSettings[0],
-                    _votingSettings[1],
-                    _votingSettings[2]
-                )
-            )
+        
+        (erc20Voting, whitelistVoting) = createVotingContracts(
+            dao, 
+            token, 
+            _gsnForwarder, 
+            _whitelistVoters, 
+            _votingSettings
         );
+        
+        // Grant dao the necessary permissions for WhitelistVoting
+        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
+        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(dao));
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(dao));
+        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(dao));
+        dao.bulk(address(whitelistVoting), items);
 
-        // create and initialize WhitelistVoting.
-        whitelistVoting = WhitelistVoting(
-            createProxy(
-                whitelistVotingBase,
-                abi.encodeWithSelector(
-                    WhitelistVoting.initialize.selector,
-                    dao,
-                    _gsnForwarder,
-                    _whitelistVoters,
-                    _votingSettings[0],
-                    _votingSettings[1],
-                    _votingSettings[2]
-                )
-            )
-        );
-
-        // Grant dao permission to change voting settings.
-        dao.grant(address(erc20Voting), address(dao), erc20Voting.MODIFY_CONFIG());
-        dao.grant(address(whitelistVoting), address(dao), whitelistVoting.MODIFY_CONFIG());
-
-        dao.grant(address(erc20Voting), address(erc20Voting), erc20Voting.UPGRADE_ROLE());
-        dao.grant(address(whitelistVoting), address(whitelistVoting), whitelistVoting.UPGRADE_ROLE());
-
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
+        // Grant dao the necessary permissions for ERC20Voting
+        items = new ACLData.BulkItem[](2);
+        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(dao));
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_CONFIG(), address(dao));
+        dao.bulk(address(erc20Voting), items);
 
         // set roles on the dao itself.
         items = new ACLData.BulkItem[](7);
@@ -154,33 +135,50 @@ contract DAOFactory {
         emit DAOCreated(_daoConfig.name, address(token), address(erc20Voting));
     }
 
-    // function createVotings(
-    //     IDAO _dao, 
-    //     GovernanceERC20 _token, 
-    //     address _gsnForwarder,
+    /// @dev internal helper method to separate voting creations and avoid stack too deep errors
+    function createVotingContracts(
+        IDAO _dao, 
+        ERC20VotesUpgradeable _token, 
+        address _gsnForwarder,
+        address[] calldata _whitelistVoters,
+        uint256[3] calldata _votingSettings
+    ) 
+        internal 
+        returns(
+            ERC20Voting erc20Voting,
+            WhitelistVoting whitelistVoting
+        ) 
+    {
+        erc20Voting = ERC20Voting(
+            createProxy(
+                erc20VotingBase,
+                abi.encodeWithSelector(
+                    ERC20Voting.initialize.selector,
+                    _dao,
+                    _token,
+                    _gsnForwarder,
+                    _votingSettings[0],
+                    _votingSettings[1],
+                    _votingSettings[2]
+                )
+            )
+        );
 
-    // ) 
-    //     internal 
-    //     returns(
-    //         ERC20Voting erc20Voting, 
-    //         WhitelistVoting whitelistVoting
-    //     ) 
-    // {
-    //     erc20Voting = ERC20Voting(
-    //         createProxy(
-    //             erc20VotingBase,
-    //             abi.encodeWithSelector(
-    //                 ERC20Voting.initialize.selector,
-    //                 dao,
-    //                 token,
-    //                 _gsnForwarder,
-    //                 _votingSettings[0],
-    //                 _votingSettings[1],
-    //                 _votingSettings[2]
-    //             )
-    //         )
-    //     );
-    // }
+        whitelistVoting = WhitelistVoting(
+            createProxy(
+                whitelistVotingBase,
+                abi.encodeWithSelector(
+                    WhitelistVoting.initialize.selector,
+                    _dao,
+                    _gsnForwarder,
+                    _whitelistVoters,
+                    _votingSettings[0],
+                    _votingSettings[1],
+                    _votingSettings[2]
+                )
+            )
+        );
+    }
 
     // @dev Internal helper method to set up the required base contracts on DAOFactory deployment.
     function setupBases() private {

@@ -131,6 +131,7 @@ describe('DAOFactory: ', function () {
         amounts: [mintAmount],
       },
       dummyVoteSettings,
+      [],
       zeroAddress
     );
 
