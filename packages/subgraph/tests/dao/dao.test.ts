@@ -22,7 +22,8 @@ import {
   handleSetMetadata,
   handleETHDeposited,
   handleDeposited,
-  handleExecuted
+  handleExecuted,
+  _handleSetMetadata
   // handleWithdrawn
 } from '../../src/dao/dao';
 import {createDummyAcctions, createTokenCalls} from '../utils';
@@ -37,17 +38,16 @@ test('Run dao (handleSetMetadata) mappings with mock event', () => {
     'mock-Dao'
   );
 
+  let metadata = 'new-metadata';
+
   let entityID = Address.fromString(DAO_ADDRESS).toHexString();
 
-  // create event
-  let newDaoEvent = createNewSetMetadataEvent('new-metadata', DAO_ADDRESS);
-
   // handle event
-  handleSetMetadata(newDaoEvent);
+  _handleSetMetadata(entityID, metadata);
 
   // checks
   assert.fieldEquals('Dao', entityID, 'id', entityID);
-  assert.fieldEquals('Dao', entityID, 'metadata', 'new-metadata');
+  assert.fieldEquals('Dao', entityID, 'metadata', metadata);
 
   clearStore();
 });

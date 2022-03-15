@@ -56,7 +56,7 @@ contract WhitelistVoting is Component, TimeHelpers {
     string private constant ERROR_CAN_NOT_EXECUTE = "VOTING_CAN_NOT_EXECUTE";
     string private constant ERROR_CAN_NOT_CREATE_VOTE = "VOTING_CAN_NOT_CREATE_VOTE";
 
-    event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
+    event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
     event CastVote(uint256 indexed voteId, address indexed voter, uint8 voterState);
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
     event UpdateConfig(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration);

@@ -55,7 +55,7 @@ contract ERC20Voting is Component, TimeHelpers {
     string private constant ERROR_CAN_NOT_FORWARD = "VOTING_CAN_NOT_FORWARD";
     string private constant ERROR_NO_VOTING_POWER = "VOTING_NO_VOTING_POWER";
 
-    event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
+    event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
     event CastVote(uint256 indexed voteId, address indexed voter, uint8 voterState, uint256 stake);
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
     event UpdateConfig(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration);

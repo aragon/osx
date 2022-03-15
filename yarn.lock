@@ -2188,10 +2188,10 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.2.tgz#30aa825f11d438671d585bd44e7fd564535fc210"
   integrity sha512-82cpyJyKRoQoRi+14ibCeGPu0CwypgtBAdBhq1WfvagpCZNKqwXbKwXllYSMG91DhmG4jt9gN8eP6lGOtozuaw==
 
-"@graphprotocol/graph-cli@^0.25.1":
-  version "0.25.3"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.25.3.tgz#cc929e831d44f88e2936ebf049d962a6fc5a4094"
-  integrity sha512-18soTrGClEVOPmsTwknrjrzEITjc817l0btyRExE8nsxCcaJFHbDZEyLJJqFHfHxI9OyW0p8h8t3PuYxC2S84g==
+"@graphprotocol/graph-cli@^0.26.0":
+  version "0.26.0"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.26.0.tgz#9bcc3533d1384d44b65e0bf7eef81221ae8a4e05"
+  integrity sha512-sQKKfkGy6jsfpZD6KA9KdvHRpeStd1ZH334CMVxhyJtPY006a/Wc2rr7TBqgAtwpggs7UiT0UA3s5vG0jFQB5g==
   dependencies:
     assemblyscript "0.19.10"
     binary-install-raw "0.0.13"
@@ -15129,9 +15129,9 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
-"gluegun@https://github.com/edgeandnode/gluegun#v4.3.1-pin-colors-dep":
+"gluegun@git+https://github.com/edgeandnode/gluegun.git#v4.3.1-pin-colors-dep":
   version "4.3.1"
-  resolved "https://github.com/edgeandnode/gluegun#b34b9003d7bf556836da41b57ef36eb21570620a"
+  resolved "git+https://github.com/edgeandnode/gluegun.git#b34b9003d7bf556836da41b57ef36eb21570620a"
   dependencies:
     apisauce "^1.0.1"
     app-module-path "^2.2.0"
@@ -19264,10 +19264,10 @@ match-all@^1.2.6:
   resolved "https://registry.yarnpkg.com/match-all/-/match-all-1.2.6.tgz#66d276ad6b49655551e63d3a6ee53e8be0566f8d"
   integrity sha512-0EESkXiTkWzrQQntBu2uzKvLu6vVkUGz40nGPbSZuegcfE5UuSzNjLaIu76zJWuaT/2I3Z/8M06OlUOZLGwLlQ==
 
-matchstick-as@^0.2.2:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.2.3.tgz#d2c68f204fdc19f5927cd263ad628864aeeae7b8"
-  integrity sha512-Eg/GFoIGSVj4pNJZJwV7azDOIoiADkOyM3VChQlaEbS0NmjsOnREcNT0za0Qyh2RgFbMH/JBPVo+vbHvm2+thg==
+matchstick-as@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.4.0.tgz#7456c2f20abee6d12366b65f4216385a9ef62a50"
+  integrity sha512-XkWoXQWUg1ms8DaDMkl2M95woGPB89f7aysjwDNst/x+G9FV48dxcAKSwilJ1BVGV3MqU7HfuKGHxegSsuxQxQ==
   dependencies:
     "@graphprotocol/graph-ts" "^0.24.1"
     assemblyscript "^0.19.20"
