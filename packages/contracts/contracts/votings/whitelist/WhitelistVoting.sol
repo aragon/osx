@@ -10,6 +10,8 @@ import "./../../core/IDAO.sol";
 import "./../../utils/TimeHelpers.sol";
 
 contract WhitelistVoting is Component, TimeHelpers {
+    using Checkpoints for Checkpoints.History;
+
     bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
@@ -38,11 +40,12 @@ contract WhitelistVoting is Component, TimeHelpers {
 
     mapping(uint256 => Vote) internal votes;
 
+    mapping(address => Checkpoints.History) private _checkpoints;
+    Checkpoints.History private _totalCheckpoints;
+
     uint64 public supportRequiredPct;
     uint64 public participationRequiredPct;
     uint64 public minDuration;
-
-    uint64 private whitelistedLength;
 
     uint256 public votesLength;
 
@@ -89,45 +92,25 @@ contract WhitelistVoting is Component, TimeHelpers {
         minDuration = _minDuration;
 
         // add whitelisted users.
-        _addWhitelistedUsers(_whitelisted);
+        _whitelistUsers(_whitelisted, true);
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
     /**
-     * @notice add new users to the whitelist.
+     * @notice adds new users to the whitelist.
      * @param _users addresses of users to add
      */
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        _addWhitelistedUsers(_users);
+        _whitelistUsers(_users);
     }
 
     /**
-     * @dev Internal function to add new users to the whitelist.
-     * @param _users addresses of users to add
-     */
-    function _addWhitelistedUsers(address[] calldata _users) internal {
-        for (uint256 i = 0; i < _users.length; i++) {
-            whitelisted[_users[i]] = true;
-        }
-
-        whitelistedLength += uint64(_users.length);
-
-        emit AddUsers(_users);
-    }
-
-    /**
-     * @notice remove new users to the whitelist.
+     * @notice removes users from the whitelist.
      * @param _users addresses of users to remove
      */
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        for (uint256 i = 0; i < _users.length; i++) {
-            whitelisted[_users[i]] = false;
-        }
-
-        whitelistedLength -= uint64(_users.length);
-
-        emit RemoveUsers(_users);
+        _whitelistUsers(_users, false);
     }
 
     /**
@@ -169,7 +152,12 @@ contract WhitelistVoting is Component, TimeHelpers {
         bool _executeIfDecided,
         bool _castVote
     ) external returns (uint256 voteId) {
-        require(whitelisted[msg.sender], ERROR_CAN_NOT_CREATE_VOTE);
+        uint64 snapshotBlock = getBlockNumber64() - 1;
+
+        require(
+            isUserWhitelisted(msg.sender, snapshotBlock), 
+            ERROR_CAN_NOT_CREATE_VOTE
+        );
 
         // calculate start and end time for the vote
         uint64 currentTimestamp = getTimestamp64();
@@ -187,7 +175,7 @@ contract WhitelistVoting is Component, TimeHelpers {
         vote_.endDate = _endDate;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = whitelistedLength;
+        vote_.votingPower = WhitelistedUserCount(snapshotBlock);
 
         for (uint256 i; i < _actions.length; i++) {
             vote_.actions.push(_actions[i]);
@@ -309,6 +297,30 @@ contract WhitelistVoting is Component, TimeHelpers {
     }
 
     /**
+    *  @dev Tells whether user is whitelisted at specific block or past it.
+    *  @param account user address
+    *  @param blockNumber block number for which it checks if user is whitelisted
+    */
+    function isUserWhitelisted(
+        address account, 
+        uint256 blockNumber
+    ) public view virtual override returns (uint256) {
+        return _checkpoints[account].getAtBlock(blockNumber);
+    }
+
+    /**
+    *  @dev returns total count of users that are whitelisted at specific block
+    *  @param blockNumber
+    *  @return How many are whitelisted
+    */
+    function WhitelistedUserCount(
+        uint256 blockNumber
+    ) public view virtual override returns (uint256) {
+        require(blockNumber < block.number, "Votes: block not yet mined");
+        return _totalCheckpoints.getAtBlock(blockNumber);
+    }
+
+    /**
      * @dev Return all information for a vote by its ID
      * @param _voteId Vote id
      * @return open Vote open status
@@ -363,7 +375,7 @@ contract WhitelistVoting is Component, TimeHelpers {
      */
     function _canVote(uint256 _voteId, address _voter) internal view returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && whitelisted[_voter];
+        return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);
     }
 
     /**
@@ -373,6 +385,24 @@ contract WhitelistVoting is Component, TimeHelpers {
      */
     function _isVoteOpen(Vote storage vote_) internal view returns (bool) {
         return getTimestamp64() < vote_.endDate && getTimestamp64() >= vote_.startDate && !vote_.executed;
+    }
+
+    /**
+        @dev Adds or removes users from whitelist
+        @param users add
+    
+     */
+    function _whitelistUsers(
+        address[] calldata _users, 
+        bool _enabled
+    ) internal {
+        uint128 blockNumber = SafeCastUpgradeable.toUint32(block.number);
+        uint224 isEnabled = _enabled ? 1 : 0;
+
+        _totalCheckpoints.push(isEnabled ? add : sub, _users.length);
+        for(uint i = 0; i < _users.length; i++) {
+            _checkpoints[_users[i]].push(isEnabled);
+        }
     }
 
     /**

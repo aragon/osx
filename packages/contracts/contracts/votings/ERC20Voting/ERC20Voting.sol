@@ -141,7 +141,11 @@ contract ERC20Voting is Component, TimeHelpers {
         if (_startDate == 0) _startDate = currentTimestamp;
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
-        require(_endDate - _startDate >= minDuration || _startDate >= currentTimestamp, ERROR_VOTE_DATES_WRONG);
+        require(
+            _endDate - _startDate >= minDuration || 
+            _startDate >= currentTimestamp,
+            ERROR_VOTE_DATES_WRONG
+        );
 
         // create a vote.
         Vote storage vote_ = votes[voteId];
