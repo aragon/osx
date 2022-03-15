@@ -31,10 +31,13 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     // Error msg's
     string internal constant ERROR_ACTION_CALL_FAILED = "ACTION_CALL_FAILED";
+    string internal constant ERROR_WITHDRAW_RECIPIENT_ZERO = "WITHDRAW_RECIPIENT_ZERO";
     string internal constant ERROR_DEPOSIT_AMOUNT_ZERO = "DEPOSIT_AMOUNT_ZERO";
+    string internal constant ERROR_WITHDRAW_AMOUNT_ZERO = "WITHDRAW_AMOUNT_ZERO";
+    string internal constant ERROR_DEPOSIT_ETH_VALUE_ZERO = "DEPOSIT_ETH_VALUE_ZERO";
     string internal constant ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH = "ETH_DEPOSIT_AMOUNT_MISMATCH";
     string internal constant ERROR_ETH_WITHDRAW_FAILED = "ETH_WITHDRAW_FAILED";
-
+    
     ERC1271 signatureValidator;
 
     /// @dev Used for UUPS upgradability pattern
@@ -121,6 +124,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         if (_token == address(0)) {
             require(msg.value == _amount, ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH);
         } else {
+            require(msg.value == 0, ERROR_DEPOSIT_ETH_VALUE_ZERO);
             ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
@@ -138,6 +142,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string memory _reference
     ) external override auth(address(this), WITHDRAW_ROLE) {
+        require(_amount > 0, ERROR_WITHDRAW_AMOUNT_ZERO);
+
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
             require(ok, ERROR_ETH_WITHDRAW_FAILED);
