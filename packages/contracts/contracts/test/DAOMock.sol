@@ -24,6 +24,10 @@ contract DAOMock is IDAO, ACL {
         return true;
     }
 
+    function trustedForwarder() public virtual view returns(address) {
+        return address(0);
+    }
+
     function setMetadata(
         bytes calldata /* _metadata */
     ) external override {}

@@ -6,9 +6,13 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "@opengsn/contracts/src/interfaces/IRelayRecipient.sol";
 
 import "./../IDAO.sol";
 
+interface Relay {
+    function trustedForwarder() external virtual view returns (address);
+}
 /// @title Abstract implementation of the DAO permissions
 /// @author Samuel Furter - Aragon Association - 2022
 /// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
@@ -27,5 +31,13 @@ abstract contract Permissions is Initializable, BaseRelayRecipient {
 
     function __Permission_init(IDAO _dao) internal virtual initializer {
         dao = _dao;
+    }
+
+    function isTrustedForwarder(address _forwarder) public virtual override view returns(bool) {
+        address forwarder = trustedForwarder();
+        if(forwarder == address(0)) {
+            forwarder = Relay(address(dao)).trustedForwarder();
+        }
+        return forwarder == _forwarder;
     }
 }

@@ -74,11 +74,10 @@ describe('ERC20Voting', function () {
     return voting.initialize(
       daoMock.address,
       erc20VoteMock.address,
-      ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
       minDuration
-    );
+    )
   }
 
   describe('initialize: ', async () => {

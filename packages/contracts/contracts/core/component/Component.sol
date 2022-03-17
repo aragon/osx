@@ -24,13 +24,9 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     bytes32 public constant MODIFY_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     /// @dev Used for UUPS upgradability pattern
-    function __Component_init(
-        IDAO _dao, 
-        address _gsnForwarder
-    ) internal virtual {
+    function __Component_init(IDAO _dao) internal virtual {
         __Permission_init(_dao);
 
-        _setTrustedForwarder(_gsnForwarder);
         _registerStandard(type(Component).interfaceId);
     }
 

@@ -28,6 +28,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
+    bytes32 public constant SET_TRUSTED_FORWARDER = keccak256("SET_TRUSTED_FORWARDER");
 
     // Error msg's
     string internal constant ERROR_ACTION_CALL_FAILED = "ACTION_CALL_FAILED";
@@ -37,17 +38,37 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     ERC1271 signatureValidator;
 
+    address private _trustedForwarder;
+
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
-    function initialize(bytes calldata _metadata, address initialOwner) external initializer {
+    function initialize(
+        bytes calldata _metadata, 
+        address _initialOwner,
+        address _forwarder
+    ) external initializer {
         _registerStandard(DAO_INTERFACE_ID);
         _registerStandard(type(ERC1271).interfaceId);
+
         _setMetadata(_metadata);
-        __ACL_init(initialOwner);
+        _setTrustedForwarder(_forwarder);
+        __ACL_init(_initialOwner);
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
+    
+    /// @notice set trusted forwarder on the DAO
+    /// @param _forwarder address of the forwarder
+    function setTrustedForwarder(address _forwarder) external auth(address(this), SET_TRUSTED_FORWARDER) {
+        _setTrustedForwarder(_forwarder);
+    }
+
+    /// @notice virtual function to get DAO's current trusted forwarder
+    /// @return address trusted forwarder's address
+    function trustedForwarder() public virtual view returns(address) {
+        return _trustedForwarder;
+    }
 
     /// @notice Checks if the current callee has the permissions for.
     /// @dev Wrapper for the willPerform method of ACL to later on be able to use it in the modifier of the sub components of this DAO.
@@ -170,5 +191,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     function _setMetadata(bytes calldata _metadata) internal {
         emit SetMetadata(_metadata);
+    }
+
+    function _setTrustedForwarder(address _forwarder) internal {
+        _trustedForwarder = _forwarder;
     }
 }

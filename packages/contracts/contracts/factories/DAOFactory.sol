@@ -84,7 +84,7 @@ contract DAOFactory {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
         // initialize dao with the ROOT_ROLE as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this));
+        dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
 
         // Create token and merkle minter
         dao.grant(address(dao), address(tokenFactory), dao.ROOT_ROLE());
@@ -98,7 +98,6 @@ contract DAOFactory {
         (erc20Voting, whitelistVoting) = createVotingContracts(
             dao, 
             token, 
-            _gsnForwarder, 
             _whitelistVoters, 
             _votingSettings
         );
@@ -139,7 +138,6 @@ contract DAOFactory {
     function createVotingContracts(
         IDAO _dao, 
         ERC20VotesUpgradeable _token, 
-        address _gsnForwarder,
         address[] calldata _whitelistVoters,
         uint256[3] calldata _votingSettings
     ) 
@@ -156,7 +154,6 @@ contract DAOFactory {
                     ERC20Voting.initialize.selector,
                     _dao,
                     _token,
-                    _gsnForwarder,
                     _votingSettings[0],
                     _votingSettings[1],
                     _votingSettings[2]
@@ -170,7 +167,6 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     WhitelistVoting.initialize.selector,
                     _dao,
-                    _gsnForwarder,
                     _whitelistVoters,
                     _votingSettings[0],
                     _votingSettings[1],

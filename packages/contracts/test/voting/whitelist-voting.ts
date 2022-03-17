@@ -71,12 +71,11 @@ describe('WhitelistVoting', function () {
   ) {
     return voting.initialize(
       daoMock.address,
-      ethers.constants.AddressZero,
       whitelisted,
       participationRequired,
       supportRequired,
       minDuration
-    );
+    )
   }
 
   describe('initialize: ', async () => {
