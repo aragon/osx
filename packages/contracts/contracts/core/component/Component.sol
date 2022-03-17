@@ -23,6 +23,8 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     /// @notice Role identifer to change the GSN forwarder
     bytes32 public constant MODIFY_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
+    event SetTrustedForwarder(address _newForwarder);
+
     /// @dev Used for UUPS upgradability pattern
     function __Component_init(IDAO _dao) internal virtual {
         __Permission_init(_dao);
@@ -33,6 +35,8 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     /// @dev used to update the trusted forwarder.
     function setTrustedForwarder(address _forwarder) public virtual auth(MODIFY_FORWARDER) {
         _setTrustedForwarder(_forwarder);
+
+        emit SetTrustedForwarder(_forwarder);
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ

@@ -28,13 +28,15 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
-    bytes32 public constant SET_TRUSTED_FORWARDER = keccak256("SET_TRUSTED_FORWARDER");
+    bytes32 public constant MODIFY_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     // Error msg's
     string internal constant ERROR_ACTION_CALL_FAILED = "ACTION_CALL_FAILED";
     string internal constant ERROR_DEPOSIT_AMOUNT_ZERO = "DEPOSIT_AMOUNT_ZERO";
     string internal constant ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH = "ETH_DEPOSIT_AMOUNT_MISMATCH";
     string internal constant ERROR_ETH_WITHDRAW_FAILED = "ETH_WITHDRAW_FAILED";
+
+    event SetTrustedForwarder(address _newForwarder);
 
     ERC1271 signatureValidator;
 
@@ -60,7 +62,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     
     /// @notice set trusted forwarder on the DAO
     /// @param _forwarder address of the forwarder
-    function setTrustedForwarder(address _forwarder) external auth(address(this), SET_TRUSTED_FORWARDER) {
+    function setTrustedForwarder(
+        address _forwarder
+    ) external auth(address(this), MODIFY_FORWARDER) {
         _setTrustedForwarder(_forwarder);
     }
 
@@ -195,5 +199,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     function _setTrustedForwarder(address _forwarder) internal {
         _trustedForwarder = _forwarder;
+
+        emit SetTrustedForwarder(_forwarder);
     }
 }
