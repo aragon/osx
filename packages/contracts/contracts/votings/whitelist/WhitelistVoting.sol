@@ -79,6 +79,7 @@ contract WhitelistVoting is Component, TimeHelpers {
     function initialize(
         IDAO _dao,
         address[] calldata _whitelisted,
+        address _gsnForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
@@ -87,7 +88,7 @@ contract WhitelistVoting is Component, TimeHelpers {
         require(_participationRequiredPct <= PCT_BASE, ERROR_PARTICIPATION_TOO_BIG);
         require(_minDuration > 0, ERROR_MIN_DURATION_NO_ZERO);
 
-        __Component_init(_dao);
+        __Component_init(_dao, _gsnForwarder);
         
         supportRequiredPct = _supportRequiredPct;
         participationRequiredPct = _participationRequiredPct;

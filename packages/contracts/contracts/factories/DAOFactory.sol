@@ -102,12 +102,17 @@ contract DAOFactory {
             _votingSettings
         );
         
-        // Grant dao the necessary permissions for WhitelistVoting
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(dao));
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(dao));
-        dao.bulk(address(whitelistVoting), items);
+
+        ACLData.BulkItem[] memory items;
+
+        if(address(whitelistVoting) != address(0)) {
+            // Grant dao the necessary permissions for WhitelistVoting
+            items = new ACLData.BulkItem[](3);
+            items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(dao));
+            items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(dao));
+            items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(dao));
+            dao.bulk(address(whitelistVoting), items);
+        }
 
         // Grant dao the necessary permissions for ERC20Voting
         items = new ACLData.BulkItem[](2);
@@ -154,6 +159,7 @@ contract DAOFactory {
                     ERC20Voting.initialize.selector,
                     _dao,
                     _token,
+                    address(0),
                     _votingSettings[0],
                     _votingSettings[1],
                     _votingSettings[2]
@@ -161,19 +167,22 @@ contract DAOFactory {
             )
         );
 
-        whitelistVoting = WhitelistVoting(
-            createProxy(
-                whitelistVotingBase,
-                abi.encodeWithSelector(
-                    WhitelistVoting.initialize.selector,
-                    _dao,
-                    _whitelistVoters,
-                    _votingSettings[0],
-                    _votingSettings[1],
-                    _votingSettings[2]
+        if(_whitelistVoters.length > 0) {
+            whitelistVoting = WhitelistVoting(
+                createProxy(
+                    whitelistVotingBase,
+                    abi.encodeWithSelector(
+                        WhitelistVoting.initialize.selector,
+                        _dao,
+                        _whitelistVoters,
+                        address(0),
+                        _votingSettings[0],
+                        _votingSettings[1],
+                        _votingSettings[2]
+                    )
                 )
-            )
-        );
+            );
+        }
     }
 
     // @dev Internal helper method to set up the required base contracts on DAOFactory deployment.

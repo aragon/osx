@@ -70,6 +70,7 @@ contract ERC20Voting is Component, TimeHelpers {
     function initialize(
         IDAO _dao,
         ERC20VotesUpgradeable _token,
+        address _gsnForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
@@ -78,7 +79,7 @@ contract ERC20Voting is Component, TimeHelpers {
         require(_participationRequiredPct <= PCT_BASE, ERROR_PARTICIPATION_TOO_BIG);
         require(_minDuration > 0, ERROR_MIN_DURATION_NO_ZERO);
 
-        __Component_init(_dao);
+        __Component_init(_dao, _gsnForwarder);
         
         token = _token;
         participationRequiredPct = _participationRequiredPct;

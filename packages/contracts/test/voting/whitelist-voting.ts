@@ -72,6 +72,7 @@ describe('WhitelistVoting', function () {
     return voting.initialize(
       daoMock.address,
       whitelisted,
+      ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
       minDuration

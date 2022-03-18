@@ -26,9 +26,13 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     event SetTrustedForwarder(address _newForwarder);
 
     /// @dev Used for UUPS upgradability pattern
-    function __Component_init(IDAO _dao) internal virtual {
+    function __Component_init(IDAO _dao, address _trustedForwarder) internal virtual {
         __Permission_init(_dao);
 
+        if(_trustedForwarder != address(0)) {
+            _setTrustedForwarder(_trustedForwarder);
+        }
+        
         _registerStandard(type(Component).interfaceId);
     }
 
