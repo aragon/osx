@@ -31,8 +31,10 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
 
         if(_trustedForwarder != address(0)) {
             _setTrustedForwarder(_trustedForwarder);
+
+            emit SetTrustedForwarder(_forwarder);
         }
-        
+
         _registerStandard(type(Component).interfaceId);
     }
 
