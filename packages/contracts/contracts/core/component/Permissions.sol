@@ -11,7 +11,7 @@ import "@opengsn/contracts/src/interfaces/IRelayRecipient.sol";
 import "./../IDAO.sol";
 
 interface Relay {
-    function trustedForwarder() external virtual view returns (address);
+    function trustedForwarder() external view returns (address);
 }
 
 /// @title Abstract implementation of the DAO permissions

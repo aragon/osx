@@ -32,17 +32,17 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
         if(_trustedForwarder != address(0)) {
             _setTrustedForwarder(_trustedForwarder);
 
-            emit SetTrustedForwarder(_forwarder);
+            emit SetTrustedForwarder(_trustedForwarder);
         }
 
         _registerStandard(type(Component).interfaceId);
     }
 
     /// @dev used to update the trusted forwarder.
-    function setTrustedForwarder(address _forwarder) public virtual auth(MODIFY_FORWARDER) {
-        _setTrustedForwarder(_forwarder);
+    function setTrustedForwarder(address _trustedForwarder) public virtual auth(MODIFY_FORWARDER) {
+        _setTrustedForwarder(_trustedForwarder);
 
-        emit SetTrustedForwarder(_forwarder);
+        emit SetTrustedForwarder(_trustedForwarder);
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
