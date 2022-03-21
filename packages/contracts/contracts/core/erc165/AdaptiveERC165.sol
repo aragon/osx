@@ -17,6 +17,10 @@ contract AdaptiveERC165 is ERC165 {
 
     bytes32 internal constant UNREGISTERED_CALLBACK = bytes32(0);
 
+    // Errors
+    error AdapERC165UnkownCallback(bytes32 magicNumber);
+
+    // Events
     event RegisteredStandard(bytes4 interfaceId);
     event RegisteredCallback(bytes4 sig, bytes4 magicNumber);
     event ReceivedCallback(bytes4 indexed sig, bytes data);
@@ -32,7 +36,7 @@ contract AdaptiveERC165 is ERC165 {
     /// @param _data The data resp. arguments passed to the method
     function _handleCallback(bytes4 _sig, bytes memory _data) internal {
         bytes32 magicNumber = callbackMagicNumbers[_sig];
-        require(magicNumber != UNREGISTERED_CALLBACK, "adap-erc165: unknown callback");
+        if (magicNumber == UNREGISTERED_CALLBACK) revert AdapERC165UnkownCallback({magicNumber: magicNumber});
 
         emit ReceivedCallback(_sig, _data);
 

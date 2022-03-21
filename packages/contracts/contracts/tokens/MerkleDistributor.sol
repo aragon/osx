@@ -22,6 +22,9 @@ contract MerkleDistributor is Initializable {
     // This is a packed array of booleans.
     mapping (uint256 => uint256) private claimedBitMap;
 
+    error DistTokenClaimedAlready(uint256 index);
+    error DistTokenClaimInvalid(uint256 index, address to, uint256 amount);
+
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
     function initialize(GovernanceERC20 _token, bytes32 _merkleRoot) external initializer {
@@ -30,8 +33,9 @@ contract MerkleDistributor is Initializable {
     }
 
     function claim(uint256 _index, address _to, uint256 _amount, bytes32[] calldata _merkleProof) external {
-        require(!isClaimed(_index), "dist: already claimed");
-        require(_verifyBalanceOnTree(_index, _to, _amount, _merkleProof), "dist: proof failed");
+        if(isClaimed(_index)) revert DistTokenClaimedAlready({index: _index});
+        if(!_verifyBalanceOnTree(_index, _to, _amount, _merkleProof))
+            revert DistTokenClaimInvalid({index: _index, to: _to, amount: _amount});
 
         _setClaimed(_index);
         token.safeTransfer(_to, _amount);
