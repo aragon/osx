@@ -1,12 +1,9 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {customError} from './test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered'
-}
-
-const ERRORS = {
-  NameAlreadyInUse: 'name already in use'
 }
 
 describe('Registry', function () {
@@ -45,7 +42,7 @@ describe('Registry', function () {
 
     await expect(
       registry.register(daoName, daoAddress, ownerAddress, ownerAddress)
-    ).to.be.revertedWith(ERRORS.NameAlreadyInUse)
+    ).to.be.revertedWith(customError('RegistryNameAlreadyUsed', daoName))
   });
 
 });

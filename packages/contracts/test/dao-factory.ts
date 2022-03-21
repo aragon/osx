@@ -1,6 +1,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {VoterState} from './test-utils/voting';
+import {customError} from './test-utils/custom-error-helper';
+
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
@@ -12,11 +14,8 @@ const EVENTS = {
   EXECUTED: 'Executed',
 };
 
-const ERRORS = {
-  NameAlreadyInUse: 'name already in use',
-  ComponentAuth: 'component: auth',
-  ACLAuth: 'acl: auth',
-};
+const EXEC_ROLE = ethers.utils.id('EXEC_ROLE');
+const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
 
 const zeroAddress = ethers.constants.AddressZero;
 const ACLAnyAddress = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
@@ -215,11 +214,13 @@ describe('DAOFactory: ', function () {
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by ERC20Voting
-    await expect(dao.execute(0, [])).to.be.revertedWith(ERRORS.ACLAuth);
+    await expect(
+        dao.execute(0, [])
+    ).to.be.revertedWith(customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE));
 
-    await expect(ERC20Voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
-      ERRORS.ComponentAuth
-    );
+    await expect(
+        ERC20Voting.changeVoteConfig(1, 2, 3)
+    ).to.be.revertedWith(customError('ACLAuth', ERC20Voting.address, ERC20Voting.address, ownerAddress, MODIFY_VOTE_CONFIG));
 
     const actions = [
       {

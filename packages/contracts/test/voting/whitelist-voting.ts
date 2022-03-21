@@ -2,23 +2,13 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import chaiUtils from '../test-utils';
 import {VoterState} from '../test-utils/voting';
+import {customError} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
 import {WhitelistVoting} from '../../typechain';
 
 const ERRORS = {
-  ERROR_INIT_PCTS: 'VOTING_INIT_PCTS',
-  ERROR_INIT_SUPPORT_TOO_BIG: 'VOTING_INIT_SUPPORT_TOO_BIG',
-  ERROR_MIN_DURATION_NO_ZERO: 'VOTING_MIN_DURATION_NO_ZERO',
-  ERROR_VOTE_DATES_WRONG: 'VOTING_DURATION_TIME_WRONG',
-  ERROR_NO_VOTING_POWER: 'VOTING_NO_VOTING_POWER',
-  ERROR_CAN_NOT_VOTE: 'VOTING_CAN_NOT_VOTE',
-  ERROR_CHANGE_SUPPORT_PCTS: 'VOTING_CHANGE_SUPPORT_PCTS',
-  ERROR_SUPPORT_TOO_BIG: 'VOTING_SUPPORT_TOO_BIG',
-  ERROR_PARTICIPATION_TOO_BIG: 'VOTING_PARTICIPATION_TOO_BIG',
-  ERROR_CAN_NOT_EXECUTE: 'VOTING_CAN_NOT_EXECUTE',
-  ERROR_CAN_NOT_CREATE_VOTE: 'VOTING_CAN_NOT_CREATE_VOTE',
   ALREADY_INITIALIZED: 'Initializable: contract is already initialized',
 };
 
@@ -83,15 +73,15 @@ describe('WhitelistVoting', function () {
     it('reverts if trying to re-initialize', async () => {
       await initializeVoting([], 1, 2, 3);
 
-      await expect(initializeVoting([], 1, 2, 3)).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
-      );
+      await expect(
+          initializeVoting([], 1, 2, 3)
+      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
 
     it('reverts if min duration is 0', async () => {
-      await expect(initializeVoting([], 1, 2, 0)).to.be.revertedWith(
-        ERRORS.ERROR_MIN_DURATION_NO_ZERO
-      );
+      await expect(
+          initializeVoting([], 1, 2, 0)
+      ).to.be.revertedWith(customError('VoteDurationZero'));
     });
 
     it('should initialize dao on the component', async () => {
@@ -132,15 +122,17 @@ describe('WhitelistVoting', function () {
     it('reverts if wrong config is set', async () => {
       await expect(
         voting.changeVoteConfig(1, pct16(1000), 3)
-      ).to.be.revertedWith(ERRORS.ERROR_SUPPORT_TOO_BIG);
+      ).to.be.revertedWith(customError('VoteSupportExceeded', pct16(100), pct16(1000)));
+
 
       await expect(
         voting.changeVoteConfig(pct16(1000), 2, 3)
-      ).to.be.revertedWith(ERRORS.ERROR_PARTICIPATION_TOO_BIG);
+      ).to.be.revertedWith(customError('VoteParticipationExceeded', pct16(100), pct16(1000)));
 
-      await expect(voting.changeVoteConfig(1, 2, 0)).to.be.revertedWith(
-        ERRORS.ERROR_MIN_DURATION_NO_ZERO
-      );
+
+      await expect(
+          voting.changeVoteConfig(1, 2, 0)
+      ).to.be.revertedWith(customError('VoteDurationZero'));
     });
 
     it('should change config successfully', async () => {
@@ -159,21 +151,25 @@ describe('WhitelistVoting', function () {
     it('reverts if user is not whitelisted to create a vote', async () => {
       await expect(
         voting.connect(signers[1]).newVote('0x00', [], 0, 0, false, false)
-      ).to.be.revertedWith(ERRORS.ERROR_CAN_NOT_CREATE_VOTE);
+      ).to.be.revertedWith(customError('VoteCreationForbidden', signers[1].address));
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
       const block = await ethers.provider.getBlock('latest');
+      const current = block.timestamp;
+      const startDate = block.timestamp;
+      const endDate = startDate + (minDuration - 1);
       await expect(
         voting.newVote(
           '0x00',
           [],
-          block.timestamp,
-          block.timestamp + (minDuration - 1),
+          startDate,
+          endDate,
           false,
           false
         )
-      ).to.be.revertedWith(ERRORS.ERROR_VOTE_DATES_WRONG);
+      ).to.be.revertedWith(customError('VoteTimesForbidden', current+1, // TODO hacky
+          startDate, endDate, minDuration));
     });
 
     it('should create a vote successfully, but not vote', async () => {
@@ -349,15 +345,15 @@ describe('WhitelistVoting', function () {
       expect(vote.executed).to.equal(true);
 
       // calling execute again should fail
-      await expect(voting.execute(0)).to.be.revertedWith(
-        ERRORS.ERROR_CAN_NOT_EXECUTE
-      );
+      await expect(
+        voting.execute(0)
+      ).to.be.revertedWith(customError('VoteExecutionForbidden',0));
     });
 
     it('reverts if vote is executed while enough yea is not given ', async () => {
-      await expect(voting.execute(0)).to.be.revertedWith(
-        ERRORS.ERROR_CAN_NOT_EXECUTE
-      );
+      await expect(
+          voting.execute(0)
+      ).to.be.revertedWith(customError('VoteExecutionForbidden',0));
     });
   });
 });
