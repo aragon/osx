@@ -98,12 +98,11 @@ contract DAOFactory {
         // register dao with its name and token to the registry
         // TODO: shall we add minter as well ?
         registry.register(_daoConfig.name, dao, msg.sender, address(token));
-        
-        erc20Voting = createERC20Voting(dao, token, _votingSettings);
-        
+
         ACLData.BulkItem[] memory items;
 
         // only create whitelist voting if at least one whitelister is passed.
+        // otherwise create erc20 voting.
         if(_whitelistVoters.length > 0) {
             whitelistVoting = createWhitelistVoting(dao, _whitelistVoters, _votingSettings);
 
@@ -113,13 +112,15 @@ contract DAOFactory {
             items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(dao));
             items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(dao));
             dao.bulk(address(whitelistVoting), items);
-        }
+        } else {
+            erc20Voting = createERC20Voting(dao, token, _votingSettings);
 
-        // Grant dao the necessary permissions for ERC20Voting
-        items = new ACLData.BulkItem[](2);
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_CONFIG(), address(dao));
-        dao.bulk(address(erc20Voting), items);
+             // Grant dao the necessary permissions for ERC20Voting
+            items = new ACLData.BulkItem[](2);
+            items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(dao));
+            items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_CONFIG(), address(dao));
+            dao.bulk(address(erc20Voting), items);
+        }
 
         // set roles on the dao itself.
         items = new ACLData.BulkItem[](7);
@@ -130,8 +131,15 @@ contract DAOFactory {
         items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.UPGRADE_ROLE(), address(dao));
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.ROOT_ROLE(), address(dao));
         items[4] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.SET_SIGNATURE_VALIDATOR_ROLE(), address(dao));
+
         // Grant voting execution permission
-        items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.EXEC_ROLE(), address(erc20Voting));
+        {
+            address voting = address(erc20Voting) == address(0) 
+                ? address(whitelistVoting) 
+                : address(erc20Voting);
+            items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.EXEC_ROLE(), voting);
+        }
+
         // Revoke permissions from factory
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.ROOT_ROLE(), address(this));
 
