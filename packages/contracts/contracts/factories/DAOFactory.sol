@@ -29,7 +29,6 @@ contract DAOFactory {
 
     address public erc20VotingBase;
     address public whitelistVotingBase;
-
     address public daoBase;
 
     Registry public registry;
@@ -52,43 +51,25 @@ contract DAOFactory {
         setupBases();
     }
 
-    /// @notice Creates a new DAO based with his name, token, metadata, and the voting settings.
-    /// @param _daoConfig The DAO name and metadata
-    /// @param _tokenConfig address, name, symbol of the token. If no addr, totally new token gets created.
-    /// @param _mintConfig the addresses and amounts to where to mint tokens.
-    /// @param _votingSettings settings for the voting contract.
-    /// @return dao DAO address.
-    /// @return erc20Voting address
-    /// @return whitelistVoting address
-    /// @return token The token address(wrapped one or the new one)
-    /// @return minter Merkle Minter contract address
-    function newDAO(
+    function newERC20VotingDAO(
         DAOConfig calldata _daoConfig,
+        uint256[3] calldata _votingSettings,
         TokenFactory.TokenConfig calldata _tokenConfig,
         TokenFactory.MintConfig calldata _mintConfig,
-        uint256[3] calldata _votingSettings,
-        address[] calldata _whitelistVoters,
         address _gsnForwarder
-    )
-        external
-        returns (
-            DAO dao,
-            ERC20Voting erc20Voting,
-            WhitelistVoting whitelistVoting,
-            ERC20VotesUpgradeable token,
-            MerkleMinter minter
-        )
-    {
+    ) external returns (
+        DAO dao,
+        ERC20Voting voting,
+        ERC20VotesUpgradeable token,
+        MerkleMinter minter
+    ) {
         if(_mintConfig.receivers.length != _mintConfig.amounts.length)
             revert MintArrayLengthMismatch({
                 receiversArrayLength: _mintConfig.receivers.length,
                 amountsArrayLength: _mintConfig.amounts.length
             });
 
-        // create dao
-        dao = DAO(createProxy(daoBase, bytes("")));
-        // initialize dao with the ROOT_ROLE as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
+        dao = createDAO(_daoConfig, _gsnForwarder);
 
         // Create token and merkle minter
         dao.grant(address(dao), address(tokenFactory), dao.ROOT_ROLE());
@@ -99,31 +80,41 @@ contract DAOFactory {
         // TODO: shall we add minter as well ?
         registry.register(_daoConfig.name, dao, msg.sender, address(token));
 
-        ACLData.BulkItem[] memory items;
+        voting = createERC20Voting(dao, token, _votingSettings);
 
-        // only create whitelist voting if at least one whitelister is passed.
-        // otherwise create erc20 voting.
-        if(_whitelistVoters.length > 0) {
-            whitelistVoting = createWhitelistVoting(dao, _whitelistVoters, _votingSettings);
+        setDAOPermissions(dao, address(voting));
 
-            // Grant dao the necessary permissions for WhitelistVoting
-            items = new ACLData.BulkItem[](3);
-            items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(dao));
-            items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(dao));
-            items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(dao));
-            dao.bulk(address(whitelistVoting), items);
-        } else {
-            erc20Voting = createERC20Voting(dao, token, _votingSettings);
+        emit DAOCreated(_daoConfig.name, address(token), address(voting));
+    }
 
-             // Grant dao the necessary permissions for ERC20Voting
-            items = new ACLData.BulkItem[](2);
-            items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(dao));
-            items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_CONFIG(), address(dao));
-            dao.bulk(address(erc20Voting), items);
-        }
+    function newWhitelistVotingDAO(
+        DAOConfig calldata _daoConfig,
+        uint256[3] calldata _votingSettings,
+        address[] calldata _whitelistVoters,
+        address _gsnForwarder
+    ) external returns (DAO dao, WhitelistVoting voting) {
+        dao = createDAO(_daoConfig, _gsnForwarder);
 
+        // register dao with its name and token to the registry
+        registry.register(_daoConfig.name, dao, msg.sender, address(0));
+
+        voting = createWhitelistVoting(dao, _whitelistVoters, _votingSettings);
+
+        setDAOPermissions(dao, address(voting));
+
+        emit DAOCreated(_daoConfig.name, address(0), address(voting));
+    }
+
+    function createDAO(DAOConfig calldata _daoConfig, address _gsnForwarder) internal returns (DAO dao) {
+        // create dao
+        dao = DAO(createProxy(daoBase, bytes("")));
+        // initialize dao with the ROOT_ROLE as DAOFactory
+        dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
+    }
+
+    function setDAOPermissions(DAO dao, address voting) internal {
         // set roles on the dao itself.
-        items = new ACLData.BulkItem[](7);
+        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
 
         // Grant DAO all the permissions required
         items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.DAO_CONFIG_ROLE(), address(dao));
@@ -131,26 +122,17 @@ contract DAOFactory {
         items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.UPGRADE_ROLE(), address(dao));
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.ROOT_ROLE(), address(dao));
         items[4] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.SET_SIGNATURE_VALIDATOR_ROLE(), address(dao));
-
-        // Grant voting execution permission
-        {
-            address voting = address(erc20Voting) == address(0) 
-                ? address(whitelistVoting) 
-                : address(erc20Voting);
-            items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.EXEC_ROLE(), voting);
-        }
+        items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, dao.EXEC_ROLE(), voting);
 
         // Revoke permissions from factory
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, dao.ROOT_ROLE(), address(this));
 
         dao.bulk(address(dao), items);
-
-        emit DAOCreated(_daoConfig.name, address(token), address(erc20Voting));
     }
 
     /// @dev internal helper method to create ERC20Voting
     function createERC20Voting(
-        IDAO _dao, 
+        DAO _dao, 
         ERC20VotesUpgradeable _token, 
         uint256[3] calldata _votingSettings
     ) internal returns (ERC20Voting erc20Voting) {
@@ -168,11 +150,18 @@ contract DAOFactory {
                 )
             )
         );
+
+         // Grant dao the necessary permissions for ERC20Voting
+        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](2);
+        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(_dao));
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_CONFIG(), address(_dao));
+
+        _dao.bulk(address(erc20Voting), items);
     }
 
     /// @dev internal helper method to create Whitelist Voting
     function createWhitelistVoting(
-        IDAO _dao, 
+        DAO _dao, 
         address[] calldata _whitelistVoters, 
         uint256[3] calldata _votingSettings
     ) internal returns (WhitelistVoting whitelistVoting) {
@@ -190,6 +179,14 @@ contract DAOFactory {
                 )
             )
         );
+
+        // Grant dao the necessary permissions for WhitelistVoting
+        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
+        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(_dao));
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(_dao));
+        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(_dao));
+
+        _dao.bulk(address(whitelistVoting), items);
     }
 
     // @dev Internal helper method to set up the required base contracts on DAOFactory deployment.
