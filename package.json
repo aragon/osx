@@ -1,8 +1,8 @@
 {
-  "name": "@aragon/zaragoza",
+  "name": "@aragon/core",
   "version": "0.1.0",
   "description": "Aragon DAO Framework",
-  "repository": "https://github.com/aragon/zaragoza",
+  "repository": "https://github.com/aragon/core",
   "author": "Aragon Association",
   "license": "MIT",
   "private": true,

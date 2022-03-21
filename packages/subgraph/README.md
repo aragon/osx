@@ -1,4 +1,4 @@
-# Zaragoza Subgraph
+# Aragon Core Subgraph
 
 ## Quick Start
 
