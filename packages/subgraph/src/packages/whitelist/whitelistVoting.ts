@@ -16,15 +16,21 @@ import {
 } from '../../../generated/schema';
 import {dataSource, store} from '@graphprotocol/graph-ts';
 import {VOTER_STATE} from '../../utils/constants';
+import {handleMetadata} from '../../utils/metadata';
 
 export function handleStartVote(event: StartVote): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
-
-  _handleStartVote(event, daoId);
+  let metdata = handleMetadata(event.params.metadata.toString());
+  _handleStartVote(event, daoId, metdata);
 }
 
-export function _handleStartVote(event: StartVote, daoId: string): void {
+// work around: to bypass context and ipfs for testing, as they are not yet supported by matchstick
+export function _handleStartVote(
+  event: StartVote,
+  daoId: string,
+  metadata: string
+): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
 
@@ -33,7 +39,7 @@ export function _handleStartVote(event: StartVote, daoId: string): void {
   proposalEntity.pkg = event.address.toHexString();
   proposalEntity.voteId = event.params.voteId;
   proposalEntity.creator = event.params.creator;
-  proposalEntity.description = event.params.description.toString();
+  proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
 
   let contract = WhitelistVoting.bind(event.address);

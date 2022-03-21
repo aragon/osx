@@ -7,10 +7,10 @@ pragma solidity 0.8.10;
 library Uint256Helpers {
     uint256 private constant MAX_UINT64 = type(uint64).max;
 
-    string private constant ERROR_NUMBER_TOO_BIG = "UINT64_NUMBER_TOO_BIG";
+    error OutOfBounds(uint256 maxValue, uint256 value);
 
     function toUint64(uint256 a) internal pure returns (uint64) {
-        require(a <= MAX_UINT64, ERROR_NUMBER_TOO_BIG);
+        if(a > MAX_UINT64) revert OutOfBounds({maxValue: MAX_UINT64, value: a});
         return uint64(a);
     }
 }

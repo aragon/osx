@@ -4,7 +4,6 @@ import {
   Executed,
   Deposited,
   ETHDeposited,
-  Withdrawn,
   Granted,
   Frozen,
   Revoked
@@ -16,24 +15,22 @@ import {
   Role,
   Permission
 } from '../../generated/schema';
-import {
-  Address,
-  BigInt,
-  ByteArray,
-  Bytes,
-  ethereum,
-  log,
-  store
-} from '@graphprotocol/graph-ts';
+import {Address, Bytes, store} from '@graphprotocol/graph-ts';
 import {ADDRESS_ZERO} from '../utils/constants';
 import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
+import {handleMetadata} from '../utils/metadata';
 
 export function handleSetMetadata(event: SetMetadata): void {
-  let id = event.address.toHexString();
-  let entity = Dao.load(id);
+  let daoId = event.address.toHexString();
+  let metadata = handleMetadata(event.params.metadata.toString());
+  _handleSetMetadata(daoId, metadata);
+}
+
+export function _handleSetMetadata(daoId: string, metadata: string): void {
+  let entity = Dao.load(daoId);
   if (entity) {
-    entity.metadata = event.params.metadata.toString();
+    entity.metadata = metadata;
     entity.save();
   }
 }

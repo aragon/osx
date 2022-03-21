@@ -30,10 +30,19 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
 
     // Error msg's
-    string internal constant ERROR_ACTION_CALL_FAILED = "ACTION_CALL_FAILED";
-    string internal constant ERROR_DEPOSIT_AMOUNT_ZERO = "DEPOSIT_AMOUNT_ZERO";
-    string internal constant ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH = "ETH_DEPOSIT_AMOUNT_MISMATCH";
-    string internal constant ERROR_ETH_WITHDRAW_FAILED = "ETH_WITHDRAW_FAILED";
+    /// @notice Thrown if action execution has failed
+    error ActionFailed();
+
+    /// @notice Thrown if the deposit or withdraw amount is zero
+    error ZeroAmount();
+
+    /// @notice Thrown if the expected and actually deposited ETH amount mismatch
+    /// @param expected ETH amount
+    /// @param actual ETH amount
+    error ETHDepositAmountMismatch(uint256 expected, uint256 actual);
+
+    /// @notice Thrown if an ETH withdraw fails
+    error ETHWithdrawFailed();
 
     ERC1271 signatureValidator;
 
@@ -86,7 +95,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         for (uint256 i = 0; i < _actions.length; i++) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
 
-            require(success, ERROR_ACTION_CALL_FAILED);
+            if(!success) revert ActionFailed();
 
             execResults[i] = response;
         }
@@ -116,11 +125,13 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string calldata _reference
     ) external payable override {
-        require(_amount > 0, ERROR_DEPOSIT_AMOUNT_ZERO);
+        if(_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
-            require(msg.value == _amount, ERROR_ETH_DEPOSIT_AMOUNT_MISMATCH);
+            if(msg.value != _amount) revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
         } else {
+            if(msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
+
             ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
@@ -138,9 +149,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string memory _reference
     ) external override auth(address(this), WITHDRAW_ROLE) {
+        if(_amount == 0) revert ZeroAmount();
+
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
-            require(ok, ERROR_ETH_WITHDRAW_FAILED);
+            if(!ok) revert ETHWithdrawFailed();
         } else {
             ERC20(_token).safeTransfer(_to, _amount);
         }

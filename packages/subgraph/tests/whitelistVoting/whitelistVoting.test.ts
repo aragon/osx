@@ -75,7 +75,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   );
 
   // handle event
-  _handleStartVote(event, DAO_ADDRESS);
+  _handleStartVote(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +
@@ -89,7 +89,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   assert.fieldEquals('WhitelistProposal', entityID, 'pkg', packageId);
   assert.fieldEquals('WhitelistProposal', entityID, 'voteId', voteId);
   assert.fieldEquals('WhitelistProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals('WhitelistProposal', entityID, 'description', STRING_DATA);
+  assert.fieldEquals('WhitelistProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
     'WhitelistProposal',
     entityID,
