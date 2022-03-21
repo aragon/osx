@@ -9,6 +9,7 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "@opengsn/contracts/src/interfaces/IRelayRecipient.sol";
 
 import "./../IDAO.sol";
+import "./../acl/ACL.sol";
 
 interface Relay {
     function trustedForwarder() external view returns (address);
@@ -22,11 +23,16 @@ abstract contract Permissions is Initializable, BaseRelayRecipient {
     
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;
+
+    // Errors
+    error Permission(bytes32 magicNumber);
     
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _role The hash of the role identifier
     modifier auth(bytes32 _role)  {
-        require(dao.hasPermission(address(this), _msgSender(), _role, _msgData()), "component: auth");
+        if(!dao.hasPermission(address(this), _msgSender(), _role, _msgData()))
+            revert ACLData.ACLAuth({here: address(this), where: address(this), who: _msgSender(), role: _role});
+
         _;
     }
 

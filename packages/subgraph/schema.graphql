@@ -83,7 +83,7 @@ type Dao @entity {
   id: ID! # use address as id
   name: String!
   creator: Bytes!
-  metadata: String!
+  metadata: String
   createdAt: BigInt!
   token: ERC20Token!
   actions: [Action!]! @derivedFrom(field: "dao")
@@ -168,7 +168,7 @@ type ERC20VotingProposal implements Proposal @entity {
   pkg: ERC20VotingPackage!
   voteId: BigInt!
   creator: Bytes!
-  description: String!
+  metadata: String!
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
@@ -218,7 +218,7 @@ type WhitelistProposal implements Proposal @entity {
   pkg: WhitelistPackage!
   voteId: BigInt!
   creator: Bytes!
-  description: String!
+  metadata: String!
   startDate: BigInt!
   endDate: BigInt!
   supportRequiredPct: BigInt!

@@ -25,7 +25,7 @@ contract DAOFactory {
     using Address for address;
     using Clones for address;
 
-    string private constant ERROR_MISMATCH = "FACTORY: MISMATCH";
+    error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
 
     address public erc20VotingBase;
     address public whitelistVotingBase;
@@ -79,7 +79,11 @@ contract DAOFactory {
             MerkleMinter minter
         )
     {
-        require(_mintConfig.receivers.length == _mintConfig.amounts.length, ERROR_MISMATCH);
+        if(_mintConfig.receivers.length != _mintConfig.amounts.length)
+            revert MintArrayLengthMismatch({
+                receiversArrayLength: _mintConfig.receivers.length,
+                amountsArrayLength: _mintConfig.amounts.length
+            });
 
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));

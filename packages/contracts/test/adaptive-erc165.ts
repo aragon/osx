@@ -8,10 +8,7 @@ import {
   AdaptiveERC165Mock__factory,
   AdaptiveERC165MockHelper__factory,
 } from '../typechain'
-
-const ERRORS = {
-  UNKNOWN_CALLBACK: 'adap-erc165: unknown callback',
-}
+import {customError} from './test-utils/custom-error-helper';
 
 const EVENTS = {
   REGISTERED_CALLBACK: 'RegisteredCallback',
@@ -23,6 +20,7 @@ const beefInterfaceId = '0xbeefbeef'
 const callbackSig = hexDataSlice(id('callbackFunc()'), 0, 4) // 0x1eb2075a
 const magicNumber = '0x10000000'
 const magicNumberReturn = magicNumber + '0'.repeat(56)
+const unregisteredNumberReturn = '0x' + '0'.repeat(64)
 
 describe('AdaptiveErc165', function () {
   let adaptive: AdaptiveERC165Mock, signers: Signer[]
@@ -62,7 +60,7 @@ describe('AdaptiveErc165', function () {
       )
     })
 
-    it('ensures the right callback was call with the right memory value', async () => {
+    it('ensures the right callback was called with the right memory value', async () => {
       await expect(
         signers[0].sendTransaction({
           to: adaptive.address,
@@ -79,7 +77,7 @@ describe('AdaptiveErc165', function () {
           to: adaptive.address,
           data: hexDataSlice(id('unknown()'), 0, 4),
         })
-      ).to.be.revertedWith(ERRORS.UNKNOWN_CALLBACK)
+      ).to.be.revertedWith(customError('AdapERC165UnkownCallback', unregisteredNumberReturn))
     })
 
     it('returns the correct value from handleCallback assembly', async () => {

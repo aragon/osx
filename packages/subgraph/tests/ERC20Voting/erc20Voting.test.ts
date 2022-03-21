@@ -67,7 +67,7 @@ test('Run ERC Voting (handleStartVote) mappings with mock event', () => {
   );
 
   // handle event
-  _handleStartVote(event, DAO_ADDRESS);
+  _handleStartVote(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +
@@ -81,12 +81,7 @@ test('Run ERC Voting (handleStartVote) mappings with mock event', () => {
   assert.fieldEquals('ERC20VotingProposal', entityID, 'pkg', packageId);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'voteId', voteId);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals(
-    'ERC20VotingProposal',
-    entityID,
-    'description',
-    STRING_DATA
-  );
+  assert.fieldEquals('ERC20VotingProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
     'ERC20VotingProposal',
     entityID,
