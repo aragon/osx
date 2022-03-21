@@ -6,58 +6,17 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import "./../../core/component/Component.sol";
-import "./../../core/IDAO.sol";
-import "./../../utils/TimeHelpers.sol";
+import "./../MajorityVotingBase.sol";
 
-contract ERC20Voting is Component, TimeHelpers {
-    bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
-
-    uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
-
-    enum VoterState {
-        None,
-        Abstain,
-        Yea,
-        Nay
-    }
-
-    struct Vote {
-        bool executed;
-        uint64 startDate;
-        uint64 endDate;
-        uint64 snapshotBlock;
-        uint64 supportRequiredPct;
-        uint64 participationRequiredPct;
-        uint256 yea;
-        uint256 nay;
-        uint256 abstain;
-        uint256 votingPower;
-        mapping(address => VoterState) voters;
-        IDAO.Action[] actions;
-    }
-
-    mapping(uint256 => Vote) internal votes;
-
-    uint64 public supportRequiredPct;
-    uint64 public participationRequiredPct;
-    uint64 public minDuration;
-    uint256 public votesLength;
+contract ERC20Voting is MajorityVotingBase {
 
     ERC20VotesUpgradeable public token;
 
-    error VoteSupportExceeded(uint64 limit, uint64 actual);
-    error VoteParticipationExceeded(uint64 limit, uint64 actual);
-    error VoteTimesForbidden(uint64 current, uint64 start, uint64 end, uint64 minDuration);
-    error VoteDurationZero();
-    error VoteCastForbidden(uint256 voteId, address sender);
-    error VoteExecutionForbidden(uint256 voteId);
-    error VotePowerZero();
+    mapping(uint256 => uint64) snapshotBlocks;
 
-    event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
-    event CastVote(uint256 indexed voteId, address indexed voter, uint8 voterState, uint256 stake);
-    event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
-    event UpdateConfig(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration);
+    function getSnapshotBlock(uint256 _voteId) public view returns (uint64) {
+        return snapshotBlocks[_voteId];
+    }
 
     /// @dev describes the version and contract for GSN compatibility.
     function versionRecipient() external view virtual override returns (string memory) {
@@ -74,46 +33,15 @@ contract ERC20Voting is Component, TimeHelpers {
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) public initializer {
-        if(_supportRequiredPct > PCT_BASE)
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
-        if(_participationRequiredPct > PCT_BASE)
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
-        if(_minDuration == 0)
-            revert VoteDurationZero();
+        MajorityVotingBase.initializeBase(
+            _dao,
+            _gsnForwarder,
+            _participationRequiredPct,
+            _supportRequiredPct,
+            _minDuration
+        );
 
-        __Component_init(_dao, _gsnForwarder);
-        
         token = _token;
-        participationRequiredPct = _participationRequiredPct;
-        supportRequiredPct = _supportRequiredPct;
-        minDuration = _minDuration;
-
-        emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
-    }
-
-    /**
-     * @notice Change required support and minQuorum
-     * @param _supportRequiredPct New required support
-     * @param _participationRequiredPct New acceptance quorum
-     * @param _minDuration each vote's minimum duration
-     */
-    function changeVoteConfig(
-        uint64 _participationRequiredPct,
-        uint64 _supportRequiredPct,
-        uint64 _minDuration
-    ) external auth(MODIFY_CONFIG) {
-        if(_supportRequiredPct > PCT_BASE)
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
-        if(_participationRequiredPct > PCT_BASE)
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
-        if(_minDuration == 0)
-            revert VoteDurationZero();
-
-        participationRequiredPct = _participationRequiredPct;
-        supportRequiredPct = _supportRequiredPct;
-        minDuration = _minDuration;
-
-        emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
     /**
@@ -132,7 +60,7 @@ contract ERC20Voting is Component, TimeHelpers {
         uint64 _endDate,
         bool _executeIfDecided,
         bool _castVote
-    ) external returns (uint256 voteId) {
+    ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         uint256 votingPower = token.getPastTotalSupply(snapshotBlock);
@@ -156,10 +84,11 @@ contract ERC20Voting is Component, TimeHelpers {
             });
 
         // create a vote.
+        snapshotBlocks[voteId] = snapshotBlock;
+
         Vote storage vote_ = votes[voteId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
-        vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = votingPower;
@@ -176,21 +105,6 @@ contract ERC20Voting is Component, TimeHelpers {
     }
 
     /**
-     * @notice Vote `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 1 = not supports]
-     * @param _voteId Id for vote
-     * @param _outcome Whether voter abstains, supports or not supports to vote.
-     * @param _executesIfDecided Whether the vote should execute its action if it becomes decided
-     */
-    function vote(
-        uint256 _voteId,
-        VoterState _outcome,
-        bool _executesIfDecided
-    ) external {
-        if(!_canVote(_voteId, msg.sender)) revert VoteCastForbidden(_voteId, msg.sender);
-        _vote(_voteId, _outcome, _msgSender(), _executesIfDecided);
-    }
-
-    /**
      * @dev Internal function to cast a vote. It assumes the queried vote exists.
      * @param _voteId voteId
      * @param _outcome Whether voter abstains, supports or not supports to vote.
@@ -201,11 +115,12 @@ contract ERC20Voting is Component, TimeHelpers {
         VoterState _outcome,
         address _voter,
         bool _executesIfDecided
-    ) internal {
+    ) internal override {
         Vote storage vote_ = votes[_voteId];
+        uint64 snapshotBlock = snapshotBlocks[_voteId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 voterStake = token.getPastVotes(_voter, vote_.snapshotBlock);
+        uint256 voterStake = token.getPastVotes(_voter, snapshotBlock);
         VoterState state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
@@ -236,179 +151,14 @@ contract ERC20Voting is Component, TimeHelpers {
     }
 
     /**
-     * @dev Method to execute a vote if allowed to
-     * @param _voteId The ID of the vote to execute
-     */
-    function execute(uint256 _voteId) public {
-        if(!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
-        _execute(_voteId);
-    }
-
-    /**
-     * @dev Internal function to execute a vote. It assumes the queried vote exists.
-     * @param _voteId the vote Id
-     */
-    function _execute(uint256 _voteId) internal {
-        bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
-
-        votes[_voteId].executed = true;
-
-        emit ExecuteVote(_voteId, execResults);
-    }
-
-    /**
-     * @dev Return the state of a voter for a given vote by its ID
-     * @param _voteId Vote identifier
-     * @return VoterState of the requested voter for a certain vote
-     */
-    function getVoterState(uint256 _voteId, address _voter) public view returns (VoterState) {
-        return votes[_voteId].voters[_voter];
-    }
-
-    /**
-     * @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-     * @param _voteId the vote Id
-     * @param _voter the address of the voter to check
-     * @return bool true if user is allowed to vote
-     */
-    function canVote(uint256 _voteId, address _voter) public view returns (bool) {
-        return _canVote(_voteId, _voter);
-    }
-
-    /**
-     * @notice Tells whether a vote #`_voteId` can be executed or not
-     * @dev Initialization check is implicitly provided by `voteExists()` as new votes can only be
-     *      created via `newVote(),` which requires initialization
-     * @return True if the given vote can be executed, false otherwise
-     */
-    function canExecute(uint256 _voteId) public view returns (bool) {
-        return _canExecute(_voteId);
-    }
-
-    /**
-     * @dev Return all information for a vote by its ID
-     * @param _voteId Vote id
-     * @return open Vote open status
-     * @return executed Vote executed status
-     * @return startDate start date
-     * @return endDate end date
-     * @return snapshotBlock snapshot block
-     * @return supportRequired support required
-     * @return participationRequired minimum participation required
-     * @return votingPower power
-     * @return yea yeas amount
-     * @return nay nays amount
-     * @return abstain abstain amount
-     * @return actions Actions
-     */
-    function getVote(uint256 _voteId)
-        public
-        view
-        returns (
-            bool open,
-            bool executed,
-            uint64 startDate,
-            uint64 endDate,
-            uint64 snapshotBlock,
-            uint64 supportRequired,
-            uint64 participationRequired,
-            uint256 votingPower,
-            uint256 yea,
-            uint256 nay,
-            uint256 abstain,
-            IDAO.Action[] memory actions
-        )
-    {
-        Vote storage vote_ = votes[_voteId];
-
-        open = _isVoteOpen(vote_);
-        executed = vote_.executed;
-        startDate = vote_.startDate;
-        endDate = vote_.endDate;
-        snapshotBlock = vote_.snapshotBlock;
-        supportRequired = vote_.supportRequiredPct;
-        participationRequired = vote_.participationRequiredPct;
-        votingPower = vote_.votingPower;
-        yea = vote_.yea;
-        nay = vote_.nay;
-        abstain = vote_.abstain;
-        actions = vote_.actions;
-    }
-
-    /**
      * @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
      * @param _voteId The voteId
      * @param _voter the address of the voter to check
      * @return True if the given voter can participate a certain vote, false otherwise
      */
-    function _canVote(uint256 _voteId, address _voter) internal view returns (bool) {
+    function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && token.getPastVotes(_voter, vote_.snapshotBlock) > 0;
-    }
-
-    /**
-     * @dev Internal function to check if a vote is still open
-     * @param vote_ the vote struct
-     * @return True if the given vote is open, false otherwise
-     */
-    function _isVoteOpen(Vote storage vote_) internal view returns (bool) {
-        return getTimestamp64() < vote_.endDate && getTimestamp64() >= vote_.startDate && !vote_.executed;
-    }
-
-    /**
-     * @dev Internal function to check if a vote can be executed. It assumes the queried vote exists.
-     * @param _voteId vote id
-     * @return True if the given vote can be executed, false otherwise
-     */
-    function _canExecute(uint256 _voteId) internal view returns (bool) {
-        Vote storage vote_ = votes[_voteId];
-
-        if (vote_.executed) {
-            return false;
-        }
-
-        // Voting is already decided
-        if (_isValuePct(vote_.yea, vote_.votingPower, vote_.supportRequiredPct)) {
-            return true;
-        }
-
-        // Vote ended?
-        if (_isVoteOpen(vote_)) {
-            return false;
-        }
-
-        uint256 totalVotes = vote_.yea + vote_.nay;
-
-        // Have enough people's stakes participated ? then proceed.
-        if (!_isValuePct(totalVotes + vote_.abstain, vote_.votingPower, vote_.participationRequiredPct)) {
-            return false;
-        }
-
-        // Has enough support?
-        if (!_isValuePct(vote_.yea, totalVotes, vote_.supportRequiredPct)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @dev Calculates whether `_value` is more than a percentage `_pct` of `_total`
-     * @param _value the current value
-     * @param _total the total value
-     * @param _pct the required support percentage
-     * @return returns if the _value is _pct or more percentage of _total.
-     */
-    function _isValuePct(
-        uint256 _value,
-        uint256 _total,
-        uint256 _pct
-    ) internal pure returns (bool) {
-        if (_total == 0) {
-            return false;
-        }
-
-        uint256 computedPct = (_value * PCT_BASE) / _total;
-        return computedPct > _pct;
+        uint64 snapshotBlock = snapshotBlocks[_voteId];
+        return _isVoteOpen(vote_) && token.getPastVotes(_voter, snapshotBlock) > 0;
     }
 }

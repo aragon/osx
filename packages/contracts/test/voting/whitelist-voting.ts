@@ -200,7 +200,7 @@ describe('WhitelistVoting', function () {
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00')
         .to.emit(voting, EVENTS.CAST_VOTE)
-        .withArgs(0, ownerAddress, VoterState.Yea);
+        .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
       const vote = await voting.getVote(0);
       expect(vote.open).to.equal(true);
@@ -242,21 +242,21 @@ describe('WhitelistVoting', function () {
     it('increases the yea or nay count and emit correct events', async () => {
       expect(await voting.vote(0, VoterState.Yea, false))
         .to.emit(voting, EVENTS.CAST_VOTE)
-        .withArgs(0, ownerAddress, VoterState.Yea);
+        .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
       let vote = await voting.getVote(0);
       expect(vote.yea).to.equal(1);
 
       expect(await voting.vote(0, VoterState.Nay, false))
         .to.emit(voting, EVENTS.CAST_VOTE)
-        .withArgs(0, ownerAddress, VoterState.Nay);
+        .withArgs(0, ownerAddress, VoterState.Nay, 1);
 
       vote = await voting.getVote(0);
       expect(vote.nay).to.equal(1);
 
       expect(await voting.vote(0, VoterState.Abstain, false))
         .to.emit(voting, EVENTS.CAST_VOTE)
-        .withArgs(0, ownerAddress, VoterState.Abstain);
+        .withArgs(0, ownerAddress, VoterState.Abstain, 1);
 
       vote = await voting.getVote(0);
       expect(vote.abstain).to.equal(1);
