@@ -2,14 +2,6 @@ contracts:
 - packages/contracts/**/*
 - packages/contracts/*
 
-ui-components:
-- packages/ui-components/**/*
-- packages/ui-components/*
-
-web-app:
-- packages/web-app/**/*
-- packages/web-app/*
-
 subgraph:
 - packages/subgraph/**/*
 - packages/subgraph/*

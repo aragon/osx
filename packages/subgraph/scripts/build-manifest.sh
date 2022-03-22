@@ -17,7 +17,7 @@ fi
 FILE=$NETWORK_NAME'.json'
 DATA=manifest/data/$FILE
 
-ZARAGOZA_CONTRACTS_MODULE=$(node -e 'console.log(require("path").dirname(require.resolve("@aragon/zaragoza-contracts/package.json")))')
+ZARAGOZA_CONTRACTS_MODULE=$(node -e 'console.log(require("path").dirname(require.resolve("@aragon/core-contracts/package.json")))')
 
 echo 'Generating manifest from data file: '$DATA
 cat $DATA
