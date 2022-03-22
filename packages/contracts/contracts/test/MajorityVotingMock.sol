@@ -4,12 +4,12 @@
 
 pragma solidity 0.8.10;
 
-import "../votings/majority-voting/MajorityVotingBase.sol";
+import "../votings/majority-voting/MajorityVoting.sol";
 
-contract MajorityVotingBaseMock is MajorityVotingBase {
+contract MajorityVotingMock is MajorityVoting {
 
     function versionRecipient() external pure override returns (string memory) {
-        return "MajorityVotingBaseMock";
+        return "MajorityVotingMock";
     }
 
     function initializeMock(
@@ -35,7 +35,7 @@ contract MajorityVotingBaseMock is MajorityVotingBase {
         uint64 /* _endDate */,
         bool /* _executeIfDecided */,
         bool /* _castVote */
-    ) external override  returns (uint256 voteId) {
+    ) external pure override  returns (uint256 voteId) {
         return 0;
     }
 
@@ -49,7 +49,7 @@ contract MajorityVotingBaseMock is MajorityVotingBase {
     function _canVote(
         uint256 /* _voteId */,
         address /* _voter */
-    ) internal view override returns (bool) {
+    ) internal pure override returns (bool) {
         return true;
     }
 }

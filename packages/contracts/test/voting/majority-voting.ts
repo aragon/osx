@@ -6,11 +6,11 @@ import {customError} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {MajorityVotingBaseMock} from '../../typechain';
+import {MajorityVotingMock} from '../../typechain';
 
-describe('MajorityVotingBaseMock', function () {
+describe('MajorityVotingMock', function () {
   let signers: any;
-  let votingBase: MajorityVotingBaseMock;
+  let votingBase: MajorityVotingMock;
   let daoMock: any;
   let ownerAddress: string;
   let user1: string;
@@ -34,7 +34,7 @@ describe('MajorityVotingBaseMock', function () {
   });
 
   beforeEach(async () => {
-    const MajorityVotingBase = await ethers.getContractFactory('MajorityVotingBaseMock');
+    const MajorityVotingBase = await ethers.getContractFactory('MajorityVotingMock');
     votingBase = await MajorityVotingBase.deploy();
   });
 

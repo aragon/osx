@@ -6,9 +6,9 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import "./MajorityVotingBase.sol";
+import "./MajorityVoting.sol";
 
-contract ERC20Voting is MajorityVotingBase {
+contract ERC20Voting is MajorityVoting {
 
     ERC20VotesUpgradeable public token;
 

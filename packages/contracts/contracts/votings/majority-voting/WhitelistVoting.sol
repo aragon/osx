@@ -4,9 +4,9 @@
 
 pragma solidity 0.8.10;
 
-import "./MajorityVotingBase.sol";
+import "./MajorityVoting.sol";
 
-contract WhitelistVoting is MajorityVotingBase {
+contract WhitelistVoting is MajorityVoting {
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
     uint64 private whitelistedLength;
