@@ -4,9 +4,9 @@
 
 pragma solidity 0.8.10;
 
-import "./../core/component/Component.sol";
-import "./../core/IDAO.sol";
-import "./../utils/TimeHelpers.sol";
+import "./../../core/component/Component.sol";
+import "./../../core/IDAO.sol";
+import "./../../utils/TimeHelpers.sol";
 
 abstract contract MajorityVotingBase is Component, TimeHelpers {
     bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
@@ -59,13 +59,13 @@ abstract contract MajorityVotingBase is Component, TimeHelpers {
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _dao The DAO contract of the current DAO
-    function initializeBase(
+    function __MajorityVotingBase_init(
         IDAO _dao,
         address _gsnForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
-    ) public initializer {
+    ) internal initializer {
         if(_supportRequiredPct > PCT_BASE)
             revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
         if(_participationRequiredPct > PCT_BASE)
@@ -128,27 +128,27 @@ abstract contract MajorityVotingBase is Component, TimeHelpers {
     /**
      * @notice Vote `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 1 = not supports]
      * @param _voteId Id for vote
-     * @param _outcome Whether voter abstains, supports or not supports to vote.
+     * @param  _choice Whether voter abstains, supports or not supports to vote.
      * @param _executesIfDecided Whether the vote should execute its action if it becomes decided
      */
     function vote(
         uint256 _voteId,
-        VoterState _outcome,
+        VoterState _choice,
         bool _executesIfDecided
     ) external {
         if(!_canVote(_voteId, msg.sender)) revert VoteCastForbidden(_voteId, msg.sender);
-        _vote(_voteId, _outcome, _msgSender(), _executesIfDecided);
+        _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /**
      * @dev Internal function to cast a vote. It assumes the queried vote exists.
      * @param _voteId voteId
-     * @param _outcome Whether voter abstains, supports or not supports to vote.
+     * @param _choice Whether voter abstains, supports or not supports to vote.
      * @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
      */
     function _vote(
         uint256 _voteId,
-        VoterState _outcome,
+        VoterState _choice,
         address _voter,
         bool _executesIfDecided
     ) internal virtual;

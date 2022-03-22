@@ -7,7 +7,7 @@ import {customError} from './test-utils/custom-error-helper';
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
   SetMetadata: 'SetMetadata',
-  UpdateConfig: 'UpdateConfig',
+  UPDATE_CONFIG: 'UpdateConfig',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
@@ -112,7 +112,7 @@ describe('DAOFactory: ', function () {
     actionExecuteContract = await ActionExecuteContract.deploy();
   });
 
-  it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
+  it.only('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
     const mintAmount = 100;
 
     let tx = await daoFactory.newDAO(
@@ -139,6 +139,7 @@ describe('DAOFactory: ', function () {
     const {name, dao, token, creator, ERC20Voting} = await getDeployments(tx);
 
     expect(name).to.equal(daoDummyName);
+
     expect(creator).to.equal(ownerAddress);
 
     await ethers.provider.send('evm_mine', []);
@@ -166,7 +167,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.SetMetadata)
       .withArgs(daoDummyMetadata)
-      .to.emit(ERC20Voting, EVENTS.UpdateConfig)
+      .to.emit(ERC20Voting, EVENTS.UPDATE_CONFIG)
       .withArgs(
         dummyVoteSettings[0],
         dummyVoteSettings[1],
@@ -243,7 +244,7 @@ describe('DAOFactory: ', function () {
     expect(await ERC20Voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
       .withArgs(ERC20Voting.address, 0, [], [])
-      .to.emit(ERC20Voting, EVENTS.UpdateConfig)
+      .to.emit(ERC20Voting, EVENTS.UPDATE_CONFIG)
       .withArgs(3, 4, 5);
 
     expect(await actionExecuteContract.test()).to.equal(true);
