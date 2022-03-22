@@ -18,8 +18,5 @@
       "**/matchstick-as",
       "**/matchstick-as/**"
     ]
-  },
-  "devDependencies": {
-    "lerna": "^3.22.1"
   }
 }

@@ -4,7 +4,7 @@ on:
     paths:
       - 'packages/subgraph/**'
       - '.github/workflows/subgraph-*.yml'
-      - 'packages/subgraph/**'
+      - 'packages/contracts/**'
 
 env:
   working-directory: packages/subgraph
