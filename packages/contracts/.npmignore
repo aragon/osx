@@ -1,9 +1,10 @@
 hardhat.config.ts
 scripts
 *.dbg.json
-artifacts/build-info/*
-artifacts/@openzeppelin/*
-artifacts/@opengsn/*
+artifacts
+typechain
+contracts
+npm
 cache/solidity-files-cache.json
 deploy/*.ts
 utils/*.ts
@@ -16,3 +17,5 @@ test
 .solhintignore
 networks.json
 tsconfig.json
+rollup.config.ts
+*.tgz

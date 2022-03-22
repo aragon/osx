@@ -2,19 +2,21 @@
   "name": "@aragon/core-contracts",
   "version": "0.0.1",
   "description": "Aragon V2 DAO Framework",
-  "main": "npm/index.js",
-  "types": "./typechain/index.ts",
+  "main": "dist/bundle-cjs.js",
+  "module": "dist/bundle-esm.js",
+  "types": "dist/bundle.d.ts",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
+    "build:npm": "rollup --config rollup.config.ts",
     "coverage": "hardhat coverage --temp artifacts",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
-    "prepublishOnly": "hardhat compile"
+    "prepublishOnly": "hardhat compile && npm run build:npm"
   },
   "repository": {
     "type": "git",
@@ -31,6 +33,8 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-typescript": "^8.3.1",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.2.22",
@@ -54,6 +58,8 @@
     "hardhat-gas-reporter": "^1.0.4",
     "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "rollup": "^2.70.1",
+    "rollup-plugin-dts": "^4.2.0",
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17",
     "tmp-promise": "^3.0.3",
