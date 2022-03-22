@@ -65,8 +65,7 @@ contract ERC20Voting is MajorityVoting {
 
         uint256 votingPower = token.getPastTotalSupply(snapshotBlock);
         if (votingPower == 0) revert VotePowerZero();
-
-
+        
         voteId = votesLength++;
 
         // calculate start and end time for the vote

@@ -98,7 +98,7 @@ contract WhitelistVoting is MajorityVoting {
         bool _executeIfDecided,
         bool _castVote
     ) external override returns (uint256 voteId) {
-        if(!whitelisted[msg.sender]) revert VoteCreationForbidden(msg.sender);
+        if(!whitelisted[_msgSender()]) revert VoteCreationForbidden(_msgSender());
 
         // calculate start and end time for the vote
         uint64 currentTimestamp = getTimestamp64();
@@ -128,10 +128,10 @@ contract WhitelistVoting is MajorityVoting {
             vote_.actions.push(_actions[i]);
         }
 
-        emit StartVote(voteId, msg.sender, _proposalMetadata);
+        emit StartVote(voteId, _msgSender(), _proposalMetadata);
 
-        if (_castVote && canVote(voteId, msg.sender)) {
-            _vote(voteId, VoterState.Yea, msg.sender, _executeIfDecided);
+        if (_castVote && canVote(voteId, _msgSender())) {
+            _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
         }
     }
 

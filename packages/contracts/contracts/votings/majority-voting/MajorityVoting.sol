@@ -32,18 +32,9 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal initializer {
-        if(_supportRequiredPct > PCT_BASE)
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
-        if(_participationRequiredPct > PCT_BASE)
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
-        if(_minDuration == 0)
-            revert VoteDurationZero();
+        _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         __Component_init(_dao, _gsnForwarder);
-
-        participationRequiredPct = _participationRequiredPct;
-        supportRequiredPct = _supportRequiredPct;
-        minDuration = _minDuration;
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
@@ -54,16 +45,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) external auth(MODIFY_VOTE_CONFIG) {
-        if(_supportRequiredPct > PCT_BASE)
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
-        if(_participationRequiredPct > PCT_BASE)
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
-        if(_minDuration == 0)
-            revert VoteDurationZero();
-
-        participationRequiredPct = _participationRequiredPct;
-        supportRequiredPct = _supportRequiredPct;
-        minDuration = _minDuration;
+        _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
@@ -155,7 +137,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
 
     /// @dev Internal function to execute a vote. It assumes the queried vote exists.
     /// @param _voteId the vote Id
-    function _execute(uint256 _voteId) internal {
+    function _execute(uint256 _voteId) internal virtual {
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         votes[_voteId].executed = true;
@@ -172,7 +154,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     /// @dev Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _voteId vote id
     /// @return True if the given vote can be executed, false otherwise
-    function _canExecute(uint256 _voteId) internal view returns (bool) {
+    function _canExecute(uint256 _voteId) internal virtual view returns (bool) {
         Vote storage vote_ = votes[_voteId];
 
         if (vote_.executed) {
@@ -207,7 +189,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     /// @dev Internal function to check if a vote is still open
     /// @param vote_ the vote struct
     /// @return True if the given vote is open, false otherwise
-    function _isVoteOpen(Vote storage vote_) internal view returns (bool) {
+    function _isVoteOpen(Vote storage vote_) internal virtual view returns (bool) {
         return getTimestamp64() < vote_.endDate && getTimestamp64() >= vote_.startDate && !vote_.executed;
     }
 
@@ -227,5 +209,27 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
 
         uint256 computedPct = (_value * PCT_BASE) / _total;
         return computedPct > _pct;
+    }
+
+    function _validateAndSetSettings(
+        uint64 _participationRequiredPct, 
+        uint64 _supportRequiredPct,
+        uint64 _minDuration
+    ) internal virtual {
+        if(_supportRequiredPct > PCT_BASE) {
+            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
+        }
+
+        if(_participationRequiredPct > PCT_BASE) {
+            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
+        }
+
+        if(_minDuration == 0) {
+            revert VoteDurationZero();
+        }
+
+        participationRequiredPct = _participationRequiredPct;
+        supportRequiredPct = _supportRequiredPct;
+        minDuration = _minDuration;
     }
 }
