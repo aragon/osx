@@ -109,7 +109,7 @@ contract DAOFactory {
         );
 
         // Grant dao permission to change voting settings.
-        dao.grant(address(voting), address(dao), voting.MODIFY_CONFIG());
+        dao.grant(address(voting), address(dao), voting.MODIFY_VOTE_CONFIG());
 
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
 

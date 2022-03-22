@@ -112,7 +112,7 @@ describe('DAOFactory: ', function () {
     actionExecuteContract = await ActionExecuteContract.deploy();
   });
 
-  it.only('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
+  it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
     const mintAmount = 100;
 
     let tx = await daoFactory.newDAO(
@@ -148,7 +148,7 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_CONFIG_ROLE = await ERC20Voting.MODIFY_CONFIG();
+    const MODIFY_VOTE_CONFIG_ROLE = await ERC20Voting.MODIFY_VOTE_CONFIG();
     const EXEC_ROLE = await dao.EXEC_ROLE();
 
     const DAORoles = await Promise.all([
@@ -190,7 +190,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.Granted)
       .withArgs(
-        MODIFY_CONFIG_ROLE,
+        MODIFY_VOTE_CONFIG_ROLE,
         daoFactory.address,
         dao.address,
         ERC20Voting.address,

@@ -9,7 +9,7 @@ import "./../../core/IDAO.sol";
 import "./../../utils/TimeHelpers.sol";
 
 abstract contract MajorityVotingBase is Component, TimeHelpers {
-    bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
+    bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
@@ -92,7 +92,7 @@ abstract contract MajorityVotingBase is Component, TimeHelpers {
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
-    ) external auth(MODIFY_CONFIG) {
+    ) external auth(MODIFY_VOTE_CONFIG) {
         if(_supportRequiredPct > PCT_BASE)
             revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
         if(_participationRequiredPct > PCT_BASE)
