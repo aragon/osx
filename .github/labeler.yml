@@ -1,7 +1,10 @@
 contracts:
 - packages/contracts/**/*
 - packages/contracts/*
+- .github/workflows/contract-*.yml
+- .github/workflows/contracts-*.yml
 
 subgraph:
 - packages/subgraph/**/*
 - packages/subgraph/*
+- .github/workflows/subgraph-*.yml
