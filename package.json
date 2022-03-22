@@ -9,14 +9,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/@graphprotocol/graph-ts",
-      "**/@graphprotocol/graph-ts/**",
-      "**/@graphprotocol/graph-cli",
-      "**/@graphprotocol/graph-cli/**",
-      "**/matchstick-as",
-      "**/matchstick-as/**"
     ]
   }
 }
