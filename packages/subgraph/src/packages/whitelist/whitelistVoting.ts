@@ -49,12 +49,13 @@ export function _handleStartVote(
     proposalEntity.executed = vote.value.value1;
     proposalEntity.startDate = vote.value.value2;
     proposalEntity.endDate = vote.value.value3;
-    proposalEntity.supportRequiredPct = vote.value.value4;
-    proposalEntity.participationRequired = vote.value.value5;
-    proposalEntity.votingPower = vote.value.value6;
+    proposalEntity.snapshotBlock = vote.value.value4;
+    proposalEntity.supportRequiredPct = vote.value.value5;
+    proposalEntity.participationRequired = vote.value.value6;
+    proposalEntity.votingPower = vote.value.value7;
 
     // actions
-    let actions = vote.value.value10;
+    let actions = vote.value.value11;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -108,9 +109,9 @@ export function handleCastVote(event: CastVote): void {
     let contract = WhitelistVoting.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
-      proposalEntity.yea = vote.value.value7;
-      proposalEntity.nay = vote.value.value8;
-      proposalEntity.abstain = vote.value.value9;
+      proposalEntity.yea = vote.value.value8;
+      proposalEntity.nay = vote.value.value9;
+      proposalEntity.abstain = vote.value.value10;
       proposalEntity.save();
     }
   }

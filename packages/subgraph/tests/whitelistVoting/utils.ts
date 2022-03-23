@@ -171,6 +171,7 @@ export function createGetVoteCall(
   executed: boolean,
   startDate: string,
   endDate: string,
+  snapshotBlock: string,
   supportRequired: string,
   participationRequired: string,
   votingPower: string,
@@ -182,7 +183,7 @@ export function createGetVoteCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getVote',
-    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
+    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
   )
     .withArgs([ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))])
     .returns([
@@ -190,6 +191,7 @@ export function createGetVoteCall(
       ethereum.Value.fromBoolean(executed),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(startDate)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate)),
+      ethereum.Value.fromSignedBigInt(BigInt.fromString(snapshotBlock)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequired)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequired)),
       ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower)),

@@ -221,6 +221,7 @@ type WhitelistProposal implements Proposal @entity {
   metadata: String!
   startDate: BigInt!
   endDate: BigInt!
+  snapshotBlock: BigInt!
   supportRequiredPct: BigInt!
   participationRequired: BigInt!
   votingPower: BigInt!
