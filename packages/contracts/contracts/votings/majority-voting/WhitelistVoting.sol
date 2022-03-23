@@ -6,6 +6,10 @@ pragma solidity 0.8.10;
 
 import "./MajorityVoting.sol";
 
+/// @title A component for whitelist voting
+/// @author Giorgi Lagidze, Samuel Furter - Aragon Association - 2021-2022
+/// @notice The majority voting implementation using an ERC-20 token
+/// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract WhitelistVoting is MajorityVoting {
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
@@ -18,13 +22,14 @@ contract WhitelistVoting is MajorityVoting {
     event AddUsers(address[] users);
     event RemoveUsers(address[] users);
 
-    /// @dev describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.WhitelistVoting";
-    }
-
-    /// @dev Used for UUPS upgradability pattern
-    /// @param _dao The DAO contract of the current DAO
+    /// @notice Initializes the component
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _dao The IDAO interface of the associated DAO
+    /// @param _gsnForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _participationRequiredPct The minimal required participation in percent.
+    /// @param _supportRequiredPct The minimal required support in percent.
+    /// @param _minDuration The minimal duration of a vote
+    /// @param _whitelisted The whitelisted addresses
     function initialize(
         IDAO _dao,
         address _gsnForwarder,
@@ -33,7 +38,7 @@ contract WhitelistVoting is MajorityVoting {
         uint64 _minDuration,
         address[] calldata _whitelisted
     ) public initializer {
-        __MajorityVotingBase_init(
+        __MajorityVoting_init(
             _dao,
             _gsnForwarder,
             _participationRequiredPct,
@@ -45,6 +50,12 @@ contract WhitelistVoting is MajorityVoting {
         _addWhitelistedUsers(_whitelisted);
     }
 
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
+    function versionRecipient() external view virtual override returns (string memory) {
+        return "0.0.1+opengsn.recipient.WhitelistVoting";
+    }
+
     /// @notice add new users to the whitelist.
     /// @param _users addresses of users to add
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
@@ -54,11 +65,15 @@ contract WhitelistVoting is MajorityVoting {
     /// @dev Internal function to add new users to the whitelist.
     /// @param _users addresses of users to add
     function _addWhitelistedUsers(address[] calldata _users) internal {
-        for (uint256 i = 0; i < _users.length; i++) {
-            whitelisted[_users[i]] = true;
+        uint256 userCount = _users.length;
+
+        unchecked {
+            for (uint256 i = 0; i < userCount; i++) {
+                whitelisted[_users[i]] = true;
+            }
         }
 
-        whitelistedLength += uint64(_users.length);
+        whitelistedLength += uint64(userCount);
 
         emit AddUsers(_users);
     }
@@ -66,11 +81,15 @@ contract WhitelistVoting is MajorityVoting {
     /// @notice remove new users to the whitelist.
     /// @param _users addresses of users to remove
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        for (uint256 i = 0; i < _users.length; i++) {
-            whitelisted[_users[i]] = false;
+        uint256 userCount = _users.length;
+
+        unchecked {
+            for (uint256 i = 0; i < userCount; i++) {
+                whitelisted[_users[i]] = false;
+            }
         }
 
-        whitelistedLength -= uint64(_users.length);
+        whitelistedLength -= uint64(userCount);
 
         emit RemoveUsers(_users);
     }
@@ -116,8 +135,11 @@ contract WhitelistVoting is MajorityVoting {
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = whitelistedLength;
 
-        for (uint256 i; i < _actions.length; i++) {
-            vote_.actions.push(_actions[i]);
+        uint256 actionsCount = _actions.length;
+        unchecked {
+            for (uint256 i = 0; i < actionsCount; i++) {
+                vote_.actions.push(_actions[i]);
+            }
         }
 
         emit StartVote(voteId, _msgSender(), _proposalMetadata);

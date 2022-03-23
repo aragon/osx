@@ -6,6 +6,9 @@ pragma solidity 0.8.10;
 
 import "./../../core/IDAO.sol";
 
+/// @title The interface for majority voting contracts
+/// @author Michael Heuer - Aragon Association - 2022
+/// @notice The interface for majority voting contracts
 interface IMajorityVoting {
 
     enum VoterState {

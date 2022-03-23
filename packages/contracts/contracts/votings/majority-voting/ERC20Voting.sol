@@ -5,26 +5,26 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-
 import "./MajorityVoting.sol";
 
+/// @title A component for ERC-20 token voting
+/// @author Giorgi Lagidze, Samuel Furter - Aragon Association - 2021-2022
+/// @notice The majority voting implementation using an ERC-20 token
+/// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract ERC20Voting is MajorityVoting {
 
     ERC20VotesUpgradeable public token;
 
-    mapping(uint256 => uint64) snapshotBlocks;
+    mapping(uint256 => uint64) internal snapshotBlocks;
 
-    function getSnapshotBlock(uint256 _voteId) public view returns (uint64) {
-        return snapshotBlocks[_voteId];
-    }
-
-    /// @dev describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.ERC20Voting";
-    }
-
-    /// @dev Used for UUPS upgradability pattern
-    /// @param _dao The DAO contract of the current DAO
+    /// @notice Initializes the component
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _dao The IDAO interface of the associated DAO
+    /// @param _gsnForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _participationRequiredPct The minimal required participation in percent.
+    /// @param _supportRequiredPct The minimal required support in percent.
+    /// @param _minDuration The minimal duration of a vote
+    /// @param _token The ERC20 token used for voting
     function initialize(
         IDAO _dao,
         address _gsnForwarder,
@@ -33,7 +33,7 @@ contract ERC20Voting is MajorityVoting {
         uint64 _minDuration,
         ERC20VotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(
+        __MajorityVoting_init(
             _dao,
             _gsnForwarder,
             _participationRequiredPct,
@@ -42,6 +42,12 @@ contract ERC20Voting is MajorityVoting {
         );
 
         token = _token;
+    }
+
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
+    function versionRecipient() external view virtual override returns (string memory) {
+        return "0.0.1+opengsn.recipient.ERC20Voting";
     }
 
     /// @notice Create a new vote on this concrete implementation

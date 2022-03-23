@@ -8,6 +8,10 @@ import "./IMajorityVoting.sol";
 import "./../../core/component/Component.sol";
 import "./../../utils/TimeHelpers.sol";
 
+/// @title The abstract implementation of majority voting components
+/// @author Michael Heuer - Aragon Association - 2022
+/// @notice The abstract implementation of majority voting components
+/// @dev This components implements the `IMajorityVoting` interface
 abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
@@ -20,12 +24,14 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     uint64 public minDuration;
     uint256 public votesLength;
 
-    /// @dev describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory);
-
-    /// @dev Used for UUPS upgradability pattern
-    /// @param _dao The DAO contract of the current DAO
-    function __MajorityVotingBase_init(
+    /// @notice Initializes the component
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _dao The IDAO interface of the associated DAO
+    /// @param _gsnForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _participationRequiredPct The minimal required participation in percent.
+    /// @param _supportRequiredPct The minimal required support in percent.
+    /// @param _minDuration The minimal duration of a vote
+    function __MajorityVoting_init(
         IDAO _dao,
         address _gsnForwarder,
         uint64 _participationRequiredPct,
@@ -38,7 +44,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
-    
+
     /// @inheritdoc IMajorityVoting
     function changeVoteConfig(
         uint64 _participationRequiredPct,
