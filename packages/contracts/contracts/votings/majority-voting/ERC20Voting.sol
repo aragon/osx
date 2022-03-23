@@ -15,7 +15,7 @@ contract ERC20Voting is MajorityVoting {
 
     ERC20VotesUpgradeable public token;
 
-    mapping(uint256 => uint64) internal snapshotBlocks;
+    mapping(uint256 => uint64) private snapshotBlocks;
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
