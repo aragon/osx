@@ -65,15 +65,13 @@ contract WhitelistVoting is MajorityVoting {
     /// @dev Internal function to add new users to the whitelist.
     /// @param _users addresses of users to add
     function _addWhitelistedUsers(address[] calldata _users) internal {
-        uint256 userCount = _users.length;
-
         unchecked {
-            for (uint256 i = 0; i < userCount; i++) {
+            for (uint256 i = 0; i < _users.length; i++) {
                 whitelisted[_users[i]] = true;
             }
-        }
 
-        whitelistedLength += uint64(userCount);
+            whitelistedLength += uint64(_users.length);
+        }
 
         emit AddUsers(_users);
     }
@@ -81,15 +79,14 @@ contract WhitelistVoting is MajorityVoting {
     /// @notice remove new users to the whitelist.
     /// @param _users addresses of users to remove
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        uint256 userCount = _users.length;
-
         unchecked {
-            for (uint256 i = 0; i < userCount; i++) {
+            for (uint256 i = 0; i < _users.length; i++) {
                 whitelisted[_users[i]] = false;
             }
+
+            whitelistedLength -= uint64(_users.length);
         }
 
-        whitelistedLength -= uint64(userCount);
 
         emit RemoveUsers(_users);
     }
@@ -135,11 +132,8 @@ contract WhitelistVoting is MajorityVoting {
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = whitelistedLength;
 
-
         unchecked {
-            uint256 actionsCount = _actions.length;
-            
-            for (uint256 i = 0; i < actionsCount; i++) {
+            for (uint256 i = 0; i < _actions.length; i++) {
                 vote_.actions.push(_actions[i]);
             }
         }

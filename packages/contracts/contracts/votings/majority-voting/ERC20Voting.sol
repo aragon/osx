@@ -97,9 +97,7 @@ contract ERC20Voting is MajorityVoting {
         vote_.votingPower = votingPower;
 
         unchecked {
-            uint256 actionsCount = _actions.length;
-
-            for (uint256 i = 0; i < actionsCount; i++) {
+            for (uint256 i = 0; i < _actions.length; i++) {
                 vote_.actions.push(_actions[i]);
             }
         }
