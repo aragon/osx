@@ -11,7 +11,7 @@ import "./../../utils/TimeHelpers.sol";
 /// @title The abstract implementation of majority voting components
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
-/// @dev This components implements the `IMajorityVoting` interface
+/// @dev This component implements the `IMajorityVoting` interface
 abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
