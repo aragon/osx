@@ -44,7 +44,7 @@ contract MajorityVotingMock is MajorityVoting {
         VoterState /* _choice */,
         address /* _voter */,
         bool /* _executesIfDecided */
-    ) internal override {}
+    ) internal pure override {}
 
     function _canVote(
         uint256 /* _voteId */,
