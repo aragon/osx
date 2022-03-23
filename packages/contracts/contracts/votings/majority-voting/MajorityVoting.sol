@@ -57,7 +57,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        bool _castVote
+        VoterState _choice
     ) external virtual returns (uint256 voteId);
 
     /// @inheritdoc IMajorityVoting

@@ -84,7 +84,7 @@ describe('ERC20Voting', function () {
     it('reverts total token supply while creating a vote is 0', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.newVote('0x00', [], 0, 0, false, false)
+        voting.newVote('0x00', [], 0, 0, false, VoterState.None)
       ).to.be.revertedWith(customError('VotePowerZero'));
     });
 
@@ -101,7 +101,7 @@ describe('ERC20Voting', function () {
           startDate,
           endDate,
           false,
-          false
+          VoterState.None
         )
       ).to.be.revertedWith(customError('VoteTimesForbidden', current+1, // TODO hacky
           startDate, endDate, minDuration));
@@ -111,7 +111,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, false))
+      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None))
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00');
 
@@ -137,7 +137,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, true))
+      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea))
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00')
         .to.emit(voting, EVENTS.CAST_VOTE)
@@ -167,7 +167,7 @@ describe('ERC20Voting', function () {
       // set voting power to 100
       await erc20VoteMock.mock.getPastTotalSupply.returns(votingPower);
 
-      await voting.newVote('0x00', dummyActions, 0, 0, false, false);
+      await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None);
     });
 
     it('should not be able to vote if user has 0 token', async () => {

@@ -95,7 +95,7 @@ describe('WhitelistVoting', function () {
 
     it('reverts if user is not whitelisted to create a vote', async () => {
       await expect(
-        voting.connect(signers[1]).newVote('0x00', [], 0, 0, false, false)
+        voting.connect(signers[1]).newVote('0x00', [], 0, 0, false, VoterState.None)
       ).to.be.revertedWith(customError('VoteCreationForbidden', signers[1].address));
     });
 
@@ -111,14 +111,14 @@ describe('WhitelistVoting', function () {
           startDate,
           endDate,
           false,
-          false
+          VoterState.None
         )
       ).to.be.revertedWith(customError('VoteTimesForbidden', current+1, // TODO hacky
           startDate, endDate, minDuration));
     });
 
     it('should create a vote successfully, but not vote', async () => {
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, false))
+      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None))
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00');
 
@@ -141,7 +141,7 @@ describe('WhitelistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediatelly', async () => {
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, true))
+      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea))
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00')
         .to.emit(voting, EVENTS.CAST_VOTE)
@@ -180,7 +180,7 @@ describe('WhitelistVoting', function () {
         addresses
       );
 
-      await voting.newVote('0x00', dummyActions, 0, 0, false, false);
+      await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None);
     });
 
     // VoterState.Yea

@@ -58,7 +58,7 @@ interface IMajorityVoting {
     /// @param _startDate state date of the vote. If 0, uses current timestamp
     /// @param _endDate end date of the vote. If 0, uses _start + minDuration
     /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-    /// @param _castVote Configuration to cast vote as "YES" on creation of it
+    /// @param _choice Vote choice to cast on creation
     /// @return voteId The ID of the vote
     function newVote(
         bytes calldata _proposalMetadata,
@@ -66,7 +66,7 @@ interface IMajorityVoting {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        bool _castVote
+        VoterState _choice
     ) external returns (uint256 voteId);
 
     /// @notice Vote `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 1 = not supports]

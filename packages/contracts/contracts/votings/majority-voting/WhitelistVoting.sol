@@ -45,18 +45,14 @@ contract WhitelistVoting is MajorityVoting {
         _addWhitelistedUsers(_whitelisted);
     }
 
-    /**
-     * @notice add new users to the whitelist.
-     * @param _users addresses of users to add
-     */
+    /// @notice add new users to the whitelist.
+    /// @param _users addresses of users to add
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _addWhitelistedUsers(_users);
     }
 
-    /**
-     * @dev Internal function to add new users to the whitelist.
-     * @param _users addresses of users to add
-     */
+    /// @dev Internal function to add new users to the whitelist.
+    /// @param _users addresses of users to add
     function _addWhitelistedUsers(address[] calldata _users) internal {
         for (uint256 i = 0; i < _users.length; i++) {
             whitelisted[_users[i]] = true;
@@ -67,10 +63,8 @@ contract WhitelistVoting is MajorityVoting {
         emit AddUsers(_users);
     }
 
-    /**
-     * @notice remove new users to the whitelist.
-     * @param _users addresses of users to remove
-     */
+    /// @notice remove new users to the whitelist.
+    /// @param _users addresses of users to remove
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         for (uint256 i = 0; i < _users.length; i++) {
             whitelisted[_users[i]] = false;
@@ -81,22 +75,20 @@ contract WhitelistVoting is MajorityVoting {
         emit RemoveUsers(_users);
     }
 
-    /**
-     * @notice Create a new vote on this concrete implementation
-     * @param _proposalMetadata The IPFS hash pointing to the proposal metadata
-     * @param _actions the actions that will be executed after vote passes
-     * @param _startDate state date of the vote. If 0, uses current timestamp
-     * @param _endDate end date of the vote. If 0, uses _start + minDuration
-     * @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-     * @param _castVote Configuration to cast vote as "YES" on creation of it
-     */
+    /// @notice Create a new vote on this concrete implementation
+    /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata
+    /// @param _actions the actions that will be executed after vote passes
+    /// @param _startDate state date of the vote. If 0, uses current timestamp
+    /// @param _endDate end date of the vote. If 0, uses _start + minDuration
+    /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
+    /// @param _choice Vote choice to cast on creationr
     function newVote(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        bool _castVote
+        VoterState _choice
     ) external override returns (uint256 voteId) {
         if(!whitelisted[_msgSender()]) revert VoteCreationForbidden(_msgSender());
 
@@ -130,17 +122,15 @@ contract WhitelistVoting is MajorityVoting {
 
         emit StartVote(voteId, _msgSender(), _proposalMetadata);
 
-        if (_castVote && canVote(voteId, _msgSender())) {
-            _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
+        if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
+            _vote(voteId, _choice, _msgSender(), _executeIfDecided);
         }
     }
 
-    /**
-     * @dev Internal function to cast a vote. It assumes the queried vote exists.
-     * @param _voteId voteId
-     * @param _choice Whether voter abstains, supports or not supports to vote.
-     * @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
-     */
+    /// @dev Internal function to cast a vote. It assumes the queried vote exists.
+    /// @param _voteId voteId
+    /// @param _choice Whether voter abstains, supports or not supports to vote.
+    /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
     function _vote(
         uint256 _voteId,
         VoterState _choice,

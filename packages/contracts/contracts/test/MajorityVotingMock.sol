@@ -34,7 +34,7 @@ contract MajorityVotingMock is MajorityVoting {
         uint64 /* _startDate */,
         uint64 /* _endDate */,
         bool /* _executeIfDecided */,
-        bool /* _castVote */
+        VoterState /* _choice */
     ) external pure override  returns (uint256 voteId) {
         return 0;
     }

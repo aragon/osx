@@ -239,7 +239,7 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await ERC20Voting.newVote('0x', actions, 0, 0, false, false);
+    await ERC20Voting.newVote('0x', actions, 0, 0, false, VoterState.None);
 
     expect(await ERC20Voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
