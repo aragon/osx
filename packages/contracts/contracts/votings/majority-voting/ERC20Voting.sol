@@ -95,9 +95,10 @@ contract ERC20Voting is MajorityVoting {
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = votingPower;
-        
+
         unchecked {
             uint256 actionsCount = _actions.length;
+
             for (uint256 i = 0; i < actionsCount; i++) {
                 vote_.actions.push(_actions[i]);
             }
