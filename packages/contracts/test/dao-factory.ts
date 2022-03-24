@@ -7,7 +7,7 @@ import {customError} from './test-utils/custom-error-helper';
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
   SetMetadata: 'SetMetadata',
-  UpdateConfig: 'UpdateConfig',
+  UPDATE_CONFIG: 'UpdateConfig',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
@@ -139,6 +139,7 @@ describe('DAOFactory: ', function () {
     const {name, dao, token, creator, ERC20Voting} = await getDeployments(tx);
 
     expect(name).to.equal(daoDummyName);
+
     expect(creator).to.equal(ownerAddress);
 
     await ethers.provider.send('evm_mine', []);
@@ -147,7 +148,7 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_CONFIG_ROLE = await ERC20Voting.MODIFY_CONFIG();
+    const MODIFY_VOTE_CONFIG_ROLE = await ERC20Voting.MODIFY_VOTE_CONFIG();
     const EXEC_ROLE = await dao.EXEC_ROLE();
 
     const DAORoles = await Promise.all([
@@ -166,7 +167,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.SetMetadata)
       .withArgs(daoDummyMetadata)
-      .to.emit(ERC20Voting, EVENTS.UpdateConfig)
+      .to.emit(ERC20Voting, EVENTS.UPDATE_CONFIG)
       .withArgs(
         dummyVoteSettings[0],
         dummyVoteSettings[1],
@@ -189,7 +190,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.Granted)
       .withArgs(
-        MODIFY_CONFIG_ROLE,
+        MODIFY_VOTE_CONFIG_ROLE,
         daoFactory.address,
         dao.address,
         ERC20Voting.address,
@@ -238,12 +239,12 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await ERC20Voting.newVote('0x', actions, 0, 0, false, false);
+    await ERC20Voting.newVote('0x', actions, 0, 0, false, VoterState.None);
 
     expect(await ERC20Voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
       .withArgs(ERC20Voting.address, 0, [], [])
-      .to.emit(ERC20Voting, EVENTS.UpdateConfig)
+      .to.emit(ERC20Voting, EVENTS.UPDATE_CONFIG)
       .withArgs(3, 4, 5);
 
     expect(await actionExecuteContract.test()).to.equal(true);

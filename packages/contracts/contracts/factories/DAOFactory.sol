@@ -7,7 +7,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "./../votings/ERC20Voting/ERC20Voting.sol";
+import "./../votings/majority-voting/ERC20Voting.sol";
 import "./../tokens/GovernanceERC20.sol";
 import "./../tokens/GovernanceWrappedERC20.sol";
 import "./../registry/Registry.sol";
@@ -99,17 +99,17 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     ERC20Voting.initialize.selector,
                     dao,
-                    token,
                     _gsnForwarder,
                     _votingSettings[0],
                     _votingSettings[1],
-                    _votingSettings[2]
+                    _votingSettings[2],
+                    token
                 )
             )
         );
 
         // Grant dao permission to change voting settings.
-        dao.grant(address(voting), address(dao), voting.MODIFY_CONFIG());
+        dao.grant(address(voting), address(dao), voting.MODIFY_VOTE_CONFIG());
 
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
 
