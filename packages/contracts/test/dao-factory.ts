@@ -242,7 +242,7 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, 0);
+    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
     expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
@@ -374,7 +374,7 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, 0);
+    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
     expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
