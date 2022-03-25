@@ -141,11 +141,11 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     ERC20Voting.initialize.selector,
                     _dao,
-                    _token,
                     address(0),
                     _votingSettings[0],
                     _votingSettings[1],
-                    _votingSettings[2]
+                    _votingSettings[2],
+                    _token
                 )
             )
         );
@@ -170,11 +170,11 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     WhitelistVoting.initialize.selector,
                     _dao,
-                    _whitelistVoters,
                     address(0),
                     _votingSettings[0],
                     _votingSettings[1],
-                    _votingSettings[2]
+                    _votingSettings[2],
+                     _whitelistVoters
                 )
             )
         );
