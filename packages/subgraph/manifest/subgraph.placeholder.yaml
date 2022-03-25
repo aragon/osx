@@ -108,7 +108,7 @@ templates:
         - name: WhitelistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
       eventHandlers:
-        - event: CastVote(indexed uint256,indexed address,uint8)
+        - event: CastVote(indexed uint256,indexed address,uint8,uint256)
           handler: handleCastVote
         - event: ExecuteVote(indexed uint256,bytes[])
           handler: handleExecuteVote

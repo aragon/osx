@@ -9,7 +9,6 @@ import {
   DAO_ADDRESS
 } from '../constants';
 import {
-  createGetVoteCall,
   createNewCastVoteEvent,
   createNewExecuteVoteEvent,
   createNewStartVoteEvent,
@@ -22,7 +21,7 @@ import {
   handleUpdateConfig,
   _handleStartVote
 } from '../../src/packages/ERC20Voting/erc20Voting';
-import {createDummyAcctions} from '../utils';
+import {createDummyAcctions, createGetVoteCall} from '../utils';
 
 test('Run ERC Voting (handleStartVote) mappings with mock event', () => {
   // create state
@@ -164,7 +163,7 @@ test('Run ERC Voting (handleCastVote) mappings with mock event', () => {
     voteId,
     ADDRESS_ONE,
     '2', // Yea
-    '10000',
+    votingPower,
     VOTING_ADDRESS
   );
 

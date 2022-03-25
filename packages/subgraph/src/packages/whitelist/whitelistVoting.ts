@@ -100,6 +100,7 @@ export function handleCastVote(event: CastVote): void {
     voterProposalEntity.proposal = proposalId;
   }
   voterProposalEntity.vote = VOTER_STATE.get(event.params.voterState);
+  voterProposalEntity.weight = event.params.voterWeight;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 

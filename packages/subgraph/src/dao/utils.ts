@@ -144,13 +144,13 @@ export function addPackage(daoId: string, who: Address): void {
 
   // package
   // @dev this is a temporary solution as we have only 2 packages, and should change in the future.
-  let contract = WhitelistVotingContract.bind(who);
-  let response = contract.try_whitelisted(Address.fromString(ADDRESS_ZERO));
+  let contract = ERC20VotingContract.bind(who);
+  let response = contract.try_token();
   if (!response.reverted) {
-    createWhitelistVotingPakcage(who, daoId);
+    createErc20VotingPakcage(who, daoId);
     return;
   }
-  createErc20VotingPakcage(who, daoId);
+  createWhitelistVotingPakcage(who, daoId);
 }
 
 export function removePackage(daoId: string, who: string): void {

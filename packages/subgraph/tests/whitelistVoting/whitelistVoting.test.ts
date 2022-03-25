@@ -15,7 +15,6 @@ import {
   ADDRESS_TWO
 } from '../constants';
 import {
-  createGetVoteCall,
   createNewAddUsersEvent,
   createNewCastVoteEvent,
   createNewExecuteVoteEvent,
@@ -32,7 +31,7 @@ import {
   handleUpdateConfig,
   _handleStartVote
 } from '../../src/packages/whitelist/whitelistVoting';
-import {createDummyAcctions} from '../utils';
+import {createDummyAcctions, createGetVoteCall} from '../utils';
 
 let voteId = '0';
 let startDate = '1644851000';
@@ -148,7 +147,13 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewCastVoteEvent(voteId, ADDRESS_ONE, '2', VOTING_ADDRESS);
+  let event = createNewCastVoteEvent(
+    voteId,
+    ADDRESS_ONE,
+    '2',
+    votingPower,
+    VOTING_ADDRESS
+  );
 
   handleCastVote(event);
 

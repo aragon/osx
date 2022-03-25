@@ -157,7 +157,7 @@ type ERC20Vote @entity {
   voter: ERC20VotingVoter!
   proposal: ERC20VotingProposal!
   vote: VoterState!
-  stake: BigInt!
+  weight: BigInt!
   createdAt: BigInt!
 }
 
@@ -208,6 +208,7 @@ type WhitelistVote @entity {
   voter: WhitelistVoter!
   proposal: WhitelistProposal!
   vote: VoterState!
+  weight: BigInt!
   createdAt: BigInt!
 }
 
