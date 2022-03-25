@@ -115,11 +115,14 @@ describe('ERC20Voting', function () {
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00');
 
+      const block = await ethers.provider.getBlock('latest');
+
       const vote = await voting.getVote(0);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote.supportRequired).to.equal(2);
       expect(vote.participationRequired).to.equal(1);
+      expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.votingPower).to.equal(1);
       expect(vote.yea).to.equal(0);
       expect(vote.nay).to.equal(0);
@@ -143,11 +146,14 @@ describe('ERC20Voting', function () {
         .to.emit(voting, EVENTS.CAST_VOTE)
         .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
+      const block = await ethers.provider.getBlock('latest');
+
       const vote = await voting.getVote(0);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote.supportRequired).to.equal(2);
       expect(vote.participationRequired).to.equal(1);
+      expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.votingPower).to.equal(1);
       expect(vote.yea).to.equal(1);
       expect(vote.nay).to.equal(0);

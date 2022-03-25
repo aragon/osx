@@ -107,6 +107,7 @@ interface IMajorityVoting {
     /// @return executed Vote executed status
     /// @return startDate start date
     /// @return endDate end date
+    /// @return snapshotBlock The block number of the snapshot taken for this vote
     /// @return supportRequired support required
     /// @return participationRequired minimum participation required
     /// @return votingPower power
