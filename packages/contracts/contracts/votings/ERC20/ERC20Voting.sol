@@ -4,28 +4,16 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/Checkpoints.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "./../majority/MajorityVoting.sol";
 
-/// @title A component for whitelist voting
+/// @title A component for ERC-20 token voting
 /// @author Giorgi Lagidze, Samuel Furter - Aragon Association - 2021-2022
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
-contract WhitelistVoting is MajorityVoting {
-    using Checkpoints for Checkpoints.History;
+contract ERC20Voting is MajorityVoting {
 
-    bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
-    bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
-
-    mapping(address => Checkpoints.History) private _checkpoints;
-    Checkpoints.History private _totalCheckpoints;
-
-    mapping(address => bool) public whitelisted;
-
-    error VoteCreationForbidden(address sender);
-
-    event AddUsers(address[] users);
-    event RemoveUsers(address[] users);
+    ERC20VotesUpgradeable public token;
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
@@ -34,14 +22,14 @@ contract WhitelistVoting is MajorityVoting {
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
-    /// @param _whitelisted The whitelisted addresses
+    /// @param _token The ERC20 token used for voting
     function initialize(
         IDAO _dao,
         address _gsnForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration,
-        address[] calldata _whitelisted
+        ERC20VotesUpgradeable _token
     ) public initializer {
         __MajorityVoting_init(
             _dao,
@@ -51,36 +39,13 @@ contract WhitelistVoting is MajorityVoting {
             _minDuration
         );
 
-        // add whitelisted users
-        _addWhitelistedUsers(_whitelisted);
+        token = _token;
     }
 
     /// @notice Returns the version of the GSN relay recipient
     /// @dev Describes the version and contract for GSN compatibility
     function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.WhitelistVoting";
-    }
-
-    /// @notice add new users to the whitelist.
-    /// @param _users addresses of users to add
-    function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        _addWhitelistedUsers(_users);
-    }
-
-    /// @dev Internal function to add new users to the whitelist.
-    /// @param _users addresses of users to add
-    function _addWhitelistedUsers(address[] calldata _users) internal {
-        _whitelistUsers(_users, true);
-
-        emit AddUsers(_users);
-    }
-
-    /// @notice remove new users to the whitelist.
-    /// @param _users addresses of users to remove
-    function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        _whitelistUsers(_users, false);
-
-        emit RemoveUsers(_users);
+        return "0.0.1+opengsn.recipient.ERC20Voting";
     }
 
     /// @notice Create a new vote on this concrete implementation
@@ -89,7 +54,7 @@ contract WhitelistVoting is MajorityVoting {
     /// @param _startDate state date of the vote. If 0, uses current timestamp
     /// @param _endDate end date of the vote. If 0, uses _start + minDuration
     /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-    /// @param _choice Vote choice to cast on creationr
+    /// @param _choice Vote choice to cast on creation
     function newVote(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
@@ -99,11 +64,12 @@ contract WhitelistVoting is MajorityVoting {
         VoterState _choice
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
+
+        uint256 votingPower = token.getPastTotalSupply(snapshotBlock);
+        if (votingPower == 0) revert VotePowerZero();
         
-        if(!isUserWhitelisted(_msgSender(), snapshotBlock)) {
-            revert VoteCreationForbidden(_msgSender());
-        }
-        
+        voteId = votesLength++;
+
         // calculate start and end time for the vote
         uint64 currentTimestamp = getTimestamp64();
 
@@ -118,16 +84,14 @@ contract WhitelistVoting is MajorityVoting {
                 minDuration: minDuration
             });
 
-        voteId = votesLength++;
-
         // create a vote.
         Vote storage vote_ = votes[voteId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
-        vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = uint64(whitelistedUserCount(snapshotBlock));
+        vote_.votingPower = votingPower;
+        vote_.snapshotBlock = snapshotBlock;
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -138,7 +102,7 @@ contract WhitelistVoting is MajorityVoting {
         emit StartVote(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
+            _vote(voteId, _choice, _msgSender(), _executeIfDecided);
         }
     }
 
@@ -154,94 +118,43 @@ contract WhitelistVoting is MajorityVoting {
     ) internal override {
         Vote storage vote_ = votes[_voteId];
 
+        // This could re-enter, though we can assume the governance token is not malicious
+        uint256 voterStake = token.getPastVotes(_voter, vote_.snapshotBlock);
         VoterState state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoterState.Yea) {
-            vote_.yea = vote_.yea - 1;
+            vote_.yea = vote_.yea - voterStake;
         } else if (state == VoterState.Nay) {
-            vote_.nay = vote_.nay - 1;
+            vote_.nay = vote_.nay - voterStake;
         } else if (state == VoterState.Abstain) {
-            vote_.abstain = vote_.abstain - 1;
+            vote_.abstain = vote_.abstain - voterStake;
         }
 
         // write the updated/new vote for the voter.
         if (_choice == VoterState.Yea) {
-            vote_.yea = vote_.yea + 1;
+            vote_.yea = vote_.yea + voterStake;
         } else if (_choice == VoterState.Nay) {
-            vote_.nay = vote_.nay + 1;
+            vote_.nay = vote_.nay + voterStake;
         } else if (_choice == VoterState.Abstain) {
-            vote_.abstain = vote_.abstain + 1;
+            vote_.abstain = vote_.abstain + voterStake;
         }
 
         vote_.voters[_voter] = _choice;
 
-        emit CastVote(_voteId, _voter, uint8(_choice), 1);
+        emit CastVote(_voteId, _voter, uint8(_choice), voterStake);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);
         }
     }
-   
-    /**
-    *  @dev Tells whether user is whitelisted at specific block or past it.
-    *  @param account user address
-    *  @param blockNumber block number for which it checks if user is whitelisted
-    */
-    function isUserWhitelisted(
-        address account, 
-        uint256 blockNumber
-    ) public view returns (bool) {
-        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
-        
-        return _checkpoints[account].getAtBlock(blockNumber) == 1;
-    }
 
-    /**
-    *  @dev returns total count of users that are whitelisted at specific block
-    *  @param blockNumber specific block to get count from
-    *  @return count of users that are whitelisted blockNumber or prior to it.
-    */
-    function whitelistedUserCount(
-        uint256 blockNumber
-    ) public view returns (uint256) {
-        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
-        
-        return _totalCheckpoints.getAtBlock(blockNumber);
-    }
-
-    /**
-     * @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-     * @param _voteId The voteId
-     * @param _voter the address of the voter to check
-     * @return True if the given voter can participate a certain vote, false otherwise
-     */
+    /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @param _voteId The voteId
+    /// @param _voter the address of the voter to check
+    /// @return True if the given voter can participate a certain vote, false otherwise
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);
-    }
-
-    /**
-    *  @dev Adds or removes users from whitelist
-    *  @param _users user addresses
-    *  @param _enabled whether to add or remove from whitelist
-    */
-    function _whitelistUsers(
-        address[] calldata _users, 
-        bool _enabled
-    ) internal {        
-        _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
-        
-        for(uint i = 0; i < _users.length; i++) {
-            _checkpoints[_users[i]].push(_enabled ? 1 : 0);
-        }
-    }
-
-    function _add(uint256 a, uint256 b) private pure returns(uint256) {
-        unchecked { return a + b; }
-    }
-
-    function _sub(uint256 a, uint256 b) private pure returns(uint256) {
-        unchecked { return a - b; }
+        return _isVoteOpen(vote_) && token.getPastVotes(_voter, vote_.snapshotBlock) > 0;
     }
 }

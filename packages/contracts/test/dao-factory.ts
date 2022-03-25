@@ -142,6 +142,7 @@ describe('DAOFactory: ', function () {
     const {name, dao, token, creator, voting} = await getDeployments(tx, true);
 
     expect(name).to.equal(daoDummyName);
+
     expect(creator).to.equal(ownerAddress);
 
     await ethers.provider.send('evm_mine', []);
@@ -150,7 +151,7 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_CONFIG_ROLE = await voting.MODIFY_CONFIG();
+    const MODIFY_VOTE_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
     const EXEC_ROLE = await dao.EXEC_ROLE();
 
     const DAORoles = await Promise.all([
@@ -192,7 +193,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.Granted)
       .withArgs(
-        MODIFY_CONFIG_ROLE,
+        MODIFY_VOTE_CONFIG_ROLE,
         daoFactory.address,
         dao.address,
         voting.address,
@@ -241,7 +242,7 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, false);
+    await voting.newVote('0x', actions, 0, 0, false, 0);
 
     expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
@@ -272,7 +273,7 @@ describe('DAOFactory: ', function () {
 
     await ethers.provider.send('evm_mine', []);
 
-    const MODIFY_CONFIG_ROLE = await voting.MODIFY_CONFIG();
+    const MODIFY_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
     // @ts-ignore
     const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
     const EXEC_ROLE = await dao.EXEC_ROLE();
@@ -373,7 +374,7 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, false);
+    await voting.newVote('0x', actions, 0, 0, false, 0);
 
     expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)

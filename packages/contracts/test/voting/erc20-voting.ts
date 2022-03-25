@@ -1,7 +1,7 @@
 import chai, {expect} from 'chai';
 import {ethers, waffle} from 'hardhat';
 import chaiUtils from '../test-utils';
-import {VoterState} from '../test-utils/voting';
+import {VoterState, EVENTS, ERRORS, pct16, toBn} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
@@ -10,21 +10,6 @@ import {ERC20Voting} from '../../typechain';
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 
 const {deployMockContract} = waffle;
-
-const ERRORS = {
-  ALREADY_INITIALIZED: 'Initializable: contract is already initialized',
-};
-
-const toBn = ethers.BigNumber.from;
-const bigExp = (x: number, y: number) => toBn(x).mul(toBn(10).pow(toBn(y)));
-const pct16 = (x: number) => bigExp(x, 16);
-
-const EVENTS = {
-  UPDATE_CONFIG: 'UpdateConfig',
-  START_VOTE: 'StartVote',
-  CAST_VOTE: 'CastVote',
-  EXECUTED: 'Executed',
-};
 
 describe('ERC20Voting', function () {
   let signers: any;
@@ -64,21 +49,15 @@ describe('ERC20Voting', function () {
   ) {
     return voting.initialize(
       daoMock.address,
-      erc20VoteMock.address,
       ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
-      minDuration
-    )
+      minDuration, 
+      erc20VoteMock.address
+    );
   }
 
   describe('initialize: ', async () => {
-    it('reverts if min duration is 0', async () => {
-      await expect(
-          initializeVoting(1, 2, 0)
-      ).to.be.revertedWith(customError('VoteDurationZero'));
-    });
-
     it('reverts if trying to re-initialize', async () => {
       await initializeVoting(1, 2, 3);
 
@@ -88,36 +67,11 @@ describe('ERC20Voting', function () {
         ERRORS.ALREADY_INITIALIZED
       );
     });
-    it('should initialize dao on the component', async () => {
-      // TODO: Waffle's calledOnContractWith is not supported by Hardhat
-      // await voting['initialize(address,address,uint64[3],bytes[])']
-      //          (daoMock.address, erc20VoteMock.address, [1, 2, 3], [])
-      // expect('initialize').to.be.calledOnContractWith(voting, [daoMock.address]);
-    });
-  });
-
-  describe('UpdateConfig: ', async () => {
-    beforeEach(async () => {
-      await initializeVoting(1, 2, 3);
-    });
-    it('reverts if wrong config is set', async () => {
+    
+    it('reverts if min duration is 0', async () => {
       await expect(
-        voting.changeVoteConfig(1, pct16(1000), 3)
-      ).to.be.revertedWith(customError('VoteSupportExceeded', pct16(100), pct16(1000)));
-
-      await expect(
-        voting.changeVoteConfig(pct16(1000), 2, 3)
-      ).to.be.revertedWith(customError('VoteParticipationExceeded', pct16(100), pct16(1000)));
-
-      await expect(
-          voting.changeVoteConfig(1, 2, 0)
+          initializeVoting(1, 2, 0)
       ).to.be.revertedWith(customError('VoteDurationZero'));
-    });
-
-    it('should change config successfully', async () => {
-      expect(await voting.changeVoteConfig(2, 4, 8))
-        .to.emit(voting, EVENTS.UPDATE_CONFIG)
-        .withArgs(2, 4, 8);
     });
   });
 
@@ -130,7 +84,7 @@ describe('ERC20Voting', function () {
     it('reverts total token supply while creating a vote is 0', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.newVote('0x00', [], 0, 0, false, false)
+        voting.newVote('0x00', [], 0, 0, false, VoterState.None)
       ).to.be.revertedWith(customError('VotePowerZero'));
     });
 
@@ -147,7 +101,7 @@ describe('ERC20Voting', function () {
           startDate,
           endDate,
           false,
-          false
+          VoterState.None
         )
       ).to.be.revertedWith(customError('VoteTimesForbidden', current+1, // TODO hacky
           startDate, endDate, minDuration));
@@ -157,7 +111,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, false))
+      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None))
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00');
 
@@ -183,7 +137,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, true))
+      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea))
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00')
         .to.emit(voting, EVENTS.CAST_VOTE)
@@ -213,7 +167,7 @@ describe('ERC20Voting', function () {
       // set voting power to 100
       await erc20VoteMock.mock.getPastTotalSupply.returns(votingPower);
 
-      await voting.newVote('0x00', dummyActions, 0, 0, false, false);
+      await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None);
     });
 
     it('should not be able to vote if user has 0 token', async () => {

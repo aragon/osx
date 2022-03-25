@@ -1,3 +1,0 @@
-files:
-  - source: /packages/web-app/src/locales/en/*.json
-    translation: /packages/web-app/src/locales/%locale%/%original_file_name%

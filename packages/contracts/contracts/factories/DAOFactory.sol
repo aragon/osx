@@ -7,9 +7,8 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "./../votings/ERC20Voting/ERC20Voting.sol";
 import "./../votings/whitelist/WhitelistVoting.sol";
-
+import "./../votings/ERC20/ERC20Voting.sol";
 import "./../tokens/GovernanceERC20.sol";
 import "./../tokens/GovernanceWrappedERC20.sol";
 import "./../registry/Registry.sol";
@@ -154,7 +153,7 @@ contract DAOFactory {
          // Grant dao the necessary permissions for ERC20Voting
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](2);
         items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(_dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_CONFIG(), address(_dao));
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_VOTE_CONFIG(), address(_dao));
 
         _dao.bulk(address(erc20Voting), items);
     }
