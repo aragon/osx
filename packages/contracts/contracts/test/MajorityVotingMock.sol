@@ -4,7 +4,7 @@
 
 pragma solidity 0.8.10;
 
-import "../votings/majority-voting/MajorityVoting.sol";
+import "../votings/majority/MajorityVoting.sol";
 
 contract MajorityVotingMock is MajorityVoting {
 

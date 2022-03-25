@@ -48,7 +48,7 @@ templates:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json
         - name: WhitelistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
       eventHandlers:
@@ -81,7 +81,7 @@ templates:
         - Dao
       abis:
         - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
         - event: CastVote(indexed uint256,indexed address,uint8,uint256)
           handler: handleCastVote
