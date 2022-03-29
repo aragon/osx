@@ -106,7 +106,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         bool executed,
         uint64 startDate,
         uint64 endDate,
-         uint64 snapshotBlock,
+        uint64 snapshotBlock,
         uint64 supportRequired,
         uint64 participationRequired,
         uint256 votingPower,

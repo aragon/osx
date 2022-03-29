@@ -28,7 +28,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
-    bytes32 public constant MODIFY_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
+    bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     // Error msg's
     /// @notice Thrown if action execution has failed
@@ -73,7 +73,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _forwarder address of the forwarder
     function setTrustedForwarder(
         address _forwarder
-    ) external auth(address(this), MODIFY_FORWARDER) {
+    ) external auth(address(this), MODIFY_TRUSTED_FORWARDER) {
         _setTrustedForwarder(_forwarder);
     }
 

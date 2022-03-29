@@ -21,7 +21,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     /// @notice Role identifier to upgrade a component 
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
     /// @notice Role identifer to change the GSN forwarder
-    bytes32 public constant MODIFY_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
+    bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     event SetTrustedForwarder(address _newForwarder);
 
@@ -39,7 +39,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     }
 
     /// @dev used to update the trusted forwarder.
-    function setTrustedForwarder(address _trustedForwarder) public virtual auth(MODIFY_FORWARDER) {
+    function setTrustedForwarder(address _trustedForwarder) public virtual auth(MODIFY_TRUSTED_FORWARDER) {
         _setTrustedForwarder(_trustedForwarder);
 
         emit SetTrustedForwarder(_trustedForwarder);
