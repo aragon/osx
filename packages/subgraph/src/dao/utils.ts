@@ -78,7 +78,7 @@ export function decodeWithdrawParams(data: ByteArray): WithdrawParams {
   return withdrawParams;
 }
 
-function createErc20VotingPakcage(who: Address, daoId: string): void {
+function createErc20VotingPackage(who: Address, daoId: string): void {
   let packageEntity = ERC20VotingPackage.load(who.toHexString());
   if (!packageEntity) {
     packageEntity = new ERC20VotingPackage(who.toHexString());
@@ -109,7 +109,7 @@ function createErc20VotingPakcage(who: Address, daoId: string): void {
   }
 }
 
-function createWhitelistVotingPakcage(who: Address, daoId: string): void {
+function createWhitelistVotingPackage(who: Address, daoId: string): void {
   let packageEntity = WhitelistPackage.load(who.toHexString());
   if (!packageEntity) {
     packageEntity = new WhitelistPackage(who.toHexString());
@@ -147,10 +147,10 @@ export function addPackage(daoId: string, who: Address): void {
   let contract = ERC20VotingContract.bind(who);
   let response = contract.try_token();
   if (!response.reverted) {
-    createErc20VotingPakcage(who, daoId);
+    createErc20VotingPackage(who, daoId);
     return;
   }
-  createWhitelistVotingPakcage(who, daoId);
+  createWhitelistVotingPackage(who, daoId);
 }
 
 export function removePackage(daoId: string, who: string): void {
