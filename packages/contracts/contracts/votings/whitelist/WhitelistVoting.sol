@@ -14,7 +14,6 @@ import "./../majority/MajorityVoting.sol";
 contract WhitelistVoting is MajorityVoting {
     using Checkpoints for Checkpoints.History;
 
-    bytes32 public constant MODIFY_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
     mapping(address => Checkpoints.History) private _checkpoints;

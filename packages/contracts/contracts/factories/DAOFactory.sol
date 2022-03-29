@@ -201,7 +201,7 @@ contract DAOFactory {
         // Grant dao the necessary permissions for WhitelistVoting
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](4);
         items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(_dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_CONFIG(), address(_dao));
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_VOTE_CONFIG(), address(_dao));
         items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(_dao));
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_TRUSTED_FORWARDER(), address(_dao));
 
