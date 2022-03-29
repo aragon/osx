@@ -17,6 +17,7 @@ typechain
 .vscode
 .DS_Store
 *.pem
+*.tgz
 
 # debug
 *.log
