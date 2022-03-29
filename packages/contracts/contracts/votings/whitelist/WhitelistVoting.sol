@@ -127,7 +127,7 @@ contract WhitelistVoting is MajorityVoting {
         vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = uint64(whitelistedUserCount(snapshotBlock));
+        vote_.votingPower = whitelistedUserCount(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
