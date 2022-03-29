@@ -15,7 +15,6 @@ import {
   ADDRESS_TWO
 } from '../constants';
 import {
-  createGetVoteCall,
   createNewAddUsersEvent,
   createNewCastVoteEvent,
   createNewExecuteVoteEvent,
@@ -32,7 +31,15 @@ import {
   handleUpdateConfig,
   _handleStartVote
 } from '../../src/packages/whitelist/whitelistVoting';
-import {createDummyAcctions} from '../utils';
+import {createDummyAcctions, createGetVoteCall} from '../utils';
+
+let voteId = '0';
+let startDate = '1644851000';
+let endDate = '1644852000';
+let snapshotBlock = '100';
+let supportRequiredPct = '1000';
+let participationRequired = '500';
+let votingPower = '1000';
 
 test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   // create state
@@ -42,12 +49,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   erc20VotingPackage.save();
 
   // create calls
-  let voteId = '0';
-  let startDate = '1644851000';
-  let endDate = '1644852000';
-  let supportRequiredPct = '1000';
-  let participationRequired = '500';
-  let votingPower = '1000';
+
   getVotesLengthCall(VOTING_ADDRESS, '1');
   let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
@@ -57,6 +59,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
     false,
     startDate,
     endDate,
+    snapshotBlock,
     supportRequiredPct,
     participationRequired,
     votingPower,
@@ -125,12 +128,6 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
   erc20VotingProposal.save();
 
   // create calls
-  let voteId = '0';
-  let startDate = '1644851000';
-  let endDate = '1644852000';
-  let supportRequiredPct = '1000';
-  let participationRequired = '500';
-  let votingPower = '1000';
   let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
     VOTING_ADDRESS,
@@ -139,6 +136,7 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
     false,
     startDate,
     endDate,
+    snapshotBlock,
     supportRequiredPct,
     participationRequired,
     votingPower,
@@ -149,7 +147,13 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewCastVoteEvent(voteId, ADDRESS_ONE, '2', VOTING_ADDRESS);
+  let event = createNewCastVoteEvent(
+    voteId,
+    ADDRESS_ONE,
+    '2',
+    votingPower,
+    VOTING_ADDRESS
+  );
 
   handleCastVote(event);
 

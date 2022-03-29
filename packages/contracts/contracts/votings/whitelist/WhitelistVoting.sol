@@ -4,6 +4,7 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts/utils/Checkpoints.sol";
 import "./../majority/MajorityVoting.sol";
 
 /// @title A component for whitelist voting
@@ -11,9 +12,12 @@ import "./../majority/MajorityVoting.sol";
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract WhitelistVoting is MajorityVoting {
+    using Checkpoints for Checkpoints.History;
+
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
-    uint64 private whitelistedLength;
+    mapping(address => Checkpoints.History) private _checkpoints;
+    Checkpoints.History private _totalCheckpoints;
 
     mapping(address => bool) public whitelisted;
 
@@ -65,13 +69,7 @@ contract WhitelistVoting is MajorityVoting {
     /// @dev Internal function to add new users to the whitelist.
     /// @param _users addresses of users to add
     function _addWhitelistedUsers(address[] calldata _users) internal {
-        unchecked {
-            for (uint256 i = 0; i < _users.length; i++) {
-                whitelisted[_users[i]] = true;
-            }
-
-            whitelistedLength += uint64(_users.length);
-        }
+        _whitelistUsers(_users, true);
 
         emit AddUsers(_users);
     }
@@ -79,14 +77,7 @@ contract WhitelistVoting is MajorityVoting {
     /// @notice remove new users to the whitelist.
     /// @param _users addresses of users to remove
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        unchecked {
-            for (uint256 i = 0; i < _users.length; i++) {
-                whitelisted[_users[i]] = false;
-            }
-
-            whitelistedLength -= uint64(_users.length);
-        }
-
+        _whitelistUsers(_users, false);
 
         emit RemoveUsers(_users);
     }
@@ -106,8 +97,12 @@ contract WhitelistVoting is MajorityVoting {
         bool _executeIfDecided,
         VoterState _choice
     ) external override returns (uint256 voteId) {
-        if(!whitelisted[_msgSender()]) revert VoteCreationForbidden(_msgSender());
-
+        uint64 snapshotBlock = getBlockNumber64() - 1;
+        
+        if(!isUserWhitelisted(_msgSender(), snapshotBlock)) {
+            revert VoteCreationForbidden(_msgSender());
+        }
+        
         // calculate start and end time for the vote
         uint64 currentTimestamp = getTimestamp64();
 
@@ -128,9 +123,10 @@ contract WhitelistVoting is MajorityVoting {
         Vote storage vote_ = votes[voteId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
+        vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = whitelistedLength;
+        vote_.votingPower = whitelistedUserCount(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -141,7 +137,7 @@ contract WhitelistVoting is MajorityVoting {
         emit StartVote(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, _choice, _msgSender(), _executeIfDecided);
+            _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
         }
     }
 
@@ -185,9 +181,66 @@ contract WhitelistVoting is MajorityVoting {
             _execute(_voteId);
         }
     }
+   
+    /**
+    *  @dev Tells whether user is whitelisted at specific block or past it.
+    *  @param account user address
+    *  @param blockNumber block number for which it checks if user is whitelisted
+    */
+    function isUserWhitelisted(
+        address account, 
+        uint256 blockNumber
+    ) public view returns (bool) {
+        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+        
+        return _checkpoints[account].getAtBlock(blockNumber) == 1;
+    }
 
+    /**
+    *  @dev returns total count of users that are whitelisted at specific block
+    *  @param blockNumber specific block to get count from
+    *  @return count of users that are whitelisted blockNumber or prior to it.
+    */
+    function whitelistedUserCount(
+        uint256 blockNumber
+    ) public view returns (uint256) {
+        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+        
+        return _totalCheckpoints.getAtBlock(blockNumber);
+    }
+
+    /**
+     * @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+     * @param _voteId The voteId
+     * @param _voter the address of the voter to check
+     * @return True if the given voter can participate a certain vote, false otherwise
+     */
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && whitelisted[_voter];
+        return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);
+    }
+
+    /**
+    *  @dev Adds or removes users from whitelist
+    *  @param _users user addresses
+    *  @param _enabled whether to add or remove from whitelist
+    */
+    function _whitelistUsers(
+        address[] calldata _users, 
+        bool _enabled
+    ) internal {        
+        _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
+        
+        for(uint i = 0; i < _users.length; i++) {
+            _checkpoints[_users[i]].push(_enabled ? 1 : 0);
+        }
+    }
+
+    function _add(uint256 a, uint256 b) private pure returns(uint256) {
+        unchecked { return a + b; }
+    }
+
+    function _sub(uint256 a, uint256 b) private pure returns(uint256) {
+        unchecked { return a - b; }
     }
 }

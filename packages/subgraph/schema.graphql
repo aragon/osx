@@ -157,7 +157,7 @@ type ERC20Vote @entity {
   voter: ERC20VotingVoter!
   proposal: ERC20VotingProposal!
   vote: VoterState!
-  stake: BigInt!
+  weight: BigInt!
   createdAt: BigInt!
 }
 
@@ -179,6 +179,7 @@ type ERC20VotingProposal implements Proposal @entity {
   abstain: BigInt
   votingPower: BigInt!
   voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
+  open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
 }
@@ -208,6 +209,7 @@ type WhitelistVote @entity {
   voter: WhitelistVoter!
   proposal: WhitelistProposal!
   vote: VoterState!
+  weight: BigInt!
   createdAt: BigInt!
 }
 
@@ -221,6 +223,7 @@ type WhitelistProposal implements Proposal @entity {
   metadata: String!
   startDate: BigInt!
   endDate: BigInt!
+  snapshotBlock: BigInt!
   supportRequiredPct: BigInt!
   participationRequired: BigInt!
   votingPower: BigInt!
@@ -228,6 +231,7 @@ type WhitelistProposal implements Proposal @entity {
   nay: BigInt
   abstain: BigInt
   voters: [WhitelistVote!]! @derivedFrom(field: "proposal")
+  open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
 }

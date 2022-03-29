@@ -12,7 +12,7 @@ contract DAOMock is IDAO, ACL {
     mapping(address => mapping(uint256 => uint256)) public pastVotes;
 
     constructor(address initialOwner) {
-        ACL.__ACL_init(initialOwner);
+        __ACL_init(initialOwner);
     }
 
     function hasPermission(
@@ -22,6 +22,10 @@ contract DAOMock is IDAO, ACL {
         bytes memory /* _data */
     ) public pure override returns (bool) {
         return true;
+    }
+
+    function trustedForwarder() public virtual view returns(address) {
+        return address(0);
     }
 
     function setMetadata(

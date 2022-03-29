@@ -10,7 +10,6 @@ import "./../../core/IDAO.sol";
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice The interface for majority voting contracts
 interface IMajorityVoting {
-
     enum VoterState {
         None,
         Abstain,
@@ -22,6 +21,7 @@ interface IMajorityVoting {
         bool executed;
         uint64 startDate;
         uint64 endDate;
+        uint64 snapshotBlock;
         uint64 supportRequiredPct;
         uint64 participationRequiredPct;
         uint256 yea;
@@ -40,7 +40,7 @@ interface IMajorityVoting {
     error VoteExecutionForbidden(uint256 voteId);
     error VotePowerZero();
 
-    event StartVote(uint256 indexed voteId, address indexed creator, bytes description);
+    event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
     event CastVote(uint256 indexed voteId, address indexed voter, uint8 voterState, uint256 voterWeight);
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
     event UpdateConfig(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration);
@@ -107,6 +107,7 @@ interface IMajorityVoting {
     /// @return executed Vote executed status
     /// @return startDate start date
     /// @return endDate end date
+    /// @return snapshotBlock The block number of the snapshot taken for this vote
     /// @return supportRequired support required
     /// @return participationRequired minimum participation required
     /// @return votingPower power
@@ -115,19 +116,20 @@ interface IMajorityVoting {
     /// @return abstain abstain amount
     /// @return actions Actions
     function getVote(uint256 _voteId)
-    external
-    view
-    returns (
-        bool open,
-        bool executed,
-        uint64 startDate,
-        uint64 endDate,
-        uint64 supportRequired,
-        uint64 participationRequired,
-        uint256 votingPower,
-        uint256 yea,
-        uint256 nay,
-        uint256 abstain,
-        IDAO.Action[] memory actions
-    );
+        external
+        view
+        returns (
+            bool open,
+            bool executed,
+            uint64 startDate,
+            uint64 endDate,
+            uint64 snapshotBlock,
+            uint64 supportRequired,
+            uint64 participationRequired,
+            uint256 votingPower,
+            uint256 yea,
+            uint256 nay,
+            uint256 abstain,
+            IDAO.Action[] memory actions
+        );
 }

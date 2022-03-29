@@ -15,8 +15,6 @@ contract ERC20Voting is MajorityVoting {
 
     ERC20VotesUpgradeable public token;
 
-    mapping(uint256 => uint64) private snapshotBlocks;
-
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
@@ -87,14 +85,13 @@ contract ERC20Voting is MajorityVoting {
             });
 
         // create a vote.
-        snapshotBlocks[voteId] = snapshotBlock;
-
         Vote storage vote_ = votes[voteId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = votingPower;
+        vote_.snapshotBlock = snapshotBlock;
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -120,10 +117,9 @@ contract ERC20Voting is MajorityVoting {
         bool _executesIfDecided
     ) internal override {
         Vote storage vote_ = votes[_voteId];
-        uint64 snapshotBlock = snapshotBlocks[_voteId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 voterStake = token.getPastVotes(_voter, snapshotBlock);
+        uint256 voterStake = token.getPastVotes(_voter, vote_.snapshotBlock);
         VoterState state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
@@ -159,7 +155,6 @@ contract ERC20Voting is MajorityVoting {
     /// @return True if the given voter can participate a certain vote, false otherwise
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        uint64 snapshotBlock = snapshotBlocks[_voteId];
-        return _isVoteOpen(vote_) && token.getPastVotes(_voter, snapshotBlock) > 0;
+        return _isVoteOpen(vote_) && token.getPastVotes(_voter, vote_.snapshotBlock) > 0;
     }
 }

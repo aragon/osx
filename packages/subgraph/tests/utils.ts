@@ -48,3 +48,43 @@ export function createDummyAcctions(
 
   return [tuple];
 }
+
+export function createGetVoteCall(
+  contractAddress: string,
+  voteId: string,
+  open: boolean,
+  executed: boolean,
+  startDate: string,
+  endDate: string,
+  snapshotBlock: string,
+  supportRequired: string,
+  participationRequired: string,
+  votingPower: string,
+  yea: string,
+  nay: string,
+  abstain: string,
+  actions: ethereum.Tuple[]
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'getVote',
+    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,uint256,(address,uint256,bytes)[])'
+  )
+    .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteId))])
+    .returns([
+      ethereum.Value.fromBoolean(open),
+      ethereum.Value.fromBoolean(executed),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportRequired)),
+      ethereum.Value.fromUnsignedBigInt(
+        BigInt.fromString(participationRequired)
+      ),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingPower)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yea)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(nay)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(abstain)),
+      ethereum.Value.fromTupleArray(actions)
+    ]);
+}

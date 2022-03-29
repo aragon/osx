@@ -44,6 +44,7 @@ export function createNewCastVoteEvent(
   voteId: string,
   voter: string,
   voterState: string,
+  voterWeight: string,
   contractAddress: string
 ): CastVote {
   let newCastVoteEvent = changetype<CastVote>(newMockEvent());
@@ -63,10 +64,15 @@ export function createNewCastVoteEvent(
     'voterState',
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voterState))
   );
+  let voterWeightParam = new ethereum.EventParam(
+    'voterState',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voterWeight))
+  );
 
   newCastVoteEvent.parameters.push(voteIdParam);
   newCastVoteEvent.parameters.push(voterParam);
   newCastVoteEvent.parameters.push(voterStateParam);
+  newCastVoteEvent.parameters.push(voterWeightParam);
 
   return newCastVoteEvent;
 }
@@ -162,42 +168,6 @@ export function createNewRemoveUsersEvent(
   newRemoveUsersEvent.parameters.push(usersParam);
 
   return newRemoveUsersEvent;
-}
-
-export function createGetVoteCall(
-  contractAddress: string,
-  voteId: string,
-  open: boolean,
-  executed: boolean,
-  startDate: string,
-  endDate: string,
-  supportRequired: string,
-  participationRequired: string,
-  votingPower: string,
-  yea: string,
-  nay: string,
-  abstain: string,
-  actions: ethereum.Tuple[]
-): void {
-  createMockedFunction(
-    Address.fromString(contractAddress),
-    'getVote',
-    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,(address,uint256,bytes)[])'
-  )
-    .withArgs([ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))])
-    .returns([
-      ethereum.Value.fromBoolean(open),
-      ethereum.Value.fromBoolean(executed),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(startDate)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequired)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequired)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(yea)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(nay)),
-      ethereum.Value.fromSignedBigInt(BigInt.fromString(abstain)),
-      ethereum.Value.fromTupleArray(actions)
-    ]);
 }
 
 export function getVotesLengthCall(

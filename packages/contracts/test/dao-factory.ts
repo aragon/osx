@@ -7,7 +7,7 @@ import {customError} from './test-utils/custom-error-helper';
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
   SetMetadata: 'SetMetadata',
-  UPDATE_CONFIG: 'UpdateConfig',
+  UpdateConfig: 'UpdateConfig',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
@@ -24,7 +24,7 @@ const daoDummyName = 'dao1';
 const daoDummyMetadata = '0x0000';
 const dummyVoteSettings = [1, 2, 3];
 
-async function getDeployments(tx: any) {
+async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();
   const {events} = data;
   const {name, dao, token, creator} = events.find(
@@ -38,7 +38,7 @@ async function getDeployments(tx: any) {
   return {
     token: await ethers.getContractAt('GovernanceERC20', token),
     dao: await ethers.getContractAt('DAO', dao),
-    ERC20Voting: await ethers.getContractAt('ERC20Voting', voting),
+    voting: tokenVoting ? await ethers.getContractAt('ERC20Voting', voting) : await ethers.getContractAt('WhitelistVoting', voting),
     creator,
     name,
   };
@@ -65,6 +65,8 @@ describe('DAOFactory: ', function () {
     // @ts-ignore
     const ERC20Voting = await hre.artifacts.readArtifact('ERC20Voting');
     // @ts-ignore
+    const WhitelistVoting = await hre.artifacts.readArtifact('WhitelistVoting');
+    // @ts-ignore
     const Token = await hre.artifacts.readArtifact('GovernanceERC20');
 
     return {
@@ -72,6 +74,7 @@ describe('DAOFactory: ', function () {
         ...DAOFactoryArtifact.abi,
         ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
         ...ERC20Voting.abi.filter((f: any) => f.type === 'event'),
+        ...WhitelistVoting.abi.filter((f: any) => f.type === 'event'),
         ...Token.abi.filter((f: any) => f.type === 'event'),
       ],
       bytecode: DAOFactoryArtifact.bytecode,
@@ -115,11 +118,12 @@ describe('DAOFactory: ', function () {
   it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
     const mintAmount = 100;
 
-    let tx = await daoFactory.newDAO(
+    let tx = await daoFactory.newERC20VotingDAO(
       {
         name: daoDummyName,
         metadata: daoDummyMetadata,
       },
+      dummyVoteSettings,
       {
         addr: zeroAddress,
         name: 'TokenName',
@@ -129,14 +133,13 @@ describe('DAOFactory: ', function () {
         receivers: [ownerAddress],
         amounts: [mintAmount],
       },
-      dummyVoteSettings,
       zeroAddress
     );
 
     // get block that tx was mined
     const blockNum = await ethers.provider.getBlockNumber();
 
-    const {name, dao, token, creator, ERC20Voting} = await getDeployments(tx);
+    const {name, dao, token, creator, voting} = await getDeployments(tx, true);
 
     expect(name).to.equal(daoDummyName);
 
@@ -148,7 +151,7 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_VOTE_CONFIG_ROLE = await ERC20Voting.MODIFY_VOTE_CONFIG();
+    const MODIFY_VOTE_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
     const EXEC_ROLE = await dao.EXEC_ROLE();
 
     const DAORoles = await Promise.all([
@@ -167,7 +170,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.SetMetadata)
       .withArgs(daoDummyMetadata)
-      .to.emit(ERC20Voting, EVENTS.UPDATE_CONFIG)
+      .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(
         dummyVoteSettings[0],
         dummyVoteSettings[1],
@@ -193,7 +196,7 @@ describe('DAOFactory: ', function () {
         MODIFY_VOTE_CONFIG_ROLE,
         daoFactory.address,
         dao.address,
-        ERC20Voting.address,
+        voting.address,
         ACLAllowFlagAddress
       )
       .to.emit(dao, EVENTS.Revoked)
@@ -207,7 +210,7 @@ describe('DAOFactory: ', function () {
       .withArgs(
         EXEC_ROLE,
         daoFactory.address,
-        ERC20Voting.address,
+        voting.address,
         dao.address,
         ACLAllowFlagAddress
       );
@@ -220,8 +223,8 @@ describe('DAOFactory: ', function () {
     ).to.be.revertedWith(customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE));
 
     await expect(
-        ERC20Voting.changeVoteConfig(1, 2, 3)
-    ).to.be.revertedWith(customError('ACLAuth', ERC20Voting.address, ERC20Voting.address, ownerAddress, MODIFY_VOTE_CONFIG));
+        voting.changeVoteConfig(1, 2, 3)
+    ).to.be.revertedWith(customError('ACLAuth', voting.address, voting.address, ownerAddress, MODIFY_VOTE_CONFIG));
 
     const actions = [
       {
@@ -230,21 +233,153 @@ describe('DAOFactory: ', function () {
         data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
       },
       {
-        to: ERC20Voting.address,
+        to: voting.address,
         value: 0,
-        data: ERC20Voting.interface.encodeFunctionData(
+        data: voting.interface.encodeFunctionData(
           'changeVoteConfig',
           [3, 4, 5]
         ),
       },
     ];
 
-    await ERC20Voting.newVote('0x', actions, 0, 0, false, VoterState.None);
+    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
-    expect(await ERC20Voting.vote(0, VoterState.Yea, true))
+    expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.EXECUTED)
-      .withArgs(ERC20Voting.address, 0, [], [])
-      .to.emit(ERC20Voting, EVENTS.UPDATE_CONFIG)
+      .withArgs(voting.address, 0, [], [])
+      .to.emit(voting, EVENTS.UpdateConfig)
+      .withArgs(3, 4, 5);
+
+    expect(await actionExecuteContract.test()).to.equal(true);
+  });
+
+  it('creates WhitelistVoting DAO', async () => {
+    const mintAmount = 100;
+
+    let tx = await daoFactory.newWhitelistVotingDAO(
+      {
+        name: daoDummyName,
+        metadata: daoDummyMetadata,
+      },
+      dummyVoteSettings,
+      [ownerAddress],
+      zeroAddress
+    );
+
+    const {name, dao, token, creator, voting} = await getDeployments(tx, false);
+
+    expect(name).to.equal(daoDummyName);
+    expect(creator).to.equal(ownerAddress);
+
+    await ethers.provider.send('evm_mine', []);
+
+    const MODIFY_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
+    // @ts-ignore
+    const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
+    const EXEC_ROLE = await dao.EXEC_ROLE();
+
+    const DAORoles = await Promise.all([
+      dao.DAO_CONFIG_ROLE(),
+      dao.ROOT_ROLE(),
+      dao.WITHDRAW_ROLE(),
+      dao.UPGRADE_ROLE(),
+      dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+    ]);
+
+    // ======== Test Role events that were emitted successfully ==========
+
+    tx = expect(tx);
+
+    // Check if correct ACL events are thrown.
+    tx = tx.to
+      .emit(dao, EVENTS.SetMetadata)
+      .withArgs(daoDummyMetadata)
+      .to.emit(voting, EVENTS.UpdateConfig)
+      .withArgs(
+        dummyVoteSettings[0],
+        dummyVoteSettings[1],
+        dummyVoteSettings[2]
+      );
+
+    // @ts-ignore
+    DAORoles.map(item => {
+      tx = tx.to
+        .emit(dao, EVENTS.Granted)
+        .withArgs(
+          item,
+          daoFactory.address,
+          dao.address,
+          dao.address,
+          ACLAllowFlagAddress
+        );
+    });
+
+    tx = tx.to
+      .emit(dao, EVENTS.Granted)
+      .withArgs(
+        MODIFY_CONFIG_ROLE,
+        daoFactory.address,
+        dao.address,
+        voting.address,
+        ACLAllowFlagAddress
+      )
+      .to.emit(dao, EVENTS.Granted)
+      .withArgs(
+        MODIFY_WHITELIST,
+        daoFactory.address,
+        dao.address,
+        voting.address,
+        ACLAllowFlagAddress
+      )
+      .to.emit(dao, EVENTS.Revoked)
+      .withArgs(
+        DAORoles[1],
+        daoFactory.address,
+        daoFactory.address,
+        dao.address
+      )
+      .to.emit(dao, EVENTS.Granted)
+      .withArgs(
+        EXEC_ROLE,
+        daoFactory.address,
+        voting.address,
+        dao.address,
+        ACLAllowFlagAddress
+      );
+
+    // ===== Test if user can create a vote and execute it ======
+
+    // should be only callable by WhitelistVoting
+    await expect(
+        dao.execute(0, [])
+    ).to.be.revertedWith(customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE));
+
+    await expect(
+        voting.changeVoteConfig(1, 2, 3)
+    ).to.be.revertedWith(customError('ACLAuth', voting.address, voting.address, ownerAddress, MODIFY_VOTE_CONFIG));
+
+    const actions = [
+      {
+        to: actionExecuteContract.address,
+        value: 0,
+        data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
+      },
+      {
+        to: voting.address,
+        value: 0,
+        data: voting.interface.encodeFunctionData(
+          'changeVoteConfig',
+          [3, 4, 5]
+        ),
+      },
+    ];
+
+    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
+
+    expect(await voting.vote(0, VoterState.Yea, true))
+      .to.emit(dao, EVENTS.EXECUTED)
+      .withArgs(voting.address, 0, [], [])
+      .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(3, 4, 5);
 
     expect(await actionExecuteContract.test()).to.equal(true);
