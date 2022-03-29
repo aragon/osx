@@ -16,7 +16,7 @@
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
-    "prepublishOnly": "hardhat build && npm run build:npm"
+    "prepublishOnly": "hardhat build && yarn build:npm"
   },
   "repository": {
     "type": "git",
