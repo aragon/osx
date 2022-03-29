@@ -18,7 +18,7 @@ export default [
     ],
   },
   {
-    input: "npm/index-def.ts",
+    input: "npm/index.ts",
     plugins: [dts()],
     output: [
       {

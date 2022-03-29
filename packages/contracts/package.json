@@ -5,18 +5,18 @@
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",
-  "directories": {
-    "lib": "lib"
-  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "hardhat test",
-    "compile": "hardhat compile",
+    "build": "hardhat compile",
     "build:npm": "rollup --config rollup.config.ts",
     "coverage": "hardhat coverage --temp artifacts",
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
-    "prepublishOnly": "hardhat compile && npm run build:npm"
+    "prepublishOnly": "hardhat build && npm run build:npm"
   },
   "repository": {
     "type": "git",
@@ -34,9 +34,6 @@
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-typescript": "^8.3.1",
-    "@typechain/ethers-v5": "^7.2.0",
-    "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.7",

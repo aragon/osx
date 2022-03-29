@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: yarn
       - name: Compile contracts
-        run: yarn run compile
+        run: yarn run build
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true

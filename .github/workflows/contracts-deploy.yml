@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Compile
-        run: cd packages/contracts && yarn run compile
+        run: cd packages/contracts && yarn run build
       - name: Run Hardhat Tests
         env:
           REPORT_GAS: true
@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Compile
-        run: cd packages/contracts && yarn run compile
+        run: cd packages/contracts && yarn run build
       - name: Deploy
         run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.prepare.outputs.tags }}"
         env:

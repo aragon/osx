@@ -14,7 +14,7 @@ make sure the Contracts package is compiled:
 
 ```console
 cd packages/contracts
-yarn compile
+yarn build
 ```
 
 ## Build & deploy the subgraph

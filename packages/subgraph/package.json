@@ -5,7 +5,7 @@
   "homepage": "https://github.com/aragon/core",
   "license": "MIT",
   "scripts": {
-    "build:contracts": "cd ../contracts && yarn compile",
+    "build:contracts": "cd ../contracts && yarn build",
     "manifest": "scripts/build-manifest.sh",
     "build": "scripts/build-subgraph.sh",
     "deploy": "scripts/deploy-subgraph.sh",
