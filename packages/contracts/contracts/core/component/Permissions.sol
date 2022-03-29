@@ -11,6 +11,7 @@ import "@opengsn/contracts/src/interfaces/IRelayRecipient.sol";
 import "./../IDAO.sol";
 import "./../acl/ACL.sol";
 
+/// @dev Used to silence compiler warning in order to call trustedForwarder() on the DAO
 interface Relay {
     function trustedForwarder() external view returns (address);
 }
