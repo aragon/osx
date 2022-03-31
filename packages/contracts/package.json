@@ -1,6 +1,6 @@
 {
   "name": "@aragon/core-contracts",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha",
   "description": "Aragon V2 DAO Framework",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -16,7 +16,7 @@
     "flatten": "hardhat flatten",
     "analyze": "mythx analyze",
     "deploy": "hardhat deploy",
-    "prepublishOnly": "hardhat build && yarn build:npm"
+    "prepublishOnly": "yarn build && yarn build:npm"
   },
   "repository": {
     "type": "git",
