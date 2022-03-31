@@ -5,6 +5,9 @@
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:contracts": "cd ../contracts && yarn build",
     "build": "find ../contracts/artifacts/contracts/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./types",
