@@ -5,6 +5,9 @@
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],
