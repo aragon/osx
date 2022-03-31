@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Build Contracts
-        run: cd ./packages/contracts/ && yarn run compile
+        run: cd ./packages/contracts/ && yarn run build
       - name: Deploy Subgraph
         run: cd ./packages/subgraph/ && yarn run deploy
         env:
