@@ -10,8 +10,8 @@ import * as Component from "../artifacts/contracts/core/component/Component.sol/
 import * as Permissions from "../artifacts/contracts/core/component/Permissions.sol/Permissions.json";
 
 // Factories
-import * as DAOFactory from "../artifacts/contracts/factories/DAOFactory.sol/DAOFactory.json";
-import * as TokenFactory from "../artifacts/contracts/factories/TokenFactory.sol/TokenFactory.json";
+import * as DAOFactory from "../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json";
+import * as TokenFactory from "../artifacts/contracts/factory/TokenFactory.sol/TokenFactory.json";
 
 // Registry
 import * as Registry from "../artifacts/contracts/registry/Registry.sol/Registry.json";
@@ -23,7 +23,7 @@ import * as MerkleDistributor from "../artifacts/contracts/tokens/MerkleDistribu
 import * as MerkleMinter from "../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json";
 
 // Voting (future packages)
-import * as ERC20Voting from "../artifacts/contracts/votings/ERC20Voting/ERC20Voting.sol/ERC20Voting.json";
+import * as ERC20Voting from "../artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json";
 import * as WhitelistVoting from "../artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json";
 
 export default {
