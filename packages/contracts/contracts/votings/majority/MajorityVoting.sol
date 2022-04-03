@@ -4,6 +4,7 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IMajorityVoting.sol";
 import "./../../core/component/Component.sol";
 import "./../../utils/TimeHelpers.sol";

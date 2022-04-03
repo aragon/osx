@@ -20,7 +20,7 @@ interface Relay {
 /// @author Samuel Furter - Aragon Association - 2022
 /// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
 /// @dev When your contract inherits from this, it's important to call __Permission_init with the dao address.
-abstract contract Permissions is Initializable, BaseRelayRecipient {
+/*abstract contract Permissions is Initializable, BaseRelayRecipient {
     
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;
@@ -31,8 +31,8 @@ abstract contract Permissions is Initializable, BaseRelayRecipient {
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _role The hash of the role identifier
     modifier auth(bytes32 _role)  {
-        if(!dao.hasPermission(address(this), _msgSender(), _role, _msgData()))
-            revert ACLData.ACLAuth({here: address(this), where: address(this), who: _msgSender(), role: _role});
+        if(!dao.hasPermission(address(this), msg.sender, _role, msg.data))
+            revert ACLData.ACLAuth({here: address(this), where: address(this), who: msg.sender, role: _role});
 
         _;
     }
@@ -41,13 +41,4 @@ abstract contract Permissions is Initializable, BaseRelayRecipient {
         dao = _dao;
     }
 
-    function isTrustedForwarder(address _forwarder) public virtual override view returns(bool) {
-        address forwarder = trustedForwarder();
-
-        if(forwarder == address(0)) {
-            forwarder = Relay(address(dao)).trustedForwarder();
-        }
-
-        return forwarder == _forwarder;
-    }
-}
+}*/
