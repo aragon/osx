@@ -27,7 +27,7 @@ abstract contract Permissions is Initializable, MetaTxnCompatible {
 
     /// @notice Initializes the contract
     /// @dev This is required for the UUPS upgradability pattern
-    function __Permission_init(IDAO _dao) internal virtual initializer {
+    function __Permissions_init(IDAO _dao) internal virtual initializer {
         dao = _dao;
     }
 
