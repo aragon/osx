@@ -11,7 +11,6 @@ import "../core/IDAO.sol";
 import "../core/component/Permissions.sol";
 import "./MerkleDistributor.sol";
 
-// TODO make component?
 contract MerkleMinter is Permissions {
     using Clones for address;
 
@@ -21,7 +20,7 @@ contract MerkleMinter is Permissions {
     address public distributorBase;
 
     event MintedMerkle(address indexed distributor, bytes32 indexed merkleRoot, uint256 totalAmount, bytes tree, bytes context);
-    
+
     function initialize(
         IDAO _dao,
         GovernanceERC20 _token, 

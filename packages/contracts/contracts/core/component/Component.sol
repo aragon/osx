@@ -19,9 +19,9 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     
     /// @notice Role identifier to upgrade a component 
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
-
-    /// @dev Used for UUPS upgradability pattern
-    function __Component_init(IDAO _dao) internal virtual {
+    
+    /// @notice Initialization
+    /// @param _dao the associated DAO address
     function __Component_init(IDAO _dao) internal virtual initializer {
         __Permission_init(_dao);
 

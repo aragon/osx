@@ -16,8 +16,9 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
 
     event SetTrustedForwarder(address _newForwarder);
 
-    /// @dev Used for UUPS upgradability pattern
-    function __MetaTxnComponent_init(IDAO _dao, address _trustedForwarder) internal virtual {
+    /// @notice Initialization
+    /// @param _dao the associated DAO address who
+    /// @param _trustedForwarder the trusted forwarder address who verifies the meta transaction
     function __MetaTxnComponent_init(IDAO _dao, address _trustedForwarder) internal virtual initializer {
         __Component_init(_dao);
 
@@ -30,22 +31,22 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
         _registerStandard(type(MetaTxnComponent).interfaceId);
     }
 
+    /// @inheritdoc MetaTxnCompatible
     function _msgSender() internal override(BaseRelayRecipient, MetaTxnCompatible) view returns (address) {
         return BaseRelayRecipient._msgSender();
     }
 
+    /// @inheritdoc MetaTxnCompatible
     function _msgData() internal override(BaseRelayRecipient, MetaTxnCompatible) view returns (bytes calldata) {
         return BaseRelayRecipient._msgData();
     }
 
-    /// @dev used to update the trusted forwarder.
+    /// @notice Setter for the trusted forwarder who verifies the meta transaction
+    /// @param _trustedForwarder the trusted forwarder address
+    /// @dev used to update the trusted forwarder
     function setTrustedForwarder(address _trustedForwarder) public virtual auth(MODIFY_TRUSTED_FORWARDER) {
         _setTrustedForwarder(_trustedForwarder);
 
         emit SetTrustedForwarder(_trustedForwarder);
     }
-
-    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_ROLE) { }
-
 }

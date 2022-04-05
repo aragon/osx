@@ -126,7 +126,7 @@ contract DAOFactory {
     }
 
     // @dev Does set the required permissions for the new DAO.
-    // @oaram _dao The DAO instance just created.
+    // @param _dao The DAO instance just created.
     // @param _voting The voting contract address (whitelist OR ERC20 voting)
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set roles on the dao itself.
