@@ -18,6 +18,7 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
 
     /// @dev Used for UUPS upgradability pattern
     function __MetaTxnComponent_init(IDAO _dao, address _trustedForwarder) internal virtual {
+    function __MetaTxnComponent_init(IDAO _dao, address _trustedForwarder) internal virtual initializer {
         __Component_init(_dao);
 
         if(_trustedForwarder != address(0)) {

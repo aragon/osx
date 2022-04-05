@@ -22,6 +22,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
 
     /// @dev Used for UUPS upgradability pattern
     function __Component_init(IDAO _dao) internal virtual {
+    function __Component_init(IDAO _dao) internal virtual initializer {
         __Permission_init(_dao);
 
         _registerStandard(type(Component).interfaceId);
