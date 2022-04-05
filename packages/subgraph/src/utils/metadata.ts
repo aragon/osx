@@ -1,4 +1,4 @@
-import {Bytes, ipfs} from '@graphprotocol/graph-ts';
+import {ipfs} from '@graphprotocol/graph-ts';
 
 export function handleMetadata(metadata: string): string {
   // check if metadata is ipfs

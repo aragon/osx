@@ -134,8 +134,6 @@ export function handleExecuteVote(event: ExecuteVote): void {
   if (!vote.reverted) {
     let actions = vote.value.value10;
     for (let index = 0; index < actions.length; index++) {
-      const action = actions[index];
-
       let actionId =
         event.address.toHexString() +
         '_' +

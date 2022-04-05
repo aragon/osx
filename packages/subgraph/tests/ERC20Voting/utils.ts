@@ -7,6 +7,8 @@ import {
   UpdateConfig
 } from '../../generated/templates/ERC20Voting/ERC20Voting';
 
+// events
+
 export function createNewStartVoteEvent(
   voteId: string,
   creator: string,
@@ -129,6 +131,8 @@ export function createNewUpdateConfigEvent(
 
   return newUpdateConfigEvent;
 }
+
+// calls
 
 export function getVotesLengthCall(
   contractAddress: string,

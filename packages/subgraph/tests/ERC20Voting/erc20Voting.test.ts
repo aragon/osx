@@ -1,4 +1,4 @@
-import {assert, clearStore, test, logStore} from 'matchstick-as/assembly/index';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {ERC20VotingPackage, ERC20VotingProposal} from '../../generated/schema';
 import {

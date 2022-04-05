@@ -1,21 +1,16 @@
-import {
-  ethereum,
-  Bytes,
-  Address,
-  BigInt,
-  ByteArray
-} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {
   SetMetadata,
   ETHDeposited,
   Deposited,
-  Withdrawn,
   Granted,
   Revoked,
   Frozen,
   Executed
 } from '../../generated/templates/DaoTemplate/DAO';
+
+// events
 
 export function createNewSetMetadataEvent(
   metadata: string,
@@ -96,20 +91,6 @@ export function createNewDepositedEvent(
   newEvent.parameters.push(referenceParam);
 
   return newEvent;
-}
-
-export function getBalanceOf(
-  contractAddress: string,
-  account: string,
-  returns: string
-): void {
-  createMockedFunction(
-    Address.fromString(contractAddress),
-    'balanceOf',
-    'balanceOf(address):(uint256)'
-  )
-    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
-    .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
 
 export function createNewGrantedEvent(
@@ -221,6 +202,22 @@ export function createNewFrozenEvent(
   newFrozenEvent.parameters.push(whereParam);
 
   return newFrozenEvent;
+}
+
+// calls
+
+export function getBalanceOf(
+  contractAddress: string,
+  account: string,
+  returns: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'balanceOf',
+    'balanceOf(address):(uint256)'
+  )
+    .withArgs([ethereum.Value.fromAddress(Address.fromString(account))])
+    .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
 
 export function getEXEC_ROLE(contractAddress: string, returns: Bytes): void {

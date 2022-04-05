@@ -9,6 +9,8 @@ import {
   RemoveUsers
 } from '../../generated/templates/WhitelistVoting/WhitelistVoting';
 
+// events
+
 export function createNewStartVoteEvent(
   voteId: string,
   creator: string,
@@ -169,6 +171,8 @@ export function createNewRemoveUsersEvent(
 
   return newRemoveUsersEvent;
 }
+
+// calls
 
 export function getVotesLengthCall(
   contractAddress: string,

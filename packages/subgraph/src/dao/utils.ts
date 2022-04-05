@@ -10,7 +10,6 @@ import {
   Bytes,
   DataSourceContext,
   ethereum,
-  log,
   store
 } from '@graphprotocol/graph-ts';
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
