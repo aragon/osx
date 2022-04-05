@@ -22,7 +22,9 @@ class WithdrawParams {
   token: Address = Address.fromString(ADDRESS_ZERO);
   to: Address = Address.fromString(ADDRESS_ZERO);
   amount: BigInt = BigInt.zero();
+  /* eslint-disable */
   reference: string = '';
+  /* eslint-enable */
 }
 
 /**

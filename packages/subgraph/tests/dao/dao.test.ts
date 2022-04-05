@@ -16,7 +16,6 @@ import {
   ADDRESS_ZERO,
   VOTING_ADDRESS
 } from '../constants';
-import {runHandleNewDAORegistered} from '../registry/utils';
 import {
   handleETHDeposited,
   handleDeposited,
@@ -27,13 +26,9 @@ import {createDummyAcctions, createTokenCalls} from '../utils';
 import {Dao, ERC20VotingProposal} from '../../generated/schema';
 
 test('Run dao (handleSetMetadata) mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
+  // create state
+  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
+  daoEntity.save();
 
   let metadata = 'new-metadata';
 
@@ -50,14 +45,6 @@ test('Run dao (handleSetMetadata) mappings with mock event', () => {
 });
 
 test('Run dao (handleDeposited) for ETH mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
-
   // create event
   let newEvent = createNewETHDepositedEvent(ADDRESS_ONE, ONE_ETH, DAO_ADDRESS);
 
@@ -81,14 +68,6 @@ test('Run dao (handleDeposited) for ETH mappings with mock event', () => {
 });
 
 test('Run dao (handleDeposited) for Token mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
-
   // create event
   let newEvent = createNewDepositedEvent(
     ADDRESS_ONE,

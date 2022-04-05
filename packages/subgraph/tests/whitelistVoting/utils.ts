@@ -20,7 +20,7 @@ export function createNewStartVoteEvent(
   let newStartVoteEvent = changetype<StartVote>(newMockEvent());
 
   newStartVoteEvent.address = Address.fromString(contractAddress);
-  newStartVoteEvent.parameters = new Array();
+  newStartVoteEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -52,7 +52,7 @@ export function createNewCastVoteEvent(
   let newCastVoteEvent = changetype<CastVote>(newMockEvent());
 
   newCastVoteEvent.address = Address.fromString(contractAddress);
-  newCastVoteEvent.parameters = new Array();
+  newCastVoteEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -86,7 +86,7 @@ export function createNewExecuteVoteEvent(
   let newExecuteVoteEvent = changetype<ExecuteVote>(newMockEvent());
 
   newExecuteVoteEvent.address = Address.fromString(contractAddress);
-  newExecuteVoteEvent.parameters = new Array();
+  newExecuteVoteEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -112,7 +112,7 @@ export function createNewUpdateConfigEvent(
   let newUpdateConfigEvent = changetype<UpdateConfig>(newMockEvent());
 
   newUpdateConfigEvent.address = Address.fromString(contractAddress);
-  newUpdateConfigEvent.parameters = new Array();
+  newUpdateConfigEvent.parameters = [];
 
   let participationRequiredPctParam = new ethereum.EventParam(
     'participationRequiredPct',
@@ -141,7 +141,7 @@ export function createNewAddUsersEvent(
   let newAddUsersEvent = changetype<AddUsers>(newMockEvent());
 
   newAddUsersEvent.address = Address.fromString(contractAddress);
-  newAddUsersEvent.parameters = new Array();
+  newAddUsersEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
@@ -160,7 +160,7 @@ export function createNewRemoveUsersEvent(
   let newRemoveUsersEvent = changetype<RemoveUsers>(newMockEvent());
 
   newRemoveUsersEvent.address = Address.fromString(contractAddress);
-  newRemoveUsersEvent.parameters = new Array();
+  newRemoveUsersEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',

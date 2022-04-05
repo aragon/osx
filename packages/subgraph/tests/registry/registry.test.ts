@@ -1,16 +1,24 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address} from '@graphprotocol/graph-ts';
-import {runHandleNewDAORegistered} from './utils';
 import {DAO_ADDRESS, ADDRESS_ONE, DAO_TOKEN_ADDRESS} from '../constants';
+import {createTokenCalls} from '../utils';
+import {createNewDaoEvent} from './utils';
+import {handleNewDAORegistered} from '../../src/registry';
 
 test('Run registry mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
+  // create calls
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+
+  // create event
+  let newDaoEvent = createNewDaoEvent(
     DAO_ADDRESS,
     ADDRESS_ONE,
     DAO_TOKEN_ADDRESS,
     'mock-Dao'
   );
+
+  // handle event
+  handleNewDAORegistered(newDaoEvent);
 
   let entityID = Address.fromString(DAO_ADDRESS).toHexString();
 

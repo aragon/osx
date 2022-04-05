@@ -3,7 +3,7 @@ import {ethereum, Bytes} from '@graphprotocol/graph-ts';
 export function supportsInterface(
   contract: ethereum.SmartContract,
   interfaceId: string,
-  expected: boolean = true
+  expected = true
 ): boolean {
   let result = ethereum.call(
     new ethereum.SmartContractCall(

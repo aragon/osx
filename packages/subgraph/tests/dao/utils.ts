@@ -19,7 +19,7 @@ export function createNewSetMetadataEvent(
   let newSetMetadataEvent = changetype<SetMetadata>(newMockEvent());
 
   newSetMetadataEvent.address = Address.fromString(contractAddress);
-  newSetMetadataEvent.parameters = new Array();
+  newSetMetadataEvent.parameters = [];
 
   let metadataParam = new ethereum.EventParam(
     'metadata',
@@ -39,7 +39,7 @@ export function createNewETHDepositedEvent(
   let newEvent = changetype<ETHDeposited>(newMockEvent());
 
   newEvent.address = Address.fromString(contractAddress);
-  newEvent.parameters = new Array();
+  newEvent.parameters = [];
 
   let senderParam = new ethereum.EventParam(
     'sender',
@@ -66,7 +66,7 @@ export function createNewDepositedEvent(
   let newEvent = changetype<Deposited>(newMockEvent());
 
   newEvent.address = Address.fromString(contractAddress);
-  newEvent.parameters = new Array();
+  newEvent.parameters = [];
 
   let senderParam = new ethereum.EventParam(
     'sender',
@@ -104,7 +104,7 @@ export function createNewGrantedEvent(
   let newGrantedEvent = changetype<Granted>(newMockEvent());
 
   newGrantedEvent.address = Address.fromString(contractAddress);
-  newGrantedEvent.parameters = new Array();
+  newGrantedEvent.parameters = [];
 
   let roleParam = new ethereum.EventParam(
     'role',
@@ -146,7 +146,7 @@ export function createNewRevokedEvent(
   let newGrantedEvent = changetype<Revoked>(newMockEvent());
 
   newGrantedEvent.address = Address.fromString(contractAddress);
-  newGrantedEvent.parameters = new Array();
+  newGrantedEvent.parameters = [];
 
   let roleParam = new ethereum.EventParam(
     'role',
@@ -182,7 +182,7 @@ export function createNewFrozenEvent(
   let newFrozenEvent = changetype<Frozen>(newMockEvent());
 
   newFrozenEvent.address = Address.fromString(contractAddress);
-  newFrozenEvent.parameters = new Array();
+  newFrozenEvent.parameters = [];
 
   let roleParam = new ethereum.EventParam(
     'role',
@@ -333,7 +333,7 @@ export function createNewExecutedEvent(
   let newExecutedEvent = changetype<Executed>(newMockEvent());
 
   newExecutedEvent.address = Address.fromString(contractAddress);
-  newExecutedEvent.parameters = new Array();
+  newExecutedEvent.parameters = [];
 
   let actorParam = new ethereum.EventParam(
     'actor',
