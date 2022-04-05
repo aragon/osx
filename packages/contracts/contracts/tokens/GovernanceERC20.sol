@@ -32,23 +32,6 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }   
-
-    /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
-    /// we have to override it and activate GSN's _msgSender. 
-    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    /// ends up first and that's what gets called by super._msgSender
-    function _msgSender() internal view override(MetaTxnCompatible, ContextUpgradeable) virtual returns (address) {
-        return MetaTxnCompatible._msgSender();
-    }
-
-    /// @dev Since 2 base classes end up having _msgData(OZ + GSN), 
-    /// we have to override it and activate GSN's _msgData. 
-    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    /// ends up first and that's what gets called by super._msgData
-    function _msgData() internal view override(MetaTxnCompatible, ContextUpgradeable) virtual returns (bytes calldata) {
-        return MetaTxnCompatible._msgData();
-    }
-
     function mint(address to, uint256 amount) external auth(TOKEN_MINTER_ROLE) {
         _mint(to, amount);
     }

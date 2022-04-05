@@ -31,13 +31,13 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
         _registerStandard(type(MetaTxnComponent).interfaceId);
     }
 
-    /// @inheritdoc MetaTxnCompatible
-    function _msgSender() internal override(BaseRelayRecipient, MetaTxnCompatible) view returns (address) {
+    /// @notice overrides the 'ContextUpgradeable' from 'Component' with that of 'BaseRelayRecipient'
+    function _msgSender() internal override(ContextUpgradeable, BaseRelayRecipient) view returns (address) {
         return BaseRelayRecipient._msgSender();
     }
 
-    /// @inheritdoc MetaTxnCompatible
-    function _msgData() internal override(BaseRelayRecipient, MetaTxnCompatible) view returns (bytes calldata) {
+    /// @notice overrides the 'ContextUpgradeable' from 'Component' with that of 'BaseRelayRecipient'
+    function _msgData() internal override(ContextUpgradeable, BaseRelayRecipient) view returns (bytes calldata) {
         return BaseRelayRecipient._msgData();
     }
 

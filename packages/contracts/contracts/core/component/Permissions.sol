@@ -5,8 +5,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
-import "./MetaTxnCompatible.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./../IDAO.sol";
 import "./../acl/ACL.sol";
 
@@ -20,7 +19,7 @@ interface Relay {
 /// @author Samuel Furter - Aragon Association - 2022
 /// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
 /// @dev When your contract inherits from this, it is important to call __Permission_init with the associated dao address.
-abstract contract Permissions is Initializable, MetaTxnCompatible {
+abstract contract Permissions is Initializable, ContextUpgradeable {
     
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;
