@@ -21,7 +21,7 @@ abstract contract Permissions is Initializable, ContextUpgradeable {
 
     /// @notice Initializes the contract
     /// @param _dao the associated DAO address
-    function __Permissions_init(IDAO _dao) internal virtual initializer {
+    function __Permissions_init(IDAO _dao) internal virtual onlyInitializing {
         dao = _dao;
     }
 

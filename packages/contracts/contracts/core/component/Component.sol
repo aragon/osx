@@ -22,7 +22,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     
     /// @notice Initialization
     /// @param _dao the associated DAO address
-    function __Component_init(IDAO _dao) internal virtual initializer {
+    function __Component_init(IDAO _dao) internal virtual onlyInitializing {
         __Permissions_init(_dao);
 
         _registerStandard(type(Component).interfaceId);

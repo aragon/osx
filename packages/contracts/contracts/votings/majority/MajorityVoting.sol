@@ -37,7 +37,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxnComponent, TimeHelpe
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
-    ) internal initializer {
+    ) internal onlyInitializing {
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         __MetaTxnComponent_init(_dao, _gsnForwarder);
