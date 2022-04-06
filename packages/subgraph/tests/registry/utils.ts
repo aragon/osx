@@ -1,25 +1,8 @@
-import {Address, ethereum, Bytes} from '@graphprotocol/graph-ts';
+import {Address, ethereum} from '@graphprotocol/graph-ts';
 import {newMockEvent} from 'matchstick-as/assembly/index';
 import {NewDAORegistered} from '../../generated/Registry/Registry';
-import {handleNewDAORegistered} from '../../src/registry';
-import {DAO_TOKEN_ADDRESS} from '../constants';
-import {createTokenCalls} from '../utils';
 
-export function runHandleNewDAORegistered(
-  DAO_ADDRESS: string,
-  creator: string,
-  token: string,
-  daoName: string
-): void {
-  // create calls
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-
-  // create event
-  let newDaoEvent = createNewDaoEvent(DAO_ADDRESS, creator, token, daoName);
-
-  // handle event
-  handleNewDAORegistered(newDaoEvent);
-}
+// events
 
 export function createNewDaoEvent(
   dao: string,
@@ -29,7 +12,7 @@ export function createNewDaoEvent(
 ): NewDAORegistered {
   let newDaoEvent = changetype<NewDAORegistered>(newMockEvent());
 
-  newDaoEvent.parameters = new Array();
+  newDaoEvent.parameters = [];
 
   let daoParam = new ethereum.EventParam(
     'dao',

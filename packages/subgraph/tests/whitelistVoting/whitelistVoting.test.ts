@@ -1,9 +1,8 @@
-import {assert, clearStore, test, logStore} from 'matchstick-as/assembly/index';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   WhitelistPackage,
   WhitelistProposal,
-  WhitelistVote,
   WhitelistVoter
 } from '../../generated/schema';
 import {

@@ -1,4 +1,4 @@
-import {assert, clearStore, test, logStore} from 'matchstick-as/assembly/index';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt, ByteArray, Bytes} from '@graphprotocol/graph-ts';
 import {
   createNewFrozenEvent,
@@ -19,8 +19,6 @@ import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
   ONE_ETH,
-  STRING_DATA,
-  HALF_ETH,
   ADDRESS_ZERO,
   VOTING_ADDRESS,
   ADDRESS_TWO
@@ -28,12 +26,14 @@ import {
 import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
 import {crypto} from '@graphprotocol/graph-ts';
 import {createTokenCalls} from '../utils';
+import {Permission, Role} from '../../generated/schema';
+
+let role = Bytes.fromByteArray(
+  crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
+);
 
 test('Run dao (handleGranted) mappings with mock event', () => {
   // create event and run it's handler
-  let role = Bytes.fromByteArray(
-    crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
-  );
   let grantedEvent = createNewGrantedEvent(
     role,
     ADDRESS_ONE,
@@ -107,9 +107,6 @@ test('Run dao (handleGranted) mappings with mock event', () => {
 
 test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   // create event and run it's handler
-  let role = Bytes.fromByteArray(
-    crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
-  );
   let grantedEvent = createNewGrantedEvent(
     role,
     ADDRESS_ONE,
@@ -147,34 +144,25 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
 });
 
 test('Run dao (handleRevoked) mappings with mock event', () => {
-  let role = Bytes.fromByteArray(
-    crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
-  );
-
-  // first Grant a permission
-  let grantedEvent = createNewGrantedEvent(
-    role,
-    ADDRESS_ONE,
-    VOTING_ADDRESS,
-    DAO_ADDRESS,
-    ADDRESS_TWO,
-    DAO_ADDRESS
-  );
-  // launch calls
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-  getEXEC_ROLE(DAO_ADDRESS, role);
-
-  // handle event
-  handleGranted(grantedEvent);
-
-  // checks
-  // role
+  // create state
   let roleEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
   // permission
   let permissionEntityID =
     roleEntityID + '_' + Address.fromString(VOTING_ADDRESS).toHexString();
 
+  let roleEntity = new Role(roleEntityID);
+  roleEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
+  roleEntity.where = Address.fromString(DAO_ADDRESS);
+  roleEntity.role = role;
+  roleEntity.frozen = false;
+  roleEntity.save();
+
+  let permissionEntity = new Permission(permissionEntityID);
+  permissionEntity.role = roleEntity.id;
+  permissionEntity.save();
+
+  // check state exist
   assert.fieldEquals(
     'Permission',
     permissionEntityID,
@@ -191,42 +179,46 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
     DAO_ADDRESS
   );
 
+  getEXEC_ROLE(DAO_ADDRESS, role);
+
   // handle event
   handleRevoked(revokedEvent);
 
   // checks
-  // permission
+  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
+  assert.fieldEquals(
+    'Role',
+    roleEntityID,
+    'dao',
+    Address.fromString(DAO_ADDRESS).toHexString()
+  );
+  assert.fieldEquals(
+    'Role',
+    roleEntityID,
+    'where',
+    Address.fromString(DAO_ADDRESS).toHexString()
+  );
+  assert.fieldEquals('Role', roleEntityID, 'role', role.toHexString());
+  assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
+
   assert.notInStore('Permission', permissionEntityID);
 
   clearStore();
 });
 
 test('Run dao (handleFrozen) mappings with mock event', () => {
-  let role = Bytes.fromByteArray(
-    crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
-  );
-
-  // first Grant a permission
-  let grantedEvent = createNewGrantedEvent(
-    role,
-    ADDRESS_ONE,
-    VOTING_ADDRESS,
-    DAO_ADDRESS,
-    ADDRESS_TWO,
-    DAO_ADDRESS
-  );
-  // launch calls
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-  getEXEC_ROLE(DAO_ADDRESS, role);
-
-  // handle event
-  handleGranted(grantedEvent);
-
-  // checks
-  // role
+  // create state
   let roleEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
 
+  let roleEntity = new Role(roleEntityID);
+  roleEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
+  roleEntity.where = Address.fromString(DAO_ADDRESS);
+  roleEntity.role = role;
+  roleEntity.frozen = false;
+  roleEntity.save();
+
+  // check state exist
   assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
   assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
 
@@ -242,6 +234,20 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   handleFrozen(frozenEvent);
 
   // checks
+  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
+  assert.fieldEquals(
+    'Role',
+    roleEntityID,
+    'dao',
+    Address.fromString(DAO_ADDRESS).toHexString()
+  );
+  assert.fieldEquals(
+    'Role',
+    roleEntityID,
+    'where',
+    Address.fromString(DAO_ADDRESS).toHexString()
+  );
+  assert.fieldEquals('Role', roleEntityID, 'role', role.toHexString());
   assert.fieldEquals('Role', roleEntityID, 'frozen', 'true');
 
   clearStore();

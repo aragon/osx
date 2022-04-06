@@ -1,7 +1,6 @@
-import {assert, clearStore, test, logStore} from 'matchstick-as/assembly/index';
+import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, Bytes} from '@graphprotocol/graph-ts';
 import {
-  createNewSetMetadataEvent,
   createNewETHDepositedEvent,
   createNewDepositedEvent,
   getBalanceOf,
@@ -17,26 +16,19 @@ import {
   ADDRESS_ZERO,
   VOTING_ADDRESS
 } from '../constants';
-import {runHandleNewDAORegistered} from '../registry/utils';
 import {
-  handleSetMetadata,
   handleETHDeposited,
   handleDeposited,
   handleExecuted,
   _handleSetMetadata
-  // handleWithdrawn
 } from '../../src/dao/dao';
 import {createDummyAcctions, createTokenCalls} from '../utils';
 import {Dao, ERC20VotingProposal} from '../../generated/schema';
 
 test('Run dao (handleSetMetadata) mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
+  // create state
+  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
+  daoEntity.save();
 
   let metadata = 'new-metadata';
 
@@ -53,14 +45,6 @@ test('Run dao (handleSetMetadata) mappings with mock event', () => {
 });
 
 test('Run dao (handleDeposited) for ETH mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
-
   // create event
   let newEvent = createNewETHDepositedEvent(ADDRESS_ONE, ONE_ETH, DAO_ADDRESS);
 
@@ -84,14 +68,6 @@ test('Run dao (handleDeposited) for ETH mappings with mock event', () => {
 });
 
 test('Run dao (handleDeposited) for Token mappings with mock event', () => {
-  // create event and run it's handler
-  runHandleNewDAORegistered(
-    DAO_ADDRESS,
-    ADDRESS_ONE,
-    DAO_TOKEN_ADDRESS,
-    'mock-Dao'
-  );
-
   // create event
   let newEvent = createNewDepositedEvent(
     ADDRESS_ONE,
@@ -188,7 +164,7 @@ test('Run dao (handleDeposited) for Token mappings with mock event', () => {
   clearStore();
 });
 
-test('Run dao (handleDeposited) for Token mappings with mock event', () => {
+test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   // create state
   let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
   daoEntity.save();

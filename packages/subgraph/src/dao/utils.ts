@@ -10,7 +10,6 @@ import {
   Bytes,
   DataSourceContext,
   ethereum,
-  log,
   store
 } from '@graphprotocol/graph-ts';
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
@@ -23,6 +22,7 @@ class WithdrawParams {
   token: Address = Address.fromString(ADDRESS_ZERO);
   to: Address = Address.fromString(ADDRESS_ZERO);
   amount: BigInt = BigInt.zero();
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   reference: string = '';
 }
 
