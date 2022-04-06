@@ -9,11 +9,6 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./../IDAO.sol";
 import "./../acl/ACL.sol";
 
-// TODO Is this still needed?
-/// @dev Used to silence compiler warning in order to call trustedForwarder() on the DAO
-interface Relay {
-    function trustedForwarder() external view returns (address);
-}
 
 /// @title Abstract implementation of the DAO permissions
 /// @author Samuel Furter - Aragon Association - 2022
