@@ -22,9 +22,8 @@ class WithdrawParams {
   token: Address = Address.fromString(ADDRESS_ZERO);
   to: Address = Address.fromString(ADDRESS_ZERO);
   amount: BigInt = BigInt.zero();
-  /* eslint-disable */
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   reference: string = '';
-  /* eslint-enable */
 }
 
 /**
