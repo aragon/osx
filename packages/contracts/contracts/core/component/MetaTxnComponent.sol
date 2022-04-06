@@ -17,7 +17,7 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
     event SetTrustedForwarder(address _newForwarder);
 
     /// @notice Initialization
-    /// @param _dao the associated DAO address who
+    /// @param _dao the associated DAO address
     /// @param _trustedForwarder the trusted forwarder address who verifies the meta transaction
     function __MetaTxnComponent_init(IDAO _dao, address _trustedForwarder) internal virtual initializer {
         __Component_init(_dao);
