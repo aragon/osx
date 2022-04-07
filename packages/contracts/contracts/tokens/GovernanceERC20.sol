@@ -27,7 +27,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
         string calldata _name, 
         string calldata _symbol
     ) external initializer {
-         __ERC20_init(_name, _symbol);
+        __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __Permissions_init(_dao);
 
