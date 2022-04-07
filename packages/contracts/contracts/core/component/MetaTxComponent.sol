@@ -10,7 +10,7 @@ import "./Component.sol";
 /// @title Base component in the Aragon DAO framework supporting meta transactions
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice Any component within the Aragon DAO framework using meta transactions has to inherit from this contract
-abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
+abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @notice Role identifer to change the GSN forwarder
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
@@ -19,7 +19,7 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
     /// @notice Initialization
     /// @param _dao the associated DAO address
     /// @param _trustedForwarder the trusted forwarder address who verifies the meta transaction
-    function __MetaTxnComponent_init(IDAO _dao, address _trustedForwarder) internal virtual onlyInitializing {
+    function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder) internal virtual onlyInitializing {
         __Component_init(_dao);
 
         if(_trustedForwarder != address(0)) {
@@ -28,7 +28,7 @@ abstract contract MetaTxnComponent is Component, BaseRelayRecipient {
             emit SetTrustedForwarder(_trustedForwarder);
         }
 
-        _registerStandard(type(MetaTxnComponent).interfaceId);
+        _registerStandard(type(MetaTxComponent).interfaceId);
     }
 
     /// @notice overrides '_msgSender()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'

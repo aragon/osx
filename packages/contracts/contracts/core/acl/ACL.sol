@@ -78,7 +78,7 @@ contract ACL is Initializable {
 
     /// @dev Init method to set the owner of the ACL
     /// @param _who The callee of the method
-    function __ACL_init(address _who) internal initializer {
+    function __ACL_init(address _who) internal onlyInitializing {
         _initializeACL(_who);
     }
     

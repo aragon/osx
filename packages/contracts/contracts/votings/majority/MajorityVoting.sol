@@ -5,14 +5,14 @@
 pragma solidity 0.8.10;
 
 import "./IMajorityVoting.sol";
-import "./../../core/component/MetaTxnComponent.sol";
+import "./../../core/component/MetaTxComponent.sol";
 import "./../../utils/TimeHelpers.sol";
 
 /// @title The abstract implementation of majority voting components
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
-abstract contract MajorityVoting is IMajorityVoting, MetaTxnComponent, TimeHelpers {
+abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelpers {
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
@@ -40,7 +40,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxnComponent, TimeHelpe
     ) internal onlyInitializing {
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        __MetaTxnComponent_init(_dao, _gsnForwarder);
+        __MetaTxComponent_init(_dao, _gsnForwarder);
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
