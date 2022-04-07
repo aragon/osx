@@ -12,6 +12,13 @@ import "./../majority/MajorityVoting.sol";
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract WhitelistVoting is MajorityVoting {
+    bytes4 internal constant WHITELIST_VOTING_INTERFACE_ID =
+        MAJORITY_VOTING_INTERFACE_ID ^
+            this.addWhitelistedUsers.selector ^
+            this.removeWhitelistedUsers.selector ^
+            this.isUserWhitelisted.selector ^
+            this.whitelistedUserCount.selector;
+
     using Checkpoints for Checkpoints.History;
 
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
@@ -40,6 +47,7 @@ contract WhitelistVoting is MajorityVoting {
         uint64 _minDuration,
         address[] calldata _whitelisted
     ) public initializer {
+        _registerStandard(WHITELIST_VOTING_INTERFACE_ID);
         __MajorityVoting_init(_dao, _gsnForwarder, _participationRequiredPct, _supportRequiredPct, _minDuration);
 
         // add whitelisted users
