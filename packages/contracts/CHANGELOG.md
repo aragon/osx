@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Refactored subgraph
 - Decoupled `Permissions` from `BaseRelayRecipient`.
+- Fixed OZ contracts-upgradable `Initializable`
 
 ### Removed
 - Removed `Relay` interface from `Permissions.sol`.
