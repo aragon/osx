@@ -13,6 +13,8 @@ import "./../../utils/TimeHelpers.sol";
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
 abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
+    bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
+
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
@@ -38,6 +40,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal initializer {
+        _registerStandard(MAJORITY_VOTING_INTERFACE_ID);
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         __Component_init(_dao, _gsnForwarder);
@@ -72,13 +75,13 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         VoterState _choice,
         bool _executesIfDecided
     ) external {
-        if(_choice != VoterState.None && !_canVote(_voteId, msg.sender)) revert VoteCastForbidden(_voteId, msg.sender);
+        if (_choice != VoterState.None && !_canVote(_voteId, msg.sender)) revert VoteCastForbidden(_voteId, msg.sender);
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
     function execute(uint256 _voteId) public {
-        if(!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
+        if (!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
         _execute(_voteId);
     }
 
@@ -99,22 +102,22 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
 
     /// @inheritdoc IMajorityVoting
     function getVote(uint256 _voteId)
-    public
-    view
-    returns (
-        bool open,
-        bool executed,
-        uint64 startDate,
-        uint64 endDate,
-        uint64 snapshotBlock,
-        uint64 supportRequired,
-        uint64 participationRequired,
-        uint256 votingPower,
-        uint256 yea,
-        uint256 nay,
-        uint256 abstain,
-        IDAO.Action[] memory actions
-    )
+        public
+        view
+        returns (
+            bool open,
+            bool executed,
+            uint64 startDate,
+            uint64 endDate,
+            uint64 snapshotBlock,
+            uint64 supportRequired,
+            uint64 participationRequired,
+            uint256 votingPower,
+            uint256 yea,
+            uint256 nay,
+            uint256 abstain,
+            IDAO.Action[] memory actions
+        )
     {
         Vote storage vote_ = votes[_voteId];
 
@@ -122,7 +125,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         executed = vote_.executed;
         startDate = vote_.startDate;
         endDate = vote_.endDate;
-        snapshotBlock= vote_.snapshotBlock;
+        snapshotBlock = vote_.snapshotBlock;
         supportRequired = vote_.supportRequiredPct;
         participationRequired = vote_.participationRequiredPct;
         votingPower = vote_.votingPower;
@@ -162,7 +165,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     /// @dev Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _voteId vote id
     /// @return True if the given vote can be executed, false otherwise
-    function _canExecute(uint256 _voteId) internal virtual view returns (bool) {
+    function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
         Vote storage vote_ = votes[_voteId];
 
         if (vote_.executed) {
@@ -197,7 +200,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     /// @dev Internal function to check if a vote is still open
     /// @param vote_ the vote struct
     /// @return True if the given vote is open, false otherwise
-    function _isVoteOpen(Vote storage vote_) internal virtual view returns (bool) {
+    function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
         return getTimestamp64() < vote_.endDate && getTimestamp64() >= vote_.startDate && !vote_.executed;
     }
 
@@ -220,19 +223,19 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
     }
 
     function _validateAndSetSettings(
-        uint64 _participationRequiredPct, 
+        uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal virtual {
-        if(_supportRequiredPct > PCT_BASE) {
+        if (_supportRequiredPct > PCT_BASE) {
             revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
         }
 
-        if(_participationRequiredPct > PCT_BASE) {
+        if (_participationRequiredPct > PCT_BASE) {
             revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
         }
 
-        if(_minDuration == 0) {
+        if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 
