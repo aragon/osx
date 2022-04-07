@@ -22,7 +22,11 @@ const ACLAnyAddress = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 const ACLAllowFlagAddress = '0x0000000000000000000000000000000000000002';
 const daoDummyName = 'dao1';
 const daoDummyMetadata = '0x0000';
-const dummyVoteSettings = [1, 2, 3];
+const dummyVoteSettings = {
+  participationRequiredPct: 1,
+  supportRequiredPct: 2,
+  minDuration: 3
+}
 
 async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();
@@ -172,9 +176,9 @@ describe('DAOFactory: ', function () {
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(
-        dummyVoteSettings[0],
-        dummyVoteSettings[1],
-        dummyVoteSettings[2]
+        dummyVoteSettings.participationRequiredPct,
+        dummyVoteSettings.supportRequiredPct,
+        dummyVoteSettings.minDuration
       );
 
     // @ts-ignore
@@ -296,9 +300,9 @@ describe('DAOFactory: ', function () {
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(
-        dummyVoteSettings[0],
-        dummyVoteSettings[1],
-        dummyVoteSettings[2]
+        dummyVoteSettings.participationRequiredPct,
+        dummyVoteSettings.supportRequiredPct,
+        dummyVoteSettings.minDuration
       );
 
     // @ts-ignore
