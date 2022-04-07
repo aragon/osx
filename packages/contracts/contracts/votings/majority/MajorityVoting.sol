@@ -72,13 +72,19 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         VoterState _choice,
         bool _executesIfDecided
     ) external {
-        if(_choice != VoterState.None && !_canVote(_voteId, _msgSender())) revert VoteCastForbidden(_voteId, _msgSender());
+        if (_choice != VoterState.None && !_canVote(_voteId, _msgSender())) { 
+            revert VoteCastForbidden(_voteId, _msgSender());
+        }
+
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
     function execute(uint256 _voteId) public {
-        if(!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
+        if (!_canExecute(_voteId)) {
+            revert VoteExecutionForbidden(_voteId);
+        }
+
         _execute(_voteId);
     }
 
@@ -224,15 +230,15 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal virtual {
-        if(_supportRequiredPct > PCT_BASE) {
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
+        if (_supportRequiredPct > PCT_BASE) {
+            revert VoteSupportExceeded({ limit: PCT_BASE, actual: _supportRequiredPct });
         }
 
-        if(_participationRequiredPct > PCT_BASE) {
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
+        if (_participationRequiredPct > PCT_BASE) {
+            revert VoteParticipationExceeded({ limit: PCT_BASE, actual: _participationRequiredPct });
         }
 
-        if(_minDuration == 0) {
+        if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 

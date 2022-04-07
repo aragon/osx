@@ -30,18 +30,18 @@ import "../core/IDAO.sol";
 //    GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
 //    EIP712Upgradeable => ERC20Upgradeable => Initializable
 // ]
-contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgradeable, ERC20WrapperUpgradeable, BaseRelayRecipient {
+contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgradeable, ERC20WrapperUpgradeable {
 
-    /// @dev describes the version and contract for GSN compatibility.
-    function versionRecipient() external virtual override view returns (string memory) {
-        return "0.0.1+opengsn.recipient.GovernanceWrappedERC20";
-    }
-
-    function __GovernanceWrappedERC20_init(
+    /// @notice Initializes the Governance ERC20 Token
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _token The token that will be wrapped.
+    /// @param _name The name of the token
+    /// @param _symbol The symbol of the token
+    function initialize(
         IERC20Upgradeable _token, 
         string calldata _name,
         string calldata _symbol
-    ) internal onlyInitializing {
+    ) external initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
@@ -51,29 +51,21 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
 
-    function initialize(
-        IERC20Upgradeable _token, 
-        string calldata _name,
-        string calldata _symbol
-    ) external initializer {
-        __GovernanceWrappedERC20_init(_token,_name,_symbol);
-    }
+    // /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
+    // /// we have to override it and activate GSN's _msgSender. 
+    // /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
+    // /// ends up first and that's what gets called by super._msgSender
+    // function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (address) {
+    //     return super._msgSender();
+    // }
 
-    /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
-    /// we have to override it and activate GSN's _msgSender. 
-    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    /// ends up first and that's what gets called by super._msgSender
-    function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (address) {
-        return super._msgSender();
-    }
-
-    /// @dev Since 2 base classes end up having _msgData(OZ + GSN), 
-    /// we have to override it and activate GSN's _msgData. 
-    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    /// ends up first and that's what gets called by super._msgData
-    function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (bytes calldata) {
-        return super._msgData();
-    }
+    // /// @dev Since 2 base classes end up having _msgData(OZ + GSN), 
+    // /// we have to override it and activate GSN's _msgData. 
+    // /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
+    // /// ends up first and that's what gets called by super._msgData
+    // function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (bytes calldata) {
+    //     return super._msgData();
+    // }
     
     // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole

@@ -21,6 +21,11 @@ contract MerkleMinter is Permissions {
 
     event MintedMerkle(address indexed distributor, bytes32 indexed merkleRoot, uint256 totalAmount, bytes tree, bytes context);
 
+    /// @notice Initializes Merkle Minter
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _dao The IDAO interface of the associated DAO
+    /// @param _token The token where the distribution goes to.
+    /// @param _distributorBase The distributor base.
     function initialize(
         IDAO _dao,
         GovernanceERC20 _token, 
@@ -36,7 +41,8 @@ contract MerkleMinter is Permissions {
         uint256 _totalAmount, 
         bytes calldata _tree, 
         bytes calldata _context
-    ) external auth(MERKLE_MINTER_ROLE) 
+    ) 
+    external auth(MERKLE_MINTER_ROLE) 
     returns (MerkleDistributor distributor) 
     {
         address distributorAddr = distributorBase.clone();

@@ -68,11 +68,12 @@ contract DAOFactory {
         ERC20VotesUpgradeable token,
         MerkleMinter minter
     ) {
-        if(_mintConfig.receivers.length != _mintConfig.amounts.length)
+        if(_mintConfig.receivers.length != _mintConfig.amounts.length) {
             revert MintArrayLengthMismatch({
                 receiversArrayLength: _mintConfig.receivers.length,
                 amountsArrayLength: _mintConfig.amounts.length
             });
+        }
 
         dao = createDAO(_daoConfig, _gsnForwarder);
 
