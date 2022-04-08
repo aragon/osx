@@ -32,6 +32,10 @@ import "../core/IDAO.sol";
 // ]
 contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgradeable, ERC20WrapperUpgradeable {
 
+    constructor(IERC20Upgradeable _token, string memory _name, string memory _symbol) public {
+        initialize(_token, _name, _symbol);
+    }
+
     /// @notice Initializes the Governance ERC20 Token
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _token The token that will be wrapped.
@@ -39,9 +43,9 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
     /// @param _symbol The symbol of the token
     function initialize(
         IERC20Upgradeable _token, 
-        string calldata _name,
-        string calldata _symbol
-    ) external initializer {
+        string memory _name,
+        string memory _symbol
+    ) public initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);

@@ -35,6 +35,7 @@ contract TokenFactory {
         address addr;
         string name;
         string symbol;
+        bool useProxies;
     }
 
     struct MintConfig {
@@ -58,57 +59,34 @@ contract TokenFactory {
         TokenConfig calldata _tokenConfig,
         MintConfig calldata _mintConfig
     ) external returns (ERC20VotesUpgradeable, MerkleMinter) {
-        address token = _tokenConfig.addr;
-
-        // deploy token
-        if(token != address(0)) {
-            // Validate if token is ERC20
-            // Not Enough Checks, but better than nothing.
-            token.functionCall(abi.encodeWithSelector(
-                IERC20Upgradeable.balanceOf.selector, 
-                address(this)
-            )); 
-            
-            token = governanceWrappedERC20Base.clone();
-            // user already has a token. we need to wrap it in 
-            // GovernanceWrappedERC20 in order to make the token
-            // include governance functionality.
-            GovernanceWrappedERC20(token).initialize(
-                IERC20Upgradeable(_tokenConfig.addr),
-                _tokenConfig.name,
-                _tokenConfig.symbol
+        // token already exists - wrap it inside our governance
+        if(_tokenConfig.addr != address(0)) {
+            address token = _deployWrappedGovernanceToken(
+                _tokenConfig.addr, 
+                _tokenConfig.name, 
+                _tokenConfig.symbol, 
+                _tokenConfig.useProxies
             );
-
-            return (
-                ERC20VotesUpgradeable(token), 
-                MerkleMinter(address(0))
-            );
+            return (ERC20VotesUpgradeable(token), MerkleMinter(address(0)));
         }
 
-        token = governanceERC20Base.clone();
-        GovernanceERC20(token).initialize(
+        // token doesn't exist, deploy governance token and merkle minter
+        (address token, address minter) = _deployGovernanceToken(
             _dao, 
             _tokenConfig.name, 
-            _tokenConfig.symbol
+            _tokenConfig.symbol, 
+            _tokenConfig.useProxies
         );
-
-        // deploy and initialize minter
-        address merkleMinter = merkleMinterBase.clone();
-        MerkleMinter(merkleMinter).initialize(
-            _dao,
-            GovernanceERC20(token),
-            distributorBase
-        );
-
+        
         // emit event for new token
         emit TokenCreated(
             IERC20Upgradeable(token),
-            MerkleMinter(merkleMinter),
+            MerkleMinter(minter),
             MerkleDistributor(distributorBase)
         );
 
         bytes32 tokenMinterRole  = GovernanceERC20(token).TOKEN_MINTER_ROLE();
-        bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_ROLE();
+        bytes32 merkleMinterRole = MerkleMinter(minter).MERKLE_MINTER_ROLE();
 
         // give tokenFactory the permission to mint.
         _dao.grant(token, address(this), tokenMinterRole);
@@ -123,20 +101,97 @@ contract TokenFactory {
         _dao.revoke(token, address(this), tokenMinterRole);
 
         _dao.grant(token, address(_dao), tokenMinterRole);
-        _dao.grant(token, merkleMinter, tokenMinterRole);
-        _dao.grant(merkleMinter, address(_dao), merkleMinterRole);
+        _dao.grant(token, minter, tokenMinterRole);
+        _dao.grant(minter, address(_dao), merkleMinterRole);
         
         return (
             ERC20VotesUpgradeable(token), 
-            MerkleMinter(merkleMinter)
+            MerkleMinter(minter)
         );
+    }
+
+    function _deployGovernanceToken(
+        DAO _dao,
+        string calldata _name,
+        string calldata _symbol,
+        bool _useProxies
+    ) private returns(
+        address token, 
+        address minter
+    ) {
+        if(_useProxies) {
+            token = governanceERC20Base.clone();
+            GovernanceERC20(token).initialize(_dao, _name, _symbol);
+
+            // deploy and initialize minter
+            minter = merkleMinterBase.clone();
+            MerkleMinter(minter).initialize(
+                _dao,
+                GovernanceERC20(token),
+                distributorBase
+            );
+        } else {
+            token = address(new GovernanceERC20(_dao, _name, _symbol));
+            minter = address(new MerkleMinter(_dao, GovernanceERC20(token), distributorBase));
+        }
+    }
+
+    function _deployWrappedGovernanceToken(
+        address _token,
+        string calldata _name,
+        string calldata _symbol,
+        bool _useProxies
+    ) private returns(address token) {
+        // Validate if token is ERC20
+        // Not Enough Checks, but better than nothing.
+        _token.functionCall(abi.encodeWithSelector(
+            IERC20Upgradeable.balanceOf.selector, 
+            address(this)
+        )); 
+
+        if(_useProxies) {
+            token = governanceWrappedERC20Base.clone();
+            // user already has a token. we need to wrap it in 
+            // GovernanceWrappedERC20 in order to make the token
+            // include governance functionality.
+            GovernanceWrappedERC20(token).initialize(
+                IERC20Upgradeable(_token),
+                _name,
+                _symbol
+            );            
+        } else {
+            token = address(
+                new GovernanceWrappedERC20(
+                    IERC20Upgradeable(_token), 
+                    _name,
+                    _symbol
+                )
+            );
+        }
     }
     
     // @dev private helper method to set up the required base contracts on TokenFactory deployment.
     function setupBases() private {
         distributorBase = new MerkleDistributor();
-        governanceERC20Base = address(new GovernanceERC20());
-        governanceWrappedERC20Base = address(new GovernanceWrappedERC20());
-        merkleMinterBase = address(new MerkleMinter());
+        
+        governanceERC20Base = address(
+            new GovernanceERC20(IDAO(address(0)), "S","S")
+        );
+
+        governanceWrappedERC20Base = address(
+            new GovernanceWrappedERC20(
+                IERC20Upgradeable(governanceERC20Base), 
+                "" , 
+                ""
+            )
+        );
+
+        merkleMinterBase = address(
+            new MerkleMinter(
+                IDAO(address(0)), 
+                GovernanceERC20(governanceERC20Base), 
+                distributorBase
+            )
+        );
     }
 }

@@ -13,10 +13,17 @@ import "../core/erc165/AdaptiveERC165.sol";
 import "../core/component/Permissions.sol";
 import "../core/IDAO.sol";
 
+// for proxy - we need upgradable
+// for upgradable - we need upgradable
+// for default - we need non-upgradable
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
      /// @notice The role identifier to mint new tokens
     bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
     
+    constructor(IDAO _dao, string memory _name, string memory _symbol) public {
+        initialize(_dao, _name, _symbol);
+    }
+
     /// @notice Initializes the Governance ERC20 Token
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
@@ -24,9 +31,9 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
     /// @param _symbol The symbol of the token
     function initialize(
         IDAO _dao, 
-        string calldata _name, 
-        string calldata _symbol
-    ) external initializer {
+        string memory _name, 
+        string memory _symbol
+    ) public initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __Permissions_init(_dao);

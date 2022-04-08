@@ -21,6 +21,10 @@ contract MerkleMinter is Permissions {
 
     event MintedMerkle(address indexed distributor, bytes32 indexed merkleRoot, uint256 totalAmount, bytes tree, bytes context);
 
+    constructor(IDAO _dao, GovernanceERC20 _token, MerkleDistributor _distributorBase) public {
+        initialize(_dao, _token, _distributorBase);
+    }
+    
     /// @notice Initializes Merkle Minter
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
@@ -30,7 +34,7 @@ contract MerkleMinter is Permissions {
         IDAO _dao,
         GovernanceERC20 _token, 
         MerkleDistributor _distributorBase
-    ) external initializer {
+    ) public initializer {
         token = _token;
         distributorBase = address(_distributorBase);
         __Permissions_init(_dao);
