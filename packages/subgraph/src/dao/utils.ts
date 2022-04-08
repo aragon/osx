@@ -15,8 +15,14 @@ import {
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
 import {ERC20Voting, WhitelistVoting} from '../../generated/templates';
 import {handleERC20Token} from '../utils/tokens';
-import {ADDRESS_ZERO} from '../utils/constants';
+import {
+  ADDRESS_ZERO,
+  MAJORITY_VOTING_INTERFACE,
+  WHITELIST_VOTING_INTERFACE
+} from '../utils/constants';
 import {WhitelistVoting as WhitelistVotingContract} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
+import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
+import {supportsInterface} from '../utils/erc165';
 
 class WithdrawParams {
   token: Address = Address.fromString(ADDRESS_ZERO);
@@ -136,21 +142,31 @@ function createWhitelistVotingPackage(who: Address, daoId: string): void {
 }
 
 export function addPackage(daoId: string, who: Address): void {
-  let daoPackageEntityId = daoId + '_' + who.toHexString();
-  let daoPackageEntity = new DaoPackage(daoPackageEntityId);
-  daoPackageEntity.pkg = who.toHexString();
-  daoPackageEntity.dao = daoId;
-  daoPackageEntity.save();
-
   // package
-  // @dev this is a temporary solution as we have only 2 packages, and should change in the future.
-  let contract = ERC20VotingContract.bind(who);
-  let response = contract.try_token();
-  if (!response.reverted) {
+  // TODO: rethink this once the market place is ready
+  let contract = ERC165Contract.bind(who);
+  let whiteListInterfaceSuppoted = supportsInterface(
+    contract,
+    WHITELIST_VOTING_INTERFACE
+  );
+  let ERC20VotingInterfaceSuppoted = supportsInterface(
+    contract,
+    MAJORITY_VOTING_INTERFACE
+  );
+
+  if (whiteListInterfaceSuppoted) {
+    createWhitelistVotingPackage(who, daoId);
+  } else if (ERC20VotingInterfaceSuppoted) {
     createErc20VotingPackage(who, daoId);
-    return;
   }
-  createWhitelistVotingPackage(who, daoId);
+
+  if (whiteListInterfaceSuppoted || ERC20VotingInterfaceSuppoted) {
+    let daoPackageEntityId = daoId + '_' + who.toHexString();
+    let daoPackageEntity = new DaoPackage(daoPackageEntityId);
+    daoPackageEntity.pkg = who.toHexString();
+    daoPackageEntity.dao = daoId;
+    daoPackageEntity.save();
+  }
 }
 
 export function removePackage(daoId: string, who: string): void {
