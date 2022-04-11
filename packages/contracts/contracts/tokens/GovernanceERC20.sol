@@ -19,11 +19,11 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
      /// @notice The role identifier to mint new tokens
     bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
     
-    function initialize(
+    function __GovernanceERC20_init(
         IDAO _dao, 
         string calldata _name, 
         string calldata _symbol
-    ) external initializer {
+    ) internal onlyInitializing {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __Permissions_init(_dao);
@@ -31,6 +31,14 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
+    }
+
+    function initialize(
+        IDAO _dao, 
+        string calldata _name, 
+        string calldata _symbol
+    ) external initializer {
+        __GovernanceERC20_init(_dao,_name,_symbol);
     }
 
     function mint(address to, uint256 amount) external auth(TOKEN_MINTER_ROLE) {
