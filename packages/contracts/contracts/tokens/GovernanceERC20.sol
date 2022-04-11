@@ -13,11 +13,8 @@ import "../core/erc165/AdaptiveERC165.sol";
 import "../core/component/Permissions.sol";
 import "../core/IDAO.sol";
 
-// for proxy - we need upgradable
-// for upgradable - we need upgradable
-// for default - we need non-upgradable
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
-     /// @notice The role identifier to mint new tokens
+    /// @notice The role identifier to mint new tokens
     bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
     
     constructor(IDAO _dao, string memory _name, string memory _symbol) public {
