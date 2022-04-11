@@ -1,20 +1,21 @@
-import chai, {expect} from 'chai';
-import {ethers, waffle} from 'hardhat';
+import chai, { expect } from 'chai';
+import { ethers, waffle } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import chaiUtils from '../test-utils';
-import {VoterState, EVENTS, ERRORS, pct16, toBn} from '../test-utils/voting';
-import {customError} from '../test-utils/custom-error-helper';
+import { VoterState, EVENTS, pct16, toBn } from '../test-utils/voting';
+import { customError, ERRORS } from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {ERC20Voting} from '../../typechain';
+import { ERC20Voting, DAOMock } from '../../typechain';
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 
-const {deployMockContract} = waffle;
+const { deployMockContract } = waffle;
 
 describe('ERC20Voting', function () {
-  let signers: any;
+  let signers: SignerWithAddress[];
   let voting: ERC20Voting;
-  let daoMock: any;
+  let daoMock: DAOMock;
   let erc20VoteMock: any;
   let ownerAddress: string;
   let dummyActions: any;
@@ -52,7 +53,7 @@ describe('ERC20Voting', function () {
       ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
-      minDuration, 
+      minDuration,
       erc20VoteMock.address
     );
   }
@@ -62,15 +63,15 @@ describe('ERC20Voting', function () {
       await initializeVoting(1, 2, 3);
 
       await expect(
-          initializeVoting(2, 1, 3)
+        initializeVoting(2, 1, 3)
       ).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
       );
     });
-    
+
     it('reverts if min duration is 0', async () => {
       await expect(
-          initializeVoting(1, 2, 0)
+        initializeVoting(1, 2, 0)
       ).to.be.revertedWith(customError('VoteDurationZero'));
     });
   });
@@ -103,8 +104,8 @@ describe('ERC20Voting', function () {
           false,
           VoterState.None
         )
-      ).to.be.revertedWith(customError('VoteTimesForbidden', current+1, // TODO hacky
-          startDate, endDate, minDuration));
+      ).to.be.revertedWith(customError('VoteTimesForbidden', current + 1, // TODO hacky
+        startDate, endDate, minDuration));
     });
 
     it('should create a vote successfully, but not vote', async () => {
@@ -180,7 +181,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(0, VoterState.Yea, false)).to.be.revertedWith(
-          customError('VoteCastForbidden', 0, ownerAddress)
+        customError('VoteCastForbidden', 0, ownerAddress)
       );
     });
 

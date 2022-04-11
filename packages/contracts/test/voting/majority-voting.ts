@@ -1,33 +1,23 @@
-import chai, {expect} from 'chai';
-import {ethers} from 'hardhat';
+import chai, { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import chaiUtils from '../test-utils';
-import {VoterState, EVENTS, ERRORS, pct16} from '../test-utils/voting';
-import {customError} from '../test-utils/custom-error-helper';
+import { EVENTS, pct16 } from '../test-utils/voting';
+import { customError, ERRORS } from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {MajorityVotingMock} from '../../typechain';
+import { MajorityVotingMock, DAOMock } from '../../typechain';
 
 describe('MajorityVotingMock', function () {
-  let signers: any;
+  let signers: SignerWithAddress[];
   let votingBase: MajorityVotingMock;
-  let daoMock: any;
+  let daoMock: DAOMock;
   let ownerAddress: string;
-  let user1: string;
-  let dummyActions: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-    user1 = await signers[1].getAddress();
-
-    dummyActions = [
-      {
-        to: ownerAddress,
-        data: '0x00000000',
-        value: 0,
-      },
-    ];
 
     const DAOMock = await ethers.getContractFactory('DAOMock');
     daoMock = await DAOMock.deploy(ownerAddress);
@@ -57,13 +47,13 @@ describe('MajorityVotingMock', function () {
       await initializeMock(1, 2, 3);
 
       await expect(
-          initializeMock(1, 2, 3)
+        initializeMock(1, 2, 3)
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
 
     it('reverts if min duration is 0', async () => {
       await expect(
-          initializeMock( 1, 2, 0)
+        initializeMock(1, 2, 0)
       ).to.be.revertedWith(customError('VoteDurationZero'));
     });
 
@@ -78,7 +68,7 @@ describe('MajorityVotingMock', function () {
 
   describe('changeVoteConfig: ', async () => {
     beforeEach(async () => {
-      await initializeMock( 1, 2, 3);
+      await initializeMock(1, 2, 3);
     });
     it('reverts if wrong config is set', async () => {
       await expect(
@@ -92,7 +82,7 @@ describe('MajorityVotingMock', function () {
 
 
       await expect(
-          votingBase.changeVoteConfig(1, 2, 0)
+        votingBase.changeVoteConfig(1, 2, 0)
       ).to.be.revertedWith(customError('VoteDurationZero'));
     });
 
