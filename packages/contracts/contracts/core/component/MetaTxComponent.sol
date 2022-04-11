@@ -7,6 +7,11 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 import "./Component.sol";
 
+/// @dev Used to silence compiler warning in order to call trustedForwarder() on the DAO
+interface Relay {
+    function trustedForwarder() external view returns (address);
+}
+
 /// @title Base component in the Aragon DAO framework supporting meta transactions
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice Any component within the Aragon DAO framework using meta transactions has to inherit from this contract
@@ -39,6 +44,18 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @notice overrides '_msgData()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'
     function _msgData() internal override(ContextUpgradeable, BaseRelayRecipient) view returns (bytes calldata) {
         return BaseRelayRecipient._msgData();
+    }
+
+    /// @notice used to check the trusted forwarder in the dao in case it's not set on the component itself.
+    /// @return bool true in case the caller is the trusted forwarder
+    function isTrustedForwarder(address _forwarder) public virtual override view returns(bool) {
+        address forwarder = trustedForwarder();
+
+        if(forwarder == address(0)) {
+            forwarder = Relay(address(dao)).trustedForwarder();
+        }
+
+        return forwarder == _forwarder;
     }
 
     /// @notice Setter for the trusted forwarder who verifies the meta transaction
