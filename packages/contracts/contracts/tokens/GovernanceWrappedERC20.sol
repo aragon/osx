@@ -37,11 +37,11 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
         return "0.0.1+opengsn.recipient.GovernanceWrappedERC20";
     }
 
-    function __GovernanceWrappedERC20_init(
+    function initialize(
         IERC20Upgradeable _token, 
         string calldata _name,
         string calldata _symbol
-    ) internal onlyInitializing {
+    ) external initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
@@ -49,14 +49,6 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
-    }
-
-    function initialize(
-        IERC20Upgradeable _token, 
-        string calldata _name,
-        string calldata _symbol
-    ) external initializer {
-        __GovernanceWrappedERC20_init(_token,_name,_symbol);
     }
 
     /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
