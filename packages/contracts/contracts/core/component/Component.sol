@@ -16,10 +16,8 @@ import "./../IDAO.sol";
 /// @author Samuel Furter - Aragon Association - 2021
 /// @notice Any component within the Aragon DAO framework has to inherit from this contract
 abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
-    
-    /// @notice Role identifier to upgrade a component 
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
-    
+
     /// @notice Initialization
     /// @param _dao the associated DAO address
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
