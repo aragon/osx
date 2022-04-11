@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    GPL-3.0
- */
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity 0.8.10;
 
@@ -24,7 +22,7 @@ contract DAOMock is IDAO, ACL {
         return true;
     }
 
-    function trustedForwarder() public virtual view returns(address) {
+    function trustedForwarder() public view virtual returns (address) {
         return address(0);
     }
 
@@ -32,7 +30,11 @@ contract DAOMock is IDAO, ACL {
         bytes calldata /* _metadata */
     ) external override {}
 
-    function execute(uint256 callId, Action[] memory _actions) external override returns (bytes[] memory) {
+    function execute(uint256 callId, Action[] memory _actions)
+        external
+        override
+        returns (bytes[] memory)
+    {
         bytes[] memory results;
         emit Executed(msg.sender, callId, _actions, results);
         return results;

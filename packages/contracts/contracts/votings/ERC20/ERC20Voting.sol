@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -12,7 +10,6 @@ import "./../majority/MajorityVoting.sol";
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract ERC20Voting is MajorityVoting {
-
     ERC20VotesUpgradeable public token;
 
     /// @notice Initializes the component
@@ -67,7 +64,7 @@ contract ERC20Voting is MajorityVoting {
 
         uint256 votingPower = token.getPastTotalSupply(snapshotBlock);
         if (votingPower == 0) revert VotePowerZero();
-        
+
         voteId = votesLength++;
 
         // calculate start and end time for the vote
@@ -76,7 +73,7 @@ contract ERC20Voting is MajorityVoting {
         if (_startDate == 0) _startDate = currentTimestamp;
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
-        if(_endDate - _startDate <  minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
             revert VoteTimesForbidden({
                 current: currentTimestamp,
                 start: _startDate,

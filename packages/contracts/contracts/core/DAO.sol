@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -22,15 +20,14 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     using SafeERC20 for ERC20;
     using Address for address;
 
-    // Roles
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
     bytes32 public constant DAO_CONFIG_ROLE = keccak256("DAO_CONFIG_ROLE");
     bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
+    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE =
+        keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
-    // Error msg's
     /// @notice Thrown if action execution has failed
     error ActionFailed();
 
@@ -45,6 +42,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @notice Thrown if an ETH withdraw fails
     error ETHWithdrawFailed();
 
+    //TODO Rename and add NatSpec
     event SetTrustedForwarder(address _newForwarder);
 
     ERC1271 signatureValidator;
@@ -54,7 +52,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
     function initialize(
-        bytes calldata _metadata, 
+        bytes calldata _metadata,
         address _initialOwner,
         address _forwarder
     ) external initializer {
@@ -67,19 +65,25 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
-    
+    function _authorizeUpgrade(address)
+        internal
+        virtual
+        override
+        auth(address(this), UPGRADE_ROLE)
+    {}
+
     /// @notice set trusted forwarder on the DAO
     /// @param _forwarder address of the forwarder
-    function setTrustedForwarder(
-        address _forwarder
-    ) external auth(address(this), MODIFY_TRUSTED_FORWARDER) {
+    function setTrustedForwarder(address _forwarder)
+        external
+        auth(address(this), MODIFY_TRUSTED_FORWARDER)
+    {
         _setTrustedForwarder(_forwarder);
     }
 
     /// @notice virtual function to get DAO's current trusted forwarder
     /// @return address trusted forwarder's address
-    function trustedForwarder() public virtual view returns(address) {
+    function trustedForwarder() public view virtual returns (address) {
         return _trustedForwarder;
     }
 
@@ -101,7 +105,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @notice Update the DAO metadata
     /// @dev Sets a new IPFS hash
     /// @param _metadata The IPFS hash of the new metadata object
-    function setMetadata(bytes calldata _metadata) external override auth(address(this), DAO_CONFIG_ROLE) {
+    function setMetadata(bytes calldata _metadata)
+        external
+        override
+        auth(address(this), DAO_CONFIG_ROLE)
+    {
         _setMetadata(_metadata);
     }
 
@@ -118,9 +126,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         bytes[] memory execResults = new bytes[](_actions.length);
 
         for (uint256 i = 0; i < _actions.length; i++) {
-            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+            (bool success, bytes memory response) = _actions[i].to.call{ value: _actions[i].value }(
+                _actions[i].data
+            );
 
-            if(!success) revert ActionFailed();
+            if (!success) revert ActionFailed();
 
             execResults[i] = response;
         }
@@ -150,12 +160,13 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string calldata _reference
     ) external payable override {
-        if(_amount == 0) revert ZeroAmount();
+        if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
-            if(msg.value != _amount) revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
+            if (msg.value != _amount)
+                revert ETHDepositAmountMismatch({ expected: _amount, actual: msg.value });
         } else {
-            if(msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
+            if (msg.value != 0) revert ETHDepositAmountMismatch({ expected: 0, actual: msg.value });
 
             ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
@@ -174,11 +185,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string memory _reference
     ) external override auth(address(this), WITHDRAW_ROLE) {
-        if(_amount == 0) revert ZeroAmount();
+        if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
-            (bool ok, ) = _to.call{value: _amount}("");
-            if(!ok) revert ETHWithdrawFailed();
+            (bool ok, ) = _to.call{ value: _amount }("");
+            if (!ok) revert ETHWithdrawFailed();
         } else {
             ERC20(_token).safeTransfer(_to, _amount);
         }
@@ -199,13 +210,17 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @param _hash Hash of the data to be signed
     /// @param _signature Signature byte array associated with _hash
     /// @return bytes4
-    function isValidSignature(bytes32 _hash, bytes memory _signature) external view override returns (bytes4) {
+    function isValidSignature(bytes32 _hash, bytes memory _signature)
+        external
+        view
+        override
+        returns (bytes4)
+    {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// Private/Internal Functions
-
+    //TODO add NatSpec
     function _setMetadata(bytes calldata _metadata) internal {
         emit SetMetadata(_metadata);
     }

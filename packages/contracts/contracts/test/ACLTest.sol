@@ -1,10 +1,8 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
-import '../core/acl/ACL.sol';
+import "../core/acl/ACL.sol";
 
 contract ACLTest is ACL {
     function init(address _who) public {
@@ -19,11 +17,7 @@ contract ACLTest is ACL {
         return authPermissions[permissionHash(_where, _who, _role)];
     }
 
-    function getFreezePermission(address _where, bytes32 _role)
-        public
-        view
-        returns (bool)
-    {
+    function getFreezePermission(address _where, bytes32 _role) public view returns (bool) {
         return freezePermissions[freezeHash(_where, _role)];
     }
 
@@ -35,11 +29,7 @@ contract ACLTest is ACL {
         return permissionHash(_where, _who, _role);
     }
 
-    function getFreezeHash(address _where, bytes32 _role)
-        public
-        pure
-        returns (bytes32)
-    {
+    function getFreezeHash(address _where, bytes32 _role) public pure returns (bytes32) {
         return freezeHash(_where, _role);
     }
 
