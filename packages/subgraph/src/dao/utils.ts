@@ -17,7 +17,7 @@ import {ERC20Voting, WhitelistVoting} from '../../generated/templates';
 import {handleERC20Token} from '../utils/tokens';
 import {
   ADDRESS_ZERO,
-  MAJORITY_VOTING_INTERFACE,
+  ERC20_VOTING_INTERFACE,
   WHITELIST_VOTING_INTERFACE
 } from '../utils/constants';
 import {WhitelistVoting as WhitelistVotingContract} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
@@ -92,7 +92,7 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
     let supportRequiredPct = contract.try_supportRequiredPct();
     let participationRequiredPct = contract.try_participationRequiredPct();
     let minDuration = contract.try_minDuration();
-    let token = contract.try_token();
+    let token = contract.try_getVotingToken();
 
     packageEntity.supportRequiredPct = supportRequiredPct.reverted
       ? null
@@ -145,22 +145,23 @@ export function addPackage(daoId: string, who: Address): void {
   // package
   // TODO: rethink this once the market place is ready
   let contract = ERC165Contract.bind(who);
+
+  let ERC20VotingInterfaceSuppoted = supportsInterface(
+    contract,
+    ERC20_VOTING_INTERFACE
+  );
   let whiteListInterfaceSuppoted = supportsInterface(
     contract,
     WHITELIST_VOTING_INTERFACE
   );
-  let ERC20VotingInterfaceSuppoted = supportsInterface(
-    contract,
-    MAJORITY_VOTING_INTERFACE
-  );
 
-  if (whiteListInterfaceSuppoted) {
-    createWhitelistVotingPackage(who, daoId);
-  } else if (ERC20VotingInterfaceSuppoted) {
+  if (ERC20VotingInterfaceSuppoted) {
     createErc20VotingPackage(who, daoId);
+  } else if (whiteListInterfaceSuppoted) {
+    createWhitelistVotingPackage(who, daoId);
   }
 
-  if (whiteListInterfaceSuppoted || ERC20VotingInterfaceSuppoted) {
+  if (ERC20VotingInterfaceSuppoted || whiteListInterfaceSuppoted) {
     let daoPackageEntityId = daoId + '_' + who.toHexString();
     let daoPackageEntity = new DaoPackage(daoPackageEntityId);
     daoPackageEntity.pkg = who.toHexString();

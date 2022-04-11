@@ -8,7 +8,7 @@ import {
   getEXEC_ROLEreverted,
   getParticipationRequiredPct,
   getSupportRequiredPct,
-  getSVToken,
+  getVotingToken,
   getVotesLength,
   getMinDuration,
   getSupportsInterface
@@ -26,7 +26,7 @@ import {crypto} from '@graphprotocol/graph-ts';
 import {createTokenCalls} from '../utils';
 import {Permission, Role} from '../../generated/schema';
 import {
-  MAJORITY_VOTING_INTERFACE,
+  ERC20_VOTING_INTERFACE,
   WHITELIST_VOTING_INTERFACE
 } from '../../src/utils/constants';
 
@@ -34,7 +34,7 @@ let role = Bytes.fromByteArray(
   crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
 );
 
-function testPackages(supportsMajorityVoting: boolean): void {
+function testPackages(supportsErc20VotingInterface: boolean): void {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
     role,
@@ -52,20 +52,20 @@ function testPackages(supportsMajorityVoting: boolean): void {
   getMinDuration(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getVotesLength(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
 
-  if (supportsMajorityVoting) {
+  if (supportsErc20VotingInterface) {
     createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-    getSVToken(VOTING_ADDRESS, DAO_TOKEN_ADDRESS);
+    getVotingToken(VOTING_ADDRESS, DAO_TOKEN_ADDRESS);
     getSupportsInterface(
       VOTING_ADDRESS,
-      MAJORITY_VOTING_INTERFACE,
-      supportsMajorityVoting
+      ERC20_VOTING_INTERFACE,
+      supportsErc20VotingInterface
     );
     getSupportsInterface(VOTING_ADDRESS, WHITELIST_VOTING_INTERFACE, false);
   } else {
     getSupportsInterface(
       VOTING_ADDRESS,
-      MAJORITY_VOTING_INTERFACE,
-      supportsMajorityVoting
+      ERC20_VOTING_INTERFACE,
+      supportsErc20VotingInterface
     );
     getSupportsInterface(VOTING_ADDRESS, WHITELIST_VOTING_INTERFACE, true);
   }
@@ -119,7 +119,7 @@ function testPackages(supportsMajorityVoting: boolean): void {
   );
 
   // packages
-  if (supportsMajorityVoting) {
+  if (supportsErc20VotingInterface) {
     assert.fieldEquals(
       'ERC20VotingPackage',
       Address.fromString(VOTING_ADDRESS).toHexString(),

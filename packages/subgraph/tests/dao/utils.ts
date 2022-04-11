@@ -1,9 +1,4 @@
-import {
-  ethereum,
-  Bytes,
-  Address,
-  BigInt
-} from '@graphprotocol/graph-ts';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {
   SetMetadata,
@@ -328,11 +323,11 @@ export function getVotesLength(contractAddress: string, returns: BigInt): void {
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getSVToken(contractAddress: string, returns: string): void {
+export function getVotingToken(contractAddress: string, returns: string): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'token',
-    'token():(address)'
+    'getVotingToken',
+    'getVotingToken():(address)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
