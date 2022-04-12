@@ -54,14 +54,13 @@ contract MerkleMinter is MetaTxComponent {
         bytes32 _merkleRoot, 
         uint256 _totalAmount, 
         bytes calldata _tree, 
-        bytes calldata _context,
-        address _gsnForwarder
+        bytes calldata _context
     ) 
     external auth(MERKLE_MINTER_ROLE) 
     returns (MerkleDistributor distributor) 
     {
         address distributorAddr = distributorBase.clone();
-        MerkleDistributor(distributorAddr).initialize(dao, token, _merkleRoot, _gsnForwarder);
+        MerkleDistributor(distributorAddr).initialize(dao, token, _merkleRoot, trustedForwarder());
 
         token.mint(distributorAddr, _totalAmount);
 
