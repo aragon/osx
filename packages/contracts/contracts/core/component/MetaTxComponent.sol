@@ -20,10 +20,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @param _trustedForwarder the trusted forwarder address who verifies the meta transaction
     function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder) internal virtual onlyInitializing {
         __Component_init(_dao);
-
-        _setTrustedForwarder(_trustedForwarder);
-        emit SetTrustedForwarder(_trustedForwarder);
-
+        _setTrustedForwarderWithEvent(_trustedForwarder);
         _registerStandard(type(MetaTxComponent).interfaceId);
     }
 
@@ -41,6 +38,12 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @param _trustedForwarder the trusted forwarder address
     /// @dev used to update the trusted forwarder
     function setTrustedForwarder(address _trustedForwarder) public virtual auth(MODIFY_TRUSTED_FORWARDER) {
+        _setTrustedForwarderWithEvent(_trustedForwarder);
+    }
+
+    /// @dev Internal function to set the trusted forwarder and emit an event
+    /// @param _trustedForwarder the trusted forwarder address
+    function _setTrustedForwarderWithEvent(address _trustedForwarder) internal {
         _setTrustedForwarder(_trustedForwarder);
 
         emit SetTrustedForwarder(_trustedForwarder);
