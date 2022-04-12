@@ -15,24 +15,36 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
-// NOTE: If user already has a ERC20 token, it's important to wrap it inside This
-// to make it have ERC20Votes functionality. For the voting contract, it works like this:
-// 1. user first calls approve on his own ERC20 to make `amount` spendable by GovernanceWrappedERC20
-// 2. Then calls `depositFor` for `amount` on GovernanceWrappedERC20
-// After those, Users can now participate in the voting. If user doesn't want to make votes anymore,
-// he can call `withdrawTo` to take his tokens back to his ERC20.
+/**
+ * @notice The DAO Wrapped Token in case dao already has a token.
+ * @dev IMPORTANT: The following contract must be deployed by the proxy standard ERC-1167 or be deployed just directly.
+ * NOTE that in case the contract is deployed natively via constructor, contract will still use ERC20VotesUpgradeable
+ * instead of ERC20Votes. This will still work, since constructor anyways calls initialize which calls all the initialize
+ * functions on the next contracts on the inheritance chain.  This case might bring a little bit more gas costs
+ * due to the `__gap` storage variable that OZ upgradable contracts do, but avoiding this means we should also be
+ * having different implementations for GovernanceERC20 in such case for proxy and native one. 
+ * At the time of writing this, We are moving forward with the united version.
 
-// IMPORTANT: In this token, no need to have mint functionality, 
-// as it's the wrapped token's responsibility to mint whenever needed
+ * NOTE: If user already has a ERC20 token, it's important to wrap it inside This
+ * to make it have ERC20Votes functionality. For the voting contract, it works like this:
+ * 1. user first calls approve on his own ERC20 to make `amount` spendable by GovernanceWrappedERC20
+ * 2. Then calls `depositFor` for `amount` on GovernanceWrappedERC20
+ * After those, Users can now participate in the voting. If user doesn't want to make votes anymore,
+ * he can call `withdrawTo` to take his tokens back to his ERC20.
 
-// Inheritance Chain -> 
-// [
-//    GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
-//    EIP712Upgradeable => ERC20Upgradeable => Initializable
-// ]
+ * IMPORTANT: In this token, no need to have mint functionality, 
+ * as it's the wrapped token's responsibility to mint whenever needed
+
+ * Inheritance Chain -> 
+ * [
+   GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
+   EIP712Upgradeable => ERC20Upgradeable => Initializable
+ * ]
+*/
+
 contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgradeable, ERC20WrapperUpgradeable {
 
-    constructor(IERC20Upgradeable _token, string memory _name, string memory _symbol) public {
+    constructor(IERC20Upgradeable _token, string memory _name, string memory _symbol) {
         initialize(_token, _name, _symbol);
     }
 
@@ -54,22 +66,6 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
-
-    // /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
-    // /// we have to override it and activate GSN's _msgSender. 
-    // /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    // /// ends up first and that's what gets called by super._msgSender
-    // function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (address) {
-    //     return super._msgSender();
-    // }
-
-    // /// @dev Since 2 base classes end up having _msgData(OZ + GSN), 
-    // /// we have to override it and activate GSN's _msgData. 
-    // /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    // /// ends up first and that's what gets called by super._msgData
-    // function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (bytes calldata) {
-    //     return super._msgData();
-    // }
     
     // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole

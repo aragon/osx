@@ -13,11 +13,25 @@ import "../core/erc165/AdaptiveERC165.sol";
 import "../core/component/Permissions.sol";
 import "../core/IDAO.sol";
 
+
+/**
+ * @notice The DAO Token
+ * @dev IMPORTANT: The following contract must be deployed by the proxy standard ERC-1167 or be deployed just directly.
+ * NOTE that in case the contract is deployed natively via constructor, contract will still use ERC20VotesUpgradeable
+ * instead of ERC20Votes. This will still work, since constructor anyways calls initialize which calls all the initialize
+ * functions on the next contracts on the inheritance chain.  This case might bring a little bit more gas costs
+ * due to the `__gap` storage variable that OZ upgradable contracts do, but avoiding this means we should also be
+ * having different implementations for GovernanceERC20 in such case for proxy and native one. 
+ * At the time of writing this, We are moving forward with the united version.
+ */
+
+/// @title Governance Token for the DAO
+/// @author Giorgi Lagidze - 2021
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
     /// @notice The role identifier to mint new tokens
     bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
     
-    constructor(IDAO _dao, string memory _name, string memory _symbol) public {
+    constructor(IDAO _dao, string memory _name, string memory _symbol) {
         initialize(_dao, _name, _symbol);
     }
 

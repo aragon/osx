@@ -57,7 +57,8 @@ contract TokenFactory {
     function newToken(
         DAO _dao,
         TokenConfig calldata _tokenConfig,
-        MintConfig calldata _mintConfig
+        MintConfig calldata _mintConfig,
+        address _gsnForwarder
     ) external returns (ERC20VotesUpgradeable, MerkleMinter) {
         // token already exists - wrap it inside our governance
         if(_tokenConfig.addr != address(0)) {
@@ -75,7 +76,8 @@ contract TokenFactory {
             _dao, 
             _tokenConfig.name, 
             _tokenConfig.symbol, 
-            _tokenConfig.useProxies
+            _tokenConfig.useProxies,
+            _gsnForwarder
         );
         
         // emit event for new token
@@ -114,7 +116,8 @@ contract TokenFactory {
         DAO _dao,
         string calldata _name,
         string calldata _symbol,
-        bool _useProxies
+        bool _useProxies,
+        address _gsnForwarder
     ) private returns(
         address token, 
         address minter
@@ -128,11 +131,12 @@ contract TokenFactory {
             MerkleMinter(minter).initialize(
                 _dao,
                 GovernanceERC20(token),
-                distributorBase
+                distributorBase,
+                _gsnForwarder
             );
         } else {
             token = address(new GovernanceERC20(_dao, _name, _symbol));
-            minter = address(new MerkleMinter(_dao, GovernanceERC20(token), distributorBase));
+            minter = address(new MerkleMinter(_dao, GovernanceERC20(token), distributorBase, _gsnForwarder));
         }
     }
 
@@ -174,23 +178,25 @@ contract TokenFactory {
     function setupBases() private {
         distributorBase = new MerkleDistributor();
         
-        governanceERC20Base = address(
-            new GovernanceERC20(IDAO(address(0)), "S","S")
-        );
+        // Since we allow base contracts to be deployed as the native contracts as well,
+        // we should be careful to pass arguments so that these base contracts are unusuable by themselves.
+        // Might need a second eye in future.
+        governanceERC20Base = address(new GovernanceERC20(IDAO(address(0)), "BaseToken","BaseSymbol"));
 
         governanceWrappedERC20Base = address(
             new GovernanceWrappedERC20(
-                IERC20Upgradeable(governanceERC20Base), 
-                "" , 
-                ""
+                IERC20Upgradeable(address(0)), 
+                "BaseToken" , 
+                "BaseSymbol"
             )
         );
 
         merkleMinterBase = address(
             new MerkleMinter(
                 IDAO(address(0)), 
-                GovernanceERC20(governanceERC20Base), 
-                distributorBase
+                GovernanceERC20(address(0)), 
+                MerkleDistributor(address(0)),
+                address(0)
             )
         );
     }
