@@ -21,7 +21,8 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder) internal virtual onlyInitializing {
         __Component_init(_dao);
 
-        setTrustedForwarder(_trustedForwarder);
+        _setTrustedForwarder(_trustedForwarder);
+        emit SetTrustedForwarder(_trustedForwarder);
 
         _registerStandard(type(MetaTxComponent).interfaceId);
     }
