@@ -10,7 +10,6 @@ import "./Component.sol";
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice Any component within the Aragon DAO framework using meta transactions has to inherit from this contract
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
-    /// @notice Role identifer to change the GSN forwarder
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     event SetTrustedForwarder(address _newForwarder);
