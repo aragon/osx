@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set `votingToken` to private, to allow for registering ERC20Voting interfaceId.
 
-## v0.0.1-alpha
+## v0.1.0-alpha
+
+- Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos.
 
 ### Added
 

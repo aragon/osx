@@ -38,6 +38,12 @@ contract DAOFactory {
         bytes metadata;
     }
 
+    struct VoteConfig {
+        uint64 participationRequiredPct;
+        uint64 supportRequiredPct;
+        uint64 minDuration;
+    }
+
     event DAOCreated(string name, address indexed token, address indexed voting);
 
     // @dev Stores the registry and token factory address and creates the base contracts required for the factory
@@ -52,13 +58,13 @@ contract DAOFactory {
 
     // @dev Creates a new DAO with ERC20 based voting. It also will deploy a new token if the corresponding config is passed.
     // @oaram _daoConfig The name and metadata hash of the DAO it creates
-    // @param _votingSettings The majority voting configs and minimum duration of voting
+    // @param _voteConfig The majority voting configs and minimum duration of voting
     // @param _tokenConfig The token config used to deploy a new token
     // @param _mintConfig The config for the minter for the newly created token
     // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
     function newERC20VotingDAO(
         DAOConfig calldata _daoConfig,
-        uint256[3] calldata _votingSettings,
+        VoteConfig calldata _voteConfig,
         TokenFactory.TokenConfig calldata _tokenConfig,
         TokenFactory.MintConfig calldata _mintConfig,
         address _gsnForwarder
@@ -85,7 +91,7 @@ contract DAOFactory {
         // TODO: shall we add minter as well ?
         registry.register(_daoConfig.name, dao, msg.sender, address(token));
 
-        voting = createERC20Voting(dao, token, _votingSettings);
+        voting = createERC20Voting(dao, token, _voteConfig);
 
         setDAOPermissions(dao, address(voting));
 
@@ -94,12 +100,12 @@ contract DAOFactory {
 
     // @dev Creates a new DAO with whitelist based voting.
     // @oaram _daoConfig The name and metadata hash of the DAO it creates
-    // @param _votingSettings The majority voting configs and minimum duration of voting
+    // @param _voteConfig The majority voting configs and minimum duration of voting
     // @param _whitelisVoters A array of addresses that are allowed to vote
     // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
     function newWhitelistVotingDAO(
         DAOConfig calldata _daoConfig,
-        uint256[3] calldata _votingSettings,
+        VoteConfig calldata _voteConfig,
         address[] calldata _whitelistVoters,
         address _gsnForwarder
     ) external returns (DAO dao, WhitelistVoting voting) {
@@ -108,7 +114,7 @@ contract DAOFactory {
         // register dao with its name and token to the registry
         registry.register(_daoConfig.name, dao, msg.sender, address(0));
 
-        voting = createWhitelistVoting(dao, _whitelistVoters, _votingSettings);
+        voting = createWhitelistVoting(dao, _whitelistVoters, _voteConfig);
 
         setDAOPermissions(dao, address(voting));
 
@@ -151,7 +157,7 @@ contract DAOFactory {
     function createERC20Voting(
         DAO _dao, 
         ERC20VotesUpgradeable _token, 
-        uint256[3] calldata _votingSettings
+        VoteConfig calldata _voteConfig
     ) internal returns (ERC20Voting erc20Voting) {
         erc20Voting = ERC20Voting(
             createProxy(
@@ -160,9 +166,9 @@ contract DAOFactory {
                     ERC20Voting.initialize.selector,
                     _dao,
                     address(0),
-                    _votingSettings[0],
-                    _votingSettings[1],
-                    _votingSettings[2],
+                    _voteConfig.participationRequiredPct,
+                    _voteConfig.supportRequiredPct,
+                    _voteConfig.minDuration,
                     _token
                 )
             )
@@ -181,7 +187,7 @@ contract DAOFactory {
     function createWhitelistVoting(
         DAO _dao, 
         address[] calldata _whitelistVoters, 
-        uint256[3] calldata _votingSettings
+        VoteConfig calldata _voteConfig
     ) internal returns (WhitelistVoting whitelistVoting) {
         whitelistVoting = WhitelistVoting(
             createProxy(
@@ -190,10 +196,10 @@ contract DAOFactory {
                     WhitelistVoting.initialize.selector,
                     _dao,
                     address(0),
-                    _votingSettings[0],
-                    _votingSettings[1],
-                    _votingSettings[2],
-                     _whitelistVoters
+                    _voteConfig.participationRequiredPct,
+                    _voteConfig.supportRequiredPct,
+                    _voteConfig.minDuration,
+                    _whitelistVoters
                 )
             )
         );
