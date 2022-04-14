@@ -10,9 +10,9 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import "./GovernanceERC20.sol";
-import "../core/component/Component.sol";
+import "../core/component/MetaTxComponent.sol";
 
-contract MerkleDistributor is Component {
+contract MerkleDistributor is MetaTxComponent {
     using SafeERC20Upgradeable for GovernanceERC20;
 
     bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
@@ -31,12 +31,23 @@ contract MerkleDistributor is Component {
 
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
-    function initialize(IDAO _dao, GovernanceERC20 _token, bytes32 _merkleRoot) external initializer {
+    function initialize(
+        IDAO _dao,
+        address _trustedForwarder,
+        GovernanceERC20 _token,
+        bytes32 _merkleRoot
+    ) external initializer {
         _registerStandard(MERKLE_DISTRIBUTOR_INTERFACE_ID);
-        __Component_init(_dao);
+        __MetaTxComponent_init(_dao, _trustedForwarder);
 
         token = _token;
         merkleRoot = _merkleRoot;
+    }
+
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
+    function versionRecipient() external view virtual override returns (string memory) {
+        return "0.0.1+opengsn.recipient.MerkleDistributor";
     }
 
     function claim(uint256 _index, address _to, uint256 _amount, bytes32[] calldata _merkleProof) external {

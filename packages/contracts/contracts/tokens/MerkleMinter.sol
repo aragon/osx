@@ -40,7 +40,7 @@ contract MerkleMinter is Permissions {
     returns (MerkleDistributor distributor) 
     {
         address distributorAddr = distributorBase.clone();
-        MerkleDistributor(distributorAddr).initialize(dao, token, _merkleRoot);
+        MerkleDistributor(distributorAddr).initialize(dao, dao.trustedForwarder(), token, _merkleRoot);
 
         token.mint(distributorAddr, _totalAmount);
 
