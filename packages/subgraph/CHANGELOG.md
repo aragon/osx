@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Implement mapping and unit testing for events of `MetaTxComponent`.
 - Utilizing interfaceId for distinguishing between `ERC20Voting` and `WhitelistVoting`.
 - Added eslint.
 
