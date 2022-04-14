@@ -3,7 +3,8 @@ import {
   StartVote,
   ExecuteVote,
   UpdateConfig,
-  ERC20Voting
+  ERC20Voting,
+  TrustedForwarderSet
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
 import {
   Action,
@@ -162,6 +163,14 @@ export function handleUpdateConfig(event: UpdateConfig): void {
     packageEntity.participationRequiredPct =
       event.params.participationRequiredPct;
     packageEntity.minDuration = event.params.minDuration;
+    packageEntity.save();
+  }
+}
+
+export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
+  let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
+  if (packageEntity) {
+    packageEntity.trustedForwarder = event.params.forwarder;
     packageEntity.save();
   }
 }

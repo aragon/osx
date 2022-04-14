@@ -93,6 +93,8 @@ templates:
           handler: handleStartVote
         - event: UpdateConfig(uint64,uint64,uint64)
           handler: handleUpdateConfig
+        - event: TrustedForwarderSet(address)
+          handler: handleTrustedForwarderSet
   # WhitelistVoting (package)
   - name: WhitelistVoting
     kind: ethereum/contract
@@ -122,3 +124,5 @@ templates:
           handler: handleAddUsers
         - event: RemoveUsers(address[])
           handler: handleRemoveUsers
+        - event: TrustedForwarderSet(address)
+          handler: handleTrustedForwarderSet

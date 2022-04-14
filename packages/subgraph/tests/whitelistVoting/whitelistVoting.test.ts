@@ -11,7 +11,8 @@ import {
   VOTING_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
-  ADDRESS_TWO
+  ADDRESS_TWO,
+  ADDRESS_ZERO
 } from '../constants';
 import {
   createNewAddUsersEvent,
@@ -19,6 +20,7 @@ import {
   createNewExecuteVoteEvent,
   createNewRemoveUsersEvent,
   createNewStartVoteEvent,
+  createNewTrustedForwarderSetEvent,
   createNewUpdateConfigEvent,
   getVotesLengthCall
 } from './utils';
@@ -27,6 +29,7 @@ import {
   handleCastVote,
   handleExecuteVote,
   handleRemoveUsers,
+  handleTrustedForwarderSet,
   handleUpdateConfig,
   _handleStartVote
 } from '../../src/packages/whitelist/whitelistVoting';
@@ -267,6 +270,30 @@ test('Run Whitelist Voting (RemoveUsers) mappings with mock event', () => {
     userArray[0].toHexString()
   );
   assert.notInStore('WhitelistVoter', userArray[1].toHexString());
+
+  clearStore();
+});
+
+test('Run Whitelist Voting (handleTrustedForwarderSet) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
+  let whitelistVotingPackage = new WhitelistPackage(entityID);
+  whitelistVotingPackage.save();
+
+  // create event
+  let event = createNewTrustedForwarderSetEvent(ADDRESS_ZERO, VOTING_ADDRESS);
+
+  // handle event
+  handleTrustedForwarderSet(event);
+
+  // checks
+  assert.fieldEquals('WhitelistPackage', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'WhitelistPackage',
+    entityID,
+    'trustedForwarder',
+    Address.fromString(ADDRESS_ZERO).toHexString()
+  );
 
   clearStore();
 });

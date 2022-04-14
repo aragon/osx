@@ -6,10 +6,32 @@ import {
   ExecuteVote,
   UpdateConfig,
   AddUsers,
-  RemoveUsers
+  RemoveUsers,
+  TrustedForwarderSet
 } from '../../generated/templates/WhitelistVoting/WhitelistVoting';
 
 // events
+
+export function createNewTrustedForwarderSetEvent(
+  forwarderAddress: string,
+  contractAddress: string
+): TrustedForwarderSet {
+  let newTrustedForwarderSetEvent = changetype<TrustedForwarderSet>(
+    newMockEvent()
+  );
+
+  newTrustedForwarderSetEvent.address = Address.fromString(contractAddress);
+  newTrustedForwarderSetEvent.parameters = [];
+
+  let forwarderAddressParam = new ethereum.EventParam(
+    'forwarder',
+    ethereum.Value.fromAddress(Address.fromString(forwarderAddress))
+  );
+
+  newTrustedForwarderSetEvent.parameters.push(forwarderAddressParam);
+
+  return newTrustedForwarderSetEvent;
+}
 
 export function createNewStartVoteEvent(
   voteId: string,

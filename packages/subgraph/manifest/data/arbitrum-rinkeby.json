@@ -4,8 +4,8 @@
   "dataSources": {
     "Registry": {
       "name": "Registry",
-      "address": "0x264308C03feAfA071C97b73b09E911530CCCd216",
-      "startBlock": 11137075
+      "address": "0xd3D851B5F087DFfbE94C2729D8a0C29D61D02974",
+      "startBlock": 11191582
     }
   }
 }

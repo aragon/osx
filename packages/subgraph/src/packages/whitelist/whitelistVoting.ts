@@ -5,7 +5,8 @@ import {
   UpdateConfig,
   AddUsers,
   RemoveUsers,
-  WhitelistVoting
+  WhitelistVoting,
+  TrustedForwarderSet
 } from '../../../generated/templates/WhitelistVoting/WhitelistVoting';
 import {
   Action,
@@ -182,5 +183,13 @@ export function handleRemoveUsers(event: RemoveUsers): void {
     if (voterEntity) {
       store.remove('WhitelistVoter', user.toHexString());
     }
+  }
+}
+
+export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
+  let packageEntity = WhitelistPackage.load(event.address.toHexString());
+  if (packageEntity) {
+    packageEntity.trustedForwarder = event.params.forwarder;
+    packageEntity.save();
   }
 }

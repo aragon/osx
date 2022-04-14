@@ -6,18 +6,21 @@ import {
   DAO_TOKEN_ADDRESS,
   VOTING_ADDRESS,
   STRING_DATA,
-  DAO_ADDRESS
+  DAO_ADDRESS,
+  ADDRESS_ZERO
 } from '../constants';
 import {
   createNewCastVoteEvent,
   createNewExecuteVoteEvent,
   createNewStartVoteEvent,
+  createNewTrustedForwarderSetEvent,
   createNewUpdateConfigEvent,
   getVotesLengthCall
 } from './utils';
 import {
   handleCastVote,
   handleExecuteVote,
+  handleTrustedForwarderSet,
   handleUpdateConfig,
   _handleStartVote
 } from '../../src/packages/ERC20Voting/erc20Voting';
@@ -249,6 +252,30 @@ test('Run ERC Voting (handleUpdateConfig) mappings with mock event', () => {
     '2'
   );
   assert.fieldEquals('ERC20VotingPackage', entityID, 'minDuration', '3600');
+
+  clearStore();
+});
+
+test('Run ERC Voting (handleTrustedForwarderSet) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
+  let erc20VotingPackage = new ERC20VotingPackage(entityID);
+  erc20VotingPackage.save();
+
+  // create event
+  let event = createNewTrustedForwarderSetEvent(ADDRESS_ZERO, VOTING_ADDRESS);
+
+  // handle event
+  handleTrustedForwarderSet(event);
+
+  // checks
+  assert.fieldEquals('ERC20VotingPackage', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'ERC20VotingPackage',
+    entityID,
+    'trustedForwarder',
+    Address.fromString(ADDRESS_ZERO).toHexString()
+  );
 
   clearStore();
 });
