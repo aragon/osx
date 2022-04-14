@@ -8,18 +8,16 @@ import {
   getEXEC_ROLEreverted,
   getParticipationRequiredPct,
   getSupportRequiredPct,
-  getSVToken,
+  getVotingToken,
   getVotesLength,
   getMinDuration,
-  getWhiteListed,
-  getWhitelistedLength
+  getSupportsInterface
 } from './utils';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
   ONE_ETH,
-  ADDRESS_ZERO,
   VOTING_ADDRESS,
   ADDRESS_TWO
 } from '../constants';
@@ -27,12 +25,16 @@ import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
 import {crypto} from '@graphprotocol/graph-ts';
 import {createTokenCalls} from '../utils';
 import {Permission, Role} from '../../generated/schema';
+import {
+  ERC20_VOTING_INTERFACE,
+  WHITELIST_VOTING_INTERFACE
+} from '../../src/utils/constants';
 
 let role = Bytes.fromByteArray(
   crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
 );
 
-test('Run dao (handleGranted) mappings with mock event', () => {
+function testPackages(supportsErc20VotingInterface: boolean): void {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
     role,
@@ -44,15 +46,29 @@ test('Run dao (handleGranted) mappings with mock event', () => {
   );
 
   // launch calls
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getEXEC_ROLE(DAO_ADDRESS, role);
   getSupportRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getParticipationRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getMinDuration(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getVotesLength(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
-  getSVToken(VOTING_ADDRESS, DAO_TOKEN_ADDRESS);
-  getWhiteListed(VOTING_ADDRESS, ADDRESS_ZERO, false);
-  getWhitelistedLength(VOTING_ADDRESS, '1');
+
+  if (supportsErc20VotingInterface) {
+    createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+    getVotingToken(VOTING_ADDRESS, DAO_TOKEN_ADDRESS);
+    getSupportsInterface(
+      VOTING_ADDRESS,
+      ERC20_VOTING_INTERFACE,
+      supportsErc20VotingInterface
+    );
+    getSupportsInterface(VOTING_ADDRESS, WHITELIST_VOTING_INTERFACE, false);
+  } else {
+    getSupportsInterface(
+      VOTING_ADDRESS,
+      ERC20_VOTING_INTERFACE,
+      supportsErc20VotingInterface
+    );
+    getSupportsInterface(VOTING_ADDRESS, WHITELIST_VOTING_INTERFACE, true);
+  }
 
   // handle event
   handleGranted(grantedEvent);
@@ -102,7 +118,32 @@ test('Run dao (handleGranted) mappings with mock event', () => {
     daoPackageEntityID
   );
 
+  // packages
+  if (supportsErc20VotingInterface) {
+    assert.fieldEquals(
+      'ERC20VotingPackage',
+      Address.fromString(VOTING_ADDRESS).toHexString(),
+      'id',
+      Address.fromString(VOTING_ADDRESS).toHexString()
+    );
+  } else {
+    assert.fieldEquals(
+      'WhitelistPackage',
+      Address.fromString(VOTING_ADDRESS).toHexString(),
+      'id',
+      Address.fromString(VOTING_ADDRESS).toHexString()
+    );
+  }
+
   clearStore();
+}
+
+test('Run dao (handleGranted) mappings with mock event for ERC20 Voting', () => {
+  testPackages(true);
+});
+
+test('Run dao (handleGranted) mappings with mock event for Whitelist Voting', () => {
+  testPackages(false);
 });
 
 test('Run dao (handleGranted) mappings with reverted mocke call', () => {
@@ -117,10 +158,7 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   );
 
   // launch calls
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getEXEC_ROLEreverted(DAO_ADDRESS);
-  getWhiteListed(VOTING_ADDRESS, ADDRESS_ZERO, false);
-  getWhitelistedLength(VOTING_ADDRESS, '1');
 
   // handle event
   handleGranted(grantedEvent);

@@ -204,6 +204,43 @@ export function createNewFrozenEvent(
   return newFrozenEvent;
 }
 
+export function createNewExecutedEvent(
+  actor: string,
+  callId: string,
+  actions: ethereum.Tuple[],
+  execResults: Bytes[],
+  contractAddress: string
+): Executed {
+  let newExecutedEvent = changetype<Executed>(newMockEvent());
+
+  newExecutedEvent.address = Address.fromString(contractAddress);
+  newExecutedEvent.parameters = [];
+
+  let actorParam = new ethereum.EventParam(
+    'actor',
+    ethereum.Value.fromAddress(Address.fromString(actor))
+  );
+  let callIdParam = new ethereum.EventParam(
+    'callId',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(callId))
+  );
+  let actionsParam = new ethereum.EventParam(
+    'actions',
+    ethereum.Value.fromTupleArray(actions)
+  );
+  let execResultsParams = new ethereum.EventParam(
+    'execResults',
+    ethereum.Value.fromBytesArray(execResults)
+  );
+
+  newExecutedEvent.parameters.push(actorParam);
+  newExecutedEvent.parameters.push(callIdParam);
+  newExecutedEvent.parameters.push(actionsParam);
+  newExecutedEvent.parameters.push(execResultsParams);
+
+  return newExecutedEvent;
+}
+
 // calls
 
 export function getBalanceOf(
@@ -286,27 +323,30 @@ export function getVotesLength(contractAddress: string, returns: BigInt): void {
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getSVToken(contractAddress: string, returns: string): void {
+export function getVotingToken(contractAddress: string, returns: string): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'token',
-    'token():(address)'
+    'getVotingToken',
+    'getVotingToken():(address)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }
 
-export function getWhiteListed(
+export function getIsUserWhitelisted(
   contractAddress: string,
   address: string,
   returns: boolean
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'whitelisted',
-    'whitelisted(address):(bool)'
+    'isUserWhitelisted',
+    'isUserWhitelisted(address,uint256):(bool)'
   )
-    .withArgs([ethereum.Value.fromAddress(Address.fromString(address))])
+    .withArgs([
+      ethereum.Value.fromAddress(Address.fromString(address)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.zero())
+    ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
 
@@ -323,39 +363,18 @@ export function getWhitelistedLength(
     .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(returns))]);
 }
 
-export function createNewExecutedEvent(
-  actor: string,
-  callId: string,
-  actions: ethereum.Tuple[],
-  execResults: Bytes[],
-  contractAddress: string
-): Executed {
-  let newExecutedEvent = changetype<Executed>(newMockEvent());
-
-  newExecutedEvent.address = Address.fromString(contractAddress);
-  newExecutedEvent.parameters = [];
-
-  let actorParam = new ethereum.EventParam(
-    'actor',
-    ethereum.Value.fromAddress(Address.fromString(actor))
-  );
-  let callIdParam = new ethereum.EventParam(
-    'callId',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(callId))
-  );
-  let actionsParam = new ethereum.EventParam(
-    'actions',
-    ethereum.Value.fromTupleArray(actions)
-  );
-  let execResultsParams = new ethereum.EventParam(
-    'execResults',
-    ethereum.Value.fromBytesArray(execResults)
-  );
-
-  newExecutedEvent.parameters.push(actorParam);
-  newExecutedEvent.parameters.push(callIdParam);
-  newExecutedEvent.parameters.push(actionsParam);
-  newExecutedEvent.parameters.push(execResultsParams);
-
-  return newExecutedEvent;
+export function getSupportsInterface(
+  contractAddress: string,
+  interfaceId: string,
+  returns: boolean
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'supportsInterface',
+    'supportsInterface(bytes4):(bool)'
+  )
+    .withArgs([
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
+    ])
+    .returns([ethereum.Value.fromBoolean(returns)]);
 }
