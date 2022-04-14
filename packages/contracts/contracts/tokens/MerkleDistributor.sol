@@ -8,19 +8,18 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-
-import "./GovernanceERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../core/component/MetaTxComponent.sol";
 
 contract MerkleDistributor is MetaTxComponent {
-    using SafeERC20Upgradeable for GovernanceERC20;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
         this.claim.selector ^
         this.unclaimedBalance.selector ^
         this.isClaimed.selector;
 
-    GovernanceERC20 public token;
+    IERC20Upgradeable public token;
     bytes32 public merkleRoot;
 
     // This is a packed array of booleans.
@@ -34,7 +33,7 @@ contract MerkleDistributor is MetaTxComponent {
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
-        GovernanceERC20 _token,
+        IERC20Upgradeable _token,
         bytes32 _merkleRoot
     ) external initializer {
         _registerStandard(MERKLE_DISTRIBUTOR_INTERFACE_ID);

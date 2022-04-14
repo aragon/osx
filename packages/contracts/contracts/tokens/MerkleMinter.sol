@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../core/IDAO.sol";
 import "../core/component/Permissions.sol";
 import "./MerkleDistributor.sol";
+import "./GovernanceERC20.sol";
 
 contract MerkleMinter is Permissions {
     using Clones for address;
