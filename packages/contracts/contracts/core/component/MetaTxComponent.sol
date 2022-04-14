@@ -12,7 +12,7 @@ import "./Component.sol";
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
-    event SetTrustedForwarder(address _newForwarder);
+    event TrustedForwarderSet(address forwarder);
 
     /// @notice Initialization
     /// @param _dao the associated DAO address
@@ -47,6 +47,6 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function _setTrustedForwarderWithEvent(address _trustedForwarder) internal {
         _setTrustedForwarder(_trustedForwarder);
 
-        emit SetTrustedForwarder(_trustedForwarder);
+        emit TrustedForwarderSet(_trustedForwarder);
     }
 }
