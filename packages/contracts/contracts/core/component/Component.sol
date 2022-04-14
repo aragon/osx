@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./Permissions.sol";
 import "../erc165/AdaptiveERC165.sol";
-import "./../acl/ACL.sol";
 import "./../IDAO.sol";
 
 /// @title Base component in the Aragon DAO framework
