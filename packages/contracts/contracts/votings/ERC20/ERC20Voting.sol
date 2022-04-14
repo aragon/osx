@@ -12,8 +12,9 @@ import "./../majority/MajorityVoting.sol";
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract ERC20Voting is MajorityVoting {
+    bytes4 internal constant ERC20_VOTING_INTERFACE_ID = MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
 
-    ERC20VotesUpgradeable public token;
+    ERC20VotesUpgradeable private votingToken;
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
@@ -31,6 +32,7 @@ contract ERC20Voting is MajorityVoting {
         uint64 _minDuration,
         ERC20VotesUpgradeable _token
     ) public initializer {
+        _registerStandard(ERC20_VOTING_INTERFACE_ID);
         __MajorityVoting_init(
             _dao,
             _gsnForwarder,
@@ -39,7 +41,14 @@ contract ERC20Voting is MajorityVoting {
             _minDuration
         );
 
-        token = _token;
+        votingToken = _token;
+    }
+
+    /// @notice getter function for the voting token
+    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface 
+    /// @return ERC20VotesUpgradeable the token used for voting 
+    function getVotingToken() public view returns(ERC20VotesUpgradeable){
+        return votingToken;
     }
 
     /// @notice Returns the version of the GSN relay recipient
@@ -65,7 +74,7 @@ contract ERC20Voting is MajorityVoting {
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        uint256 votingPower = token.getPastTotalSupply(snapshotBlock);
+        uint256 votingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (votingPower == 0) revert VotePowerZero();
         
         voteId = votesLength++;
@@ -119,7 +128,7 @@ contract ERC20Voting is MajorityVoting {
         Vote storage vote_ = votes[_voteId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 voterStake = token.getPastVotes(_voter, vote_.snapshotBlock);
+        uint256 voterStake = votingToken.getPastVotes(_voter, vote_.snapshotBlock);
         VoterState state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
@@ -155,6 +164,6 @@ contract ERC20Voting is MajorityVoting {
     /// @return True if the given voter can participate a certain vote, false otherwise
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && token.getPastVotes(_voter, vote_.snapshotBlock) > 0;
+        return _isVoteOpen(vote_) && votingToken.getPastVotes(_voter, vote_.snapshotBlock) > 0;
     }
 }

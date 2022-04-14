@@ -70,7 +70,11 @@ describe('WhitelistVoting', function () {
       await initializeVoting(1, 2, 3, []);
     });
     it('should return fasle, if user is not whitelisted', async () => {
-      expect(await voting.whitelisted(ownerAddress)).to.equal(false);
+      const block1 = await ethers.provider.getBlock('latest');
+      await ethers.provider.send('evm_mine', []);
+      expect(
+        await voting.isUserWhitelisted(ownerAddress, block1.number)
+      ).to.equal(false);
     });
 
     it('should add new users in the whitelist', async () => {
