@@ -8,7 +8,7 @@ chai.use(chaiUtils);
 import { ComponentMock, DAOMock } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-describe('ComponentMock', function () {
+describe('Component', function () {
   let signers: SignerWithAddress[];
   let componentMock: ComponentMock;
   let daoMock: DAOMock;
