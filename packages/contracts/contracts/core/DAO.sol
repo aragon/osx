@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
 import "./acl/ACL.sol";
@@ -18,7 +19,7 @@ import "./IDAO.sol";
 /// @author Samuel Furter - Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and use to use public interface.
 /// @dev Public API of the Aragon DAO framework
-contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165 {
+contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165, BaseRelayRecipient {
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -45,11 +46,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @notice Thrown if an ETH withdraw fails
     error ETHWithdrawFailed();
 
-    event SetTrustedForwarder(address _newForwarder);
+    event TrustedForwarderSet(address forwarder);
 
     ERC1271 signatureValidator;
-
-    address private _trustedForwarder;
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
@@ -66,6 +65,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         __ACL_init(_initialOwner);
     }
 
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
+    function versionRecipient() external view virtual override returns (string memory) {
+        return "0.0.1+opengsn.recipient.DAO";
+    }
+
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
     
@@ -75,12 +80,6 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         address _forwarder
     ) external auth(address(this), MODIFY_TRUSTED_FORWARDER) {
         _setTrustedForwarder(_forwarder);
-    }
-
-    /// @notice virtual function to get DAO's current trusted forwarder
-    /// @return address trusted forwarder's address
-    function trustedForwarder() public virtual view returns(address) {
-        return _trustedForwarder;
     }
 
     /// @notice Checks if the current callee has the permissions for.
@@ -208,11 +207,5 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     function _setMetadata(bytes calldata _metadata) internal {
         emit SetMetadata(_metadata);
-    }
-
-    function _setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
-
-        emit SetTrustedForwarder(_forwarder);
     }
 }
