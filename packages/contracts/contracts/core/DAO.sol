@@ -46,8 +46,6 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @notice Thrown if an ETH withdraw fails
     error ETHWithdrawFailed();
 
-    event TrustedForwarderSet(address forwarder);
-
     ERC1271 signatureValidator;
 
     /// @dev Used for UUPS upgradability pattern
@@ -74,20 +72,19 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
     
-    /// @notice set trusted forwarder on the DAO
-    /// @param _forwarder address of the forwarder
+    /// @inheritdoc IDAO
     function setTrustedForwarder(
-        address _forwarder
-    ) external auth(address(this), MODIFY_TRUSTED_FORWARDER) {
-        _setTrustedForwarder(_forwarder);
+        address _trustedForwarder
+    ) external override auth(address(this), MODIFY_TRUSTED_FORWARDER) {
+        _setTrustedForwarder(_trustedForwarder);
     }
 
-    /// @notice Checks if the current callee has the permissions for.
-    /// @dev Wrapper for the willPerform method of ACL to later on be able to use it in the modifier of the sub components of this DAO.
-    /// @param _where Which contract does get called
-    /// @param _who Who is calling this method
-    /// @param _role Which role is required to call this
-    /// @param _data Additional data used in the ACLOracle
+    /// @inheritdoc IDAO
+    function trustedForwarder() public virtual override (IDAO, BaseRelayRecipient) view returns (address){
+        return BaseRelayRecipient.trustedForwarder();
+    }
+
+    /// @inheritdoc IDAO
     function hasPermission(
         address _where,
         address _who,
@@ -97,17 +94,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return willPerform(_where, _who, _role, _data);
     }
 
-    /// @notice Update the DAO metadata
-    /// @dev Sets a new IPFS hash
-    /// @param _metadata The IPFS hash of the new metadata object
+    /// @inheritdoc IDAO
     function setMetadata(bytes calldata _metadata) external override auth(address(this), DAO_CONFIG_ROLE) {
         _setMetadata(_metadata);
     }
 
-    /// @notice If called, the list of provided actions will be executed.
-    /// @dev It run a loop through the array of acctions and execute one by one.
-    /// @dev If one acction fails, all will be reverted.
-    /// @param _actions The aray of actions
+    /// @inheritdoc IDAO
     function execute(uint256 callId, Action[] memory _actions)
         external
         override
@@ -129,21 +121,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return execResults;
     }
 
-    /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
-    receive() external payable {
-        emit ETHDeposited(msg.sender, msg.value);
-    }
-
-    /// @dev Fallback to handle future versions of the ERC165 standard.
-    fallback() external {
-        _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
-    }
-
-    /// @notice Deposit ETH or any token to this contract with a reference string
-    /// @dev Deposit ETH (token address == 0) or any token with a reference
-    /// @param _token The address of the token and in case of ETH address(0)
-    /// @param _amount The amount of tokens to deposit
-    /// @param _reference The deposit reference describing the reason of it
+    /// @inheritdoc IDAO
     function deposit(
         address _token,
         uint256 _amount,
@@ -162,11 +140,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         emit Deposited(msg.sender, _token, _amount, _reference);
     }
 
-    /// @notice Withdraw tokens or ETH from the DAO with a withdraw reference string
-    /// @param _token The address of the token and in case of ETH address(0)
-    /// @param _to The target address to send tokens or ETH
-    /// @param _amount The amount of tokens to deposit
-    /// @param _reference The deposit reference describing the reason of it
+    /// @inheritdoc IDAO
     function withdraw(
         address _token,
         address _to,
@@ -185,20 +159,16 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         emit Withdrawn(_token, _to, _amount, _reference);
     }
 
-    /// @notice Setter to set the signature validator contract of ERC1271
-    /// @param _signatureValidator ERC1271 SignatureValidator
-    function setSignatureValidator(ERC1271 _signatureValidator)
-        external
+    /// @inheritdoc IDAO
+    function setSignatureValidator(address _signatureValidator)
+        external override
         auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE)
     {
-        signatureValidator = _signatureValidator;
+        signatureValidator = ERC1271(_signatureValidator);
     }
 
-    /// @notice Method to validate the signature as described in ERC1271
-    /// @param _hash Hash of the data to be signed
-    /// @param _signature Signature byte array associated with _hash
-    /// @return bytes4
-    function isValidSignature(bytes32 _hash, bytes memory _signature) external view override returns (bytes4) {
+    /// @inheritdoc IDAO
+    function isValidSignature(bytes32 _hash, bytes memory _signature) external view override(IDAO, ERC1271) returns (bytes4) {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
@@ -206,6 +176,17 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// Private/Internal Functions
 
     function _setMetadata(bytes calldata _metadata) internal {
-        emit SetMetadata(_metadata);
+        emit MetadataSet(_metadata);
+    }
+
+
+    /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
+    receive() external payable {
+        emit ETHDeposited(msg.sender, msg.value);
+    }
+
+    /// @dev Fallback to handle future versions of the ERC165 standard.
+    fallback() external {
+        _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 }
