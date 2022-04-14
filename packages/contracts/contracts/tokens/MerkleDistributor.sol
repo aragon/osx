@@ -7,14 +7,18 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import "./GovernanceERC20.sol";
+import "../core/component/Component.sol";
 
-contract MerkleDistributor is Initializable {
-    
+contract MerkleDistributor is Component {
     using SafeERC20Upgradeable for GovernanceERC20;
+
+    bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
+        this.claim.selector ^
+        this.unclaimedBalance.selector ^
+        this.isClaimed.selector;
 
     GovernanceERC20 public token;
     bytes32 public merkleRoot;
@@ -27,7 +31,10 @@ contract MerkleDistributor is Initializable {
 
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
-    function initialize(GovernanceERC20 _token, bytes32 _merkleRoot) external initializer {
+    function initialize(IDAO _dao, GovernanceERC20 _token, bytes32 _merkleRoot) external initializer {
+        _registerStandard(MERKLE_DISTRIBUTOR_INTERFACE_ID);
+        __Component_init(_dao);
+
         token = _token;
         merkleRoot = _merkleRoot;
     }
