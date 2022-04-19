@@ -7,7 +7,7 @@ import { customError } from './test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
-  SetMetadata: 'SetMetadata',
+  MetadataSet: 'MetadataSet',
   UpdateConfig: 'UpdateConfig',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
@@ -172,7 +172,7 @@ describe('DAOFactory: ', function () {
 
     // Check if correct ACL events are thrown.
     tx = tx.to
-      .emit(dao, EVENTS.SetMetadata)
+      .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(
@@ -294,7 +294,7 @@ describe('DAOFactory: ', function () {
 
     // Check if correct ACL events are thrown.
     tx = tx.to
-      .emit(dao, EVENTS.SetMetadata)
+      .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(

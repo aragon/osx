@@ -1,6 +1,6 @@
 import {
   DAO as DAOContract,
-  SetMetadata,
+  MetadataSet,
   Executed,
   Deposited,
   ETHDeposited,
@@ -21,13 +21,13 @@ import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
 import {handleMetadata} from '../utils/metadata';
 
-export function handleSetMetadata(event: SetMetadata): void {
+export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
   let metadata = handleMetadata(event.params.metadata.toString());
-  _handleSetMetadata(daoId, metadata);
+  _handleMetadataSet(daoId, metadata);
 }
 
-export function _handleSetMetadata(daoId: string, metadata: string): void {
+export function _handleMetadataSet(daoId: string, metadata: string): void {
   let entity = Dao.load(daoId);
   if (entity) {
     entity.metadata = metadata;
