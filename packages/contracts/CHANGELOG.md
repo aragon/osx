@@ -9,17 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Implement getter function `getVotingToken` in `ERC20Voting`.
-- Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos.
+- Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos. 
+- Added `MetaTxComponent`.
 
 ### Changed
 
-- Set `votingToken` to private, to allow for registering ERC20Voting interfaceId.
+- Decoupled `Permissions` from `BaseRelayRecipient`.
+- Fixed OZ contracts-upgradable `Initializable`.
 
-## v0.1.0-alpha
+### Removed
 
-- Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos.
+- Removed `Relay` interface from `Permissions.sol`.
+
+## v0.0.1-alpha
 
 ### Added
-
-- First version of the package, exposing the JSON artifacts
+- First version of the package, exposing the JSON artifacts.

@@ -4,6 +4,8 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import "../core/acl/ACL.sol";
 import "../core/IDAO.sol";
 
@@ -11,7 +13,7 @@ contract DAOMock is IDAO, ACL {
     mapping(uint256 => uint256) public totalSupply;
     mapping(address => mapping(uint256 => uint256)) public pastVotes;
 
-    constructor(address initialOwner) {
+    constructor(address initialOwner) initializer {
         __ACL_init(initialOwner);
     }
 

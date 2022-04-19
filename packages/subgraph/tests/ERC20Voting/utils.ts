@@ -4,10 +4,32 @@ import {
   StartVote,
   CastVote,
   ExecuteVote,
-  UpdateConfig
+  UpdateConfig,
+  TrustedForwarderSet
 } from '../../generated/templates/ERC20Voting/ERC20Voting';
 
 // events
+
+export function createNewTrustedForwarderSetEvent(
+  forwarderAddress: string,
+  contractAddress: string
+): TrustedForwarderSet {
+  let newTrustedForwarderSetEvent = changetype<TrustedForwarderSet>(
+    newMockEvent()
+  );
+
+  newTrustedForwarderSetEvent.address = Address.fromString(contractAddress);
+  newTrustedForwarderSetEvent.parameters = [];
+
+  let forwarderAddressParam = new ethereum.EventParam(
+    'forwarder',
+    ethereum.Value.fromAddress(Address.fromString(forwarderAddress))
+  );
+
+  newTrustedForwarderSetEvent.parameters.push(forwarderAddressParam);
+
+  return newTrustedForwarderSetEvent;
+}
 
 export function createNewStartVoteEvent(
   voteId: string,

@@ -68,13 +68,16 @@ contract DAOFactory {
         TokenFactory.TokenConfig calldata _tokenConfig,
         TokenFactory.MintConfig calldata _mintConfig,
         address _gsnForwarder
-    ) external returns (
-        DAO dao,
-        ERC20Voting voting,
-        ERC20VotesUpgradeable token,
-        MerkleMinter minter
-    ) {
-        if(_mintConfig.receivers.length != _mintConfig.amounts.length)
+    )
+        external
+        returns (
+            DAO dao,
+            ERC20Voting voting,
+            ERC20VotesUpgradeable token,
+            MerkleMinter minter
+        )
+    {
+        if (_mintConfig.receivers.length != _mintConfig.amounts.length)
             revert MintArrayLengthMismatch({
                 receiversArrayLength: _mintConfig.receivers.length,
                 amountsArrayLength: _mintConfig.amounts.length
@@ -132,7 +135,7 @@ contract DAOFactory {
     }
 
     // @dev Does set the required permissions for the new DAO.
-    // @oaram _dao The DAO instance just created.
+    // @param _dao The DAO instance just created.
     // @param _voting The voting contract address (whitelist OR ERC20 voting)
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set roles on the dao itself.
@@ -165,7 +168,7 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     ERC20Voting.initialize.selector,
                     _dao,
-                    address(0),
+                    _dao.trustedForwarder(),
                     _voteConfig.participationRequiredPct,
                     _voteConfig.supportRequiredPct,
                     _voteConfig.minDuration,
@@ -174,7 +177,7 @@ contract DAOFactory {
             )
         );
 
-         // Grant dao the necessary permissions for ERC20Voting
+        // Grant dao the necessary permissions for ERC20Voting
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
         items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(_dao));
         items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_VOTE_CONFIG(), address(_dao));
@@ -195,7 +198,7 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     WhitelistVoting.initialize.selector,
                     _dao,
-                    address(0),
+                    _dao.trustedForwarder(),
                     _voteConfig.participationRequiredPct,
                     _voteConfig.supportRequiredPct,
                     _voteConfig.minDuration,

@@ -5,14 +5,14 @@
 pragma solidity 0.8.10;
 
 import "./IMajorityVoting.sol";
-import "./../../core/component/Component.sol";
+import "./../../core/component/MetaTxComponent.sol";
 import "./../../utils/TimeHelpers.sol";
 
 /// @title The abstract implementation of majority voting components
 /// @author Michael Heuer - Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
-abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
+abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelpers {
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
@@ -38,11 +38,11 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
-    ) internal initializer {
+    ) internal onlyInitializing {
         _registerStandard(MAJORITY_VOTING_INTERFACE_ID);
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        __Component_init(_dao, _gsnForwarder);
+        __MetaTxComponent_init(_dao, _gsnForwarder);
 
         emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
@@ -74,7 +74,7 @@ abstract contract MajorityVoting is IMajorityVoting, Component, TimeHelpers {
         VoterState _choice,
         bool _executesIfDecided
     ) external {
-        if(_choice != VoterState.None && !_canVote(_voteId, msg.sender)) revert VoteCastForbidden(_voteId, msg.sender);
+        if(_choice != VoterState.None && !_canVote(_voteId, _msgSender())) revert VoteCastForbidden(_voteId, _msgSender());
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 

@@ -1,8 +1,8 @@
-export function customError (errorName: string, ...args: any[]){
+export function customError(errorName: string, ...args: any[]) {
 
   let argumentString = '';
 
-  if(Array.isArray(args) && args.length) {
+  if (Array.isArray(args) && args.length) {
 
     // add quotation marks to first argument if it is of string type
     if (typeof args[0] === 'string') {
@@ -20,3 +20,7 @@ export function customError (errorName: string, ...args: any[]){
 
   return `'${errorName}(${argumentString})'`
 }
+
+export const ERRORS = {
+  ALREADY_INITIALIZED: 'Initializable: contract is already initialized',
+};

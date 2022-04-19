@@ -21,11 +21,6 @@ contract MerkleMinter is Permissions {
 
     event MintedMerkle(address indexed distributor, bytes32 indexed merkleRoot, uint256 totalAmount, bytes tree, bytes context);
 
-    /// @dev describes the version and contract for GSN compatibility.
-    function versionRecipient() external virtual override view returns (string memory) {
-        return "0.0.1+opengsn.recipient.MerkleMinter";
-    }
-
     function initialize(
         IDAO _dao,
         GovernanceERC20 _token, 
@@ -33,7 +28,7 @@ contract MerkleMinter is Permissions {
     ) external initializer {
         token = _token;
         distributorBase = address(_distributorBase);
-        __Permission_init(_dao);
+        __Permissions_init(_dao);
     }
     
     function merkleMint(
