@@ -1,0 +1,122 @@
+{
+  "rinkeby": {
+    "dao": {
+      "ERC20Voting": {
+        "tx": "0x7a601acbb5bd4bb80f64a683c58bb7a204e859443f75741b0325a69b2e22e7a3",
+        "name": "_c4_DummyDAO_ERC20_Voting",
+        "votingType": "ERC20Voting",
+        "address": "0x050e4B5F56b63959e605458828782A7FccC769CD",
+        "token": "0x8e021c88Ef710dbC21e10D5c4cEC8Ff731F3b7c8",
+        "voting": "0x48D8911c34174d34ce016461870f04E688eD0021",
+        "deposits": [
+          {
+            "approveTx": "",
+            "depositTx": "0xfb776ea4c2dbf128264fb5c09c5ab21d70616cbdf7198d4f174ca34e85f558fa",
+            "tokenName": "ETH",
+            "token": "0x0000000000000000000000000000000000000000",
+            "amount": "0.001",
+            "dao": "0x050e4B5F56b63959e605458828782A7FccC769CD"
+          },
+          {
+            "approveTx": "0x0697c5b81d94e537de254aa7f0b1d38faa3a2a282ca20814da14f08758a3f77a",
+            "depositTx": "0x4a1508d997477d3d9a28bd4340ffb11d9c5e37e3d604f1d5f5330923810b436f",
+            "tokenName": "Dai",
+            "token": "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
+            "amount": "0.001",
+            "dao": "0x050e4B5F56b63959e605458828782A7FccC769CD"
+          },
+          {
+            "approveTx": "0xe253bfe2fc8910095340cfc3bb49bc60fc551d75b97f4f1922a6519f2e7557b6",
+            "depositTx": "0x92f9bc6816560de872a55f9b2c6587451334f3a6b5ee3dae1066d43e66bbd3b5",
+            "tokenName": "Uni",
+            "token": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+            "amount": "0.001",
+            "dao": "0x050e4B5F56b63959e605458828782A7FccC769CD"
+          }
+        ],
+        "proposal": {
+          "proposalTx": "0xc0f12a18304fe93cf6cee29d8c531529314fd21e4a585a0d54130d47dca020d6",
+          "metadata": {
+            "name": "ERC20Voting Dummy Proposal",
+            "description": "Dummy withdraw proposal for QA and testing purposes...",
+            "links": [
+              {
+                "label": "link01",
+                "url": "https://link.01"
+              },
+              {
+                "label": "link02",
+                "url": "https://link.02"
+              }
+            ]
+          },
+          "dao": "0x050e4B5F56b63959e605458828782A7FccC769CD"
+        }
+      },
+      "WhitelistVoting": {
+        "tx": "0x3dd7a92024bc46048d42d3e8c58962310e51453594d0c22d5f56363674b00124",
+        "name": "_c4_DummyDAO_Whitelist_Voting",
+        "votingType": "WhitelistVoting",
+        "address": "0x29060390D15e3bf75b347bE10326AA959021f5dC",
+        "token": "0x0000000000000000000000000000000000000000",
+        "voting": "0x3E8b34ca712916fA3350aB597E0759f6d78794FC",
+        "deposits": [
+          {
+            "approveTx": "",
+            "depositTx": "0x00b57a0e6bdbfc2fc66a722007e5e48324ccae793b175af5343741364633d1a2",
+            "tokenName": "ETH",
+            "token": "0x0000000000000000000000000000000000000000",
+            "amount": "0.001",
+            "dao": "0x29060390D15e3bf75b347bE10326AA959021f5dC"
+          },
+          {
+            "approveTx": "0xaa783c098abd6ec1878e8552c8615c291c4e92d590ccc58d128a8f5ac9ea4924",
+            "depositTx": "0x60c75657829719c807d1d151e9f275cb9cd0ba5c632fcb7985f234e9923dda44",
+            "tokenName": "Dai",
+            "token": "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
+            "amount": "0.001",
+            "dao": "0x29060390D15e3bf75b347bE10326AA959021f5dC"
+          },
+          {
+            "approveTx": "0x9bbc3a56fd854aab396f7f596eadb5b8c1c9affe178c2c0e1823d5b3fa5eaa5d",
+            "depositTx": "0x24096d2484a2a10dc553294467da4cceef16039ced4c9c4355a4876062f61955",
+            "tokenName": "Uni",
+            "token": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+            "amount": "0.001",
+            "dao": "0x29060390D15e3bf75b347bE10326AA959021f5dC"
+          }
+        ],
+        "proposal": {
+          "proposalTx": "0xeeb70e994be7bdcde474972d46abcef808590e3650f380a199f128c99dcc31e4",
+          "metadata": {
+            "name": "WhitelistVoting Dummy Proposal",
+            "description": "Dummy withdraw proposal for QA and testing purposes...",
+            "links": [
+              {
+                "label": "link01",
+                "url": "https://link.01"
+              },
+              {
+                "label": "link02",
+                "url": "https://link.02"
+              }
+            ]
+          },
+          "dao": "0x29060390D15e3bf75b347bE10326AA959021f5dC"
+        }
+      }
+    }
+  },
+  "arbitrum-rinkeby": {
+    "dao": {
+      "ERC20Voting": {},
+      "WhitelistVoting": {}
+    }
+  },
+  "mumbai": {
+    "dao": {
+      "ERC20Voting": {},
+      "WhitelistVoting": {}
+    }
+  }
+}
