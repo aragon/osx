@@ -118,12 +118,6 @@ interface Proposal {
   executed: Boolean!
 }
 
-# Voter
-
-interface Voter {
-  id: ID! # address
-}
-
 # Votings
 
 enum VoterState {
@@ -147,7 +141,7 @@ type ERC20VotingPackage implements Package @entity {
   token: ERC20Token
 }
 
-type ERC20VotingVoter implements Voter @entity {
+type ERC20VotingVoter @entity {
   id: ID! # address
   proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
 }
@@ -199,7 +193,7 @@ type WhitelistPackage implements Package @entity {
   users: [WhitelistVoter!]! @derivedFrom(field: "pkg")
 }
 
-type WhitelistVoter implements Voter @entity {
+type WhitelistVoter @entity {
   id: ID! # address
   proposals: [WhitelistVote!]! @derivedFrom(field: "voter")
   pkg: WhitelistPackage!
