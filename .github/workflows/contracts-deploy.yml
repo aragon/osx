@@ -72,6 +72,8 @@ jobs:
     needs: ['build-deploy']
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ARABOT_PAT }}
       - uses: actions/download-artifact@v3
         with:
           path: artefacts
@@ -85,27 +87,35 @@ jobs:
         run: node .github/helpers/contracts/updateActiveContractsJSON.js
       - name: Update Subgraph manifests
         run: node .github/helpers/subgraph/updateManifest.js
-      - name: create Dummy DAOs erc20
-        run: node .github/helpers/contracts/dummy-dao/createDao.ts rinkeby ${{ secrets.ETH_KEY }} erc20
-      - name: create Dummy DAOs whitelist
-        run: node .github/helpers/contracts/dummy-dao/createDao.ts rinkeby ${{ secrets.ETH_KEY }}
-      - name: Deposit to Erc20 DAO
-        run: node .github/helpers/contracts/dummy-dao/deposit.ts rinkeby ${{ secrets.ETH_KEY }} erc20
-      - name: Deposit to Whitelist DAO
-        run: node .github/helpers/contracts/dummy-dao/deposit.ts rinkeby ${{ secrets.ETH_KEY }}
-      - name: Proposal of Erc20
-        run: node .github/helpers/contracts/dummy-dao/proposal.ts rinkeby ${{ secrets.ETH_KEY }} erc20
-      - name: Proposal of Whitelist
-        run: node .github/helpers/contracts/dummy-dao/proposal.ts rinkeby ${{ secrets.ETH_KEY }}
       - name: Commit changes
         run: |
           git fetch
           git pull
-          git config --global user.name "Rekard0"
-          git config --global user.email "5880388+Rekard0@users.noreply.github.com"
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
           git add active_contracts.json
-          git add dummy_daos.json	
           git add packages/contracts/Releases.md
           git add ./packages/subgraph/	
           git commit -am "Updates files with deployed contract addresses"
+          git push
+      - name: create Dummy DAOs erc20
+        run: ts-node .github/helpers/contracts/dummy-dao/createDao.ts $NETWORK ${{ secrets.ETH_KEY }} erc20
+      - name: create Dummy DAOs whitelist
+        run: ts-node .github/helpers/contracts/dummy-dao/createDao.ts $NETWORK ${{ secrets.ETH_KEY }}
+      - name: Deposit to Erc20 DAO
+        run: ts-node .github/helpers/contracts/dummy-dao/deposit.ts $NETWORK ${{ secrets.ETH_KEY }} erc20
+      - name: Deposit to Whitelist DAO
+        run: ts-node .github/helpers/contracts/dummy-dao/deposit.ts $NETWORK ${{ secrets.ETH_KEY }}
+      - name: Proposal of Erc20
+        run: ts-node .github/helpers/contracts/dummy-dao/proposal.ts $NETWORK ${{ secrets.ETH_KEY }} erc20
+      - name: Proposal of Whitelist
+        run: ts-node .github/helpers/contracts/dummy-dao/proposal.ts $NETWORK ${{ secrets.ETH_KEY }}
+      - name: Commit changes
+        run: |
+          git fetch
+          git pull
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
+          git add dummy_daos.json	
+          git commit -am "Updates files with dummy DAOs info"
           git push
