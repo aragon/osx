@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build:contracts": "cd ../contracts && yarn build",
-    "build": "find ../contracts/artifacts/contracts/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./types",
+    "build": "yarn run build:contracts && find ../contracts/artifacts/contracts/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./types",
     "build:npm": "rollup --config rollup.config.ts",
     "prepublishOnly": "yarn build:contracts && yarn build && yarn build:npm"
   },
