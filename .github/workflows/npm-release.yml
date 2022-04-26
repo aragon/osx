@@ -1,12 +1,6 @@
 name: NPM Release
 
 on:
-  workflow_call:
-    inputs:
-      ref:
-        description: "Ref to checkout"
-        required: false
-        type: string
   pull_request:
     types:
       - closed
@@ -15,52 +9,19 @@ on:
       - main
     paths:
       - 'packages/contracts-ethers/**'
-      - '!packages/contracts/**'
+      - '.github/workflows/npm-release.yml'
 
 jobs:
-  prepare: 
+  check:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged
-    outputs:
-      bump: ${{ steps.prerelease.outputs.prerelease }}${{ steps.patch.outputs.bump }}${{ steps.minor.outputs.bump }}${{ steps.major.outputs.bump }}
-    steps:
-      - name: Is patch
-        id: patch
-        if: contains( github.event.pull_request.labels.*.name, 'npm:patch')
-        run: echo "::set-output name=bump::patch"
-      - name: Is minor
-        id: minor
-        if: contains( github.event.pull_request.labels.*.name, 'npm:minor')
-        run: echo "::set-output name=bump::minor"
-      - name: Is major
-        id: major
-        if: contains( github.event.pull_request.labels.*.name, 'npm:major')
-        run: echo "::set-output name=bump::major"
-      - name: Is pre release
-        id: prerelease
-        if: contains( github.event.pull_request.base.ref, 'develop' )
-        run: echo "::set-output name=prerelease::pre"
-  build_deploy:
-    runs-on: ubuntu-latest
-    needs: [prepare]
-    if: ${{ needs.prepare.outputs.bump }} != 'pre' && ${{ needs.prepare.outputs.bump }} != ''
-    strategy:
-      fail-fast: false
-      matrix:
-        package: [contracts, contracts-ethers]
     steps:
       - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: changes
         with:
-          ref: ${{ inputs.ref }}
-      - name: Install node
-        uses: actions/setup-node@v1
-      - name: Install dependencies
-        run: yarn install --pure-lockfile
-      - name: Version bump
-        run:  |
-          yarn config set version-git-tag false
-          yarn version --${{ needs.prepare.outputs.bump }}
-          yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          filters: |
+            contracts:
+              - 'packages/contracts/**'
+              - '.github/workflows/contracts-deploy.yml'
+      - if: steps.changes.outputs.src == 'false'
+        uses: './github/workflows/npm-release-reusable.yml'
