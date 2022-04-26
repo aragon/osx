@@ -1,15 +1,17 @@
 name: Contracts Deploy
 on:
-  push:
-    paths:
-      - 'packages/contracts/**'
+  pull_request:
+    types:
+      - closed
     branches:
       - 'develop'
       - 'main'
+    paths:
+      - 'packages/contracts/**'
 
 jobs:
   test:
-    if: github.actor != 'arabot-1'
+    if: github.actor != 'arabot-1' && github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,6 +72,8 @@ jobs:
   conclude:
     runs-on: ubuntu-latest
     needs: ['build-deploy']
+    outputs:
+      commit: ${{ steps.commit.outputs.commit }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -84,6 +88,7 @@ jobs:
       - name: Update Subgraph manifests
         run: node .github/helpers/subgraph/updateManifest.js
       - name: Commit changes
+        id: commit
         run: |
           git fetch
           git pull
@@ -94,3 +99,11 @@ jobs:
           git add ./packages/subgraph/	
           git commit -am "Updates files with deployed contract addresses"
           git push
+          echo "::set-output name=commit::$(git rev-parse HEAD)"
+  npm-release:
+    runs-on: ubuntu-latest
+    needs: ['conclude']
+    steps:
+      - uses: './github/workflows/npm-release.yml'
+        with:
+          ref: ${{ needs.conclude.outputs.commit }}
