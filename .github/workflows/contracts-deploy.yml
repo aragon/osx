@@ -8,6 +8,7 @@ on:
       - 'main'
     paths:
       - 'packages/contracts/**'
+      - '.github/workflows/contracts-deploy.yml'
 
 jobs:
   test:
@@ -104,6 +105,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: ['conclude']
     steps:
-      - uses: './github/workflows/npm-release.yml'
+      - uses: './github/workflows/npm-release-reusable.yml'
         with:
           ref: ${{ needs.conclude.outputs.commit }}
