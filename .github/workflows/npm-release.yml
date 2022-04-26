@@ -43,7 +43,7 @@ jobs:
   build_deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.bump }} != 'pre'
+    if: ${{ needs.prepare.outputs.bump }} != 'pre' && ${{ needs.prepare.outputs.bump }} != ''
     strategy:
       fail-fast: false
       matrix:
