@@ -43,8 +43,9 @@ jobs:
   build_deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
+    if: ${{ needs.prepare.outputs.bump }} != 'pre' && ${{ needs.prepare.outputs.bump }} != ''
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         package: [contracts, contracts-ethers]
     steps:

@@ -8,7 +8,8 @@
     "declaration": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "rootDir": "../../"
   },
-  "include": ["./types"],
-  "files": ["./types/index.ts"]
+  "include": ["./npm", "/types"],
+  "files": ["./npm/index.ts"]
 }
