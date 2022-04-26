@@ -45,7 +45,7 @@ jobs:
     needs: [prepare]
     if: ${{ needs.prepare.outputs.bump }} != 'pre'
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         package: [contracts, contracts-ethers]
     steps:
