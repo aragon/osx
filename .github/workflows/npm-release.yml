@@ -1,0 +1,27 @@
+name: NPM Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - develop
+      - main
+    paths:
+      - 'packages/contracts-ethers/**'
+      - '.github/workflows/npm-release.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            contracts:
+              - 'packages/contracts/**'
+              - '.github/workflows/contracts-deploy.yml'
+      - if: steps.changes.outputs.src == 'false'
+        uses: './github/workflows/npm-release-reusable.yml'
