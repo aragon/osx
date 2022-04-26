@@ -1,0 +1,81 @@
+name: Dummy Dao
+on:
+  workflow_call:
+    inputs:
+      last_commit:
+        required: true
+        type: string
+    secrets:
+      ETH_KEY:
+        description: 'A token passed from the caller workflow'
+        required: false
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.prepare.outputs.environment }}
+      tags: ${{ steps.prepare.outputs.tags }}
+      matrix: ${{ steps.prepare.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare
+        id: prepare
+        run: node .github/helpers/contracts/prepare.js '${{ github.ref }}'
+  create-dummy-daos:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.last_commit }}
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - name: Compile
+        run: cd packages/contracts && yarn run build
+      - name: create Dummy DAOs erc20
+        run: node .github/helpers/contracts/dummy-dao/createDao.ts ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
+      - name: create Dummy DAOs whitelist
+        run: node .github/helpers/contracts/dummy-dao/createDao.ts ${{matrix.network}} ${{ secrets.ETH_KEY }}
+      - name: Deposit to Erc20 DAO
+        run: node .github/helpers/contracts/dummy-dao/deposit.ts ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
+      - name: Deposit to Whitelist DAO
+        run: node .github/helpers/contracts/dummy-dao/deposit.ts ${{matrix.network}} ${{ secrets.ETH_KEY }}
+      - name: Proposal of Erc20
+        run: node .github/helpers/contracts/dummy-dao/proposal.ts ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
+      - name: Proposal of Whitelist
+        run: node .github/helpers/contracts/dummy-dao/proposal.ts ${{matrix.network}} ${{ secrets.ETH_KEY }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{matrix.network}}
+          path: ./dummy_daos.json
+          retention-days: 1
+  conclude-dummy-daos:
+    runs-on: ubuntu-latest
+    needs: ['create-dummy-daos']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ARABOT_PAT }}
+      - uses: actions/download-artifact@v3
+        with:
+          path: artefacts
+      - name: Update updateDummyDaoJSON.json
+        run: node .github/helpers/contracts/dummy-dao/updateDummyDaoJSON.js
+      - name: Commit changes
+        run: |
+          git fetch
+          git pull
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
+          git add dummy_daos.json	
+          git commit -am "Updates files with dummy DAOs info"
+          git push

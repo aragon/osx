@@ -1,4 +1,5 @@
 const fs = require('fs/promises');
+const fetch = require('node-fetch');
 const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
@@ -75,6 +76,42 @@ async function proposal() {
 
   const actions = [[daoAddress, '0', encoded]];
 
+  let overrides = {};
+
+  if (networkName === 'mumbai') {
+    const fees = await (
+      await fetch('https://gasstation-mumbai.matic.today/v2')
+    ).json();
+
+    const maxPriorityFee = ethers.utils.parseUnits(
+      fees.fast.maxPriorityFee.toFixed(6).toString(),
+      'gwei'
+    );
+
+    const maxFeePerGas = ethers.utils.parseUnits(
+      fees.fast.maxFee.toFixed(6).toString(),
+      'gwei'
+    );
+
+    console.log(
+      'fees',
+      fees,
+      'maxPriorityFee',
+      maxPriorityFee.toString(),
+      'maxFeePerGas',
+      maxFeePerGas.toString()
+    );
+
+    overrides = {
+      maxPriorityFeePerGas: maxPriorityFee.toString(),
+      maxFeePerGas: maxFeePerGas.toString(),
+    };
+  } else if (networkName === 'arbitrum-rinkeby') {
+    overrides = {
+      gasLimit: 199000000,
+    };
+  }
+
   // initiate Voting contract
   let VotingContract;
   if (isERC20Voting === 'erc20') {
@@ -97,7 +134,8 @@ async function proposal() {
     0,
     0,
     true,
-    2
+    2,
+    overrides
   ); // vote Yea and execute
 
   await proposalTx.wait(1);
@@ -111,6 +149,15 @@ async function proposal() {
   console.log('writing results:', resultObj, 'to file.', '\n');
 
   // edit or add property
+  if (
+    !content[networkName].dao[
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    ].proposal
+  ) {
+    content[networkName].dao[
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    ].proposal = {};
+  }
   content[networkName].dao[
     isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
   ].proposal = resultObj;

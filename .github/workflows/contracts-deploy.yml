@@ -49,13 +49,13 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Compile
         run: cd packages/contracts && yarn run build
       - name: Deploy
-        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.prepare.outputs.tags }}"
+        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,Verify,${{ needs.prepare.outputs.tags }}"
         env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
@@ -69,6 +69,8 @@ jobs:
           retention-days: 1
   conclude:
     runs-on: ubuntu-latest
+    outputs:
+      commitid: ${{ steps.changes.outputs.commitid }}
     needs: ['build-deploy']
     steps:
       - uses: actions/checkout@v2
@@ -77,10 +79,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: artefacts
-      - name: Install dependencies
-        run: yarn install --pure-lockfile
-      - name: Compile
-        run: cd packages/contracts && yarn run build
       - name: Update Releases.md
         run: node .github/helpers/contracts/updateReleasesMD.js
       - name: Update active_contracts.json
@@ -98,24 +96,13 @@ jobs:
           git add ./packages/subgraph/	
           git commit -am "Updates files with deployed contract addresses"
           git push
-      - name: create Dummy DAOs erc20
-        run: ts-node .github/helpers/contracts/dummy-dao/createDao.ts $NETWORK ${{ secrets.ETH_KEY }} erc20
-      - name: create Dummy DAOs whitelist
-        run: ts-node .github/helpers/contracts/dummy-dao/createDao.ts $NETWORK ${{ secrets.ETH_KEY }}
-      - name: Deposit to Erc20 DAO
-        run: ts-node .github/helpers/contracts/dummy-dao/deposit.ts $NETWORK ${{ secrets.ETH_KEY }} erc20
-      - name: Deposit to Whitelist DAO
-        run: ts-node .github/helpers/contracts/dummy-dao/deposit.ts $NETWORK ${{ secrets.ETH_KEY }}
-      - name: Proposal of Erc20
-        run: ts-node .github/helpers/contracts/dummy-dao/proposal.ts $NETWORK ${{ secrets.ETH_KEY }} erc20
-      - name: Proposal of Whitelist
-        run: ts-node .github/helpers/contracts/dummy-dao/proposal.ts $NETWORK ${{ secrets.ETH_KEY }}
-      - name: Commit changes
-        run: |
-          git fetch
-          git pull
-          git config --global user.name "Arabot-1"
-          git config --global user.email "arabot-1@users.noreply.github.com"
-          git add dummy_daos.json	
-          git commit -am "Updates files with dummy DAOs info"
-          git push
+          SHA=$(git rev-parse HEAD)
+          echo "::set-output name=commitid::$SHA"
+  call-create-daos-workflow:
+    needs: [conclude]
+    uses: ./.github/workflows/create-dummy-dao.yml
+    with:
+      last_commit: ${{ needs.conclude.outputs.commitid }}
+    secrets:
+      ETH_KEY: ${{ secrets.ETH_KEY }}
+      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}

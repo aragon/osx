@@ -74,7 +74,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await verifyContract(distributorBase, []);
 };
 export default func;
-func.tags = ['DAOFactory', 'TokenFactory', 'Registry', 'verify'];
+func.tags = ['Verify'];
 func.runAtTheEnd = true;
 func.skip = (hre: HardhatRuntimeEnvironment) =>
   Promise.resolve(

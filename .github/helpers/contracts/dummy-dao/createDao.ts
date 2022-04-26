@@ -1,4 +1,5 @@
 const fs = require('fs/promises');
+const fetch = require('node-fetch');
 const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
@@ -27,8 +28,8 @@ async function createDao() {
 
   const votings = ['ERC20', 'Whitelist'];
   let tx;
-  const name = 'DummyDAO_' + votings[isERC20Voting === 'erc20' ? 0 : 1];
-  const daoName = name + `_Voting`;
+  let name = 'DummyDAO_' + votings[isERC20Voting === 'erc20' ? 0 : 1];
+  const daoName = name + `_Voting_` + new Date().getTime();
 
   const metaObj = {
     name: daoName,
@@ -44,30 +45,64 @@ async function createDao() {
 
   console.log('ipfs cid', cid.path);
 
-  const metadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(cid.path));
-  const daoConfig = [daoName, metadata];
-  const votingSettings = ['200000000000000000', '400000000000000000', '60000'];
+  let metadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(cid.path));
+  let daoConfig = [daoName, metadata];
+  let votingSettings = ['200000000000000000', '400000000000000000', '60000'];
+
+  let overrides = {};
+
+  if (networkName === 'mumbai') {
+    const fees = await (
+      await fetch('https://gasstation-mumbai.matic.today/v2')
+    ).json();
+
+    const maxPriorityFee = ethers.utils.parseUnits(
+      fees.fast.maxPriorityFee.toFixed(6).toString(),
+      'gwei'
+    );
+
+    const maxFeePerGas = ethers.utils.parseUnits(
+      fees.fast.maxFee.toFixed(6).toString(),
+      'gwei'
+    );
+
+    console.log(
+      'fees',
+      fees,
+      'maxPriorityFee',
+      maxPriorityFee.toString(),
+      'maxFeePerGas',
+      maxFeePerGas.toString()
+    );
+
+    overrides = {
+      maxPriorityFeePerGas: maxPriorityFee.toString(),
+      maxFeePerGas: maxFeePerGas.toString(),
+    };
+  }
 
   if (isERC20Voting) {
-    const tokenConfig = [
+    let tokenConfig = [
       '0x0000000000000000000000000000000000000000',
       name,
       'DMDT',
     ];
-    const mintConfig = [[signer.address], ['10000000000000000000000']];
+    let mintConfig = [[signer.address], ['10000000000000000000000']];
     tx = await DAOFactoryContract.newERC20VotingDAO(
       daoConfig,
       votingSettings,
       tokenConfig,
       mintConfig,
-      '0x0000000000000000000000000000000000000000'
+      '0x0000000000000000000000000000000000000000',
+      overrides
     );
   } else {
     tx = await DAOFactoryContract.newWhitelistVotingDAO(
       daoConfig,
       votingSettings,
       [signer.address],
-      '0x0000000000000000000000000000000000000000'
+      '0x0000000000000000000000000000000000000000',
+      overrides
     );
   }
 
@@ -93,20 +128,20 @@ async function createDao() {
   const daoTokenEncoded = eventFactory.topics[1];
   const daoVotingEncoded = eventFactory.topics[2];
 
-  const daoAddress = ethers.utils.defaultAbiCoder.decode(
+  let daoAddress = ethers.utils.defaultAbiCoder.decode(
     ['address'],
     daoAddressEncoded
   );
-  const daoToken = ethers.utils.defaultAbiCoder.decode(
+  let daoToken = ethers.utils.defaultAbiCoder.decode(
     ['address'],
     daoTokenEncoded
   );
-  const daoVoting = ethers.utils.defaultAbiCoder.decode(
+  let daoVoting = ethers.utils.defaultAbiCoder.decode(
     ['address'],
     daoVotingEncoded
   );
 
-  const resultObj = {
+  let resultObj = {
     tx: tx.hash,
     name: daoName,
     votingType: isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting',
@@ -120,10 +155,23 @@ async function createDao() {
   // read file and make object
   const dummyDAOFile = await fs.readFile(path.join('./', 'dummy_daos.json'));
   let content = JSON.parse(dummyDAOFile.toString());
+
   // edit or add property
+  if (!content[networkName]) content[networkName] = {};
+  if (!content[networkName].dao) content[networkName].dao = {};
+  if (
+    !content[networkName].dao[
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    ]
+  ) {
+    content[networkName].dao[
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    ] = {};
+  }
   content[networkName].dao[
     isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
   ] = resultObj;
+
   //write file
   await fs.writeFile(
     path.join('./', 'dummy_daos.json'),

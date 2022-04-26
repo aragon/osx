@@ -1,4 +1,5 @@
 const fs = require('fs/promises');
+const fetch = require('node-fetch');
 const path = require('path');
 const {ethers} = require('ethers');
 const networks = require('../../../../packages/contracts/networks.json');
@@ -18,12 +19,8 @@ const tokensList = {
       address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     },
   ],
-  mumbai: [
-    {
-      name: 'WMATIC',
-      address: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
-    },
-  ],
+  'arbitrum-rinkeby': [],
+  mumbai: [],
 };
 
 async function deposit() {
@@ -47,6 +44,38 @@ async function deposit() {
   const amount = ethers.utils.parseEther('0.001');
   let results = [];
 
+  let overrides = {};
+
+  if (networkName === 'mumbai') {
+    const fees = await (
+      await fetch('https://gasstation-mumbai.matic.today/v2')
+    ).json();
+
+    const maxPriorityFee = ethers.utils.parseUnits(
+      fees.fast.maxPriorityFee.toFixed(6).toString(),
+      'gwei'
+    );
+
+    const maxFeePerGas = ethers.utils.parseUnits(
+      fees.fast.maxFee.toFixed(6).toString(),
+      'gwei'
+    );
+
+    console.log(
+      'fees',
+      fees,
+      'maxPriorityFee',
+      maxPriorityFee.toString(),
+      'maxFeePerGas',
+      maxFeePerGas.toString()
+    );
+
+    overrides = {
+      maxPriorityFeePerGas: maxPriorityFee.toString(),
+      maxFeePerGas: maxFeePerGas.toString(),
+    };
+  }
+
   // deposit ETH
   console.log(
     '\n',
@@ -57,14 +86,11 @@ async function deposit() {
     '\n'
   );
 
-  let overrides = {
-    value: amount,
-  };
   const tx = await DaoContract.deposit(
     ethers.constants.AddressZero,
     amount,
     'dummy deposit of ETH, amount:' + ethers.utils.formatEther(amount),
-    overrides
+    {...overrides, value: amount}
   );
 
   await tx.wait(1);
@@ -99,41 +125,52 @@ async function deposit() {
       '\n'
     );
 
-    const approveTx = await erc20TokenContract.approve(daoAddress, amount);
-    await approveTx.wait(1);
+    const balance = await erc20TokenContract.balanceOf(signer.address);
 
-    // deposit
-    console.log(
-      'Depositing amount:',
-      amount.toString(),
-      'of token:',
-      token.address,
-      'to DAO:',
-      daoAddress,
-      '\n'
-    );
+    console.log('balance:', balance.toString());
 
-    const tokenDepositTx = await DaoContract.deposit(
-      token.address,
-      amount,
-      'dummy deposit of:' +
-        token.name +
-        'amount:' +
-        ethers.utils.formatEther(amount)
-    );
+    if (balance.gt(ethers.BigNumber.from(0))) {
+      const approveTx = await erc20TokenContract.approve(
+        daoAddress,
+        amount,
+        overrides
+      );
+      await approveTx.wait(1);
 
-    await tokenDepositTx.wait(1);
+      // deposit
+      console.log(
+        'Depositing amount:',
+        amount.toString(),
+        'of token:',
+        token.address,
+        'to DAO:',
+        daoAddress,
+        '\n'
+      );
 
-    const resultObj = {
-      approveTx: approveTx.hash,
-      depositTx: tokenDepositTx.hash,
-      tokenName: token.name,
-      token: token.address,
-      amount: ethers.utils.formatEther(amount),
-      dao: daoAddress,
-    };
+      const tokenDepositTx = await DaoContract.deposit(
+        token.address,
+        amount,
+        'dummy deposit of:' +
+          token.name +
+          'amount:' +
+          ethers.utils.formatEther(amount),
+        overrides
+      );
 
-    results.push(resultObj);
+      await tokenDepositTx.wait(1);
+
+      const resultObj = {
+        approveTx: approveTx.hash,
+        depositTx: tokenDepositTx.hash,
+        tokenName: token.name,
+        token: token.address,
+        amount: ethers.utils.formatEther(amount),
+        dao: daoAddress,
+      };
+
+      results.push(resultObj);
+    }
   }
 
   console.log('writing results:', results, 'to file.', '\n');
@@ -142,6 +179,15 @@ async function deposit() {
   const dummyDAOFile = await fs.readFile(path.join('./', 'dummy_daos.json'));
   let content = JSON.parse(dummyDAOFile.toString());
   // edit or add property
+  if (
+    !content[networkName].dao[
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    ].deposits
+  ) {
+    content[networkName].dao[
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    ].deposits = [];
+  }
   content[networkName].dao[
     isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
   ].deposits = results;
