@@ -131,7 +131,6 @@ jobs:
       last_commit: ${{ needs.conclude.outputs.commitid }}
     secrets:
       ETH_KEY: ${{ secrets.ETH_KEY }}
-      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}
   npm-release:
     runs-on: ubuntu-latest
     needs: ['conclude']
