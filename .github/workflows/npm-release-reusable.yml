@@ -4,21 +4,16 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: "Ref to checkout"
+        description: 'Ref to checkout'
         required: false
         type: string
-  pull_request:
-    types:
-      - closed
-    branches:
-      - develop
-      - main
-    paths:
-      - 'packages/contracts-ethers/**'
-      - '!packages/contracts/**'
+    secrets:
+      NPM_TOKEN:
+        description: 'A token passed from the caller workflow'
+        required: true
 
 jobs:
-  prepare: 
+  prepare:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged
     outputs:
@@ -59,10 +54,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Version bump
-        run:  |
+        run: |
           yarn config set version-git-tag false
           yarn version --${{ needs.prepare.outputs.bump }}
           yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
