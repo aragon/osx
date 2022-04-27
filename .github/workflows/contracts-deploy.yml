@@ -19,7 +19,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Compile
@@ -52,7 +52,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Compile
@@ -62,19 +62,42 @@ jobs:
         env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
-          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
-          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
-          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.network}}
           path: ./packages/contracts/deployments/*
           retention-days: 1
+  verfiyContracts:
+    runs-on: ubuntu-latest
+    needs: [build-deploy]
+    environment: ${{ needs.prepare.outputs.environment }}
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{matrix.network}}
+          path: ./packages/contracts/deployments/
+      - name: Verify
+        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "Verify"
+        env:
+          NETWORK: ${{ matrix.network }}
+          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
+          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
+          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
   conclude:
     runs-on: ubuntu-latest
-    needs: ['build-deploy']
     outputs:
-      commit: ${{ steps.commit.outputs.commit }}
+      commitid: ${{ steps.changes.outputs.commitid }}
+    needs: ['build-deploy']
     steps:
       - uses: actions/checkout@v2
         with:
@@ -100,11 +123,19 @@ jobs:
           git add ./packages/subgraph/	
           git commit -am "Updates files with deployed contract addresses"
           git push
-          echo "::set-output name=commit::$(git rev-parse HEAD)"
+          echo "::set-output name=commitid::$(git rev-parse HEAD)"
+  call-create-daos-workflow:
+    needs: ['conclude']
+    uses: './.github/workflows/create-dummy-dao.yml'
+    with:
+      last_commit: ${{ needs.conclude.outputs.commitid }}
+    secrets:
+      ETH_KEY: ${{ secrets.ETH_KEY }}
+      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}
   npm-release:
     runs-on: ubuntu-latest
     needs: ['conclude']
     steps:
-      - uses: './github/workflows/npm-release-reusable.yml'
+      - uses: './.github/workflows/npm-release-reusable.yml'
         with:
-          ref: ${{ needs.conclude.outputs.commit }}
+          ref: ${{ needs.conclude.outputs.commitid }}

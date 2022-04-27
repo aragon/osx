@@ -31,4 +31,3 @@ jobs:
         env:
           REPORT_GAS: true
         run: yarn run test
-        

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos. 
+- added workflow and scripts in `.github/helpers/contracts/dummy-dao/` to create dummy daos, deposits and proposals on contract deploy
+- Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos.
 - Added `MetaTxComponent`.
 
 ### Changed
@@ -24,4 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v0.0.1-alpha
 
 ### Added
+
 - First version of the package, exposing the JSON artifacts.
