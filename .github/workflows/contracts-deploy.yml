@@ -58,18 +58,41 @@ jobs:
       - name: Compile
         run: cd packages/contracts && yarn run build
       - name: Deploy
-        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,Verify,${{ needs.prepare.outputs.tags }}"
+        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.prepare.outputs.tags }}"
         env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
-          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
-          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
-          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.network}}
           path: ./packages/contracts/deployments/*
           retention-days: 1
+  verfiyContracts:
+    runs-on: ubuntu-latest
+    needs: [build-deploy]
+    environment: ${{ needs.prepare.outputs.environment }}
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: yarn install --pure-lockfile
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{matrix.network}}
+          path: ./packages/contracts/deployments/
+      - name: Verify
+        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "Verify"
+        env:
+          NETWORK: ${{ matrix.network }}
+          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
+          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
+          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
   conclude:
     runs-on: ubuntu-latest
     outputs:
