@@ -5,10 +5,6 @@ on:
       last_commit:
         required: true
         type: string
-    secrets:
-      ETH_KEY:
-        description: 'A token passed from the caller workflow'
-        required: false
   workflow_dispatch:
 
 jobs:
