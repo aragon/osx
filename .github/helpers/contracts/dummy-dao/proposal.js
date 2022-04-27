@@ -7,6 +7,7 @@ const networks = require('../../../../packages/contracts/networks.json');
 const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json');
 const WhiteVotingJson = require('../../../../packages/contracts/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
+const gas = require('./estimateGas');
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
@@ -76,41 +77,7 @@ async function proposal() {
 
   const actions = [[daoAddress, '0', encoded]];
 
-  let overrides = {};
-
-  if (networkName === 'mumbai') {
-    const fees = await (
-      await fetch('https://gasstation-mumbai.matic.today/v2')
-    ).json();
-
-    const maxPriorityFee = ethers.utils.parseUnits(
-      fees.fast.maxPriorityFee.toFixed(6).toString(),
-      'gwei'
-    );
-
-    const maxFeePerGas = ethers.utils.parseUnits(
-      fees.fast.maxFee.toFixed(6).toString(),
-      'gwei'
-    );
-
-    console.log(
-      'fees',
-      fees,
-      'maxPriorityFee',
-      maxPriorityFee.toString(),
-      'maxFeePerGas',
-      maxFeePerGas.toString()
-    );
-
-    overrides = {
-      maxPriorityFeePerGas: maxPriorityFee.toString(),
-      maxFeePerGas: maxFeePerGas.toString(),
-    };
-  } else if (networkName === 'arbitrum-rinkeby') {
-    overrides = {
-      gasLimit: 199000000,
-    };
-  }
+  let overrides = await gas.setGasOverride(provider);
 
   // initiate Voting contract
   let VotingContract;

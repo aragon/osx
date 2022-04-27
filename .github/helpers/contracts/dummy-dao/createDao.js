@@ -1,11 +1,11 @@
 const fs = require('fs/promises');
-const fetch = require('node-fetch');
 const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
 const activeContracts = require('../../../../active_contracts.json');
 const networks = require('../../../../packages/contracts/networks.json');
 const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json');
+const gas = require('./estimateGas');
 
 async function createDao() {
   const args = process.argv.slice(2);
@@ -49,37 +49,8 @@ async function createDao() {
   let daoConfig = [daoName, metadata];
   let votingSettings = ['200000000000000000', '400000000000000000', '60000'];
 
-  let overrides = {};
-
-  if (networkName === 'mumbai') {
-    const fees = await (
-      await fetch('https://gasstation-mumbai.matic.today/v2')
-    ).json();
-
-    const maxPriorityFee = ethers.utils.parseUnits(
-      fees.fast.maxPriorityFee.toFixed(6).toString(),
-      'gwei'
-    );
-
-    const maxFeePerGas = ethers.utils.parseUnits(
-      fees.fast.maxFee.toFixed(6).toString(),
-      'gwei'
-    );
-
-    console.log(
-      'fees',
-      fees,
-      'maxPriorityFee',
-      maxPriorityFee.toString(),
-      'maxFeePerGas',
-      maxFeePerGas.toString()
-    );
-
-    overrides = {
-      maxPriorityFeePerGas: maxPriorityFee.toString(),
-      maxFeePerGas: maxFeePerGas.toString(),
-    };
-  }
+  let overrides = await gas.setGasOverride(provider);
+  console.log('Setting fee data:', overrides);
 
   if (isERC20Voting) {
     let tokenConfig = [

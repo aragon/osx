@@ -42,17 +42,17 @@ jobs:
       - name: Compile
         run: cd packages/contracts && yarn run build
       - name: create Dummy DAOs erc20
-        run: node .github/helpers/contracts/dummy-dao/createDao.ts ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
+        run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
       - name: create Dummy DAOs whitelist
-        run: node .github/helpers/contracts/dummy-dao/createDao.ts ${{matrix.network}} ${{ secrets.ETH_KEY }}
+        run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - name: Deposit to Erc20 DAO
-        run: node .github/helpers/contracts/dummy-dao/deposit.ts ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
+        run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
       - name: Deposit to Whitelist DAO
-        run: node .github/helpers/contracts/dummy-dao/deposit.ts ${{matrix.network}} ${{ secrets.ETH_KEY }}
+        run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - name: Proposal of Erc20
-        run: node .github/helpers/contracts/dummy-dao/proposal.ts ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
+        run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
       - name: Proposal of Whitelist
-        run: node .github/helpers/contracts/dummy-dao/proposal.ts ${{matrix.network}} ${{ secrets.ETH_KEY }}
+        run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.network}}

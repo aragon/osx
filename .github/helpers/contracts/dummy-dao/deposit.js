@@ -6,22 +6,8 @@ const networks = require('../../../../packages/contracts/networks.json');
 const daoJson = require('../../../../packages/contracts/artifacts/contracts/core/IDAO.sol/IDAO.json');
 const erc20Json = require('../../../../packages/contracts/artifacts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json');
 const dummyDaos = require('../../../../dummy_daos.json');
-
-// assume the privKey ownes the following tokens
-const tokensList = {
-  rinkeby: [
-    {
-      name: 'Dai',
-      address: '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735',
-    },
-    {
-      name: 'Uni',
-      address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-    },
-  ],
-  'arbitrum-rinkeby': [],
-  mumbai: [],
-};
+const gas = require('./estimateGas');
+const {TOKENLIST} = require('./constans');
 
 async function deposit() {
   const args = process.argv.slice(2);
@@ -44,37 +30,7 @@ async function deposit() {
   const amount = ethers.utils.parseEther('0.001');
   let results = [];
 
-  let overrides = {};
-
-  if (networkName === 'mumbai') {
-    const fees = await (
-      await fetch('https://gasstation-mumbai.matic.today/v2')
-    ).json();
-
-    const maxPriorityFee = ethers.utils.parseUnits(
-      fees.fast.maxPriorityFee.toFixed(6).toString(),
-      'gwei'
-    );
-
-    const maxFeePerGas = ethers.utils.parseUnits(
-      fees.fast.maxFee.toFixed(6).toString(),
-      'gwei'
-    );
-
-    console.log(
-      'fees',
-      fees,
-      'maxPriorityFee',
-      maxPriorityFee.toString(),
-      'maxFeePerGas',
-      maxFeePerGas.toString()
-    );
-
-    overrides = {
-      maxPriorityFeePerGas: maxPriorityFee.toString(),
-      maxFeePerGas: maxFeePerGas.toString(),
-    };
-  }
+  let overrides = await gas.setGasOverride(provider);
 
   // deposit ETH
   console.log(
@@ -107,7 +63,7 @@ async function deposit() {
   results.push(ethResultObj);
 
   // deposit token
-  const tokens = tokensList[networkName];
+  const tokens = TOKENLIST[networkName];
   for (let index = 0; index < tokens.length; index++) {
     const token = tokens[index];
     // approve
