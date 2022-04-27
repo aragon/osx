@@ -20,7 +20,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Install yarn
         run: npm i -G yarn
       - name: Install dependencies
@@ -31,4 +31,3 @@ jobs:
         env:
           REPORT_GAS: true
         run: yarn run test
-        
