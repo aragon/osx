@@ -69,7 +69,7 @@ jobs:
           retention-days: 1
   verfiyContracts:
     runs-on: ubuntu-latest
-    needs: [build-deploy, needs]
+    needs: [build-deploy, prepare]
     environment: ${{ needs.prepare.outputs.environment }}
     strategy:
       fail-fast: true
