@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Made `DAO` a `BaseRelayRecipient`
 - Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos. 
 - Added `MetaTxComponent`.
 
 ### Changed
 
+- Renamed the event `SetMetadata` to `MetadataSet`
+- Completed the `IDAO` interface and changed `DAO` accordingly
 - Decoupled `Permissions` from `BaseRelayRecipient`.
 - Fixed OZ contracts-upgradable `Initializable`.
 
