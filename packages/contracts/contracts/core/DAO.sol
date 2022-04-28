@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
 import "./acl/ACL.sol";
@@ -19,7 +18,7 @@ import "./IDAO.sol";
 /// @author Samuel Furter - Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and use to use public interface.
 /// @dev Public API of the Aragon DAO framework
-contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165, BaseRelayRecipient {
+contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165 {
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -48,6 +47,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     ERC1271 signatureValidator;
 
+    address private _trustedForwarder;
+
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
     function initialize(
@@ -63,25 +64,19 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         __ACL_init(_initialOwner);
     }
 
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.DAO";
-    }
-
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
     
     /// @inheritdoc IDAO
     function setTrustedForwarder(
-        address _trustedForwarder
+        address _newTrustedForwarder
     ) external override auth(address(this), MODIFY_TRUSTED_FORWARDER) {
-        _setTrustedForwarder(_trustedForwarder);
+        _setTrustedForwarder(_newTrustedForwarder);
     }
 
     /// @inheritdoc IDAO
-    function trustedForwarder() public virtual override (IDAO, BaseRelayRecipient) view returns (address){
-        return BaseRelayRecipient.trustedForwarder();
+    function trustedForwarder() public virtual view override returns(address) {
+        return _trustedForwarder;
     }
 
     /// @inheritdoc IDAO
@@ -173,12 +168,15 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// Private/Internal Functions
-
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
+    function _setTrustedForwarder(address _forwarder) internal {
+        _trustedForwarder = _forwarder;
+
+        emit TrustedForwarderSet(_forwarder);
+    }
 
     /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
     receive() external payable {
