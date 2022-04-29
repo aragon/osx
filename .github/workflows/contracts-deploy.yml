@@ -131,6 +131,7 @@ jobs:
       last_commit: ${{ needs.conclude.outputs.commitid }}
     secrets:
       ETH_KEY: ${{ secrets.ETH_KEY }}
+      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}
   npm-release:
     needs: ['conclude']
     uses: './.github/workflows/npm-release-reusable.yml'
