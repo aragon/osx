@@ -13,6 +13,12 @@ on:
         description: 'A token passed from the caller workflow'
         required: true
   workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - '.github/workflows/create-dummy-dao.yml'
 
 jobs:
   prepare:
