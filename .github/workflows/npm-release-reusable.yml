@@ -53,7 +53,9 @@ jobs:
           node-version: 14
       - name: Install dependencies
         run: yarn install --pure-lockfile
+        working-directory: packages/${{ matrix.package }}
       - name: Version bump
+        working-directory: packages/${{ matrix.package }}
         run: |
           yarn config set version-git-tag false
           yarn version --${{ needs.prepare.outputs.bump }}
