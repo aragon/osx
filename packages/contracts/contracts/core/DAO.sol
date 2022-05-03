@@ -60,7 +60,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _registerStandard(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);
-        _setTrustedForwarder(_forwarder);
+        _setTrustedForwarderWithEvent(_forwarder);
         __ACL_init(_initialOwner);
     }
 
@@ -71,7 +71,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function setTrustedForwarder(
         address _newTrustedForwarder
     ) external override auth(address(this), MODIFY_TRUSTED_FORWARDER) {
-        _setTrustedForwarder(_newTrustedForwarder);
+        _setTrustedForwarderWithEvent(_newTrustedForwarder);
     }
 
     /// @inheritdoc IDAO
@@ -172,7 +172,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         emit MetadataSet(_metadata);
     }
 
-    function _setTrustedForwarder(address _forwarder) internal {
+    function _setTrustedForwarderWithEvent(address _forwarder) internal {
         _trustedForwarder = _forwarder;
 
         emit TrustedForwarderSet(_forwarder);
