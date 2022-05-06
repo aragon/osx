@@ -60,7 +60,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _registerStandard(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);
-        _setTrustedForwarderWithEvent(_forwarder);
+        _setTrustedForwarder(_forwarder);
         __ACL_init(_initialOwner);
     }
 
@@ -71,7 +71,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function setTrustedForwarder(
         address _newTrustedForwarder
     ) external override auth(address(this), MODIFY_TRUSTED_FORWARDER) {
-        _setTrustedForwarderWithEvent(_newTrustedForwarder);
+        _setTrustedForwarder(_newTrustedForwarder);
     }
 
     /// @inheritdoc IDAO
@@ -168,16 +168,6 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    function _setMetadata(bytes calldata _metadata) internal {
-        emit MetadataSet(_metadata);
-    }
-
-    function _setTrustedForwarderWithEvent(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
-
-        emit TrustedForwarderSet(_forwarder);
-    }
-
     /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
     receive() external payable {
         emit ETHDeposited(msg.sender, msg.value);
@@ -186,5 +176,15 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @dev Fallback to handle future versions of the ERC165 standard.
     fallback() external {
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
+    }
+
+    function _setMetadata(bytes calldata _metadata) internal {
+        emit MetadataSet(_metadata);
+    }
+
+    function _setTrustedForwarder(address _forwarder) internal {
+        _trustedForwarder = _forwarder;
+
+        emit TrustedForwarderSet(_forwarder);
     }
 }
