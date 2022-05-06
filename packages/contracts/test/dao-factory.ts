@@ -12,7 +12,7 @@ const EVENTS = {
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
-  EXECUTED: 'Executed',
+  Executed: 'Executed',
 };
 
 const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
@@ -249,7 +249,7 @@ describe('DAOFactory: ', function () {
     await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
     expect(await voting.vote(0, VoterState.Yea, true))
-      .to.emit(dao, EVENTS.EXECUTED)
+      .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(3, 4, 5);
@@ -379,7 +379,7 @@ describe('DAOFactory: ', function () {
     await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
     expect(await voting.vote(0, VoterState.Yea, true))
-      .to.emit(dao, EVENTS.EXECUTED)
+      .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(3, 4, 5);
