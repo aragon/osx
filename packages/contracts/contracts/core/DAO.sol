@@ -16,7 +16,7 @@ import "./IDAO.sol";
 
 /// @title The public interface of the Aragon DAO framework.
 /// @author Samuel Furter - Aragon Association - 2021
-/// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and use to use public interface.
+/// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework
 contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165 {
     using SafeERC20 for ERC20;
@@ -30,7 +30,10 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
-    // Error msg's
+    ERC1271 signatureValidator;
+
+    address private _trustedForwarder;
+
     /// @notice Thrown if action execution has failed
     error ActionFailed();
 
@@ -44,10 +47,6 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     /// @notice Thrown if an ETH withdraw fails
     error ETHWithdrawFailed();
-
-    ERC1271 signatureValidator;
-
-    address private _trustedForwarder;
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
