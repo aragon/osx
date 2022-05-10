@@ -3,7 +3,6 @@
 pragma solidity 0.8.10;
 
 import "../core/component/Component.sol";
-import "hardhat/console.sol";
 
 contract TestComponent is Component {
     bytes32 public constant DO_SOMETHING_ROLE = keccak256("DO_SOMETHING_ROLE");
