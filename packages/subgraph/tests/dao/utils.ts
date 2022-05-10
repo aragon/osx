@@ -1,7 +1,7 @@
 import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 import {
-  SetMetadata,
+  MetadataSet,
   ETHDeposited,
   Deposited,
   Granted,
@@ -12,23 +12,23 @@ import {
 
 // events
 
-export function createNewSetMetadataEvent(
+export function createNewMetadataSetEvent(
   metadata: string,
   contractAddress: string
-): SetMetadata {
-  let newSetMetadataEvent = changetype<SetMetadata>(newMockEvent());
+): MetadataSet {
+  let newMetadataSetEvent = changetype<MetadataSet>(newMockEvent());
 
-  newSetMetadataEvent.address = Address.fromString(contractAddress);
-  newSetMetadataEvent.parameters = [];
+  newMetadataSetEvent.address = Address.fromString(contractAddress);
+  newMetadataSetEvent.parameters = [];
 
   let metadataParam = new ethereum.EventParam(
     'metadata',
     ethereum.Value.fromBytes(Bytes.fromUTF8(metadata))
   );
 
-  newSetMetadataEvent.parameters.push(metadataParam);
+  newMetadataSetEvent.parameters.push(metadataParam);
 
-  return newSetMetadataEvent;
+  return newMetadataSetEvent;
 }
 
 export function createNewETHDepositedEvent(

@@ -26,9 +26,13 @@ contract DAOMock is IDAO, ACL {
         return true;
     }
 
-    function trustedForwarder() public virtual view returns(address) {
+    function trustedForwarder() public override pure returns(address) {
         return address(0);
     }
+
+    function setTrustedForwarder(
+        address /* _trustedForwarder */
+    ) external override {}
 
     function setMetadata(
         bytes calldata /* _metadata */
@@ -52,4 +56,13 @@ contract DAOMock is IDAO, ACL {
         uint256, /* _amount */
         string memory /* _reference */
     ) public override {}
+
+    function setSignatureValidator(address  /* _signatureValidator */) external override {}
+
+    function isValidSignature(
+        bytes32, /* _hash */ 
+        bytes memory /* _signature */
+        ) external pure override returns (bytes4) {
+        return 0x0;
+    }
 }

@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the event `SetMetadata` to `MetadataSet`
+- Completed the `IDAO` interface and changed `DAO` accordingly
 - Decoupled `Permissions` from `BaseRelayRecipient`.
 - Fixed OZ contracts-upgradable `Initializable`.
 

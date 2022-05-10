@@ -33,7 +33,7 @@ abstract contract IDAO {
     /// @param _metadata The IPFS hash of the new metadata object
     function setMetadata(bytes calldata _metadata) external virtual;
 
-    event SetMetadata(bytes metadata);
+    event MetadataSet(bytes metadata);
 
     /// @notice If called, the list of provided actions will be executed.
     /// @dev It run a loop through the array of acctions and execute one by one.
@@ -74,4 +74,25 @@ abstract contract IDAO {
     ) external virtual;
 
     event Withdrawn(address indexed token, address indexed to, uint256 amount, string _reference);
+
+    /// @notice Setter for the trusted forwarder verifying the meta transaction
+    /// @param _trustedForwarder the trusted forwarder address
+    /// @dev used to update the trusted forwarder
+    function setTrustedForwarder(address _trustedForwarder) external virtual;
+
+    /// @notice Setter for the trusted forwarder verifying the meta transaction
+    /// @return the trusted forwarder address
+    function trustedForwarder() external virtual returns (address);
+
+    event TrustedForwarderSet(address forwarder);
+
+    /// @notice Setter to set the signature validator contract of ERC1271
+    /// @param _signatureValidator ERC1271 SignatureValidator
+    function setSignatureValidator(address _signatureValidator) external virtual;
+
+    /// @notice Method to validate the signature as described in ERC1271
+    /// @param _hash Hash of the data to be signed
+    /// @param _signature Signature byte array associated with _hash
+    /// @return bytes4
+    function isValidSignature(bytes32 _hash, bytes memory _signature) external virtual returns (bytes4);
 }

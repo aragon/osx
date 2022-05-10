@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the event `SetMetadata` to `MetadataSet`
 - Updated Subgraph to adapt to the changes in the core contracts.
 - Refactored subgraph's unit testing, applying clean code standards.
 

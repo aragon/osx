@@ -20,12 +20,12 @@ import {
   handleETHDeposited,
   handleDeposited,
   handleExecuted,
-  _handleSetMetadata
+  _handleMetadataSet
 } from '../../src/dao/dao';
 import {createDummyAcctions, createTokenCalls} from '../utils';
 import {Dao, ERC20VotingProposal} from '../../generated/schema';
 
-test('Run dao (handleSetMetadata) mappings with mock event', () => {
+test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // create state
   let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
   daoEntity.save();
@@ -35,7 +35,7 @@ test('Run dao (handleSetMetadata) mappings with mock event', () => {
   let entityID = Address.fromString(DAO_ADDRESS).toHexString();
 
   // handle event
-  _handleSetMetadata(entityID, metadata);
+  _handleMetadataSet(entityID, metadata);
 
   // checks
   assert.fieldEquals('Dao', entityID, 'id', entityID);

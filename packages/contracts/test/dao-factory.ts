@@ -7,12 +7,12 @@ import { customError } from './test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
-  SetMetadata: 'SetMetadata',
+  MetadataSet: 'MetadataSet',
   UpdateConfig: 'UpdateConfig',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
-  EXECUTED: 'Executed',
+  Executed: 'Executed',
 };
 
 const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
@@ -172,7 +172,7 @@ describe('DAOFactory: ', function () {
 
     // Check if correct ACL events are thrown.
     tx = tx.to
-      .emit(dao, EVENTS.SetMetadata)
+      .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(
@@ -249,7 +249,7 @@ describe('DAOFactory: ', function () {
     await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
     expect(await voting.vote(0, VoterState.Yea, true))
-      .to.emit(dao, EVENTS.EXECUTED)
+      .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(3, 4, 5);
@@ -294,7 +294,7 @@ describe('DAOFactory: ', function () {
 
     // Check if correct ACL events are thrown.
     tx = tx.to
-      .emit(dao, EVENTS.SetMetadata)
+      .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(
@@ -379,7 +379,7 @@ describe('DAOFactory: ', function () {
     await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
 
     expect(await voting.vote(0, VoterState.Yea, true))
-      .to.emit(dao, EVENTS.EXECUTED)
+      .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.UpdateConfig)
       .withArgs(3, 4, 5);
