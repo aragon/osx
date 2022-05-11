@@ -7,7 +7,7 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "./Component.sol";
 
 /// @title Base component in the Aragon DAO framework supporting meta transactions
-/// @author Michael Heuer - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice Any component within the Aragon DAO framework using meta transactions has to inherit from this contract
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");

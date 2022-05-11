@@ -1,13 +1,11 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
 import "../core/DAO.sol";
 
 /// @title Register your unique DAO name
-/// @author Samuel Furter - Aragon Association - 2021
+/// @author Aragon Association - 2021
 /// @notice This contract provides the possiblity to register a DAO by a unique name.
 contract Registry {
 

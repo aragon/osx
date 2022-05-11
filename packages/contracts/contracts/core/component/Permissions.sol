@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -11,7 +9,7 @@ import "./../acl/ACL.sol";
 
 
 /// @title Abstract implementation of the DAO permissions
-/// @author Samuel Furter - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
 /// @dev When your contract inherits from this, it is important to call __Permission_init with the associated DAO address.
 abstract contract Permissions is Initializable, ContextUpgradeable {
