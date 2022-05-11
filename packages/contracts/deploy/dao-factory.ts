@@ -17,11 +17,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       throw e;
     }
   }
-  const tokenAddr = await getContractAddress('TokenFactory', hre);
+  const tokenFactory = await getContractAddress('TokenFactory', hre);
 
-  await deploy('DAOFactory', {
+  await deploy('GlobalDAOFactory', {
     from: deployer,
-    args: [registryAddr, tokenAddr],
+    args: [registryAddr, tokenFactory],
     log: true,
   });
 };
