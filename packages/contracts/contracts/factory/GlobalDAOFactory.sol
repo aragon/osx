@@ -11,13 +11,13 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-// import "./../tokens/GovernanceERC20.sol";
-// import "./../tokens/GovernanceWrappedERC20.sol";
+import "./../tokens/GovernanceERC20.sol";
+import "./../tokens/GovernanceWrappedERC20.sol";
 import "./../registry/Registry.sol";
 import "./../core/DAO.sol";
 import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
-// import "./TokenFactory.sol";
+import "./TokenFactory.sol";
 import "../APM/IApp.sol";
 
 /// @title DAOFactory to create a DAO
@@ -32,7 +32,7 @@ contract GlobalDAOFactory {
     address public daoBase;
 
     Registry public registry;
-    // TokenFactory public tokenFactory;
+    TokenFactory public tokenFactory;
 
     struct DAOConfig {
         string name;
@@ -51,11 +51,9 @@ contract GlobalDAOFactory {
     // @dev Stores the registry and token factory address and creates the base contracts required for the factory
     // @param _registry The DAO registry to register the DAO with his name
     // @param _tokenFactory The Token Factory to register tokens
-    constructor(
-        Registry _registry /*, TokenFactory _tokenFactory*/
-    ) {
+    constructor(Registry _registry, TokenFactory _tokenFactory) {
         registry = _registry;
-        // tokenFactory = _tokenFactory;
+        tokenFactory = _tokenFactory;
 
         setupBases();
     }
@@ -70,11 +68,27 @@ contract GlobalDAOFactory {
         dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
     }
 
+    function createToken(
+        DAO dao,
+        TokenFactory.TokenConfig memory _tokenConfig,
+        TokenFactory.MintConfig memory _mintConfig
+    ) public returns (ERC20VotesUpgradeable token, MerkleMinter minter) {
+        if (_mintConfig.receivers.length != _mintConfig.amounts.length)
+            revert MintArrayLengthMismatch({
+                receiversArrayLength: _mintConfig.receivers.length,
+                amountsArrayLength: _mintConfig.amounts.length
+            });
+
+        dao.grant(address(dao), address(tokenFactory), dao.ROOT_ROLE());
+        (token, minter) = tokenFactory.newToken(dao, _tokenConfig, _mintConfig);
+        dao.revoke(address(dao), address(tokenFactory), dao.ROOT_ROLE());
+    }
+
     struct Package {
-        address factoryAddress;
+        address factoryAddress; // package deployer (factory) address, hopefully from APM
         bytes32[] PackagePermissions; // to be granted to DAO
         bytes32[] DAOPermissions; // Dao permission to be granted to package like: exec_role
-        bytes args;
+        bytes args; // pre-determined value for stting up the package
     }
 
     function createDAOWithPackages(DAOConfig calldata _daoConfig, Package[] calldata packages)
@@ -88,6 +102,7 @@ contract GlobalDAOFactory {
         // register dao with its name and token to the registry
         registry.register(_daoConfig.name, dao, msg.sender, address(0));
 
+        // TODO: perhaps having a stack of address could be usefull for relationship between apps.
         // stack of address
         // address[] memory addressStack;
 
