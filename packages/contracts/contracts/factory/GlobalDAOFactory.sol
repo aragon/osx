@@ -46,7 +46,15 @@ contract GlobalDAOFactory {
         uint64 minDuration;
     }
 
-    event DAOCreated(string name, address indexed token, address indexed voting);
+    struct Package {
+        address factoryAddress; // package deployer (factory) address, hopefully from APM
+        bytes32[] PackagePermissions; // to be granted to DAO
+        bytes32[] DAOPermissions; // Dao permission to be granted to package like: exec_role
+        bytes args; // pre-determined value for stting up the package
+    }
+
+    event TokenCreated(string name, address indexed token, address indexed minter, address indexed dao);
+    event PackageCreated(address indexed dao, address indexed packageAddress);
 
     // @dev Stores the registry and token factory address and creates the base contracts required for the factory
     // @param _registry The DAO registry to register the DAO with his name
@@ -61,11 +69,13 @@ contract GlobalDAOFactory {
     // @dev Creates a new DAO.
     // @oaram _daoConfig The name and metadata hash of the DAO it creates
     // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
-    function createDAO(DAOConfig calldata _daoConfig, address _gsnForwarder) internal returns (DAO dao) {
+    function createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
         // initialize dao with the ROOT_ROLE as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
+        dao.initialize(_daoConfig.metadata, address(this), _daoConfig.gsnForwarder);
+        // register dao with its name and token to the registry
+        registry.register(_daoConfig.name, dao, msg.sender);
     }
 
     function createToken(
@@ -82,56 +92,49 @@ contract GlobalDAOFactory {
         dao.grant(address(dao), address(tokenFactory), dao.ROOT_ROLE());
         (token, minter) = tokenFactory.newToken(dao, _tokenConfig, _mintConfig);
         dao.revoke(address(dao), address(tokenFactory), dao.ROOT_ROLE());
-    }
 
-    struct Package {
-        address factoryAddress; // package deployer (factory) address, hopefully from APM
-        bytes32[] PackagePermissions; // to be granted to DAO
-        bytes32[] DAOPermissions; // Dao permission to be granted to package like: exec_role
-        bytes args; // pre-determined value for stting up the package
+        emit TokenCreated(_tokenConfig.name, address(token), address(minter), address(dao));
     }
 
     function createDAOWithPackages(DAOConfig calldata _daoConfig, Package[] calldata packages)
         public
         returns (DAO dao)
     {
-        // create dao
-        dao = DAO(createProxy(daoBase, bytes("")));
-        // initialize dao with the ROOT_ROLE as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _daoConfig.gsnForwarder);
-        // register dao with its name and token to the registry
-        registry.register(_daoConfig.name, dao, msg.sender, address(0));
+        dao = createDAO(_daoConfig);
 
-        // TODO: perhaps having a stack of address could be usefull for relationship between apps.
-        // stack of address
-        // address[] memory addressStack;
-
-        // install packaes on Dao
         for (uint256 i = 0; i < packages.length; i++) {
-            address app = IApp(packages[i].factoryAddress).deploy(address(dao), packages[i].args);
-
+            // NOTE: perhaps having a stack of address could be usefull for relationship between apps.
+            // address[] memory addressStack;
             // addressStack[i] = app;
-
-            // Grant dao the necessary permissions on the package
-            ACLData.BulkItem[] memory packageItems = new ACLData.BulkItem[](packages[i].PackagePermissions.length);
-            for (uint256 j = 0; j < packages[i].PackagePermissions.length; j++) {
-                packageItems[j] = ACLData.BulkItem(
-                    ACLData.BulkOp.Grant,
-                    packages[i].PackagePermissions[j],
-                    address(dao)
-                );
-            }
-            dao.bulk(app, packageItems);
-
-            // Grant Package the necessary permissions on the DAO
-            ACLData.BulkItem[] memory daoItems = new ACLData.BulkItem[](packages[i].DAOPermissions.length);
-            for (uint256 j = 0; j < packages[i].DAOPermissions.length; j++) {
-                daoItems[j] = ACLData.BulkItem(ACLData.BulkOp.Grant, packages[i].DAOPermissions[j], app);
-            }
-            dao.bulk(address(dao), daoItems);
+            setupPackage(dao, packages[i]);
         }
 
         setDAOPermissions(dao);
+    }
+
+    function installPckagesOnDAO(DAO dao, Package calldata package) public {
+        setupPackage(dao, package);
+    }
+
+    function setupPackage(DAO dao, Package calldata packages) internal returns (address app) {
+        // deploy new packaes for Dao
+        app = IApp(packages.factoryAddress).deploy(address(dao), packages.args);
+
+        // Grant dao the necessary permissions on the package
+        ACLData.BulkItem[] memory packageItems = new ACLData.BulkItem[](packages.PackagePermissions.length);
+        for (uint256 i = 0; i < packages.PackagePermissions.length; i++) {
+            packageItems[i] = ACLData.BulkItem(ACLData.BulkOp.Grant, packages.PackagePermissions[i], address(dao));
+        }
+        dao.bulk(app, packageItems);
+
+        // Grant Package the necessary permissions on the DAO
+        ACLData.BulkItem[] memory daoItems = new ACLData.BulkItem[](packages.DAOPermissions.length);
+        for (uint256 i = 0; i < packages.DAOPermissions.length; i++) {
+            daoItems[i] = ACLData.BulkItem(ACLData.BulkOp.Grant, packages.DAOPermissions[i], app);
+        }
+        dao.bulk(address(dao), daoItems);
+
+        emit PackageCreated(address(dao), address(app));
     }
 
     // @dev Does set the required permissions for the new DAO.
@@ -150,7 +153,6 @@ contract GlobalDAOFactory {
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.ROOT_ROLE(), address(_dao));
         items[4] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.SET_SIGNATURE_VALIDATOR_ROLE(), address(_dao));
         items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.MODIFY_TRUSTED_FORWARDER(), address(_dao));
-        // items[6] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.EXEC_ROLE(), _voting);
 
         // Revoke permissions from factory
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, _dao.ROOT_ROLE(), address(this));
