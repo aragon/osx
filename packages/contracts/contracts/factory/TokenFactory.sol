@@ -82,7 +82,12 @@ contract TokenFactory {
 
         // deploy and initialize minter
         address merkleMinter = merkleMinterBase.clone();
-        MerkleMinter(merkleMinter).initialize(_dao, GovernanceERC20(token), distributorBase);
+        MerkleMinter(merkleMinter).initialize(
+            _dao,
+            _dao.trustedForwarder(),
+            GovernanceERC20(token),
+            distributorBase
+        );
 
         // emit event for new token
         emit TokenCreated(IERC20Upgradeable(token), MerkleMinter(merkleMinter), MerkleDistributor(distributorBase));

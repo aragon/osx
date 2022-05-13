@@ -7,11 +7,11 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
 import "../core/IDAO.sol";
-import "../core/component/Component.sol";
+import "../core/component/MetaTxComponent.sol";
 import "./MerkleDistributor.sol";
 import "./GovernanceERC20.sol";
 
-contract MerkleMinter is Component {
+contract MerkleMinter is MetaTxComponent {
     using Clones for address;
 
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
@@ -31,16 +31,23 @@ contract MerkleMinter is Component {
 
     function initialize(
         IDAO _dao,
-        GovernanceERC20 _token,
+        address _trustedForwarder,
+        GovernanceERC20 _token, 
         MerkleDistributor _distributorBase
     ) external initializer {
         _registerStandard(MERKLE_MINTER_INTERFACE_ID);
-        __Component_init(_dao);
+        __MetaTxComponent_init(_dao, _trustedForwarder);
 
         token = _token;
         distributorBase = address(_distributorBase);
     }
 
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
+    function versionRecipient() external view virtual override returns (string memory) {
+        return "0.0.1+opengsn.recipient.MerkleMinter";
+    }
+    
     function merkleMint(
         bytes32 _merkleRoot,
         uint256 _totalAmount,
