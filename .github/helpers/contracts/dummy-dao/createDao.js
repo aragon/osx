@@ -86,6 +86,7 @@ async function createDao() {
 
   let packageStructs = [];
   let packageTypes = [];
+
   for (let index = 0; index < packages.length; index++) {
     const package = packages[index];
     packageTypes.push(package.slice(0, -7));
@@ -221,7 +222,7 @@ async function createDao() {
     votingType: packageTypes,
     address: daoPackages.dao,
     token: daoPackages.tokens,
-    voting: daoPackages.packages,
+    packages: daoPackages.packages,
   };
 
   console.log('writing results:', resultObj, 'to file.');

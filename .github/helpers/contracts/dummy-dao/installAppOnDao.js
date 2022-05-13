@@ -11,11 +11,7 @@ const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 const parseArgs = require('minimist');
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
-
-async function proposal() {
+async function install() {
   console.log('\n=== Staring A Proposal on a DAO ===');
 
   const args = parseArgs(process.argv.slice(2));
@@ -23,6 +19,7 @@ async function proposal() {
   const daoJsonKey = args.daoKey;
   const networkName = args.network;
   const privKey = args.privKey;
+  const package = args.package;
 
   const provider = new ethers.providers.JsonRpcProvider(
     networkName === 'localhost'
@@ -31,6 +28,20 @@ async function proposal() {
   );
   const signer = new ethers.Wallet(privKey, provider);
 
+  const activeFactory =
+    networkName === 'localhost'
+      ? require('../../../../packages/contracts/deployments/localhost/GlobalDAOFactory.json')
+          .address
+      : activeContracts[networkName].DAOFactory;
+
+  // initiate factory contract
+  // const daoFactoryAbi = daoFacotryJson.abi;
+  // const DAOFactoryContract = new ethers.Contract(
+  //   activeFactory,
+  //   daoFactoryAbi,
+  //   signer
+  // );
+
   const daoAddress = dummyDaos[networkName][daoJsonKey].address;
   const votingAddress = dummyDaos[networkName][daoJsonKey].packages[0];
 
@@ -38,8 +49,8 @@ async function proposal() {
 
   // metadata
   const metaObj = {
-    name: 'Dummy Proposal',
-    description: 'Dummy withdraw proposal for QA and testing purposes...',
+    name: 'Dummy Proposal Install app',
+    description: 'Dummy Install app proposal for QA and testing purposes...',
     links: [
       {label: 'link01', url: 'https://link.01'},
       {label: 'link02', url: 'https://link.02'},
@@ -53,27 +64,62 @@ async function proposal() {
   let metadata = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(cid.path));
 
   // action
-  // get one of the deposits
-  const dummyDAOFile = await fs.readFile(path.join('./', 'dummy_daos.json'));
-  let content = JSON.parse(dummyDAOFile.toString());
+  const packageAddress =
+    networkName === 'localhost'
+      ? require(`../../../../packages/contracts/deployments/localhost/WhiteListFactory.json`)
+          .address
+      : activeContracts[networkName][package];
 
-  const deposits = content[networkName][daoJsonKey].deposits;
+  const packageParams = ethers.utils.defaultAbiCoder.encode(
+    ['uint256', 'uint256', 'uint256', 'address[]'],
+    ['200000000000000000', '400000000000000000', '60000', [signer.address]]
+  );
 
-  const deposit = deposits[getRandomInt(deposits.length)];
+  const DAOPermissions = [
+    '0x63af41e89ba81155a6d0c671442336165410b87bcfffee4277673b048f3ff856',
+  ];
+
+  // white list permissions
+  const packagePermissions = [
+    '0x34179493ff3543eca4b827bc6719d1c88c0ce7b52c9a8a32967cb8b23d18def7',
+    '0x7b1c084e648f2b7880dcc7c57d1e460cdc48c77cfeb2f1794850376d720c00dd',
+    '0x88aa719609f728b0c5e7fb8dd3608d5c25d497efbb3b9dd64e9251ebba101508',
+    '0x2d1966159c0f7fc976963ae5b9a8848ccf0746b84347640a98e38988ec402e4f',
+  ];
+
+  const packageStruct = [
+    packageAddress,
+    packagePermissions,
+    DAOPermissions,
+    packageParams,
+  ];
+
+  console.log('packageStruct', packageStruct);
 
   // prepare action
-  let ABI = [
-    'function withdraw(address _token, address _to, uint256 _amount, string _reference)',
-  ];
-  let iface = new ethers.utils.Interface(ABI);
-  let encoded = iface.encodeFunctionData('withdraw', [
-    deposit.token,
-    signer.address,
-    ethers.utils.parseEther(deposit.amount),
-    'withdrawing from dao to:' + signer.address,
+  // prepare permission action  =  grant(address _where, address _who, bytes32 _role) on DAO to factroy
+  let AclABI = ['function grant(address _where, address _who, bytes32 _role)'];
+  let aclIface = new ethers.utils.Interface(AclABI);
+  let aclEncoded = aclIface.encodeFunctionData('grant', [
+    daoAddress,
+    activeFactory,
+    '0x79e553c6f53701daa99614646285e66adb98ff0fcc1ef165dd2718e5c873bee6', // root_role
   ]);
 
-  const actions = [[daoAddress, '0', encoded]];
+  // prepare install action
+  let ABI = [
+    'function installPckagesOnDAO(address dao, tuple(address,bytes32[],bytes32[],bytes) package)',
+  ];
+  let iface = new ethers.utils.Interface(ABI);
+  let encoded = iface.encodeFunctionData('installPckagesOnDAO', [
+    daoAddress,
+    packageStruct,
+  ]);
+
+  const actions = [
+    [daoAddress, '0', aclEncoded],
+    [activeFactory, '0', encoded],
+  ];
 
   let overrides = await gas.setGasOverride(provider);
 
@@ -119,12 +165,15 @@ async function proposal() {
   };
 
   console.log('writing results:', resultObj, 'to file.', '\n');
+  // read file and make object
+  const dummyDAOFile = await fs.readFile(path.join('./', 'dummy_daos.json'));
+  let content = JSON.parse(dummyDAOFile.toString());
 
   // edit or add property
-  if (!content[networkName][daoJsonKey].proposal) {
-    content[networkName][daoJsonKey].proposal = {};
+  if (!content[networkName][daoJsonKey].installAppProposal) {
+    content[networkName][daoJsonKey].installAppProposal = {};
   }
-  content[networkName][daoJsonKey].proposal = resultObj;
+  content[networkName][daoJsonKey].installAppProposal = resultObj;
   //write file
   await fs.writeFile(
     path.join('./', 'dummy_daos.json'),
@@ -134,7 +183,7 @@ async function proposal() {
   console.log('!Done');
 }
 
-proposal()
+install()
   .then(() => process.exit(0))
   .catch(error => {
     console.error(error);

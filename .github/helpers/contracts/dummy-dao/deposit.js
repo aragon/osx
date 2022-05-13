@@ -8,21 +8,26 @@ const erc20Json = require('../../../../packages/contracts/artifacts/@openzeppeli
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 const {TOKENLIST} = require('./constans');
+const parseArgs = require('minimist');
 
 async function deposit() {
-  const args = process.argv.slice(2);
-  const networkName = args[0];
-  const privKey = args[1];
-  const isERC20Voting = args[2];
+  console.log('\n=== Staring depositing to DAOs ===');
+
+  const args = parseArgs(process.argv.slice(2));
+
+  const daoJsonKey = args.daoKey;
+  const networkName = args.network;
+  const privKey = args.privKey;
+
   const provider = new ethers.providers.JsonRpcProvider(
-    networks[networkName].url
+    networkName === 'localhost'
+      ? 'http://127.0.0.1:8545'
+      : networks[networkName].url
   );
+
   const signer = new ethers.Wallet(privKey, provider);
 
-  const daoAddress =
-    dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
-    ].address;
+  const daoAddress = dummyDaos[networkName][daoJsonKey].address;
   // initiate DAO contract
   const DaoContract = new ethers.Contract(daoAddress, daoJson.abi, signer);
 
@@ -30,7 +35,11 @@ async function deposit() {
   const amount = ethers.utils.parseEther('0.001');
   let results = [];
 
-  let overrides = await gas.setGasOverride(provider);
+  let overrides =
+    networkName === 'localhost'
+      ? {gasLimit: 30000000, gasPrice: 20000000000}
+      : await gas.setGasOverride(provider);
+  console.log('Setting fee data:', overrides);
 
   // deposit ETH
   console.log(
@@ -135,18 +144,10 @@ async function deposit() {
   const dummyDAOFile = await fs.readFile(path.join('./', 'dummy_daos.json'));
   let content = JSON.parse(dummyDAOFile.toString());
   // edit or add property
-  if (
-    !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
-    ].deposits
-  ) {
-    content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
-    ].deposits = [];
+  if (!content[networkName][daoJsonKey].deposits) {
+    content[networkName][daoJsonKey].deposits = [];
   }
-  content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
-  ].deposits = results;
+  content[networkName][daoJsonKey].deposits = results;
   //write file
   await fs.writeFile(
     path.join('./', 'dummy_daos.json'),

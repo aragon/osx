@@ -11,6 +11,7 @@ const TOKENLIST = {
   ],
   'arbitrum-rinkeby': [],
   mumbai: [],
+  localhost: [],
 };
 
 module.exports = {TOKENLIST};
