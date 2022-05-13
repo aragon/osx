@@ -5,17 +5,18 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../core/IDAO.sol";
-import "../core/component/Permissions.sol";
+import "../core/component/Component.sol";
 import "./MerkleDistributor.sol";
 import "./GovernanceERC20.sol";
 
-contract MerkleMinter is Permissions {
+contract MerkleMinter is Component {
     using Clones for address;
 
-    bytes32 public constant MERKLE_MINTER_ROLE = keccak256("MERKLE_MINTER_ROLE");
+    bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
+
+    bytes32 constant public MERKLE_MINTER_ROLE = keccak256("MERKLE_MINTER_ROLE");
 
     GovernanceERC20 public token;
     address public distributorBase;
@@ -33,9 +34,11 @@ contract MerkleMinter is Permissions {
         GovernanceERC20 _token,
         MerkleDistributor _distributorBase
     ) external initializer {
+        _registerStandard(MERKLE_MINTER_INTERFACE_ID);
+        __Component_init(_dao);
+
         token = _token;
         distributorBase = address(_distributorBase);
-        __Permissions_init(_dao);
     }
 
     function merkleMint(
