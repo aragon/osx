@@ -76,7 +76,10 @@ async function createDao() {
     name,
     'DMDT',
   ];
-  let mintConfig = [[signer.address], ['10000000000000000000000']];
+  let mintConfig = [
+    [signer.address, '0x0000000000000000000000000000000000000000'],
+    ['10000000000000000000000', '100'],
+  ];
 
   let overrides =
     networkName === 'localhost'

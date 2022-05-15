@@ -1,64 +1,18 @@
 {
   "localhost": {
     "dao1": {
-      "tx": "0x8da0d09943df9389ecf734b4c7d07b9e28d535b6f478c20f98cf35cc672085db",
-      "name": "DummyDAO_ERC20VotingFactory_Voting_1652454945156",
+      "tx": "0x87d21acb8cc90b70990a9ff382a522b883420f820b7bebd8b5fdf6b3af6469f2",
+      "name": "DummyDAO_ERC20VotingFactory_Voting_1652525406425",
       "votingType": [
         "ERC20Voting"
       ],
-      "address": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3",
+      "address": "0x25189F000C52E207d579419CbE8555a9D2B0a397",
       "token": [
-        "0x4eBa0F586AcB9E086Ae9127fe6A21B7CD0345c84"
+        "0xbAa0fE41206385F564CF46c8bA0d25c35912153E"
       ],
       "packages": [
-        "0x6e422a359BB68819701F659CaE85dA676817c1F6"
-      ],
-      "deposits": [
-        {
-          "approveTx": "",
-          "depositTx": "0xcd1ba2636c040d832f3b44013d4ce13250fe9842a7bfb4e83f812ec9c5edade6",
-          "tokenName": "ETH",
-          "token": "0x0000000000000000000000000000000000000000",
-          "amount": "0.001",
-          "dao": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3"
-        }
-      ],
-      "proposal": {
-        "proposalTx": "0xbb880e2f82b588c2cafc7bde020fb6380704205978d893e1c940556f184b1255",
-        "metadata": {
-          "name": "Dummy Proposal",
-          "description": "Dummy withdraw proposal for QA and testing purposes...",
-          "links": [
-            {
-              "label": "link01",
-              "url": "https://link.01"
-            },
-            {
-              "label": "link02",
-              "url": "https://link.02"
-            }
-          ]
-        },
-        "dao": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3"
-      },
-      "installAppProposal": {
-        "proposalTx": "0x46dcbc5ba7ced43590aa8e625a98bc4b52e2b23faff85539a486475973cc8cb5",
-        "metadata": {
-          "name": "Dummy Proposal Install app",
-          "description": "Dummy Install app proposal for QA and testing purposes...",
-          "links": [
-            {
-              "label": "link01",
-              "url": "https://link.01"
-            },
-            {
-              "label": "link02",
-              "url": "https://link.02"
-            }
-          ]
-        },
-        "dao": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3"
-      }
+        "0x362AbE36c5AD83643C9F605Fcc2d354E575685b3"
+      ]
     },
     "dao2": {
       "tx": "0x8718b17fdec532f0d59fb16d0a32f14596a964a82991bc90ca4684e2f57b6fe6",

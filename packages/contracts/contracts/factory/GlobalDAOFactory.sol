@@ -56,6 +56,8 @@ contract GlobalDAOFactory {
     event TokenCreated(string name, address indexed token, address indexed minter, address indexed dao);
     event PackageCreated(address indexed dao, address indexed packageAddress);
 
+    error NoRootRole();
+
     // @dev Stores the registry and token factory address and creates the base contracts required for the factory
     // @param _registry The DAO registry to register the DAO with his name
     // @param _tokenFactory The Token Factory to register tokens
@@ -82,7 +84,7 @@ contract GlobalDAOFactory {
         DAO dao,
         TokenFactory.TokenConfig memory _tokenConfig,
         TokenFactory.MintConfig memory _mintConfig
-    ) public returns (ERC20VotesUpgradeable token, MerkleMinter minter) {
+    ) external returns (ERC20VotesUpgradeable token, MerkleMinter minter) {
         if (_mintConfig.receivers.length != _mintConfig.amounts.length)
             revert MintArrayLengthMismatch({
                 receiversArrayLength: _mintConfig.receivers.length,
@@ -97,7 +99,7 @@ contract GlobalDAOFactory {
     }
 
     function createDAOWithPackages(DAOConfig calldata _daoConfig, Package[] calldata packages)
-        public
+        external
         returns (DAO dao)
     {
         dao = createDAO(_daoConfig);
@@ -112,8 +114,10 @@ contract GlobalDAOFactory {
         setDAOPermissions(dao);
     }
 
-    function installPckagesOnDAO(DAO dao, Package calldata package) public {
+    function installPckagesOnDAO(DAO dao, Package calldata package) external {
+        if (dao.hasPermission(address(this), address(dao), dao.ROOT_ROLE(), bytes("0x00"))) revert NoRootRole();
         setupPackage(dao, package);
+        dao.revoke(address(dao), address(this), dao.ROOT_ROLE());
     }
 
     function setupPackage(DAO dao, Package calldata packages) internal returns (address app) {
@@ -140,9 +144,7 @@ contract GlobalDAOFactory {
     // @dev Does set the required permissions for the new DAO.
     // @param _dao The DAO instance just created.
     // @param _voting The voting contract address (whitelist OR ERC20 voting)
-    function setDAOPermissions(
-        DAO _dao /*, address _voting*/
-    ) internal {
+    function setDAOPermissions(DAO _dao) internal {
         // set roles on the dao itself.
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
 
