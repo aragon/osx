@@ -8,13 +8,18 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "../core/acl/ACL.sol";
+
 /* solium-disable function-order */
 // Allow public initialize() to be first
-contract Repo {
+contract Repo is Initializable, UUPSUpgradeable, ACL {
     /* Hardcoded constants to save gas
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
     */
     bytes32 public constant CREATE_VERSION_ROLE = 0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8;
+    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
     string private constant ERROR_INVALID_BUMP = "REPO_INVALID_BUMP";
     string private constant ERROR_INVALID_VERSION = "REPO_INVALID_VERSION";
@@ -33,14 +38,16 @@ contract Repo {
 
     event NewVersion(uint256 versionId, uint16[3] semanticVersion);
 
-    /**
-     * @dev Initialize can only be called once. It saves the block number in which it was initialized.
-     * @notice Initialize this Repo
-     */
-    // function initialize() public onlyInit {
-    //     initialized();
-    //     versionsNextIndex = 1;
-    // }
+    /// @dev Used for UUPS upgradability pattern
+    function initialize(address initialOwner) external initializer {
+        __ACL_init(initialOwner);
+
+        // set roles.
+        _grant(address(this), initialOwner, CREATE_VERSION_ROLE);
+    }
+
+    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
+    function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
 
     /**
      * @notice Create new version with contract `_contractAddress` and content `@fromHex(_contentURI)`
@@ -51,8 +58,8 @@ contract Repo {
     function newVersion(
         uint16[3] memory _newSemanticVersion,
         address _contractAddress,
-        bytes calldata _contentURI //auth(CREATE_VERSION_ROLE)
-    ) public {
+        bytes calldata _contentURI
+    ) external auth(address(this), CREATE_VERSION_ROLE) {
         address contractAddress = _contractAddress;
         uint256 lastVersionIndex = versionsNextIndex - 1;
 

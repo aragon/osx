@@ -8,6 +8,9 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "../core/acl/ACL.sol";
 import "./Repo.sol";
 
 contract APMInternalAppNames {
@@ -16,97 +19,74 @@ contract APMInternalAppNames {
     string internal constant ENS_SUB_APP_NAME = "apm-enssub";
 }
 
-contract APMRegistry is APMInternalAppNames {
-    /* Hardcoded constants to save gas
-    bytes32 public constant CREATE_REPO_ROLE = keccak256("CREATE_REPO_ROLE");
-    */
-    bytes32 public constant CREATE_REPO_ROLE = 0x2a9494d64846c9fdbf0158785aa330d8bc9caf45af27fa0e8898eb4d55adcea6;
+contract APMRegistry is APMInternalAppNames, Initializable, UUPSUpgradeable, ACL {
+    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
-    string private constant ERROR_INIT_PERMISSIONS = "APMREG_INIT_PERMISSIONS";
-    string private constant ERROR_EMPTY_NAME = "APMREG_EMPTY_NAME";
+    address public repoBase;
 
-    event NewRepo(bytes32 id, string name, address repo);
+    error ApmRegEmpityName();
 
-    /**
-     * NEEDS CREATE_NAME_ROLE and POINT_ROOTNODE_ROLE permissions on registrar
-     * @dev Initialize can only be called once. It saves the block number in which it was initialized
-     * @notice Initialize this APMRegistry instance and set `_registrar` as the ENS subdomain registrar
-     * @param _registrar ENSSubdomainRegistrar instance that holds registry root node ownership
-     */
-    // function initialize(ENSSubdomainRegistrar _registrar) public onlyInit {
-    //     initialized();
+    event NewRepo(string name, address repo);
 
-    //     registrar = _registrar;
-    //     ens = registrar.ens();
+    /// @dev Used for UUPS upgradability pattern
+    function initialize() external initializer {
+        __ACL_init(msg.sender);
+        repoBase = address(new Repo());
+    }
 
-    //     registrar.pointRootNode(this);
-
-    //     // Check APM has all permissions it needss
-    //     ACL acl = ACL(kernel().acl());
-    //     require(acl.hasPermission(this, registrar, registrar.CREATE_NAME_ROLE()), ERROR_INIT_PERMISSIONS);
-    //     require(acl.hasPermission(this, acl, acl.CREATE_PERMISSIONS_ROLE()), ERROR_INIT_PERMISSIONS);
-    // }
+    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
+    function _authorizeUpgrade(address) internal virtual override auth(msg.sender, UPGRADE_ROLE) {}
 
     /**
      * @notice Create new repo in registry with `_name`
      * @param _name Repo name, must be ununsed
-     * @param _dev Address that will be given permission to create versions
      */
-    function newRepo(
-        string calldata _name,
-        address _dev /*auth(CREATE_REPO_ROLE)*/
-    ) public returns (Repo) {
-        return _newRepo(_name, _dev);
+    function newRepo(string calldata _name) external returns (Repo) {
+        return _newRepo(_name, msg.sender);
     }
 
     /**
      * @notice Create new repo in registry with `_name` and publish a first version with contract `_contractAddress` and content `@fromHex(_contentURI)`
      * @param _name Repo name
-     * @param _dev Address that will be given permission to create versions
      * @param _initialSemanticVersion Semantic version for new repo version
      * @param _contractAddress address for smart contract logic for version (if set to 0, it uses last versions' contractAddress)
      * @param _contentURI External URI for fetching new version's content
      */
     function newRepoWithVersion(
         string calldata _name,
-        address _dev,
         uint16[3] memory _initialSemanticVersion,
         address _contractAddress,
-        bytes memory _contentURI /*auth(CREATE_REPO_ROLE)*/
-    ) public returns (Repo) {
-        Repo repo = _newRepo(_name, address(this)); // need to have permissions to create version
+        bytes memory _contentURI
+    ) public returns (Repo repo) {
+        repo = _newRepo(_name, address(this)); // need to have permissions to create version
         repo.newVersion(_initialSemanticVersion, _contractAddress, _contentURI);
 
-        // Give permissions to _dev
-        // ACL acl = ACL(kernel().acl());
-        // acl.revokePermission(this, repo, repo.CREATE_VERSION_ROLE());
-        // acl.grantPermission(_dev, repo, repo.CREATE_VERSION_ROLE());
-        // acl.setPermissionManager(_dev, repo, repo.CREATE_VERSION_ROLE());
-        return repo;
+        // revoke permissions
+        setRepoPermissions(repo, msg.sender);
     }
 
-    function _newRepo(string calldata _name, address _dev) internal returns (Repo) {
-        require(bytes(_name).length > 0, ERROR_EMPTY_NAME);
+    function setRepoPermissions(Repo repo, address dev) internal {
+        // set roles on the dao itself.
+        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](5);
 
-        Repo repo = new Repo(); //newClonedRepo();
+        // Grant DAO all the permissions required
+        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, repo.CREATE_VERSION_ROLE(), dev);
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, repo.UPGRADE_ROLE(), dev);
+        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, repo.ROOT_ROLE(), dev);
 
-        // ACL(kernel().acl()).createPermission(_dev, repo, repo.CREATE_VERSION_ROLE(), _dev);
+        // Revoke permissions from APM
+        items[3] = ACLData.BulkItem(ACLData.BulkOp.Revoke, repo.ROOT_ROLE(), address(this));
+        items[4] = ACLData.BulkItem(ACLData.BulkOp.Revoke, repo.CREATE_VERSION_ROLE(), address(this));
 
-        // Creates [name] subdomain in the rootNode and sets registry as resolver
-        // This will fail if repo name already exists
-        bytes32 node = keccak256(abi.encodePacked(_name)); //registrar.createNameAndPoint(keccak256(abi.encodePacked(_name)), repo);
-
-        emit NewRepo(node, _name, address(repo));
-
-        return repo;
+        repo.bulk(address(repo), items);
     }
 
-    // function newClonedRepo() internal returns (Repo repo) {
-    //     repo = Repo(newAppProxy(kernel(), repoAppId()));
-    //     repo.initialize();
-    // }
+    function _newRepo(string calldata _name, address initialOwner) internal returns (Repo repo) {
+        if (!(bytes(_name).length > 0)) revert ApmRegEmpityName();
 
-    function repoAppId() internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(REPO_APP_NAME)); //keccak256(abi.encodePacked(registrar.rootNode(), keccak256(abi.encodePacked(REPO_APP_NAME))));
+        repo = new Repo();
+        repo.initialize(initialOwner);
+
+        emit NewRepo(_name, address(repo));
     }
 }

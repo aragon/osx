@@ -46,6 +46,27 @@ contract GlobalDAOFactory {
         uint64 minDuration;
     }
 
+    /**
+    NOTE: better aproach might be to have a permission ops like:
+
+    struct PermissionOp {
+        PermissionType permissionType;
+        bytes32[] roles;
+        address where;
+        address who;
+    }
+
+    to be used inside Packages like:
+
+    struct Package {
+        address factoryAddress; // package deployer (factory) address, hopefully from APM
+        PermissionOp[] PermissionOps; 
+        bytes args; // pre-determined value for stting up the package
+    }
+
+    for futher improvment and relationship between apps, utilizing AppArray and indexes
+
+     */
     struct Package {
         address factoryAddress; // package deployer (factory) address, hopefully from APM
         bytes32[] PackagePermissions; // to be granted to DAO
@@ -66,18 +87,6 @@ contract GlobalDAOFactory {
         tokenFactory = _tokenFactory;
 
         setupBases();
-    }
-
-    // @dev Creates a new DAO.
-    // @oaram _daoConfig The name and metadata hash of the DAO it creates
-    // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
-    function createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
-        // create dao
-        dao = DAO(createProxy(daoBase, bytes("")));
-        // initialize dao with the ROOT_ROLE as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _daoConfig.gsnForwarder);
-        // register dao with its name and token to the registry
-        registry.register(_daoConfig.name, dao, msg.sender);
     }
 
     function createToken(
@@ -118,6 +127,18 @@ contract GlobalDAOFactory {
         if (dao.hasPermission(address(this), address(dao), dao.ROOT_ROLE(), bytes("0x00"))) revert NoRootRole();
         setupPackage(dao, package);
         dao.revoke(address(dao), address(this), dao.ROOT_ROLE());
+    }
+
+    // @dev Creates a new DAO.
+    // @oaram _daoConfig The name and metadata hash of the DAO it creates
+    // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
+    function createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
+        // create dao
+        dao = DAO(createProxy(daoBase, bytes("")));
+        // initialize dao with the ROOT_ROLE as DAOFactory
+        dao.initialize(_daoConfig.metadata, address(this), _daoConfig.gsnForwarder);
+        // register dao with its name and token to the registry
+        registry.register(_daoConfig.name, dao, msg.sender);
     }
 
     function setupPackage(DAO dao, Package calldata packages) internal returns (address app) {
