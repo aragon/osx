@@ -2,24 +2,24 @@
   "arbitrum-rinkeby": {
     "dao": {
       "ERC20Voting": {
-        "tx": "0xe0502cf74fa47f461682d6592fb5db5f76665e476445c446fee22786cdb5ac89",
-        "name": "DummyDAO_ERC20_Voting_1652206223148",
+        "tx": "0x3af1b1d8a6e8a9b17aa4762affeccb969497489e3ba269b07319ec10a83fe297",
+        "name": "DummyDAO_ERC20_Voting_1652697874380",
         "votingType": "ERC20Voting",
-        "address": "0xd6BBC01596365785b14c5B83680a8De0DD5c70c7",
-        "token": "0x77768A011ce365F21b015235135A890714987fDa",
-        "voting": "0xdA3a47a36D49C35579549947bF9B70FC5E312fBa",
+        "address": "0xD66EaB577A92858dEB61f6d4dCF2409Ee1B4EeC4",
+        "token": "0xAB76D26dAa65A840D4e858c899F6C72dB99528C5",
+        "voting": "0x22B467912E42Fc986C2f493Cd19cB1629141AF19",
         "deposits": [
           {
             "approveTx": "",
-            "depositTx": "0x5597159f61cd76acab43744f08e1ee3670056699f67fcfdaacde0a63417b3650",
+            "depositTx": "0x89538ce8eb755ac840ae5460a6ad90a9692b5f911d833e27dc2a79a60b419a47",
             "tokenName": "ETH",
             "token": "0x0000000000000000000000000000000000000000",
             "amount": "0.001",
-            "dao": "0xd6BBC01596365785b14c5B83680a8De0DD5c70c7"
+            "dao": "0xD66EaB577A92858dEB61f6d4dCF2409Ee1B4EeC4"
           }
         ],
         "proposal": {
-          "proposalTx": "0xc753fdcb85cbde0b564630fc966e2035a58b5a8e2c5cd3fbcf35a39c55d93d83",
+          "proposalTx": "0xf474fa9d5b3a43efc3a2d8c33f7a60d8be20a497d8cf4b5c279fd1dc8500309b",
           "metadata": {
             "name": "ERC20Voting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -34,28 +34,28 @@
               }
             ]
           },
-          "dao": "0xd6BBC01596365785b14c5B83680a8De0DD5c70c7"
+          "dao": "0xD66EaB577A92858dEB61f6d4dCF2409Ee1B4EeC4"
         }
       },
       "WhitelistVoting": {
-        "tx": "0x491521735f0eb66b3b6f083a9ed06778a87e9f5b46d986b61bfe4d55f632b508",
-        "name": "DummyDAO_Whitelist_Voting_1652206229486",
+        "tx": "0xbb26576b2c34101abe916edfa260f165440c179c215d3ee0d800ab4faf4c640f",
+        "name": "DummyDAO_Whitelist_Voting_1652697880969",
         "votingType": "WhitelistVoting",
-        "address": "0xBAC6E5E4cefD895aC9f9BBf197e42839Fff8687C",
+        "address": "0xd4daeF88a72e0744BB055E75d20D9f38eBaaC786",
         "token": "0x0000000000000000000000000000000000000000",
-        "voting": "0xc40145923B7A292ecF56a340C7e47B365Ceb794d",
+        "voting": "0xB8beED397Ef56d3c3d65CA8065619646c7a485E4",
         "deposits": [
           {
             "approveTx": "",
-            "depositTx": "0xc0e12a94b930e524071e64cfff2c6c427ed52473f1080cd3ab7a6db068c2669e",
+            "depositTx": "0x49afbcdb9fff0cd07360e6fa8ac795c1fd875ec03975815b18de2c4399438b19",
             "tokenName": "ETH",
             "token": "0x0000000000000000000000000000000000000000",
             "amount": "0.001",
-            "dao": "0xBAC6E5E4cefD895aC9f9BBf197e42839Fff8687C"
+            "dao": "0xd4daeF88a72e0744BB055E75d20D9f38eBaaC786"
           }
         ],
         "proposal": {
-          "proposalTx": "0x79d1ae1d3847548fc9015e4388e5100ccadb21f3205c1bcff65b65db13ca7aec",
+          "proposalTx": "0xe18046c3fd890a04c24bc45c803d1f7e99d6231bc9cf581d96962ae27a4613d8",
           "metadata": {
             "name": "WhitelistVoting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -70,7 +70,7 @@
               }
             ]
           },
-          "dao": "0xBAC6E5E4cefD895aC9f9BBf197e42839Fff8687C"
+          "dao": "0xd4daeF88a72e0744BB055E75d20D9f38eBaaC786"
         }
       }
     }
@@ -78,24 +78,24 @@
   "mumbai": {
     "dao": {
       "ERC20Voting": {
-        "tx": "0x02b9d56e48f11264dbed107b3bcc3b9f19645befb3b3c2f750212ace14ed7637",
-        "name": "DummyDAO_ERC20_Voting_1652185285511",
+        "tx": "0xd0b4705ec3e4f5c20688709eaae5aa2e478ab4c116906c3e893fdd703eee1bd7",
+        "name": "DummyDAO_ERC20_Voting_1652687396917",
         "votingType": "ERC20Voting",
-        "address": "0xEb69Bff480de4C073af3cf9649fa93A477D598F4",
-        "token": "0x800E211143e3d3BE4CbcC93DadA298e089278Be4",
-        "voting": "0x764962B19bC0888913aB97634c976084d8BD46C8",
+        "address": "0xc30e89C0d92d41F8a3BD6d09019228E8D607b639",
+        "token": "0x2A7520f0BCB455CAc36a5bd03c52A8715B7483d8",
+        "voting": "0x4fefe0FacC5326de2f708818117a3eDDcf83cd20",
         "deposits": [
           {
             "approveTx": "",
-            "depositTx": "0x41ef2c5d9649466a224302bee41939a18c41b34794b36098917e75df82467de3",
+            "depositTx": "0x539c7595601ad26285eb464b415c00187b9306947aa6e5e96aa65285c6f34cb6",
             "tokenName": "ETH",
             "token": "0x0000000000000000000000000000000000000000",
             "amount": "0.001",
-            "dao": "0xEb69Bff480de4C073af3cf9649fa93A477D598F4"
+            "dao": "0xc30e89C0d92d41F8a3BD6d09019228E8D607b639"
           }
         ],
         "proposal": {
-          "proposalTx": "0xd86df27d7e0865943b901ca9372fa35f4997379df2600f47cdc6390588418142",
+          "proposalTx": "0x65af5bee5d09f2a01c141c3fa39e2645f916782aa89f887a184c13563bff5f75",
           "metadata": {
             "name": "ERC20Voting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -110,28 +110,28 @@
               }
             ]
           },
-          "dao": "0xEb69Bff480de4C073af3cf9649fa93A477D598F4"
+          "dao": "0xc30e89C0d92d41F8a3BD6d09019228E8D607b639"
         }
       },
       "WhitelistVoting": {
-        "tx": "0x2a9726e1771a5d6e78c36f1c45dbd71fe25c0532cb1c15f05fc73f06c90a2173",
-        "name": "DummyDAO_Whitelist_Voting_1652185299445",
+        "tx": "0xbe404350b865cbc41de839910dbd5723ca0f9c9f41b5d6efbef91e13c04beaba",
+        "name": "DummyDAO_Whitelist_Voting_1652687402536",
         "votingType": "WhitelistVoting",
-        "address": "0x1D8694F500927d6cC971D1D52AdfD3b5cd17C5ff",
+        "address": "0xb29e94D9951a88873ec974b6aA5A9f773408635d",
         "token": "0x0000000000000000000000000000000000000000",
-        "voting": "0x451890a6696ba031aaEa77578772775f91e03fFe",
+        "voting": "0x7C8FFd22b54b462E30771d688c5Ade2023FA3fd9",
         "deposits": [
           {
             "approveTx": "",
-            "depositTx": "0xabfcb3eeacee6d65023189f1922e3a73c882918fdc6124af97a74907f3d33362",
+            "depositTx": "0x039843b36d060a087a6e76cc39b9f250a45da0237a5a2f2311a7b6b470331b69",
             "tokenName": "ETH",
             "token": "0x0000000000000000000000000000000000000000",
             "amount": "0.001",
-            "dao": "0x1D8694F500927d6cC971D1D52AdfD3b5cd17C5ff"
+            "dao": "0xb29e94D9951a88873ec974b6aA5A9f773408635d"
           }
         ],
         "proposal": {
-          "proposalTx": "0xe2f9dbcaa5a391585554216125c00fe17aa74a0672797a551f74575c91b05029",
+          "proposalTx": "0xde73b932e0f7237deb9703a7f67a07dd435a3de0a9574f5fd0b904241f974e51",
           "metadata": {
             "name": "WhitelistVoting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -146,7 +146,7 @@
               }
             ]
           },
-          "dao": "0x1D8694F500927d6cC971D1D52AdfD3b5cd17C5ff"
+          "dao": "0xb29e94D9951a88873ec974b6aA5A9f773408635d"
         }
       }
     }
@@ -154,40 +154,40 @@
   "rinkeby": {
     "dao": {
       "ERC20Voting": {
-        "tx": "0x3bfc59f5ec9f9c3db486740f36b7f83c5f742214f6ae28b04650e6756123615d",
-        "name": "DummyDAO_ERC20_Voting_1652261886433",
+        "tx": "0x133324b9775f2835c96bd3a2c12f177a520ee787cef7eb23e165f6b1bcea3bfb",
+        "name": "DummyDAO_ERC20_Voting_1652687398837",
         "votingType": "ERC20Voting",
-        "address": "0x908EF7B121ba886cB8F3300C01eF9af366f38731",
-        "token": "0x78763e51C4beD92Af7a4Ebc9a7fc57caeccb87Ca",
-        "voting": "0x5A8cb3a62a2f39632a20D3aDB772D88F7D8A2f44",
+        "address": "0xd59f77b1e6194Ec788EC98D6844C3bf54117bB6d",
+        "token": "0x76eE664664D108c8b181C7695eFc4fe2d8311c22",
+        "voting": "0xCc9123cd80dC7a4627BfBf831460E2Ed6AB79d92",
         "deposits": [
           {
             "approveTx": "",
-            "depositTx": "0xf327ebc918185d70fdfd04c95155f28e346e993a7db867039725de8f17e07718",
+            "depositTx": "0x1cd88fc014085e5ac4a3ad7c07a0db5681d7e1fd0fb72b734c574eb3c268e2b5",
             "tokenName": "ETH",
             "token": "0x0000000000000000000000000000000000000000",
             "amount": "0.001",
-            "dao": "0x908EF7B121ba886cB8F3300C01eF9af366f38731"
+            "dao": "0xd59f77b1e6194Ec788EC98D6844C3bf54117bB6d"
           },
           {
-            "approveTx": "0xaa6f80e008ea1c2f8b42653ba5a259fa2f63e21b2f9db6d899062e6f17f6b62b",
-            "depositTx": "0x25ee6c19343205cb6a259c4e9ac4ef2e90e221621d59395d0b497f9b950645bd",
+            "approveTx": "0x3569506d8d61c2db4bb8315cb72e5a8ba95816e470a4047cb36aedb8106a4c32",
+            "depositTx": "0x7fbaf8e674d6bcdf4a6c2d6fc781e1eed053b946be9581833e9ec3accaea657c",
             "tokenName": "Dai",
             "token": "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
             "amount": "0.001",
-            "dao": "0x908EF7B121ba886cB8F3300C01eF9af366f38731"
+            "dao": "0xd59f77b1e6194Ec788EC98D6844C3bf54117bB6d"
           },
           {
-            "approveTx": "0x3377702184fa9b36db0c292755fd0cfc92f8ff2841addd2429a16fa67be63b7b",
-            "depositTx": "0x00830a2560d9836096fd947d80bc1c0b3fd7198e6785537fcf1b09bcce570696",
+            "approveTx": "0x4ec8c6f86ff76200753d325ccb08c1e46e115de3557b13a30e60348a209d9223",
+            "depositTx": "0x270d6d922eb334814a741824e29e8790999d0e2c172cb2fee5e2ffc68d94c34e",
             "tokenName": "Uni",
             "token": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
             "amount": "0.001",
-            "dao": "0x908EF7B121ba886cB8F3300C01eF9af366f38731"
+            "dao": "0xd59f77b1e6194Ec788EC98D6844C3bf54117bB6d"
           }
         ],
         "proposal": {
-          "proposalTx": "0xf3c197b95ac2126ee763549dbb00015a8220fb95b03bec64655f9149d0e27725",
+          "proposalTx": "0x3e32d0fb2726882fc3fbec7217e097a2b9b8c872e77982baf125b94c4094deab",
           "metadata": {
             "name": "ERC20Voting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -202,44 +202,44 @@
               }
             ]
           },
-          "dao": "0x908EF7B121ba886cB8F3300C01eF9af366f38731"
+          "dao": "0xd59f77b1e6194Ec788EC98D6844C3bf54117bB6d"
         }
       },
       "WhitelistVoting": {
-        "tx": "0xd0d9525e2815556bc09018fa326093a00de8d2bc5cb5832becb08086336da0cb",
-        "name": "DummyDAO_Whitelist_Voting_1652261901837",
+        "tx": "0x9d476fcf107096aad99a68136bbbb36bad0d5dba480fcd03b6212f1f2afa8caf",
+        "name": "DummyDAO_Whitelist_Voting_1652687414245",
         "votingType": "WhitelistVoting",
-        "address": "0x5E99e65eF55593bDd386E6435fff90dDF7A4F5AD",
+        "address": "0x8E25F347524aD7Dc7B1bB47c6B0c97514c3D6D3C",
         "token": "0x0000000000000000000000000000000000000000",
-        "voting": "0xF74660a4604CbF5Be0be9c045642ed90379cbe89",
+        "voting": "0x3E14f3EF200b4B65f6332B7b62E6F66a7E7734ec",
         "deposits": [
           {
             "approveTx": "",
-            "depositTx": "0xcf5254175241c9b60b3f6b05256851f8728378617bddf714d6d39732160a2e2f",
+            "depositTx": "0x340877c6e663a485fd6783a911fad18afdfaa5edea58cc243b6179fa9d7b93c8",
             "tokenName": "ETH",
             "token": "0x0000000000000000000000000000000000000000",
             "amount": "0.001",
-            "dao": "0x5E99e65eF55593bDd386E6435fff90dDF7A4F5AD"
+            "dao": "0x8E25F347524aD7Dc7B1bB47c6B0c97514c3D6D3C"
           },
           {
-            "approveTx": "0x5f9d31bb852d4708bb6261d8df43120a78cadaeae25abb3fc6f57438c08f35d0",
-            "depositTx": "0x7453790becf492bf83454e2c73dcaebba64272293c1b067efac52d0d80aca0d0",
+            "approveTx": "0x517ae53b0b30b56e87d34aac33887b36816578590540823ab669dbd9a2764a64",
+            "depositTx": "0xf337ce158216947738c83fe3d15a0aef3f49ab239fce22eb2ee9c906fac9d094",
             "tokenName": "Dai",
             "token": "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
             "amount": "0.001",
-            "dao": "0x5E99e65eF55593bDd386E6435fff90dDF7A4F5AD"
+            "dao": "0x8E25F347524aD7Dc7B1bB47c6B0c97514c3D6D3C"
           },
           {
-            "approveTx": "0x9476a4154b96f128acb5b6586aaaa2f39464ba38f53a9f3f71ca2067e75dc012",
-            "depositTx": "0x1b508b72e28ea5c42b8d2a54386e56f150a8167e7a28bc3e47d602626de7edb0",
+            "approveTx": "0x195bffa0051414b1802a7489afa88f0bdc1c7bf5d4a66ef9116cf64bf3067c23",
+            "depositTx": "0xe8383c7f92f0a389bdc235db910f48564e06561ca76bb7a20da24c7b7103c215",
             "tokenName": "Uni",
             "token": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
             "amount": "0.001",
-            "dao": "0x5E99e65eF55593bDd386E6435fff90dDF7A4F5AD"
+            "dao": "0x8E25F347524aD7Dc7B1bB47c6B0c97514c3D6D3C"
           }
         ],
         "proposal": {
-          "proposalTx": "0x7a1ef50aecf1a9b525bec485e6ec10b1eddd1a1fd6ee21578ff4f3e91ae882d2",
+          "proposalTx": "0xcd72c98428c1188693629348312a34d32891218956f984134adb92dd69e078c5",
           "metadata": {
             "name": "WhitelistVoting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -254,7 +254,7 @@
               }
             ]
           },
-          "dao": "0x5E99e65eF55593bDd386E6435fff90dDF7A4F5AD"
+          "dao": "0x8E25F347524aD7Dc7B1bB47c6B0c97514c3D6D3C"
         }
       }
     }
