@@ -29,6 +29,12 @@ contract MerkleMinter is MetaTxComponent {
         bytes context
     );
 
+    /// @notice Initializes the component
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _dao The IDAO interface of the associated DAO
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _token A mintable ERC20 token
+    /// @param _distributorBase A `MerkleDistributor` to be cloned
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
@@ -48,6 +54,11 @@ contract MerkleMinter is MetaTxComponent {
         return "0.0.1+opengsn.recipient.MerkleMinter";
     }
 
+    /// @notice Mints ERC20 token and distributes them using a `MerkleDistributor`
+    /// @param _merkleRoot the root of the merkle balance tree
+    /// @param _totalAmount the total amount of tokens to be minted
+    /// @param _tree the link to the stored merkle tree
+    /// @param _context additional info related to the minting process
     function merkleMint(
         bytes32 _merkleRoot,
         uint256 _totalAmount,
