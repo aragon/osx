@@ -85,7 +85,7 @@ contract TokenFactory {
         MerkleMinter(merkleMinter).initialize(
             _dao,
             _dao.trustedForwarder(),
-            GovernanceERC20(token),
+            IERC20MintableUpgradeable(token),
             distributorBase
         );
 

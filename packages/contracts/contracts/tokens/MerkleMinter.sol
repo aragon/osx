@@ -8,17 +8,17 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 
 import "../core/IDAO.sol";
 import "../core/component/MetaTxComponent.sol";
+import "./IERC20MintableUpgradeable.sol";
 import "./MerkleDistributor.sol";
-import "./GovernanceERC20.sol";
 
 contract MerkleMinter is MetaTxComponent {
     using Clones for address;
 
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
-    bytes32 constant public MERKLE_MINTER_ROLE = keccak256("MERKLE_MINTER_ROLE");
+    bytes32 public constant MERKLE_MINTER_ROLE = keccak256("MERKLE_MINTER_ROLE");
 
-    GovernanceERC20 public token;
+    IERC20MintableUpgradeable public token;
     address public distributorBase;
 
     event MintedMerkle(
@@ -32,7 +32,7 @@ contract MerkleMinter is MetaTxComponent {
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
-        GovernanceERC20 _token, 
+        IERC20MintableUpgradeable _token,
         MerkleDistributor _distributorBase
     ) external initializer {
         _registerStandard(MERKLE_MINTER_INTERFACE_ID);
@@ -47,7 +47,7 @@ contract MerkleMinter is MetaTxComponent {
     function versionRecipient() external view virtual override returns (string memory) {
         return "0.0.1+opengsn.recipient.MerkleMinter";
     }
-    
+
     function merkleMint(
         bytes32 _merkleRoot,
         uint256 _totalAmount,
