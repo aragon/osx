@@ -5,7 +5,7 @@ import { ethers } from 'hardhat';
 import chaiUtils from '../test-utils';
 import { customError } from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree'
-import { BigNumber, Contract } from 'ethers'
+import { BigNumber } from 'ethers'
 
 chai.use(chaiUtils);
 
@@ -28,7 +28,6 @@ describe('MerkleDistributor', function () {
   let totalAmount: BigNumber;
 
   beforeEach(async () => {
-
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
@@ -41,7 +40,6 @@ describe('MerkleDistributor', function () {
     ])
     merkleRoot = tree.getHexRoot();
     totalAmount = amount0.add(amount1);
-
 
     // create a DAO
     const DAO = await ethers.getContractFactory('DAO');
@@ -84,7 +82,7 @@ describe('MerkleDistributor', function () {
       await dao.revoke(minter.address, ownerAddress, MERKLE_MINTER_ROLE);
 
       await expect(
-        minter.merkleMint(tree.getHexRoot(), 100, "0x", "0x")
+        minter.merkleMint(tree.getHexRoot(), totalAmount, dummyMerkleTreeStorageLink, dummyMintingContext)
       ).to.be.revertedWith(
         customError('ACLAuth', minter.address, minter.address, ownerAddress, MERKLE_MINTER_ROLE)
       );
@@ -94,7 +92,7 @@ describe('MerkleDistributor', function () {
       await dao.revoke(token.address, minter.address, TOKEN_MINTER_ROLE);
 
       await expect(
-        minter.merkleMint(tree.getHexRoot(), 100, "0x", "0x")
+        minter.merkleMint(tree.getHexRoot(), totalAmount, dummyMerkleTreeStorageLink, dummyMintingContext)
       ).to.be.revertedWith(
         customError('ACLAuth', token.address, token.address, minter.address, TOKEN_MINTER_ROLE)
       );
