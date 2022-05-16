@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    GPL-3.0
- */
+// SPDX-License-Identifier: GPL-3.0
 
 // Copied and modified from: https://github.com/Uniswap/merkle-distributor/blob/master/contracts/MerkleDistributor.sol
 

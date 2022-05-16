@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -15,7 +13,7 @@ import "../tokens/MerkleMinter.sol";
 import "../tokens/MerkleDistributor.sol";
 
 /// @title TokenFactory to create a DAO
-/// @author Giorgi Lagidze - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice This contract is used to create a Token.
 contract TokenFactory {
     using Address for address;

@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -9,7 +7,7 @@ import "./../../core/component/MetaTxComponent.sol";
 import "./../../utils/TimeHelpers.sol";
 
 /// @title The abstract implementation of majority voting components
-/// @author Michael Heuer - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
 abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelpers {
