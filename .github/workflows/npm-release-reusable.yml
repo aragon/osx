@@ -38,12 +38,13 @@ jobs:
   build_deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.bump }} != 'pre' && ${{ needs.prepare.outputs.bump }} != ''
+    if: ${{ needs.prepare.outputs.bump != 'pre' }}
     strategy:
       fail-fast: false
       matrix:
         package: [contracts, contracts-ethers]
     steps:
+      - run: echo ${{ needs.prepare.outputs.bump }}
       - uses: actions/checkout@v2
         with:
           ref: ${{ inputs.ref }}
@@ -63,3 +64,4 @@ jobs:
           yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
