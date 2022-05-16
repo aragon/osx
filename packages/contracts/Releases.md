@@ -1,5 +1,26 @@
 # Contract Releases
 
+Time: 2022-05-16T21:35:49.676Z  
+Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/core/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)  
+Network: arbitrum-rinkeby  
+DAOFactory: 0x9d4669361461443eB25A29b79C68C8AC906D8cC1
+Registry: 0xAAAb8c6b83a5C7b1462af4427d97b33197388C38
+TokenFactory: 0xB88fE875623E33BFDa76A517e9d5DC2023995f73
+___  
+Time: 2022-05-16T21:35:49.680Z  
+Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/core/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)  
+Network: mumbai  
+DAOFactory: 0x246503df057A9a85E0144b6867a828c99676128B
+Registry: 0xBa48CE7E1a29c3E43ad2C46D2defd4Ef6BB8CD88
+TokenFactory: 0x56ce4D8006292Abf418291FaE813C1E3769240A4
+___  
+Time: 2022-05-16T21:35:49.684Z  
+Commit: [deae304e1b87d0b60f4d69c32d762296ff0c71ff](https://github.com/aragon/core/commit/deae304e1b87d0b60f4d69c32d762296ff0c71ff)  
+Network: rinkeby  
+DAOFactory: 0x971571f70638B09E7488C33c8ed6cC9eE90c946c
+Registry: 0xB22F1918E444c95F3C98595725884c28183714fB
+TokenFactory: 0x4d35922def435b32b3c9f262754410EB30c1D296
+___  
 Time: 2022-05-16T07:47:45.181Z  
 Commit: [66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1](https://github.com/aragon/core/commit/66bfe6fcc71bd4f8209db0b8bfe0e3a1aa0183b1)  
 Network: arbitrum-rinkeby  
