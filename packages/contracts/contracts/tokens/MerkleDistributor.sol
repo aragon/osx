@@ -15,21 +15,25 @@ contract MerkleDistributor is MetaTxComponent {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
-        this.claim.selector ^
-        this.unclaimedBalance.selector ^
-        this.isClaimed.selector;
+        this.claim.selector ^ this.unclaimedBalance.selector ^ this.isClaimed.selector;
 
     IERC20Upgradeable public token;
     bytes32 public merkleRoot;
 
     // This is a packed array of booleans.
-    mapping (uint256 => uint256) private claimedBitMap;
+    mapping(uint256 => uint256) private claimedBitMap;
 
     error DistTokenClaimedAlready(uint256 index);
     error DistTokenClaimInvalid(uint256 index, address to, uint256 amount);
 
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
+    /// @notice Initializes the component
+    /// @dev This is required for the UUPS upgradability pattern
+    /// @param _dao The IDAO interface of the associated DAO
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _token A mintable ERC20 token
+    /// @param _merkleRoot The merkle root of the balance tree
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
@@ -49,9 +53,19 @@ contract MerkleDistributor is MetaTxComponent {
         return "0.0.1+opengsn.recipient.MerkleDistributor";
     }
 
-    function claim(uint256 _index, address _to, uint256 _amount, bytes32[] calldata _merkleProof) external {
-        if(isClaimed(_index)) revert DistTokenClaimedAlready({index: _index});
-        if(!_verifyBalanceOnTree(_index, _to, _amount, _merkleProof))
+    /// @notice Claims an amount of tokens and sends it to an address
+    /// @param _index The index in the balance tree to be claimed
+    /// @param _to The receiving address
+    /// @param _amount The amount of tokens
+    /// @param _proof The merkle proof to be verified
+    function claim(
+        uint256 _index,
+        address _to,
+        uint256 _amount,
+        bytes32[] calldata _proof
+    ) external {
+        if (isClaimed(_index)) revert DistTokenClaimedAlready({index: _index});
+        if (!_verifyBalanceOnTree(_index, _to, _amount, _proof))
             revert DistTokenClaimInvalid({index: _index, to: _to, amount: _amount});
 
         _setClaimed(_index);
@@ -60,16 +74,41 @@ contract MerkleDistributor is MetaTxComponent {
         emit Claimed(_index, _to, _amount);
     }
 
-    function unclaimedBalance(uint256 _index, address _to, uint256 _amount, bytes32[] memory _proof) public view returns (uint256) {
+    /// @notice Returns the amount of unclaimed tokens
+    /// @param _index The index in the balance tree to be claimed
+    /// @param _to The receiving address
+    /// @param _amount The amount of tokens
+    /// @param _proof The merkle proof to be verified
+    /// @return The unclaimed amount
+    function unclaimedBalance(
+        uint256 _index,
+        address _to,
+        uint256 _amount,
+        bytes32[] memory _proof
+    ) public view returns (uint256) {
         if (isClaimed(_index)) return 0;
         return _verifyBalanceOnTree(_index, _to, _amount, _proof) ? _amount : 0;
     }
 
-    function _verifyBalanceOnTree(uint256 _index, address _to, uint256 _amount, bytes32[] memory _proof) internal view returns (bool) {
+    /// @notice Verifies a balance on a merkle tree
+    /// @param _index The index in the balance tree to be claimed
+    /// @param _to The receiving address
+    /// @param _amount The amount of tokens
+    /// @param _proof The merkle proof to be verified
+    /// @return True if the given proof is correct
+    function _verifyBalanceOnTree(
+        uint256 _index,
+        address _to,
+        uint256 _amount,
+        bytes32[] memory _proof
+    ) internal view returns (bool) {
         bytes32 node = keccak256(abi.encodePacked(_index, _to, _amount));
         return MerkleProof.verify(_proof, merkleRoot, node);
     }
 
+    /// @notice Checks if an index on the merkle tree is claimed
+    /// @param _index The index in the balance tree to be claimed
+    /// @return True if the index is claimed
     function isClaimed(uint256 _index) public view returns (bool) {
         uint256 claimedWord_index = _index / 256;
         uint256 claimedBit_index = _index % 256;
@@ -78,6 +117,8 @@ contract MerkleDistributor is MetaTxComponent {
         return claimedWord & mask == mask;
     }
 
+    /// @notice Sets an index in the merkle tree to be claimed
+    /// @param _index The index in the balance tree to be claimed
     function _setClaimed(uint256 _index) private {
         uint256 claimedWord_index = _index / 256;
         uint256 claimedBit_index = _index % 256;
