@@ -44,6 +44,7 @@ contract TokenFactory {
 
     /// TODO: Worth considering the decimals ?
     /// @notice if addr is zero, creates new token + merkle minter, otherwise, creates a wrapped token only.
+    /// @notice if receiver addr is zero, mint token to DAO's address.
     /// @param _dao The dao address
     /// @param _tokenConfig The address of the token, name, and symbol. If no addr is passed will a new token get created.
     /// @param _mintConfig contains addresses and values(where to mint tokens and how much)
@@ -100,7 +101,6 @@ contract TokenFactory {
             // allow minting to treasury
             address receiver = _mintConfig.receivers[i] == address(0) ? address(_dao) : _mintConfig.receivers[i];
             GovernanceERC20(token).mint(receiver, _mintConfig.amounts[i]);
-            // GovernanceERC20(token).mint(_mintConfig.receivers[i], _mintConfig.amounts[i]);
         }
         // remove the mint permission from tokenFactory
         _dao.revoke(token, address(this), tokenMinterRole);
