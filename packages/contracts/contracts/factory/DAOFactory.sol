@@ -63,7 +63,7 @@ contract DAOFactory is PackageInstaller {
         // initialize dao with the ROOT_ROLE as DAOFactory
         dao.initialize(_daoConfig.metadata, address(this), _daoConfig.gsnForwarder);
         // register dao with its name and token to the registry
-        registry.register(_daoConfig.name, dao, msg.sender);
+        registry.register(dao, msg.sender, _daoConfig.name);
     }
 
     // @dev Does set the required permissions for the new DAO.
