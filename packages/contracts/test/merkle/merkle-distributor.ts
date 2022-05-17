@@ -40,35 +40,38 @@ describe('MerkleDistributor', function () {
 
   describe('general', () => {
     const ZERO_BYTES32 = `0x${`0`.repeat(64)}`
-    
-    beforeEach(async () => {    
+
+    beforeEach(async () => {
       await distributor.initialize(dao.address, ethers.constants.AddressZero, token.address, ZERO_BYTES32);
     });
 
     describe('#token', () => {
-    it('returns the token address', async () => {
-      expect(await distributor.token()).to.eq(token.address)
+      it('returns the token address', async () => {
+        expect(await distributor.token()).to.eq(token.address)
       })
     })
 
     describe('#merkleRoot', () => {
-        it('returns the zero merkle root', async () => {
+      it('returns the zero merkle root', async () => {
         expect(await distributor.merkleRoot()).to.eq(ZERO_BYTES32)
-        })
+      })
     })
 
     describe('#claim', () => {
-        it('fails for empty proof', async () => {
-        await expect(distributor.claim(0, wallet0, 10, [])).to.be.revertedWith(
-            customError('DistTokenClaimInvalid', 0, wallet0, 10)
+      it('fails for empty proof', async () => {
+        await expect(
+          distributor.claim(0, wallet0, 10, [])
+        ).to.be.revertedWith(
+          customError('DistTokenClaimInvalid', 0, wallet0, 10)
         )
-        })
+      })
 
-        it('fails for invalid index', async () => {
-        await expect(distributor.claim(0, wallet0, 10, [])).to.be.revertedWith(
+      it('fails for invalid index', async () => {
+        await expect(
+          distributor.claim(0, wallet0, 10, [])).to.be.revertedWith(
             customError('DistTokenClaimInvalid', 0, wallet0, 10)
-        )
-        })
+          )
+      })
     });
   })
 
@@ -79,7 +82,7 @@ describe('MerkleDistributor', function () {
         { account: wallet0, amount: BigNumber.from(100) },
         { account: wallet1, amount: BigNumber.from(101) },
       ])
-      
+
       await distributor.initialize(dao.address, ethers.constants.AddressZero, token.address, tree.getHexRoot());
       await token.setBalance(distributor.address, 201)
     })
@@ -124,7 +127,7 @@ describe('MerkleDistributor', function () {
       await distributor.claim(0, wallet0, 100, proof0)
       await expect(
         distributor.claim(0, wallet0, 100, proof0)
-      ).to.be.revertedWith(customError('DistTokenClaimedAlready',0));
+      ).to.be.revertedWith(customError('DistTokenClaimedAlready', 0));
     })
 
     it('cannot claim more than once: 0 and then 1', async () => {
@@ -143,7 +146,7 @@ describe('MerkleDistributor', function () {
 
       await expect(
         distributor.claim(0, wallet0, 100, tree.getProof(0, wallet0, BigNumber.from(100)))
-      ).to.be.revertedWith(customError('DistTokenClaimedAlready',0));
+      ).to.be.revertedWith(customError('DistTokenClaimedAlready', 0));
     })
 
     it('cannot claim more than once: 1 and then 0', async () => {
@@ -162,14 +165,14 @@ describe('MerkleDistributor', function () {
 
       await expect(
         distributor.claim(1, wallet1, 101, tree.getProof(1, wallet1, BigNumber.from(101)))
-      ).to.be.revertedWith(customError('DistTokenClaimedAlready',1));
+      ).to.be.revertedWith(customError('DistTokenClaimedAlready', 1));
     })
 
     it('cannot claim for address other than proof', async () => {
       const proof0 = tree.getProof(0, wallet0, BigNumber.from(100))
       await expect(
-          distributor.claim(1, wallet1, 101, proof0
-      )).to.be.revertedWith(customError('DistTokenClaimInvalid', 1, wallet1, 101))
+        distributor.claim(1, wallet1, 101, proof0
+        )).to.be.revertedWith(customError('DistTokenClaimInvalid', 1, wallet1, 101))
     })
 
     it('cannot claim more than proof', async () => {
@@ -178,9 +181,9 @@ describe('MerkleDistributor', function () {
         distributor.claim(0, wallet0, 101, proof0)
       ).to.be.revertedWith(customError('DistTokenClaimInvalid', 0, wallet0, 101));
     })
-})
+  })
 
-describe('larger tree', () => {
+  describe('larger tree', () => {
     let tree: BalanceTree
     beforeEach('deploy', async () => {
       tree = new BalanceTree(
