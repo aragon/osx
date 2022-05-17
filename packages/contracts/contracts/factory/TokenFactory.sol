@@ -100,7 +100,7 @@ contract TokenFactory {
         for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
             // allow minting to treasury
             address receiver = _mintConfig.receivers[i] == address(0) ? address(_dao) : _mintConfig.receivers[i];
-            GovernanceERC20(token).mint(receiver, _mintConfig.amounts[i]);
+            IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
         }
         // remove the mint permission from tokenFactory
         _dao.revoke(token, address(this), tokenMinterRole);
