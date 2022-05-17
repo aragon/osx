@@ -38,7 +38,7 @@ jobs:
   build_deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.bump }} != 'pre' && ${{ needs.prepare.outputs.bump }} != ''
+    if: ${{ needs.prepare.outputs.bump != 'pre' }}
     strategy:
       fail-fast: false
       matrix:
@@ -63,3 +63,35 @@ jobs:
           yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{matrix.package}}
+          path: ./packages/${{ matrix.package }}/
+          retention-days: 1
+  pushChanges:
+    runs-on: ubuntu-latest
+    needs: [build_deploy]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.ARABOT_PAT }}
+      - uses: actions/download-artifact@v3
+        with:
+          path: packages/contracts/
+          name: contracts
+      - uses: actions/download-artifact@v3
+        with:
+          path: packages/contracts-ethers/
+          name: contracts-ethers
+      - name: Commit changes
+        id: commit
+        run: |
+          git fetch
+          git pull
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
+          git add packages/contracts/package.json
+          git add packages/contracts-ethers/package.json
+          git commit -am "Updates package.json versions"
+          git push
