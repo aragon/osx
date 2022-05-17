@@ -12,8 +12,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "../core/acl/ACL.sol";
 
-/* solium-disable function-order */
-// Allow public initialize() to be first
 contract Repo is Initializable, UUPSUpgradeable, ACL {
     /* Hardcoded constants to save gas
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");

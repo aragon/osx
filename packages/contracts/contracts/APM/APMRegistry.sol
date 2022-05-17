@@ -8,9 +8,7 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "../core/acl/ACL.sol";
+import "../core/component/MetaTxComponent.sol";
 import "./Repo.sol";
 
 contract APMInternalAppNames {
@@ -19,9 +17,7 @@ contract APMInternalAppNames {
     string internal constant ENS_SUB_APP_NAME = "apm-enssub";
 }
 
-contract APMRegistry is APMInternalAppNames, Initializable, UUPSUpgradeable, ACL {
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
-
+contract APMRegistry is APMInternalAppNames, MetaTxComponent {
     address public repoBase;
 
     error ApmRegEmpityName();
@@ -29,13 +25,17 @@ contract APMRegistry is APMInternalAppNames, Initializable, UUPSUpgradeable, ACL
     event NewRepo(string name, address repo);
 
     /// @dev Used for UUPS upgradability pattern
-    function initialize() external initializer {
-        __ACL_init(msg.sender);
+    function initialize(IDAO _dao, address _gsnForwarder) external initializer {
+        __MetaTxComponent_init(_dao, _gsnForwarder);
+
         repoBase = address(new Repo());
     }
 
-    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(msg.sender, UPGRADE_ROLE) {}
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
+    function versionRecipient() external view virtual override returns (string memory) {
+        return "0.0.1+opengsn.recipient.APMRegistry";
+    }
 
     /**
      * @notice Create new repo in registry with `_name`

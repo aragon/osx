@@ -47,7 +47,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'APMRegistry',
       ampAddress
     );
-    await APMRegistryContract.initialize(/*pass adminDaoAddress*/);
+    await APMRegistryContract.initialize(
+      adminDaoAddress,
+      '0x0000000000000000000000000000000000000000'
+    );
     console.log('APMRegistryContract initialized');
   }
 };
