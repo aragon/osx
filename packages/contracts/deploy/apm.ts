@@ -10,7 +10,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let erc20VotingFactoryAddress: string = '';
   let whiteListFactoryAddress: string = '';
-  while (!erc20VotingFactoryAddress && !whiteListFactoryAddress) {
+  let adminDaoAddress: string = '';
+  while (
+    !erc20VotingFactoryAddress &&
+    !whiteListFactoryAddress &&
+    !adminDaoAddress
+  ) {
     try {
       erc20VotingFactoryAddress = await getContractAddress(
         'ERC20VotingFactory',
@@ -20,6 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'WhiteListFactory',
         hre
       );
+      adminDaoAddress = await getContractAddress('DAO', hre);
     } catch (e) {
       console.log(
         'no WhiteListFactory, or ERC20VotingFactory address found...'
@@ -41,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'APMRegistry',
       ampAddress
     );
-    await APMRegistryContract.initialize();
+    await APMRegistryContract.initialize(/*pass adminDaoAddress*/);
     console.log('APMRegistryContract initialized');
   }
 };
