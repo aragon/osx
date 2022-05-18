@@ -13,12 +13,12 @@ contract WhitelistVoting is MajorityVoting {
     using Checkpoints for Checkpoints.History;
 
     bytes4 internal constant WHITELIST_VOTING_INTERFACE_ID =
-            MAJORITY_VOTING_INTERFACE_ID ^
-                this.addWhitelistedUsers.selector ^
-                this.removeWhitelistedUsers.selector ^
-                this.isUserWhitelisted.selector ^
-                this.whitelistedUserCount.selector;
-            
+        MAJORITY_VOTING_INTERFACE_ID ^
+            this.addWhitelistedUsers.selector ^
+            this.removeWhitelistedUsers.selector ^
+            this.isUserWhitelisted.selector ^
+            this.whitelistedUserCount.selector;
+
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
     mapping(address => Checkpoints.History) private _checkpoints;
@@ -46,13 +46,7 @@ contract WhitelistVoting is MajorityVoting {
         address[] calldata _whitelisted
     ) public initializer {
         _registerStandard(WHITELIST_VOTING_INTERFACE_ID);
-        __MajorityVoting_init(
-            _dao,
-            _gsnForwarder,
-            _participationRequiredPct,
-            _supportRequiredPct,
-            _minDuration
-        );
+        __MajorityVoting_init(_dao, _gsnForwarder, _participationRequiredPct, _supportRequiredPct, _minDuration);
 
         // add whitelisted users
         _addWhitelistedUsers(_whitelisted);
@@ -102,18 +96,18 @@ contract WhitelistVoting is MajorityVoting {
         VoterState _choice
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
-        
-        if(!isUserWhitelisted(_msgSender(), snapshotBlock)) {
+
+        if (!isUserWhitelisted(_msgSender(), snapshotBlock)) {
             revert VoteCreationForbidden(_msgSender());
         }
-        
+
         // calculate start and end time for the vote
         uint64 currentTimestamp = getTimestamp64();
 
         if (_startDate == 0) _startDate = currentTimestamp;
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
-        if(_endDate - _startDate <  minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
             revert VoteTimesForbidden({
                 current: currentTimestamp,
                 start: _startDate,
@@ -185,31 +179,26 @@ contract WhitelistVoting is MajorityVoting {
             _execute(_voteId);
         }
     }
-   
+
     /**
-    *  @dev Tells whether user is whitelisted at specific block or past it.
-    *  @param account user address
-    *  @param blockNumber block number for which it checks if user is whitelisted
-    */
-    function isUserWhitelisted(
-        address account, 
-        uint256 blockNumber
-    ) public view returns (bool) {
-        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
-        
+     *  @dev Tells whether user is whitelisted at specific block or past it.
+     *  @param account user address
+     *  @param blockNumber block number for which it checks if user is whitelisted
+     */
+    function isUserWhitelisted(address account, uint256 blockNumber) public view returns (bool) {
+        if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+
         return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
     /**
-    *  @dev returns total count of users that are whitelisted at specific block
-    *  @param blockNumber specific block to get count from
-    *  @return count of users that are whitelisted blockNumber or prior to it.
-    */
-    function whitelistedUserCount(
-        uint256 blockNumber
-    ) public view returns (uint256) {
-        if(blockNumber == 0) blockNumber = getBlockNumber64() - 1;
-        
+     *  @dev returns total count of users that are whitelisted at specific block
+     *  @param blockNumber specific block to get count from
+     *  @return count of users that are whitelisted blockNumber or prior to it.
+     */
+    function whitelistedUserCount(uint256 blockNumber) public view returns (uint256) {
+        if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 
@@ -225,26 +214,27 @@ contract WhitelistVoting is MajorityVoting {
     }
 
     /**
-    *  @dev Adds or removes users from whitelist
-    *  @param _users user addresses
-    *  @param _enabled whether to add or remove from whitelist
-    */
-    function _whitelistUsers(
-        address[] calldata _users, 
-        bool _enabled
-    ) internal {        
+     *  @dev Adds or removes users from whitelist
+     *  @param _users user addresses
+     *  @param _enabled whether to add or remove from whitelist
+     */
+    function _whitelistUsers(address[] calldata _users, bool _enabled) internal {
         _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
-        
-        for(uint i = 0; i < _users.length; i++) {
+
+        for (uint256 i = 0; i < _users.length; i++) {
             _checkpoints[_users[i]].push(_enabled ? 1 : 0);
         }
     }
 
-    function _add(uint256 a, uint256 b) private pure returns(uint256) {
-        unchecked { return a + b; }
+    function _add(uint256 a, uint256 b) private pure returns (uint256) {
+        unchecked {
+            return a + b;
+        }
     }
 
-    function _sub(uint256 a, uint256 b) private pure returns(uint256) {
-        unchecked { return a - b; }
+    function _sub(uint256 a, uint256 b) private pure returns (uint256) {
+        unchecked {
+            return a - b;
+        }
     }
 }

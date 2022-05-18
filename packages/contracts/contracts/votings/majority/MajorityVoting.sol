@@ -72,13 +72,14 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         VoterState _choice,
         bool _executesIfDecided
     ) external {
-        if(_choice != VoterState.None && !_canVote(_voteId, _msgSender())) revert VoteCastForbidden(_voteId, _msgSender());
+        if (_choice != VoterState.None && !_canVote(_voteId, _msgSender()))
+            revert VoteCastForbidden(_voteId, _msgSender());
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
     function execute(uint256 _voteId) public {
-        if(!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
+        if (!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
         _execute(_voteId);
     }
 
@@ -99,22 +100,22 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
 
     /// @inheritdoc IMajorityVoting
     function getVote(uint256 _voteId)
-    public
-    view
-    returns (
-        bool open,
-        bool executed,
-        uint64 startDate,
-        uint64 endDate,
-        uint64 snapshotBlock,
-        uint64 supportRequired,
-        uint64 participationRequired,
-        uint256 votingPower,
-        uint256 yea,
-        uint256 nay,
-        uint256 abstain,
-        IDAO.Action[] memory actions
-    )
+        public
+        view
+        returns (
+            bool open,
+            bool executed,
+            uint64 startDate,
+            uint64 endDate,
+            uint64 snapshotBlock,
+            uint64 supportRequired,
+            uint64 participationRequired,
+            uint256 votingPower,
+            uint256 yea,
+            uint256 nay,
+            uint256 abstain,
+            IDAO.Action[] memory actions
+        )
     {
         Vote storage vote_ = votes[_voteId];
 
@@ -122,7 +123,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         executed = vote_.executed;
         startDate = vote_.startDate;
         endDate = vote_.endDate;
-        snapshotBlock= vote_.snapshotBlock;
+        snapshotBlock = vote_.snapshotBlock;
         supportRequired = vote_.supportRequiredPct;
         participationRequired = vote_.participationRequiredPct;
         votingPower = vote_.votingPower;
@@ -162,7 +163,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     /// @dev Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _voteId vote id
     /// @return True if the given vote can be executed, false otherwise
-    function _canExecute(uint256 _voteId) internal virtual view returns (bool) {
+    function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
         Vote storage vote_ = votes[_voteId];
 
         if (vote_.executed) {
@@ -197,7 +198,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     /// @dev Internal function to check if a vote is still open
     /// @param vote_ the vote struct
     /// @return True if the given vote is open, false otherwise
-    function _isVoteOpen(Vote storage vote_) internal virtual view returns (bool) {
+    function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
         return getTimestamp64() < vote_.endDate && getTimestamp64() >= vote_.startDate && !vote_.executed;
     }
 
@@ -220,19 +221,19 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     }
 
     function _validateAndSetSettings(
-        uint64 _participationRequiredPct, 
+        uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal virtual {
-        if(_supportRequiredPct > PCT_BASE) {
+        if (_supportRequiredPct > PCT_BASE) {
             revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
         }
 
-        if(_participationRequiredPct > PCT_BASE) {
+        if (_participationRequiredPct > PCT_BASE) {
             revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
         }
 
-        if(_minDuration == 0) {
+        if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 

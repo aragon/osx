@@ -8,7 +8,7 @@ library Uint256Helpers {
     error OutOfBounds(uint256 maxValue, uint256 value);
 
     function toUint64(uint256 a) internal pure returns (uint64) {
-        if(a > MAX_UINT64) revert OutOfBounds({maxValue: MAX_UINT64, value: a});
+        if (a > MAX_UINT64) revert OutOfBounds({maxValue: MAX_UINT64, value: a});
         return uint64(a);
     }
 }

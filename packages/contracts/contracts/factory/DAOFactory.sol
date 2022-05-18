@@ -156,8 +156,8 @@ contract DAOFactory {
 
     /// @dev internal helper method to create ERC20Voting
     function createERC20Voting(
-        DAO _dao, 
-        ERC20VotesUpgradeable _token, 
+        DAO _dao,
+        ERC20VotesUpgradeable _token,
         VoteConfig calldata _voteConfig
     ) internal returns (ERC20Voting erc20Voting) {
         erc20Voting = ERC20Voting(
@@ -186,8 +186,8 @@ contract DAOFactory {
 
     /// @dev internal helper method to create Whitelist Voting
     function createWhitelistVoting(
-        DAO _dao, 
-        address[] calldata _whitelistVoters, 
+        DAO _dao,
+        address[] calldata _whitelistVoters,
         VoteConfig calldata _voteConfig
     ) internal returns (WhitelistVoting whitelistVoting) {
         whitelistVoting = WhitelistVoting(

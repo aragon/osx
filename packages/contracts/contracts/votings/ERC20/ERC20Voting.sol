@@ -31,21 +31,15 @@ contract ERC20Voting is MajorityVoting {
         ERC20VotesUpgradeable _token
     ) public initializer {
         _registerStandard(ERC20_VOTING_INTERFACE_ID);
-        __MajorityVoting_init(
-            _dao,
-            _gsnForwarder,
-            _participationRequiredPct,
-            _supportRequiredPct,
-            _minDuration
-        );
+        __MajorityVoting_init(_dao, _gsnForwarder, _participationRequiredPct, _supportRequiredPct, _minDuration);
 
         votingToken = _token;
     }
 
     /// @notice getter function for the voting token
-    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface 
-    /// @return ERC20VotesUpgradeable the token used for voting 
-    function getVotingToken() public view returns(ERC20VotesUpgradeable){
+    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface
+    /// @return ERC20VotesUpgradeable the token used for voting
+    function getVotingToken() public view returns (ERC20VotesUpgradeable) {
         return votingToken;
     }
 
@@ -74,7 +68,7 @@ contract ERC20Voting is MajorityVoting {
 
         uint256 votingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (votingPower == 0) revert VotePowerZero();
-        
+
         voteId = votesLength++;
 
         // calculate start and end time for the vote
@@ -83,7 +77,7 @@ contract ERC20Voting is MajorityVoting {
         if (_startDate == 0) _startDate = currentTimestamp;
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
-        if(_endDate - _startDate <  minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
             revert VoteTimesForbidden({
                 current: currentTimestamp,
                 start: _startDate,

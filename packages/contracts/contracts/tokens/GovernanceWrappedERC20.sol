@@ -20,23 +20,28 @@ import "../core/IDAO.sol";
 // After those, Users can now participate in the voting. If user doesn't want to make votes anymore,
 // he can call `withdrawTo` to take his tokens back to his ERC20.
 
-// IMPORTANT: In this token, no need to have mint functionality, 
+// IMPORTANT: In this token, no need to have mint functionality,
 // as it's the wrapped token's responsibility to mint whenever needed
 
-// Inheritance Chain -> 
+// Inheritance Chain ->
 // [
 //    GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
 //    EIP712Upgradeable => ERC20Upgradeable => Initializable
 // ]
-contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgradeable, ERC20WrapperUpgradeable, BaseRelayRecipient {
-
+contract GovernanceWrappedERC20 is
+    Initializable,
+    AdaptiveERC165,
+    ERC20VotesUpgradeable,
+    ERC20WrapperUpgradeable,
+    BaseRelayRecipient
+{
     /// @dev describes the version and contract for GSN compatibility.
-    function versionRecipient() external virtual override view returns (string memory) {
+    function versionRecipient() external view virtual override returns (string memory) {
         return "0.0.1+opengsn.recipient.GovernanceWrappedERC20";
     }
 
     function __GovernanceWrappedERC20_init(
-        IERC20Upgradeable _token, 
+        IERC20Upgradeable _token,
         string calldata _name,
         string calldata _symbol
     ) internal onlyInitializing {
@@ -50,35 +55,45 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
     }
 
     function initialize(
-        IERC20Upgradeable _token, 
+        IERC20Upgradeable _token,
         string calldata _name,
         string calldata _symbol
     ) external initializer {
-        __GovernanceWrappedERC20_init(_token,_name,_symbol);
+        __GovernanceWrappedERC20_init(_token, _name, _symbol);
     }
 
-    /// @dev Since 2 base classes end up having _msgSender(OZ + GSN), 
-    /// we have to override it and activate GSN's _msgSender. 
+    /// @dev Since 2 base classes end up having _msgSender(OZ + GSN),
+    /// we have to override it and activate GSN's _msgSender.
     /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
     /// ends up first and that's what gets called by super._msgSender
-    function _msgSender() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (address) {
+    function _msgSender() internal view virtual override(BaseRelayRecipient, ContextUpgradeable) returns (address) {
         return super._msgSender();
     }
 
-    /// @dev Since 2 base classes end up having _msgData(OZ + GSN), 
-    /// we have to override it and activate GSN's _msgData. 
+    /// @dev Since 2 base classes end up having _msgData(OZ + GSN),
+    /// we have to override it and activate GSN's _msgData.
     /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
     /// ends up first and that's what gets called by super._msgData
-    function _msgData() internal view override(BaseRelayRecipient, ContextUpgradeable) virtual returns (bytes calldata) {
+    function _msgData()
+        internal
+        view
+        virtual
+        override(BaseRelayRecipient, ContextUpgradeable)
+        returns (bytes calldata)
+    {
         return super._msgData();
     }
-    
+
     // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._afterTokenTransfer(from, to, amount);
         // reduce _delegate calls only when minting
-        if(from == address(0) && to != address(0) && delegates(to) == address(0)) {
+        if (from == address(0) && to != address(0) && delegates(to) == address(0)) {
             _delegate(to, to);
         }
     }
@@ -87,7 +102,7 @@ contract GovernanceWrappedERC20 is Initializable, AdaptiveERC165, ERC20VotesUpgr
         super._mint(to, amount);
     }
 
-    function _burn(address account, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable){
+    function _burn(address account, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._burn(account, amount);
     }
 }

@@ -49,7 +49,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
     function initialize(
-        bytes calldata _metadata, 
+        bytes calldata _metadata,
         address _initialOwner,
         address _forwarder
     ) external initializer {
@@ -63,16 +63,18 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
-    
+
     /// @inheritdoc IDAO
-    function setTrustedForwarder(
-        address _newTrustedForwarder
-    ) external override auth(address(this), MODIFY_TRUSTED_FORWARDER) {
+    function setTrustedForwarder(address _newTrustedForwarder)
+        external
+        override
+        auth(address(this), MODIFY_TRUSTED_FORWARDER)
+    {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
     /// @inheritdoc IDAO
-    function trustedForwarder() public virtual view override returns(address) {
+    function trustedForwarder() public view virtual override returns (address) {
         return _trustedForwarder;
     }
 
@@ -103,7 +105,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         for (uint256 i = 0; i < _actions.length; i++) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
 
-            if(!success) revert ActionFailed();
+            if (!success) revert ActionFailed();
 
             execResults[i] = response;
         }
@@ -119,12 +121,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string calldata _reference
     ) external payable override {
-        if(_amount == 0) revert ZeroAmount();
+        if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
-            if(msg.value != _amount) revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
+            if (msg.value != _amount) revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
         } else {
-            if(msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
+            if (msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
 
             ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
@@ -139,11 +141,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         uint256 _amount,
         string memory _reference
     ) external override auth(address(this), WITHDRAW_ROLE) {
-        if(_amount == 0) revert ZeroAmount();
+        if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
-            if(!ok) revert ETHWithdrawFailed();
+            if (!ok) revert ETHWithdrawFailed();
         } else {
             ERC20(_token).safeTransfer(_to, _amount);
         }
@@ -153,14 +155,20 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     /// @inheritdoc IDAO
     function setSignatureValidator(address _signatureValidator)
-        external override
+        external
+        override
         auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE)
     {
         signatureValidator = ERC1271(_signatureValidator);
     }
 
     /// @inheritdoc IDAO
-    function isValidSignature(bytes32 _hash, bytes memory _signature) external view override(IDAO, ERC1271) returns (bytes4) {
+    function isValidSignature(bytes32 _hash, bytes memory _signature)
+        external
+        view
+        override(IDAO, ERC1271)
+        returns (bytes4)
+    {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
