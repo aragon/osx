@@ -35,3 +35,4 @@ jobs:
     uses: './.github/workflows/npm-release-reusable.yml'
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}

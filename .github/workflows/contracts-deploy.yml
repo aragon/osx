@@ -139,3 +139,4 @@ jobs:
       ref: ${{ needs.conclude.outputs.commitid }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}
