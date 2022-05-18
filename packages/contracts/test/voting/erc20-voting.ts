@@ -1,16 +1,16 @@
-import chai, { expect } from 'chai';
-import { ethers, waffle } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import chai, {expect} from 'chai';
+import {ethers, waffle} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chaiUtils from '../test-utils';
-import { VoterState, EVENTS, pct16, toBn } from '../test-utils/voting';
-import { customError, ERRORS } from '../test-utils/custom-error-helper';
+import {VoterState, EVENTS, pct16, toBn} from '../test-utils/voting';
+import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import { ERC20Voting, DAOMock } from '../../typechain';
+import {ERC20Voting, DAOMock} from '../../typechain';
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 
-const { deployMockContract } = waffle;
+const {deployMockContract} = waffle;
 
 describe('ERC20Voting', function () {
   let signers: SignerWithAddress[];
@@ -62,17 +62,15 @@ describe('ERC20Voting', function () {
     it('reverts if trying to re-initialize', async () => {
       await initializeVoting(1, 2, 3);
 
-      await expect(
-        initializeVoting(2, 1, 3)
-      ).to.be.revertedWith(
+      await expect(initializeVoting(2, 1, 3)).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
       );
     });
 
     it('reverts if min duration is 0', async () => {
-      await expect(
-        initializeVoting(1, 2, 0)
-      ).to.be.revertedWith(customError('VoteDurationZero'));
+      await expect(initializeVoting(1, 2, 0)).to.be.revertedWith(
+        customError('VoteDurationZero')
+      );
     });
   });
 
@@ -96,23 +94,25 @@ describe('ERC20Voting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.newVote(
-          '0x00',
-          [],
+        voting.newVote('0x00', [], startDate, endDate, false, VoterState.None)
+      ).to.be.revertedWith(
+        customError(
+          'VoteTimesForbidden',
+          current + 1, // TODO hacky
           startDate,
           endDate,
-          false,
-          VoterState.None
+          minDuration
         )
-      ).to.be.revertedWith(customError('VoteTimesForbidden', current + 1, // TODO hacky
-        startDate, endDate, minDuration));
+      );
     });
 
     it('should create a vote successfully, but not vote', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None))
+      expect(
+        await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None)
+      )
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00');
 
@@ -141,7 +141,9 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea))
+      expect(
+        await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea)
+      )
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00')
         .to.emit(voting, EVENTS.CAST_VOTE)

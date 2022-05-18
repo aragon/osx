@@ -75,8 +75,10 @@ describe('Core: TokenFactory', () => {
     });
 
     it('should fail if token addr is no ERC20 contract', async () => {
-      const dummyContractFactory = await ethers.getContractFactory('DummyContract')
-      const dummyContract = await dummyContractFactory.deploy()
+      const dummyContractFactory = await ethers.getContractFactory(
+        'DummyContract'
+      );
+      const dummyContract = await dummyContractFactory.deploy();
       const config: TokenConfig = {
         addr: dummyContract.address,
         name: 'FakeToken',
@@ -88,15 +90,15 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      await expect(tokenFactory.callStatic.newToken(
-        dao.address,
-        config,
-        mintConfig
-      )).to.revertedWith('Address: low-level call failed');
-    })
+      await expect(
+        tokenFactory.callStatic.newToken(dao.address, config, mintConfig)
+      ).to.revertedWith('Address: low-level call failed');
+    });
 
     it('should create a GovernanceWrappedERC20 clone', async () => {
-      const erc20Contract = await smock.fake<GovernanceERC20>('GovernanceERC20');
+      const erc20Contract = await smock.fake<GovernanceERC20>(
+        'GovernanceERC20'
+      );
       const config: TokenConfig = {
         addr: erc20Contract.address,
         name: 'FakeToken',
@@ -118,7 +120,9 @@ describe('Core: TokenFactory', () => {
     });
 
     it('should return MerkleMinter with 0x0', async () => {
-      const erc20Contract = await smock.fake<GovernanceERC20>('GovernanceERC20');
+      const erc20Contract = await smock.fake<GovernanceERC20>(
+        'GovernanceERC20'
+      );
       const config: TokenConfig = {
         addr: erc20Contract.address,
         name: 'FakeToken',

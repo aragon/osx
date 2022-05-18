@@ -1,13 +1,13 @@
-import chai, { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import chai, {expect} from 'chai';
+import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chaiUtils from '../test-utils';
-import { VoterState, EVENTS, pct16, toBn } from '../test-utils/voting';
-import { customError, ERRORS } from '../test-utils/custom-error-helper';
+import {VoterState, EVENTS, pct16, toBn} from '../test-utils/voting';
+import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import { WhitelistVoting, DAOMock } from '../../typechain';
+import {WhitelistVoting, DAOMock} from '../../typechain';
 
 describe('WhitelistVoting', function () {
   let signers: SignerWithAddress[];
@@ -59,9 +59,9 @@ describe('WhitelistVoting', function () {
     it('reverts if trying to re-initialize', async () => {
       await initializeVoting(1, 2, 3, []);
 
-      await expect(
-        initializeVoting(1, 2, 3, [])
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      await expect(initializeVoting(1, 2, 3, [])).to.be.revertedWith(
+        ERRORS.ALREADY_INITIALIZED
+      );
     });
   });
 
@@ -84,7 +84,9 @@ describe('WhitelistVoting', function () {
 
       await ethers.provider.send('evm_mine', []);
 
-      expect(await voting.isUserWhitelisted(ownerAddress, block.number)).to.equal(true);
+      expect(
+        await voting.isUserWhitelisted(ownerAddress, block.number)
+      ).to.equal(true);
       expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(true);
       expect(await voting.isUserWhitelisted(user1, 0)).to.equal(true);
     });
@@ -94,15 +96,18 @@ describe('WhitelistVoting', function () {
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isUserWhitelisted(ownerAddress, block1.number)).to.equal(true);
+      expect(
+        await voting.isUserWhitelisted(ownerAddress, block1.number)
+      ).to.equal(true);
       expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(true);
-
 
       await voting.removeWhitelistedUsers([ownerAddress]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isUserWhitelisted(ownerAddress, block2.number)).to.equal(false);
+      expect(
+        await voting.isUserWhitelisted(ownerAddress, block2.number)
+      ).to.equal(false);
       expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(false);
     });
   });
@@ -115,8 +120,12 @@ describe('WhitelistVoting', function () {
 
     it('reverts if user is not whitelisted to create a vote', async () => {
       await expect(
-        voting.connect(signers[1]).newVote('0x00', [], 0, 0, false, VoterState.None)
-      ).to.be.revertedWith(customError('VoteCreationForbidden', signers[1].address));
+        voting
+          .connect(signers[1])
+          .newVote('0x00', [], 0, 0, false, VoterState.None)
+      ).to.be.revertedWith(
+        customError('VoteCreationForbidden', signers[1].address)
+      );
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
@@ -125,20 +134,22 @@ describe('WhitelistVoting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.newVote(
-          '0x00',
-          [],
+        voting.newVote('0x00', [], startDate, endDate, false, VoterState.None)
+      ).to.be.revertedWith(
+        customError(
+          'VoteTimesForbidden',
+          current + 1, // TODO hacky
           startDate,
           endDate,
-          false,
-          VoterState.None
+          minDuration
         )
-      ).to.be.revertedWith(customError('VoteTimesForbidden', current + 1, // TODO hacky
-        startDate, endDate, minDuration));
+      );
     });
 
     it('should create a vote successfully, but not vote', async () => {
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None))
+      expect(
+        await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None)
+      )
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00');
 
@@ -164,7 +175,9 @@ describe('WhitelistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediatelly', async () => {
-      expect(await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea))
+      expect(
+        await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea)
+      )
         .to.emit(voting, EVENTS.START_VOTE)
         .withArgs(0, ownerAddress, '0x00')
         .to.emit(voting, EVENTS.CAST_VOTE)
@@ -315,15 +328,15 @@ describe('WhitelistVoting', function () {
       expect(vote.executed).to.equal(true);
 
       // calling execute again should fail
-      await expect(
-        voting.execute(0)
-      ).to.be.revertedWith(customError('VoteExecutionForbidden', 0));
+      await expect(voting.execute(0)).to.be.revertedWith(
+        customError('VoteExecutionForbidden', 0)
+      );
     });
 
     it('reverts if vote is executed while enough yea is not given ', async () => {
-      await expect(
-        voting.execute(0)
-      ).to.be.revertedWith(customError('VoteExecutionForbidden', 0));
+      await expect(voting.execute(0)).to.be.revertedWith(
+        customError('VoteExecutionForbidden', 0)
+      );
     });
   });
 });

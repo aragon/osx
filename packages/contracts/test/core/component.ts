@@ -1,12 +1,12 @@
-import chai, { expect } from 'chai';
-import { ethers } from 'hardhat';
+import chai, {expect} from 'chai';
+import {ethers} from 'hardhat';
 import chaiUtils from '../test-utils';
-import { ERRORS } from '../test-utils/custom-error-helper';
+import {ERRORS} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import { ComponentMock, DAOMock } from '../../typechain';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import {ComponentMock, DAOMock} from '../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 describe('Component', function () {
   let signers: SignerWithAddress[];
@@ -39,9 +39,7 @@ describe('Component', function () {
 
   describe('Context: ', async () => {
     it('returns the right message sender', async () => {
-      expect(
-        await componentMock.msgSender()
-      ).to.be.equal(ownerAddress);
+      expect(await componentMock.msgSender()).to.be.equal(ownerAddress);
     });
   });
 });
