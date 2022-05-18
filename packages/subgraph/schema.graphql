@@ -114,8 +114,11 @@ interface Package {
 interface Proposal {
   id: ID! # package + voteId
   dao: Dao!
+  creator: Bytes!
+  metadata: String!
   actions: [Action!]! @derivedFrom(field: "proposal")
   executed: Boolean!
+  createdAt: BigInt!
 }
 
 # Votings
