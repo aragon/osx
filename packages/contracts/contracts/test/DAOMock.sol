@@ -36,7 +36,11 @@ contract DAOMock is IDAO, ACL {
         bytes calldata /* _metadata */
     ) external override {}
 
-    function execute(uint256 callId, Action[] memory _actions) external override returns (bytes[] memory) {
+    function execute(uint256 callId, Action[] memory _actions)
+        external
+        override
+        returns (bytes[] memory)
+    {
         bytes[] memory results;
         emit Executed(msg.sender, callId, _actions, results);
         return results;

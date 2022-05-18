@@ -34,7 +34,8 @@ contract AdaptiveERC165 is ERC165 {
     /// @param _data The data resp. arguments passed to the method
     function _handleCallback(bytes4 _sig, bytes memory _data) internal {
         bytes32 magicNumber = callbackMagicNumbers[_sig];
-        if (magicNumber == UNREGISTERED_CALLBACK) revert AdapERC165UnkownCallback({magicNumber: magicNumber});
+        if (magicNumber == UNREGISTERED_CALLBACK)
+            revert AdapERC165UnkownCallback({magicNumber: magicNumber});
 
         emit ReceivedCallback(_sig, _data);
 

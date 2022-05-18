@@ -66,7 +66,13 @@ contract GovernanceWrappedERC20 is
     /// we have to override it and activate GSN's _msgSender.
     /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
     /// ends up first and that's what gets called by super._msgSender
-    function _msgSender() internal view virtual override(BaseRelayRecipient, ContextUpgradeable) returns (address) {
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(BaseRelayRecipient, ContextUpgradeable)
+        returns (address)
+    {
         return super._msgSender();
     }
 
@@ -98,11 +104,17 @@ contract GovernanceWrappedERC20 is
         }
     }
 
-    function _mint(address to, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
+    function _mint(address to, uint256 amount)
+        internal
+        override(ERC20VotesUpgradeable, ERC20Upgradeable)
+    {
         super._mint(to, amount);
     }
 
-    function _burn(address account, uint256 amount) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
+    function _burn(address account, uint256 amount)
+        internal
+        override(ERC20VotesUpgradeable, ERC20Upgradeable)
+    {
         super._burn(account, amount);
     }
 }

@@ -25,7 +25,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant DAO_CONFIG_ROLE = keccak256("DAO_CONFIG_ROLE");
     bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
     bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE = keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
+    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE =
+        keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     ERC1271 signatureValidator;
@@ -62,7 +63,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
+    function _authorizeUpgrade(address)
+        internal
+        virtual
+        override
+        auth(address(this), UPGRADE_ROLE)
+    {}
 
     /// @inheritdoc IDAO
     function setTrustedForwarder(address _newTrustedForwarder)
@@ -89,7 +95,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @inheritdoc IDAO
-    function setMetadata(bytes calldata _metadata) external override auth(address(this), DAO_CONFIG_ROLE) {
+    function setMetadata(bytes calldata _metadata)
+        external
+        override
+        auth(address(this), DAO_CONFIG_ROLE)
+    {
         _setMetadata(_metadata);
     }
 
@@ -103,7 +113,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         bytes[] memory execResults = new bytes[](_actions.length);
 
         for (uint256 i = 0; i < _actions.length; i++) {
-            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(_actions[i].data);
+            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
+                _actions[i].data
+            );
 
             if (!success) revert ActionFailed();
 
@@ -124,7 +136,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
-            if (msg.value != _amount) revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
+            if (msg.value != _amount)
+                revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
         } else {
             if (msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
 

@@ -63,7 +63,13 @@ contract ACL is Initializable {
     mapping(bytes32 => bool) internal freezePermissions;
 
     // Events
-    event Granted(bytes32 indexed role, address indexed actor, address indexed who, address where, IACLOracle oracle);
+    event Granted(
+        bytes32 indexed role,
+        address indexed actor,
+        address indexed who,
+        address where,
+        IACLOracle oracle
+    );
     event Revoked(bytes32 indexed role, address indexed actor, address indexed who, address where);
     event Frozen(bytes32 indexed role, address indexed actor, address where);
 
@@ -75,7 +81,13 @@ contract ACL is Initializable {
         if (
             !(willPerform(_where, msg.sender, _role, msg.data) ||
                 willPerform(address(this), msg.sender, _role, msg.data))
-        ) revert ACLData.ACLAuth({here: address(this), where: _where, who: msg.sender, role: _role});
+        )
+            revert ACLData.ACLAuth({
+                here: address(this),
+                where: _where,
+                who: msg.sender,
+                role: _role
+            });
         _;
     }
 
@@ -133,7 +145,10 @@ contract ACL is Initializable {
     /// @dev Method to do bulk operations on the ACL
     /// @param _where The address of the contract
     /// @param items A list of ACL operations to do
-    function bulk(address _where, ACLData.BulkItem[] calldata items) external auth(_where, ROOT_ROLE) {
+    function bulk(address _where, ACLData.BulkItem[] calldata items)
+        external
+        auth(_where, ROOT_ROLE)
+    {
         for (uint256 i = 0; i < items.length; i++) {
             ACLData.BulkItem memory item = items[i];
 
@@ -232,7 +247,8 @@ contract ACL is Initializable {
     /// @param _role The hash of the role identifier
     function _freeze(address _where, bytes32 _role) internal {
         bytes32 permission = freezeHash(_where, _role);
-        if (freezePermissions[permission]) revert ACLData.ACLRoleFrozen({where: _where, role: _role});
+        if (freezePermissions[permission])
+            revert ACLData.ACLRoleFrozen({where: _where, role: _role});
         freezePermissions[freezeHash(_where, _role)] = true;
 
         emit Frozen(_role, msg.sender, _where);
@@ -256,7 +272,9 @@ contract ACL is Initializable {
         if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
 
         // Since it's not a flag, assume it's an ACLOracle and try-catch to skip failures
-        try IACLOracle(accessFlagOrAclOracle).willPerform(_where, _who, _role, _data) returns (bool allowed) {
+        try IACLOracle(accessFlagOrAclOracle).willPerform(_where, _who, _role, _data) returns (
+            bool allowed
+        ) {
             if (allowed) return true;
         } catch {}
 

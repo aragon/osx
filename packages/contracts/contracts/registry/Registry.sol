@@ -16,7 +16,12 @@ contract Registry {
     /// @param dao The address of the DAO contract
     /// @param creator The address of the creator
     /// @param name The name of the DAO
-    event NewDAORegistered(DAO indexed dao, address indexed creator, address indexed token, string name);
+    event NewDAORegistered(
+        DAO indexed dao,
+        address indexed creator,
+        address indexed token,
+        string name
+    );
 
     mapping(string => bool) public daos;
 

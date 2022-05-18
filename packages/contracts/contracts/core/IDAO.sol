@@ -37,7 +37,10 @@ abstract contract IDAO {
     /// @dev It run a loop through the array of acctions and execute one by one.
     /// @dev If one acction fails, all will be reverted.
     /// @param _actions The aray of actions
-    function execute(uint256 callId, Action[] memory _actions) external virtual returns (bytes[] memory);
+    function execute(uint256 callId, Action[] memory _actions)
+        external
+        virtual
+        returns (bytes[] memory);
 
     event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
 
@@ -52,7 +55,12 @@ abstract contract IDAO {
         string calldata _reference
     ) external payable virtual;
 
-    event Deposited(address indexed sender, address indexed token, uint256 amount, string _reference);
+    event Deposited(
+        address indexed sender,
+        address indexed token,
+        uint256 amount,
+        string _reference
+    );
     // ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
     // with `send/transfer`, receive function can still be executed without reverting due to gas cost
     // increases in EIP-2929. To still use `send/transfer`, access list is needed that has the address
@@ -92,5 +100,8 @@ abstract contract IDAO {
     /// @param _hash Hash of the data to be signed
     /// @param _signature Signature byte array associated with _hash
     /// @return bytes4
-    function isValidSignature(bytes32 _hash, bytes memory _signature) external virtual returns (bytes4);
+    function isValidSignature(bytes32 _hash, bytes memory _signature)
+        external
+        virtual
+        returns (bytes4);
 }

@@ -25,7 +25,12 @@ abstract contract Permissions is Initializable, ContextUpgradeable {
     /// @param _role The hash of the role identifier
     modifier auth(bytes32 _role) {
         if (!dao.hasPermission(address(this), _msgSender(), _role, _msgData()))
-            revert ACLData.ACLAuth({here: address(this), where: address(this), who: _msgSender(), role: _role});
+            revert ACLData.ACLAuth({
+                here: address(this),
+                where: address(this),
+                who: _msgSender(),
+                role: _role
+            });
 
         _;
     }

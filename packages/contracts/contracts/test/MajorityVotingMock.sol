@@ -16,7 +16,13 @@ contract MajorityVotingMock is MajorityVoting {
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) public initializer {
-        __MajorityVoting_init(_dao, _gsnForwarder, _participationRequiredPct, _supportRequiredPct, _minDuration);
+        __MajorityVoting_init(
+            _dao,
+            _gsnForwarder,
+            _participationRequiredPct,
+            _supportRequiredPct,
+            _minDuration
+        );
     }
 
     function newVote(

@@ -46,7 +46,13 @@ contract WhitelistVoting is MajorityVoting {
         address[] calldata _whitelisted
     ) public initializer {
         _registerStandard(WHITELIST_VOTING_INTERFACE_ID);
-        __MajorityVoting_init(_dao, _gsnForwarder, _participationRequiredPct, _supportRequiredPct, _minDuration);
+        __MajorityVoting_init(
+            _dao,
+            _gsnForwarder,
+            _participationRequiredPct,
+            _supportRequiredPct,
+            _minDuration
+        );
 
         // add whitelisted users
         _addWhitelistedUsers(_whitelisted);

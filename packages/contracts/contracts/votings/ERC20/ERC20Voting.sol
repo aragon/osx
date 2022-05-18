@@ -10,7 +10,8 @@ import "./../majority/MajorityVoting.sol";
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract ERC20Voting is MajorityVoting {
-    bytes4 internal constant ERC20_VOTING_INTERFACE_ID = MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
+    bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
+        MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
 
     ERC20VotesUpgradeable private votingToken;
 
@@ -31,7 +32,13 @@ contract ERC20Voting is MajorityVoting {
         ERC20VotesUpgradeable _token
     ) public initializer {
         _registerStandard(ERC20_VOTING_INTERFACE_ID);
-        __MajorityVoting_init(_dao, _gsnForwarder, _participationRequiredPct, _supportRequiredPct, _minDuration);
+        __MajorityVoting_init(
+            _dao,
+            _gsnForwarder,
+            _participationRequiredPct,
+            _supportRequiredPct,
+            _minDuration
+        );
 
         votingToken = _token;
     }

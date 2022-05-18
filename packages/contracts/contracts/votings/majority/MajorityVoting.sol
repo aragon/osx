@@ -183,7 +183,13 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         uint256 totalVotes = vote_.yea + vote_.nay;
 
         // Have enough people's stakes participated ? then proceed.
-        if (!_isValuePct(totalVotes + vote_.abstain, vote_.votingPower, vote_.participationRequiredPct)) {
+        if (
+            !_isValuePct(
+                totalVotes + vote_.abstain,
+                vote_.votingPower,
+                vote_.participationRequiredPct
+            )
+        ) {
             return false;
         }
 
@@ -199,7 +205,10 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     /// @param vote_ the vote struct
     /// @return True if the given vote is open, false otherwise
     function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
-        return getTimestamp64() < vote_.endDate && getTimestamp64() >= vote_.startDate && !vote_.executed;
+        return
+            getTimestamp64() < vote_.endDate &&
+            getTimestamp64() >= vote_.startDate &&
+            !vote_.executed;
     }
 
     /// @dev Calculates whether `_value` is more than a percentage `_pct` of `_total`
