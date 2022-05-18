@@ -17,7 +17,11 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @notice Initialization
     /// @param _dao the associated DAO address
     /// @param _trustedForwarder the trusted forwarder address who verifies the meta transaction
-    function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder) internal virtual onlyInitializing {
+    function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder)
+        internal
+        virtual
+        onlyInitializing
+    {
         __Component_init(_dao);
 
         _registerStandard(type(MetaTxComponent).interfaceId);
@@ -27,19 +31,33 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     }
 
     /// @notice overrides '_msgSender()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'
-    function _msgSender() internal view override(ContextUpgradeable, BaseRelayRecipient) returns (address) {
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, BaseRelayRecipient)
+        returns (address)
+    {
         return BaseRelayRecipient._msgSender();
     }
 
     /// @notice overrides '_msgData()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'
-    function _msgData() internal view override(ContextUpgradeable, BaseRelayRecipient) returns (bytes calldata) {
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, BaseRelayRecipient)
+        returns (bytes calldata)
+    {
         return BaseRelayRecipient._msgData();
     }
 
     /// @notice Setter for the trusted forwarder verifying the meta transaction
     /// @param _trustedForwarder the trusted forwarder address
     /// @dev used to update the trusted forwarder
-    function setTrustedForwarder(address _trustedForwarder) public virtual auth(MODIFY_TRUSTED_FORWARDER) {
+    function setTrustedForwarder(address _trustedForwarder)
+        public
+        virtual
+        auth(MODIFY_TRUSTED_FORWARDER)
+    {
         _setTrustedForwarder(_trustedForwarder);
 
         emit TrustedForwarderSet(_trustedForwarder);

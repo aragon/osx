@@ -125,7 +125,10 @@ contract DAOFactory {
     // @dev Creates a new DAO.
     // @oaram _daoConfig The name and metadata hash of the DAO it creates
     // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
-    function createDAO(DAOConfig calldata _daoConfig, address _gsnForwarder) internal returns (DAO dao) {
+    function createDAO(DAOConfig calldata _daoConfig, address _gsnForwarder)
+        internal
+        returns (DAO dao)
+    {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
         // initialize dao with the ROOT_ROLE as DAOFactory
@@ -144,8 +147,16 @@ contract DAOFactory {
         items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.WITHDRAW_ROLE(), address(_dao));
         items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.UPGRADE_ROLE(), address(_dao));
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.ROOT_ROLE(), address(_dao));
-        items[4] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.SET_SIGNATURE_VALIDATOR_ROLE(), address(_dao));
-        items[5] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.MODIFY_TRUSTED_FORWARDER(), address(_dao));
+        items[4] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            _dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+            address(_dao)
+        );
+        items[5] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            _dao.MODIFY_TRUSTED_FORWARDER(),
+            address(_dao)
+        );
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.EXEC_ROLE(), _voting);
 
         // Revoke permissions from factory
@@ -156,8 +167,8 @@ contract DAOFactory {
 
     /// @dev internal helper method to create ERC20Voting
     function createERC20Voting(
-        DAO _dao, 
-        ERC20VotesUpgradeable _token, 
+        DAO _dao,
+        ERC20VotesUpgradeable _token,
         VoteConfig calldata _voteConfig
     ) internal returns (ERC20Voting erc20Voting) {
         erc20Voting = ERC20Voting(
@@ -177,17 +188,29 @@ contract DAOFactory {
 
         // Grant dao the necessary permissions for ERC20Voting
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.UPGRADE_ROLE(), address(_dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_VOTE_CONFIG(), address(_dao));
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, erc20Voting.MODIFY_TRUSTED_FORWARDER(), address(_dao));
+        items[0] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            erc20Voting.UPGRADE_ROLE(),
+            address(_dao)
+        );
+        items[1] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            erc20Voting.MODIFY_VOTE_CONFIG(),
+            address(_dao)
+        );
+        items[2] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            erc20Voting.MODIFY_TRUSTED_FORWARDER(),
+            address(_dao)
+        );
 
         _dao.bulk(address(erc20Voting), items);
     }
 
     /// @dev internal helper method to create Whitelist Voting
     function createWhitelistVoting(
-        DAO _dao, 
-        address[] calldata _whitelistVoters, 
+        DAO _dao,
+        address[] calldata _whitelistVoters,
         VoteConfig calldata _voteConfig
     ) internal returns (WhitelistVoting whitelistVoting) {
         whitelistVoting = WhitelistVoting(
@@ -207,10 +230,26 @@ contract DAOFactory {
 
         // Grant dao the necessary permissions for WhitelistVoting
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](4);
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_WHITELIST(), address(_dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_VOTE_CONFIG(), address(_dao));
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.UPGRADE_ROLE(), address(_dao));
-        items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, whitelistVoting.MODIFY_TRUSTED_FORWARDER(), address(_dao));
+        items[0] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            whitelistVoting.MODIFY_WHITELIST(),
+            address(_dao)
+        );
+        items[1] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            whitelistVoting.MODIFY_VOTE_CONFIG(),
+            address(_dao)
+        );
+        items[2] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            whitelistVoting.UPGRADE_ROLE(),
+            address(_dao)
+        );
+        items[3] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            whitelistVoting.MODIFY_TRUSTED_FORWARDER(),
+            address(_dao)
+        );
 
         _dao.bulk(address(whitelistVoting), items);
     }

@@ -44,9 +44,9 @@ describe('Core: ACL', function () {
 
   describe('init', () => {
     it('should allow init call only once', async () => {
-      await expect(
-          acl.init(ownerSigner.address)
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      await expect(acl.init(ownerSigner.address)).to.be.revertedWith(
+        'Initializable: contract is already initialized'
+      );
     });
 
     it('should emit Granted', async () => {
@@ -86,14 +86,23 @@ describe('Core: ACL', function () {
       await acl.grant(acl.address, otherSigner.address, ADMIN_ROLE);
       await expect(
         acl.grant(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLRoleAlreadyGranted', acl.address, otherSigner.address, ADMIN_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLRoleAlreadyGranted',
+          acl.address,
+          otherSigner.address,
+          ADMIN_ROLE
+        )
+      );
     });
 
     it('should revert if frozen', async () => {
       await acl.freeze(acl.address, ADMIN_ROLE);
       await expect(
         acl.grant(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLRoleFrozen', acl.address, ADMIN_ROLE));
+      ).to.be.revertedWith(
+        customError('ACLRoleFrozen', acl.address, ADMIN_ROLE)
+      );
     });
 
     it('should not allow grant', async () => {
@@ -101,7 +110,15 @@ describe('Core: ACL', function () {
         acl
           .connect(otherSigner)
           .grant(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -110,7 +127,15 @@ describe('Core: ACL', function () {
         acl
           .connect(otherSigner)
           .grant(acl.address, otherSigner.address, ROOT_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
   });
 
@@ -155,7 +180,14 @@ describe('Core: ACL', function () {
           ADMIN_ROLE,
           ALLOW_FLAG
         )
-      ).to.be.revertedWith(customError('ACLRoleAlreadyGranted', acl.address, otherSigner.address, ADMIN_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLRoleAlreadyGranted',
+          acl.address,
+          otherSigner.address,
+          ADMIN_ROLE
+        )
+      );
     });
 
     it('should revert if frozen', async () => {
@@ -167,7 +199,9 @@ describe('Core: ACL', function () {
           ADMIN_ROLE,
           ALLOW_FLAG
         )
-      ).to.be.revertedWith(customError('ACLRoleFrozen', acl.address, ADMIN_ROLE));
+      ).to.be.revertedWith(
+        customError('ACLRoleFrozen', acl.address, ADMIN_ROLE)
+      );
     });
 
     it('should set ACLOracle', async () => {
@@ -197,7 +231,15 @@ describe('Core: ACL', function () {
             ADMIN_ROLE,
             ALLOW_FLAG
           )
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -216,7 +258,15 @@ describe('Core: ACL', function () {
             ROOT_ROLE,
             ALLOW_FLAG
           )
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
   });
 
@@ -245,7 +295,15 @@ describe('Core: ACL', function () {
         acl
           .connect(otherSigner)
           .revoke(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
 
     it('should revert if frozen', async () => {
@@ -253,7 +311,9 @@ describe('Core: ACL', function () {
       await acl.freeze(acl.address, ADMIN_ROLE);
       await expect(
         acl.revoke(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLRoleFrozen', acl.address, ADMIN_ROLE));
+      ).to.be.revertedWith(
+        customError('ACLRoleFrozen', acl.address, ADMIN_ROLE)
+      );
     });
 
     it('should revert if already revoked', async () => {
@@ -261,7 +321,14 @@ describe('Core: ACL', function () {
       await acl.revoke(acl.address, otherSigner.address, ADMIN_ROLE);
       await expect(
         acl.revoke(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLRoleAlreadyRevoked', acl.address, otherSigner.address, ADMIN_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLRoleAlreadyRevoked',
+          acl.address,
+          otherSigner.address,
+          ADMIN_ROLE
+        )
+      );
     });
 
     it('should not allow', async () => {
@@ -269,7 +336,15 @@ describe('Core: ACL', function () {
         acl
           .connect(otherSigner)
           .revoke(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -278,7 +353,15 @@ describe('Core: ACL', function () {
         acl
           .connect(otherSigner)
           .revoke(acl.address, otherSigner.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
   });
 
@@ -295,22 +378,38 @@ describe('Core: ACL', function () {
 
     it('should revert if already frozen', async () => {
       await acl.freeze(acl.address, ADMIN_ROLE);
-      await expect(
-          acl.freeze(acl.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLRoleFrozen', acl.address, ADMIN_ROLE));
+      await expect(acl.freeze(acl.address, ADMIN_ROLE)).to.be.revertedWith(
+        customError('ACLRoleFrozen', acl.address, ADMIN_ROLE)
+      );
     });
 
     it('should not allow', async () => {
       await expect(
         acl.connect(otherSigner).freeze(acl.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
 
     it('should not allow for non ROOT', async () => {
       await acl.grant(acl.address, otherSigner.address, ADMIN_ROLE);
       await expect(
         acl.connect(otherSigner).freeze(acl.address, ADMIN_ROLE)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
   });
 
@@ -466,9 +565,9 @@ describe('Core: ACL', function () {
         },
       ];
 
-      await expect(
-          acl.bulk(acl.address, bulkItems)
-      ).to.be.revertedWith(customError('ACLRoleFrozen', acl.address, ADMIN_ROLE));
+      await expect(acl.bulk(acl.address, bulkItems)).to.be.revertedWith(
+        customError('ACLRoleFrozen', acl.address, ADMIN_ROLE)
+      );
       expect(
         await acl.getAuthPermission(acl.address, signers[1].address, ADMIN_ROLE)
       ).to.be.equal(ALLOW_FLAG);
@@ -490,7 +589,15 @@ describe('Core: ACL', function () {
       ];
       await expect(
         acl.connect(otherSigner).bulk(acl.address, bulkItems)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
 
     it('should not allow for non ROOT', async () => {
@@ -504,7 +611,15 @@ describe('Core: ACL', function () {
       ];
       await expect(
         acl.connect(otherSigner).bulk(acl.address, bulkItems)
-      ).to.be.revertedWith(customError('ACLAuth', acl.address, acl.address, otherSigner.address, ROOT_ROLE));
+      ).to.be.revertedWith(
+        customError(
+          'ACLAuth',
+          acl.address,
+          acl.address,
+          otherSigner.address,
+          ROOT_ROLE
+        )
+      );
     });
   });
 

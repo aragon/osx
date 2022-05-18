@@ -1,6 +1,6 @@
-import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt} from '@graphprotocol/graph-ts';
-import {ERC20VotingPackage, ERC20VotingProposal} from '../../generated/schema';
+import { assert, clearStore, test } from 'matchstick-as/assembly/index';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { ERC20VotingPackage, ERC20VotingProposal } from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -24,7 +24,7 @@ import {
   handleUpdateConfig,
   _handleStartVote
 } from '../../src/packages/ERC20Voting/erc20Voting';
-import {createDummyAcctions, createGetVoteCall} from '../utils';
+import { createDummyAcctions, createGetVoteCall } from '../utils';
 
 test('Run ERC Voting (handleStartVote) mappings with mock event', () => {
   // create state

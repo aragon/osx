@@ -24,7 +24,7 @@ contract DAOMock is IDAO, ACL {
         return true;
     }
 
-    function trustedForwarder() public override pure returns(address) {
+    function trustedForwarder() public pure override returns (address) {
         return address(0);
     }
 
@@ -36,7 +36,11 @@ contract DAOMock is IDAO, ACL {
         bytes calldata /* _metadata */
     ) external override {}
 
-    function execute(uint256 callId, Action[] memory _actions) external override returns (bytes[] memory) {
+    function execute(uint256 callId, Action[] memory _actions)
+        external
+        override
+        returns (bytes[] memory)
+    {
         bytes[] memory results;
         emit Executed(msg.sender, callId, _actions, results);
         return results;
@@ -55,12 +59,14 @@ contract DAOMock is IDAO, ACL {
         string memory /* _reference */
     ) public override {}
 
-    function setSignatureValidator(address  /* _signatureValidator */) external override {}
+    function setSignatureValidator(
+        address /* _signatureValidator */
+    ) external override {}
 
     function isValidSignature(
-        bytes32, /* _hash */ 
+        bytes32, /* _hash */
         bytes memory /* _signature */
-        ) external pure override returns (bytes4) {
+    ) external pure override returns (bytes4) {
         return 0x0;
     }
 }

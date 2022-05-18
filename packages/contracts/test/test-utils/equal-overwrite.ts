@@ -1,33 +1,33 @@
-import { BigNumber } from 'ethers'
+import {BigNumber} from 'ethers';
 
 // this function is adapted from Waffle
 const deepEqual = (actual: any, expected: any): boolean => {
   // if they don't match by type, then fail
   if (typeof actual !== typeof expected) {
-    return false
+    return false;
   }
 
   // recurse through each array element
   if (Array.isArray(expected)) {
     if (actual.length !== expected.length) {
-      return false
+      return false;
     }
 
     for (let i = 0; i < actual.length; i++) {
-      const result = deepEqual(actual[i], expected[i])
-      if (result === false) return false
+      const result = deepEqual(actual[i], expected[i]);
+      if (result === false) return false;
     }
-    return true
+    return true;
   }
 
   // compare BigNumbers
   if (BigNumber.isBigNumber(actual)) {
-    return actual.eq(expected)
+    return actual.eq(expected);
   }
 
   // otherwise direct compare
-  return actual === expected
-}
+  return actual === expected;
+};
 
 export function equalOverwrite(
   Assertion: Chai.AssertionStatic,
@@ -38,8 +38,8 @@ export function equalOverwrite(
   // and this cause tests to fail
   Assertion.overwriteMethod('equal', (_super: (...args: any[]) => any) => {
     return function (this: Chai.AssertionStatic, ...args: any[]) {
-      const actual = utils.flag(this, 'object')
-      const [expected] = args
+      const actual = utils.flag(this, 'object');
+      const [expected] = args;
 
       if (Array.isArray(actual)) {
         this.assert(
@@ -48,10 +48,10 @@ export function equalOverwrite(
           '',
           actual,
           expected
-        )
+        );
       } else {
-        _super.apply(this, args)
+        _super.apply(this, args);
       }
-    }
-  })
+    };
+  });
 }

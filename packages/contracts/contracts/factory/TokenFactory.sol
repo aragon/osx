@@ -61,7 +61,9 @@ contract TokenFactory {
         if (token != address(0)) {
             // Validate if token is ERC20
             // Not Enough Checks, but better than nothing.
-            token.functionCall(abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this)));
+            token.functionCall(
+                abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
+            );
 
             token = governanceWrappedERC20Base.clone();
             // user already has a token. we need to wrap it in
@@ -89,7 +91,11 @@ contract TokenFactory {
         );
 
         // emit event for new token
-        emit TokenCreated(IERC20Upgradeable(token), MerkleMinter(merkleMinter), MerkleDistributor(distributorBase));
+        emit TokenCreated(
+            IERC20Upgradeable(token),
+            MerkleMinter(merkleMinter),
+            MerkleDistributor(distributorBase)
+        );
 
         bytes32 tokenMinterRole = GovernanceERC20(token).TOKEN_MINTER_ROLE();
         bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_ROLE();

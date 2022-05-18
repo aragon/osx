@@ -120,6 +120,8 @@ contract MerkleDistributor is MetaTxComponent {
     function _setClaimed(uint256 _index) private {
         uint256 claimedWord_index = _index / 256;
         uint256 claimedBit_index = _index % 256;
-        claimedBitMap[claimedWord_index] = claimedBitMap[claimedWord_index] | (1 << claimedBit_index);
+        claimedBitMap[claimedWord_index] =
+            claimedBitMap[claimedWord_index] |
+            (1 << claimedBit_index);
     }
 }

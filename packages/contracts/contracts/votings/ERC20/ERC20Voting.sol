@@ -10,7 +10,8 @@ import "./../majority/MajorityVoting.sol";
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
 contract ERC20Voting is MajorityVoting {
-    bytes4 internal constant ERC20_VOTING_INTERFACE_ID = MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
+    bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
+        MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
 
     ERC20VotesUpgradeable private votingToken;
 
@@ -43,9 +44,9 @@ contract ERC20Voting is MajorityVoting {
     }
 
     /// @notice getter function for the voting token
-    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface 
-    /// @return ERC20VotesUpgradeable the token used for voting 
-    function getVotingToken() public view returns(ERC20VotesUpgradeable){
+    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface
+    /// @return ERC20VotesUpgradeable the token used for voting
+    function getVotingToken() public view returns (ERC20VotesUpgradeable) {
         return votingToken;
     }
 
@@ -74,7 +75,7 @@ contract ERC20Voting is MajorityVoting {
 
         uint256 votingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (votingPower == 0) revert VotePowerZero();
-        
+
         voteId = votesLength++;
 
         // calculate start and end time for the vote
@@ -83,7 +84,7 @@ contract ERC20Voting is MajorityVoting {
         if (_startDate == 0) _startDate = currentTimestamp;
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
-        if(_endDate - _startDate <  minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
             revert VoteTimesForbidden({
                 current: currentTimestamp,
                 start: _startDate,

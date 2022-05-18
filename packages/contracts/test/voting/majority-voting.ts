@@ -1,13 +1,13 @@
-import chai, { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import chai, {expect} from 'chai';
+import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chaiUtils from '../test-utils';
-import { EVENTS, pct16 } from '../test-utils/voting';
-import { customError, ERRORS } from '../test-utils/custom-error-helper';
+import {EVENTS, pct16} from '../test-utils/voting';
+import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import { MajorityVotingMock, DAOMock } from '../../typechain';
+import {MajorityVotingMock, DAOMock} from '../../typechain';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -24,7 +24,9 @@ describe('MajorityVotingMock', function () {
   });
 
   beforeEach(async () => {
-    const MajorityVotingBase = await ethers.getContractFactory('MajorityVotingMock');
+    const MajorityVotingBase = await ethers.getContractFactory(
+      'MajorityVotingMock'
+    );
     votingBase = await MajorityVotingBase.deploy();
   });
 
@@ -46,15 +48,15 @@ describe('MajorityVotingMock', function () {
     it('reverts if trying to re-initialize', async () => {
       await initializeMock(1, 2, 3);
 
-      await expect(
-        initializeMock(1, 2, 3)
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      await expect(initializeMock(1, 2, 3)).to.be.revertedWith(
+        ERRORS.ALREADY_INITIALIZED
+      );
     });
 
     it('reverts if min duration is 0', async () => {
-      await expect(
-        initializeMock(1, 2, 0)
-      ).to.be.revertedWith(customError('VoteDurationZero'));
+      await expect(initializeMock(1, 2, 0)).to.be.revertedWith(
+        customError('VoteDurationZero')
+      );
     });
 
     it.skip('should initialize the Component it inherits from as well', async () => {
@@ -73,17 +75,19 @@ describe('MajorityVotingMock', function () {
     it('reverts if wrong config is set', async () => {
       await expect(
         votingBase.changeVoteConfig(1, pct16(1000), 3)
-      ).to.be.revertedWith(customError('VoteSupportExceeded', pct16(100), pct16(1000)));
-
+      ).to.be.revertedWith(
+        customError('VoteSupportExceeded', pct16(100), pct16(1000))
+      );
 
       await expect(
         votingBase.changeVoteConfig(pct16(1000), 2, 3)
-      ).to.be.revertedWith(customError('VoteParticipationExceeded', pct16(100), pct16(1000)));
+      ).to.be.revertedWith(
+        customError('VoteParticipationExceeded', pct16(100), pct16(1000))
+      );
 
-
-      await expect(
-        votingBase.changeVoteConfig(1, 2, 0)
-      ).to.be.revertedWith(customError('VoteDurationZero'));
+      await expect(votingBase.changeVoteConfig(1, 2, 0)).to.be.revertedWith(
+        customError('VoteDurationZero')
+      );
     });
 
     it('should change config successfully', async () => {

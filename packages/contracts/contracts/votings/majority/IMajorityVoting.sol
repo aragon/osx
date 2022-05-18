@@ -39,9 +39,18 @@ interface IMajorityVoting {
     error VotePowerZero();
 
     event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
-    event CastVote(uint256 indexed voteId, address indexed voter, uint8 voterState, uint256 voterWeight);
+    event CastVote(
+        uint256 indexed voteId,
+        address indexed voter,
+        uint8 voterState,
+        uint256 voterWeight
+    );
     event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
-    event UpdateConfig(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration);
+    event UpdateConfig(
+        uint64 participationRequiredPct,
+        uint64 supportRequiredPct,
+        uint64 minDuration
+    );
 
     /// @notice Change required support and minQuorum
     /// @param _supportRequiredPct New required support

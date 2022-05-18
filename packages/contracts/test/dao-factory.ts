@@ -1,9 +1,8 @@
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { VoterState } from './test-utils/voting';
-import { customError } from './test-utils/custom-error-helper';
-
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {VoterState} from './test-utils/voting';
+import {customError} from './test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
@@ -25,24 +24,26 @@ const daoDummyMetadata = '0x0000';
 const dummyVoteSettings = {
   participationRequiredPct: 1,
   supportRequiredPct: 2,
-  minDuration: 3
-}
+  minDuration: 3,
+};
 
 async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();
-  const { events } = data;
-  const { name, dao, token, creator } = events.find(
-    ({ event }: { event: any }) => event === EVENTS.NewDAORegistered
+  const {events} = data;
+  const {name, dao, token, creator} = events.find(
+    ({event}: {event: any}) => event === EVENTS.NewDAORegistered
   ).args;
 
-  const { voting } = events.find(
-    ({ event }: { event: any }) => event === EVENTS.DAOCreated
+  const {voting} = events.find(
+    ({event}: {event: any}) => event === EVENTS.DAOCreated
   ).args;
 
   return {
     token: await ethers.getContractAt('GovernanceERC20', token),
     dao: await ethers.getContractAt('DAO', dao),
-    voting: tokenVoting ? await ethers.getContractAt('ERC20Voting', voting) : await ethers.getContractAt('WhitelistVoting', voting),
+    voting: tokenVoting
+      ? await ethers.getContractAt('ERC20Voting', voting)
+      : await ethers.getContractAt('WhitelistVoting', voting),
     creator,
     name,
   };
@@ -89,7 +90,7 @@ describe('DAOFactory: ', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const { abi, bytecode } = await getMergedABI();
+    const {abi, bytecode} = await getMergedABI();
 
     mergedABI = abi;
     daoFactoryBytecode = bytecode;
@@ -143,7 +144,7 @@ describe('DAOFactory: ', function () {
     // get block that tx was mined
     const blockNum = await ethers.provider.getBlockNumber();
 
-    const { name, dao, token, creator, voting } = await getDeployments(tx, true);
+    const {name, dao, token, creator, voting} = await getDeployments(tx, true);
 
     expect(name).to.equal(daoDummyName);
 
@@ -222,13 +223,19 @@ describe('DAOFactory: ', function () {
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by ERC20Voting
-    await expect(
-      dao.execute(0, [])
-    ).to.be.revertedWith(customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE));
+    await expect(dao.execute(0, [])).to.be.revertedWith(
+      customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE)
+    );
 
-    await expect(
-      voting.changeVoteConfig(1, 2, 3)
-    ).to.be.revertedWith(customError('ACLAuth', voting.address, voting.address, ownerAddress, MODIFY_VOTE_CONFIG));
+    await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
+      customError(
+        'ACLAuth',
+        voting.address,
+        voting.address,
+        ownerAddress,
+        MODIFY_VOTE_CONFIG
+      )
+    );
 
     const actions = [
       {
@@ -268,7 +275,7 @@ describe('DAOFactory: ', function () {
       zeroAddress
     );
 
-    const { name, dao, token, creator, voting } = await getDeployments(tx, false);
+    const {name, dao, token, creator, voting} = await getDeployments(tx, false);
 
     expect(name).to.equal(daoDummyName);
     expect(creator).to.equal(ownerAddress);
@@ -352,13 +359,19 @@ describe('DAOFactory: ', function () {
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by WhitelistVoting
-    await expect(
-      dao.execute(0, [])
-    ).to.be.revertedWith(customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE));
+    await expect(dao.execute(0, [])).to.be.revertedWith(
+      customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE)
+    );
 
-    await expect(
-      voting.changeVoteConfig(1, 2, 3)
-    ).to.be.revertedWith(customError('ACLAuth', voting.address, voting.address, ownerAddress, MODIFY_VOTE_CONFIG));
+    await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
+      customError(
+        'ACLAuth',
+        voting.address,
+        voting.address,
+        ownerAddress,
+        MODIFY_VOTE_CONFIG
+      )
+    );
 
     const actions = [
       {
