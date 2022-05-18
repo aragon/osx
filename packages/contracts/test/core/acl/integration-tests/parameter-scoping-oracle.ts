@@ -1,12 +1,16 @@
-import chai, { expect } from 'chai';
-import { ethers } from 'hardhat';
-import chaiUtils from '../../test-utils';
-import { customError } from '../../test-utils/custom-error-helper';
+import chai, {expect} from 'chai';
+import {ethers} from 'hardhat';
+import chaiUtils from '../../../test-utils';
+import {customError} from '../../../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import { TestParameterScopingACLOracle, TestComponent, DAO } from '../../../typechain';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import {
+  TestParameterScopingACLOracle,
+  TestComponent,
+  DAO,
+} from '../../../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const DO_SOMETHING_ROLE = ethers.utils.id('DO_SOMETHING_ROLE');
 
@@ -32,7 +36,9 @@ describe('TestParameterScopingOracle', function () {
     await testComponent.initialize(dao.address);
 
     // create parameter oracle
-    const ParameterOracle = await ethers.getContractFactory('TestParameterScopingACLOracle');
+    const ParameterOracle = await ethers.getContractFactory(
+      'TestParameterScopingACLOracle'
+    );
     parameterOracle = await ParameterOracle.deploy();
 
     // Giver signer[0] the DO_SOMETHING_ROLE on the TestComponent
@@ -45,24 +51,29 @@ describe('TestParameterScopingOracle', function () {
   });
 
   describe('oracle conditions:', async () => {
-
     it('adds if the first parameter is larger than the second', async () => {
       let param1 = 10;
       let param2 = 1;
-    
+
       expect(
         await testComponent.callStatic.addPermissioned(param1, param2)
       ).to.be.equal(11);
     });
-    
+
     it('reverts if the oracle is called by the wrong function', async () => {
       let param1 = 10;
       let param2 = 1;
-      
+
       await expect(
         testComponent.callStatic.subPermissioned(param1, param2)
       ).to.be.revertedWith(
-        customError('ACLAuth', testComponent.address, testComponent.address, ownerAddress, DO_SOMETHING_ROLE)
+        customError(
+          'ACLAuth',
+          testComponent.address,
+          testComponent.address,
+          ownerAddress,
+          DO_SOMETHING_ROLE
+        )
       );
     });
 
@@ -73,7 +84,13 @@ describe('TestParameterScopingOracle', function () {
       await expect(
         testComponent.callStatic.addPermissioned(param1, param2)
       ).to.be.revertedWith(
-        customError('ACLAuth', testComponent.address, testComponent.address, ownerAddress, DO_SOMETHING_ROLE)
+        customError(
+          'ACLAuth',
+          testComponent.address,
+          testComponent.address,
+          ownerAddress,
+          DO_SOMETHING_ROLE
+        )
       );
     });
   });

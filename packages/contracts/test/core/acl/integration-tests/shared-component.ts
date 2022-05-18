@@ -1,11 +1,15 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../../test-utils';
-import {customError} from '../../test-utils/custom-error-helper';
+import chaiUtils from '../../../test-utils';
+import {customError} from '../../../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {TestSharedComponent, TestIdGatingOracle, DAO} from '../../../typechain';
+import {
+  TestSharedComponent,
+  TestIdGatingOracle,
+  DAO,
+} from '../../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const ID_GATED_ACTION_ROLE = ethers.utils.id('ID_GATED_ACTION_ROLE');
