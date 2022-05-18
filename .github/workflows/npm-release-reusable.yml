@@ -11,6 +11,9 @@ on:
       NPM_TOKEN:
         description: 'A token passed from the caller workflow'
         required: true
+      ARABOT_PAT:
+        description: 'A PAT passed from the caller workflow'
+        required: true
 
 jobs:
   prepare:
@@ -41,8 +44,11 @@ jobs:
         package: [contracts, contracts-ethers]
     steps:
       - uses: actions/checkout@v2
+        if: ${{ inputs.ref != '' }}
         with:
           ref: ${{ inputs.ref }}
+      - uses: actions/checkout@v2
+        if: ${{ inputs.ref == '' }}
       - name: Install node
         uses: actions/setup-node@v1
         with:
@@ -60,7 +66,7 @@ jobs:
           yarn version --${{ needs.prepare.outputs.bump }}
       - name: Version add alpha for develop
         working-directory: packages/${{ matrix.package }}
-        if: ${{ contains(inputs.ref, 'develop') }}
+        if: ${{ contains(inputs.ref, 'develop') || contains(github.base_ref, 'develop') }}
         run: |
           VERSION=$(cat package.json | jq -r .version)
           yarn version --new-version "$VERSION-alpha" --no-git-tag-version
