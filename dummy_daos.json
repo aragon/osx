@@ -1,30 +1,30 @@
 {
   "localhost": {
     "dao1": {
-      "tx": "0xfffab6bf20304493fdce5da7e598e02dd225c5d933472b96174e89adb62aa4be",
-      "name": "DummyDAO_ERC20VotingFactory_Voting_1652712940847",
+      "tx": "0xcdd8e6f87ae2e7a2db062b6c6b9d964992a8c4825586131d3c99a5889a5688e0",
+      "name": "DummyDAO_ERC20VotingFactory_Voting_1652833705825",
       "votingType": [
         "ERC20Voting"
       ],
-      "address": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3",
+      "address": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E",
       "token": [
-        "0x857CAe05C1141F40d7CdcE66dd9E8274471f524C"
+        "0x34366Ff75844B9A211a3594cE020903d813D7032"
       ],
       "packages": [
-        "0x6d1b73C4BcBdE9766465E498c0D265F8F3c8d794"
+        "0xf143d310A6Eeed34747b30bCd5253b28d131BCE3"
       ],
       "deposits": [
         {
           "approveTx": "",
-          "depositTx": "0xcd1ba2636c040d832f3b44013d4ce13250fe9842a7bfb4e83f812ec9c5edade6",
+          "depositTx": "0x1bfd0a52cecc5a1079833916d009425ee3253876a76a1979eef844890600e71a",
           "tokenName": "ETH",
           "token": "0x0000000000000000000000000000000000000000",
           "amount": "0.001",
-          "dao": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3"
+          "dao": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E"
         }
       ],
       "proposal": {
-        "proposalTx": "0xda5726432d871bf4cd232079acd78d1589d9ad631ce17f206472f6e73bebead5",
+        "proposalTx": "0x456b06e96ed51b4a024d86ebeffd2a6888c01a5b22c6495d5963703691590773",
         "metadata": {
           "name": "Dummy Proposal",
           "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -39,10 +39,10 @@
             }
           ]
         },
-        "dao": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3"
+        "dao": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E"
       },
       "installAppProposal": {
-        "proposalTx": "0x9895cef43277b979f421382edcee1089d76951e49859bd9ad64a318f3894a3bd",
+        "proposalTx": "0xd00541cd60b8e7c9a401567ea04a72a160dd01a84c5d560155e216d8cd8bc88c",
         "metadata": {
           "name": "Dummy Proposal Install app",
           "description": "Dummy Install app proposal for QA and testing purposes...",
@@ -57,7 +57,7 @@
             }
           ]
         },
-        "dao": "0xD3C681910a419a732c6BD9BA1F909cE2787120c3"
+        "dao": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E"
       }
     },
     "dao2": {

@@ -13,9 +13,9 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../../core/DAO.sol";
 import "./WhitelistVoting.sol";
 import "../../utils/Proxy.sol";
-import "../../APM/IApp.sol";
+import "../../APM/IPackage.sol";
 
-contract WhiteListFactory is IApp {
+contract WhiteListFactory is IPackage {
     using Address for address;
     using Clones for address;
 

@@ -30,17 +30,9 @@ async function install() {
 
   const activeFactory =
     networkName === 'localhost'
-      ? require('../../../../packages/contracts/deployments/localhost/GlobalDAOFactory.json')
+      ? require('../../../../packages/contracts/deployments/localhost/DAOFactory.json')
           .address
       : activeContracts[networkName].DAOFactory;
-
-  // initiate factory contract
-  // const daoFactoryAbi = daoFacotryJson.abi;
-  // const DAOFactoryContract = new ethers.Contract(
-  //   activeFactory,
-  //   daoFactoryAbi,
-  //   signer
-  // );
 
   const daoAddress = dummyDaos[networkName][daoJsonKey].address;
   const votingAddress = dummyDaos[networkName][daoJsonKey].packages[0];
@@ -88,6 +80,7 @@ async function install() {
   ];
 
   const packageStruct = [
+    false,
     packageAddress,
     packagePermissions,
     DAOPermissions,
@@ -108,12 +101,12 @@ async function install() {
 
   // prepare install action
   let ABI = [
-    'function installPckagesOnDAO(address dao, tuple(address,bytes32[],bytes32[],bytes) package)',
+    'function installPckagesOnExistingDAO(address dao, tuple(bool,address,bytes32[],bytes32[],bytes)[] package)',
   ];
   let iface = new ethers.utils.Interface(ABI);
-  let encoded = iface.encodeFunctionData('installPckagesOnDAO', [
+  let encoded = iface.encodeFunctionData('installPckagesOnExistingDAO', [
     daoAddress,
-    packageStruct,
+    [packageStruct],
   ]);
 
   const actions = [

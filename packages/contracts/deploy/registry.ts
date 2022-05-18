@@ -8,15 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  let adminDaoAddress: string = '';
-  while (!adminDaoAddress) {
-    try {
-      adminDaoAddress = await getContractAddress('DAO', hre);
-    } catch (e) {
-      console.log('no Registry address found...');
-      throw e;
-    }
-  }
+  const adminDaoAddress = await getContractAddress('DAO', hre);
 
   await deploy('Registry', {
     from: deployer,

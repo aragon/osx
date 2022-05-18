@@ -29,7 +29,7 @@ contract TokenFactory {
 
     MerkleDistributor public distributorBase;
 
-    event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
+    event TokenCreated(string name, address token, MerkleMinter minter, MerkleDistributor distributor, DAO dao);
 
     struct TokenConfig {
         address addr;
@@ -41,6 +41,8 @@ contract TokenFactory {
         address[] receivers;
         uint256[] amounts;
     }
+
+    error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
 
     constructor() {
         setupBases();
@@ -79,6 +81,12 @@ contract TokenFactory {
             return (ERC20VotesUpgradeable(token), MerkleMinter(address(0)));
         }
 
+        if (_mintConfig.receivers.length != _mintConfig.amounts.length)
+            revert MintArrayLengthMismatch({
+                receiversArrayLength: _mintConfig.receivers.length,
+                amountsArrayLength: _mintConfig.amounts.length
+            });
+
         token = governanceERC20Base.clone();
         GovernanceERC20(token).initialize(_dao, _tokenConfig.name, _tokenConfig.symbol);
 
@@ -87,7 +95,13 @@ contract TokenFactory {
         MerkleMinter(merkleMinter).initialize(_dao, GovernanceERC20(token), distributorBase);
 
         // emit event for new token
-        emit TokenCreated(IERC20Upgradeable(token), MerkleMinter(merkleMinter), MerkleDistributor(distributorBase));
+        emit TokenCreated(
+            _tokenConfig.name,
+            token,
+            MerkleMinter(merkleMinter),
+            MerkleDistributor(distributorBase),
+            _dao
+        );
 
         bytes32 tokenMinterRole = GovernanceERC20(token).TOKEN_MINTER_ROLE();
         bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_ROLE();

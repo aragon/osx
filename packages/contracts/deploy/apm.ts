@@ -8,31 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  let erc20VotingFactoryAddress: string = '';
-  let whiteListFactoryAddress: string = '';
-  let adminDaoAddress: string = '';
-  while (
-    !erc20VotingFactoryAddress &&
-    !whiteListFactoryAddress &&
-    !adminDaoAddress
-  ) {
-    try {
-      erc20VotingFactoryAddress = await getContractAddress(
-        'ERC20VotingFactory',
-        hre
-      );
-      whiteListFactoryAddress = await getContractAddress(
-        'WhiteListFactory',
-        hre
-      );
-      adminDaoAddress = await getContractAddress('DAO', hre);
-    } catch (e) {
-      console.log(
-        'no WhiteListFactory, or ERC20VotingFactory address found...'
-      );
-      throw e;
-    }
-  }
+  const adminDaoAddress = await getContractAddress('DAO', hre);
 
   const ret = await deploy('APMRegistry', {
     from: deployer,
@@ -42,7 +18,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ampAddress: string = ret.receipt?.contractAddress || '';
 
   if (ampAddress !== '') {
-    console.log('APM deploy result', ampAddress);
     const APMRegistryContract = await ethers.getContractAt(
       'APMRegistry',
       ampAddress
@@ -51,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       adminDaoAddress,
       '0x0000000000000000000000000000000000000000'
     );
-    console.log('APMRegistryContract initialized');
+    console.log('=== APMRegistryContract initialized', ampAddress);
   }
 };
 export default func;

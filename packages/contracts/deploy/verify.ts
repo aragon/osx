@@ -56,8 +56,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   console.log('Verifying base contracts');
 
-  const erc20VotingBase = await DAOFactoryContract.erc20VotingBase();
-  const whitelistVotingBase = await DAOFactoryContract.whitelistVotingBase();
+  // const erc20VotingBase = await DAOFactoryContract.erc20VotingBase();
+  // const whitelistVotingBase = await DAOFactoryContract.whitelistVotingBase();
   const daoBase = await DAOFactoryContract.daoBase();
   const governanceERC20Base = await TokenFactoryContract.governanceERC20Base();
   const governanceWrappedERC20Base =
@@ -65,8 +65,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const merkleMinterBase = await TokenFactoryContract.merkleMinterBase();
   const distributorBase = await TokenFactoryContract.distributorBase();
 
-  await verifyContract(erc20VotingBase, []);
-  await verifyContract(whitelistVotingBase, []);
+  // await verifyContract(erc20VotingBase, []);
+  // await verifyContract(whitelistVotingBase, []);
   await verifyContract(daoBase, []);
   await verifyContract(governanceERC20Base, []);
   await verifyContract(governanceWrappedERC20Base, []);

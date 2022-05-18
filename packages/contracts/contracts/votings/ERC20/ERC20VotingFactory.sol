@@ -14,16 +14,16 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../../core/DAO.sol";
 import "./ERC20Voting.sol";
 import "../../utils/Proxy.sol";
-import "../../APM/IApp.sol";
-import "../../factory/GlobalDAOFactory.sol";
+import "../../APM/IPackage.sol";
 import "../../tokens/MerkleMinter.sol";
 import "../../factory/TokenFactory.sol";
 
-contract ERC20VotingFactory is IApp {
+contract ERC20VotingFactory is IPackage {
     using Address for address;
     using Clones for address;
 
     address public erc20VotingBase;
+    TokenFactory public tokenFactory;
 
     struct VoteConfig {
         uint64 participationRequiredPct;
@@ -31,13 +31,13 @@ contract ERC20VotingFactory is IApp {
         uint64 minDuration;
     }
 
-    constructor() {
+    constructor(address _tokenFactory) {
         erc20VotingBase = address(new ERC20Voting());
+        tokenFactory = TokenFactory(_tokenFactory);
     }
 
     function deploy(address dao, bytes calldata params) external returns (address erc20Voting) {
         DAO _dao = DAO(payable(dao));
-        GlobalDAOFactory globalDaoFactory = GlobalDAOFactory(msg.sender);
 
         (
             VoteConfig memory _voteConfig,
@@ -45,12 +45,7 @@ contract ERC20VotingFactory is IApp {
             TokenFactory.MintConfig memory _mintConfig
         ) = abi.decode(params, (VoteConfig, TokenFactory.TokenConfig, TokenFactory.MintConfig));
 
-        // call the global factory as it still have permission to create a token for DAO
-        (ERC20VotesUpgradeable token, MerkleMinter minter) = globalDaoFactory.createToken(
-            _dao,
-            _tokenConfig,
-            _mintConfig
-        );
+        (ERC20VotesUpgradeable token, ) = tokenFactory.newToken(_dao, _tokenConfig, _mintConfig);
 
         erc20Voting = createProxy(
             erc20VotingBase,

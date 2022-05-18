@@ -4,7 +4,7 @@ const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
 const activeContracts = require('../../../../active_contracts.json');
 const networks = require('../../../../packages/contracts/networks.json');
-const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/GlobalDAOFactory.sol/GlobalDAOFactory.json');
+const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json');
 const gas = require('./estimateGas');
 const parseArgs = require('minimist');
 
@@ -25,7 +25,7 @@ async function createDao() {
   const signer = new ethers.Wallet(privKey, provider);
   const activeFactory =
     networkName === 'localhost'
-      ? require('../../../../packages/contracts/deployments/localhost/GlobalDAOFactory.json')
+      ? require('../../../../packages/contracts/deployments/localhost/DAOFactory.json')
           .address
       : activeContracts[networkName].DAOFactory;
 
@@ -150,6 +150,7 @@ async function createDao() {
     }
 
     const packageStruct = [
+      isERC20Voting,
       packageAddress,
       packagePermissions,
       DAOPermissions,
@@ -174,8 +175,8 @@ async function createDao() {
   console.log('events', reciept.events);
   console.log(
     'looking for events',
-    ethers.utils.id('PackageCreated(address,address)'),
-    ethers.utils.id('TokenCreated(string,address,address,address)')
+    ethers.utils.id('PackageInstalled(address,address)'),
+    ethers.utils.id('TokenCreated(string,address,address,address,address)')
   );
 
   let daoPackages = {
@@ -186,7 +187,9 @@ async function createDao() {
   for (let index = 0; index < reciept.events.length; index++) {
     const event = reciept.events[index];
     if (
-      event.topics.includes(ethers.utils.id('PackageCreated(address,address)'))
+      event.topics.includes(
+        ethers.utils.id('PackageInstalled(address,address)')
+      )
     ) {
       const daoAddressEncoded = event.topics[1]; // dao address encoded
       const daoVotingEncoded = event.topics[2]; // package address
@@ -207,15 +210,18 @@ async function createDao() {
 
     if (
       event.topics.includes(
-        ethers.utils.id('TokenCreated(string,address,address,address)')
+        ethers.utils.id('TokenCreated(string,address,address,address,address)')
       )
     ) {
-      daoTokenEncoded = event.topics[1];
-      let daoToken = ethers.utils.defaultAbiCoder.decode(
-        ['address'],
-        daoTokenEncoded
+      console.log('event.topics', event);
+      // daoTokenEncoded = event.topics[1];
+      const decodedTokenEvent = ethers.utils.defaultAbiCoder.decode(
+        ['string', 'address', 'address', 'address', 'address'],
+        event.data
       );
-      daoPackages.tokens = [...daoPackages.tokens, daoToken[0]];
+      console.log('decodedTokenEvent', decodedTokenEvent);
+
+      daoPackages.tokens = [...daoPackages.tokens, decodedTokenEvent[1]];
     }
   }
 
