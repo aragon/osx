@@ -55,12 +55,21 @@ jobs:
       - name: Install dependencies
         run: yarn install --pure-lockfile
         working-directory: packages/${{ matrix.package }}
-      - name: Version bump
+      - name: Version bump main
         working-directory: packages/${{ matrix.package }}
         run: |
           yarn config set version-git-tag false
+          # run the bump twice to remove -alpha first
           yarn version --${{ needs.prepare.outputs.bump }}
-          yarn publish
+          yarn version --${{ needs.prepare.outputs.bump }}
+      - name: Version add alpha for develop
+        working-directory: packages/${{ matrix.package }}
+        run: |
+          VERSION=$(cat package.json | jq -r .version)
+          yarn version --new-version "$VERSION-alpha" --no-git-tag-version
+      - name: publish
+        run: yarn publish
+        working-directory: packages/${{ matrix.package }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - uses: actions/upload-artifact@v2
