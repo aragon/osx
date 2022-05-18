@@ -10,7 +10,7 @@ import "./TestComponent.sol";
 contract TestParameterScopingACLOracle is IACLOracle {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestComponent.addPermissioned.selector;
 
-    function getSelector(bytes memory _data) public pure returns(bytes4 sig) {
+    function getSelector(bytes memory _data) public pure returns (bytes4 sig) {
         assembly {
             sig := mload(add(_data, 32))
         }
@@ -23,7 +23,7 @@ contract TestParameterScopingACLOracle is IACLOracle {
         bytes calldata _data
     ) external pure returns (bool) {
         (_where, _who, _role);
-        
+
         // Require the function selector to match
         require(getSelector(_data) == ADD_PERMISSIONED_SELECTOR);
 
