@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added tests for the `ACL` and `IACLOracle`
 - Allow tokens to be minted to DAO's treasury by passing address(0) as receiver in `TokenFactory`.
 
 ### Changed
