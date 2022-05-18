@@ -71,7 +71,7 @@ jobs:
           VERSION=$(cat package.json | jq -r .version)
           yarn version --new-version "$VERSION-alpha" --no-git-tag-version
       - name: publish
-        run: echo "publishing" # yarn publish
+        run: yarn publish
         working-directory: packages/${{ matrix.package }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -80,30 +80,30 @@ jobs:
           name: ${{matrix.package}}
           path: ./packages/${{ matrix.package }}/
           retention-days: 1
-#  pushChanges:
-#    runs-on: ubuntu-latest
-#    needs: [build_deploy]
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          ref: ${{ inputs.ref }}
-#          token: ${{ secrets.ARABOT_PAT }}
-#      - uses: actions/download-artifact@v3
-#        with:
-#          path: packages/contracts/
-#          name: contracts
-#      - uses: actions/download-artifact@v3
-#        with:
-#          path: packages/contracts-ethers/
-#          name: contracts-ethers
-#      - name: Commit changes
-#        id: commit
-#        run: |
-#          git fetch
-#          git pull
-#          git config --global user.name "Arabot-1"
-#          git config --global user.email "arabot-1@users.noreply.github.com"
-#          git add packages/contracts/package.json
-#          git add packages/contracts-ethers/package.json
-#          git commit -am "Updates package.json versions"
-#          git push
+  pushChanges:
+    runs-on: ubuntu-latest
+    needs: [build_deploy]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
+          token: ${{ secrets.ARABOT_PAT }}
+      - uses: actions/download-artifact@v3
+        with:
+          path: packages/contracts/
+          name: contracts
+      - uses: actions/download-artifact@v3
+        with:
+          path: packages/contracts-ethers/
+          name: contracts-ethers
+      - name: Commit changes
+        id: commit
+        run: |
+          git fetch
+          git pull
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
+          git add packages/contracts/package.json
+          git add packages/contracts-ethers/package.json
+          git commit -am "Updates package.json versions"
+          git push
