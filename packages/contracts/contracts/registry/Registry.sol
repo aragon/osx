@@ -44,7 +44,7 @@ contract Registry is Component {
         address creator,
         string calldata name
     ) external auth(REGISTER_DAO_ROLE) {
-        if (daos[dao] == true) revert DAOAlreadyRegistered({dao: dao});
+        if (daos[dao]) revert DAOAlreadyRegistered({dao: dao});
 
         daos[dao] = true;
 
