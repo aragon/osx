@@ -17,12 +17,11 @@ import {
 } from '../../../generated/schema';
 import {dataSource, store} from '@graphprotocol/graph-ts';
 import {VOTER_STATE} from '../../utils/constants';
-import {handleMetadata} from '../../utils/metadata';
 
 export function handleStartVote(event: StartVote): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
-  let metdata = handleMetadata(event.params.metadata.toString());
+  let metdata = event.params.metadata.toString();
   _handleStartVote(event, daoId, metdata);
 }
 
