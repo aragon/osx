@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- expand `Proposal` entity to include `creator`, `metadata` and `createdAt`.
+- Remove decoding `metadata` hash from Subgraph.
+- Expand `Proposal` entity to include `creator`, `metadata` and `createdAt`.
 
 ### Changed
 
