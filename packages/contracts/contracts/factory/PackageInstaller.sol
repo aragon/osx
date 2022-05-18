@@ -2,15 +2,15 @@
  * SPDX-License-Identifier:    MIT
  */
 
-/*
-    DIRTY CONTRACT - should not be used in production, this is for POC purpose only
-*/
-
 pragma solidity 0.8.10;
 
 import "../APM/IPackage.sol";
 import "./../core/DAO.sol";
+import "../utils/UncheckedIncrement.sol";
 
+/// @title PackageInstaller to install packages on a DAO.
+/// @author Sarkawt Noori - Aragon Association - 2022
+/// @notice This contract is used to create/deploy new packages and instaling them on a DAO.
 contract PackageInstaller {
     address public tokenFactory;
 
@@ -53,7 +53,7 @@ contract PackageInstaller {
 
     function installPckagesOnExistingDAO(DAO dao, Package[] calldata packages) external {
         if (dao.hasPermission(address(this), address(dao), dao.ROOT_ROLE(), bytes("0x00"))) revert NoRootRole();
-        for (uint256 i = 0; i < packages.length; i++) {
+        for (uint256 i; i < packages.length; i = _uncheckedIncrement(i)) {
             installPackage(dao, packages[i]);
         }
         dao.revoke(address(dao), address(this), dao.ROOT_ROLE());

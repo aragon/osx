@@ -2,10 +2,6 @@
  * SPDX-License-Identifier:    MIT
  */
 
-/*
-    DIRTY CONTRACT - should not be used in production, this is for POC purpose only
-*/
-
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
@@ -17,6 +13,7 @@ import "./../registry/Registry.sol";
 import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
 import "./PackageInstaller.sol";
+import "../utils/UncheckedIncrement.sol";
 
 /// @title DAOFactory to create a DAO
 /// @author Giorgi Lagidze & Samuel Furter - Aragon Association - 2022
@@ -50,7 +47,7 @@ contract DAOFactory is PackageInstaller {
     {
         dao = createDAO(_daoConfig);
 
-        for (uint256 i = 0; i < packages.length; i++) {
+        for (uint256 i; i < packages.length; i = _uncheckedIncrement(i)) {
             installPackage(dao, packages[i]);
         }
 

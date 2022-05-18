@@ -1,30 +1,30 @@
 {
   "localhost": {
     "dao1": {
-      "tx": "0xcdd8e6f87ae2e7a2db062b6c6b9d964992a8c4825586131d3c99a5889a5688e0",
-      "name": "DummyDAO_ERC20VotingFactory_Voting_1652833705825",
+      "tx": "0x8c0b753fee5bc072adf25f1e0fb5dc88c310dd8743c2c24b2b518beaf7fd97dd",
+      "name": "DummyDAO_ERC20VotingFactory_Voting_1652870624894",
       "votingType": [
         "ERC20Voting"
       ],
-      "address": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E",
+      "address": "0xE6420f652305E8D5C72421c2498A5abBeB917c19",
       "token": [
-        "0x34366Ff75844B9A211a3594cE020903d813D7032"
+        "0x45b653df619F811367F85CD4Ed72c0F048C974Ce"
       ],
       "packages": [
-        "0xf143d310A6Eeed34747b30bCd5253b28d131BCE3"
+        "0xd09fE9669C7D5c67fc6dA991df418685f54D33bC"
       ],
       "deposits": [
         {
           "approveTx": "",
-          "depositTx": "0x1bfd0a52cecc5a1079833916d009425ee3253876a76a1979eef844890600e71a",
+          "depositTx": "0x854ca6164b748372c75cf8a90f0ac4b11c3e1a05bc3df194848eecf49d211771",
           "tokenName": "ETH",
           "token": "0x0000000000000000000000000000000000000000",
           "amount": "0.001",
-          "dao": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E"
+          "dao": "0xE6420f652305E8D5C72421c2498A5abBeB917c19"
         }
       ],
       "proposal": {
-        "proposalTx": "0x456b06e96ed51b4a024d86ebeffd2a6888c01a5b22c6495d5963703691590773",
+        "proposalTx": "0x3ce3738b58df693213602a24c3ca0d9cd4ce53c1e22b0faed9278c2b918b8175",
         "metadata": {
           "name": "Dummy Proposal",
           "description": "Dummy withdraw proposal for QA and testing purposes...",
@@ -39,10 +39,10 @@
             }
           ]
         },
-        "dao": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E"
+        "dao": "0xE6420f652305E8D5C72421c2498A5abBeB917c19"
       },
       "installAppProposal": {
-        "proposalTx": "0xd00541cd60b8e7c9a401567ea04a72a160dd01a84c5d560155e216d8cd8bc88c",
+        "proposalTx": "0x9690e89d7a5bd9a2136673c00ee7fabf4cfe62a2422c032e1461eaf992f95e74",
         "metadata": {
           "name": "Dummy Proposal Install app",
           "description": "Dummy Install app proposal for QA and testing purposes...",
@@ -57,7 +57,7 @@
             }
           ]
         },
-        "dao": "0x6baC9d29CD5839F42a624c3907e16ADf1F13c07E"
+        "dao": "0xE6420f652305E8D5C72421c2498A5abBeB917c19"
       }
     },
     "dao2": {
@@ -101,48 +101,20 @@
       }
     },
     "dao3": {
-      "tx": "0x1315e98a174248751c4f822d37970ed6a89b120c364da0efc79b61c79c4c9cd7",
-      "name": "DummyDAO_ERC20Voting_WhiteList_Voting_1652454977846",
+      "tx": "0x6630dadeba057700e926bde8cab714cad5ae8cc09e341b665f64bab8eca747fe",
+      "name": "DummyDAO_ERC20Voting_WhiteList_Voting_1652865351424",
       "votingType": [
         "ERC20Voting",
         "WhiteList"
       ],
-      "address": "0x3279b6eE61d76252Be19DdcD32aA7c8AB607fd35",
+      "address": "0x83357099D9e0fBEa7dbd8B836e975397B69Eb11D",
       "token": [
-        "0x8BA475Ed293Eee3f175262a7892f74F9E1cE1e75"
+        "0xe76cD3A37b4457A3E4D6EE67801040722516e63C"
       ],
       "packages": [
-        "0xb2d8Bd1652a66201180E17b78db4AfFadD961782",
-        "0xB40A95470868F8BdeB5Ec30Cd6294Dc2899a3f1C"
-      ],
-      "deposits": [
-        {
-          "approveTx": "",
-          "depositTx": "0xd60c82c797d69788b1a3c14caeb6fe0839d6ef91a317b3edf526405c95191cec",
-          "tokenName": "ETH",
-          "token": "0x0000000000000000000000000000000000000000",
-          "amount": "0.001",
-          "dao": "0x3279b6eE61d76252Be19DdcD32aA7c8AB607fd35"
-        }
-      ],
-      "proposal": {
-        "proposalTx": "0x76012d15a2f8a6ed59de8047755c1ae5bc0ea9ebc9a5ffa696caa59cc54b4353",
-        "metadata": {
-          "name": "Dummy Proposal",
-          "description": "Dummy withdraw proposal for QA and testing purposes...",
-          "links": [
-            {
-              "label": "link01",
-              "url": "https://link.01"
-            },
-            {
-              "label": "link02",
-              "url": "https://link.02"
-            }
-          ]
-        },
-        "dao": "0x3279b6eE61d76252Be19DdcD32aA7c8AB607fd35"
-      }
+        "0x26Cb35bF669081062f2a104e14040F8A6BA8d1B5",
+        "0xDe58B38DcdB852dedeC5aBFe844308eF96882AA2"
+      ]
     }
   }
 }
