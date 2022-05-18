@@ -23,6 +23,7 @@ contract Registry is Component {
     /// @notice Emitted if a new DAO is registered
     /// @param dao The address of the DAO contract
     /// @param creator The address of the creator
+    /// @param name The name of the DAO
     event NewDAORegistered(IDAO indexed dao, address indexed creator, string name);
 
     /// @notice Initializes the component
@@ -39,6 +40,7 @@ contract Registry is Component {
     /// @notice Registers a DAO by its address
     /// @dev A name is unique within the Aragon DAO framework and can get stored here
     /// @param dao The address of the DAO contract
+    /// @param name The name of the DAO
     function register(
         IDAO dao,
         address creator,
