@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./../tokens/GovernanceERC20.sol";
 import "./../tokens/GovernanceWrappedERC20.sol";
-import "./../registry/Registry.sol";
+import "./../registry/ERC165ContractRegistry.sol";
 import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
 import "./PackageInstaller.sol";
@@ -24,7 +24,7 @@ contract DAOFactory is PackageInstaller {
 
     address public daoBase;
 
-    Registry public registry;
+    ERC165ContractRegistry public idaoRegistry;
 
     struct DAOConfig {
         string name;
@@ -32,11 +32,20 @@ contract DAOFactory is PackageInstaller {
         address gsnForwarder;
     }
 
-    // @dev Stores the registry and token factory address and creates the base contracts required for the factory
-    // @param _registry The DAO registry to register the DAO with his name
-    // @param _tokenFactory The Token Factory to register tokens
-    constructor(Registry _registry, address _tokenFactory) PackageInstaller(_tokenFactory) {
-        registry = _registry;
+    /// @notice Emitted if a new DAO is registered
+    /// @param dao The address of the DAO contract
+    /// @param creator The address of the creator
+    /// @param name The name of the DAO
+    event NewDAORegistered(IDAO indexed dao, address indexed creator, string name);
+
+    /// @notice Stores the registry and token factory address and creates the base contracts required for the factory.
+    /// @dev This assumes that the registry is already initialized.
+    /// @param _registry The DAO registry to register the DAO with his name
+    /// @param _tokenFactory The Token Factory to register tokens
+    constructor(ERC165ContractRegistry _registry, address _tokenFactory)
+        PackageInstaller(_tokenFactory)
+    {
+        idaoRegistry = _registry;
 
         setupBases();
     }
@@ -54,21 +63,21 @@ contract DAOFactory is PackageInstaller {
         setDAOPermissions(dao);
     }
 
-    // @dev Creates a new DAO.
-    // @oaram _daoConfig The name and metadata hash of the DAO it creates
-    // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
+    /// @notice Creates a new DAO.
+    /// @param _daoConfig The name and metadata hash of the DAO it creates
     function createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
         // initialize dao with the ROOT_ROLE as DAOFactory
         dao.initialize(_daoConfig.metadata, address(this), _daoConfig.gsnForwarder);
         // register dao with its name and token to the registry
-        registry.register(dao, msg.sender, _daoConfig.name);
+        idaoRegistry.register(address(dao));
+
+        emit NewDAORegistered(dao, msg.sender, _daoConfig.name); // TODO msg.sender should become _msgSender() if DAOFactory  becomes a component
     }
 
-    // @dev Does set the required permissions for the new DAO.
-    // @param _dao The DAO instance just created.
-    // @param _voting The voting contract address (whitelist OR ERC20 voting)
+    /// @notice Does set the required permissions for the new DAO.
+    /// @param _dao The DAO instance just created.
     function setDAOPermissions(DAO _dao) internal {
         // set roles on the dao itself.
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
@@ -87,7 +96,7 @@ contract DAOFactory is PackageInstaller {
         _dao.bulk(address(_dao), items);
     }
 
-    // @dev Internal helper method to set up the required base contracts on DAOFactory deployment.
+    /// @notice Internal helper method to set up the required base contracts on DAOFactory deployment.
     function setupBases() private {
         daoBase = address(new DAO());
     }
