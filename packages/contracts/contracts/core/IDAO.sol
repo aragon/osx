@@ -91,7 +91,7 @@ abstract contract IDAO {
     /// @notice Withdraw tokens or ETH from the DAO with a withdraw reference string
     /// @param _token The address of the token and in case of ETH address(0)
     /// @param _to The target address to send tokens or ETH
-    /// @param _amount The amount of tokens to deposit
+    /// @param _amount The amount of tokens to withdraw
     /// @param _reference The withdraw reference describing the reason of it
     function withdraw(
         address _token,
