@@ -11,10 +11,17 @@ import {
 import {customError} from './test-utils/custom-error-helper';
 
 const EVENTS = {
+<<<<<<< Updated upstream
   REGISTERED_CALLBACK: 'RegisteredCallback',
   REGISTERED_STANDARD: 'RegisteredStandard',
   RECEIVED_CALLBACK: 'ReceivedCallback',
 };
+=======
+  REGISTERED_CALLBACK: 'CallbackRegistered',
+  REGISTERED_STANDARD: 'StandardRegistered',
+  RECEIVED_CALLBACK: 'CallbackReceived',
+}
+>>>>>>> Stashed changes
 
 const beefInterfaceId = '0xbeefbeef';
 const callbackSig = hexDataSlice(id('callbackFunc()'), 0, 4); // 0x1eb2075a

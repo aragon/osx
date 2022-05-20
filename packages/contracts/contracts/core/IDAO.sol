@@ -31,6 +31,8 @@ abstract contract IDAO {
     /// @param _metadata The IPFS hash of the new metadata object
     function setMetadata(bytes calldata _metadata) external virtual;
 
+    /// @dev Emitted when the DAO metadata is updated
+    /// @param metadata The IPFS hash of the new metadata object
     event MetadataSet(bytes metadata);
 
     /// @notice If called, the list of provided actions will be executed.
@@ -42,6 +44,13 @@ abstract contract IDAO {
         virtual
         returns (bytes[] memory);
 
+    /// @notice Emitted when a proposal is executed
+    /// @param actor The address of the caller
+    /// @param callId The id of the call
+    /// @dev The value of callId is defined by the component/contract calling the execute function. 
+    ///      A Component implementation can use it, for example, as a nonce.
+    /// @param actions Array of actions executed
+    /// @param execResults Array with the results of the executed actions
     event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
 
     /// @notice Deposit ETH or any token to this contract with a reference string
@@ -55,23 +64,35 @@ abstract contract IDAO {
         string calldata _reference
     ) external payable virtual;
 
+    /// @notice Emitted when a deposit is made
+    /// @param sender The address of the sender
+    /// @param token The address of the token deposited
+    /// @param amount The amount of tokens deposited
+    /// @param _reference The deposit reference desribing the reason of it
     event Deposited(
         address indexed sender,
         address indexed token,
         uint256 amount,
         string _reference
     );
-    // ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
-    // with `send/transfer`, receive function can still be executed without reverting due to gas cost
-    // increases in EIP-2929. To still use `send/transfer`, access list is needed that has the address
-    // of the contract(base contract) that is behind the proxy.
+
+    /**
+     *  @dev ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
+     *  with `send/transfer`, receive function can still be executed without reverting due to gas cost
+     *  increases in EIP-2929. To still use `send/transfer`, access list is needed that has the address
+     *  of the contract(base contract) that is behind the proxy.
+     *
+     *  @notice Emitted when ETH is deposited
+     *  @param sender The address of the sender
+     *  @param amount The amount of ETH deposited
+     */ 
     event ETHDeposited(address sender, uint256 amount);
 
     /// @notice Withdraw tokens or ETH from the DAO with a withdraw reference string
     /// @param _token The address of the token and in case of ETH address(0)
     /// @param _to The target address to send tokens or ETH
     /// @param _amount The amount of tokens to deposit
-    /// @param _reference The deposit reference describing the reason of it
+    /// @param _reference The withdraw reference describing the reason of it
     function withdraw(
         address _token,
         address _to,
@@ -79,6 +100,11 @@ abstract contract IDAO {
         string memory _reference
     ) external virtual;
 
+    /// @notice Emitted when a withdraw is done
+    /// @param token The address of the token withdrawn
+    /// @param to The address of the withdrawer 
+    /// @param amount The amount of tokens withdrawn
+    /// @param _reference The withdraw reference describing the reason of it
     event Withdrawn(address indexed token, address indexed to, uint256 amount, string _reference);
 
     /// @notice Setter for the trusted forwarder verifying the meta transaction

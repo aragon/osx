@@ -12,7 +12,7 @@ contract Registry {
     /// @param name The DAO name requested for registration
     error RegistryNameAlreadyUsed(string name);
 
-    /// @notice Emitted if a new DAO is registered
+    /// @notice Emitted when a new DAO is registered
     /// @param dao The address of the DAO contract
     /// @param creator The address of the creator
     /// @param name The name of the DAO

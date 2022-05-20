@@ -40,12 +40,16 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     error ZeroAmount();
 
     /// @notice Thrown if the expected and actually deposited ETH amount mismatch
-    /// @param expected ETH amount
-    /// @param actual ETH amount
+    /// @param expected ETH expected amount
+    /// @param actual ETH actual amount
     error ETHDepositAmountMismatch(uint256 expected, uint256 actual);
 
     /// @notice Thrown if an ETH withdraw fails
     error ETHWithdrawFailed();
+
+    /// @notice Emmited when setting a new TrustedForwarder on the DAO
+    /// @param forwarder the new forwarder address
+    event TrustedForwarderSet(address forwarder);
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
@@ -103,7 +107,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _setMetadata(_metadata);
     }
 
-    /// @inheritdoc IDAO
+    /// @notice If called, the list of provided actions will be executed.
+    /// @dev It run a loop through the array of acctions and execute one by one.
+    /// @dev If one acction fails, all will be reverted.
+    /// @param callId The id of the call
+    /// @dev The value of callId is defined by the component/contract calling execute. It can be used, for example, as a nonce.
+    /// @param _actions The array of actions
     function execute(uint256 callId, Action[] memory _actions)
         external
         override
@@ -196,10 +205,14 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 
+    /// @notice Method that emmits the MetadataSet event when a new metadata is set
+    /// @param _metadata Hash of the IPFS file object 
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
+    /// @notice set trusted forwarder on the DAO and emits the event
+    /// @param _forwarder address of the forwarder
     function _setTrustedForwarder(address _forwarder) internal {
         _trustedForwarder = _forwarder;
 

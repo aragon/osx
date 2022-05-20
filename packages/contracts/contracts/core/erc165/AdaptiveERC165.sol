@@ -19,9 +19,15 @@ contract AdaptiveERC165 is ERC165 {
     error AdapERC165UnkownCallback(bytes32 magicNumber);
 
     // Events
-    event RegisteredStandard(bytes4 interfaceId);
-    event RegisteredCallback(bytes4 sig, bytes4 magicNumber);
-    event ReceivedCallback(bytes4 indexed sig, bytes data);
+
+    /// @dev Emmitted when a new standard is registred and assigned to `interfaceId`
+    event StandardRegistered(bytes4 interfaceId);
+
+    /// @dev Emmitted when a callback is registered
+    event CallbackRegistered(bytes4 sig, bytes4 magicNumber);
+
+    /// @dev Emmitted when a callback is received
+    event CallbackReceived(bytes4 indexed sig, bytes data);
 
     /// @dev Method to check if the contract supports a specific interface or not
     /// @param _interfaceId The identifier of the interface to check for
@@ -37,7 +43,7 @@ contract AdaptiveERC165 is ERC165 {
         if (magicNumber == UNREGISTERED_CALLBACK)
             revert AdapERC165UnkownCallback({magicNumber: magicNumber});
 
-        emit ReceivedCallback(_sig, _data);
+        emit CallbackReceived(_sig, _data);
 
         // low-level return magic number
         assembly {
@@ -63,7 +69,7 @@ contract AdaptiveERC165 is ERC165 {
     /// @param _interfaceId The identifier of the interface to check for
     function _registerStandard(bytes4 _interfaceId) internal {
         standardSupported[_interfaceId] = true;
-        emit RegisteredStandard(_interfaceId);
+        emit StandardRegistered(_interfaceId);
     }
 
     /// @dev Registers a callback
@@ -71,6 +77,6 @@ contract AdaptiveERC165 is ERC165 {
     /// @param _magicNumber The data resp. arguments passed to the method
     function _registerCallback(bytes4 _callbackSig, bytes4 _magicNumber) internal {
         callbackMagicNumbers[_callbackSig] = _magicNumber;
-        emit RegisteredCallback(_callbackSig, _magicNumber);
+        emit CallbackRegistered(_callbackSig, _magicNumber);
     }
 }

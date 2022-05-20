@@ -20,7 +20,7 @@ import {ADDRESS_ZERO} from '../utils/constants';
 import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
 
-export function handleMetadataSet(event: MetadataSet): void {
+export function handleSetMetadata(event: MetadataSet): void {
   let daoId = event.address.toHexString();
   let metadata = event.params.metadata.toString();
   _handleMetadataSet(daoId, metadata);

@@ -7,7 +7,7 @@ import {customError} from './test-utils/custom-error-helper';
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
   MetadataSet: 'MetadataSet',
-  UpdateConfig: 'UpdateConfig',
+  ConfigUpdated: 'ConfigUpdated',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
@@ -175,7 +175,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
-      .to.emit(voting, EVENTS.UpdateConfig)
+      .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(
         dummyVoteSettings.participationRequiredPct,
         dummyVoteSettings.supportRequiredPct,
@@ -258,7 +258,7 @@ describe('DAOFactory: ', function () {
     expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
-      .to.emit(voting, EVENTS.UpdateConfig)
+      .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(3, 4, 5);
 
     expect(await actionExecuteContract.test()).to.equal(true);
@@ -303,7 +303,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
-      .to.emit(voting, EVENTS.UpdateConfig)
+      .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(
         dummyVoteSettings.participationRequiredPct,
         dummyVoteSettings.supportRequiredPct,
@@ -394,7 +394,7 @@ describe('DAOFactory: ', function () {
     expect(await voting.vote(0, VoterState.Yea, true))
       .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
-      .to.emit(voting, EVENTS.UpdateConfig)
+      .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(3, 4, 5);
 
     expect(await actionExecuteContract.test()).to.equal(true);

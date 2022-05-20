@@ -25,6 +25,10 @@ contract TokenFactory {
 
     MerkleDistributor public distributorBase;
 
+    /// @notice Emitted when a new token is created
+    /// @param token ERC20 Upgradeable token address
+    /// @param minter The Merkle minter of the new token
+    /// @param distributor The Merkle distibutor of the new token
     event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
 
     struct TokenConfig {

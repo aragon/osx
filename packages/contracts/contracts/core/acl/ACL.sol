@@ -63,6 +63,13 @@ contract ACL is Initializable {
     mapping(bytes32 => bool) internal freezePermissions;
 
     // Events
+
+    /// @notice Emitted when a new permission `role` is granted to the address `actor` by the address `who` in the contract `where`
+    /// @param role The hash of the role identifier
+    /// @param actor The address receiving the new role
+    /// @param who The address (EOA or contract) owning the permission
+    /// @param where The address of the contract    
+    /// @param oracle The ACLOracle to be used or it is just the ALLOW_FLAG
     event Granted(
         bytes32 indexed role,
         address indexed actor,
@@ -70,7 +77,18 @@ contract ACL is Initializable {
         address where,
         IACLOracle oracle
     );
+
+    /// @notice Emitted when a new permission `role` is revoked to the address `actor` by the address `who` in the contract `where`
+    /// @param role The hash of the role identifier
+    /// @param actor The address receiving the revoked role
+    /// @param who The address (EOA or contract) owning the permission
+    /// @param where The address of the contract
     event Revoked(bytes32 indexed role, address indexed actor, address indexed who, address where);
+    
+    /// @notice Emitted when a `role` is frozen to the address `actor` by the contract `where`
+    /// @param role The hash of the role identifier
+    /// @param actor The address that is frozen
+    /// @param where The address of the contract
     event Frozen(bytes32 indexed role, address indexed actor, address where);
 
     /// @dev The modifier used within the DAO framework to check permissions.
