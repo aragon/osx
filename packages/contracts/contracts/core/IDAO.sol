@@ -116,6 +116,8 @@ abstract contract IDAO {
     /// @return the trusted forwarder address
     function trustedForwarder() external virtual returns (address);
 
+    /// @notice Emmited when setting a new TrustedForwarder on the DAO
+    /// @param forwarder the new forwarder address
     event TrustedForwarderSet(address forwarder);
 
     /// @notice Setter to set the signature validator contract of ERC1271

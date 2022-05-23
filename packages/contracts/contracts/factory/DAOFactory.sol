@@ -60,7 +60,7 @@ contract DAOFactory {
 
     /// @dev Creates a new DAO with ERC20 based voting. It also will deploy a new token if the corresponding config is passed.
     /// @param _daoConfig The name and metadata hash of the DAO it creates
-    /// @param _votingSettings The majority voting configs and minimum duration of voting
+    /// @param _voteConfig The majority voting configs and minimum duration of voting
     /// @param _tokenConfig The token config used to deploy a new token
     /// @param _mintConfig The config for the minter for the newly created token
     /// @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
@@ -105,7 +105,7 @@ contract DAOFactory {
 
     /// @dev Creates a new DAO with whitelist based voting.
     /// @param _daoConfig The name and metadata hash of the DAO it creates
-    /// @param _votingSettings The majority voting configs and minimum duration of voting
+    /// @param _voteConfig The majority voting configs and minimum duration of voting
     /// @param _whitelistVoters A array of addresses that are allowed to vote
     /// @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
     function newWhitelistVotingDAO(
@@ -172,7 +172,7 @@ contract DAOFactory {
     /// @dev internal helper method to create ERC20Voting
     /// @param _dao The DAO address
     /// @param _token The ERC20 Upgradeable token address
-    /// @param _votingSettings The ERC20 voting settings for the DAO
+    /// @param _voteConfig The ERC20 voting settings for the DAO
     function createERC20Voting(
         DAO _dao,
         ERC20VotesUpgradeable _token,
@@ -217,7 +217,7 @@ contract DAOFactory {
     /// @dev internal helper method to create Whitelist Voting
     /// @param _dao The DAO address creating the Whitelist Voting
     /// @param _whitelistVoters The array of the allowed voting addresses
-    /// @param _votingSettings The array with the voting settings
+    /// @param _voteConfig The voting settings
     function createWhitelistVoting(
         DAO _dao,
         address[] calldata _whitelistVoters,

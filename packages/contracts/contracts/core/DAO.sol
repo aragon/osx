@@ -47,10 +47,6 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     /// @notice Thrown if an ETH withdraw fails
     error ETHWithdrawFailed();
 
-    /// @notice Emmited when setting a new TrustedForwarder on the DAO
-    /// @param forwarder the new forwarder address
-    event TrustedForwarderSet(address forwarder);
-
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
     function initialize(
