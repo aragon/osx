@@ -20,10 +20,13 @@ contract APMRegistry is APMInternalAppNames, MetaTxComponent {
 
     event NewRepo(string name, address repo);
 
+    // TODO: state waiting for general registry component
+
     /// @dev Used for UUPS upgradability pattern
     function initialize(IDAO _dao, address _gsnForwarder) external initializer {
         __MetaTxComponent_init(_dao, _gsnForwarder);
 
+        // TODO: should support proxy?
         repoBase = address(new Repo());
     }
 
@@ -42,20 +45,20 @@ contract APMRegistry is APMInternalAppNames, MetaTxComponent {
     }
 
     /**
-     * @notice Create new repo in registry with `_name` and publish a first version with contract `_contractAddress` and content `@fromHex(_contentURI)`
+     * @notice Create new repo in registry with `_name` and publish a first version with contract `_pluginFactoryAddress` and content `@fromHex(_contentURI)`
      * @param _name Repo name
      * @param _initialSemanticVersion Semantic version for new repo version
-     * @param _contractAddress address for smart contract logic for version (if set to 0, it uses last versions' contractAddress)
+     * @param _pluginFactoryAddress address for smart contract logic for version (if set to 0, it uses last versions' contractAddress)
      * @param _contentURI External URI for fetching new version's content
      */
     function newRepoWithVersion(
         string calldata _name,
         uint16[3] memory _initialSemanticVersion,
-        address _contractAddress,
+        address _pluginFactoryAddress,
         bytes memory _contentURI
     ) public returns (Repo repo) {
         repo = _newRepo(_name, address(this)); // need to have permissions to create version
-        repo.newVersion(_initialSemanticVersion, _contractAddress, _contentURI);
+        repo.newVersion(_initialSemanticVersion, _pluginFactoryAddress, _contentURI);
 
         // revoke permissions
         setRepoPermissions(repo, msg.sender);

@@ -12,19 +12,20 @@ import "./../tokens/GovernanceWrappedERC20.sol";
 import "./../registry/Registry.sol";
 import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
-import "./PackageInstaller.sol";
+import "../APM/PluginInstaller.sol";
 import "../utils/UncheckedIncrement.sol";
 
 /// @title DAOFactory to create a DAO
 /// @author Giorgi Lagidze & Samuel Furter - Aragon Association - 2022
 /// @notice This contract is used to create a DAO.
-contract DAOFactory is PackageInstaller {
+contract DAOFactory {
     using Address for address;
     using Clones for address;
 
     address public daoBase;
 
     Registry public registry;
+    PluginInstaller public pluginInstaller;
 
     struct DAOConfig {
         string name;
@@ -35,29 +36,34 @@ contract DAOFactory is PackageInstaller {
     // @dev Stores the registry and token factory address and creates the base contracts required for the factory
     // @param _registry The DAO registry to register the DAO with his name
     // @param _tokenFactory The Token Factory to register tokens
-    constructor(Registry _registry, address _tokenFactory) PackageInstaller(_tokenFactory) {
+    constructor(Registry _registry, PluginInstaller _pluginInstaller) {
         registry = _registry;
+        pluginInstaller = _pluginInstaller;
 
         setupBases();
     }
 
-    function createDAOWithPackages(DAOConfig calldata _daoConfig, Package[] calldata packages)
+    function createDAO(DAOConfig calldata _daoConfig, PluginInstaller.Package[] calldata packages)
         external
         returns (DAO dao)
     {
-        dao = createDAO(_daoConfig);
+        // create a DAO
+        dao = _createDAO(_daoConfig);
 
-        for (uint256 i; i < packages.length; i = _uncheckedIncrement(i)) {
-            installPackage(dao, packages[i]);
-        }
+        // grant root permission to PluginInstaller
+        dao.grant(address(dao), address(pluginInstaller), dao.ROOT_ROLE());
 
+        // insall packages
+        pluginInstaller.installPlugins(dao, packages);
+
+        // setup dao permissions
         setDAOPermissions(dao);
     }
 
     // @dev Creates a new DAO.
     // @oaram _daoConfig The name and metadata hash of the DAO it creates
     // @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
-    function createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
+    function _createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
         // initialize dao with the ROOT_ROLE as DAOFactory
@@ -71,7 +77,7 @@ contract DAOFactory is PackageInstaller {
     // @param _voting The voting contract address (whitelist OR ERC20 voting)
     function setDAOPermissions(DAO _dao) internal {
         // set roles on the dao itself.
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](7);
+        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](8);
 
         // Grant DAO all the permissions required
         items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.DAO_CONFIG_ROLE(), address(_dao));
@@ -83,6 +89,8 @@ contract DAOFactory is PackageInstaller {
 
         // Revoke permissions from factory
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Revoke, _dao.ROOT_ROLE(), address(this));
+        // Revoke permissions from PluginInstaller
+        items[7] = ACLData.BulkItem(ACLData.BulkOp.Revoke, _dao.ROOT_ROLE(), address(pluginInstaller));
 
         _dao.bulk(address(_dao), items);
     }

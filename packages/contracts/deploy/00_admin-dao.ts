@@ -1,6 +1,9 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {getContractAddress} from './helpers';
+
+/** NOTE:
+ * Create an Admin Dao with no Plugin, to be the owner of Dao and Apm registry.
+ */
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;

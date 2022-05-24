@@ -103,14 +103,6 @@ async function createDao() {
 
     const isERC20Voting = package === 'ERC20VotingFactory' ? true : false;
 
-    /*
-    struct Package {
-        address factoryAddress; // package deployer (factory) address, hopefully from APM
-        bytes32[] PackagePermissions; // to be granted to DAO
-        bytes32[] DAOPermissions; // Dao permission to be granted to package like: exec_role
-        bytes args; // pre-determined value for stting up the package
-    }
-    */
     let packageParams;
     let packagePermissions;
     const DAOPermissions = [
@@ -162,7 +154,7 @@ async function createDao() {
 
   console.log('calling contract with: ', daoConfig, packageStructs);
 
-  const tx = await DAOFactoryContract.createDAOWithPackages(
+  const tx = await DAOFactoryContract.createDAO(
     daoConfig,
     packageStructs,
     overrides
@@ -175,7 +167,7 @@ async function createDao() {
   console.log('events', reciept.events);
   console.log(
     'looking for events',
-    ethers.utils.id('PackageInstalled(address,address)'),
+    ethers.utils.id('PluginInstalled(address,address)'),
     ethers.utils.id('TokenCreated(string,address,address,address,address)')
   );
 
@@ -187,9 +179,7 @@ async function createDao() {
   for (let index = 0; index < reciept.events.length; index++) {
     const event = reciept.events[index];
     if (
-      event.topics.includes(
-        ethers.utils.id('PackageInstalled(address,address)')
-      )
+      event.topics.includes(ethers.utils.id('PluginInstalled(address,address)'))
     ) {
       const daoAddressEncoded = event.topics[1]; // dao address encoded
       const daoVotingEncoded = event.topics[2]; // package address

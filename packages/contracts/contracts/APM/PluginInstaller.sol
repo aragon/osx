@@ -4,14 +4,14 @@
 
 pragma solidity 0.8.10;
 
-import "../APM/IPackage.sol";
+import "../APM/IPluginFactory.sol";
 import "./../core/DAO.sol";
 import "../utils/UncheckedIncrement.sol";
 
-/// @title PackageInstaller to install packages on a DAO.
+/// @title PluginInstaller to install packages on a DAO.
 /// @author Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract is used to create/deploy new packages and instaling them on a DAO.
-contract PackageInstaller {
+contract PluginInstaller {
     address public tokenFactory;
 
     /**
@@ -36,14 +36,14 @@ contract PackageInstaller {
 
      */
     struct Package {
-        bool isNewTokenNeeded;
+        bool isGovernanceTokenNeeded; // is governance erc20 token is need by package factory address
         address factoryAddress; // package deployer (factory) address, hopefully from APM
         bytes32[] PackagePermissions; // to be granted to DAO
         bytes32[] DAOPermissions; // Dao permission to be granted to package like: exec_role
         bytes args; // pre-determined value for stting up the package
     }
 
-    event PackageInstalled(address indexed dao, address indexed packageAddress);
+    event PluginInstalled(address indexed dao, address indexed pluginAddress);
 
     error NoRootRole();
 
@@ -51,42 +51,48 @@ contract PackageInstaller {
         tokenFactory = _tokenFactory;
     }
 
-    function installPckagesOnExistingDAO(DAO dao, Package[] calldata packages) external {
-        if (dao.hasPermission(address(this), address(dao), dao.ROOT_ROLE(), bytes("0x00"))) revert NoRootRole();
-        for (uint256 i; i < packages.length; i = _uncheckedIncrement(i)) {
-            installPackage(dao, packages[i]);
-        }
+    function installPluginsOnExistingDAO(DAO dao, Package[] calldata packages) external {
+        if (!dao.hasPermission(address(dao), address(this), dao.ROOT_ROLE(), bytes("0x00"))) revert NoRootRole();
+        installPlugins(dao, packages);
         dao.revoke(address(dao), address(this), dao.ROOT_ROLE());
     }
 
-    function installPackage(DAO dao, Package calldata packages) internal returns (address app) {
+    function installPlugins(DAO dao, Package[] calldata packages) public {
+        for (uint256 i; i < packages.length; i = _uncheckedIncrement(i)) {
+            _installPlugin(dao, packages[i]);
+        }
+    }
+
+    function _installPlugin(DAO dao, Package calldata package) internal returns (address app) {
         // revoke root from TokenFactory
-        if (packages.isNewTokenNeeded) {
+        if (package.isGovernanceTokenNeeded) {
             dao.grant(address(dao), address(tokenFactory), dao.ROOT_ROLE());
         }
 
+        // TODO: Retrive data from APM once APM is ready
+
         // deploy new packaes for Dao
-        app = IPackage(packages.factoryAddress).deploy(address(dao), packages.args);
+        app = IPluginFactory(package.factoryAddress).deploy(address(dao), package.args);
 
         // revoke root from TokenFactory
-        if (packages.isNewTokenNeeded) {
+        if (package.isGovernanceTokenNeeded) {
             dao.revoke(address(dao), address(tokenFactory), dao.ROOT_ROLE());
         }
 
         // Grant dao the necessary permissions on the package
-        ACLData.BulkItem[] memory packageItems = new ACLData.BulkItem[](packages.PackagePermissions.length);
-        for (uint256 i = 0; i < packages.PackagePermissions.length; i++) {
-            packageItems[i] = ACLData.BulkItem(ACLData.BulkOp.Grant, packages.PackagePermissions[i], address(dao));
+        ACLData.BulkItem[] memory packageItems = new ACLData.BulkItem[](package.PackagePermissions.length);
+        for (uint256 i; i < package.PackagePermissions.length; i = _uncheckedIncrement(i)) {
+            packageItems[i] = ACLData.BulkItem(ACLData.BulkOp.Grant, package.PackagePermissions[i], address(dao));
         }
         dao.bulk(app, packageItems);
 
         // Grant Package the necessary permissions on the DAO
-        ACLData.BulkItem[] memory daoItems = new ACLData.BulkItem[](packages.DAOPermissions.length);
-        for (uint256 i = 0; i < packages.DAOPermissions.length; i++) {
-            daoItems[i] = ACLData.BulkItem(ACLData.BulkOp.Grant, packages.DAOPermissions[i], app);
+        ACLData.BulkItem[] memory daoItems = new ACLData.BulkItem[](package.DAOPermissions.length);
+        for (uint256 i; i < package.DAOPermissions.length; i = _uncheckedIncrement(i)) {
+            daoItems[i] = ACLData.BulkItem(ACLData.BulkOp.Grant, package.DAOPermissions[i], app);
         }
         dao.bulk(address(dao), daoItems);
 
-        emit PackageInstalled(address(dao), address(app));
+        emit PluginInstalled(address(dao), address(app));
     }
 }

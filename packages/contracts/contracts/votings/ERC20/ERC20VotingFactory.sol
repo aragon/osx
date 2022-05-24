@@ -14,11 +14,11 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../../core/DAO.sol";
 import "./ERC20Voting.sol";
 import "../../utils/Proxy.sol";
-import "../../APM/IPackage.sol";
+import "../../APM/IPluginFactory.sol";
 import "../../tokens/MerkleMinter.sol";
 import "../../factory/TokenFactory.sol";
 
-contract ERC20VotingFactory is IPackage {
+contract ERC20VotingFactory is IPluginFactory {
     using Address for address;
     using Clones for address;
 

@@ -28,11 +28,11 @@ async function install() {
   );
   const signer = new ethers.Wallet(privKey, provider);
 
-  const activeFactory =
+  const pluginInstallerAddress =
     networkName === 'localhost'
-      ? require('../../../../packages/contracts/deployments/localhost/DAOFactory.json')
+      ? require('../../../../packages/contracts/deployments/localhost/PluginInstaller.json')
           .address
-      : activeContracts[networkName].DAOFactory;
+      : activeContracts[networkName].pluginInstallerAddress;
 
   const daoAddress = dummyDaos[networkName][daoJsonKey].address;
   const votingAddress = dummyDaos[networkName][daoJsonKey].packages[0];
@@ -95,23 +95,23 @@ async function install() {
   let aclIface = new ethers.utils.Interface(AclABI);
   let aclEncoded = aclIface.encodeFunctionData('grant', [
     daoAddress,
-    activeFactory,
+    pluginInstallerAddress,
     '0x79e553c6f53701daa99614646285e66adb98ff0fcc1ef165dd2718e5c873bee6', // root_role
   ]);
 
   // prepare install action
   let ABI = [
-    'function installPckagesOnExistingDAO(address dao, tuple(bool,address,bytes32[],bytes32[],bytes)[] package)',
+    'function installPluginsOnExistingDAO(address dao, tuple(bool,address,bytes32[],bytes32[],bytes)[] package)',
   ];
   let iface = new ethers.utils.Interface(ABI);
-  let encoded = iface.encodeFunctionData('installPckagesOnExistingDAO', [
+  let encoded = iface.encodeFunctionData('installPluginsOnExistingDAO', [
     daoAddress,
     [packageStruct],
   ]);
 
   const actions = [
     [daoAddress, '0', aclEncoded],
-    [activeFactory, '0', encoded],
+    [pluginInstallerAddress, '0', encoded],
   ];
 
   let overrides = await gas.setGasOverride(provider);

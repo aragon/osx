@@ -9,11 +9,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const registryAddr = await getContractAddress('Registry', hre);
-  const tokenFactory = await getContractAddress('TokenFactory', hre);
+  const PluginInstaller = await getContractAddress('PluginInstaller', hre);
 
   await deploy('DAOFactory', {
     from: deployer,
-    args: [registryAddr, tokenFactory],
+    args: [registryAddr, PluginInstaller],
     log: true,
   });
 };

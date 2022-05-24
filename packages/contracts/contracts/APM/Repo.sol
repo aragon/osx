@@ -21,7 +21,7 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
 
     struct Version {
         uint16[3] semanticVersion;
-        address contractAddress;
+        address pluginFactoryAddress;
         bytes contentURI;
     }
 
@@ -44,17 +44,18 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
     function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
 
     /**
-     * @notice Create new version with contract `_contractAddress` and content `@fromHex(_contentURI)`
+     * @notice Create new version with contract `_pluginFactoryAddress` and content `@fromHex(_contentURI)`
      * @param _newSemanticVersion Semantic version for new repo version
-     * @param _contractAddress address for smart contract logic for version (if set to 0, it uses last versions' contractAddress)
+     * @param _pluginFactoryAddress address for smart contract logic for version (if set to 0, it uses last versions' pluginFactoryAddress)
      * @param _contentURI External URI for fetching new version's content
      */
     function newVersion(
         uint16[3] memory _newSemanticVersion,
-        address _contractAddress,
+        address _pluginFactoryAddress,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_ROLE) {
-        address contractAddress = _contractAddress;
+        // TODO: check if factoryAddress is IPluginFactory
+        address pluginFactoryAddress = _pluginFactoryAddress;
         uint256 lastVersionIndex = versionsNextIndex - 1;
 
         uint16[3] memory lastSematicVersion;
@@ -63,12 +64,12 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
             Version storage lastVersion = versions[lastVersionIndex];
             lastSematicVersion = lastVersion.semanticVersion;
 
-            if (contractAddress == address(0)) {
-                contractAddress = lastVersion.contractAddress;
+            if (pluginFactoryAddress == address(0)) {
+                pluginFactoryAddress = lastVersion.pluginFactoryAddress;
             }
             // Only allows smart contract change on major version bumps
             require(
-                lastVersion.contractAddress == contractAddress ||
+                lastVersion.pluginFactoryAddress == pluginFactoryAddress ||
                     _newSemanticVersion[0] > lastVersion.semanticVersion[0],
                 ERROR_INVALID_VERSION
             );
@@ -77,9 +78,9 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
         require(isValidBump(lastSematicVersion, _newSemanticVersion), ERROR_INVALID_BUMP);
 
         uint256 versionId = versionsNextIndex++;
-        versions[versionId] = Version(_newSemanticVersion, contractAddress, _contentURI);
+        versions[versionId] = Version(_newSemanticVersion, pluginFactoryAddress, _contentURI);
         versionIdForSemantic[semanticVersionHash(_newSemanticVersion)] = versionId;
-        latestVersionIdForContract[contractAddress] = versionId;
+        latestVersionIdForContract[pluginFactoryAddress] = versionId;
 
         emit NewVersion(versionId, _newSemanticVersion);
     }
@@ -89,23 +90,23 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
         view
         returns (
             uint16[3] memory semanticVersion,
-            address contractAddress,
+            address pluginFactoryAddress,
             bytes memory contentURI
         )
     {
         return getByVersionId(versionsNextIndex - 1);
     }
 
-    function getLatestForContractAddress(address _contractAddress)
+    function getLatestForContractAddress(address _pluginFactoryAddress)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address contractAddress,
+            address pluginFactoryAddress,
             bytes memory contentURI
         )
     {
-        return getByVersionId(latestVersionIdForContract[_contractAddress]);
+        return getByVersionId(latestVersionIdForContract[_pluginFactoryAddress]);
     }
 
     function getBySemanticVersion(uint16[3] memory _semanticVersion)
@@ -113,7 +114,7 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
         view
         returns (
             uint16[3] memory semanticVersion,
-            address contractAddress,
+            address pluginFactoryAddress,
             bytes memory contentURI
         )
     {
@@ -125,13 +126,13 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
         view
         returns (
             uint16[3] memory semanticVersion,
-            address contractAddress,
+            address pluginFactoryAddress,
             bytes memory contentURI
         )
     {
         require(_versionId > 0 && _versionId < versionsNextIndex, ERROR_INEXISTENT_VERSION);
         Version storage version = versions[_versionId];
-        return (version.semanticVersion, version.contractAddress, version.contentURI);
+        return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }
 
     function getVersionsCount() public view returns (uint256) {
