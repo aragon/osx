@@ -7,8 +7,10 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "../core/acl/ACL.sol";
+import "../core/erc165/AdaptiveERC165.sol";
+import "./IRepo.sol";
 
-contract Repo is Initializable, UUPSUpgradeable, ACL {
+contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     /* Hardcoded constants to save gas
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
     */
@@ -34,6 +36,7 @@ contract Repo is Initializable, UUPSUpgradeable, ACL {
 
     /// @dev Used for UUPS upgradability pattern
     function initialize(address initialOwner) external initializer {
+        _registerStandard(type(IRepo).interfaceId);
         __ACL_init(initialOwner);
 
         // set roles.

@@ -4,30 +4,17 @@
 
 pragma solidity 0.8.10;
 
-import "../core/component/MetaTxComponent.sol";
-import "./Repo.sol";
+import "../registry/APMRegistry.sol";
+import "../APM/Repo.sol";
 
-contract APMRegistry is MetaTxComponent {
-    address public repoBase;
+contract RepoFactory {
+
+    APMRegistry apmRegistry;
 
     error ApmRegEmpityName();
 
-    event NewRepo(string name, address repo);
-
-    // TODO: state waiting for general registry component
-
-    /// @dev Used for UUPS upgradability pattern
-    function initialize(IDAO _dao, address _gsnForwarder) external initializer {
-        __MetaTxComponent_init(_dao, _gsnForwarder);
-
-        // TODO: should support proxy?
-        repoBase = address(new Repo());
-    }
-
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.APMRegistry";
+    constructor(APMRegistry _apmRegistry) {
+        apmRegistry = _apmRegistry;
     }
 
     /**
@@ -54,7 +41,7 @@ contract APMRegistry is MetaTxComponent {
         repo = _newRepo(_name, address(this)); // need to have permissions to create version
         repo.newVersion(_initialSemanticVersion, _pluginFactoryAddress, _contentURI);
 
-        // revoke permissions
+        // setup permissions
         setRepoPermissions(repo, msg.sender);
     }
 
@@ -80,6 +67,6 @@ contract APMRegistry is MetaTxComponent {
         repo = new Repo();
         repo.initialize(initialOwner);
 
-        emit NewRepo(_name, address(repo));
+        apmRegistry.register(_name, address(repo));
     }
 }
