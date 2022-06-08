@@ -25,8 +25,9 @@ abstract contract ERC165Registry is Component {
     /// @param _managingDao The interface of the DAO managing the components permissions
     /// @param _contractInterfaceId The ERC165 interface id of the contracts to be registered
     function __ERC165Registry_init(IDAO _managingDao, bytes4 _contractInterfaceId)
-        public
-        initializer
+        internal
+        virtual
+        onlyInitializing
     {
         __Component_init(_managingDao);
 
