@@ -18,9 +18,9 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8;
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
-    string private constant ERROR_INVALID_BUMP = "REPO_INVALID_BUMP";
-    string private constant ERROR_INVALID_VERSION = "REPO_INVALID_VERSION";
-    string private constant ERROR_INEXISTENT_VERSION = "REPO_INEXISTENT_VERSION";
+    error InvalidBupm();
+    error InvalidVersion();
+    error InexistentVersion();
 
     struct Version {
         uint16[3] semanticVersion;
@@ -77,14 +77,13 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
                 pluginFactoryAddress = lastVersion.pluginFactoryAddress;
             }
             // Only allows smart contract change on major version bumps
-            require(
-                lastVersion.pluginFactoryAddress == pluginFactoryAddress ||
-                    _newSemanticVersion[0] > lastVersion.semanticVersion[0],
-                ERROR_INVALID_VERSION
-            );
+            if (
+                lastVersion.pluginFactoryAddress != pluginFactoryAddress ||
+                _newSemanticVersion[0] <= lastVersion.semanticVersion[0]
+            ) revert InvalidVersion();
         }
 
-        require(isValidBump(lastSematicVersion, _newSemanticVersion), ERROR_INVALID_BUMP);
+        if (!isValidBump(lastSematicVersion, _newSemanticVersion)) revert InvalidBupm();
 
         uint256 versionId = versionsNextIndex++;
         versions[versionId] = Version(_newSemanticVersion, pluginFactoryAddress, _contentURI);
@@ -139,7 +138,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
             bytes memory contentURI
         )
     {
-        require(_versionId > 0 && _versionId < versionsNextIndex, ERROR_INEXISTENT_VERSION);
+        if (_versionId <= 0 && _versionId >= versionsNextIndex) revert InexistentVersion();
         Version storage version = versions[_versionId];
         return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }
