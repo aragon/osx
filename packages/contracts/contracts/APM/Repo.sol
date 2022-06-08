@@ -14,7 +14,8 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     /* Hardcoded constants to save gas
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
     */
-    bytes32 public constant CREATE_VERSION_ROLE = 0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8;
+    bytes32 public constant CREATE_VERSION_ROLE =
+        0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8;
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
     string private constant ERROR_INVALID_BUMP = "REPO_INVALID_BUMP";
@@ -44,7 +45,12 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(address(this), UPGRADE_ROLE) {}
+    function _authorizeUpgrade(address)
+        internal
+        virtual
+        override
+        auth(address(this), UPGRADE_ROLE)
+    {}
 
     /**
      * @notice Create new version with contract `_pluginFactoryAddress` and content `@fromHex(_contentURI)`
@@ -142,7 +148,11 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         return versionsNextIndex - 1;
     }
 
-    function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion) public pure returns (bool) {
+    function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
+        public
+        pure
+        returns (bool)
+    {
         bool hasBumped;
         uint256 i = 0;
         while (i < 3) {

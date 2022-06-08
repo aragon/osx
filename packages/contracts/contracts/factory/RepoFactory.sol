@@ -8,7 +8,6 @@ import "../registry/APMRegistry.sol";
 import "../APM/Repo.sol";
 
 contract RepoFactory {
-
     APMRegistry apmRegistry;
 
     error ApmRegEmpityName();
@@ -56,7 +55,11 @@ contract RepoFactory {
 
         // Revoke permissions from APM
         items[3] = ACLData.BulkItem(ACLData.BulkOp.Revoke, repo.ROOT_ROLE(), address(this));
-        items[4] = ACLData.BulkItem(ACLData.BulkOp.Revoke, repo.CREATE_VERSION_ROLE(), address(this));
+        items[4] = ACLData.BulkItem(
+            ACLData.BulkOp.Revoke,
+            repo.CREATE_VERSION_ROLE(),
+            address(this)
+        );
 
         repo.bulk(address(repo), items);
     }

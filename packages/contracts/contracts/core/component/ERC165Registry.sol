@@ -8,7 +8,6 @@ import "./Component.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract allows to register contracts
 abstract contract ERC165Registry is Component {
-
     bytes4 public contractInterfaceId;
 
     mapping(address => bool) public registrees;
@@ -25,7 +24,10 @@ abstract contract ERC165Registry is Component {
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _managingDao The interface of the DAO managing the components permissions
     /// @param _contractInterfaceId The ERC165 interface id of the contracts to be registered
-    function __ERC165Registry_init(IDAO _managingDao, bytes4 _contractInterfaceId) public initializer {
+    function __ERC165Registry_init(IDAO _managingDao, bytes4 _contractInterfaceId)
+        public
+        initializer
+    {
         __Component_init(_managingDao);
 
         contractInterfaceId = _contractInterfaceId;

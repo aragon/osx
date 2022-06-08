@@ -19,7 +19,7 @@ contract APMRegistry is ERC165Registry {
 
     /// @notice Initializes the contract
     /// @param _dao the managing DAO address
-    function initialize(IDAO _dao) public {
+    function initialize(IDAO _dao) public initializer {
         bytes4 repoInterfaceId = type(IRepo).interfaceId;
         __ERC165Registry_init(_dao, repoInterfaceId);
     }
