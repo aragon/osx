@@ -27,8 +27,8 @@ contract TokenFactory {
 
     /// @notice Emitted when a new token is created
     /// @param token ERC20 Upgradeable token address
-    /// @param minter The Merkle minter of the new token
-    /// @param distributor The Merkle distibutor of the new token
+    /// @param minter The `MerkleMinter` contract minting the new token
+    /// @param distributor The `MerkleDistibutor` contract distributing the new token
     event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
 
     struct TokenConfig {
@@ -47,8 +47,8 @@ contract TokenFactory {
     }
 
     /// TODO: Worth considering the decimals ?
-    /// @notice if addr is zero, creates new token + merkle minter, otherwise, creates a wrapped token only.
-    /// @notice if receiver addr is zero, mint token to DAO's address.
+    /// @notice If addr is zero, creates new token + merkle minter, otherwise, creates a wrapped token only.
+    /// @notice If receiver address is zero, mint token to DAO's address.
     /// @param _dao The dao address
     /// @param _tokenConfig The address of the token, name, and symbol. If no addr is passed will a new token get created.
     /// @param _mintConfig contains addresses and values(where to mint tokens and how much)
@@ -122,7 +122,7 @@ contract TokenFactory {
         return (ERC20VotesUpgradeable(token), MerkleMinter(merkleMinter));
     }
 
-    // @dev private helper method to set up the required base contracts on TokenFactory deployment.
+    // @dev Private helper method to set up the required base contracts on TokenFactory deployment.
     function setupBases() private {
         distributorBase = new MerkleDistributor();
         governanceERC20Base = address(new GovernanceERC20());

@@ -36,8 +36,8 @@ abstract contract IDAO {
     event MetadataSet(bytes metadata);
 
     /// @notice If called, the list of provided actions will be executed.
-    /// @dev It run a loop through the array of acctions and execute one by one.
-    /// @dev If one acction fails, all will be reverted.
+    /// @dev It runs a loop through the array of actions and execute them one by one.
+    /// @dev If one action fails, all will be reverted.
     /// @param _actions The aray of actions
     function execute(uint256 callId, Action[] memory _actions)
         external
@@ -76,23 +76,20 @@ abstract contract IDAO {
         string _reference
     );
 
-    /**
-     *  @dev ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
-     *  with `send/transfer`, receive function can still be executed without reverting due to gas cost
-     *  increases in EIP-2929. To still use `send/transfer`, access list is needed that has the address
-     *  of the contract(base contract) that is behind the proxy.
-     *
-     *  @notice Emitted when ETH is deposited
-     *  @param sender The address of the sender
-     *  @param amount The amount of ETH deposited
-     */ 
+    /// @dev ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
+    ///      with `send/transfer`, receive function can still be executed without reverting due to gas cost
+    ///      increases in EIP-2929. To still use `send/transfer`, access list is needed that has the address
+    ///      of the contract(base contract) that is behind the proxy.
+    /// @notice Emitted when ETH is deposited
+    /// @param sender The address of the sender
+    /// @param amount The amount of ETH deposited
     event ETHDeposited(address sender, uint256 amount);
 
     /// @notice Withdraw tokens or ETH from the DAO with a withdraw reference string
     /// @param _token The address of the token and in case of ETH address(0)
     /// @param _to The target address to send tokens or ETH
     /// @param _amount The amount of tokens to withdraw
-    /// @param _reference The withdraw reference describing the reason of it
+    /// @param _reference The reference describing the withdrawal reason
     function withdraw(
         address _token,
         address _to,
@@ -104,19 +101,19 @@ abstract contract IDAO {
     /// @param token The address of the token withdrawn
     /// @param to The address of the withdrawer 
     /// @param amount The amount of tokens withdrawn
-    /// @param _reference The withdraw reference describing the reason of it
+    /// @param _reference The reference describing the withdrawal reason
     event Withdrawn(address indexed token, address indexed to, uint256 amount, string _reference);
 
     /// @notice Setter for the trusted forwarder verifying the meta transaction
-    /// @param _trustedForwarder the trusted forwarder address
-    /// @dev used to update the trusted forwarder
+    /// @param _trustedForwarder The trusted forwarder address
+    /// @dev Used to update the trusted forwarder
     function setTrustedForwarder(address _trustedForwarder) external virtual;
 
     /// @notice Setter for the trusted forwarder verifying the meta transaction
-    /// @return the trusted forwarder address
+    /// @return The trusted forwarder address
     function trustedForwarder() external virtual returns (address);
 
-    /// @notice Emmited when setting a new TrustedForwarder on the DAO
+    /// @notice Emitted when setting a new TrustedForwarder on the DAO
     /// @param forwarder the new forwarder address
     event TrustedForwarderSet(address forwarder);
 
@@ -124,7 +121,7 @@ abstract contract IDAO {
     /// @param _signatureValidator ERC1271 SignatureValidator
     function setSignatureValidator(address _signatureValidator) external virtual;
 
-    /// @notice Method to validate the signature as described in ERC1271
+    /// @notice Validates the signature as described in ERC1271
     /// @param _hash Hash of the data to be signed
     /// @param _signature Signature byte array associated with _hash
     /// @return bytes4

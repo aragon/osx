@@ -43,7 +43,7 @@ contract DAOFactory {
     }
 
     /// @notice Emitted when a new DAO is created
-    /// @param name DAO name
+    /// @param name The DAO name
     /// @param token ERC20 DAO token address or address(0) no token was created
     /// @param voting The address of the voting component of the new DAO
     event DAOCreated(string name, address indexed token, address indexed voting);
@@ -106,7 +106,7 @@ contract DAOFactory {
     /// @dev Creates a new DAO with whitelist based voting.
     /// @param _daoConfig The name and metadata hash of the DAO it creates
     /// @param _voteConfig The majority voting configs and minimum duration of voting
-    /// @param _whitelistVoters A array of addresses that are allowed to vote
+    /// @param _whitelistVoters An array of addresses that are allowed to vote
     /// @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
     function newWhitelistVotingDAO(
         DAOConfig calldata _daoConfig,
@@ -169,7 +169,7 @@ contract DAOFactory {
         _dao.bulk(address(_dao), items);
     }
 
-    /// @dev internal helper method to create ERC20Voting
+    /// @dev Internal helper method to create ERC20Voting
     /// @param _dao The DAO address
     /// @param _token The ERC20 Upgradeable token address
     /// @param _voteConfig The ERC20 voting settings for the DAO
@@ -214,7 +214,7 @@ contract DAOFactory {
         _dao.bulk(address(erc20Voting), items);
     }
 
-    /// @dev internal helper method to create Whitelist Voting
+    /// @dev Internal helper method to create Whitelist Voting
     /// @param _dao The DAO address creating the Whitelist Voting
     /// @param _whitelistVoters The array of the allowed voting addresses
     /// @param _voteConfig The voting settings

@@ -40,8 +40,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     error ZeroAmount();
 
     /// @notice Thrown if the expected and actually deposited ETH amount mismatch
-    /// @param expected ETH expected amount
-    /// @param actual ETH actual amount
+    /// @param expected Expected ETH amount
+    /// @param actual Actual ETH amount
     error ETHDepositAmountMismatch(uint256 expected, uint256 actual);
 
     /// @notice Thrown if an ETH withdraw fails
@@ -104,8 +104,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @notice If called, the list of provided actions will be executed.
-    /// @dev It run a loop through the array of acctions and execute one by one.
-    /// @dev If one acction fails, all will be reverted.
+    /// @dev It runs a loop through the array of actions and executes them one by one.
+    /// @dev If one action fails, all will be reverted.
     /// @param callId The id of the call
     /// @dev The value of callId is defined by the component/contract calling execute. It can be used, for example, as a nonce.
     /// @param _actions The array of actions
@@ -191,7 +191,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
+    /// @dev Emits ETHDeposited event to track ETH deposits that weren't done over the deposit method.
     receive() external payable {
         emit ETHDeposited(msg.sender, msg.value);
     }
@@ -201,14 +201,14 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 
-    /// @notice Method that emmits the MetadataSet event when a new metadata is set
+    /// @notice Emits the MetadataSet event if new metadata is set
     /// @param _metadata Hash of the IPFS file object 
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
-    /// @notice set trusted forwarder on the DAO and emits the event
-    /// @param _forwarder address of the forwarder
+    /// @notice Set trusted forwarder on the DAO and emits the event
+    /// @param _forwarder Address of the forwarder
     function _setTrustedForwarder(address _forwarder) internal {
         _trustedForwarder = _forwarder;
 
