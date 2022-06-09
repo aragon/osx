@@ -8,6 +8,8 @@ import "./Component.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract allows to register contracts
 abstract contract ERC165Registry is Component {
+    bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
+
     bytes4 public contractInterfaceId;
 
     mapping(address => bool) public registrees;
@@ -34,7 +36,7 @@ abstract contract ERC165Registry is Component {
         contractInterfaceId = _contractInterfaceId;
     }
 
-    function _register(address registrant) internal {
+    function _register(address registrant) internal auth(REGISTER_ROLE) {
         if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId))
             revert ContractInterfaceInvalid(registrant);
 
