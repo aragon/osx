@@ -2,15 +2,14 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import chaiUtils from '../../../test-utils';
 import {customError} from '../../../test-utils/custom-error-helper';
-
-chai.use(chaiUtils);
-
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   TestParameterScopingACLOracle,
   TestComponent,
   DAO,
 } from '../../../../typechain';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+
+chai.use(chaiUtils);
 
 const DO_SOMETHING_ROLE = ethers.utils.id('DO_SOMETHING_ROLE');
 
@@ -41,7 +40,7 @@ describe('TestParameterScopingOracle', function () {
     );
     parameterOracle = await ParameterOracle.deploy();
 
-    // Giver signer[0] the DO_SOMETHING_ROLE on the TestComponent
+    // Give signers[0] the DO_SOMETHING_ROLE on the TestComponent
     dao.grantWithOracle(
       testComponent.address,
       ownerAddress,
@@ -77,7 +76,7 @@ describe('TestParameterScopingOracle', function () {
       );
     });
 
-    it('reverts the first parameter is not larger than the second', async () => {
+    it('reverts if the first parameter is not larger than the second', async () => {
       let param1 = 1;
       let param2 = 1;
 
