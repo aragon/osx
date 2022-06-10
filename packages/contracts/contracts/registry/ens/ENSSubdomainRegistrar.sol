@@ -17,8 +17,9 @@ contract ENSSubdomainRegistrar is Component {
     ENS private ens;
     bytes32 public node;
 
-    /// @notice Thrown if the contract is not the domain owner
-    error CallerUnauthorized(address expected, address actual);
+    /// @notice Thrown if the registrar is not authorized and is neither the domain node owner
+    ///         nor an approved operator of the domain node owner
+    error RegistrarUnauthorized(address nodeOwner, address here);
 
     /// @notice Initializes the component
     /// @param _managingDao The interface of the DAO managing the components permissions
@@ -33,7 +34,7 @@ contract ENSSubdomainRegistrar is Component {
 
         // This contract must either be the domain node owner or be an approved operator of the node owner
         if (nodeOwner != address(this) && !_ens.isApprovedForAll(nodeOwner, address(this)))
-            revert CallerUnauthorized({expected: nodeOwner, actual: address(this)});
+            revert RegistrarUnauthorized({nodeOwner: nodeOwner, here: address(this)});
 
         _registerStandard(REGISTRY_INTERFACE_ID);
 
@@ -43,9 +44,9 @@ contract ENSSubdomainRegistrar is Component {
         node = _node;
     }
 
-    /// @notice Registers a new subdomain and transfer ownership to the specified address
-    /// @param _label The hash of the subdomain name
-    /// @param _owner The owner of the subdomain to be registered
+    /// @notice Registers a new subdomain and gives ownership to the specified address
+    /// @param _label The labelhash of the subdomain name
+    /// @param _owner The address of the new subdomain owner
     function registerSubnode(bytes32 _label, address _owner)
         external
         auth(REGISTER_ENS_SUBDOMAIN_ROLE)

@@ -159,14 +159,14 @@ describe.only('ENSSubdomainRegistrar', function () {
       );
     });
 
-    it('does not initialize if the registrar does not own the node and is not approved', async () => {
+    it('does not initialize if the registrar is neither the domain node owner nor an approved operator of the domain node owner', async () => {
       await expect(
         subdomainRegistrar
           .connect(signers[0])
           .initialize(dao.address, ens.address, namehash('test'))
       ).to.be.revertedWith(
         customError(
-          'CallerUnauthorized',
+          'RegistrarUnauthorized',
           ethers.constants.AddressZero,
           subdomainRegistrar.address
         )
