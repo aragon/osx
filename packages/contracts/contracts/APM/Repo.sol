@@ -18,7 +18,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8;
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
-    error InvalidBupm();
+    error InvalidBump();
     error InvalidVersion();
     error InexistentVersion();
 
@@ -83,7 +83,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
             ) revert InvalidVersion();
         }
 
-        if (!isValidBump(lastSematicVersion, _newSemanticVersion)) revert InvalidBupm();
+        if (!isValidBump(lastSematicVersion, _newSemanticVersion)) revert InvalidBump();
 
         uint256 versionId = versionsNextIndex++;
         versions[versionId] = Version(_newSemanticVersion, pluginFactoryAddress, _contentURI);

@@ -7,7 +7,7 @@ const EVENTS = {
   NewRepo: 'NewRepo',
 };
 
-describe('APM-Registry', function () {
+describe('APM: APM-Registry', function () {
   let apmRegistry: any;
   let ownerAddress: string;
   let dao: DAO;
@@ -16,14 +16,14 @@ describe('APM-Registry', function () {
   before(async () => {
     const signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
+  });
 
+  beforeEach(async function () {
     // DAO
     const DAO = await ethers.getContractFactory('DAO');
     dao = await DAO.deploy();
     await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
-  });
 
-  beforeEach(async function () {
     // deploy and initialize APMRegistry
     const APMRegistry = await ethers.getContractFactory('APMRegistry');
     apmRegistry = await APMRegistry.deploy();
@@ -56,8 +56,6 @@ describe('APM-Registry', function () {
     const repoName = 'my-repo';
 
     await apmRegistry.register(repoName, repo.address);
-
-    console.log('repo address', repo.address);
 
     await expect(
       apmRegistry.register(repoName, repo.address)
