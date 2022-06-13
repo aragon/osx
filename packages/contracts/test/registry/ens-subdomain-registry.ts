@@ -94,7 +94,7 @@ describe.only('ENSSubdomainRegistrar', function () {
         resolver.address,
         0
       );
-    tx.wait();
+    await tx.wait();
 
     // Verify that the subdomain is owned by the correct address
     expect(await ens.owner(namehash(fullDomain))).to.equal(
