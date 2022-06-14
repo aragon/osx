@@ -160,7 +160,22 @@ describe.only('ENSSubdomainRegistrar', function () {
       );
     });
 
-    it('does not initialize if the registrar is neither the domain node owner nor an approved operator of the domain node owner', async () => {
+    it('reverts if the registrar is neither the domain node owner nor an approved operator of the domain node owner', async () => {
+      await expect(
+        subdomainRegistrar
+          .connect(signers[1])
+          .initialize(dao.address, ens.address, namehash('test'))
+      ).to.be.revertedWith(
+        customError(
+          'RegistrarUnauthorized',
+          ethers.constants.AddressZero,
+          subdomainRegistrar.address
+        )
+      );
+    });
+
+    it('reverts if the registrar is neither the domain node owner nor an approved operator of the domain node owner, also if it is the owner of the ENS registries', async () => {
+      // signers[0] has deployed the ENS registries before
       await expect(
         subdomainRegistrar
           .connect(signers[0])
