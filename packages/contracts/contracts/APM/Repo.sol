@@ -78,8 +78,8 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
             }
             // Only allows smart contract change on major version bumps
             if (
-                lastVersion.pluginFactoryAddress != pluginFactoryAddress ||
-                _newSemanticVersion[0] <= lastVersion.semanticVersion[0]
+                !(lastVersion.pluginFactoryAddress == pluginFactoryAddress ||
+                    _newSemanticVersion[0] > lastVersion.semanticVersion[0])
             ) revert InvalidVersion();
         }
 
@@ -138,7 +138,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
             bytes memory contentURI
         )
     {
-        if (_versionId <= 0 && _versionId >= versionsNextIndex) revert InexistentVersion();
+        if (!(_versionId > 0 && _versionId < versionsNextIndex)) revert InexistentVersion();
         Version storage version = versions[_versionId];
         return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }
