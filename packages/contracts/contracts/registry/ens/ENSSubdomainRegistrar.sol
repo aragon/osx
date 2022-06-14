@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 import "../../core/component/Component.sol";
 
 /// @title A registrar for ENS subdomains
@@ -16,6 +17,7 @@ contract ENSSubdomainRegistrar is Component {
 
     ENS private ens;
     bytes32 public node;
+    address public resolver;
 
     /// @notice Thrown if the registrar is not authorized and is neither the domain node owner
     ///         nor an approved operator of the domain node owner
@@ -43,15 +45,24 @@ contract ENSSubdomainRegistrar is Component {
 
         ens = _ens;
         node = _node;
+        resolver = ens.resolver(_node);
     }
 
-    /// @notice Registers a new subdomain and gives ownership to the specified address
+    /// @notice Registers a new subdomain and set the target address in the resolver
     /// @param _label The labelhash of the subdomain name
-    /// @param _owner The address of the new subdomain owner
-    function registerSubnode(bytes32 _label, address _owner)
+    /// @param _targetAddress The address to which the subdomain resolves
+    function registerSubnode(bytes32 _label, address _targetAddress)
         external
         auth(REGISTER_ENS_SUBDOMAIN_ROLE)
     {
-        ens.setSubnodeRecord(node, _label, _owner, ens.resolver(node), 0);
+        bytes32 subnode = ens.setSubnodeOwner(node, _label, address(this));
+        ens.setResolver(subnode, resolver);
+        Resolver(resolver).setAddr(subnode, _targetAddress);
+    }
+
+    /// @notice Sets the resolver to be used for the subdomains being registered
+    /// @param _resolver The resolver to be used
+    function setResolver(Resolver _resolver) external auth(REGISTER_ENS_SUBDOMAIN_ROLE) {
+        resolver = address(_resolver);
     }
 }
