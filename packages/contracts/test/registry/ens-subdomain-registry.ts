@@ -106,6 +106,7 @@ describe.only('ENSSubdomainRegistrar', function () {
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
+    const dummyMetadata = '0x';
 
     // Setup ENS with signers[0] owning the the ENS root node ('') and the resolver node ('resolver')
     [ens, resolver] = await setupENS(signers[0]);
@@ -114,7 +115,7 @@ describe.only('ENSSubdomainRegistrar', function () {
     const DAO = await ethers.getContractFactory('DAO');
     dao = await DAO.deploy();
     await dao.initialize(
-      '0x',
+      dummyMetadata,
       await signers[0].getAddress(),
       ethers.constants.AddressZero
     );
