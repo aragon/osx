@@ -132,7 +132,7 @@ describe('ERC20Voting', function () {
 
       expect(await voting.canVote(1, ownerAddress)).to.equal(false);
 
-      expect(vote.actions).to.eql([
+      expect(vote.actions).to.equal([
         [dummyActions[0].to, toBn(dummyActions[0].value), dummyActions[0].data],
       ]);
     });

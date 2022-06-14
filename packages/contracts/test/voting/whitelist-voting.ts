@@ -169,7 +169,7 @@ describe('WhitelistVoting', function () {
       expect(await voting.canVote(0, ownerAddress)).to.equal(true);
       expect(await voting.canVote(0, user1)).to.equal(false);
 
-      expect(vote.actions).to.eql([
+      expect(vote.actions).to.equal([
         [dummyActions[0].to, toBn(dummyActions[0].value), dummyActions[0].data],
       ]);
     });
