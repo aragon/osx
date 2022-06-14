@@ -64,7 +64,7 @@ async function setupENS(
   return [ens, resolver];
 }
 
-describe.only('ENSSubdomainRegistrar', function () {
+describe('ENSSubdomainRegistrar', function () {
   let signers: SignerWithAddress[];
   let dao: DAO;
   let ens: ENSRegistry;

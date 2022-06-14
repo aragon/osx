@@ -35,7 +35,7 @@ contract ENSSubdomainRegistrar is Component {
         address nodeOwner = _ens.owner(_node);
 
         // This contract must either be the domain node owner or be an approved operator of the node owner
-        if (nodeOwner != address(this) && !_ens.isApprovedForAll(nodeOwner, address(this))) {
+        if (!(nodeOwner == address(this) || _ens.isApprovedForAll(nodeOwner, address(this)))) {
             revert RegistrarUnauthorized({nodeOwner: nodeOwner, here: address(this)});
         }
 
