@@ -12,12 +12,13 @@ import "../../core/component/Component.sol";
 ///         This contract must either be domain node owner or be an approved operator of the node owner.
 ///         During the subdomain registration, the same resolver as specified in the parent domain is used.
 contract ENSSubdomainRegistrar is Component {
-    bytes4 internal constant REGISTRY_INTERFACE_ID = this.registerSubnode.selector;
+    bytes4 internal constant REGISTRY_INTERFACE_ID = this.registerSubnode.selector ^ this.setResolver.selector;
     bytes32 public constant REGISTER_ENS_SUBDOMAIN_ROLE = keccak256("REGISTER_ENS_SUBDOMAIN_ROLE");
 
     ENS private ens;
     bytes32 public node;
     address public resolver;
+    address public reverseRegistrar;
 
     /// @notice Thrown if the registrar is not authorized and is neither the domain node owner
     ///         nor an approved operator of the domain node owner
