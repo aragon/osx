@@ -133,13 +133,13 @@ describe('ENSSubdomainRegistrar', function () {
       [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
     });
 
-    it('returns the zero address as the owner for unregistered domains', async () => {
+    it('unregistered domains are owned by the zero address', async () => {
       expect(await ens.owner(ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
       );
     });
 
-    it('resolves unregistered domains to the zero address', async () => {
+    it('unregistered domains resolve to the zero address', async () => {
       expect(await resolver['addr(bytes32)'](ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
       );
