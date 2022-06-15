@@ -1,11 +1,11 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../test-utils';
-import {ERRORS} from '../test-utils/custom-error-helper';
+import chaiUtils from '../../test-utils';
+import {ERRORS} from '../../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {ComponentMock, DAOMock} from '../../typechain';
+import {ComponentMock, DAOMock} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 describe('Component', function () {

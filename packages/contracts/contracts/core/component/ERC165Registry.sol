@@ -22,6 +22,10 @@ abstract contract ERC165Registry is Component {
     /// @param registrant The address of the contract to be registered
     error ContractInterfaceInvalid(address registrant);
 
+    /// @notice Thrown if the address is not a contract
+    /// @param registrant The address of the contract to be registered
+    error ContractAddressInvalid(address registrant);
+
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _managingDao The interface of the DAO managing the components permissions
@@ -37,6 +41,7 @@ abstract contract ERC165Registry is Component {
     }
 
     function _register(address registrant) internal auth(REGISTER_ROLE) {
+        if (!Address.isContract(registrant)) revert ContractAddressInvalid(registrant);
         if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId))
             revert ContractInterfaceInvalid(registrant);
 
