@@ -8,9 +8,11 @@ import "../../core/component/Component.sol";
 
 /// @title A registrar for ENS subdomains
 /// @author Aragon Association - 2022
-/// @notice This contract registers ENS subdomains under a parent domain specified in the installation process.
-///         This contract must either be domain node owner or be an approved operator of the node owner.
-///         During the subdomain registration, the same resolver as specified in the parent domain is used.
+/// @notice This contract registers ENS subdomains under a parent domain specified in the initialization process
+///         and maintains ownership of the subdomain since only the resolver address is set.
+///         This contract must either be the domain node owner or an approved operator of the node owner.
+///         During the subdomain initialization, the resolver specified in the parent domain is used.
+
 contract ENSSubdomainRegistrar is Component {
     bytes4 internal constant REGISTRY_INTERFACE_ID =
         this.registerSubnode.selector ^ this.setResolver.selector;
@@ -77,8 +79,8 @@ contract ENSSubdomainRegistrar is Component {
         Resolver(resolver).setAddr(subnode, _targetAddress);
     }
 
-    /// @notice Sets the resolver to be used for the subdomains being registered
-    /// @param _resolver The resolver to be used
+    /// @notice Sets the resolver contract address which the subdomains being registered will use
+    /// @param _resolver The resolver contract to be used
     function setResolver(Resolver _resolver) external auth(REGISTER_ENS_SUBDOMAIN_ROLE) {
         resolver = address(_resolver);
     }
