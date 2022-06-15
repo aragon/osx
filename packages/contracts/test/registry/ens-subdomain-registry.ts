@@ -128,18 +128,18 @@ describe('ENSSubdomainRegistrar', function () {
     signers = await ethers.getSigners();
   });
 
-  describe('After deployment of ENS', () => {
+  describe('After deployment', () => {
     beforeEach(async () => {
       [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
     });
 
-    it('unregistered domains are owned by the zero address', async () => {
+    it('unregistered domains are owned by the zero address on ENS', async () => {
       expect(await ens.owner(ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
       );
     });
 
-    it('unregistered domains resolve to the zero address', async () => {
+    it('unregistered domains resolve to the zero address on ENS', async () => {
       expect(await resolver['addr(bytes32)'](ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
       );
