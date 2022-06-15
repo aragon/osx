@@ -82,7 +82,7 @@ async function setupENS(
   return [ens, resolver, dao, registrar];
 }
 
-describe('ENSSubdomainRegistrar', function () {
+describe.only('ENSSubdomainRegistrar', function () {
   let signers: SignerWithAddress[];
   let dao: DAO;
   let ens: ENSRegistry;
@@ -124,17 +124,84 @@ describe('ENSSubdomainRegistrar', function () {
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
-    [ens, resolver, dao, registrar] = await setupENS(signers[0]);
   });
 
-  describe('initialize:', () => {
-    it('initializes if the node owner has approved the subdomain registrar address', async () => {
+  describe('After deployment of ENS', () => {
+    beforeEach(async () => {
+      [ens, resolver, dao, registrar] = await setupENS(signers[0]);
+    });
+
+    it('returns the zero address as the owner for unregistered domains', async () => {
+      expect(await ens.owner(namehash('test'))).to.equal(
+        ethers.constants.AddressZero
+      );
+    });
+
+    it('resolves unregistered domains to the zero address', async () => {
+      expect(await resolver['addr(bytes32)'](namehash('test'))).to.equal(
+        ethers.constants.AddressZero
+      );
+    });
+
+    it('reverts during intialization because the registrar is neither the domain node owner nor an approved operator of him/her', async () => {
+      await expect(
+        registrar
+          .connect(signers[1])
+          .initialize(dao.address, ens.address, namehash('test'))
+      ).to.be.revertedWith(
+        customError(
+          'RegistrarUnauthorized',
+          ethers.constants.AddressZero,
+          registrar.address
+        )
+      );
+
+      // This is also the case for signers[0] who owns the ENS registries
+      await expect(
+        registrar
+          .connect(signers[0])
+          .initialize(dao.address, ens.address, namehash('test'))
+      ).to.be.revertedWith(
+        customError(
+          'RegistrarUnauthorized',
+          ethers.constants.AddressZero,
+          registrar.address
+        )
+      );
+    });
+  });
+
+  describe('the registrar is the domain node owner', () => {
+    beforeEach(async () => {
+      [ens, resolver, dao, registrar] = await setupENS(signers[0]);
+
+      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
+      registerSubdomainHelper('test', '', signers[0], registrar.address);
+    });
+
+    it('initializes correctly', async () => {
+      expect(
+        await registrar
+          .connect(signers[0])
+          .initialize(dao.address, ens.address, namehash('test'))
+      );
+    });
+
+    postInitializationTests();
+  });
+
+  describe('the registrar is approved by the domain node owner', () => {
+    beforeEach(async () => {
+      [ens, resolver, dao, registrar] = await setupENS(signers[0]);
+
       // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the signers[0] the owner
       registerSubdomainHelper('test', '', signers[0], signers[0].address);
 
       // Approve the subdomain registrar contract address to operate for signers[0] (who owns 'test')
       await ens.connect(signers[0]).setApprovalForAll(registrar.address, true);
+    });
 
+    it('initializes correctly', async () => {
       expect(
         await registrar
           .connect(signers[0])
@@ -142,192 +209,120 @@ describe('ENSSubdomainRegistrar', function () {
       );
     });
 
-    it('initializes if the subdomain registrar owns the node', async () => {
-      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
-
-      expect(
-        await registrar
-          .connect(signers[0])
-          .initialize(dao.address, ens.address, namehash('test'))
-      );
-    });
-
-    it('reverts if the registrar is neither the domain node owner nor an approved operator of the domain node owner', async () => {
-      await expect(
-        registrar
-          .connect(signers[1])
-          .initialize(dao.address, ens.address, namehash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'RegistrarUnauthorized',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
-
-    it('reverts if the registrar is neither the domain node owner nor an approved operator of the domain node owner, also if it is the owner of the ENS registries', async () => {
-      // signers[0] has deployed the ENS registries before
-      await expect(
-        registrar
-          .connect(signers[0])
-          .initialize(dao.address, ens.address, namehash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'RegistrarUnauthorized',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
+    postInitializationTests();
   });
 
-  describe('registerSubnode:', () => {
-    it('registers the subdomain and resolves to the target address if the calling address has permission and the registrar is the parent domain owner', async () => {
-      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
+  function postInitializationTests() {
+    describe('and is initialized', () => {
+      beforeEach(async () => {
+        // Initialize the registrar with the 'test' domain
+        registrar.initialize(dao.address, ens.address, namehash('test'));
+      });
 
-      // Initialize the registrar with the 'test' domain
-      registrar.initialize(dao.address, ens.address, namehash('test'));
+      it('reverts if initialized a second time', async () => {
+        await expect(
+          registrar.initialize(dao.address, ens.address, namehash('foo'))
+        ).to.be.revertedWith('Initializable: contract is already initialized');
+      });
 
-      // Grant signers[1] the right to register new subdomains in the subdomain registrar contract
-      await dao.grant(
-        registrar.address,
-        await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_ROLE
-      );
+      it('reverts subnode registration if the calling address lacks the `REGISTER_ENS_SUBDOMAIN_ROLE`', async () => {
+        // Register the subdomain 'my.test' as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_ROLE` granted
+        const targetAddress = dao.address;
 
-      // Register the subdomain 'my.test' as signers[1] and set it to resovle to the target address
-      const targetAddress = dao.address;
-      let tx = await registrar
-        .connect(signers[1])
-        .registerSubnode(labelhash('my'), targetAddress);
-      await tx.wait();
+        await expect(
+          registrar
+            .connect(signers[1])
+            .registerSubnode(labelhash('my'), targetAddress)
+        ).to.be.revertedWith(
+          customError(
+            'ACLAuth',
+            registrar.address,
+            registrar.address,
+            signers[1].address,
+            REGISTER_ENS_SUBDOMAIN_ROLE
+          )
+        );
+      });
 
-      // Check that the subdomain is still owned by the subdomain registrar
-      expect(await ens.owner(namehash('my.test'))).to.equal(registrar.address);
+      it('reverts setting the resolver if the calling address lacks the `REGISTER_ENS_SUBDOMAIN_ROLE`', async () => {
+        // Set a new resolver as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_ROLE` granted
+        await expect(
+          registrar
+            .connect(signers[1])
+            .setResolver(ethers.constants.AddressZero)
+        ).to.be.revertedWith(
+          customError(
+            'ACLAuth',
+            registrar.address,
+            registrar.address,
+            signers[1].address,
+            REGISTER_ENS_SUBDOMAIN_ROLE
+          )
+        );
+      });
 
-      // Check that the subdomain resolves to the target address
-      expect(await resolver['addr(bytes32)'](namehash('my.test'))).to.equal(
-        targetAddress
-      );
+      describe('and the `REGISTER_ENS_SUBDOMAIN_ROLE` permission is granted to the calling address', () => {
+        beforeEach(async () => {
+          // Grant signers[1] the right to register new subdomains in the subdomainRegistrar
+          // this is possible because subdomainRegistrar is the controller
+          await dao.grant(
+            registrar.address,
+            await signers[1].getAddress(),
+            REGISTER_ENS_SUBDOMAIN_ROLE
+          );
+        });
+
+        it('registers the subdomain and resolves to the target address', async () => {
+          // register 'my.test' as signers[1] and set it to resovle to the target address
+          const targetAddress = dao.address;
+          let tx = await registrar
+            .connect(signers[1])
+            .registerSubnode(labelhash('my'), targetAddress);
+          await tx.wait();
+
+          // Check that the subdomain is still owned by the subdomain registrar
+          expect(await ens.owner(namehash('my.test'))).to.equal(
+            registrar.address
+          );
+
+          // Check that the subdomain resolves to the target address
+          expect(await resolver['addr(bytes32)'](namehash('my.test'))).to.equal(
+            targetAddress
+          );
+        });
+
+        it('reverts if the subdomain was already registered before', async () => {
+          // register 'my.test' as signers[1] and set it to resovle to the target address
+          const targetAddress = dao.address;
+          let tx = await registrar
+            .connect(signers[1])
+            .registerSubnode(labelhash('my'), targetAddress);
+          await tx.wait();
+
+          // try to regist the same subnode again
+          await expect(
+            registrar
+              .connect(signers[1])
+              .registerSubnode(labelhash('my'), await signers[1].getAddress())
+          ).to.be.revertedWith(
+            customError(
+              'AlreadyRegistered',
+              namehash('my.test'),
+              registrar.address
+            )
+          );
+        });
+
+        it('sets the resolver correctly', async () => {
+          const newResolverAddr = ethers.constants.AddressZero;
+          let tx = await registrar
+            .connect(signers[1])
+            .setResolver(newResolverAddr);
+          await tx.wait();
+
+          expect(await registrar.resolver()).to.equal(newResolverAddr);
+        });
+      });
     });
-
-    it('registers the subdomain and resolves to the right address if the calling address has the `REGISTER_ENS_SUBDOMAIN_ROLE` and the registrar is approved by the domain owner', async () => {
-      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make signers[1] its owner
-      registerSubdomainHelper('test', '', signers[0], signers[1].address);
-
-      // Approve the subdomain registrar contract address to operate for signers[1] (who owns 'test')
-      await ens.connect(signers[1]).setApprovalForAll(registrar.address, true);
-      expect(
-        await ens.isApprovedForAll(
-          await signers[1].getAddress(),
-          registrar.address
-        )
-      ).to.equal(true);
-
-      // Initialize the registrar with the 'test' domain
-      registrar.initialize(dao.address, ens.address, namehash('test'));
-
-      // Grant signers[2] the right to register new subdomains in the subdomainRegistrar
-      // this is possible because subdomainRegistrar is the controller
-      await dao.grant(
-        registrar.address,
-        await signers[2].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_ROLE
-      );
-
-      // register 'my.test' as signers[2] and set it to resovle to the target address
-      const targetAddress = dao.address;
-      let tx = await registrar
-        .connect(signers[2])
-        .registerSubnode(labelhash('my'), targetAddress);
-      await tx.wait();
-
-      // Check that the subdomain is still owned by the subdomain registrar
-      expect(await ens.owner(namehash('my.test'))).to.equal(registrar.address);
-
-      // Check that the subdomain resolves to the target address
-      expect(await resolver['addr(bytes32)'](namehash('my.test'))).to.equal(
-        targetAddress
-      );
-
-      /*       // TODO
-      tx = await subdomainRegistrar
-        .connect(signers[2])
-        .registerSubnode(labelhash('my'), signers[0].address);
-      await tx.wait(); */
-    });
-
-    it('reverts if the calling address lacks the `REGISTER_ENS_SUBDOMAIN_ROLE`', async () => {
-      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
-
-      // Initialize the registrar with the 'test' domain
-      registrar.initialize(dao.address, ens.address, namehash('test'));
-
-      // Register the subdomain 'my.test' as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_ROLE` granted
-      const targetAddress = dao.address;
-
-      await expect(
-        registrar
-          .connect(signers[1])
-          .registerSubnode(labelhash('my'), targetAddress)
-      ).to.be.revertedWith(
-        customError(
-          'ACLAuth',
-          registrar.address,
-          registrar.address,
-          signers[1].address,
-          REGISTER_ENS_SUBDOMAIN_ROLE
-        )
-      );
-    });
-  });
-
-  describe('setResolver:', () => {
-    it('sets the resolver if the calling address has the `REGISTER_ENS_SUBDOMAIN_ROLE`', async () => {
-      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
-
-      // Initialize the registrar with the 'test' domain
-      registrar.initialize(dao.address, ens.address, namehash('test'));
-
-      // Grant signers[1] the right to register new subdomains in the subdomain registrar contract
-      await dao.grant(
-        registrar.address,
-        await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_ROLE
-      );
-
-      // Set a new resolver
-      const newResolverAddr = ethers.constants.AddressZero;
-      let tx = await registrar.connect(signers[1]).setResolver(newResolverAddr);
-      await tx.wait();
-
-      expect(await registrar.resolver()).to.equal(newResolverAddr);
-    });
-
-    it('reversts the resolver if the calling address lacks the `REGISTER_ENS_SUBDOMAIN_ROLE`', async () => {
-      // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
-      registerSubdomainHelper('test', '', signers[0], registrar.address);
-
-      // Initialize the registrar with the 'test' domain
-      registrar.initialize(dao.address, ens.address, namehash('test'));
-
-      // Set a new resolver as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_ROLE` granted
-      await expect(
-        registrar.connect(signers[1]).setResolver(ethers.constants.AddressZero)
-      ).to.be.revertedWith(
-        customError(
-          'ACLAuth',
-          registrar.address,
-          registrar.address,
-          signers[1].address,
-          REGISTER_ENS_SUBDOMAIN_ROLE
-        )
-      );
-    });
-  });
+  }
 });

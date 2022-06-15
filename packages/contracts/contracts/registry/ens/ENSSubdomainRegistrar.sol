@@ -21,7 +21,15 @@ contract ENSSubdomainRegistrar is Component {
 
     /// @notice Thrown if the registrar is not authorized and is neither the domain node owner
     ///         nor an approved operator of the domain node owner
+    /// @param nodeOwner The node owner
+    /// @param here The address of this registry
     error RegistrarUnauthorized(address nodeOwner, address here);
+
+    /// @notice Thrown if the subnode is already
+    ///         nor an approved operator of the domain node owner
+    /// @param subnode The subnode namehash
+    /// @param nodeOwner The node owner address
+    error AlreadyRegistered(bytes32 subnode, address nodeOwner);
 
     /// @notice Initializes the component
     /// @param _managingDao The interface of the DAO managing the components permissions
@@ -48,14 +56,21 @@ contract ENSSubdomainRegistrar is Component {
         resolver = ens.resolver(_node);
     }
 
-    /// @notice Registers a new subdomain and set the target address in the resolver
+    /// @notice Registers a new subdomain with this registrar as the own and set the target address in the resolver
     /// @param _label The labelhash of the subdomain name
     /// @param _targetAddress The address to which the subdomain resolves
     function registerSubnode(bytes32 _label, address _targetAddress)
         external
         auth(REGISTER_ENS_SUBDOMAIN_ROLE)
     {
-        bytes32 subnode = ens.setSubnodeOwner(node, _label, address(this));
+        bytes32 subnode = keccak256(abi.encodePacked(node, _label));
+        address currentOwner = ens.owner(subnode);
+
+        if (currentOwner != address(0)) {
+            revert AlreadyRegistered(subnode, currentOwner);
+        }
+
+        ens.setSubnodeOwner(node, _label, address(this));
         ens.setResolver(subnode, resolver);
         Resolver(resolver).setAddr(subnode, _targetAddress);
     }
