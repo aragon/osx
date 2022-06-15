@@ -12,18 +12,25 @@ import "../core/erc165/AdaptiveERC165.sol";
 import "../APM/IPluginFactory.sol";
 import "./IRepo.sol";
 
+/// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
+/// @author Aragon Association - 2020 - 2022
 contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
-    /* Hardcoded constants to save gas
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
-    */
-    bytes32 public constant CREATE_VERSION_ROLE =
-        0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8;
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
+    /// @notice Thrown version bump is invalid
     error InvalidBump();
+
+    /// @notice Thrown if version is invalid
     error InvalidVersion();
+
+    /// @notice Thrown if version does not exist
     error InexistentVersion();
+
+    /// @notice Thrown if contract does not have IPluginFactory interface
     error InvalidPluginInterface();
+
+    /// @notice Thrown if address is not a PluginFactory contract
     error InvalidPluginContract();
 
     struct Version {
@@ -56,12 +63,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         auth(address(this), UPGRADE_ROLE)
     {}
 
-    /**
-     * @notice Create new version with contract `_pluginFactoryAddress` and content `@fromHex(_contentURI)`
-     * @param _newSemanticVersion Semantic version for new repo version
-     * @param _pluginFactoryAddress address for smart contract logic for version (if set to 0, it uses last versions' pluginFactoryAddress)
-     * @param _contentURI External URI for fetching new version's content
-     */
+    /// @inheritdoc IRepo
     function newVersion(
         uint16[3] memory _newSemanticVersion,
         address _pluginFactoryAddress,
@@ -109,6 +111,10 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         emit NewVersion(versionId, _newSemanticVersion);
     }
 
+    /// @notice get latest plugin
+    /// @return _newSemanticVersion Semantic version for latest repo version
+    /// @return _pluginFactoryAddress Address of latest plugin factory for version
+    /// @return _contentURI External URI for fetching latest version's content
     function getLatest()
         public
         view
@@ -121,6 +127,10 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         return getByVersionId(versionsNextIndex - 1);
     }
 
+    /// @notice get latest by plugin factory address
+    /// @return _newSemanticVersion Semantic version for repo version
+    /// @return _pluginFactoryAddress Address of plugin factory for version
+    /// @return _contentURI External URI for fetching version's content
     function getLatestForContractAddress(address _pluginFactoryAddress)
         public
         view
@@ -133,6 +143,10 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         return getByVersionId(latestVersionIdForContract[_pluginFactoryAddress]);
     }
 
+    /// @notice get latest by semantic version
+    /// @return _newSemanticVersion Semantic version for latest repo version
+    /// @return _pluginFactoryAddress Address of plugin factory for version
+    /// @return _contentURI External URI for fetching latest version's content
     function getBySemanticVersion(uint16[3] memory _semanticVersion)
         public
         view
@@ -145,6 +159,10 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         return getByVersionId(versionIdForSemantic[semanticVersionHash(_semanticVersion)]);
     }
 
+    /// @notice get latest by version id
+    /// @return _newSemanticVersion Semantic version for repo version
+    /// @return _pluginFactoryAddress Address of plugin factory for version
+    /// @return _contentURI External URI for fetching version's content
     function getByVersionId(uint256 _versionId)
         public
         view
@@ -159,10 +177,16 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }
 
+    /// @notice get version count
+    /// @return uint256 count value
     function getVersionsCount() public view returns (uint256) {
         return versionsNextIndex - 1;
     }
 
+    /// @notice check if new version is valid compared to the previous one
+    /// @param _oldVersion Old semantic version
+    /// @param _newVersion New semantic version
+    /// @return bool True if bump is valid
     function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
         public
         pure
@@ -186,6 +210,9 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         return hasBumped;
     }
 
+    /// @notice Generate hash from semantic version
+    /// @param uint16[3] Semantic version array
+    /// @return bytes32 Hash of the semantic version
     function semanticVersionHash(uint16[3] memory version) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(version[0], version[1], version[2]));
     }

@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "./Component.sol";
 
 /// @title An ERC165-based registry for contracts
-/// @author Aragon Association - 2022
+/// @author Michel Heuer, Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract allows to register contracts
 abstract contract ERC165Registry is Component {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
@@ -40,6 +40,9 @@ abstract contract ERC165Registry is Component {
         contractInterfaceId = _contractInterfaceId;
     }
 
+    /// @notice Register an ERC165 contract address
+    /// @dev The managing DAO needs to grant REGISTER_ROLE to registrar
+    /// @param registrant The address of an ERC165 contract
     function _register(address registrant) internal auth(REGISTER_ROLE) {
         if (!Address.isContract(registrant)) revert ContractAddressInvalid(registrant);
         if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId))
