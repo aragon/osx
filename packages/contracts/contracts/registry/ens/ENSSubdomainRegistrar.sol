@@ -12,7 +12,8 @@ import "../../core/component/Component.sol";
 ///         This contract must either be domain node owner or be an approved operator of the node owner.
 ///         During the subdomain registration, the same resolver as specified in the parent domain is used.
 contract ENSSubdomainRegistrar is Component {
-    bytes4 internal constant REGISTRY_INTERFACE_ID = this.registerSubnode.selector ^ this.setResolver.selector;
+    bytes4 internal constant REGISTRY_INTERFACE_ID =
+        this.registerSubnode.selector ^ this.setResolver.selector;
     bytes32 public constant REGISTER_ENS_SUBDOMAIN_ROLE = keccak256("REGISTER_ENS_SUBDOMAIN_ROLE");
 
     ENS private ens;
@@ -57,7 +58,7 @@ contract ENSSubdomainRegistrar is Component {
         resolver = ens.resolver(_node);
     }
 
-    /// @notice Registers a new subdomain with this registrar as the own and set the target address in the resolver
+    /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver
     /// @param _label The labelhash of the subdomain name
     /// @param _targetAddress The address to which the subdomain resolves
     function registerSubnode(bytes32 _label, address _targetAddress)
