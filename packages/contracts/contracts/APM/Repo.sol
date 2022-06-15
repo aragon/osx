@@ -6,8 +6,10 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/acl/ACL.sol";
 import "../core/erc165/AdaptiveERC165.sol";
+import "../APM/IPluginFactory.sol";
 import "./IRepo.sol";
 
 contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
@@ -21,6 +23,8 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     error InvalidBump();
     error InvalidVersion();
     error InexistentVersion();
+    error InvalidPluginInterface();
+    error InvalidPluginContract();
 
     struct Version {
         uint16[3] semanticVersion;
@@ -63,7 +67,19 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         address _pluginFactoryAddress,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_ROLE) {
-        // TODO: check if factoryAddress is IPluginFactory
+        // check if _pluginFactoryAddress is IPluginFactory
+        if (Address.isContract(_pluginFactoryAddress)) {
+            try
+                IPluginFactory(_pluginFactoryAddress).supportsInterface(
+                    PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
+                )
+            returns (bool result) {
+                if (!result) revert InvalidPluginInterface();
+            } catch {
+                revert InvalidPluginContract();
+            }
+        } else if (_pluginFactoryAddress != address(0)) revert InvalidPluginContract();
+
         address pluginFactoryAddress = _pluginFactoryAddress;
         uint256 lastVersionIndex = versionsNextIndex - 1;
 

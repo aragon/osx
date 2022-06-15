@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {Repo} from '../../typechain';
+import {Repo, PluginFactoryMock} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
@@ -14,6 +14,7 @@ describe('APM: Repo', function () {
   let ownerAddress: string;
   let repo: Repo;
   let signers: any;
+  let pluginFactoryMock: PluginFactoryMock;
 
   function assertVersion(
     versionData: any,
@@ -35,6 +36,15 @@ describe('APM: Repo', function () {
     expect(contentURI).to.equal(contentUri); // content should match
   }
 
+  async function deployMockPluginFactory(): Promise<PluginFactoryMock> {
+    const PluginFactoryMock = await ethers.getContractFactory(
+      'PluginFactoryMock'
+    );
+    pluginFactoryMock = await PluginFactoryMock.deploy();
+
+    return pluginFactoryMock;
+  }
+
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
@@ -45,6 +55,9 @@ describe('APM: Repo', function () {
     const Repo = await ethers.getContractFactory('Repo');
     repo = await Repo.deploy();
     await repo.initialize(ownerAddress);
+
+    // deploy pluging factory mock
+    pluginFactoryMock = await deployMockPluginFactory();
   });
 
   it('computes correct valid bumps', async function () {
@@ -71,8 +84,25 @@ describe('APM: Repo', function () {
   // valid version as being a correct bump from 0.0.0
   it('cannot create invalid first version', async function () {
     await expect(
-      repo.newVersion([1, 1, 0], zeroAddress, emptyBytes)
+      repo.newVersion([1, 1, 0], pluginFactoryMock.address, emptyBytes)
     ).to.be.revertedWith(customError('InvalidBump'));
+  });
+
+  it('cannot create version with unsupported interface contract', async function () {
+    const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
+    let adaptiveERC165 = await AdaptiveERC165.deploy();
+
+    await expect(
+      repo.newVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
+    ).to.be.revertedWith(customError('InvalidPluginInterface'));
+  });
+
+  it('cannot create version with random address', async function () {
+    const randomAddress = await signers[8].getAddress();
+
+    await expect(
+      repo.newVersion([1, 0, 0], randomAddress, emptyBytes)
+    ).to.be.revertedWith(customError('InvalidPluginContract'));
   });
 
   context('creating initial version', async function () {
@@ -80,7 +110,8 @@ describe('APM: Repo', function () {
     const initialContent = '0x12';
 
     before(async function () {
-      initialPluginAddress = await signers[8].getAddress(); // random addr, irrelevant
+      const pluginFactoryMock = await deployMockPluginFactory();
+      initialPluginAddress = pluginFactoryMock.address;
     });
 
     beforeEach(async function () {
@@ -134,12 +165,10 @@ describe('APM: Repo', function () {
     });
 
     it('fails when changing contract address in non major version', async () => {
+      const pluginFactoryMock = await deployMockPluginFactory();
+
       await expect(
-        repo.newVersion(
-          [1, 1, 0],
-          await signers[6].getAddress(), // random addr, irrelevant
-          initialContent
-        )
+        repo.newVersion([1, 1, 0], pluginFactoryMock.address, initialContent)
       ).to.be.revertedWith(customError('InvalidVersion'));
     });
 
@@ -160,7 +189,8 @@ describe('APM: Repo', function () {
       const newContent = '0x13';
 
       before(async function () {
-        newPluginAddress = await signers[10].getAddress(); // random addr, irrelevant
+        const pluginFactoryMock = await deployMockPluginFactory();
+        newPluginAddress = pluginFactoryMock.address;
       });
 
       beforeEach(async function () {
