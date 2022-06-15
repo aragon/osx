@@ -10,11 +10,11 @@ import {
   ENSRegistry,
 } from '../../typechain';
 
-function labelhash(label: string): string {
+function ensLabelHash(label: string): string {
   return ethers.utils.id(label);
 }
 
-function namehash(name: string): string {
+function ensDomainHash(name: string): string {
   return ethers.utils.namehash(name);
 }
 
@@ -32,12 +32,12 @@ async function setupResolver(
   await ens
     .connect(owner)
     .setSubnodeOwner(
-      namehash(''),
-      labelhash('resolver'),
+      ensDomainHash(''),
+      ensLabelHash('resolver'),
       await owner.getAddress()
     );
 
-  const resolverNode = namehash('resolver');
+  const resolverNode = ensDomainHash('resolver');
 
   await ens.connect(owner).setResolver(resolverNode, resolver.address);
   await resolver
@@ -106,8 +106,8 @@ describe('ENSSubdomainRegistrar', function () {
     let tx = await ens
       .connect(domainOwner)
       .setSubnodeRecord(
-        namehash(domain),
-        labelhash(subdomain),
+        ensDomainHash(domain),
+        ensLabelHash(subdomain),
         subdomainOwnerAddress,
         resolver.address,
         0
@@ -115,11 +115,13 @@ describe('ENSSubdomainRegistrar', function () {
     await tx.wait();
 
     // Verify that the subdomain is owned by the correct address
-    expect(await ens.owner(namehash(fullDomain))).to.equal(
+    expect(await ens.owner(ensDomainHash(fullDomain))).to.equal(
       subdomainOwnerAddress
     );
     // Verify that that the subdomain's resolver address is set correctly
-    expect(await ens.resolver(namehash(fullDomain))).to.equal(resolver.address);
+    expect(await ens.resolver(ensDomainHash(fullDomain))).to.equal(
+      resolver.address
+    );
   }
 
   beforeEach(async () => {
@@ -132,13 +134,13 @@ describe('ENSSubdomainRegistrar', function () {
     });
 
     it('returns the zero address as the owner for unregistered domains', async () => {
-      expect(await ens.owner(namehash('test'))).to.equal(
+      expect(await ens.owner(ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
       );
     });
 
     it('resolves unregistered domains to the zero address', async () => {
-      expect(await resolver['addr(bytes32)'](namehash('test'))).to.equal(
+      expect(await resolver['addr(bytes32)'](ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
       );
     });
@@ -147,7 +149,7 @@ describe('ENSSubdomainRegistrar', function () {
       await expect(
         registrar
           .connect(signers[1])
-          .initialize(managingDao.address, ens.address, namehash('test'))
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
           'RegistrarUnauthorized',
@@ -160,7 +162,7 @@ describe('ENSSubdomainRegistrar', function () {
       await expect(
         registrar
           .connect(signers[0])
-          .initialize(managingDao.address, ens.address, namehash('test'))
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
           'RegistrarUnauthorized',
@@ -183,7 +185,7 @@ describe('ENSSubdomainRegistrar', function () {
       expect(
         await registrar
           .connect(signers[0])
-          .initialize(managingDao.address, ens.address, namehash('test'))
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       );
     });
 
@@ -205,7 +207,7 @@ describe('ENSSubdomainRegistrar', function () {
       expect(
         await registrar
           .connect(signers[0])
-          .initialize(managingDao.address, ens.address, namehash('test'))
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       );
 
       // the default resolver is the resolver of the parent domain node
@@ -222,7 +224,7 @@ describe('ENSSubdomainRegistrar', function () {
         registrar.initialize(
           managingDao.address,
           ens.address,
-          namehash('test')
+          ensDomainHash('test')
         );
       });
 
@@ -231,7 +233,7 @@ describe('ENSSubdomainRegistrar', function () {
           registrar.initialize(
             managingDao.address,
             ens.address,
-            namehash('foo')
+            ensDomainHash('foo')
           )
         ).to.be.revertedWith('Initializable: contract is already initialized');
       });
@@ -243,7 +245,7 @@ describe('ENSSubdomainRegistrar', function () {
         await expect(
           registrar
             .connect(signers[1])
-            .registerSubnode(labelhash('my'), targetAddress)
+            .registerSubnode(ensLabelHash('my'), targetAddress)
         ).to.be.revertedWith(
           customError(
             'ACLAuth',
@@ -287,18 +289,18 @@ describe('ENSSubdomainRegistrar', function () {
           const targetAddress = managingDao.address;
           let tx = await registrar
             .connect(signers[1])
-            .registerSubnode(labelhash('my'), targetAddress);
+            .registerSubnode(ensLabelHash('my'), targetAddress);
           await tx.wait();
 
           // Check that the subdomain is still owned by the subdomain registrar
-          expect(await ens.owner(namehash('my.test'))).to.equal(
+          expect(await ens.owner(ensDomainHash('my.test'))).to.equal(
             registrar.address
           );
 
           // Check that the subdomain resolves to the target address
-          expect(await resolver['addr(bytes32)'](namehash('my.test'))).to.equal(
-            targetAddress
-          );
+          expect(
+            await resolver['addr(bytes32)'](ensDomainHash('my.test'))
+          ).to.equal(targetAddress);
         });
 
         it('reverts if the subdomain was already registered before', async () => {
@@ -306,18 +308,21 @@ describe('ENSSubdomainRegistrar', function () {
           const targetAddress = managingDao.address;
           let tx = await registrar
             .connect(signers[1])
-            .registerSubnode(labelhash('my'), targetAddress);
+            .registerSubnode(ensLabelHash('my'), targetAddress);
           await tx.wait();
 
           // try to regist the same subnode again
           await expect(
             registrar
               .connect(signers[1])
-              .registerSubnode(labelhash('my'), await signers[1].getAddress())
+              .registerSubnode(
+                ensLabelHash('my'),
+                await signers[1].getAddress()
+              )
           ).to.be.revertedWith(
             customError(
               'AlreadyRegistered',
-              namehash('my.test'),
+              ensDomainHash('my.test'),
               registrar.address
             )
           );
