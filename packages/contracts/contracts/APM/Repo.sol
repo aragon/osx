@@ -112,9 +112,9 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest plugin
-    /// @return _newSemanticVersion Semantic version for latest repo version
-    /// @return _pluginFactoryAddress Address of latest plugin factory for version
-    /// @return _contentURI External URI for fetching latest version's content
+    /// @return semanticVersion Semantic version for latest repo version
+    /// @return pluginFactoryAddress Address of latest plugin factory for version
+    /// @return contentURI External URI for fetching latest version's content
     function getLatest()
         public
         view
@@ -128,9 +128,9 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest by plugin factory address
-    /// @return _newSemanticVersion Semantic version for repo version
-    /// @return _pluginFactoryAddress Address of plugin factory for version
-    /// @return _contentURI External URI for fetching version's content
+    /// @return semanticVersion Semantic version for repo version
+    /// @return pluginFactoryAddress Address of plugin factory for version
+    /// @return contentURI External URI for fetching version's content
     function getLatestForContractAddress(address _pluginFactoryAddress)
         public
         view
@@ -144,9 +144,9 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest by semantic version
-    /// @return _newSemanticVersion Semantic version for latest repo version
-    /// @return _pluginFactoryAddress Address of plugin factory for version
-    /// @return _contentURI External URI for fetching latest version's content
+    /// @return semanticVersion Semantic version for latest repo version
+    /// @return pluginFactoryAddress Address of plugin factory for version
+    /// @return contentURI External URI for fetching latest version's content
     function getBySemanticVersion(uint16[3] memory _semanticVersion)
         public
         view
@@ -160,9 +160,9 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest by version id
-    /// @return _newSemanticVersion Semantic version for repo version
-    /// @return _pluginFactoryAddress Address of plugin factory for version
-    /// @return _contentURI External URI for fetching version's content
+    /// @return semanticVersion Semantic version for repo version
+    /// @return pluginFactoryAddress Address of plugin factory for version
+    /// @return contentURI External URI for fetching version's content
     function getByVersionId(uint256 _versionId)
         public
         view
@@ -211,7 +211,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice Generate hash from semantic version
-    /// @param uint16[3] Semantic version array
+    /// @param version Semantic version array
     /// @return bytes32 Hash of the semantic version
     function semanticVersionHash(uint16[3] memory version) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(version[0], version[1], version[2]));
