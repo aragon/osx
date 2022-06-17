@@ -11,15 +11,22 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 contract TestSharedComponent is Component {
     bytes32 public constant ID_GATED_ACTION_ROLE = keccak256("ID_GATED_ACTION_ROLE");
 
+    mapping(uint256 => IDAO) public ownedIds;
+
     uint256 internal _counter;
 
     modifier sharedAuth(uint256 _id, bytes32 _role) {
-        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _role, _msgData()))
-            revert ACLData.ACLAuth({here: address(this), where: address(this), who: _msgSender(), role: _role});
+        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _role, _msgData())) {
+            revert ACLData.ACLAuth({
+                here: address(this),
+                where: address(this),
+                who: _msgSender(),
+                role: _role
+            });
+        }
 
         _;
     }
-    mapping(uint256 => IDAO) public ownedIds;
 
     function initialize(IDAO _dao) external initializer {
         __Component_init(_dao);
