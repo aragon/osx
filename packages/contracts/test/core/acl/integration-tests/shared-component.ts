@@ -16,7 +16,7 @@ const ID_GATED_ACTION_ROLE = ethers.utils.id('ID_GATED_ACTION_ROLE');
 describe('SharedComponent', function () {
   let signers: SignerWithAddress[];
   let testComponent: TestSharedComponent;
-  let owningDao: DAO;
+  let managingDAO: DAO;
   let dao1: DAO;
   let dao2: DAO;
   let ownerAddress: string;
@@ -26,12 +26,12 @@ describe('SharedComponent', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    // create a DAO
+    // Deploy the managing DAO and two other DAOs
     const DAO = await ethers.getContractFactory('DAO');
-    owningDao = await DAO.deploy();
+    managingDAO = await DAO.deploy();
     dao1 = await DAO.deploy();
     dao2 = await DAO.deploy();
-    await owningDao.initialize(
+    await managingDAO.initialize(
       '0x',
       ownerAddress,
       ethers.constants.AddressZero
@@ -39,12 +39,12 @@ describe('SharedComponent', function () {
     await dao1.initialize('0x', ownerAddress, ethers.constants.AddressZero);
     await dao2.initialize('0x', ownerAddress, ethers.constants.AddressZero);
 
-    // create a component
+    // Deploy the `TestSharedComponent`
     const TestSharedComponent = await ethers.getContractFactory(
       'TestSharedComponent'
     );
     testComponent = await TestSharedComponent.deploy();
-    await testComponent.initialize(owningDao.address);
+    await testComponent.initialize(managingDAO.address);
 
     expectedACLAuthError = customError(
       'ACLAuth',
@@ -76,11 +76,11 @@ describe('SharedComponent', function () {
     it('executes if the ID is allowed', async () => {
       const allowedId = 0;
 
-      // deploy oracle and set allowed ID
+      // Deploy `TestIdGatingOracle` and set the allowed ID in the constructor
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions with the deployed oracle
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
@@ -88,11 +88,12 @@ describe('SharedComponent', function () {
         oracle.address
       );
 
-      // Deploy the oracle and set the allowed ID
+      // Deploy a new object in the `TestComponent` which will have the ID 0
       const tx = await testComponent.createNewObject(dao1.address);
       await tx.wait();
       await ethers.provider.send('evm_mine', []);
 
+      // Check that the ID gated action can be executed
       expect(testComponent.callStatic.idGatedAction(allowedId));
     });
 
@@ -104,7 +105,7 @@ describe('SharedComponent', function () {
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Grant signers[0] the permission to do ID gated actions with the deployed oracle
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
@@ -126,7 +127,7 @@ describe('SharedComponent', function () {
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Grant signers[0] the permission to do ID gated actions with the deployed oracle
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
@@ -140,7 +141,7 @@ describe('SharedComponent', function () {
         oracle.address
       );
 
-      // Create ID-gated object associated with dao1
+      // Create ID-gated object associated with `dao1`
       let tx = await testComponent.createNewObject(dao1.address);
       await tx.wait();
       tx = await testComponent.createNewObject(dao2.address);
@@ -164,7 +165,7 @@ describe('SharedComponent', function () {
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Create ID-gated object associated with dao1
+      // Create ID-gated object associated with `dao1`
       const tx = await testComponent.createNewObject(dao1.address);
       await tx.wait();
       await ethers.provider.send('evm_mine', []);
@@ -181,7 +182,7 @@ describe('SharedComponent', function () {
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Grant signers[0] the permission to do ID gated actions with the deployed oracle
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
       dao2.grantWithOracle(
         testComponent.address,
         ownerAddress,
@@ -189,7 +190,7 @@ describe('SharedComponent', function () {
         oracle.address
       );
 
-      // Create ID-gated object associated with dao1
+      // Create ID-gated object associated with `dao1`
       const tx = await testComponent.createNewObject(dao1.address);
       await tx.wait();
       await ethers.provider.send('evm_mine', []);
@@ -206,7 +207,7 @@ describe('SharedComponent', function () {
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Grant signer[0] permission to do ID gated actions with the deployed oracle
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
@@ -214,7 +215,7 @@ describe('SharedComponent', function () {
         oracle.address
       );
 
-      // Create ID-gated object associated with dao1
+      // Create ID-gated object associated with `dao1`
       const tx = await testComponent.createNewObject(dao2.address);
       await tx.wait();
       await ethers.provider.send('evm_mine', []);

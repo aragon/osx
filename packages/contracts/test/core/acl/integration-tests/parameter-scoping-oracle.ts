@@ -17,7 +17,7 @@ describe('TestParameterScopingOracle', function () {
   let signers: SignerWithAddress[];
   let parameterOracle: TestParameterScopingACLOracle;
   let testComponent: TestComponent;
-  let dao: DAO;
+  let managingDao: DAO;
   let ownerAddress: string;
   let expectedACLAuthError: string;
 
@@ -27,22 +27,26 @@ describe('TestParameterScopingOracle', function () {
 
     // create a DAO
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    managingDao = await DAO.deploy();
+    await managingDao.initialize(
+      '0x',
+      ownerAddress,
+      ethers.constants.AddressZero
+    );
 
-    // create a component
+    // Deploy the component
     const TestComponent = await ethers.getContractFactory('TestComponent');
     testComponent = await TestComponent.deploy();
-    await testComponent.initialize(dao.address);
+    await testComponent.initialize(managingDao.address);
 
-    // create parameter oracle
+    // Deploy the oracle
     const ParameterOracle = await ethers.getContractFactory(
       'TestParameterScopingACLOracle'
     );
     parameterOracle = await ParameterOracle.deploy();
 
-    // Give signers[0] the DO_SOMETHING_ROLE on the TestComponent
-    dao.grantWithOracle(
+    // Give signers[0] the `DO_SOMETHING_ROLE` on the TestComponent
+    managingDao.grantWithOracle(
       testComponent.address,
       ownerAddress,
       DO_SOMETHING_ROLE,
