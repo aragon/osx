@@ -11,11 +11,19 @@ contract TestComponent is Component {
         __Component_init(_dao);
     }
 
-    function addPermissioned(uint256 _param1, uint256 _param2) external auth(DO_SOMETHING_ROLE) returns (uint256) {
+    function addPermissioned(uint256 _param1, uint256 _param2)
+        external
+        auth(DO_SOMETHING_ROLE)
+        returns (uint256)
+    {
         return _param1 + _param2;
     }
 
-    function subPermissioned(uint256 _param1, uint256 _param2) external auth(DO_SOMETHING_ROLE) returns (uint256) {
+    function subPermissioned(uint256 _param1, uint256 _param2)
+        external
+        auth(DO_SOMETHING_ROLE)
+        returns (uint256)
+    {
         return _param1 - _param2;
     }
 
