@@ -54,7 +54,7 @@ contract TestSharedComponent is Component {
     }
 }
 
-/// @notice The oracle associated
+/// @notice The oracle associated with `TestSharedComponent`
 contract TestIdGatingOracle is IACLOracle {
     uint256 public allowedId;
 
@@ -69,7 +69,7 @@ contract TestIdGatingOracle is IACLOracle {
         address _who,
         bytes32 _role,
         bytes calldata _data
-    ) external returns (bool) {
+    ) external view returns (bool) {
         (_where, _who, _role);
 
         // Security issue? Can the method be wrapped?
