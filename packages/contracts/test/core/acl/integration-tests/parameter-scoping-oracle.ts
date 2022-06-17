@@ -19,6 +19,7 @@ describe('TestParameterScopingOracle', function () {
   let testComponent: TestComponent;
   let dao: DAO;
   let ownerAddress: string;
+  let expectedACLAuthError: string;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -47,17 +48,17 @@ describe('TestParameterScopingOracle', function () {
       DO_SOMETHING_ROLE,
       parameterOracle.address
     );
-  });
 
-  describe('oracle conditions:', async () => {
-    const expectedACLAuthError = customError(
+    expectedACLAuthError = customError(
       'ACLAuth',
       testComponent.address,
       testComponent.address,
       ownerAddress,
       DO_SOMETHING_ROLE
     );
+  });
 
+  describe('oracle conditions:', async () => {
     it('adds if the first parameter is larger than the second', async () => {
       let param1 = 10;
       let param2 = 1;
