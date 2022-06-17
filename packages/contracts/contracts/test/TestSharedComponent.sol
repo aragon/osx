@@ -15,7 +15,13 @@ contract TestSharedComponent is Component {
 
     uint256 internal _counter;
 
+    error ObjectIdNotAssigned(uint256 _id);
+
     modifier sharedAuth(uint256 _id, bytes32 _role) {
+        if (_id > _counter) {
+            revert ObjectIdNotAssigned(_id);
+        }
+
         if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _role, _msgData())) {
             revert ACLData.ACLAuth({
                 here: address(this),
@@ -35,7 +41,7 @@ contract TestSharedComponent is Component {
     /// @notice Creates a new object with an ID being associated with a specific DAO
     /// @param _dao The DAO that manages permissions for the object
     /// @return id The ID that is associated with the object and the DAO
-    function newObject(IDAO _dao) external returns (uint256 id) {
+    function createNewObject(IDAO _dao) external returns (uint256 id) {
         id = _counter;
         ownedIds[id] = _dao;
         _counter++;
@@ -63,7 +69,7 @@ contract TestIdGatingOracle is IACLOracle {
         address _who,
         bytes32 _role,
         bytes calldata _data
-    ) external view returns (bool) {
+    ) external returns (bool) {
         (_where, _who, _role);
 
         // Security issue? Can the method be wrapped?
