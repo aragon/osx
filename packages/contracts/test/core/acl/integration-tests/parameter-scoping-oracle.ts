@@ -50,6 +50,14 @@ describe('TestParameterScopingOracle', function () {
   });
 
   describe('oracle conditions:', async () => {
+    const expectedACLAuthError = customError(
+      'ACLAuth',
+      testComponent.address,
+      testComponent.address,
+      ownerAddress,
+      DO_SOMETHING_ROLE
+    );
+
     it('adds if the first parameter is larger than the second', async () => {
       let param1 = 10;
       let param2 = 1;
@@ -65,32 +73,25 @@ describe('TestParameterScopingOracle', function () {
 
       await expect(
         testComponent.callStatic.subPermissioned(param1, param2)
-      ).to.be.revertedWith(
-        customError(
-          'ACLAuth',
-          testComponent.address,
-          testComponent.address,
-          ownerAddress,
-          DO_SOMETHING_ROLE
-        )
-      );
+      ).to.be.revertedWith(expectedACLAuthError);
     });
 
-    it('reverts if the first parameter is not larger than the second', async () => {
+    it('reverts if the first parameter is equal to the second', async () => {
       let param1 = 1;
       let param2 = 1;
 
       await expect(
         testComponent.callStatic.addPermissioned(param1, param2)
-      ).to.be.revertedWith(
-        customError(
-          'ACLAuth',
-          testComponent.address,
-          testComponent.address,
-          ownerAddress,
-          DO_SOMETHING_ROLE
-        )
-      );
+      ).to.be.revertedWith(expectedACLAuthError);
+    });
+
+    it('reverts if the first parameter is smaller than the second', async () => {
+      let param1 = 1;
+      let param2 = 10;
+
+      await expect(
+        testComponent.callStatic.addPermissioned(param1, param2)
+      ).to.be.revertedWith(expectedACLAuthError);
     });
   });
 });
