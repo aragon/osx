@@ -47,7 +47,7 @@ abstract contract IDAO {
     /// @notice Emitted when a proposal is executed
     /// @param actor The address of the caller
     /// @param callId The id of the call
-    /// @dev The value of callId is defined by the component/contract calling the execute function. 
+    /// @dev The value of callId is defined by the component/contract calling the execute function.
     ///      A Component implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed
     /// @param execResults Array with the results of the executed actions
@@ -57,7 +57,7 @@ abstract contract IDAO {
     /// @dev Deposit ETH (token address == 0) or any token with a reference
     /// @param _token The address of the token and in case of ETH address(0)
     /// @param _amount The amount of tokens to deposit
-    /// @param _reference The deposit reference describing the reason of it
+    /// @param _reference The reference describing the deposit reason
     function deposit(
         address _token,
         uint256 _amount,
@@ -68,7 +68,7 @@ abstract contract IDAO {
     /// @param sender The address of the sender
     /// @param token The address of the token deposited
     /// @param amount The amount of tokens deposited
-    /// @param _reference The deposit reference desribing the reason of it
+    /// @param _reference The reference describing the deposit reason
     event Deposited(
         address indexed sender,
         address indexed token,
@@ -76,11 +76,11 @@ abstract contract IDAO {
         string _reference
     );
 
-    /// @dev ETHDeposited and Deposited are both needed. ETHDeposited makes sure that whoever sends funds
-    ///      with `send/transfer`, receive function can still be executed without reverting due to gas cost
-    ///      increases in EIP-2929. To still use `send/transfer`, access list is needed that has the address
-    ///      of the contract(base contract) that is behind the proxy.
     /// @notice Emitted when ETH is deposited
+    /// @dev `ETHDeposited` and `Deposited` are both needed. `ETHDeposited` makes sure that whoever sends funds
+    ///      with `send`/`transfer`, receive function can still be executed without reverting due to gas cost
+    ///      increases in EIP-2929. To still use `send`/`transfer`, access list is needed that has the address
+    ///      of the contract(base contract) that is behind the proxy.
     /// @param sender The address of the sender
     /// @param amount The amount of ETH deposited
     event ETHDeposited(address sender, uint256 amount);
@@ -99,7 +99,7 @@ abstract contract IDAO {
 
     /// @notice Emitted when a withdraw is done
     /// @param token The address of the token withdrawn
-    /// @param to The address of the withdrawer 
+    /// @param to The address of the withdrawer
     /// @param amount The amount of tokens withdrawn
     /// @param _reference The reference describing the withdrawal reason
     event Withdrawn(address indexed token, address indexed to, uint256 amount, string _reference);
