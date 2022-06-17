@@ -64,11 +64,11 @@ contract ACL is Initializable {
 
     // Events
 
-    /// @notice Emitted when a new permission `role` is granted to the address `actor` by the address `who` in the contract `where`
+    /// @notice Emitted when a permission `role` is granted to the address `actor` by the address `who` in the contract `where`
     /// @param role The hash of the role identifier
     /// @param actor The address receiving the new role
     /// @param who The address (EOA or contract) owning the permission
-    /// @param where The address of the contract    
+    /// @param where The address of the contract
     /// @param oracle The ACLOracle to be used or it is just the ALLOW_FLAG
     event Granted(
         bytes32 indexed role,
@@ -78,23 +78,22 @@ contract ACL is Initializable {
         IACLOracle oracle
     );
 
-    /// @notice Emitted when a new permission `role` is revoked to the address `actor` by the address `who` in the contract `where`
+    /// @notice Emitted when a permission `role` is revoked to the address `actor` by the address `who` in the contract `where`
     /// @param role The hash of the role identifier
     /// @param actor The address receiving the revoked role
     /// @param who The address (EOA or contract) owning the permission
     /// @param where The address of the contract
     event Revoked(bytes32 indexed role, address indexed actor, address indexed who, address where);
-    
+
     /// @notice Emitted when a `role` is frozen to the address `actor` by the contract `where`
     /// @param role The hash of the role identifier
     /// @param actor The address that is frozen
     /// @param where The address of the contract
     event Frozen(bytes32 indexed role, address indexed actor, address where);
 
-    /// @dev The modifier used within the DAO framework to check permissions.
-    //       Allows to set ROOT roles on specific contract or on the main, overal DAO.
-    /// @param _where The contract that will be called
-    /// @param _role The role required to call the method this modifier is applied to
+    /// @notice The modifier to be used to check permissions.
+    /// @param _where The address of the contract
+    /// @param _role The hash of the role identifier required to call the method this modifier is applied to
     modifier auth(address _where, bytes32 _role) {
         if (
             !(willPerform(_where, msg.sender, _role, msg.data) ||
@@ -109,13 +108,15 @@ contract ACL is Initializable {
         _;
     }
 
-    /// @dev Init method to set the owner of the ACL
-    /// @param _who The callee of the method
-    function __ACL_init(address _who) internal onlyInitializing {
-        _initializeACL(_who);
+    /// @notice Initialization method to set the initial owner of the ACL
+    /// @dev The initial owner is granted the `ROOT_ROLE` permission
+    /// @param _initialOwner The initial owner of the ACL
+    function __ACL_init(address _initialOwner) internal onlyInitializing {
+        _initializeACL(_initialOwner);
     }
 
-    /// @dev Method to grant permissions for a role on a contract to an address
+    /// @notice Grants permission to call a contract address from another address via the specified role identifier
+    /// @dev Requires the `ROOT_ROLE` permission
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
@@ -127,11 +128,12 @@ contract ACL is Initializable {
         _grant(_where, _who, _role);
     }
 
-    /// @dev This method is used to grant access on a method of a contract based on a ACLOracle that allows us to have more dynamic permissions management.
+    /// @notice Grants permission to call a contract address from another address via a role identifier and an `ACLOracle`
+    /// @dev Requires the `ROOT_ROLE` permission
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
-    /// @param _oracle The ACLOracle responsible for this role on a specific method of a contract
+    /// @param _oracle The `ACLOracle` that will be asked for authorization on calls connected to the specified role identifier
     function grantWithOracle(
         address _where,
         address _who,
@@ -141,7 +143,8 @@ contract ACL is Initializable {
         _grantWithOracle(_where, _who, _role, _oracle);
     }
 
-    /// @dev Method to revoke permissions of an address for a role of a contract
+    /// @notice Revokes permissions of an address for a role identifier of a contract
+    /// @dev Requires the `ROOT_ROLE` permission
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
@@ -153,14 +156,17 @@ contract ACL is Initializable {
         _revoke(_where, _who, _role);
     }
 
-    /// @dev Method to freeze a role of a contract
+    /// @notice Freezes the current permission settings on a contract associated for the specified role identifier.
+    ///         This is a permanent operation and permissions on the specified contract with the specified role identifier can never be granted or revoked again.
+    /// @dev Requires the `ROOT_ROLE` permission
     /// @param _where The address of the contract
     /// @param _role The hash of the role identifier
     function freeze(address _where, bytes32 _role) external auth(_where, ROOT_ROLE) {
         _freeze(_where, _role);
     }
 
-    /// @dev Method to do bulk operations on the ACL
+    /// @notice Method to do bulk operations on the ACL
+    /// @dev Requires the `ROOT_ROLE` permission
     /// @param _where The address of the contract
     /// @param items A list of ACL operations to do
     function bulk(address _where, ACLData.BulkItem[] calldata items)
@@ -176,12 +182,12 @@ contract ACL is Initializable {
         }
     }
 
-    /// @dev This method is used to check if a callee has the permissions for. It is public to simplify the code within the DAO framework.
+    /// @notice Checks if a caller has the permissions on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the contract
-    /// @param _who The address (EOA or contract) owning the permission
+    /// @param _who The address (EOA or contract) for which the permission is checked
     /// @param _role The hash of the role identifier
-    /// @param _data The optional data passed to the ACLOracle registered.
-    /// @return bool
+    /// @param _data The optional data passed to the `ACLOracle` registered
+    /// @return bool Returns true if `who` has the permissions on the contract via the specified role identifier
     function willPerform(
         address _where,
         address _who,
@@ -189,26 +195,27 @@ contract ACL is Initializable {
         bytes memory _data
     ) public returns (bool) {
         return
-            _checkRole(_where, _who, _role, _data) || // check if _who is eligible for _role on _where
-            _checkRole(_where, ANY_ADDR, _role, _data) || // check if anyone is eligible for _role on _where
-            _checkRole(ANY_ADDR, _who, _role, _data); // check if _who is eligible for _role on any contract.
+            _checkRole(_where, _who, _role, _data) || // check if _who has permission for _role on _where
+            _checkRole(_where, ANY_ADDR, _role, _data) || // check if anyone has permission for _role on _where
+            _checkRole(ANY_ADDR, _who, _role, _data); // check if _who has permission for _role on any contract
     }
 
-    /// @dev This method is used to check if a given role on a contract is frozen
+    /// @notice This method is used to check if permissions for a given role identifier on a contract are frozen
     /// @param _where The address of the contract
     /// @param _role The hash of the role identifier
-    /// @return bool Return true or false depending if it is frozen or not
+    /// @return bool Returns true if the role identifier has been frozen for the contract address
     function isFrozen(address _where, bytes32 _role) public view returns (bool) {
         return freezePermissions[freezeHash(_where, _role)];
     }
 
-    /// @dev This method is internally used to grant the ROOT_ROLE on initialization of the ACL
-    /// @param _who The address (EOA or contract) owning the permission
-    function _initializeACL(address _who) internal {
-        _grant(address(this), _who, ROOT_ROLE);
+    /// @notice This method is used in the public `_grant` method of the ACL
+    /// @notice Grants the `ROOT_ROLE` permission during initialization of the ACL
+    /// @param _initialOwner The initial owner of the ACL
+    function _initializeACL(address _initialOwner) internal {
+        _grant(address(this), _initialOwner, ROOT_ROLE);
     }
 
-    /// @dev This method is used in the public grant method of the ACL
+    /// @notice This method is used in the public `grant` method of the ACL
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
@@ -220,7 +227,7 @@ contract ACL is Initializable {
         _grantWithOracle(_where, _who, _role, IACLOracle(ALLOW_FLAG));
     }
 
-    /// @dev This method is used in the internal _grant method of the ACL
+    /// @notice This method is used in the internal `_grant` method of the ACL
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
@@ -241,7 +248,7 @@ contract ACL is Initializable {
         emit Granted(_role, msg.sender, _who, _where, _oracle);
     }
 
-    /// @dev This method is used in the public revoke method of the ACL
+    /// @notice This method is used in the public `revoke` method of the ACL
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
@@ -260,7 +267,7 @@ contract ACL is Initializable {
         emit Revoked(_role, msg.sender, _who, _where);
     }
 
-    /// @dev This method is used in the public freeze method of the ACL
+    /// @notice This method is used in the public `freeze` method of the ACL
     /// @param _where The address of the contract
     /// @param _role The hash of the role identifier
     function _freeze(address _where, bytes32 _role) internal {
@@ -272,12 +279,12 @@ contract ACL is Initializable {
         emit Frozen(_role, msg.sender, _where);
     }
 
-    /// @dev This method is used in the public willPerform method of the ACL.
+    /// @notice Checks if a caller has the permissions on a contract via a role identifier and redirects the approval to an `ACLOracle` if this was in the setup
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
     /// @param _data The optional data passed to the ACLOracle registered.
-    /// @return bool
+    /// @return bool Returns true if `who` has the permissions on the contract via the specified role identifier
     function _checkRole(
         address _where,
         address _who,
@@ -299,11 +306,12 @@ contract ACL is Initializable {
         return false;
     }
 
-    /// @dev This internal method is used to generate the hash for the authPermissions mapping based on the target contract, the address to grant permissions, and the role identifier.
+    /// @notice Generates the hash for the `authPermissions` mapping obtained from the workd "PERMISSION",
+    ///         the contract address, the address owning the permission, and the role identifier.
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _role The hash of the role identifier
-    /// @return bytes32 The hash of the permissions
+    /// @return bytes32 The permission hash
     function permissionHash(
         address _where,
         address _who,
@@ -312,10 +320,11 @@ contract ACL is Initializable {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _role));
     }
 
-    /// @dev This internal method is used to generate the hash for the freezePermissions mapping based on the target contract and the role identifier.
+    /// @notice Generates the hash for the `freezePermissions` mapping obtained from the workd "PERMISSION",
+    ///         the contract address, the address owning the permission, and the role identifier.
     /// @param _where The address of the contract
     /// @param _role The hash of the role identifier
-    /// @return bytes32 The freeze hash used in the freezePermissions mapping
+    /// @return bytes32 The freeze hash
     function freezeHash(address _where, bytes32 _role) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("FREEZE", _where, _role));
     }
