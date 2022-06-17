@@ -157,20 +157,12 @@ describe('SharedComponent', function () {
       ).to.be.revertedWith(expectedACLAuthError);
     });
 
-    it('reverts if the role name is wrong', async () => {
+    it('reverts if the permission is missing', async () => {
       // Deploy oracle and set allowed ID
-      const allowedId = 1;
+      const allowedId = 0;
 
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
-
-      // Grant signers[0] permission to do ID gated actions with the deployed oracle
-      dao1.grantWithOracle(
-        testComponent.address,
-        ownerAddress,
-        ethers.utils.id('WRONG_ROLE'),
-        oracle.address
-      );
 
       // Create ID-gated object associated with dao1
       const tx = await testComponent.createNewObject(dao1.address);
@@ -178,7 +170,7 @@ describe('SharedComponent', function () {
       await ethers.provider.send('evm_mine', []);
 
       await expect(
-        testComponent.callStatic.idGatedAction(0)
+        testComponent.callStatic.idGatedAction(allowedId)
       ).to.be.revertedWith(expectedACLAuthError);
     });
 
@@ -203,7 +195,7 @@ describe('SharedComponent', function () {
       await ethers.provider.send('evm_mine', []);
 
       await expect(
-        testComponent.callStatic.idGatedAction(0)
+        testComponent.callStatic.idGatedAction(allowedId)
       ).to.be.revertedWith(expectedACLAuthError);
     });
 
@@ -228,7 +220,7 @@ describe('SharedComponent', function () {
       await ethers.provider.send('evm_mine', []);
 
       await expect(
-        testComponent.callStatic.idGatedAction(0)
+        testComponent.callStatic.idGatedAction(allowedId)
       ).to.be.revertedWith(expectedACLAuthError);
     });
   });
