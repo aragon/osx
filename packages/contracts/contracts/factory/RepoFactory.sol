@@ -4,6 +4,7 @@
 
 pragma solidity 0.8.10;
 
+import "../utils/Proxy.sol";
 import "../registry/APMRegistry.sol";
 import "../APM/Repo.sol";
 
@@ -11,16 +12,20 @@ import "../APM/Repo.sol";
 /// @author Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract is used to create a Repo and register it on APMRegistry contract.
 contract RepoFactory {
-    APMRegistry apmRegistry;
+    APMRegistry public apmRegistry;
+    address public repoBase;
 
     error ApmRegEmpityName();
 
     constructor(APMRegistry _apmRegistry) {
         apmRegistry = _apmRegistry;
+
+        setupBases();
     }
 
     /// @notice Create new repo in registry with `_name`
     /// @param _name Repo name, must be ununsed
+    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for newRepoWithVersion
     function newRepo(string calldata _name) external returns (Repo) {
         return _newRepo(_name, msg.sender);
     }
@@ -72,9 +77,15 @@ contract RepoFactory {
     function _newRepo(string calldata _name, address _initialOwner) internal returns (Repo repo) {
         if (!(bytes(_name).length > 0)) revert ApmRegEmpityName();
 
-        repo = new Repo();
-        repo.initialize(_initialOwner);
+        repo = Repo(
+            createProxy(repoBase, abi.encodeWithSelector(Repo.initialize.selector, _initialOwner))
+        );
 
         apmRegistry.register(_name, address(repo));
+    }
+
+    // @dev Internal helper method to set up the required base contracts.
+    function setupBases() private {
+        repoBase = address(new Repo());
     }
 }

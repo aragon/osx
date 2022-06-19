@@ -2,13 +2,17 @@
 
 pragma solidity 0.8.10;
 
-import "./Component.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "./Permissions.sol";
+import "../../core/erc165/AdaptiveERC165.sol";
 
 /// @title An ERC165-based registry for contracts
 /// @author Michel Heuer, Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract allows to register contracts
-abstract contract ERC165Registry is Component {
+/// TODO: Find a better nameing instead of ERC165Registry
+abstract contract ERC165Registry is Permissions, UUPSUpgradeable {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
+    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
     bytes4 public contractInterfaceId;
 
@@ -35,10 +39,13 @@ abstract contract ERC165Registry is Component {
         virtual
         onlyInitializing
     {
-        __Component_init(_managingDao);
+        __Permissions_init(_managingDao);
 
         contractInterfaceId = _contractInterfaceId;
     }
+
+    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_ROLE) {}
 
     /// @notice Register an ERC165 contract address
     /// @dev The managing DAO needs to grant REGISTER_ROLE to registrar

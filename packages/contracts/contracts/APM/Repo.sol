@@ -33,13 +33,16 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     /// @notice Thrown if address is not a PluginFactory contract
     error InvalidPluginContract();
 
+    /// @notice Thrown if address is not a contract
+    error InvalidContract();
+
     struct Version {
         uint16[3] semanticVersion;
         address pluginFactoryAddress;
         bytes contentURI;
     }
 
-    uint256 internal versionsNextIndex = 1;
+    uint256 internal versionsNextIndex = 0;
     mapping(uint256 => Version) internal versions;
     mapping(bytes32 => uint256) internal versionIdForSemantic;
     mapping(address => uint256) internal latestVersionIdForContract;
@@ -50,6 +53,8 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     function initialize(address initialOwner) external initializer {
         _registerStandard(type(IRepo).interfaceId);
         __ACL_init(initialOwner);
+
+        versionsNextIndex = 1;
 
         // set roles.
         _grant(address(this), initialOwner, CREATE_VERSION_ROLE);
@@ -80,7 +85,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
             } catch {
                 revert InvalidPluginContract();
             }
-        } else if (_pluginFactoryAddress != address(0)) revert InvalidPluginContract();
+        } else if (_pluginFactoryAddress != address(0)) revert InvalidContract();
 
         address pluginFactoryAddress = _pluginFactoryAddress;
         uint256 lastVersionIndex = versionsNextIndex - 1;

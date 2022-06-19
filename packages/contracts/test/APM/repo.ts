@@ -102,7 +102,7 @@ describe('APM: Repo', function () {
 
     await expect(
       repo.newVersion([1, 0, 0], randomAddress, emptyBytes)
-    ).to.be.revertedWith(customError('InvalidPluginContract'));
+    ).to.be.revertedWith(customError('InvalidContract'));
   });
 
   context('creating initial version', async function () {
