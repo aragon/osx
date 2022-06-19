@@ -109,7 +109,9 @@ describe('APM: RepoFactory: ', function () {
 
     const repoName = 'my-repo';
 
-    await expect(repoFactory.newRepo(repoName)).to.be.revertedWith(
+    await expect(
+      repoFactory.newRepo(repoName, ownerAddress)
+    ).to.be.revertedWith(
       customError(
         'ACLAuth',
         apmRegistry.address,
@@ -123,7 +125,7 @@ describe('APM: RepoFactory: ', function () {
   it('create new repo', async () => {
     const repoName = 'my-repo';
 
-    let tx = await repoFactory.newRepo(repoName);
+    let tx = await repoFactory.newRepo(repoName, ownerAddress);
 
     const {name, repo} = await getAPMRegistryEvents(tx);
 
@@ -142,7 +144,8 @@ describe('APM: RepoFactory: ', function () {
         repoName,
         initialSemanticVersion,
         pluginFactoryAddress,
-        contentURI
+        contentURI,
+        ownerAddress
       )
     ).to.be.revertedWith(customError('InvalidBump'));
   });
@@ -157,7 +160,8 @@ describe('APM: RepoFactory: ', function () {
       repoName,
       initialSemanticVersion,
       pluginFactoryAddress,
-      contentURI
+      contentURI,
+      ownerAddress
     );
 
     const {name, repo} = await getAPMRegistryEvents(tx);

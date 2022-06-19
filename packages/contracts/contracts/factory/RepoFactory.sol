@@ -26,8 +26,8 @@ contract RepoFactory {
     /// @notice Create new repo in registry with `_name`
     /// @param _name Repo name, must be ununsed
     /// TODO: Rethink if it need permission to prevent it from getting poluted, same for newRepoWithVersion
-    function newRepo(string calldata _name) external returns (Repo) {
-        return _newRepo(_name, msg.sender);
+    function newRepo(string calldata _name, address _dev) external returns (Repo) {
+        return _newRepo(_name, _dev);
     }
 
     /// @notice Create new repo in registry with `_name` and publish a first version with contract `_pluginFactoryAddress` and content `@fromHex(_contentURI)`
@@ -39,13 +39,14 @@ contract RepoFactory {
         string calldata _name,
         uint16[3] memory _initialSemanticVersion,
         address _pluginFactoryAddress,
-        bytes memory _contentURI
+        bytes memory _contentURI,
+        address _dev
     ) public returns (Repo repo) {
         repo = _newRepo(_name, address(this)); // need to have permissions to create version
         repo.newVersion(_initialSemanticVersion, _pluginFactoryAddress, _contentURI);
 
         // setup permissions
-        setRepoPermissions(repo, msg.sender);
+        setRepoPermissions(repo, _dev);
     }
 
     /// @dev Does set the required permissions for the new Repo.
