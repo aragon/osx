@@ -7,7 +7,7 @@ import "../core/component/Component.sol";
 /// @title An ERC165-based registry for contracts
 /// @author Aragon Association - 2022
 /// @notice This contract allows to register contracts
-contract ERC165ContractRegistry is Component {
+contract ERC165Registry is Component {
     bytes4 internal constant REGISTRY_INTERFACE_ID = this.register.selector;
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
 

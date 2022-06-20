@@ -2,12 +2,12 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {customError} from './test-utils/custom-error-helper';
 
-import {DAO, ERC165ContractRegistry} from '../typechain';
+import {DAO, ERC165Registry} from '../typechain';
 
 const REGISTER_ROLE = ethers.utils.id('REGISTER_ROLE');
 
-describe('ERC165ContractRegistry', function () {
-  let registry: ERC165ContractRegistry;
+describe('ERC165Registry', function () {
+  let registry: ERC165Registry;
   let managingDao: DAO;
   let ownerAddress: string;
 
@@ -25,10 +25,8 @@ describe('ERC165ContractRegistry', function () {
     );
 
     // create an registry of `IDAO` contracts
-    const ERC165ContractRegistry = await ethers.getContractFactory(
-      'ERC165ContractRegistry'
-    );
-    registry = await ERC165ContractRegistry.deploy();
+    const ERC165Registry = await ethers.getContractFactory('ERC165Registry');
+    registry = await ERC165Registry.deploy();
     await registry.initialize(managingDao.address, '0x47c61d85'); // '0x47c61d85' = type(IDAO).interfaceId;
 
     // grant permission to register to the caller
@@ -58,7 +56,7 @@ describe('ERC165ContractRegistry', function () {
     });
 
     it('reverts if the contract does not support the interface', async () => {
-      // try to register a contract of type `ERC165ContractRegistry` in a registry of `IDAO` contracts
+      // try to register a contract of type `ERC165Registry` in a registry of `IDAO` contracts
       await expect(registry.register(registry.address)).to.be.revertedWith(
         customError('ContractInterfaceInvalid', registry.address)
       );
