@@ -1,17 +1,17 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {customError} from '../test-utils/custom-error-helper';
-import {DAO, Repo} from '../../typechain';
+import {DAO, PluginRepo} from '../../typechain';
 
 const EVENTS = {
-  NewRepo: 'NewRepo',
+  NewPluginRepo: 'NewPluginRepo',
 };
 
 describe('APM: APM-Registry', function () {
   let aragonPluginRegistry: any;
   let ownerAddress: string;
   let dao: DAO;
-  let repo: Repo;
+  let pluginRepo: PluginRepo;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -31,10 +31,10 @@ describe('APM: APM-Registry', function () {
     aragonPluginRegistry = await AragonPluginRegistry.deploy();
     await aragonPluginRegistry.initialize(dao.address);
 
-    // deploy a repo and initialize
-    const Repo = await ethers.getContractFactory('Repo');
-    repo = await Repo.deploy();
-    await repo.initialize(ownerAddress);
+    // deploy a pluginRepo and initialize
+    const PluginRepo = await ethers.getContractFactory('PluginRepo');
+    pluginRepo = await PluginRepo.deploy();
+    await pluginRepo.initialize(ownerAddress);
 
     // grant REGISTER_ROLE to registrer
     dao.grant(
@@ -44,25 +44,29 @@ describe('APM: APM-Registry', function () {
     );
   });
 
-  it('Should register a new repo successfully', async function () {
-    const repoName = 'my-repo';
-
-    await expect(await aragonPluginRegistry.register(repoName, repo.address))
-      .to.emit(aragonPluginRegistry, EVENTS.NewRepo)
-      .withArgs(repoName, repo.address);
-
-    expect(await aragonPluginRegistry.registrees(repo.address)).to.equal(true);
-  });
-
-  it('Should revert if repo already exists', async function () {
-    const repoName = 'my-repo';
-
-    await aragonPluginRegistry.register(repoName, repo.address);
+  it('Should register a new pluginRepo successfully', async function () {
+    const pluginRepoName = 'my-pluginRepo';
 
     await expect(
-      aragonPluginRegistry.register(repoName, repo.address)
+      await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
+    )
+      .to.emit(aragonPluginRegistry, EVENTS.NewPluginRepo)
+      .withArgs(pluginRepoName, pluginRepo.address);
+
+    expect(await aragonPluginRegistry.registrees(pluginRepo.address)).to.equal(
+      true
+    );
+  });
+
+  it('Should revert if pluginRepo already exists', async function () {
+    const pluginRepoName = 'my-pluginRepo';
+
+    await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address);
+
+    await expect(
+      aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
     ).to.be.revertedWith(
-      customError('ContractAlreadyRegistered', repo.address)
+      customError('ContractAlreadyRegistered', pluginRepo.address)
     );
   });
 });

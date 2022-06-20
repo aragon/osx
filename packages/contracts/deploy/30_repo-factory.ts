@@ -14,21 +14,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre
   );
 
-  const ret = await deploy('RepoFactory', {
+  const ret = await deploy('PluginRepoFactory', {
     from: deployer,
     args: [aragonPluginRegistryAddress],
     log: true,
   });
 
-  const repoFactoryAddress: string = ret.receipt?.contractAddress || '';
+  const pluginRepoFactoryAddress: string = ret.receipt?.contractAddress || '';
   const registerRole =
     '0xd1f21ec03a6eb050fba156f5316dad461735df521fb446dd42c5a4728e9c70fe';
 
-  // Grant REGISTER_ROLE to repo factory
+  // Grant REGISTER_ROLE to pluginRepo factory
   const adminDaoContract = await ethers.getContractAt('DAO', adminDaoAddress);
   await adminDaoContract.grant(
     aragonPluginRegistryAddress,
-    repoFactoryAddress,
+    pluginRepoFactoryAddress,
     registerRole
   );
 };

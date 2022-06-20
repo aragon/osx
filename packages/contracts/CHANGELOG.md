@@ -8,13 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
-- added `IRepo` interface for plugin Repo contract.
-- added `Repo` contract.
+- added `IPluginRepo` interface for plugin PluginRepo contract.
+- added `PluginRepo` contract.
 - added `ERC165Registry` component to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
-- added `AragonPluginRegistry` contract for registering `Repo`s.
-- added `RepoFactory` contract for creating `Repo`s.
-- added testing for `Repo`, `ERC165Registry`, `AragonPluginRegistry` and `RepoFactory`.
-- added deployment script for `admin-dao`, `apm-registry` and `repo-factory`.
+- added `AragonPluginRegistry` contract for registering `PluginRepo`s.
+- added `PluginRepoFactory` contract for creating `PluginRepo`s.
+- added testing for `PluginRepo`, `ERC165Registry`, `AragonPluginRegistry` and `PluginRepoFactory`.
+- added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
 
 ### Changed
 

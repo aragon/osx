@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {Repo, PluginFactoryMock} from '../../typechain';
+import {PluginRepo, PluginFactoryMock} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
@@ -10,9 +10,9 @@ const EVENTS = {
 const zeroAddress = ethers.constants.AddressZero;
 const emptyBytes = '0x00';
 
-describe('APM: Repo', function () {
+describe('APM: PluginRepo', function () {
   let ownerAddress: string;
-  let repo: Repo;
+  let pluginRepo: PluginRepo;
   let signers: any;
   let pluginFactoryMock: PluginFactoryMock;
 
@@ -51,40 +51,45 @@ describe('APM: Repo', function () {
   });
 
   beforeEach(async function () {
-    // deploy a repo and initialize
-    const Repo = await ethers.getContractFactory('Repo');
-    repo = await Repo.deploy();
-    await repo.initialize(ownerAddress);
+    // deploy a pluginRepo and initialize
+    const PluginRepo = await ethers.getContractFactory('PluginRepo');
+    pluginRepo = await PluginRepo.deploy();
+    await pluginRepo.initialize(ownerAddress);
 
     // deploy pluging factory mock
     pluginFactoryMock = await deployMockPluginFactory();
   });
 
   it('computes correct valid bumps', async function () {
-    expect(await repo.isValidBump([0, 0, 0], [0, 0, 1])).to.equal(true);
-    expect(await repo.isValidBump([0, 0, 0], [0, 1, 0])).to.equal(true);
-    expect(await repo.isValidBump([0, 0, 0], [1, 0, 0])).to.equal(true);
-    expect(await repo.isValidBump([1, 4, 7], [2, 0, 0])).to.equal(true);
-    expect(await repo.isValidBump([147, 4, 7], [147, 5, 0])).to.equal(true);
+    expect(await pluginRepo.isValidBump([0, 0, 0], [0, 0, 1])).to.equal(true);
+    expect(await pluginRepo.isValidBump([0, 0, 0], [0, 1, 0])).to.equal(true);
+    expect(await pluginRepo.isValidBump([0, 0, 0], [1, 0, 0])).to.equal(true);
+    expect(await pluginRepo.isValidBump([1, 4, 7], [2, 0, 0])).to.equal(true);
+    expect(await pluginRepo.isValidBump([147, 4, 7], [147, 5, 0])).to.equal(
+      true
+    );
 
-    expect(await repo.isValidBump([0, 0, 1], [0, 0, 1])).to.equal(false);
-    expect(await repo.isValidBump([0, 1, 0], [0, 2, 1])).to.equal(false);
-    expect(await repo.isValidBump([0, 0, 2], [0, 0, 1])).to.equal(false);
-    expect(await repo.isValidBump([2, 1, 0], [2, 2, 1])).to.equal(false);
-    expect(await repo.isValidBump([1, 1, 1], [5, 0, 0])).to.equal(false);
-    expect(await repo.isValidBump([5, 0, 0], [5, 2, 0])).to.equal(false);
-    expect(await repo.isValidBump([0, 1, 2], [1, 1, 2])).to.equal(false);
+    expect(await pluginRepo.isValidBump([0, 0, 1], [0, 0, 1])).to.equal(false);
+    expect(await pluginRepo.isValidBump([0, 1, 0], [0, 2, 1])).to.equal(false);
+    expect(await pluginRepo.isValidBump([0, 0, 2], [0, 0, 1])).to.equal(false);
+    expect(await pluginRepo.isValidBump([2, 1, 0], [2, 2, 1])).to.equal(false);
+    expect(await pluginRepo.isValidBump([1, 1, 1], [5, 0, 0])).to.equal(false);
+    expect(await pluginRepo.isValidBump([5, 0, 0], [5, 2, 0])).to.equal(false);
+    expect(await pluginRepo.isValidBump([0, 1, 2], [1, 1, 2])).to.equal(false);
 
     const maxUint16Value = Math.pow(2, 16) - 1; // 65535
     expect(
-      await repo.isValidBump([0, 0, maxUint16Value], [0, 0, maxUint16Value - 1])
+      await pluginRepo.isValidBump(
+        [0, 0, maxUint16Value],
+        [0, 0, maxUint16Value - 1]
+      )
     ).to.equal(false);
   });
 
   // valid version as being a correct bump from 0.0.0
   it('cannot create invalid first version', async function () {
     await expect(
-      repo.newVersion([1, 1, 0], pluginFactoryMock.address, emptyBytes)
+      pluginRepo.newVersion([1, 1, 0], pluginFactoryMock.address, emptyBytes)
     ).to.be.revertedWith(customError('InvalidBump'));
   });
 
@@ -93,7 +98,7 @@ describe('APM: Repo', function () {
     let adaptiveERC165 = await AdaptiveERC165.deploy();
 
     await expect(
-      repo.newVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
+      pluginRepo.newVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
     ).to.be.revertedWith(customError('InvalidPluginInterface'));
   });
 
@@ -101,7 +106,7 @@ describe('APM: Repo', function () {
     const randomAddress = await signers[8].getAddress();
 
     await expect(
-      repo.newVersion([1, 0, 0], randomAddress, emptyBytes)
+      pluginRepo.newVersion([1, 0, 0], randomAddress, emptyBytes)
     ).to.be.revertedWith(customError('InvalidContract'));
   });
 
@@ -115,12 +120,16 @@ describe('APM: Repo', function () {
     });
 
     beforeEach(async function () {
-      await repo.newVersion([1, 0, 0], initialPluginAddress, initialContent);
+      await pluginRepo.newVersion(
+        [1, 0, 0],
+        initialPluginAddress,
+        initialContent
+      );
     });
 
     it('version is fetchable as latest', async () => {
       assertVersion(
-        await repo.getLatest(),
+        await pluginRepo.getLatest(),
         [1, 0, 0],
         initialPluginAddress,
         initialContent
@@ -129,7 +138,7 @@ describe('APM: Repo', function () {
 
     it('version is fetchable by semantic version', async () => {
       assertVersion(
-        await repo.getBySemanticVersion([1, 0, 0]),
+        await pluginRepo.getBySemanticVersion([1, 0, 0]),
         [1, 0, 0],
         initialPluginAddress,
         initialContent
@@ -138,7 +147,7 @@ describe('APM: Repo', function () {
 
     it('version is fetchable by contract address', async () => {
       assertVersion(
-        await repo.getLatestForContractAddress(initialPluginAddress),
+        await pluginRepo.getLatestForContractAddress(initialPluginAddress),
         [1, 0, 0],
         initialPluginAddress,
         initialContent
@@ -147,7 +156,7 @@ describe('APM: Repo', function () {
 
     it('version is fetchable by version id', async () => {
       assertVersion(
-        await repo.getByVersionId(1),
+        await pluginRepo.getByVersionId(1),
         [1, 0, 0],
         initialPluginAddress,
         initialContent
@@ -155,9 +164,9 @@ describe('APM: Repo', function () {
     });
 
     it('setting contract address to 0 reuses last version address', async () => {
-      await repo.newVersion([1, 1, 0], zeroAddress, initialContent);
+      await pluginRepo.newVersion([1, 1, 0], zeroAddress, initialContent);
       assertVersion(
-        await repo.getByVersionId(2),
+        await pluginRepo.getByVersionId(2),
         [1, 1, 0],
         initialPluginAddress,
         initialContent
@@ -168,18 +177,22 @@ describe('APM: Repo', function () {
       const pluginFactoryMock = await deployMockPluginFactory();
 
       await expect(
-        repo.newVersion([1, 1, 0], pluginFactoryMock.address, initialContent)
+        pluginRepo.newVersion(
+          [1, 1, 0],
+          pluginFactoryMock.address,
+          initialContent
+        )
       ).to.be.revertedWith(customError('InvalidVersion'));
     });
 
     it('fails when version bump is invalid', async () => {
       await expect(
-        repo.newVersion([1, 2, 0], initialPluginAddress, initialContent)
+        pluginRepo.newVersion([1, 2, 0], initialPluginAddress, initialContent)
       ).to.be.revertedWith(customError('InvalidBump'));
     });
 
     it('fails if requesting version 0', async () => {
-      await expect(repo.getByVersionId(0)).to.be.revertedWith(
+      await expect(pluginRepo.getByVersionId(0)).to.be.revertedWith(
         customError('InexistentVersion')
       );
     });
@@ -194,12 +207,12 @@ describe('APM: Repo', function () {
       });
 
       beforeEach(async function () {
-        await repo.newVersion([2, 0, 0], newPluginAddress, newContent);
+        await pluginRepo.newVersion([2, 0, 0], newPluginAddress, newContent);
       });
 
       it('new version is fetchable as latest', async () => {
         assertVersion(
-          await repo.getLatest(),
+          await pluginRepo.getLatest(),
           [2, 0, 0],
           newPluginAddress,
           newContent
@@ -208,7 +221,7 @@ describe('APM: Repo', function () {
 
       it('new version is fetchable by semantic version', async () => {
         assertVersion(
-          await repo.getBySemanticVersion([2, 0, 0]),
+          await pluginRepo.getBySemanticVersion([2, 0, 0]),
           [2, 0, 0],
           newPluginAddress,
           newContent
@@ -217,7 +230,7 @@ describe('APM: Repo', function () {
 
       it('new version is fetchable by contract address', async () => {
         assertVersion(
-          await repo.getLatestForContractAddress(newPluginAddress),
+          await pluginRepo.getLatestForContractAddress(newPluginAddress),
           [2, 0, 0],
           newPluginAddress,
           newContent
@@ -226,7 +239,7 @@ describe('APM: Repo', function () {
 
       it('new version is fetchable by version id', async () => {
         assertVersion(
-          await repo.getByVersionId(2),
+          await pluginRepo.getByVersionId(2),
           [2, 0, 0],
           newPluginAddress,
           newContent
@@ -235,7 +248,7 @@ describe('APM: Repo', function () {
 
       it('old version is fetchable by semantic version', async () => {
         assertVersion(
-          await repo.getBySemanticVersion([1, 0, 0]),
+          await pluginRepo.getBySemanticVersion([1, 0, 0]),
           [1, 0, 0],
           initialPluginAddress,
           initialContent
@@ -244,7 +257,7 @@ describe('APM: Repo', function () {
 
       it('old version is fetchable by contract address', async () => {
         assertVersion(
-          await repo.getLatestForContractAddress(initialPluginAddress),
+          await pluginRepo.getLatestForContractAddress(initialPluginAddress),
           [1, 0, 0],
           initialPluginAddress,
           initialContent
@@ -253,7 +266,7 @@ describe('APM: Repo', function () {
 
       it('old version is fetchable by version id', async () => {
         assertVersion(
-          await repo.getByVersionId(1),
+          await pluginRepo.getByVersionId(1),
           [1, 0, 0],
           initialPluginAddress,
           initialContent

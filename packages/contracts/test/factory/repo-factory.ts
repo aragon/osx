@@ -1,11 +1,11 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {AragonPluginRegistry, DAO, RepoFactory} from '../../typechain';
+import {AragonPluginRegistry, DAO, PluginRepoFactory} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
-  NewRepo: 'NewRepo',
+  NewPluginRepo: 'NewPluginRepo',
 };
 
 const zeroAddress = ethers.constants.AddressZero;
@@ -13,13 +13,13 @@ const zeroAddress = ethers.constants.AddressZero;
 async function getAragonPluginRegistryEvents(tx: any) {
   const data = await tx.wait();
   const {events} = data;
-  const {name, repo} = events.find(
-    ({event}: {event: any}) => event === EVENTS.NewRepo
+  const {name, pluginRepo} = events.find(
+    ({event}: {event: any}) => event === EVENTS.NewPluginRepo
   ).args;
 
   return {
     name,
-    repo,
+    pluginRepo,
   };
 }
 
@@ -29,28 +29,30 @@ async function getMergedABI() {
     'AragonPluginRegistry'
   );
   // @ts-ignore
-  const RepoFactoryArtifact = await hre.artifacts.readArtifact('RepoFactory');
+  const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
+    'PluginRepoFactory'
+  );
 
   return {
     abi: [
-      ...RepoFactoryArtifact.abi,
+      ...PluginRepoFactoryArtifact.abi,
       ...AragonPluginRegistryArtifact.abi.filter(
         (f: any) => f.type === 'event'
       ),
     ],
-    bytecode: RepoFactoryArtifact.bytecode,
+    bytecode: PluginRepoFactoryArtifact.bytecode,
   };
 }
 
-describe('APM: RepoFactory: ', function () {
+describe('APM: PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let aragonPluginRegistry: AragonPluginRegistry;
   let ownerAddress: string;
   let dao: DAO;
-  let repoFactory: any;
+  let pluginRepoFactory: any;
 
   let mergedABI: any;
-  let repoFactoryBytecode: any;
+  let pluginRepoFactoryBytecode: any;
 
   async function getMergedABI() {
     // @ts-ignore
@@ -58,16 +60,18 @@ describe('APM: RepoFactory: ', function () {
       'AragonPluginRegistry'
     );
     // @ts-ignore
-    const RepoFactoryArtifact = await hre.artifacts.readArtifact('RepoFactory');
+    const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
+      'PluginRepoFactory'
+    );
 
     return {
       abi: [
-        ...RepoFactoryArtifact.abi,
+        ...PluginRepoFactoryArtifact.abi,
         ...AragonPluginRegistryArtifact.abi.filter(
           (f: any) => f.type === 'event'
         ),
       ],
-      bytecode: RepoFactoryArtifact.bytecode,
+      bytecode: PluginRepoFactoryArtifact.bytecode,
     };
   }
 
@@ -78,7 +82,7 @@ describe('APM: RepoFactory: ', function () {
     const {abi, bytecode} = await getMergedABI();
 
     mergedABI = abi;
-    repoFactoryBytecode = bytecode;
+    pluginRepoFactoryBytecode = bytecode;
   });
 
   beforeEach(async function () {
@@ -94,64 +98,69 @@ describe('APM: RepoFactory: ', function () {
     aragonPluginRegistry = await AragonPluginRegistry.deploy();
     await aragonPluginRegistry.initialize(dao.address);
 
-    // deploy RepoFactory
-    const RepoFactory = new ethers.ContractFactory(
+    // deploy PluginRepoFactory
+    const PluginRepoFactory = new ethers.ContractFactory(
       mergedABI,
-      repoFactoryBytecode,
+      pluginRepoFactoryBytecode,
       signers[0]
     );
-    repoFactory = await RepoFactory.deploy(aragonPluginRegistry.address);
+    pluginRepoFactory = await PluginRepoFactory.deploy(
+      aragonPluginRegistry.address
+    );
 
-    // grant REGISTER_ROLE to repoFactory
+    // grant REGISTER_ROLE to pluginRepoFactory
     dao.grant(
       aragonPluginRegistry.address,
-      repoFactory.address,
+      pluginRepoFactory.address,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
     );
   });
 
-  it('fail to create new repo with no REGISTER_ROLE', async () => {
+  it('fail to create new pluginRepo with no REGISTER_ROLE', async () => {
     dao.revoke(
       aragonPluginRegistry.address,
-      repoFactory.address,
+      pluginRepoFactory.address,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
     );
 
-    const repoName = 'my-repo';
+    const pluginRepoName = 'my-pluginRepo';
 
     await expect(
-      repoFactory.newRepo(repoName, ownerAddress)
+      pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
     ).to.be.revertedWith(
       customError(
         'ACLAuth',
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
-        repoFactory.address,
+        pluginRepoFactory.address,
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
       )
     );
   });
 
-  it('create new repo', async () => {
-    const repoName = 'my-repo';
+  it('create new pluginRepo', async () => {
+    const pluginRepoName = 'my-pluginRepo';
 
-    let tx = await repoFactory.newRepo(repoName, ownerAddress);
+    let tx = await pluginRepoFactory.newPluginRepo(
+      pluginRepoName,
+      ownerAddress
+    );
 
-    const {name, repo} = await getAragonPluginRegistryEvents(tx);
+    const {name, pluginRepo} = await getAragonPluginRegistryEvents(tx);
 
-    expect(name).to.equal(repoName);
-    expect(repo).not.undefined;
+    expect(name).to.equal(pluginRepoName);
+    expect(pluginRepo).not.undefined;
   });
 
-  it('fail creating new repo with wrong major version', async () => {
-    const repoName = 'my-repo';
+  it('fail creating new pluginRepo with wrong major version', async () => {
+    const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [0, 0, 0];
     const pluginFactoryAddress = zeroAddress;
     const contentURI = '0x00';
 
     await expect(
-      repoFactory.newRepoWithVersion(
-        repoName,
+      pluginRepoFactory.newPluginRepoWithVersion(
+        pluginRepoName,
         initialSemanticVersion,
         pluginFactoryAddress,
         contentURI,
@@ -160,23 +169,23 @@ describe('APM: RepoFactory: ', function () {
     ).to.be.revertedWith(customError('InvalidBump'));
   });
 
-  it('create new repo with version', async () => {
-    const repoName = 'my-repo';
+  it('create new pluginRepo with version', async () => {
+    const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [1, 0, 0];
     const pluginFactoryAddress = zeroAddress;
     const contentURI = '0x00';
 
-    let tx = await repoFactory.newRepoWithVersion(
-      repoName,
+    let tx = await pluginRepoFactory.newPluginRepoWithVersion(
+      pluginRepoName,
       initialSemanticVersion,
       pluginFactoryAddress,
       contentURI,
       ownerAddress
     );
 
-    const {name, repo} = await getAragonPluginRegistryEvents(tx);
+    const {name, pluginRepo} = await getAragonPluginRegistryEvents(tx);
 
-    expect(name).to.equal(repoName);
-    expect(repo).not.undefined;
+    expect(name).to.equal(pluginRepoName);
+    expect(pluginRepo).not.undefined;
   });
 });

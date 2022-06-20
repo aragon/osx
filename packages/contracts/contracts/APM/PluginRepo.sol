@@ -10,11 +10,11 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/acl/ACL.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../APM/IPluginFactory.sol";
-import "./IRepo.sol";
+import "./IPluginRepo.sol";
 
 /// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
 /// @author Aragon Association - 2020 - 2022
-contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
+contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
@@ -51,7 +51,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
 
     /// @dev Used for UUPS upgradability pattern
     function initialize(address initialOwner) external initializer {
-        _registerStandard(type(IRepo).interfaceId);
+        _registerStandard(type(IPluginRepo).interfaceId);
         __ACL_init(initialOwner);
 
         versionsNextIndex = 1;
@@ -68,7 +68,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
         auth(address(this), UPGRADE_ROLE)
     {}
 
-    /// @inheritdoc IRepo
+    /// @inheritdoc IPluginRepo
     function newVersion(
         uint16[3] memory _newSemanticVersion,
         address _pluginFactoryAddress,
@@ -117,7 +117,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest plugin
-    /// @return semanticVersion Semantic version for latest repo version
+    /// @return semanticVersion Semantic version for latest pluginRepo version
     /// @return pluginFactoryAddress Address of latest plugin factory for version
     /// @return contentURI External URI for fetching latest version's content
     function getLatest()
@@ -133,7 +133,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest by plugin factory address
-    /// @return semanticVersion Semantic version for repo version
+    /// @return semanticVersion Semantic version for pluginRepo version
     /// @return pluginFactoryAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching version's content
     function getLatestForContractAddress(address _pluginFactoryAddress)
@@ -149,7 +149,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest by semantic version
-    /// @return semanticVersion Semantic version for latest repo version
+    /// @return semanticVersion Semantic version for latest pluginRepo version
     /// @return pluginFactoryAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching latest version's content
     function getBySemanticVersion(uint16[3] memory _semanticVersion)
@@ -165,7 +165,7 @@ contract Repo is IRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
     }
 
     /// @notice get latest by version id
-    /// @return semanticVersion Semantic version for repo version
+    /// @return semanticVersion Semantic version for pluginRepo version
     /// @return pluginFactoryAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching version's content
     function getByVersionId(uint256 _versionId)
