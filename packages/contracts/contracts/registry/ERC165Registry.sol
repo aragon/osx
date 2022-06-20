@@ -42,10 +42,13 @@ contract ERC165Registry is Component {
     }
 
     function _register(address registrant) internal {
-        if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId))
-            revert ContractInterfaceInvalid(registrant);
+        if (registrees[registrant]) {
+            revert ContractAlreadyRegistered({registrant: registrant});
+        }
 
-        if (registrees[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
+        if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId)) {
+            revert ContractInterfaceInvalid(registrant);
+        }
 
         registrees[registrant] = true;
     }
