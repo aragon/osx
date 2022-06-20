@@ -11,7 +11,7 @@ import "../APM/IRepo.sol";
 /// @title Register plugin
 /// @author Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a plugin repo by a unique address.
-contract APMRegistry is ERC165Registry {
+contract AragonPluginRegistry is ERC165Registry {
     /// @notice Emitted if a new Repo is registered
     /// @param name The name of the Repo
     /// @param repo The address of the Repo

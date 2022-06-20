@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {APMRegistry, DAO, RepoFactory} from '../../typechain';
+import {AragonPluginRegistry, DAO, RepoFactory} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
@@ -10,7 +10,7 @@ const EVENTS = {
 
 const zeroAddress = ethers.constants.AddressZero;
 
-async function getAPMRegistryEvents(tx: any) {
+async function getAragonPluginRegistryEvents(tx: any) {
   const data = await tx.wait();
   const {events} = data;
   const {name, repo} = events.find(
@@ -25,14 +25,18 @@ async function getAPMRegistryEvents(tx: any) {
 
 async function getMergedABI() {
   // @ts-ignore
-  const APMRegistryArtifact = await hre.artifacts.readArtifact('APMRegistry');
+  const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
+    'AragonPluginRegistry'
+  );
   // @ts-ignore
   const RepoFactoryArtifact = await hre.artifacts.readArtifact('RepoFactory');
 
   return {
     abi: [
       ...RepoFactoryArtifact.abi,
-      ...APMRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
+      ...AragonPluginRegistryArtifact.abi.filter(
+        (f: any) => f.type === 'event'
+      ),
     ],
     bytecode: RepoFactoryArtifact.bytecode,
   };
@@ -40,7 +44,7 @@ async function getMergedABI() {
 
 describe('APM: RepoFactory: ', function () {
   let signers: SignerWithAddress[];
-  let apmRegistry: APMRegistry;
+  let aragonPluginRegistry: AragonPluginRegistry;
   let ownerAddress: string;
   let dao: DAO;
   let repoFactory: any;
@@ -50,14 +54,18 @@ describe('APM: RepoFactory: ', function () {
 
   async function getMergedABI() {
     // @ts-ignore
-    const APMRegistryArtifact = await hre.artifacts.readArtifact('APMRegistry');
+    const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
+      'AragonPluginRegistry'
+    );
     // @ts-ignore
     const RepoFactoryArtifact = await hre.artifacts.readArtifact('RepoFactory');
 
     return {
       abi: [
         ...RepoFactoryArtifact.abi,
-        ...APMRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
+        ...AragonPluginRegistryArtifact.abi.filter(
+          (f: any) => f.type === 'event'
+        ),
       ],
       bytecode: RepoFactoryArtifact.bytecode,
     };
@@ -79,10 +87,12 @@ describe('APM: RepoFactory: ', function () {
     dao = await DAO.deploy();
     await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
 
-    // deploy and initialize APMRegistry
-    const APMRegistry = await ethers.getContractFactory('APMRegistry');
-    apmRegistry = await APMRegistry.deploy();
-    await apmRegistry.initialize(dao.address);
+    // deploy and initialize AragonPluginRegistry
+    const AragonPluginRegistry = await ethers.getContractFactory(
+      'AragonPluginRegistry'
+    );
+    aragonPluginRegistry = await AragonPluginRegistry.deploy();
+    await aragonPluginRegistry.initialize(dao.address);
 
     // deploy RepoFactory
     const RepoFactory = new ethers.ContractFactory(
@@ -90,11 +100,11 @@ describe('APM: RepoFactory: ', function () {
       repoFactoryBytecode,
       signers[0]
     );
-    repoFactory = await RepoFactory.deploy(apmRegistry.address);
+    repoFactory = await RepoFactory.deploy(aragonPluginRegistry.address);
 
     // grant REGISTER_ROLE to repoFactory
     dao.grant(
-      apmRegistry.address,
+      aragonPluginRegistry.address,
       repoFactory.address,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
     );
@@ -102,7 +112,7 @@ describe('APM: RepoFactory: ', function () {
 
   it('fail to create new repo with no REGISTER_ROLE', async () => {
     dao.revoke(
-      apmRegistry.address,
+      aragonPluginRegistry.address,
       repoFactory.address,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
     );
@@ -114,8 +124,8 @@ describe('APM: RepoFactory: ', function () {
     ).to.be.revertedWith(
       customError(
         'ACLAuth',
-        apmRegistry.address,
-        apmRegistry.address,
+        aragonPluginRegistry.address,
+        aragonPluginRegistry.address,
         repoFactory.address,
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
       )
@@ -127,7 +137,7 @@ describe('APM: RepoFactory: ', function () {
 
     let tx = await repoFactory.newRepo(repoName, ownerAddress);
 
-    const {name, repo} = await getAPMRegistryEvents(tx);
+    const {name, repo} = await getAragonPluginRegistryEvents(tx);
 
     expect(name).to.equal(repoName);
     expect(repo).not.undefined;
@@ -164,7 +174,7 @@ describe('APM: RepoFactory: ', function () {
       ownerAddress
     );
 
-    const {name, repo} = await getAPMRegistryEvents(tx);
+    const {name, repo} = await getAragonPluginRegistryEvents(tx);
 
     expect(name).to.equal(repoName);
     expect(repo).not.undefined;

@@ -9,11 +9,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const adminDaoAddress = await getContractAddress('DAO', hre);
-  const apmRegistryAddress = await getContractAddress('APMRegistry', hre);
+  const aragonPluginRegistryAddress = await getContractAddress(
+    'AragonPluginRegistry',
+    hre
+  );
 
   const ret = await deploy('RepoFactory', {
     from: deployer,
-    args: [apmRegistryAddress],
+    args: [aragonPluginRegistryAddress],
     log: true,
   });
 
@@ -24,11 +27,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Grant REGISTER_ROLE to repo factory
   const adminDaoContract = await ethers.getContractAt('DAO', adminDaoAddress);
   await adminDaoContract.grant(
-    apmRegistryAddress,
+    aragonPluginRegistryAddress,
     repoFactoryAddress,
     registerRole
   );
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['APMRegistry'];
+func.tags = ['AragonPluginRegistry'];

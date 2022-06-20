@@ -5,20 +5,20 @@
 pragma solidity 0.8.10;
 
 import "../utils/Proxy.sol";
-import "../registry/APMRegistry.sol";
+import "../registry/AragonPluginRegistry.sol";
 import "../APM/Repo.sol";
 
 /// @title RepoFactory to create a Repo
 /// @author Sarkawt Noori - Aragon Association - 2022
-/// @notice This contract is used to create a Repo and register it on APMRegistry contract.
+/// @notice This contract is used to create a Repo and register it on AragonPluginRegistry contract.
 contract RepoFactory {
-    APMRegistry public apmRegistry;
+    AragonPluginRegistry public aragonPluginRegistry;
     address public repoBase;
 
     error ApmRegEmpityName();
 
-    constructor(APMRegistry _apmRegistry) {
-        apmRegistry = _apmRegistry;
+    constructor(AragonPluginRegistry _aragonPluginRegistry) {
+        aragonPluginRegistry = _aragonPluginRegistry;
 
         setupBases();
     }
@@ -82,7 +82,7 @@ contract RepoFactory {
             createProxy(repoBase, abi.encodeWithSelector(Repo.initialize.selector, _initialOwner))
         );
 
-        apmRegistry.register(_name, address(repo));
+        aragonPluginRegistry.register(_name, address(repo));
     }
 
     // @dev Internal helper method to set up the required base contracts.

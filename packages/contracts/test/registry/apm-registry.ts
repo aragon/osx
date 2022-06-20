@@ -8,7 +8,7 @@ const EVENTS = {
 };
 
 describe('APM: APM-Registry', function () {
-  let apmRegistry: any;
+  let aragonPluginRegistry: any;
   let ownerAddress: string;
   let dao: DAO;
   let repo: Repo;
@@ -24,10 +24,12 @@ describe('APM: APM-Registry', function () {
     dao = await DAO.deploy();
     await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
 
-    // deploy and initialize APMRegistry
-    const APMRegistry = await ethers.getContractFactory('APMRegistry');
-    apmRegistry = await APMRegistry.deploy();
-    await apmRegistry.initialize(dao.address);
+    // deploy and initialize AragonPluginRegistry
+    const AragonPluginRegistry = await ethers.getContractFactory(
+      'AragonPluginRegistry'
+    );
+    aragonPluginRegistry = await AragonPluginRegistry.deploy();
+    await aragonPluginRegistry.initialize(dao.address);
 
     // deploy a repo and initialize
     const Repo = await ethers.getContractFactory('Repo');
@@ -36,7 +38,7 @@ describe('APM: APM-Registry', function () {
 
     // grant REGISTER_ROLE to registrer
     dao.grant(
-      apmRegistry.address,
+      aragonPluginRegistry.address,
       ownerAddress,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
     );
@@ -45,20 +47,20 @@ describe('APM: APM-Registry', function () {
   it('Should register a new repo successfully', async function () {
     const repoName = 'my-repo';
 
-    await expect(await apmRegistry.register(repoName, repo.address))
-      .to.emit(apmRegistry, EVENTS.NewRepo)
+    await expect(await aragonPluginRegistry.register(repoName, repo.address))
+      .to.emit(aragonPluginRegistry, EVENTS.NewRepo)
       .withArgs(repoName, repo.address);
 
-    expect(await apmRegistry.registrees(repo.address)).to.equal(true);
+    expect(await aragonPluginRegistry.registrees(repo.address)).to.equal(true);
   });
 
   it('Should revert if repo already exists', async function () {
     const repoName = 'my-repo';
 
-    await apmRegistry.register(repoName, repo.address);
+    await aragonPluginRegistry.register(repoName, repo.address);
 
     await expect(
-      apmRegistry.register(repoName, repo.address)
+      aragonPluginRegistry.register(repoName, repo.address)
     ).to.be.revertedWith(
       customError('ContractAlreadyRegistered', repo.address)
     );

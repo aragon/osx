@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const adminDaoAddress = await getContractAddress('DAO', hre);
 
-  const ret = await deploy('APMRegistry', {
+  const ret = await deploy('AragonPluginRegistry', {
     from: deployer,
     log: true,
   });
@@ -18,14 +18,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ampAddress: string = ret.receipt?.contractAddress || '';
 
   if (ampAddress !== '') {
-    const APMRegistryContract = await ethers.getContractAt(
-      'APMRegistry',
+    const AragonPluginRegistryContract = await ethers.getContractAt(
+      'AragonPluginRegistry',
       ampAddress
     );
-    await APMRegistryContract.initialize(adminDaoAddress);
-    console.log('APMRegistryContract initialized', ampAddress);
+    await AragonPluginRegistryContract.initialize(adminDaoAddress);
+    console.log('AragonPluginRegistryContract initialized', ampAddress);
   }
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['APMRegistry'];
+func.tags = ['AragonPluginRegistry'];

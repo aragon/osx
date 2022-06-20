@@ -5,17 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.3.0-alpha
-
 ### Added
 
 - added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
 - added `IRepo` interface for plugin Repo contract.
 - added `Repo` contract.
-- added `ERC165Registry` component to be used for creating any ERC165-based registry such as DAO-Registry and `APMRegistry`.
-- added `APMRegistry` contract for registering `Repo`s.
+- added `ERC165Registry` component to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
+- added `AragonPluginRegistry` contract for registering `Repo`s.
 - added `RepoFactory` contract for creating `Repo`s.
-- added testing for `Repo`, `ERC165Registry`, `APMRegistry` and `RepoFactory`.
+- added testing for `Repo`, `ERC165Registry`, `AragonPluginRegistry` and `RepoFactory`.
 - added deployment script for `admin-dao`, `apm-registry` and `repo-factory`.
 
 ### Changed
