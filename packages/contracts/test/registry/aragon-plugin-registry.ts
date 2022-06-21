@@ -7,7 +7,7 @@ const EVENTS = {
   NewPluginRepo: 'NewPluginRepo',
 };
 
-describe('APM: APM-Registry', function () {
+describe('Aragon-Plugin-Registry', function () {
   let aragonPluginRegistry: any;
   let ownerAddress: string;
   let dao: DAO;
@@ -53,7 +53,7 @@ describe('APM: APM-Registry', function () {
       .to.emit(aragonPluginRegistry, EVENTS.NewPluginRepo)
       .withArgs(pluginRepoName, pluginRepo.address);
 
-    expect(await aragonPluginRegistry.registrees(pluginRepo.address)).to.equal(
+    expect(await aragonPluginRegistry.entries(pluginRepo.address)).to.equal(
       true
     );
   });

@@ -15,7 +15,7 @@ contract PluginRepoFactory {
     AragonPluginRegistry public aragonPluginRegistry;
     address public pluginRepoBase;
 
-    error ApmRegEmpityName();
+    error ApmRegEmptyName();
 
     constructor(AragonPluginRegistry _aragonPluginRegistry) {
         aragonPluginRegistry = _aragonPluginRegistry;
@@ -79,7 +79,7 @@ contract PluginRepoFactory {
         internal
         returns (PluginRepo pluginRepo)
     {
-        if (!(bytes(_name).length > 0)) revert ApmRegEmpityName();
+        if (!(bytes(_name).length > 0)) revert ApmRegEmptyName();
 
         pluginRepo = PluginRepo(
             createProxy(

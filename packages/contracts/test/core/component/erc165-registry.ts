@@ -87,7 +87,7 @@ describe('ERC165Registry', function () {
         .to.emit(erc165RegistryMock, EVENTS.Registered)
         .withArgs(dao.address);
 
-      expect(await erc165RegistryMock.registrees(dao.address)).to.equal(true);
+      expect(await erc165RegistryMock.entries(dao.address)).to.equal(true);
     });
   });
 });

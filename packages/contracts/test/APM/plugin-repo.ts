@@ -10,7 +10,7 @@ const EVENTS = {
 const zeroAddress = ethers.constants.AddressZero;
 const emptyBytes = '0x00';
 
-describe('APM: PluginRepo', function () {
+describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: any;
@@ -193,7 +193,7 @@ describe('APM: PluginRepo', function () {
 
     it('fails if requesting version 0', async () => {
       await expect(pluginRepo.getByVersionId(0)).to.be.revertedWith(
-        customError('InexistentVersion')
+        customError('VersionDoesNotExist')
       );
     });
 

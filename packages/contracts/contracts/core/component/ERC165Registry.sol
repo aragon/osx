@@ -16,7 +16,7 @@ abstract contract ERC165Registry is Permissions, UUPSUpgradeable {
 
     bytes4 public contractInterfaceId;
 
-    mapping(address => bool) public registrees;
+    mapping(address => bool) public entries;
 
     /// @notice Thrown if the contract is already registered
     /// @param registrant The address of the contract to be registered
@@ -55,8 +55,8 @@ abstract contract ERC165Registry is Permissions, UUPSUpgradeable {
         if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId))
             revert ContractInterfaceInvalid(registrant);
 
-        if (registrees[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
+        if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
 
-        registrees[registrant] = true;
+        entries[registrant] = true;
     }
 }

@@ -25,7 +25,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     error InvalidVersion();
 
     /// @notice Thrown if version does not exist
-    error InexistentVersion();
+    error VersionDoesNotExist();
 
     /// @notice Thrown if contract does not have IPluginFactory interface
     error InvalidPluginInterface();
@@ -42,7 +42,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         bytes contentURI;
     }
 
-    uint256 internal versionsNextIndex = 0;
+    uint256 internal nextVersionIndex = 0;
     mapping(uint256 => Version) internal versions;
     mapping(bytes32 => uint256) internal versionIdForSemantic;
     mapping(address => uint256) internal latestVersionIdForContract;
@@ -54,7 +54,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         _registerStandard(type(IPluginRepo).interfaceId);
         __ACL_init(initialOwner);
 
-        versionsNextIndex = 1;
+        nextVersionIndex = 1;
 
         // set roles.
         _grant(address(this), initialOwner, CREATE_VERSION_ROLE);
@@ -88,27 +88,29 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         } else if (_pluginFactoryAddress != address(0)) revert InvalidContract();
 
         address pluginFactoryAddress = _pluginFactoryAddress;
-        uint256 lastVersionIndex = versionsNextIndex - 1;
+        uint256 currentVersionIndex = nextVersionIndex - 1;
 
-        uint16[3] memory lastSematicVersion;
+        uint16[3] memory currentSematicVersion;
 
-        if (lastVersionIndex > 0) {
-            Version storage lastVersion = versions[lastVersionIndex];
-            lastSematicVersion = lastVersion.semanticVersion;
+        if (currentVersionIndex > 0) {
+            Version storage currentVersion = versions[currentVersionIndex];
+            currentSematicVersion = currentVersion.semanticVersion;
 
             if (pluginFactoryAddress == address(0)) {
-                pluginFactoryAddress = lastVersion.pluginFactoryAddress;
+                pluginFactoryAddress = currentVersion.pluginFactoryAddress;
             }
             // Only allows smart contract change on major version bumps
             if (
-                !(lastVersion.pluginFactoryAddress == pluginFactoryAddress ||
-                    _newSemanticVersion[0] > lastVersion.semanticVersion[0])
-            ) revert InvalidVersion();
+                !(currentVersion.pluginFactoryAddress == pluginFactoryAddress ||
+                    _newSemanticVersion[0] > currentVersion.semanticVersion[0])
+            ) {
+                revert InvalidVersion();
+            }
         }
 
-        if (!isValidBump(lastSematicVersion, _newSemanticVersion)) revert InvalidBump();
+        if (!isValidBump(currentSematicVersion, _newSemanticVersion)) revert InvalidBump();
 
-        uint256 versionId = versionsNextIndex++;
+        uint256 versionId = nextVersionIndex++;
         versions[versionId] = Version(_newSemanticVersion, pluginFactoryAddress, _contentURI);
         versionIdForSemantic[semanticVersionHash(_newSemanticVersion)] = versionId;
         latestVersionIdForContract[pluginFactoryAddress] = versionId;
@@ -129,7 +131,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             bytes memory contentURI
         )
     {
-        return getByVersionId(versionsNextIndex - 1);
+        return getByVersionId(nextVersionIndex - 1);
     }
 
     /// @notice get latest by plugin factory address
@@ -177,15 +179,15 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             bytes memory contentURI
         )
     {
-        if (!(_versionId > 0 && _versionId < versionsNextIndex)) revert InexistentVersion();
+        if (!(_versionId > 0 && _versionId < nextVersionIndex)) revert VersionDoesNotExist();
         Version storage version = versions[_versionId];
         return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }
 
     /// @notice get version count
     /// @return uint256 count value
-    function getVersionsCount() public view returns (uint256) {
-        return versionsNextIndex - 1;
+    function getVersionCount() public view returns (uint256) {
+        return nextVersionIndex - 1;
     }
 
     /// @notice check if new version is valid compared to the previous one
