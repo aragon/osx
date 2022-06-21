@@ -3,6 +3,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 import {AragonPluginRegistry, DAO, PluginRepoFactory} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import {deployMockPluginFactory} from '../APM/plugin-repo';
 
 const EVENTS = {
   NewPluginRepo: 'NewPluginRepo',
@@ -44,7 +45,7 @@ async function getMergedABI() {
   };
 }
 
-describe('APM: PluginRepoFactory: ', function () {
+describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let aragonPluginRegistry: AragonPluginRegistry;
   let ownerAddress: string;
@@ -153,9 +154,11 @@ describe('APM: PluginRepoFactory: ', function () {
   });
 
   it('fail creating new pluginRepo with wrong major version', async () => {
+    const pluginFactoryMock = await deployMockPluginFactory();
+
     const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [0, 0, 0];
-    const pluginFactoryAddress = zeroAddress;
+    const pluginFactoryAddress = pluginFactoryMock.address;
     const contentURI = '0x00';
 
     await expect(
@@ -170,9 +173,11 @@ describe('APM: PluginRepoFactory: ', function () {
   });
 
   it('create new pluginRepo with version', async () => {
+    const pluginFactoryMock = await deployMockPluginFactory();
+
     const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [1, 0, 0];
-    const pluginFactoryAddress = zeroAddress;
+    const pluginFactoryAddress = pluginFactoryMock.address;
     const contentURI = '0x00';
 
     let tx = await pluginRepoFactory.newPluginRepoWithVersion(

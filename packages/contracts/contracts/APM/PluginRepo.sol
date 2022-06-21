@@ -75,19 +75,19 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_ROLE) {
         // check if _pluginFactoryAddress is IPluginFactory
-        if (Address.isContract(_pluginFactoryAddress)) {
-            try
-                IPluginFactory(_pluginFactoryAddress).supportsInterface(
-                    PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
-                )
-            returns (bool result) {
-                if (!result) revert InvalidPluginInterface();
-            } catch {
-                revert InvalidPluginContract();
-            }
-        } else if (_pluginFactoryAddress != address(0)) revert InvalidContract();
+        if (!Address.isContract(_pluginFactoryAddress)) revert InvalidContract();
 
-        address pluginFactoryAddress = _pluginFactoryAddress;
+        try
+            IPluginFactory(_pluginFactoryAddress).supportsInterface(
+                PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
+            )
+        returns (bool result) {
+            if (!result) revert InvalidPluginInterface();
+        } catch {
+            revert InvalidPluginContract();
+        }
+
+        address basePluginAddress = IPluginFactory(_pluginFactoryAddress).getBasePluginAddress();
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
         uint16[3] memory currentSematicVersion;
@@ -96,12 +96,12 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             Version storage currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
 
-            if (pluginFactoryAddress == address(0)) {
-                pluginFactoryAddress = currentVersion.pluginFactoryAddress;
-            }
-            // Only allows smart contract change on major version bumps
+            address currentBasePluginAddress = IPluginFactory(currentVersion.pluginFactoryAddress)
+                .getBasePluginAddress();
+
+            // Only allows base smart contract change on major version bumps
             if (
-                !(currentVersion.pluginFactoryAddress == pluginFactoryAddress ||
+                !(currentBasePluginAddress == basePluginAddress ||
                     _newSemanticVersion[0] > currentVersion.semanticVersion[0])
             ) {
                 revert InvalidVersion();
@@ -111,9 +111,9 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         if (!isValidBump(currentSematicVersion, _newSemanticVersion)) revert InvalidBump();
 
         uint256 versionId = nextVersionIndex++;
-        versions[versionId] = Version(_newSemanticVersion, pluginFactoryAddress, _contentURI);
+        versions[versionId] = Version(_newSemanticVersion, _pluginFactoryAddress, _contentURI);
         versionIdForSemantic[semanticVersionHash(_newSemanticVersion)] = versionId;
-        latestVersionIdForContract[pluginFactoryAddress] = versionId;
+        latestVersionIdForContract[_pluginFactoryAddress] = versionId;
 
         emit NewVersion(versionId, _newSemanticVersion);
     }

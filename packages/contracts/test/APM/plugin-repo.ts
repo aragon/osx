@@ -7,8 +7,16 @@ const EVENTS = {
   NewVersion: 'NewVersion',
 };
 
-const zeroAddress = ethers.constants.AddressZero;
 const emptyBytes = '0x00';
+
+export async function deployMockPluginFactory(): Promise<PluginFactoryMock> {
+  const PluginFactoryMock = await ethers.getContractFactory(
+    'PluginFactoryMock'
+  );
+  const pluginFactoryMockContract = await PluginFactoryMock.deploy();
+
+  return pluginFactoryMockContract;
+}
 
 describe('PluginRepo', function () {
   let ownerAddress: string;
@@ -34,15 +42,6 @@ describe('PluginRepo', function () {
 
     expect(pluginFactoryAddress).to.equal(pluginAddress); // code should match
     expect(contentURI).to.equal(contentUri); // content should match
-  }
-
-  async function deployMockPluginFactory(): Promise<PluginFactoryMock> {
-    const PluginFactoryMock = await ethers.getContractFactory(
-      'PluginFactoryMock'
-    );
-    pluginFactoryMock = await PluginFactoryMock.deploy();
-
-    return pluginFactoryMock;
   }
 
   before(async () => {
@@ -163,17 +162,7 @@ describe('PluginRepo', function () {
       );
     });
 
-    it('setting contract address to 0 reuses last version address', async () => {
-      await pluginRepo.newVersion([1, 1, 0], zeroAddress, initialContent);
-      assertVersion(
-        await pluginRepo.getByVersionId(2),
-        [1, 1, 0],
-        initialPluginAddress,
-        initialContent
-      );
-    });
-
-    it('fails when changing contract address in non major version', async () => {
+    it('fails when changing base contract address in non major version', async () => {
       const pluginFactoryMock = await deployMockPluginFactory();
 
       await expect(

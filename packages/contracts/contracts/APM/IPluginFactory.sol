@@ -13,8 +13,14 @@ library PluginFactoryIDs {
 /// @title The interface required for plugin factory
 /// @author Sarkawt Noori - Aragon Association - 2022
 abstract contract IPluginFactory is AdaptiveERC165 {
+    address internal basePluginAddress;
+
     constructor() {
         _registerStandard(PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID);
+    }
+
+    function getBasePluginAddress() external view returns (address) {
+        return basePluginAddress;
     }
 
     /// @dev Required to handle the the deployment of a plugin
