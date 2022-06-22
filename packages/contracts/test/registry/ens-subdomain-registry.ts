@@ -262,7 +262,7 @@ describe('ENSSubdomainRegistrar', function () {
         await expect(
           registrar
             .connect(signers[1])
-            .setResolver(ethers.constants.AddressZero)
+            .setDefaultResolver(ethers.constants.AddressZero)
         ).to.be.revertedWith(
           customError(
             'ACLAuth',
@@ -332,7 +332,7 @@ describe('ENSSubdomainRegistrar', function () {
           const newResolverAddr = ethers.constants.AddressZero;
           let tx = await registrar
             .connect(signers[1])
-            .setResolver(newResolverAddr);
+            .setDefaultResolver(newResolverAddr);
           await tx.wait();
 
           expect(await registrar.resolver()).to.equal(newResolverAddr);
