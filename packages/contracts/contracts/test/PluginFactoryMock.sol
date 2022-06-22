@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "../APM/IPluginFactory.sol";
+import "../aragonPlugin/IPluginFactory.sol";
 import "./MajorityVotingMock.sol";
 import "../utils/Proxy.sol";
 

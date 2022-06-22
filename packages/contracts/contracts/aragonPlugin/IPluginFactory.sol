@@ -19,10 +19,6 @@ abstract contract IPluginFactory is AdaptiveERC165 {
         _registerStandard(PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID);
     }
 
-    function getBasePluginAddress() external view returns (address) {
-        return basePluginAddress;
-    }
-
     /// @dev Required to handle the the deployment of a plugin
     /// @param _dao The address of the dao where the plugin will be installed
     /// @param _params The encoded params needed for deploy a plugin
@@ -31,4 +27,10 @@ abstract contract IPluginFactory is AdaptiveERC165 {
         external
         virtual
         returns (address pluginAddress);
+
+    /// @dev Retruns the basePluginAddress
+    /// @return address The the address of the base plugin
+    function getBasePluginAddress() external view returns (address) {
+        return basePluginAddress;
+    }
 }

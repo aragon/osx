@@ -6,7 +6,7 @@ pragma solidity 0.8.10;
 
 import "../core/component/ERC165Registry.sol";
 import "../core/IDAO.sol";
-import "../APM/IPluginRepo.sol";
+import "../aragonPlugin/IPluginRepo.sol";
 
 /// @title Register plugin
 /// @author Sarkawt Noori - Aragon Association - 2022

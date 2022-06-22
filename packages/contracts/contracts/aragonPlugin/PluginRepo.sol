@@ -9,7 +9,8 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/acl/ACL.sol";
 import "../core/erc165/AdaptiveERC165.sol";
-import "../APM/IPluginFactory.sol";
+import "../utils/UncheckedIncrement.sol";
+import "./IPluginFactory.sol";
 import "./IPluginRepo.sol";
 
 /// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
@@ -44,8 +45,8 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
     uint256 internal nextVersionIndex = 0;
     mapping(uint256 => Version) internal versions;
-    mapping(bytes32 => uint256) internal versionIdForSemantic;
-    mapping(address => uint256) internal latestVersionIdForContract;
+    mapping(bytes32 => uint256) internal versionIdxForSemantic;
+    mapping(address => uint256) internal versionIdxForContract;
 
     event NewVersion(uint256 versionId, uint16[3] semanticVersion);
 
@@ -101,8 +102,8 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
             // Only allows base smart contract change on major version bumps
             if (
-                !(currentBasePluginAddress == basePluginAddress ||
-                    _newSemanticVersion[0] > currentVersion.semanticVersion[0])
+                currentBasePluginAddress != basePluginAddress &&
+                _newSemanticVersion[0] <= currentVersion.semanticVersion[0]
             ) {
                 revert InvalidVersion();
             }
@@ -110,12 +111,13 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
         if (!isValidBump(currentSematicVersion, _newSemanticVersion)) revert InvalidBump();
 
-        uint256 versionId = nextVersionIndex++;
-        versions[versionId] = Version(_newSemanticVersion, _pluginFactoryAddress, _contentURI);
-        versionIdForSemantic[semanticVersionHash(_newSemanticVersion)] = versionId;
-        latestVersionIdForContract[_pluginFactoryAddress] = versionId;
+        uint256 versionIdx = nextVersionIndex;
+        nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
+        versions[versionIdx] = Version(_newSemanticVersion, _pluginFactoryAddress, _contentURI);
+        versionIdxForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIdx;
+        versionIdxForContract[_pluginFactoryAddress] = versionIdx;
 
-        emit NewVersion(versionId, _newSemanticVersion);
+        emit NewVersion(versionIdx, _newSemanticVersion);
     }
 
     /// @notice get latest plugin
@@ -147,7 +149,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             bytes memory contentURI
         )
     {
-        return getByVersionId(latestVersionIdForContract[_pluginFactoryAddress]);
+        return getByVersionId(versionIdxForContract[_pluginFactoryAddress]);
     }
 
     /// @notice get latest by semantic version
@@ -163,14 +165,14 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             bytes memory contentURI
         )
     {
-        return getByVersionId(versionIdForSemantic[semanticVersionHash(_semanticVersion)]);
+        return getByVersionId(versionIdxForSemantic[semanticVersionHash(_semanticVersion)]);
     }
 
     /// @notice get latest by version id
     /// @return semanticVersion Semantic version for pluginRepo version
     /// @return pluginFactoryAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching version's content
-    function getByVersionId(uint256 _versionId)
+    function getByVersionId(uint256 _versionIdx)
         public
         view
         returns (
@@ -179,8 +181,8 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             bytes memory contentURI
         )
     {
-        if (!(_versionId > 0 && _versionId < nextVersionIndex)) revert VersionDoesNotExist();
-        Version storage version = versions[_versionId];
+        if (_versionIdx <= 0 || _versionIdx >= nextVersionIndex) revert VersionDoesNotExist();
+        Version storage version = versions[_versionIdx];
         return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }
 
@@ -212,7 +214,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
                 }
                 hasBumped = true;
             }
-            i++;
+            i = _uncheckedIncrement(i);
         }
         return hasBumped;
     }
