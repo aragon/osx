@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Upcoming]
 
 ### Added
-
-- Added a `ERC165Registry` `Component` to register contracts by their address and ERC165 interface ID.
+- Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
+- Added a concrete `ERC165Registry` implementation.
   
 ## v0.2.0-alpha
 
