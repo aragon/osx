@@ -50,9 +50,10 @@ contract ENSSubdomainRegistrar is Component {
             revert RegistrarUnauthorized({nodeOwner: nodeOwner, here: address(this)});
         }
 
-        _registerStandard(REGISTRY_INTERFACE_ID);
-
         __Component_init(_managingDao);
+        
+        // Register the ERC165 interface ID for the `Component`
+        _registerStandard(REGISTRY_INTERFACE_ID);
 
         ens = _ens;
         node = _node;
