@@ -5,16 +5,16 @@ import {customError, ERRORS} from '../../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {DAO, ERC165RegistryMock} from '../../../typechain';
+import {DAO, InterfaceBaseRegistryMock} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const EVENTS = {
   Registered: 'Registered',
 };
 
-describe('ERC165Registry', function () {
+describe('InterfaceBaseRegistry', function () {
   let signers: SignerWithAddress[];
-  let erc165RegistryMock: ERC165RegistryMock;
+  let interfaceBaseRegistryMock: InterfaceBaseRegistryMock;
   let dao: DAO;
   let ownerAddress: string;
 
@@ -29,16 +29,16 @@ describe('ERC165Registry', function () {
   });
 
   beforeEach(async () => {
-    const ERC165RegistryMock = await ethers.getContractFactory(
-      'ERC165RegistryMock'
+    const InterfaceBaseRegistryMock = await ethers.getContractFactory(
+      'InterfaceBaseRegistryMock'
     );
-    erc165RegistryMock = await ERC165RegistryMock.deploy();
+    interfaceBaseRegistryMock = await InterfaceBaseRegistryMock.deploy();
 
-    await erc165RegistryMock.initialize(dao.address);
+    await interfaceBaseRegistryMock.initialize(dao.address);
 
     // grant REGISTER_ROLE to registrer
     dao.grant(
-      erc165RegistryMock.address,
+      interfaceBaseRegistryMock.address,
       ownerAddress,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
     );
@@ -49,7 +49,7 @@ describe('ERC165Registry', function () {
       const randomAddress = await signers[8].getAddress();
 
       await expect(
-        erc165RegistryMock.register(randomAddress)
+        interfaceBaseRegistryMock.register(randomAddress)
       ).to.be.revertedWith(
         customError('ContractAddressInvalid', randomAddress)
       );
@@ -60,22 +60,24 @@ describe('ERC165Registry', function () {
       let adaptiveERC165 = await AdaptiveERC165.deploy();
 
       await expect(
-        erc165RegistryMock.register(adaptiveERC165.address)
+        interfaceBaseRegistryMock.register(adaptiveERC165.address)
       ).to.be.revertedWith('ContractInterfaceInvalid');
     });
 
     it('fail register if REGISTER_ROLE is not granted', async () => {
       dao.revoke(
-        erc165RegistryMock.address,
+        interfaceBaseRegistryMock.address,
         ownerAddress,
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
       );
 
-      await expect(erc165RegistryMock.register(dao.address)).to.be.revertedWith(
+      await expect(
+        interfaceBaseRegistryMock.register(dao.address)
+      ).to.be.revertedWith(
         customError(
           'ACLAuth',
-          erc165RegistryMock.address,
-          erc165RegistryMock.address,
+          interfaceBaseRegistryMock.address,
+          interfaceBaseRegistryMock.address,
           ownerAddress,
           ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
         )
@@ -83,11 +85,13 @@ describe('ERC165Registry', function () {
     });
 
     it('register known interface', async () => {
-      await expect(await erc165RegistryMock.register(dao.address))
-        .to.emit(erc165RegistryMock, EVENTS.Registered)
+      await expect(await interfaceBaseRegistryMock.register(dao.address))
+        .to.emit(interfaceBaseRegistryMock, EVENTS.Registered)
         .withArgs(dao.address);
 
-      expect(await erc165RegistryMock.entries(dao.address)).to.equal(true);
+      expect(await interfaceBaseRegistryMock.entries(dao.address)).to.equal(
+        true
+      );
     });
   });
 });

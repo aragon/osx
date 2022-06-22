@@ -9,8 +9,7 @@ import "../../core/erc165/AdaptiveERC165.sol";
 /// @title An ERC165-based registry for contracts
 /// @author Michel Heuer, Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract allows to register contracts
-/// TODO: Find a better nameing instead of ERC165Registry
-abstract contract ERC165Registry is Permissions, UUPSUpgradeable {
+abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
@@ -34,7 +33,7 @@ abstract contract ERC165Registry is Permissions, UUPSUpgradeable {
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _managingDao The interface of the DAO managing the components permissions
     /// @param _contractInterfaceId The ERC165 interface id of the contracts to be registered
-    function __ERC165Registry_init(IDAO _managingDao, bytes4 _contractInterfaceId)
+    function __InterfaceBaseRegistry_init(IDAO _managingDao, bytes4 _contractInterfaceId)
         internal
         virtual
         onlyInitializing

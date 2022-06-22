@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.10;
 
-import "../core/component/ERC165Registry.sol";
+import "../core/component/InterfaceBaseRegistry.sol";
 
-contract ERC165RegistryMock is ERC165Registry {
+contract InterfaceBaseRegistryMock is InterfaceBaseRegistry {
     event Registered(address);
 
     function initialize(IDAO _dao) external initializer {
-        __ERC165Registry_init(_dao, type(IDAO).interfaceId);
+        __InterfaceBaseRegistry_init(_dao, type(IDAO).interfaceId);
     }
 
     function register(address registrant) external {
