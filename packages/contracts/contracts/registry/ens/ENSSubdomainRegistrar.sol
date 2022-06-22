@@ -27,7 +27,7 @@ contract ENSSubdomainRegistrar is Component {
     ///         nor an approved operator of the domain node owner
     /// @param nodeOwner The node owner
     /// @param here The address of this registry
-    error RegistrarUnauthorized(address nodeOwner, address here);
+    error UnauthorizedRegistrar(address nodeOwner, address here);
 
     /// @notice Thrown if the subnode is already registered
     /// @param subnode The subnode namehash
@@ -46,7 +46,7 @@ contract ENSSubdomainRegistrar is Component {
         address nodeOwner = _ens.owner(_node);
 
         // This contract must either be the domain node owner or be an approved operator of the node owner
-        if (!(nodeOwner == address(this) || _ens.isApprovedForAll(nodeOwner, address(this)))) {
+        if (nodeOwner != address(this) && !_ens.isApprovedForAll(nodeOwner, address(this))) {
             revert RegistrarUnauthorized({nodeOwner: nodeOwner, here: address(this)});
         }
 
