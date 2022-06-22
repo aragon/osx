@@ -9,7 +9,7 @@ import "../../core/erc165/AdaptiveERC165.sol";
 /// @title An ERC165-based registry for contracts
 /// @author Michel Heuer, Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract allows to register contracts
-abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
+abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
@@ -29,11 +29,15 @@ abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
     /// @param registrant The address of the contract to be registered
     error ContractAddressInvalid(address registrant);
 
+    /// @notice Thrown if the contract do not support ERC165
+    /// @param registrant The address of the contract
+    error ContractERC165SupportInvalid(address registrant);
+
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _managingDao The interface of the DAO managing the components permissions
     /// @param _targetInterfaceId The ERC165 interface id of the contracts to be registered
-    function __InterfaceBaseRegistry_init(IDAO _managingDao, bytes4 _targetInterfaceId)
+    function __InterfaceBasedRegistry_init(IDAO _managingDao, bytes4 _targetInterfaceId)
         internal
         virtual
         onlyInitializing
@@ -50,9 +54,15 @@ abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
     /// @dev The managing DAO needs to grant REGISTER_ROLE to registrar
     /// @param registrant The address of an ERC165 contract
     function _register(address registrant) internal auth(REGISTER_ROLE) {
-        if (!Address.isContract(registrant)) revert ContractAddressInvalid(registrant);
-        if (!AdaptiveERC165(registrant).supportsInterface(targetInterfaceId))
-            revert ContractInterfaceInvalid(registrant);
+        if (!Address.isContract(registrant)) {
+            revert ContractAddressInvalid({registrant: registrant});
+        }
+
+        try AdaptiveERC165(registrant).supportsInterface(targetInterfaceId) returns (bool result) {
+            if (!result) revert ContractInterfaceInvalid(registrant);
+        } catch {
+            revert ContractERC165SupportInvalid({registrant: registrant});
+        }
 
         if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
 

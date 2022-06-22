@@ -15,33 +15,35 @@ contract PluginRepoFactory {
     AragonPluginRegistry public aragonPluginRegistry;
     address public pluginRepoBase;
 
-    error ApmRegEmptyName();
+    error EmptyName();
 
     constructor(AragonPluginRegistry _aragonPluginRegistry) {
         aragonPluginRegistry = _aragonPluginRegistry;
 
-        setupBases();
+        pluginRepoBase = address(new PluginRepo());
     }
 
     /// @notice Create new pluginRepo in registry with `_name`
     /// @param _name PluginRepo name, must be ununsed
+    /// @param _dev Address of the developer of the plugin
     /// TODO: Rethink if it need permission to prevent it from getting poluted, same for newPluginRepoWithVersion
     function newPluginRepo(string calldata _name, address _dev) external returns (PluginRepo) {
         return _newPluginRepo(_name, _dev);
     }
 
-    /// @notice Create new pluginRepo in registry with `_name` and publish a first version with contract `_pluginFactoryAddress` and content `@fromHex(_contentURI)`
+    /// @notice Creates and registers a new, named `PluginRepo` and publishes an initial version with contract
     /// @param _name PluginRepo name
     /// @param _initialSemanticVersion Semantic version for new pluginRepo version
-    /// @param _pluginFactoryAddress address for smart contract logic for version (if set to 0, it uses last versions' contractAddress)
+    /// @param _pluginFactoryAddress address for the factory smart contract of the version
     /// @param _contentURI External URI for fetching new version's content
+    /// @param _dev Address of the developer of the plugin
     function newPluginRepoWithVersion(
         string calldata _name,
         uint16[3] memory _initialSemanticVersion,
         address _pluginFactoryAddress,
         bytes memory _contentURI,
         address _dev
-    ) public returns (PluginRepo pluginRepo) {
+    ) external returns (PluginRepo pluginRepo) {
         pluginRepo = _newPluginRepo(_name, address(this)); // need to have permissions to create version
         pluginRepo.newVersion(_initialSemanticVersion, _pluginFactoryAddress, _contentURI);
 
@@ -51,7 +53,7 @@ contract PluginRepoFactory {
 
     /// @dev Does set the required permissions for the new PluginRepo.
     /// @param pluginRepo The PluginRepo instance just created.
-    /// @param dev The dev's wallet address
+    /// @param dev Address of the developer
     function setPluginRepoPermissions(PluginRepo pluginRepo, address dev) internal {
         // set roles on the dao itself.
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](5);
@@ -74,12 +76,12 @@ contract PluginRepoFactory {
 
     /// @dev Does set the required permissions for the new PluginRepo.
     /// @param _name The PluginRepo instance just created.
-    /// @param _initialOwner The initial owner wallet address
+    /// @param _initialOwner The initial owner address
     function _newPluginRepo(string calldata _name, address _initialOwner)
         internal
         returns (PluginRepo pluginRepo)
     {
-        if (!(bytes(_name).length > 0)) revert ApmRegEmptyName();
+        if (!(bytes(_name).length > 0)) revert EmptyName();
 
         pluginRepo = PluginRepo(
             createProxy(
@@ -89,10 +91,5 @@ contract PluginRepoFactory {
         );
 
         aragonPluginRegistry.register(_name, address(pluginRepo));
-    }
-
-    // @dev Internal helper method to set up the required base contracts.
-    function setupBases() private {
-        pluginRepoBase = address(new PluginRepo());
     }
 }

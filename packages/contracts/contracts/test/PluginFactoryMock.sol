@@ -7,7 +7,7 @@ import "./MajorityVotingMock.sol";
 import "../utils/Proxy.sol";
 
 contract PluginFactoryMock is IPluginFactory {
-    event NewPulginDeployed(address dao, bytes params);
+    event NewPluginDeployed(address dao, bytes params);
 
     constructor() {
         basePluginAddress = address(new MajorityVotingMock());
@@ -20,7 +20,7 @@ contract PluginFactoryMock is IPluginFactory {
     {
         packageAddress = basePluginAddress;
 
-        emit NewPulginDeployed(dao, params);
+        emit NewPluginDeployed(dao, params);
 
         return packageAddress;
     }

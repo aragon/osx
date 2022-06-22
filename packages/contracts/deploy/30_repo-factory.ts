@@ -21,8 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   const pluginRepoFactoryAddress: string = ret.receipt?.contractAddress || '';
-  const registerRole =
-    '0xd1f21ec03a6eb050fba156f5316dad461735df521fb446dd42c5a4728e9c70fe';
+  const registerRole = ethers.utils.id('REGISTER_ROLE');
 
   // Grant REGISTER_ROLE to pluginRepo factory
   const adminDaoContract = await ethers.getContractAt('DAO', adminDaoAddress);

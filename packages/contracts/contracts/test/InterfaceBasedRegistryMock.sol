@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.10;
 
-import "../core/component/InterfaceBaseRegistry.sol";
+import "../core/component/InterfaceBasedRegistry.sol";
 
-contract InterfaceBaseRegistryMock is InterfaceBaseRegistry {
+contract InterfaceBasedRegistryMock is InterfaceBasedRegistry {
     event Registered(address);
 
     function initialize(IDAO _dao) external initializer {
-        __InterfaceBaseRegistry_init(_dao, type(IDAO).interfaceId);
+        __InterfaceBasedRegistry_init(_dao, type(IDAO).interfaceId);
     }
 
     function register(address registrant) external {

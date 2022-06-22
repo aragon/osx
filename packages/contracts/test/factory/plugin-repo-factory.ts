@@ -6,7 +6,7 @@ import {customError} from '../test-utils/custom-error-helper';
 import {deployMockPluginFactory} from '../APM/plugin-repo';
 
 const EVENTS = {
-  NewPluginRepo: 'NewPluginRepo',
+  PluginRepoRegistered: 'PluginRepoRegistered',
 };
 
 const zeroAddress = ethers.constants.AddressZero;
@@ -15,7 +15,7 @@ async function getAragonPluginRegistryEvents(tx: any) {
   const data = await tx.wait();
   const {events} = data;
   const {name, pluginRepo} = events.find(
-    ({event}: {event: any}) => event === EVENTS.NewPluginRepo
+    ({event}: {event: any}) => event === EVENTS.PluginRepoRegistered
   ).args;
 
   return {
@@ -54,27 +54,6 @@ describe('PluginRepoFactory: ', function () {
 
   let mergedABI: any;
   let pluginRepoFactoryBytecode: any;
-
-  async function getMergedABI() {
-    // @ts-ignore
-    const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
-      'AragonPluginRegistry'
-    );
-    // @ts-ignore
-    const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
-      'PluginRepoFactory'
-    );
-
-    return {
-      abi: [
-        ...PluginRepoFactoryArtifact.abi,
-        ...AragonPluginRegistryArtifact.abi.filter(
-          (f: any) => f.type === 'event'
-        ),
-      ],
-      bytecode: PluginRepoFactoryArtifact.bytecode,
-    };
-  }
 
   before(async () => {
     signers = await ethers.getSigners();

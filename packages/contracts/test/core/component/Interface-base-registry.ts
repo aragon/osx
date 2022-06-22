@@ -1,20 +1,20 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import chaiUtils from '../../test-utils';
-import {customError, ERRORS} from '../../test-utils/custom-error-helper';
+import {customError} from '../../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {DAO, InterfaceBaseRegistryMock} from '../../../typechain';
+import {DAO, InterfaceBasedRegistryMock} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const EVENTS = {
   Registered: 'Registered',
 };
 
-describe('InterfaceBaseRegistry', function () {
+describe('InterfaceBasedRegistry', function () {
   let signers: SignerWithAddress[];
-  let interfaceBaseRegistryMock: InterfaceBaseRegistryMock;
+  let interfaceBasedRegistryMock: InterfaceBasedRegistryMock;
   let dao: DAO;
   let ownerAddress: string;
 
@@ -29,18 +29,18 @@ describe('InterfaceBaseRegistry', function () {
   });
 
   beforeEach(async () => {
-    const InterfaceBaseRegistryMock = await ethers.getContractFactory(
-      'InterfaceBaseRegistryMock'
+    const InterfaceBasedRegistryMock = await ethers.getContractFactory(
+      'InterfaceBasedRegistryMock'
     );
-    interfaceBaseRegistryMock = await InterfaceBaseRegistryMock.deploy();
+    interfaceBasedRegistryMock = await InterfaceBasedRegistryMock.deploy();
 
-    await interfaceBaseRegistryMock.initialize(dao.address);
+    await interfaceBasedRegistryMock.initialize(dao.address);
 
     // grant REGISTER_ROLE to registrer
     dao.grant(
-      interfaceBaseRegistryMock.address,
+      interfaceBasedRegistryMock.address,
       ownerAddress,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+      ethers.utils.id('REGISTER_ROLE')
     );
   });
 
@@ -49,7 +49,7 @@ describe('InterfaceBaseRegistry', function () {
       const randomAddress = await signers[8].getAddress();
 
       await expect(
-        interfaceBaseRegistryMock.register(randomAddress)
+        interfaceBasedRegistryMock.register(randomAddress)
       ).to.be.revertedWith(
         customError('ContractAddressInvalid', randomAddress)
       );
@@ -60,36 +60,36 @@ describe('InterfaceBaseRegistry', function () {
       let adaptiveERC165 = await AdaptiveERC165.deploy();
 
       await expect(
-        interfaceBaseRegistryMock.register(adaptiveERC165.address)
+        interfaceBasedRegistryMock.register(adaptiveERC165.address)
       ).to.be.revertedWith('ContractInterfaceInvalid');
     });
 
     it('fail register if REGISTER_ROLE is not granted', async () => {
       dao.revoke(
-        interfaceBaseRegistryMock.address,
+        interfaceBasedRegistryMock.address,
         ownerAddress,
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+        ethers.utils.id('REGISTER_ROLE')
       );
 
       await expect(
-        interfaceBaseRegistryMock.register(dao.address)
+        interfaceBasedRegistryMock.register(dao.address)
       ).to.be.revertedWith(
         customError(
           'ACLAuth',
-          interfaceBaseRegistryMock.address,
-          interfaceBaseRegistryMock.address,
+          interfaceBasedRegistryMock.address,
+          interfaceBasedRegistryMock.address,
           ownerAddress,
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+          ethers.utils.id('REGISTER_ROLE')
         )
       );
     });
 
     it('register known interface', async () => {
-      await expect(await interfaceBaseRegistryMock.register(dao.address))
-        .to.emit(interfaceBaseRegistryMock, EVENTS.Registered)
+      await expect(await interfaceBasedRegistryMock.register(dao.address))
+        .to.emit(interfaceBasedRegistryMock, EVENTS.Registered)
         .withArgs(dao.address);
 
-      expect(await interfaceBaseRegistryMock.entries(dao.address)).to.equal(
+      expect(await interfaceBasedRegistryMock.entries(dao.address)).to.equal(
         true
       );
     });

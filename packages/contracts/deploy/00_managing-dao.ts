@@ -23,10 +23,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await daoContract.initialize(
       '0x00',
       deployer,
-      '0x0000000000000000000000000000000000000000'
+      ethers.constants.AddressZero
     );
     console.log('Admin DAO Contract initialized');
   }
 };
 export default func;
-func.tags = ['DaoAdmin'];
+func.tags = ['ManagingDao'];

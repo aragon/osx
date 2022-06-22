@@ -4,7 +4,7 @@ import {customError} from '../test-utils/custom-error-helper';
 import {DAO, PluginRepo} from '../../typechain';
 
 const EVENTS = {
-  NewPluginRepo: 'NewPluginRepo',
+  PluginRepoRegistered: 'PluginRepoRegistered',
 };
 
 describe('Aragon-Plugin-Registry', function () {
@@ -40,7 +40,7 @@ describe('Aragon-Plugin-Registry', function () {
     dao.grant(
       aragonPluginRegistry.address,
       ownerAddress,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+      ethers.utils.id('REGISTER_ROLE')
     );
   });
 
@@ -50,7 +50,7 @@ describe('Aragon-Plugin-Registry', function () {
     await expect(
       await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
     )
-      .to.emit(aragonPluginRegistry, EVENTS.NewPluginRepo)
+      .to.emit(aragonPluginRegistry, EVENTS.PluginRepoRegistered)
       .withArgs(pluginRepoName, pluginRepo.address);
 
     expect(await aragonPluginRegistry.entries(pluginRepo.address)).to.equal(
