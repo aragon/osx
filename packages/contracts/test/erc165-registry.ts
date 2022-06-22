@@ -36,13 +36,13 @@ describe('ERC165Registry', function () {
   describe('register:', async () => {
     it('registers a contract of the right type', async () => {
       // `managingDao` is not registered yet
-      expect(await registry.registrees(managingDao.address)).to.equal(false);
+      expect(await registry.entries(managingDao.address)).to.equal(false);
 
       // register `managingDao`
       await registry.register(managingDao.address);
 
       // `managingDao` is now registered
-      expect(await registry.registrees(managingDao.address)).to.equal(true);
+      expect(await registry.entries(managingDao.address)).to.equal(true);
     });
 
     it('reverts if the contract is already registered', async () => {
