@@ -13,7 +13,7 @@ abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
-    bytes4 public contractInterfaceId;
+    bytes4 public targetInterfaceId;
 
     mapping(address => bool) public entries;
 
@@ -32,15 +32,15 @@ abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _managingDao The interface of the DAO managing the components permissions
-    /// @param _contractInterfaceId The ERC165 interface id of the contracts to be registered
-    function __InterfaceBaseRegistry_init(IDAO _managingDao, bytes4 _contractInterfaceId)
+    /// @param _targetInterfaceId The ERC165 interface id of the contracts to be registered
+    function __InterfaceBaseRegistry_init(IDAO _managingDao, bytes4 _targetInterfaceId)
         internal
         virtual
         onlyInitializing
     {
         __Permissions_init(_managingDao);
 
-        contractInterfaceId = _contractInterfaceId;
+        targetInterfaceId = _targetInterfaceId;
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
@@ -51,7 +51,7 @@ abstract contract InterfaceBaseRegistry is Permissions, UUPSUpgradeable {
     /// @param registrant The address of an ERC165 contract
     function _register(address registrant) internal auth(REGISTER_ROLE) {
         if (!Address.isContract(registrant)) revert ContractAddressInvalid(registrant);
-        if (!AdaptiveERC165(registrant).supportsInterface(contractInterfaceId))
+        if (!AdaptiveERC165(registrant).supportsInterface(targetInterfaceId))
             revert ContractInterfaceInvalid(registrant);
 
         if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});

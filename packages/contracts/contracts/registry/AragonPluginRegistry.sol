@@ -6,7 +6,7 @@ pragma solidity 0.8.10;
 
 import "../core/component/InterfaceBaseRegistry.sol";
 import "../core/IDAO.sol";
-import "../aragonPlugin/IPluginRepo.sol";
+import "../plugin/IPluginRepo.sol";
 
 /// @title Register plugin
 /// @author Sarkawt Noori - Aragon Association - 2022
