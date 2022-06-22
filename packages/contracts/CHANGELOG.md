@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [Upcoming]
+
+### Added
+- Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
+- Added a concrete `ERC165Registry` implementation.
+  
 ## v0.2.0-alpha
 
 ### Added
@@ -13,8 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Generalized `MerkleMinter` and made it a `MetaTxComponent`
-- Generalized `MerkleDistributor` and made it a `MetaTxComponent`
+- Generalized `MerkleMinter` and made it a `MetaTxComponent`.
+- Generalized `MerkleDistributor` and made it a `MetaTxComponent`.
 
 ### Removed
 
@@ -28,8 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed the event `SetMetadata` to `MetadataSet`
-- Completed the `IDAO` interface and changed `DAO` accordingly
+- Renamed the event `SetMetadata` to `MetadataSet`.
+- Completed the `IDAO` interface and changed `DAO` accordingly.
 - Decoupled `Permissions` from `BaseRelayRecipient`.
 - Fixed OZ contracts-upgradable `Initializable`.
 
