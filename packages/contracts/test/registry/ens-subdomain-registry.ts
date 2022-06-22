@@ -276,10 +276,15 @@ describe('ENSSubdomainRegistrar', function () {
 
       describe('and after granting permission to the calling address via the managing DAO', () => {
         beforeEach(async () => {
-          // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+          // Grant signers[1] and signers[2] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
           await managingDao.grant(
             registrar.address,
             await signers[1].getAddress(),
+            REGISTER_ENS_SUBDOMAIN_ROLE
+          );
+          await managingDao.grant(
+            registrar.address,
+            await signers[2].getAddress(),
             REGISTER_ENS_SUBDOMAIN_ROLE
           );
         });
@@ -311,7 +316,32 @@ describe('ENSSubdomainRegistrar', function () {
             .registerSubnode(ensLabelHash('my'), targetAddress);
           await tx.wait();
 
-          // try to regist the same subnode again
+          // try to register the same subnode again as signers[1]
+          await expect(
+            registrar
+              .connect(signers[2])
+              .registerSubnode(
+                ensLabelHash('my'),
+                await signers[2].getAddress()
+              )
+          ).to.be.revertedWith(
+            customError(
+              'AlreadyRegistered',
+              ensDomainHash('my.test'),
+              registrar.address
+            )
+          );
+        });
+
+        it('reverts if the subdomain was already registered before, also for the same caller', async () => {
+          // register 'my.test' as signers[1] and set it to resovle to the target address
+          const targetAddress = managingDao.address;
+          let tx = await registrar
+            .connect(signers[1])
+            .registerSubnode(ensLabelHash('my'), targetAddress);
+          await tx.wait();
+
+          // try to register the same subnode again as signers[1]
           await expect(
             registrar
               .connect(signers[1])
