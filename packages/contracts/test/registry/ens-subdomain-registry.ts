@@ -152,7 +152,7 @@ describe('ENSSubdomainRegistrar', function () {
           .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
-          'RegistrarUnauthorized',
+          'UnauthorizedRegistrar',
           ethers.constants.AddressZero,
           registrar.address
         )
@@ -165,7 +165,7 @@ describe('ENSSubdomainRegistrar', function () {
           .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
-          'RegistrarUnauthorized',
+          'UnauthorizedRegistrar',
           ethers.constants.AddressZero,
           registrar.address
         )
