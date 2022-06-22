@@ -29,8 +29,7 @@ contract ENSSubdomainRegistrar is Component {
     /// @param here The address of this registry
     error RegistrarUnauthorized(address nodeOwner, address here);
 
-    /// @notice Thrown if the subnode is already
-    ///         nor an approved operator of the domain node owner
+    /// @notice Thrown if the subnode is already registered
     /// @param subnode The subnode namehash
     /// @param nodeOwner The node owner address
     error AlreadyRegistered(bytes32 subnode, address nodeOwner);
