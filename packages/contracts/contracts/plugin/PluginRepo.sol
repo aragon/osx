@@ -20,10 +20,10 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
     /// @notice Thrown version bump is invalid
-    error InvalidBump();
+    error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
 
-    /// @notice Thrown if version is invalid
-    error InvalidVersion();
+    /// @notice Thrown if contract does not change on major bump
+    error InvalidContractAddressForMajorBump();
 
     /// @notice Thrown if version does not exist
     error VersionDoesNotExist();
@@ -35,7 +35,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     error InvalidPluginContract();
 
     /// @notice Thrown if address is not a contract
-    error InvalidContract();
+    error InvalidContractAddress();
 
     struct Version {
         uint16[3] semanticVersion;
@@ -76,7 +76,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_ROLE) {
         // check if _pluginFactoryAddress is IPluginFactory
-        if (!Address.isContract(_pluginFactoryAddress)) revert InvalidContract();
+        if (!Address.isContract(_pluginFactoryAddress)) revert InvalidContractAddress();
 
         try
             IPluginFactory(_pluginFactoryAddress).supportsInterface(
@@ -105,11 +105,16 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
                 currentBasePluginAddress != basePluginAddress &&
                 _newSemanticVersion[0] <= currentVersion.semanticVersion[0]
             ) {
-                revert InvalidVersion();
+                revert InvalidContractAddressForMajorBump();
             }
         }
 
-        if (!isValidBump(currentSematicVersion, _newSemanticVersion)) revert InvalidBump();
+        if (!isValidBump(currentSematicVersion, _newSemanticVersion)) {
+            revert InvalidBump({
+                currentVersion: currentSematicVersion,
+                nextVersion: _newSemanticVersion
+            });
+        }
 
         uint256 versionIdx = nextVersionIndex;
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);

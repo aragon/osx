@@ -1,3 +1,6 @@
+/// @notice This is an extention (adaptation) of the work at:
+/// https://github.com/aragon/apm/blob/next/test/contracts/apm/apm_repo.js
+
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {PluginRepo, PluginFactoryMock} from '../../typechain';
@@ -89,7 +92,7 @@ describe('PluginRepo', function () {
   it('cannot create invalid first version', async function () {
     await expect(
       pluginRepo.newVersion([1, 1, 0], pluginFactoryMock.address, emptyBytes)
-    ).to.be.revertedWith(customError('InvalidBump'));
+    ).to.be.revertedWith('InvalidBump([0, 0, 0], [1, 1, 0])');
   });
 
   it('cannot create version with unsupported interface contract', async function () {
@@ -106,7 +109,7 @@ describe('PluginRepo', function () {
 
     await expect(
       pluginRepo.newVersion([1, 0, 0], randomAddress, emptyBytes)
-    ).to.be.revertedWith(customError('InvalidContract'));
+    ).to.be.revertedWith(customError('InvalidContractAddress'));
   });
 
   context('creating initial version', async function () {
@@ -171,13 +174,13 @@ describe('PluginRepo', function () {
           pluginFactoryMock.address,
           initialContent
         )
-      ).to.be.revertedWith(customError('InvalidVersion'));
+      ).to.be.revertedWith(customError('InvalidContractAddressForMajorBump'));
     });
 
     it('fails when version bump is invalid', async () => {
       await expect(
         pluginRepo.newVersion([1, 2, 0], initialPluginAddress, initialContent)
-      ).to.be.revertedWith(customError('InvalidBump'));
+      ).to.be.revertedWith('InvalidBump([1, 0, 0], [1, 2, 0])');
     });
 
     it('fails if requesting version 0', async () => {

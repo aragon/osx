@@ -92,7 +92,7 @@ describe('PluginRepoFactory: ', function () {
     dao.grant(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+      ethers.utils.id('REGISTER_ROLE')
     );
   });
 
@@ -100,7 +100,7 @@ describe('PluginRepoFactory: ', function () {
     dao.revoke(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+      ethers.utils.id('REGISTER_ROLE')
     );
 
     const pluginRepoName = 'my-pluginRepo';
@@ -113,9 +113,17 @@ describe('PluginRepoFactory: ', function () {
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes('REGISTER_ROLE'))
+        ethers.utils.id('REGISTER_ROLE')
       )
     );
+  });
+
+  it('fail to create new pluginRepo with empty name', async () => {
+    const pluginRepoName = '';
+
+    await expect(
+      pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
+    ).to.be.revertedWith(customError('EmptyName'));
   });
 
   it('create new pluginRepo', async () => {
@@ -148,7 +156,7 @@ describe('PluginRepoFactory: ', function () {
         contentURI,
         ownerAddress
       )
-    ).to.be.revertedWith(customError('InvalidBump'));
+    ).to.be.revertedWith('InvalidBump([0, 0, 0], [0, 0, 0])');
   });
 
   it('create new pluginRepo with version', async () => {

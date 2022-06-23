@@ -58,13 +58,13 @@ abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
             revert ContractAddressInvalid({registrant: registrant});
         }
 
+        if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
+
         try AdaptiveERC165(registrant).supportsInterface(targetInterfaceId) returns (bool result) {
             if (!result) revert ContractInterfaceInvalid(registrant);
         } catch {
             revert ContractERC165SupportInvalid({registrant: registrant});
         }
-
-        if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
 
         entries[registrant] = true;
     }

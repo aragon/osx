@@ -85,6 +85,11 @@ describe('InterfaceBasedRegistry', function () {
     });
 
     it('register known interface', async () => {
+      // check if address is not already registered
+      expect(await interfaceBasedRegistryMock.entries(dao.address)).to.equal(
+        false
+      );
+
       await expect(await interfaceBasedRegistryMock.register(dao.address))
         .to.emit(interfaceBasedRegistryMock, EVENTS.Registered)
         .withArgs(dao.address);
