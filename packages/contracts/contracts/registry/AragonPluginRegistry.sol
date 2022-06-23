@@ -4,7 +4,7 @@
 
 pragma solidity 0.8.10;
 
-import "../core/component/InterfaceBasedRegistry.sol";
+import "./InterfaceBasedRegistry.sol";
 import "../core/IDAO.sol";
 import "../plugin/IPluginRepo.sol";
 
@@ -12,6 +12,8 @@ import "../plugin/IPluginRepo.sol";
 /// @author Sarkawt Noori - Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a plugin pluginRepo by a unique address.
 contract AragonPluginRegistry is InterfaceBasedRegistry {
+    bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
+
     /// @notice Emitted if a new PluginRepo is registered
     /// @param name The name of the PluginRepo
     /// @param pluginRepo The address of the PluginRepo
@@ -27,7 +29,7 @@ contract AragonPluginRegistry is InterfaceBasedRegistry {
     /// @notice Registers a PluginRepo
     /// @param name The name of the PluginRepo
     /// @param registrant The address of the PluginRepo contract
-    function register(string calldata name, address registrant) external {
+    function register(string calldata name, address registrant) external auth(REGISTER_ROLE) {
         _register(registrant);
 
         emit PluginRepoRegistered(name, registrant);

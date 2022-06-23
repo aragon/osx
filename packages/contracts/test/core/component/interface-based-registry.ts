@@ -2,11 +2,12 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import chaiUtils from '../../test-utils';
 import {customError} from '../../test-utils/custom-error-helper';
+import {DAO, InterfaceBasedRegistryMock} from '../../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 chai.use(chaiUtils);
 
-import {DAO, InterfaceBasedRegistryMock} from '../../../typechain';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+const REGISTER_ROLE = ethers.utils.id('REGISTER_ROLE');
 
 const EVENTS = {
   Registered: 'Registered',
@@ -37,11 +38,7 @@ describe('InterfaceBasedRegistry', function () {
     await interfaceBasedRegistryMock.initialize(dao.address);
 
     // grant REGISTER_ROLE to registrer
-    dao.grant(
-      interfaceBasedRegistryMock.address,
-      ownerAddress,
-      ethers.utils.id('REGISTER_ROLE')
-    );
+    dao.grant(interfaceBasedRegistryMock.address, ownerAddress, REGISTER_ROLE);
   });
 
   describe('Register', async () => {
@@ -64,11 +61,11 @@ describe('InterfaceBasedRegistry', function () {
       ).to.be.revertedWith('ContractInterfaceInvalid');
     });
 
-    it('fail register if REGISTER_ROLE is not granted', async () => {
+    it('fail to register if the sender lacks the required role', async () => {
       dao.revoke(
         interfaceBasedRegistryMock.address,
         ownerAddress,
-        ethers.utils.id('REGISTER_ROLE')
+        REGISTER_ROLE
       );
 
       await expect(
@@ -79,8 +76,20 @@ describe('InterfaceBasedRegistry', function () {
           interfaceBasedRegistryMock.address,
           interfaceBasedRegistryMock.address,
           ownerAddress,
-          ethers.utils.id('REGISTER_ROLE')
+          REGISTER_ROLE
         )
+      );
+    });
+
+    it('fail to register if the contract is already registered', async () => {
+      // contract is now registered
+      await interfaceBasedRegistryMock.register(dao.address);
+
+      // try to register the same contract again
+      await expect(
+        interfaceBasedRegistryMock.register(dao.address)
+      ).to.be.revertedWith(
+        customError('ContractAlreadyRegistered', dao.address)
       );
     });
 
