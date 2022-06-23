@@ -5,21 +5,13 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {PluginRepo, PluginFactoryMock} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import {deployMockPluginFactory} from '../test-utils/repo';
 
 const EVENTS = {
   NewVersion: 'NewVersion',
 };
 
 const emptyBytes = '0x00';
-
-export async function deployMockPluginFactory(): Promise<PluginFactoryMock> {
-  const PluginFactoryMock = await ethers.getContractFactory(
-    'PluginFactoryMock'
-  );
-  const pluginFactoryMockContract = await PluginFactoryMock.deploy();
-
-  return pluginFactoryMockContract;
-}
 
 describe('PluginRepo', function () {
   let ownerAddress: string;

@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../../test-utils';
-import {customError} from '../../test-utils/custom-error-helper';
-import {DAO, InterfaceBasedRegistryMock} from '../../../typechain';
+import chaiUtils from '../test-utils';
+import {customError} from '../test-utils/custom-error-helper';
+import {DAO, InterfaceBasedRegistryMock} from '../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 chai.use(chaiUtils);

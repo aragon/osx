@@ -3,7 +3,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 import {AragonPluginRegistry, DAO, PluginRepoFactory} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
-import {deployMockPluginFactory} from '../APM/plugin-repo';
+import {deployMockPluginFactory} from '../test-utils/repo';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
