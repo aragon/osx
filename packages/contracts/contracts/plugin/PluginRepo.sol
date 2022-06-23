@@ -94,7 +94,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         uint16[3] memory currentSematicVersion;
 
         if (currentVersionIndex > 0) {
-            Version storage currentVersion = versions[currentVersionIndex];
+            Version memory currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
 
             address currentBasePluginAddress = IPluginFactory(currentVersion.pluginFactoryAddress)
