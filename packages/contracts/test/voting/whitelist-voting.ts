@@ -299,26 +299,30 @@ describe('WhitelistVoting', function () {
       expect(await voting.canExecute(0)).to.equal(true);
     });
 
-    it('executes the vote immediatelly while final yea is given', async () => {
+    it('executes the vote immediately while final yea is given', async () => {
       // 2 votes in favor of yea
       await voting.connect(signers[0]).vote(0, VoterState.Yea, false);
       await voting.connect(signers[1]).vote(0, VoterState.Yea, false);
 
       // 3th supports(which is enough) and should execute right away.
-      expect(await voting.connect(signers[3]).vote(0, VoterState.Yea, true))
-        .to.emit(daoMock, EVENTS.EXECUTED)
-        .withArgs(
-          voting.address,
-          0,
-          [
-            [
-              dummyActions[0].to,
-              ethers.BigNumber.from(dummyActions[0].value),
-              dummyActions[0].data,
-            ],
-          ],
-          []
-        );
+      let tx = await voting.connect(signers[3]).vote(0, VoterState.Yea, true);
+      let rc = await tx.wait();
+
+      // check for execution event in DAO
+      const {actor, callId, actions, execResults} = daoMock.interface.parseLog(
+        rc.logs[1]
+      ).args;
+
+      expect(actor).to.equal(voting.address);
+      expect(callId).to.equal(0);
+      expect(actions).to.deep.equal([
+        [
+          dummyActions[0].to,
+          ethers.BigNumber.from(dummyActions[0].value),
+          dummyActions[0].data,
+        ],
+      ]);
+      expect(execResults).to.deep.equal([]);
 
       const vote = await voting.getVote(0);
 

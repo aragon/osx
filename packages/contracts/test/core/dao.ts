@@ -162,7 +162,7 @@ describe('DAO', function () {
       {
         to: dummyAddress1,
         data: dummyMetadata1,
-        value: 0,
+        value: ethers.BigNumber.from(0),
       },
     ];
     const expectedDummyResults = ['0x'];
@@ -187,21 +187,24 @@ describe('DAO', function () {
       );
     });
 
-    it.only('emits an event afterwards', async () => {
-      expect(await dao.execute(0, dummyActions))
-        .to.emit(dao, EVENTS.Executed)
-        .withArgs(
-          ownerAddress,
-          0,
-          [
-            [
-              dummyActions[0].to,
-              ethers.BigNumber.from(dummyActions[0].value),
-              dummyActions[0].data,
-            ],
-          ],
-          expectedDummyResults
-        );
+    it('emits an event afterwards', async () => {
+      let tx = await dao.execute(0, dummyActions);
+      let rc = await tx.wait();
+
+      const {actor, callId, actions, execResults} = dao.interface.parseLog(
+        rc.logs[0]
+      ).args;
+
+      expect(actor).to.equal(ownerAddress);
+      expect(callId).to.equal(0);
+      expect(actions).to.deep.equal([
+        [
+          dummyActions[0].to,
+          ethers.BigNumber.from(dummyActions[0].value),
+          dummyActions[0].data,
+        ],
+      ]);
+      expect(execResults).to.deep.equal(expectedDummyResults);
     });
   });
 
