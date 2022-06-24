@@ -3,8 +3,8 @@ import {
   VoteStarted,
   VoteExecuted,
   ConfigUpdated,
-  AddUsers,
-  RemoveUsers,
+  UsersAdded,
+  UsersRemoved,
   WhitelistVoting,
   TrustedForwarderSet
 } from '../../../generated/templates/WhitelistVoting/WhitelistVoting';
@@ -161,7 +161,7 @@ export function handleConfigUpdated(event: ConfigUpdated): void {
   }
 }
 
-export function handleAddUsers(event: AddUsers): void {
+export function handleUsersAdded(event: UsersAdded): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
@@ -174,7 +174,7 @@ export function handleAddUsers(event: AddUsers): void {
   }
 }
 
-export function handleRemoveUsers(event: RemoveUsers): void {
+export function handleUsersRemoved(event: UsersRemoved): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
