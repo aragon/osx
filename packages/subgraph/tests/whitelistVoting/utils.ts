@@ -5,8 +5,8 @@ import {
   VoteCast,
   VoteExecuted,
   ConfigUpdated,
-  AddUsers,
-  RemoveUsers,
+  UsersAdded,
+  UsersRemoved,
   TrustedForwarderSet
 } from '../../generated/templates/WhitelistVoting/WhitelistVoting';
 
@@ -156,42 +156,42 @@ export function createNewConfigUpdatedEvent(
   return newConfigUpdatedEvent;
 }
 
-export function createNewAddUsersEvent(
+export function createNewUsersAddedEvent(
   addresses: Address[],
   contractAddress: string
-): AddUsers {
-  let newAddUsersEvent = changetype<AddUsers>(newMockEvent());
+): UsersAdded {
+  let newUsersAddedEvent = changetype<UsersAdded>(newMockEvent());
 
-  newAddUsersEvent.address = Address.fromString(contractAddress);
-  newAddUsersEvent.parameters = [];
+  newUsersAddedEvent.address = Address.fromString(contractAddress);
+  newUsersAddedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddUsersEvent.parameters.push(usersParam);
+  newUsersAddedEvent.parameters.push(usersParam);
 
-  return newAddUsersEvent;
+  return newUsersAddedEvent;
 }
 
-export function createNewRemoveUsersEvent(
+export function createNewUsersRemovedEvent(
   addresses: Address[],
   contractAddress: string
-): RemoveUsers {
-  let newRemoveUsersEvent = changetype<RemoveUsers>(newMockEvent());
+): UsersRemoved {
+  let newUsersRemovedEvent = changetype<UsersRemoved>(newMockEvent());
 
-  newRemoveUsersEvent.address = Address.fromString(contractAddress);
-  newRemoveUsersEvent.parameters = [];
+  newUsersRemovedEvent.address = Address.fromString(contractAddress);
+  newUsersRemovedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newRemoveUsersEvent.parameters.push(usersParam);
+  newUsersRemovedEvent.parameters.push(usersParam);
 
-  return newRemoveUsersEvent;
+  return newUsersRemovedEvent;
 }
 
 // calls

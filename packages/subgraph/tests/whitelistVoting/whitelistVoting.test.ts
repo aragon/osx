@@ -15,20 +15,20 @@ import {
   ADDRESS_ZERO
 } from '../constants';
 import {
-  createNewAddUsersEvent,
+  createNewUsersAddedEvent,
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
-  createNewRemoveUsersEvent,
+  createNewUsersRemovedEvent,
   createNewVoteStartedEvent,
   createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
   getVotesLengthCall
 } from './utils';
 import {
-  handleAddUsers,
+  handleUsersAdded,
   handleVoteCast,
   handleVoteExecuted,
-  handleRemoveUsers,
+  handleUsersRemoved,
   handleTrustedForwarderSet,
   handleConfigUpdated,
   _handleVoteStarted
@@ -214,17 +214,17 @@ test('Run Whitelist Voting (handleConfigUpdated) mappings with mock event', () =
   clearStore();
 });
 
-test('Run Whitelist Voting (handleAddUsers) mappings with mock event', () => {
+test('Run Whitelist Voting (handleUsersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewAddUsersEvent(userArray, VOTING_ADDRESS);
+  let event = createNewUsersAddedEvent(userArray, VOTING_ADDRESS);
 
   // handle event
-  handleAddUsers(event);
+  handleUsersAdded(event);
 
   // checks
   assert.fieldEquals(
@@ -243,7 +243,7 @@ test('Run Whitelist Voting (handleAddUsers) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Whitelist Voting (RemoveUsers) mappings with mock event', () => {
+test('Run Whitelist Voting (UsersRemoved) mappings with mock event', () => {
   // create state
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -257,10 +257,10 @@ test('Run Whitelist Voting (RemoveUsers) mappings with mock event', () => {
   }
 
   // create event
-  let event = createNewRemoveUsersEvent([userArray[1]], VOTING_ADDRESS);
+  let event = createNewUsersRemovedEvent([userArray[1]], VOTING_ADDRESS);
 
   // handle event
-  handleRemoveUsers(event);
+  handleUsersRemoved(event);
 
   // checks
   assert.fieldEquals(
