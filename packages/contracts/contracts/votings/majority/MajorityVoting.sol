@@ -23,6 +23,14 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     uint64 public minDuration;
     uint256 public votesLength;
 
+    error VoteSupportExceeded(uint64 limit, uint64 actual);
+    error VoteParticipationExceeded(uint64 limit, uint64 actual);
+    error VoteTimesForbidden(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    error VoteDurationZero();
+    error VoteCastForbidden(uint256 voteId, address sender);
+    error VoteExecutionForbidden(uint256 voteId);
+    error VotePowerZero();
+
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO

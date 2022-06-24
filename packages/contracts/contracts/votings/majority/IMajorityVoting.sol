@@ -30,14 +30,6 @@ interface IMajorityVoting {
         IDAO.Action[] actions;
     }
 
-    error VoteSupportExceeded(uint64 limit, uint64 actual);
-    error VoteParticipationExceeded(uint64 limit, uint64 actual);
-    error VoteTimesForbidden(uint64 current, uint64 start, uint64 end, uint64 minDuration);
-    error VoteDurationZero();
-    error VoteCastForbidden(uint256 voteId, address sender);
-    error VoteExecutionForbidden(uint256 voteId);
-    error VotePowerZero();
-
     event VoteStarted(uint256 indexed voteId, address indexed creator, bytes metadata);
     event VoteCast(
         uint256 indexed voteId,
