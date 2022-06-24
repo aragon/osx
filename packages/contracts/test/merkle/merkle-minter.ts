@@ -1,13 +1,10 @@
 // Copied and modified from: https://github.com/Uniswap/merkle-distributor/blob/master/test/MerkleDistributor.spec.ts
 
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../test-utils';
 import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 import {BigNumber} from 'ethers';
-
-chai.use(chaiUtils);
 
 import {
   MerkleMinter,

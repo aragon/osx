@@ -1,9 +1,6 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../test-utils';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
-
-chai.use(chaiUtils);
 
 import {DAO, GovernanceERC20} from '../../typechain';
 
@@ -185,12 +182,12 @@ describe('DAO', function () {
     });
 
     it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions)).to.be.equal(
+      expect(await dao.callStatic.execute(0, dummyActions)).to.deep.equal(
         expectedDummyResults
       );
     });
 
-    it('emits an event afterwards', async () => {
+    it.only('emits an event afterwards', async () => {
       expect(await dao.execute(0, dummyActions))
         .to.emit(dao, EVENTS.Executed)
         .withArgs(

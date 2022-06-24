@@ -1,11 +1,8 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers, waffle} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import chaiUtils from '../test-utils';
 import {VoterState, EVENTS, pct16, toBn} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-
-chai.use(chaiUtils);
 
 import {ERC20Voting, DAOMock} from '../../typechain';
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
@@ -132,7 +129,7 @@ describe('ERC20Voting', function () {
 
       expect(await voting.canVote(1, ownerAddress)).to.equal(false);
 
-      expect(vote.actions).to.eql([
+      expect(vote.actions).to.deep.equal([
         [dummyActions[0].to, toBn(dummyActions[0].value), dummyActions[0].data],
       ]);
     });
