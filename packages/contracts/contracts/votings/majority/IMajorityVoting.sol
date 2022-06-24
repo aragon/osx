@@ -81,26 +81,26 @@ interface IMajorityVoting {
         bool _executesIfDecided
     ) external;
 
-    /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
     /// @param _voteId the vote Id
     /// @param _voter the address of the voter to check
     /// @return bool true if user is allowed to vote
     function canVote(uint256 _voteId, address _voter) external view returns (bool);
 
-    /// @dev Method to execute a vote if allowed to
+    /// @notice Method to execute a vote if allowed to
     /// @param _voteId The ID of the vote to execute
     function execute(uint256 _voteId) external;
 
-    /// @dev Method to execute a vote if allowed to
+    /// @notice Method to execute a vote if allowed to
     /// @param _voteId The ID of the vote to execute
     function canExecute(uint256 _voteId) external view returns (bool);
 
-    /// @dev Return the state of a voter for a given vote by its ID
+    /// @notice Return the state of a voter for a given vote by its ID
     /// @param _voteId The ID of the vote
     /// @return VoterState of the requested voter for a certain vote
     function getVoterState(uint256 _voteId, address _voter) external view returns (VoterState);
 
-    /// @dev Return all information for a vote by its ID
+    /// @notice Return all information for a vote by its ID
     /// @param _voteId Vote id
     /// @return open Vote open status
     /// @return executed Vote executed status

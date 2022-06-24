@@ -71,7 +71,7 @@ contract WhitelistVoting is MajorityVoting {
         _addWhitelistedUsers(_users);
     }
 
-    /// @dev Internal function to add new users to the whitelist.
+    /// @notice Internal function to add new users to the whitelist.
     /// @param _users addresses of users to add
     function _addWhitelistedUsers(address[] calldata _users) internal {
         _whitelistUsers(_users, true);
@@ -146,7 +146,7 @@ contract WhitelistVoting is MajorityVoting {
         }
     }
 
-    /// @dev Internal function to cast a vote. It assumes the queried vote exists.
+    /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _voteId voteId
     /// @param _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
@@ -187,44 +187,36 @@ contract WhitelistVoting is MajorityVoting {
         }
     }
 
-    /**
-     *  @dev Tells whether user is whitelisted at specific block or past it.
-     *  @param account user address
-     *  @param blockNumber block number for which it checks if user is whitelisted
-     */
+    /// @notice Tells whether user is whitelisted at specific block or past it.
+    /// @param account user address
+    /// @param blockNumber block number for which it checks if user is whitelisted
     function isUserWhitelisted(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
-    /**
-     *  @dev returns total count of users that are whitelisted at specific block
-     *  @param blockNumber specific block to get count from
-     *  @return count of users that are whitelisted blockNumber or prior to it.
-     */
+    /// @notice returns total count of users that are whitelisted at specific block
+    /// @param blockNumber specific block to get count from
+    /// @return count of users that are whitelisted blockNumber or prior to it.
     function whitelistedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 
-    /**
-     * @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-     * @param _voteId The voteId
-     * @param _voter the address of the voter to check
-     * @return True if the given voter can participate a certain vote, false otherwise
-     */
+    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @param _voteId The voteId
+    /// @param _voter the address of the voter to check
+    /// @return True if the given voter can participate a certain vote, false otherwise
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);
     }
 
-    /**
-     *  @dev Adds or removes users from whitelist
-     *  @param _users user addresses
-     *  @param _enabled whether to add or remove from whitelist
-     */
+    /// @notice Adds or removes users from whitelist
+    /// @param _users user addresses
+    /// @param _enabled whether to add or remove from whitelist
     function _whitelistUsers(address[] calldata _users, bool _enabled) internal {
         _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
 

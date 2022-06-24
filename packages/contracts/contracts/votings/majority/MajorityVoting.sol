@@ -141,7 +141,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         actions = vote_.actions;
     }
 
-    /// @dev Internal function to cast a vote. It assumes the queried vote exists.
+    /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _voteId voteId
     /// @param _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
@@ -152,7 +152,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         bool _executesIfDecided
     ) internal virtual;
 
-    /// @dev Internal function to execute a vote. It assumes the queried vote exists.
+    /// @notice Internal function to execute a vote. It assumes the queried vote exists.
     /// @param _voteId the vote Id
     function _execute(uint256 _voteId) internal virtual {
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
@@ -162,13 +162,13 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         emit VoteExecuted(_voteId, execResults);
     }
 
-    /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
     /// @param _voteId The voteId
     /// @param _voter the address of the voter to check
     /// @return True if the given voter can participate a certain vote, false otherwise
     function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
 
-    /// @dev Internal function to check if a vote can be executed. It assumes the queried vote exists.
+    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _voteId vote id
     /// @return True if the given vote can be executed, false otherwise
     function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
@@ -209,7 +209,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         return true;
     }
 
-    /// @dev Internal function to check if a vote is still open
+    /// @notice Internal function to check if a vote is still open
     /// @param vote_ the vote struct
     /// @return True if the given vote is open, false otherwise
     function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
@@ -219,7 +219,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
             !vote_.executed;
     }
 
-    /// @dev Calculates whether `_value` is more than a percentage `_pct` of `_total`
+    /// @notice Calculates whether `_value` is more than a percentage `_pct` of `_total`
     /// @param _value the current value
     /// @param _total the total value
     /// @param _pct the required support percentage
