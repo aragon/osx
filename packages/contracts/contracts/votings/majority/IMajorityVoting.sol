@@ -73,12 +73,12 @@ interface IMajorityVoting {
         uint64 _minDuration
     ) external;
 
-    /// @notice Create a new vote on this concrete implementation
+    /// @notice Create a new vote
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata
     /// @param _actions The actions that will be executed after vote passes
-    /// @param _startDate The state date of the vote. If 0, uses current timestamp
+    /// @param _startDate The start date of the vote. If 0, uses current timestamp
     /// @param _endDate The end date of the vote. If 0, uses _start + minDuration
-    /// @param _executeIfDecided The configuration to enable automatic execution on the last required vote
+    /// @param _executeIfDecided Option to enable automatic execution on the last required vote
     /// @param _choice The vote choice to cast on creation
     /// @return voteId The ID of the vote
     function newVote(
@@ -90,7 +90,8 @@ interface IMajorityVoting {
         VoterState _choice
     ) external returns (uint256 voteId);
 
-    /// @notice Vote `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports]
+    /// @notice Votes for a vote option and optionally executes the vote
+    /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports]
     /// @param _voteId The ID of the vote
     /// @param  _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided Whether the vote should execute its action if it becomes decided

@@ -65,7 +65,7 @@ contract WhitelistVoting is MajorityVoting {
         return "0.0.1+opengsn.recipient.WhitelistVoting";
     }
 
-    /// @notice add new users to the whitelist.
+    /// @notice Adds new users to the whitelist
     /// @param _users addresses of users to add
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _addWhitelistedUsers(_users);
@@ -79,7 +79,7 @@ contract WhitelistVoting is MajorityVoting {
         emit UsersAdded(_users);
     }
 
-    /// @notice remove new users to the whitelist.
+    /// @notice Removes users to the whitelist.
     /// @param _users addresses of users to remove
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _whitelistUsers(_users, false);
@@ -87,13 +87,7 @@ contract WhitelistVoting is MajorityVoting {
         emit UsersRemoved(_users);
     }
 
-    /// @notice Create a new vote on this concrete implementation
-    /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata
-    /// @param _actions the actions that will be executed after vote passes
-    /// @param _startDate state date of the vote. If 0, uses current timestamp
-    /// @param _endDate end date of the vote. If 0, uses _start + minDuration
-    /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-    /// @param _choice Vote choice to cast on creationr
+    /// @inheritdoc IMajorityVoting
     function newVote(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
@@ -146,10 +140,7 @@ contract WhitelistVoting is MajorityVoting {
         }
     }
 
-    /// @notice Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId voteId
-    /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
+    /// @inheritdoc MajorityVoting
     function _vote(
         uint256 _voteId,
         VoterState _choice,
@@ -205,10 +196,7 @@ contract WhitelistVoting is MajorityVoting {
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 
-    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-    /// @param _voteId The voteId
-    /// @param _voter the address of the voter to check
-    /// @return True if the given voter can participate a certain vote, false otherwise
+    /// @inheritdoc MajorityVoting
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);

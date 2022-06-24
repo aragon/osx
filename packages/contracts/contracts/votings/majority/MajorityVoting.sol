@@ -164,7 +164,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote
     /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
+    /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
         uint256 _voteId,
         VoterState _choice,
