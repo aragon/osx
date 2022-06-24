@@ -50,7 +50,6 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
 
     /// @notice Thrown if the vote execution is forbidden
     error VoteExecutionForbidden(uint256 voteId);
-    error VotePowerZero();
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern

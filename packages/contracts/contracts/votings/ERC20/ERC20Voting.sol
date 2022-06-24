@@ -15,6 +15,9 @@ contract ERC20Voting is MajorityVoting {
 
     ERC20VotesUpgradeable private votingToken;
 
+    /// @notice Thrown if the voting power is zero
+    error VotingPowerZero();
+
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
@@ -74,7 +77,7 @@ contract ERC20Voting is MajorityVoting {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         uint256 votingPower = votingToken.getPastTotalSupply(snapshotBlock);
-        if (votingPower == 0) revert VotePowerZero();
+        if (votingPower == 0) revert VotingPowerZero();
 
         voteId = votesLength++;
 

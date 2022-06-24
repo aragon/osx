@@ -88,7 +88,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
         voting.newVote('0x00', [], 0, 0, false, VoterState.None)
-      ).to.be.revertedWith(customError('VotePowerZero'));
+      ).to.be.revertedWith(customError('VotingPowerZero'));
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
