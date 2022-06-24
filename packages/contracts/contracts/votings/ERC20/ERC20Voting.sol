@@ -107,7 +107,7 @@ contract ERC20Voting is MajorityVoting {
             }
         }
 
-        emit StartVote(voteId, _msgSender(), _proposalMetadata);
+        emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
             _vote(voteId, _choice, _msgSender(), _executeIfDecided);
@@ -150,7 +150,7 @@ contract ERC20Voting is MajorityVoting {
 
         vote_.voters[_voter] = _choice;
 
-        emit CastVote(_voteId, _voter, uint8(_choice), voterStake);
+        emit VoteCast(_voteId, _voter, uint8(_choice), voterStake);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);

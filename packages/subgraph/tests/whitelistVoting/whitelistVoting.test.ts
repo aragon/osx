@@ -16,22 +16,22 @@ import {
 } from '../constants';
 import {
   createNewAddUsersEvent,
-  createNewCastVoteEvent,
-  createNewExecuteVoteEvent,
+  createNewVoteCastEvent,
+  createNewVoteExecutedEvent,
   createNewRemoveUsersEvent,
-  createNewStartVoteEvent,
+  createNewVoteStartedEvent,
   createNewTrustedForwarderSetEvent,
-  createNewUpdateConfigEvent,
+  createNewConfigUpdatedEvent,
   getVotesLengthCall
 } from './utils';
 import {
   handleAddUsers,
-  handleCastVote,
-  handleExecuteVote,
+  handleVoteCast,
+  handleVoteExecuted,
   handleRemoveUsers,
   handleTrustedForwarderSet,
-  handleUpdateConfig,
-  _handleStartVote
+  handleConfigUpdated,
+  _handleVoteStarted
 } from '../../src/packages/whitelist/whitelistVoting';
 import {createDummyAcctions, createGetVoteCall} from '../utils';
 
@@ -43,7 +43,7 @@ let supportRequiredPct = '1000';
 let participationRequired = '500';
 let votingPower = '1000';
 
-test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
+test('Run Whitelist Voting (handleVoteStarted) mappings with mock event', () => {
   // create state
   let erc20VotingPackage = new WhitelistPackage(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -72,7 +72,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewStartVoteEvent(
+  let event = createNewVoteStartedEvent(
     voteId,
     ADDRESS_ONE,
     STRING_DATA,
@@ -80,7 +80,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   );
 
   // handle event
-  _handleStartVote(event, DAO_ADDRESS, STRING_DATA);
+  _handleVoteStarted(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +
@@ -122,7 +122,7 @@ test('Run Whitelist Voting (handleStartVote) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
+test('Run Whitelist Voting (handleVoteCast) mappings with mock event', () => {
   // create state
   let proposalId =
     Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
@@ -149,7 +149,7 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewCastVoteEvent(
+  let event = createNewVoteCastEvent(
     voteId,
     ADDRESS_ONE,
     '2',
@@ -157,7 +157,7 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
     VOTING_ADDRESS
   );
 
-  handleCastVote(event);
+  handleVoteCast(event);
 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposalId;
@@ -169,17 +169,17 @@ test('Run Whitelist Voting (handleCastVote) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Whitelist Voting (handleExecuteVote) mappings with mock event', () => {
+test('Run Whitelist Voting (handleVoteExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
   let erc20VotingProposal = new WhitelistProposal(entityID);
   erc20VotingProposal.save();
 
   // create event
-  let event = createNewExecuteVoteEvent('0', VOTING_ADDRESS);
+  let event = createNewVoteExecutedEvent('0', VOTING_ADDRESS);
 
   // handle event
-  handleExecuteVote(event);
+  handleVoteExecuted(event);
 
   // checks
   assert.fieldEquals('WhitelistProposal', entityID, 'id', entityID);
@@ -188,17 +188,17 @@ test('Run Whitelist Voting (handleExecuteVote) mappings with mock event', () => 
   clearStore();
 });
 
-test('Run Whitelist Voting (handleUpdateConfig) mappings with mock event', () => {
+test('Run Whitelist Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
   let erc20VotingPackage = new WhitelistPackage(entityID);
   erc20VotingPackage.save();
 
   // create event
-  let event = createNewUpdateConfigEvent('2', '1', '3600', VOTING_ADDRESS);
+  let event = createNewConfigUpdatedEvent('2', '1', '3600', VOTING_ADDRESS);
 
   // handle event
-  handleUpdateConfig(event);
+  handleConfigUpdated(event);
 
   // checks
   assert.fieldEquals('WhitelistPackage', entityID, 'id', entityID);

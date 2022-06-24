@@ -38,15 +38,15 @@ interface IMajorityVoting {
     error VoteExecutionForbidden(uint256 voteId);
     error VotePowerZero();
 
-    event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
-    event CastVote(
+    event VoteStarted(uint256 indexed voteId, address indexed creator, bytes metadata);
+    event VoteCast(
         uint256 indexed voteId,
         address indexed voter,
         uint8 voterState,
         uint256 voterWeight
     );
-    event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
-    event UpdateConfig(
+    event VoteExecuted(uint256 indexed voteId, bytes[] execResults);
+    event ConfigUpdated(
         uint64 participationRequiredPct,
         uint64 supportRequiredPct,
         uint64 minDuration

@@ -42,7 +42,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
 
         __MetaTxComponent_init(_dao, _gsnForwarder);
 
-        emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -53,7 +53,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     ) external auth(MODIFY_VOTE_CONFIG) {
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -151,7 +151,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
 
         votes[_voteId].executed = true;
 
-        emit ExecuteVote(_voteId, execResults);
+        emit VoteExecuted(_voteId, execResults);
     }
 
     /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.

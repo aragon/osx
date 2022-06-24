@@ -26,8 +26,9 @@ contract WhitelistVoting is MajorityVoting {
 
     error VoteCreationForbidden(address sender);
 
-    event AddUsers(address[] users);
-    event RemoveUsers(address[] users);
+    event UsersAdded(address[] users);
+
+    event UsersRemoved(address[] users);
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
@@ -75,7 +76,7 @@ contract WhitelistVoting is MajorityVoting {
     function _addWhitelistedUsers(address[] calldata _users) internal {
         _whitelistUsers(_users, true);
 
-        emit AddUsers(_users);
+        emit UsersAdded(_users);
     }
 
     /// @notice remove new users to the whitelist.
@@ -83,7 +84,7 @@ contract WhitelistVoting is MajorityVoting {
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _whitelistUsers(_users, false);
 
-        emit RemoveUsers(_users);
+        emit UsersRemoved(_users);
     }
 
     /// @notice Create a new vote on this concrete implementation
@@ -138,7 +139,7 @@ contract WhitelistVoting is MajorityVoting {
             }
         }
 
-        emit StartVote(voteId, _msgSender(), _proposalMetadata);
+        emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
             _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
@@ -179,7 +180,7 @@ contract WhitelistVoting is MajorityVoting {
 
         vote_.voters[_voter] = _choice;
 
-        emit CastVote(_voteId, _voter, uint8(_choice), 1);
+        emit VoteCast(_voteId, _voter, uint8(_choice), 1);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);
