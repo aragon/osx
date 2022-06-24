@@ -13,7 +13,7 @@ abstract contract IDAO {
         bytes data; // FuncSig + arguments
     }
 
-    /// @dev Required to handle the permissions within the whole DAO framework accordingly
+    /// @notice Required to handle the permissions within the whole DAO framework accordingly
     /// @param _where The address of the contract
     /// @param _who The address of a EOA or contract to give the permissions
     /// @param _role The hash of the role identifier
@@ -31,7 +31,7 @@ abstract contract IDAO {
     /// @param _metadata The IPFS hash of the new metadata object
     function setMetadata(bytes calldata _metadata) external virtual;
 
-    /// @dev Emitted when the DAO metadata is updated
+    /// @notice Emitted when the DAO metadata is updated
     /// @param metadata The IPFS hash of the new metadata object
     event MetadataSet(bytes metadata);
 
