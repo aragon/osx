@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
+
+### Removed
+- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
   
 ## v0.2.0-alpha
 
