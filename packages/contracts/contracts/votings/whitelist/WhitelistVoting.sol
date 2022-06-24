@@ -66,21 +66,21 @@ contract WhitelistVoting is MajorityVoting {
     }
 
     /// @notice Adds new users to the whitelist
-    /// @param _users addresses of users to add
+    /// @param _users The addresses of the users to be added
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _addWhitelistedUsers(_users);
     }
 
-    /// @notice Internal function to add new users to the whitelist.
-    /// @param _users addresses of users to add
+    /// @notice Internal function to add new users to the whitelist
+    /// @param _users The addresses of users to be added
     function _addWhitelistedUsers(address[] calldata _users) internal {
         _whitelistUsers(_users, true);
 
         emit UsersAdded(_users);
     }
 
-    /// @notice Removes users to the whitelist.
-    /// @param _users addresses of users to remove
+    /// @notice Removes users from the whitelist
+    /// @param _users The addresses of the users to be removed
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _whitelistUsers(_users, false);
 
@@ -178,18 +178,18 @@ contract WhitelistVoting is MajorityVoting {
         }
     }
 
-    /// @notice Tells whether user is whitelisted at specific block or past it.
-    /// @param account user address
-    /// @param blockNumber block number for which it checks if user is whitelisted
+    /// @notice Checks if a user is whitelisted at given block number
+    /// @param account The user address that is checked
+    /// @param blockNumber The block number
     function isUserWhitelisted(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
-    /// @notice returns total count of users that are whitelisted at specific block
-    /// @param blockNumber specific block to get count from
-    /// @return count of users that are whitelisted blockNumber or prior to it.
+    /// @notice Returns total count of users that are whitelisted at given block number
+    /// @param blockNumber The specific block to get the count from
+    /// @return The user count that were whitelisted at the specified block number
     function whitelistedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
