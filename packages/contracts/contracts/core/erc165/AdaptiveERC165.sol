@@ -29,14 +29,14 @@ contract AdaptiveERC165 is ERC165 {
     /// @notice Emmitted when a callback is received
     event CallbackReceived(bytes4 indexed sig, bytes data);
 
-    /// @notice Method to check if the contract supports a specific interface or not
+    /// @notice Checks if the contract supports a specific interface or not
     /// @param _interfaceId The identifier of the interface to check for
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return standardSupported[_interfaceId] || super.supportsInterface(_interfaceId);
     }
 
-    /// @notice This method is existing to be able to support future versions of the ERC165 or similar without upgrading the contracts.
-    /// @param _sig The function signature of the called method. (msg.sig)
+    /// @notice Handles callbacks to support future versions of the ERC165 or similar without upgrading the contracts.
+    /// @param _sig The function signature of the called method (msg.sig)
     /// @param _data The data resp. arguments passed to the method
     function _handleCallback(bytes4 _sig, bytes memory _data) internal {
         bytes32 magicNumber = callbackMagicNumbers[_sig];
@@ -54,8 +54,8 @@ contract AdaptiveERC165 is ERC165 {
 
     /// @notice Registers a standard and also callback
     /// @param _interfaceId The identifier of the interface to check for
-    /// @param _callbackSig The function signature of the called method. (msg.sig)
-    /// @param _magicNumber The data resp. arguments passed to the method
+    /// @param _callbackSig The function signature of the called method (msg.sig)
+    /// @param _magicNumber The magic number to be registered for the function signature
     function _registerStandardAndCallback(
         bytes4 _interfaceId,
         bytes4 _callbackSig,
@@ -73,8 +73,8 @@ contract AdaptiveERC165 is ERC165 {
     }
 
     /// @notice Registers a callback
-    /// @param _callbackSig The function signature of the called method. (msg.sig)
-    /// @param _magicNumber The data resp. arguments passed to the method
+    /// @param _callbackSig The function signature of the called method (msg.sig)
+    /// @param _magicNumber The magic number to be registered for the function signature
     function _registerCallback(bytes4 _callbackSig, bytes4 _magicNumber) internal {
         callbackMagicNumbers[_callbackSig] = _magicNumber;
         emit CallbackRegistered(_callbackSig, _magicNumber);
