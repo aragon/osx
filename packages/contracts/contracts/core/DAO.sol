@@ -202,12 +202,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @notice Emits the MetadataSet event if new metadata is set
-    /// @param _metadata Hash of the IPFS file object 
+    /// @param _metadata Hash of the IPFS file object
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
-    /// @notice Set trusted forwarder on the DAO and emits the event
+    /// @notice Sets the trusted forwarder on the DAO and emits the associated event
     /// @param _forwarder Address of the forwarder
     function _setTrustedForwarder(address _forwarder) internal {
         _trustedForwarder = _forwarder;
