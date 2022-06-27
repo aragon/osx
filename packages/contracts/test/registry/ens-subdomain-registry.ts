@@ -190,6 +190,45 @@ describe('ENSSubdomainRegistrar', function () {
     });
 
     postInitializationTests();
+
+    it('reverts if the ownersghip of the domain node is removed from the registrar', async () => {
+      // Initialize the registrar with the 'test' domain
+      registrar.initialize(
+        managingDao.address,
+        ens.address,
+        ensDomainHash('test')
+      );
+
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+      await managingDao.grant(
+        registrar.address,
+        await signers[1].getAddress(),
+        REGISTER_ENS_SUBDOMAIN_ROLE
+      );
+
+      // signers[1] can register subdomain
+      expect(
+        await registrar
+          .connect(signers[1])
+          .registerSubnode(ensLabelHash('my1'), await signers[1].getAddress())
+      );
+
+      // Remove ownership of 'test' from the registrar contract address through the parent domain node owner
+      await ens
+        .connect(signers[0])
+        .setSubnodeOwner(
+          ensDomainHash(''),
+          ensLabelHash('test'),
+          await signers[0].getAddress()
+        );
+
+      // signers[1] can't register subdomains anymore
+      await expect(
+        registrar
+          .connect(signers[1])
+          .registerSubnode(ensLabelHash('my2'), await signers[1].getAddress())
+      ).to.be.reverted;
+    });
   });
 
   describe('After deployment and approval of the registrar by the domain node owner', () => {
@@ -215,6 +254,39 @@ describe('ENSSubdomainRegistrar', function () {
     });
 
     postInitializationTests();
+
+    it('reverts if the approval of the registrar is removed', async () => {
+      // Initialize the registrar with the 'test' domain
+      registrar.initialize(
+        managingDao.address,
+        ens.address,
+        ensDomainHash('test')
+      );
+
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+      await managingDao.grant(
+        registrar.address,
+        await signers[1].getAddress(),
+        REGISTER_ENS_SUBDOMAIN_ROLE
+      );
+
+      // signers[1] can register subdomain
+      expect(
+        await registrar
+          .connect(signers[1])
+          .registerSubnode(ensLabelHash('my1'), await signers[1].getAddress())
+      );
+
+      // Remove approval of the registrar to manage  all domains owned by signers[0] including 'test'
+      await ens.connect(signers[0]).setApprovalForAll(registrar.address, false);
+
+      // signers[1] can't register subdomains anymore
+      await expect(
+        registrar
+          .connect(signers[1])
+          .registerSubnode(ensLabelHash('my2'), await signers[1].getAddress())
+      ).to.be.reverted;
+    });
   });
 
   function postInitializationTests() {
