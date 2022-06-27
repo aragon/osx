@@ -103,12 +103,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _setMetadata(_metadata);
     }
 
-    /// @notice If called, the list of provided actions will be executed.
-    /// @dev It runs a loop through the array of actions and executes them one by one.
-    /// @dev If one action fails, all will be reverted.
-    /// @param callId The id of the call
-    /// @dev The value of callId is defined by the component/contract calling execute. It can be used, for example, as a nonce.
-    /// @param _actions The array of actions
+    /// @inheritdoc IDAO
     function execute(uint256 callId, Action[] memory _actions)
         external
         override

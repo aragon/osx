@@ -8,17 +8,17 @@ abstract contract IDAO {
     bytes4 internal constant DAO_INTERFACE_ID = type(IDAO).interfaceId;
 
     struct Action {
-        address to; // Address to call.
-        uint256 value; // Value to be sent with the call. for example (ETH)
+        address to; // Address to call
+        uint256 value; // Value to be sent with the call (for example ETH if on mainnet)
         bytes data; // FuncSig + arguments
     }
 
-    /// @notice Required to handle the permissions within the whole DAO framework accordingly
+    /// @notice Checks if an address has permission on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the contract
     /// @param _who The address of a EOA or contract to give the permissions
     /// @param _role The hash of the role identifier
-    /// @param _data The optional data passed to the ACLOracle registered.
-    /// @return bool
+    /// @param _data The optional data passed to the ACLOracle registered
+    /// @return bool Returns whether the address has permission is or not
     function hasPermission(
         address _where,
         address _who,
@@ -26,7 +26,7 @@ abstract contract IDAO {
         bytes memory _data
     ) external virtual returns (bool);
 
-    /// @notice Update the DAO metadata
+    /// @notice Updates the DAO metadata
     /// @dev Sets a new IPFS hash
     /// @param _metadata The IPFS hash of the new metadata object
     function setMetadata(bytes calldata _metadata) external virtual;
@@ -35,10 +35,13 @@ abstract contract IDAO {
     /// @param metadata The IPFS hash of the new metadata object
     event MetadataSet(bytes metadata);
 
-    /// @notice If called, the list of provided actions will be executed.
-    /// @dev It runs a loop through the array of actions and execute them one by one.
+    /// @notice Executes a list of actions
+    /// @dev It runs a loop through the array of actions and executes them one by one.
     /// @dev If one action fails, all will be reverted.
-    /// @param _actions The aray of actions
+    /// @param callId The id of the call
+    /// @dev The value of callId is defined by the component/contract calling execute. It can be used, for example, as a nonce.
+    /// @param _actions The array of actions
+    /// @return bytes[] The array of results obtained from the executed actions in `bytes`
     function execute(uint256 callId, Action[] memory _actions)
         external
         virtual
@@ -113,11 +116,11 @@ abstract contract IDAO {
     /// @return The trusted forwarder address
     function trustedForwarder() external virtual returns (address);
 
-    /// @notice Emitted when setting a new TrustedForwarder on the DAO
+    /// @notice Emitted when a new TrustedForwarder is set on the DAO
     /// @param forwarder the new forwarder address
     event TrustedForwarderSet(address forwarder);
 
-    /// @notice Setter to set the signature validator contract of ERC1271
+    /// @notice Setter for the ERC1271 signature validator contract
     /// @param _signatureValidator ERC1271 SignatureValidator
     function setSignatureValidator(address _signatureValidator) external virtual;
 

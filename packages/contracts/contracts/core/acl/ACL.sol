@@ -182,7 +182,7 @@ contract ACL is Initializable {
         }
     }
 
-    /// @notice Checks if a caller has the permissions on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
+    /// @notice Checks if an address has permission on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) for which the permission is checked
     /// @param _role The hash of the role identifier
