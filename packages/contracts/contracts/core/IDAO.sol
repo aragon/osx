@@ -67,7 +67,7 @@ abstract contract IDAO {
         string calldata _reference
     ) external payable virtual;
 
-    /// @notice Emitted when a deposit is made
+    /// @notice Emitted when a deposit has been made to the DAO
     /// @param sender The address of the sender
     /// @param token The address of the token deposited
     /// @param amount The amount of tokens deposited
@@ -100,7 +100,7 @@ abstract contract IDAO {
         string memory _reference
     ) external virtual;
 
-    /// @notice Emitted when a withdraw is done
+    /// @notice Emitted when a withdrawal has been made from the DAO
     /// @param token The address of the token withdrawn
     /// @param to The address of the withdrawer
     /// @param amount The amount of tokens withdrawn
