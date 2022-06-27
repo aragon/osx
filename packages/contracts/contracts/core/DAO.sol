@@ -197,7 +197,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     }
 
     /// @notice Emits the MetadataSet event if new metadata is set
-    /// @param _metadata Hash of the IPFS file object
+    /// @param _metadata Hash of the IPFS metadata object
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
