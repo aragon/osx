@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Upcoming]
 
 ### Changed
-- Refactored event names and NatSpec comments
+- Refactored event names
   
 ## v0.2.0-alpha
 
