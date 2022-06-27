@@ -9,7 +9,7 @@ import "../core/IDAO.sol";
 import "../plugin/IPluginRepo.sol";
 
 /// @title Register plugin
-/// @author Sarkawt Noori - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a plugin pluginRepo by a unique address.
 contract AragonPluginRegistry is InterfaceBasedRegistry {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");

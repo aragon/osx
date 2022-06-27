@@ -9,12 +9,13 @@ import "../registry/AragonPluginRegistry.sol";
 import "../plugin/PluginRepo.sol";
 
 /// @title PluginRepoFactory to create a PluginRepo
-/// @author Sarkawt Noori - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice This contract is used to create a PluginRepo and register it on AragonPluginRegistry contract.
 contract PluginRepoFactory {
     AragonPluginRegistry public aragonPluginRegistry;
     address public pluginRepoBase;
 
+    // @notice Thrown if the repo name is empty
     error EmptyName();
 
     constructor(AragonPluginRegistry _aragonPluginRegistry) {
