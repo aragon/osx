@@ -19,23 +19,29 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
-    /// @notice Thrown version bump is invalid
+    /// @notice Thrown if version bump is invalid
+    /// @param currentVersion The current semantic version
+    /// @param nextVersion The next semantic version
     error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
 
     /// @notice Thrown if contract does not change on major bump
     error InvalidContractAddressForMajorBump();
 
     /// @notice Thrown if version does not exist
-    error VersionDoesNotExist();
+    /// @param versionIdx The index of the version
+    error VersionIdxDoesNotExist(uint256 versionIdx);
 
-    /// @notice Thrown if contract does not have IPluginFactory interface
-    error InvalidPluginInterface();
+    /// @notice Thrown if contract does not have `IPluginFactory` interface
+    /// @param pluginFactoryAddress The address of the contract
+    error InvalidPluginInterface(address pluginFactoryAddress);
 
-    /// @notice Thrown if address is not a PluginFactory contract
-    error InvalidPluginContract();
+    /// @notice Thrown if address is not a `PluginFactory` contract
+    /// @param pluginFactoryAddress The address of the contract
+    error InvalidPluginFactoryContract(address pluginFactoryAddress);
 
     /// @notice Thrown if address is not a contract
-    error InvalidContractAddress();
+    /// @param pluginFactoryAddress The address of the contract
+    error InvalidContractAddress(address pluginFactoryAddress);
 
     struct Version {
         uint16[3] semanticVersion;
@@ -76,16 +82,20 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_ROLE) {
         // check if _pluginFactoryAddress is IPluginFactory
-        if (!Address.isContract(_pluginFactoryAddress)) revert InvalidContractAddress();
+        if (!Address.isContract(_pluginFactoryAddress)) {
+            revert InvalidContractAddress({pluginFactoryAddress: _pluginFactoryAddress});
+        }
 
         try
             IPluginFactory(_pluginFactoryAddress).supportsInterface(
                 PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
             )
         returns (bool result) {
-            if (!result) revert InvalidPluginInterface();
+            if (!result) {
+                revert InvalidPluginInterface({pluginFactoryAddress: _pluginFactoryAddress});
+            }
         } catch {
-            revert InvalidPluginContract();
+            revert InvalidPluginFactoryContract({pluginFactoryAddress: _pluginFactoryAddress});
         }
 
         address basePluginAddress = IPluginFactory(_pluginFactoryAddress).getBasePluginAddress();
@@ -186,7 +196,8 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             bytes memory contentURI
         )
     {
-        if (_versionIdx <= 0 || _versionIdx >= nextVersionIndex) revert VersionDoesNotExist();
+        if (_versionIdx <= 0 || _versionIdx >= nextVersionIndex)
+            revert VersionIdxDoesNotExist({versionIdx: _versionIdx});
         Version storage version = versions[_versionIdx];
         return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
     }

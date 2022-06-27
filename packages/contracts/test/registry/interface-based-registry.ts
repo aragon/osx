@@ -58,7 +58,9 @@ describe('InterfaceBasedRegistry', function () {
 
       await expect(
         interfaceBasedRegistryMock.register(adaptiveERC165.address)
-      ).to.be.revertedWith('ContractInterfaceInvalid');
+      ).to.be.revertedWith(
+        customError('ContractInterfaceInvalid', adaptiveERC165.address)
+      );
     });
 
     it('fail to register if the sender lacks the required role', async () => {
@@ -93,8 +95,8 @@ describe('InterfaceBasedRegistry', function () {
       );
     });
 
-    it('register known interface', async () => {
-      // check if address is not already registered
+    it('register a contract with known interface', async () => {
+      // make sure the address is not already registered
       expect(await interfaceBasedRegistryMock.entries(dao.address)).to.equal(
         false
       );

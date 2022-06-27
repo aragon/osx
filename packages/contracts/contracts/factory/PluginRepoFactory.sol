@@ -32,6 +32,7 @@ contract PluginRepoFactory {
     }
 
     /// @notice Creates and registers a new, named `PluginRepo` and publishes an initial version with contract
+    /// @dev Initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the `_dev`
     /// @param _name PluginRepo name
     /// @param _initialSemanticVersion Semantic version for new pluginRepo version
     /// @param _pluginFactoryAddress address for the factory smart contract of the version
@@ -44,10 +45,10 @@ contract PluginRepoFactory {
         bytes memory _contentURI,
         address _dev
     ) external returns (PluginRepo pluginRepo) {
-        pluginRepo = _newPluginRepo(_name, address(this)); // need to have permissions to create version
+        pluginRepo = _newPluginRepo(_name, address(this)); // Set `address(this)` as initial owner
         pluginRepo.newVersion(_initialSemanticVersion, _pluginFactoryAddress, _contentURI);
 
-        // setup permissions
+        // Setup permissions and transfer ownership to `_dev`
         setPluginRepoPermissions(pluginRepo, _dev);
     }
 
