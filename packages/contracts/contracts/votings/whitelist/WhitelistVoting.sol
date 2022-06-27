@@ -24,10 +24,16 @@ contract WhitelistVoting is MajorityVoting {
     mapping(address => Checkpoints.History) private _checkpoints;
     Checkpoints.History private _totalCheckpoints;
 
+    /// @notice Thrown when a sender is not allowed to create a vote
+    /// @param sender The sender address
     error VoteCreationForbidden(address sender);
 
+    /// @notice Emitted when new users are added to the whitelist
+    /// @param users The array of user addresses to be added
     event UsersAdded(address[] users);
 
+    /// @notice Emitted when users are removed from the whitelist
+    /// @param users The array of user addresses to be removed
     event UsersRemoved(address[] users);
 
     /// @notice Initializes the component
