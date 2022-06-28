@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
-- added `IPluginRepo` interface for plugin PluginRepo contract.
-- added `PluginRepo` contract.
-- added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
-- added `AragonPluginRegistry` contract for registering `PluginRepo`s.
-- added `PluginRepoFactory` contract for creating `PluginRepo`s.
-- added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
-- added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
+- Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
+- Added `IPluginRepo` interface for plugin PluginRepo contract.
+- Added `PluginRepo` contract.
+- Added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
+- Added `AragonPluginRegistry` contract for registering `PluginRepo`s.
+- Added `PluginRepoFactory` contract for creating `PluginRepo`s.
+- Added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
+- Added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 
@@ -29,8 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
-  
+- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events
+- Removed `ERC165Registry`
+
 ## v0.2.0-alpha
 
 ### Added
