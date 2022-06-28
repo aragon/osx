@@ -4,9 +4,6 @@ on:
     paths:
       - 'packages/contracts/**'
       - '.github/workflows/contract-*.yml'
-    branches-ignore:
-      - develop
-      - main
 
 env:
   working-directory: packages/contracts
