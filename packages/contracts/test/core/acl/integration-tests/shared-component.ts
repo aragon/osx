@@ -113,14 +113,24 @@ describe('SharedComponent', function () {
         oracle.address
       );
 
-      // The call fails if the ID differs
+      // The call fails because no object with ID 1 exists
       await expect(
         testComponent.callStatic.idGatedAction(nonExistingId)
       ).to.be.revertedWith(customError('ObjectIdNotAssigned', nonExistingId));
-      
+
+      // Create object with ID 0
+      let tx = await testComponent.createNewObject(dao1.address);
+      await tx.wait();
+      await ethers.provider.send('evm_mine', []);
+
+      // The call still fails because no object with ID 1 exists
       await expect(
-        testComponent.callStatic.idGatedAction(allowedId)
-      ).to.not.be.reverted();
+        testComponent.callStatic.idGatedAction(nonExistingId)
+      ).to.be.revertedWith(customError('ObjectIdNotAssigned', nonExistingId));
+
+      // The call executes for the allowed ID 0
+      await expect(testComponent.callStatic.idGatedAction(allowedId)).to.not.be
+        .reverted;
     });
 
     it('reverts if the ID is not allowed', async () => {

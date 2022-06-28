@@ -18,7 +18,7 @@ contract TestSharedComponent is Component {
     error ObjectIdNotAssigned(uint256 _id);
 
     modifier sharedAuth(uint256 _id, bytes32 _role) {
-        if (_id > _counter) {
+        if (address(ownedIds[_id]) == address(0)) {
             revert ObjectIdNotAssigned(_id);
         }
 
