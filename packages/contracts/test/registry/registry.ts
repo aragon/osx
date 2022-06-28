@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {customError} from './test-utils/custom-error-helper';
+import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',

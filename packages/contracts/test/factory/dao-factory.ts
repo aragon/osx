@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {VoterState} from './test-utils/voting';
-import {customError} from './test-utils/custom-error-helper';
+import {VoterState} from '../test-utils/voting';
+import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
