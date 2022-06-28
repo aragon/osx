@@ -141,7 +141,7 @@ describe('SharedComponent', function () {
       const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
       oracle = await Oracle.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
+      // Grants signers[0] the permission to do ID gated actions on `testComponent` via `oracle`
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
