@@ -5,12 +5,12 @@ import {ERRORS} from '../../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
 
-import {ComponentMock, DAOMock} from '../../../typechain';
+import {TestComponent, DAOMock} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 describe('Component', function () {
   let signers: SignerWithAddress[];
-  let componentMock: ComponentMock;
+  let testComponent: TestComponent;
   let daoMock: DAOMock;
   let ownerAddress: string;
 
@@ -23,23 +23,23 @@ describe('Component', function () {
   });
 
   beforeEach(async () => {
-    const ComponentMock = await ethers.getContractFactory('ComponentMock');
-    componentMock = await ComponentMock.deploy();
+    const TestComponent = await ethers.getContractFactory('TestComponent');
+    testComponent = await TestComponent.deploy();
 
-    await componentMock.initialize(daoMock.address);
+    await testComponent.initialize(daoMock.address);
   });
 
   describe('Initialization', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(
-        componentMock.initialize(daoMock.address)
+        testComponent.initialize(daoMock.address)
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('Context: ', async () => {
     it('returns the right message sender', async () => {
-      expect(await componentMock.msgSender()).to.be.equal(ownerAddress);
+      expect(await testComponent.msgSender()).to.be.equal(ownerAddress);
     });
   });
 });
