@@ -117,6 +117,10 @@ describe('SharedComponent', function () {
       await expect(
         testComponent.callStatic.idGatedAction(nonExistingId)
       ).to.be.revertedWith(customError('ObjectIdNotAssigned', nonExistingId));
+      
+      await expect(
+        testComponent.callStatic.idGatedAction(allowedId)
+      ).to.not.be.reverted();
     });
 
     it('reverts if the ID is not allowed', async () => {
