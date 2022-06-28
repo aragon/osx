@@ -164,7 +164,8 @@ describe('SharedComponent', function () {
       await ethers.provider.send('evm_mine', []);
 
       // The call is allowed for the allowed ID
-      expect(testComponent.callStatic.idGatedAction(allowedId));
+      await expect(testComponent.callStatic.idGatedAction(allowedId)).to.not.be
+        .reverted;
 
       // The call fails if the ID differs
       await expect(
