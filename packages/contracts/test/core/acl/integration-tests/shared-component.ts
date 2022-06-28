@@ -91,7 +91,8 @@ describe('SharedComponent', function () {
       await ethers.provider.send('evm_mine', []);
 
       // Check that the ID gated action can be executed
-      expect(testComponent.callStatic.idGatedAction(allowedId));
+      await expect(testComponent.callStatic.idGatedAction(allowedId)).to.not.be
+        .reverted;
     });
 
     it('reverts if the ID does not exist', async () => {
