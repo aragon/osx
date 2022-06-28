@@ -7,7 +7,7 @@ import "../core/component/Permissions.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 
 /// @title An ERC165-based registry for contracts
-/// @author Michel Heuer, Sarkawt Noori - Aragon Association - 2022
+/// @author Aragon Association - 2022
 /// @notice This contract allows to register contracts
 abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
