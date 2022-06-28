@@ -16,7 +16,7 @@ contract ERC20Voting is MajorityVoting {
     ERC20VotesUpgradeable private votingToken;
 
     /// @notice Thrown if the voting power is zero
-    error VotingPowerZero();
+    error NoVotingPower();
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
@@ -71,7 +71,7 @@ contract ERC20Voting is MajorityVoting {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         uint256 votingPower = votingToken.getPastTotalSupply(snapshotBlock);
-        if (votingPower == 0) revert VotingPowerZero();
+        if (votingPower == 0) revert NoVotingPower();
 
         voteId = votesLength++;
 
