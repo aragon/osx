@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {EVENTS, pct16} from '../test-utils/voting';
+import {VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 import {MajorityVotingMock, DAOMock} from '../../typechain';
@@ -89,7 +89,7 @@ describe('MajorityVotingMock', function () {
 
     it('should change config successfully', async () => {
       expect(await votingBase.changeVoteConfig(2, 4, 8))
-        .to.emit(votingBase, EVENTS.UPDATE_CONFIG)
+        .to.emit(votingBase, VOTING_EVENTS.CONFIG_UPDATED)
         .withArgs(2, 4, 8);
     });
   });

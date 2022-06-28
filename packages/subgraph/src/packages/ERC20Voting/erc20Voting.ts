@@ -1,8 +1,8 @@
 import {
-  CastVote,
-  StartVote,
-  ExecuteVote,
-  UpdateConfig,
+  VoteCast,
+  VoteStarted,
+  VoteExecuted,
+  ConfigUpdated,
   ERC20Voting,
   TrustedForwarderSet
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
@@ -16,16 +16,16 @@ import {
 import {dataSource} from '@graphprotocol/graph-ts';
 import {VOTER_STATE} from '../../utils/constants';
 
-export function handleStartVote(event: StartVote): void {
+export function handleVoteStarted(event: VoteStarted): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
   let metadata = event.params.metadata.toString();
-  _handleStartVote(event, daoId, metadata);
+  _handleVoteStarted(event, daoId, metadata);
 }
 
 // work around: to bypass context and ipfs for testing, as they are not yet supported by matchstick
-export function _handleStartVote(
-  event: StartVote,
+export function _handleVoteStarted(
+  event: VoteStarted,
   daoId: string,
   metadata: string
 ): void {
@@ -88,7 +88,7 @@ export function _handleStartVote(
   }
 }
 
-export function handleCastVote(event: CastVote): void {
+export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
@@ -124,7 +124,7 @@ export function handleCastVote(event: CastVote): void {
   }
 }
 
-export function handleExecuteVote(event: ExecuteVote): void {
+export function handleVoteExecuted(event: VoteExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let proposalEntity = ERC20VotingProposal.load(proposalId);
@@ -155,7 +155,7 @@ export function handleExecuteVote(event: ExecuteVote): void {
   }
 }
 
-export function handleUpdateConfig(event: UpdateConfig): void {
+export function handleConfigUpdated(event: ConfigUpdated): void {
   let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.supportRequiredPct = event.params.supportRequiredPct;

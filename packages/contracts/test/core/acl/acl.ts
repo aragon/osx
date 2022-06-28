@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {ACLTest, ACLOracleMock} from '../../typechain';
+import {ACLTest, ACLOracleMock} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {customError} from '../test-utils/custom-error-helper';
+import {customError} from '../../test-utils/custom-error-helper';
 
 const ROOT_ROLE = ethers.utils.id('ROOT_ROLE');
 const ADMIN_ROLE = ethers.utils.id('ADMIN_ROLE');

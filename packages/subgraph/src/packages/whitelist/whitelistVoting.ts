@@ -1,10 +1,10 @@
 import {
-  CastVote,
-  StartVote,
-  ExecuteVote,
-  UpdateConfig,
-  AddUsers,
-  RemoveUsers,
+  VoteCast,
+  VoteStarted,
+  VoteExecuted,
+  ConfigUpdated,
+  UsersAdded,
+  UsersRemoved,
   WhitelistVoting,
   TrustedForwarderSet
 } from '../../../generated/templates/WhitelistVoting/WhitelistVoting';
@@ -18,16 +18,16 @@ import {
 import {dataSource, store} from '@graphprotocol/graph-ts';
 import {VOTER_STATE} from '../../utils/constants';
 
-export function handleStartVote(event: StartVote): void {
+export function handleVoteStarted(event: VoteStarted): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
   let metdata = event.params.metadata.toString();
-  _handleStartVote(event, daoId, metdata);
+  _handleVoteStarted(event, daoId, metdata);
 }
 
 // work around: to bypass context and ipfs for testing, as they are not yet supported by matchstick
-export function _handleStartVote(
-  event: StartVote,
+export function _handleVoteStarted(
+  event: VoteStarted,
   daoId: string,
   metadata: string
 ): void {
@@ -90,7 +90,7 @@ export function _handleStartVote(
   }
 }
 
-export function handleCastVote(event: CastVote): void {
+export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
@@ -119,7 +119,7 @@ export function handleCastVote(event: CastVote): void {
   }
 }
 
-export function handleExecuteVote(event: ExecuteVote): void {
+export function handleVoteExecuted(event: VoteExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let proposalEntity = WhitelistProposal.load(proposalId);
@@ -150,7 +150,7 @@ export function handleExecuteVote(event: ExecuteVote): void {
   }
 }
 
-export function handleUpdateConfig(event: UpdateConfig): void {
+export function handleConfigUpdated(event: ConfigUpdated): void {
   let packageEntity = WhitelistPackage.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.participationRequiredPct =
@@ -161,7 +161,7 @@ export function handleUpdateConfig(event: UpdateConfig): void {
   }
 }
 
-export function handleAddUsers(event: AddUsers): void {
+export function handleUsersAdded(event: UsersAdded): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
@@ -174,7 +174,7 @@ export function handleAddUsers(event: AddUsers): void {
   }
 }
 
-export function handleRemoveUsers(event: RemoveUsers): void {
+export function handleUsersRemoved(event: UsersRemoved): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];

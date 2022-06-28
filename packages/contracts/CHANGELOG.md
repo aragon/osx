@@ -5,20 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Upcoming]
 
 ### Added
+
+- added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
+- added `IPluginRepo` interface for plugin PluginRepo contract.
+- added `PluginRepo` contract.
+- added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
+- added `AragonPluginRegistry` contract for registering `PluginRepo`s.
+- added `PluginRepoFactory` contract for creating `PluginRepo`s.
+- added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
+- added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 
+### Changed
+
+- Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`
+- Changed order of deployment scripts
+- Changed folder struction of tests
+- Refactored event names and NatSpec comments
+
 ### Removed
+
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
   
 ## v0.2.0-alpha
 
 ### Added
 
+- Added tests for the `ACL` and `IACLOracle`
 - Allow tokens to be minted to DAO's treasury by passing address(0) as receiver in `TokenFactory`.
 
 ### Changed

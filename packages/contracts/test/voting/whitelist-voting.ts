@@ -1,10 +1,14 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {VoterState, EVENTS, pct16, toBn} from '../test-utils/voting';
+import {VoterState, VOTING_EVENTS, pct16, toBn} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 import {WhitelistVoting, DAOMock} from '../../typechain';
+
+const DAO_EVENTS = {
+  EXECUTED: 'Executed',
+};
 
 describe('WhitelistVoting', function () {
   let signers: SignerWithAddress[];
@@ -147,7 +151,7 @@ describe('WhitelistVoting', function () {
       expect(
         await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None)
       )
-        .to.emit(voting, EVENTS.START_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(0, ownerAddress, '0x00');
 
       const block = await ethers.provider.getBlock('latest');
@@ -175,9 +179,9 @@ describe('WhitelistVoting', function () {
       expect(
         await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea)
       )
-        .to.emit(voting, EVENTS.START_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(0, ownerAddress, '0x00')
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
       const block = await ethers.provider.getBlock('latest');
@@ -221,21 +225,21 @@ describe('WhitelistVoting', function () {
     // VoterState.Yea
     it('increases the yea or nay count and emit correct events', async () => {
       expect(await voting.vote(0, VoterState.Yea, false))
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
       let vote = await voting.getVote(0);
       expect(vote.yea).to.equal(1);
 
       expect(await voting.vote(0, VoterState.Nay, false))
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Nay, 1);
 
       vote = await voting.getVote(0);
       expect(vote.nay).to.equal(1);
 
       expect(await voting.vote(0, VoterState.Abstain, false))
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Abstain, 1);
 
       vote = await voting.getVote(0);
