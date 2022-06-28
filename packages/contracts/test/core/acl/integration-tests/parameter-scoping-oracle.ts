@@ -1,6 +1,5 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../../../test-utils';
 import {customError} from '../../../test-utils/custom-error-helper';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
@@ -8,8 +7,6 @@ import {
   TestComponent,
   DAO,
 } from '../../../../typechain';
-
-chai.use(chaiUtils);
 
 const DO_SOMETHING_ROLE = ethers.utils.id('DO_SOMETHING_ROLE');
 
