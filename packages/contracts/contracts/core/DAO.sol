@@ -40,8 +40,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     error ZeroAmount();
 
     /// @notice Thrown if the expected and actually deposited ETH amount mismatch
-    /// @param expected ETH amount
-    /// @param actual ETH amount
+    /// @param expected Expected ETH amount
+    /// @param actual Actual ETH amount
     error ETHDepositAmountMismatch(uint256 expected, uint256 actual);
 
     /// @notice Thrown if an ETH withdraw fails
@@ -186,7 +186,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// @dev Emit ETHDeposited event to track ETH deposits that weren't done over the deposit method.
+    /// @dev Emits ETHDeposited event to track ETH deposits that weren't done over the deposit method.
     receive() external payable {
         emit ETHDeposited(msg.sender, msg.value);
     }
@@ -196,10 +196,14 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 
+    /// @notice Emits the MetadataSet event if new metadata is set
+    /// @param _metadata Hash of the IPFS metadata object
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
+    /// @notice Sets the trusted forwarder on the DAO and emits the associated event
+    /// @param _forwarder Address of the forwarder
     function _setTrustedForwarder(address _forwarder) internal {
         _trustedForwarder = _forwarder;
 
