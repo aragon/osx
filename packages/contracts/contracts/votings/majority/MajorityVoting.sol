@@ -23,6 +23,34 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     uint64 public minDuration;
     uint256 public votesLength;
 
+    /// @notice Thrown if the maximal possible support is exceeded
+    /// @param limit The maximal value
+    /// @param actual The actual value
+    error VoteSupportExceeded(uint64 limit, uint64 actual);
+
+    /// @notice Thrown if the maximal possible participation is exceeded
+    /// @param limit The maximal value
+    /// @param actual The actual value
+    error VoteParticipationExceeded(uint64 limit, uint64 actual);
+
+    /// @notice Thrown if the selected vote times are not allowed
+    /// @param current The maximal value
+    /// @param start The start date of the vote as a unix timestamp
+    /// @param end The end date of the vote as a unix timestamp
+    /// @param minDuration The minimal duration of the vote in seconds
+    error VoteTimesForbidden(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+
+    /// @notice Thrown if the selected vote duration is zero
+    error VoteDurationZero();
+
+    /// @notice Thrown if a voter is not allowed to cast a vote
+    /// @param voteId The ID of the vote
+    /// @param sender The address of the voter
+    error VoteCastForbidden(uint256 voteId, address sender);
+
+    /// @notice Thrown if the vote execution is forbidden
+    error VoteExecutionForbidden(uint256 voteId);
+
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
@@ -42,7 +70,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
 
         __MetaTxComponent_init(_dao, _gsnForwarder);
 
-        emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -53,7 +81,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     ) external auth(MODIFY_VOTE_CONFIG) {
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        emit UpdateConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -133,10 +161,10 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         actions = vote_.actions;
     }
 
-    /// @dev Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId voteId
+    /// @notice Internal function to cast a vote. It assumes the queried vote exists.
+    /// @param _voteId The ID of the vote
     /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
+    /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
         uint256 _voteId,
         VoterState _choice,
@@ -144,24 +172,24 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         bool _executesIfDecided
     ) internal virtual;
 
-    /// @dev Internal function to execute a vote. It assumes the queried vote exists.
-    /// @param _voteId the vote Id
+    /// @notice Internal function to execute a vote. It assumes the queried vote exists.
+    /// @param _voteId The ID of the vote
     function _execute(uint256 _voteId) internal virtual {
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         votes[_voteId].executed = true;
 
-        emit ExecuteVote(_voteId, execResults);
+        emit VoteExecuted(_voteId, execResults);
     }
 
-    /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-    /// @param _voteId The voteId
+    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @param _voteId The ID of the vote
     /// @param _voter the address of the voter to check
     /// @return True if the given voter can participate a certain vote, false otherwise
     function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
 
-    /// @dev Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// @param _voteId vote id
+    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
+    /// @param _voteId The ID of the vote
     /// @return True if the given vote can be executed, false otherwise
     function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
         Vote storage vote_ = votes[_voteId];
@@ -201,7 +229,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         return true;
     }
 
-    /// @dev Internal function to check if a vote is still open
+    /// @notice Internal function to check if a vote is still open
     /// @param vote_ the vote struct
     /// @return True if the given vote is open, false otherwise
     function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
@@ -211,7 +239,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
             !vote_.executed;
     }
 
-    /// @dev Calculates whether `_value` is more than a percentage `_pct` of `_total`
+    /// @notice Calculates whether `_value` is more than a percentage `_pct` of `_total`
     /// @param _value the current value
     /// @param _total the total value
     /// @param _pct the required support percentage

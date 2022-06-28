@@ -49,7 +49,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         bytes contentURI;
     }
 
-    uint256 internal nextVersionIndex = 0;
+    uint256 internal nextVersionIndex;
     mapping(uint256 => Version) internal versions;
     mapping(bytes32 => uint256) internal versionIdxForSemantic;
     mapping(address => uint256) internal versionIdxForContract;

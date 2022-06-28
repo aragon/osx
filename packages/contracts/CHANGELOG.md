@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
 - added `IPluginRepo` interface for plugin PluginRepo contract.
 - added `PluginRepo` contract.
-- added `InterfaceBasedRegistry` component to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
+- added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
 - added `AragonPluginRegistry` contract for registering `PluginRepo`s.
 - added `PluginRepoFactory` contract for creating `PluginRepo`s.
 - added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
@@ -22,10 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`
 - Changed order of deployment scripts
 - Changed folder struction of tests
+- Refactored event names and NatSpec comments
 
 ### Removed
+
+- `ERC165Registry` removed
 
 ## v0.2.0-alpha
 

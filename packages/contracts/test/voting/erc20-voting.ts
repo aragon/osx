@@ -2,7 +2,7 @@ import chai, {expect} from 'chai';
 import {ethers, waffle} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import chaiUtils from '../test-utils';
-import {VoterState, EVENTS, pct16, toBn} from '../test-utils/voting';
+import {VoterState, VOTING_EVENTS, pct16, toBn} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 chai.use(chaiUtils);
@@ -11,6 +11,10 @@ import {ERC20Voting, DAOMock} from '../../typechain';
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 
 const {deployMockContract} = waffle;
+
+const DAO_EVENTS = {
+  EXECUTED: 'Executed',
+};
 
 describe('ERC20Voting', function () {
   let signers: SignerWithAddress[];
@@ -84,7 +88,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
         voting.newVote('0x00', [], 0, 0, false, VoterState.None)
-      ).to.be.revertedWith(customError('VotePowerZero'));
+      ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
@@ -113,7 +117,7 @@ describe('ERC20Voting', function () {
       expect(
         await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None)
       )
-        .to.emit(voting, EVENTS.START_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(0, ownerAddress, '0x00');
 
       const block = await ethers.provider.getBlock('latest');
@@ -144,9 +148,9 @@ describe('ERC20Voting', function () {
       expect(
         await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea)
       )
-        .to.emit(voting, EVENTS.START_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(0, ownerAddress, '0x00')
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
       const block = await ethers.provider.getBlock('latest');
@@ -191,21 +195,21 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       expect(await voting.vote(0, VoterState.Yea, false))
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Yea, 1);
 
       let vote = await voting.getVote(0);
       expect(vote.yea).to.equal(1);
 
       expect(await voting.vote(0, VoterState.Nay, false))
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Nay, 1);
 
       vote = await voting.getVote(0);
       expect(vote.nay).to.equal(1);
 
       expect(await voting.vote(0, VoterState.Abstain, false))
-        .to.emit(voting, EVENTS.CAST_VOTE)
+        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(0, ownerAddress, VoterState.Abstain, 1);
 
       vote = await voting.getVote(0);
@@ -300,7 +304,7 @@ describe('ERC20Voting', function () {
 
       // supports and should execute right away.
       expect(await voting.vote(0, VoterState.Yea, true))
-        .to.emit(daoMock, EVENTS.EXECUTED)
+        .to.emit(daoMock, DAO_EVENTS.EXECUTED)
         .withArgs(
           voting.address,
           0,
@@ -312,7 +316,9 @@ describe('ERC20Voting', function () {
             ],
           ],
           []
-        );
+        )
+        .to.emit(voting, VOTING_EVENTS.VOTE_EXECUTED)
+        .withArgs(0, []);
 
       const vote = await voting.getVote(0);
 

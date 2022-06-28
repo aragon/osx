@@ -1,12 +1,12 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 import {
-  StartVote,
-  CastVote,
-  ExecuteVote,
-  UpdateConfig,
-  AddUsers,
-  RemoveUsers,
+  VoteStarted,
+  VoteCast,
+  VoteExecuted,
+  ConfigUpdated,
+  UsersAdded,
+  UsersRemoved,
   TrustedForwarderSet
 } from '../../generated/templates/WhitelistVoting/WhitelistVoting';
 
@@ -33,16 +33,16 @@ export function createNewTrustedForwarderSetEvent(
   return newTrustedForwarderSetEvent;
 }
 
-export function createNewStartVoteEvent(
+export function createNewVoteStartedEvent(
   voteId: string,
   creator: string,
   description: string,
   contractAddress: string
-): StartVote {
-  let newStartVoteEvent = changetype<StartVote>(newMockEvent());
+): VoteStarted {
+  let newVoteStartedEvent = changetype<VoteStarted>(newMockEvent());
 
-  newStartVoteEvent.address = Address.fromString(contractAddress);
-  newStartVoteEvent.parameters = [];
+  newVoteStartedEvent.address = Address.fromString(contractAddress);
+  newVoteStartedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -57,24 +57,24 @@ export function createNewStartVoteEvent(
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
 
-  newStartVoteEvent.parameters.push(voteIdParam);
-  newStartVoteEvent.parameters.push(creatorParam);
-  newStartVoteEvent.parameters.push(descriptionParam);
+  newVoteStartedEvent.parameters.push(voteIdParam);
+  newVoteStartedEvent.parameters.push(creatorParam);
+  newVoteStartedEvent.parameters.push(descriptionParam);
 
-  return newStartVoteEvent;
+  return newVoteStartedEvent;
 }
 
-export function createNewCastVoteEvent(
+export function createNewVoteCastEvent(
   voteId: string,
   voter: string,
   voterState: string,
   voterWeight: string,
   contractAddress: string
-): CastVote {
-  let newCastVoteEvent = changetype<CastVote>(newMockEvent());
+): VoteCast {
+  let newVoteCastEvent = changetype<VoteCast>(newMockEvent());
 
-  newCastVoteEvent.address = Address.fromString(contractAddress);
-  newCastVoteEvent.parameters = [];
+  newVoteCastEvent.address = Address.fromString(contractAddress);
+  newVoteCastEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -93,22 +93,22 @@ export function createNewCastVoteEvent(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voterWeight))
   );
 
-  newCastVoteEvent.parameters.push(voteIdParam);
-  newCastVoteEvent.parameters.push(voterParam);
-  newCastVoteEvent.parameters.push(voterStateParam);
-  newCastVoteEvent.parameters.push(voterWeightParam);
+  newVoteCastEvent.parameters.push(voteIdParam);
+  newVoteCastEvent.parameters.push(voterParam);
+  newVoteCastEvent.parameters.push(voterStateParam);
+  newVoteCastEvent.parameters.push(voterWeightParam);
 
-  return newCastVoteEvent;
+  return newVoteCastEvent;
 }
 
-export function createNewExecuteVoteEvent(
+export function createNewVoteExecutedEvent(
   voteId: string,
   contractAddress: string
-): ExecuteVote {
-  let newExecuteVoteEvent = changetype<ExecuteVote>(newMockEvent());
+): VoteExecuted {
+  let newVoteExecutedEvent = changetype<VoteExecuted>(newMockEvent());
 
-  newExecuteVoteEvent.address = Address.fromString(contractAddress);
-  newExecuteVoteEvent.parameters = [];
+  newVoteExecutedEvent.address = Address.fromString(contractAddress);
+  newVoteExecutedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -119,22 +119,22 @@ export function createNewExecuteVoteEvent(
     ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
   );
 
-  newExecuteVoteEvent.parameters.push(voteIdParam);
-  newExecuteVoteEvent.parameters.push(execResultsParam);
+  newVoteExecutedEvent.parameters.push(voteIdParam);
+  newVoteExecutedEvent.parameters.push(execResultsParam);
 
-  return newExecuteVoteEvent;
+  return newVoteExecutedEvent;
 }
 
-export function createNewUpdateConfigEvent(
+export function createNewConfigUpdatedEvent(
   participationRequiredPct: string,
   supportRequiredPct: string,
   minDuration: string,
   contractAddress: string
-): UpdateConfig {
-  let newUpdateConfigEvent = changetype<UpdateConfig>(newMockEvent());
+): ConfigUpdated {
+  let newConfigUpdatedEvent = changetype<ConfigUpdated>(newMockEvent());
 
-  newUpdateConfigEvent.address = Address.fromString(contractAddress);
-  newUpdateConfigEvent.parameters = [];
+  newConfigUpdatedEvent.address = Address.fromString(contractAddress);
+  newConfigUpdatedEvent.parameters = [];
 
   let participationRequiredPctParam = new ethereum.EventParam(
     'participationRequiredPct',
@@ -149,49 +149,49 @@ export function createNewUpdateConfigEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newUpdateConfigEvent.parameters.push(participationRequiredPctParam);
-  newUpdateConfigEvent.parameters.push(supportRequiredPctParam);
-  newUpdateConfigEvent.parameters.push(minDurationParam);
+  newConfigUpdatedEvent.parameters.push(participationRequiredPctParam);
+  newConfigUpdatedEvent.parameters.push(supportRequiredPctParam);
+  newConfigUpdatedEvent.parameters.push(minDurationParam);
 
-  return newUpdateConfigEvent;
+  return newConfigUpdatedEvent;
 }
 
-export function createNewAddUsersEvent(
+export function createNewUsersAddedEvent(
   addresses: Address[],
   contractAddress: string
-): AddUsers {
-  let newAddUsersEvent = changetype<AddUsers>(newMockEvent());
+): UsersAdded {
+  let newUsersAddedEvent = changetype<UsersAdded>(newMockEvent());
 
-  newAddUsersEvent.address = Address.fromString(contractAddress);
-  newAddUsersEvent.parameters = [];
+  newUsersAddedEvent.address = Address.fromString(contractAddress);
+  newUsersAddedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddUsersEvent.parameters.push(usersParam);
+  newUsersAddedEvent.parameters.push(usersParam);
 
-  return newAddUsersEvent;
+  return newUsersAddedEvent;
 }
 
-export function createNewRemoveUsersEvent(
+export function createNewUsersRemovedEvent(
   addresses: Address[],
   contractAddress: string
-): RemoveUsers {
-  let newRemoveUsersEvent = changetype<RemoveUsers>(newMockEvent());
+): UsersRemoved {
+  let newUsersRemovedEvent = changetype<UsersRemoved>(newMockEvent());
 
-  newRemoveUsersEvent.address = Address.fromString(contractAddress);
-  newRemoveUsersEvent.parameters = [];
+  newUsersRemovedEvent.address = Address.fromString(contractAddress);
+  newUsersRemovedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newRemoveUsersEvent.parameters.push(usersParam);
+  newUsersRemovedEvent.parameters.push(usersParam);
 
-  return newRemoveUsersEvent;
+  return newUsersRemovedEvent;
 }
 
 // calls

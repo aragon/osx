@@ -85,14 +85,14 @@ templates:
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
-        - event: CastVote(indexed uint256,indexed address,uint8,uint256)
-          handler: handleCastVote
-        - event: ExecuteVote(indexed uint256,bytes[])
-          handler: handleExecuteVote
-        - event: StartVote(indexed uint256,indexed address,bytes)
-          handler: handleStartVote
-        - event: UpdateConfig(uint64,uint64,uint64)
-          handler: handleUpdateConfig
+        - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
+          handler: handleVoteCast
+        - event: VoteExecuted(indexed uint256,bytes[])
+          handler: handleVoteExecuted
+        - event: VoteStarted(indexed uint256,indexed address,bytes)
+          handler: handleVoteStarted
+        - event: ConfigUpdated(uint64,uint64,uint64)
+          handler: handleConfigUpdated
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
   # WhitelistVoting (package)
@@ -112,17 +112,17 @@ templates:
         - name: WhitelistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
       eventHandlers:
-        - event: CastVote(indexed uint256,indexed address,uint8,uint256)
-          handler: handleCastVote
-        - event: ExecuteVote(indexed uint256,bytes[])
-          handler: handleExecuteVote
-        - event: StartVote(indexed uint256,indexed address,bytes)
-          handler: handleStartVote
-        - event: UpdateConfig(uint64,uint64,uint64)
-          handler: handleUpdateConfig
-        - event: AddUsers(address[])
-          handler: handleAddUsers
-        - event: RemoveUsers(address[])
-          handler: handleRemoveUsers
+        - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
+          handler: handleVoteCast
+        - event: VoteExecuted(indexed uint256,bytes[])
+          handler: handleVoteExecuted
+        - event: VoteStarted(indexed uint256,indexed address,bytes)
+          handler: handleVoteStarted
+        - event: ConfigUpdated(uint64,uint64,uint64)
+          handler: handleConfigUpdated
+        - event: UsersAdded(address[])
+          handler: handleUsersAdded
+        - event: UsersRemoved(address[])
+          handler: handleUsersRemoved
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
