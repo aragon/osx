@@ -87,6 +87,17 @@ describe('PluginRepo', function () {
     ).to.be.revertedWith('InvalidBump([0, 0, 0], [1, 1, 0])');
   });
 
+  it('cannot create version with unsupported interface contract', async function () {
+    const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
+    let adaptiveERC165 = await AdaptiveERC165.deploy();
+
+    await expect(
+      pluginRepo.newVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
+    ).to.be.revertedWith(
+      customError('InvalidPluginInterface', adaptiveERC165.address)
+    );
+  });
+
   it('cannot create version with random address', async function () {
     const randomAddress = await signers[8].getAddress();
 
