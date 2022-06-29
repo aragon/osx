@@ -1,11 +1,8 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../test-utils';
 import {customError} from '../test-utils/custom-error-helper';
 import {DAO, InterfaceBasedRegistryMock} from '../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-
-chai.use(chaiUtils);
 
 const REGISTER_ROLE = ethers.utils.id('REGISTER_ROLE');
 
