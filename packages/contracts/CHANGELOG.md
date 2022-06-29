@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Upcoming]
 
 ### Added
-- Added a `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
+- Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
 - Added `IPluginRepo` interface for plugin PluginRepo contract.
 - Added `PluginRepo` contract.
