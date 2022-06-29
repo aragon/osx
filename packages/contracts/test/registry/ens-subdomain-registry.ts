@@ -130,7 +130,7 @@ describe('ENSSubdomainRegistrar', function () {
     [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
   });
 
-  describe('The initial ENS subdomain state is correct', async () => {
+  describe('Check the initial ENS state', async () => {
     it('unregistered domains are owned by the zero address on ENS', async () => {
       expect(await ens.owner(ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
