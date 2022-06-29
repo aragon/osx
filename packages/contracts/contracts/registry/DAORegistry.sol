@@ -2,12 +2,15 @@
 
 pragma solidity 0.8.10;
 
-import "../core/DAO.sol";
+import "../core/IDAO.sol";
+import "./InterfaceBasedRegistry.sol";
 
 /// @title Register your unique DAO name
 /// @author Aragon Association - 2021
 /// @notice This contract provides the possiblity to register a DAO by a unique name.
-contract Registry {
+contract DAORegistry is InterfaceBasedRegistry {
+    bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
+
     /// @notice Thrown if the DAO name is already registered
     /// @param name The DAO name requested for registration
     error RegistryNameAlreadyUsed(string name);
@@ -16,14 +19,14 @@ contract Registry {
     /// @param dao The address of the DAO contract
     /// @param creator The address of the creator
     /// @param name The name of the DAO
-    event NewDAORegistered(
-        DAO indexed dao,
-        address indexed creator,
-        address indexed token,
-        string name
-    );
+    event NewDAORegistered(IDAO indexed dao, address indexed creator, string name);
 
-    mapping(string => bool) public daos;
+    /// @notice Initializes the contract
+    /// @param _dao the managing DAO address
+    function initialize(IDAO _dao) public initializer {
+        bytes4 daoInterfaceId = type(IDAO).interfaceId;
+        __InterfaceBasedRegistry_init(_dao, daoInterfaceId);
+    }
 
     /// @notice Registers a DAO by his name
     /// @dev A name is unique within the Aragon DAO framework and can get stored here
@@ -31,14 +34,11 @@ contract Registry {
     /// @param dao The address of the DAO contract
     function register(
         string calldata name,
-        DAO dao,
-        address creator,
-        address token
-    ) external {
-        if (daos[name] != false) revert RegistryNameAlreadyUsed({name: name});
+        IDAO dao,
+        address creator
+    ) external auth(REGISTER_ROLE) {
+        _register(address(dao));
 
-        daos[name] = true;
-
-        emit NewDAORegistered(dao, creator, token, name);
+        emit NewDAORegistered(dao, creator, name);
     }
 }

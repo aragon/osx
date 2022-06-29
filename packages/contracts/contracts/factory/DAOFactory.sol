@@ -9,7 +9,7 @@ import "./../votings/whitelist/WhitelistVoting.sol";
 import "./../votings/ERC20/ERC20Voting.sol";
 import "./../tokens/GovernanceERC20.sol";
 import "./../tokens/GovernanceWrappedERC20.sol";
-import "./../registry/Registry.sol";
+import "../registry/DAORegistry.sol";
 import "./../core/DAO.sol";
 import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
@@ -28,7 +28,7 @@ contract DAOFactory {
     address public whitelistVotingBase;
     address public daoBase;
 
-    Registry public registry;
+    DAORegistry public daoRegistry;
     TokenFactory public tokenFactory;
 
     struct DAOConfig {
@@ -51,8 +51,8 @@ contract DAOFactory {
     /// @dev Stores the registry and token factory address and creates the base contracts required for the factory
     /// @param _registry The DAO registry to register the DAO with his name
     /// @param _tokenFactory The Token Factory to register tokens
-    constructor(Registry _registry, TokenFactory _tokenFactory) {
-        registry = _registry;
+    constructor(DAORegistry _registry, TokenFactory _tokenFactory) {
+        daoRegistry = _registry;
         tokenFactory = _tokenFactory;
 
         setupBases();
@@ -94,7 +94,7 @@ contract DAOFactory {
 
         // register dao with its name and token to the registry
         // TODO: shall we add minter as well ?
-        registry.register(_daoConfig.name, dao, msg.sender, address(token));
+        daoRegistry.register(_daoConfig.name, dao, msg.sender);
 
         voting = createERC20Voting(dao, token, _voteConfig);
 
@@ -117,7 +117,7 @@ contract DAOFactory {
         dao = createDAO(_daoConfig, _gsnForwarder);
 
         // register dao with its name and token to the registry
-        registry.register(_daoConfig.name, dao, msg.sender, address(0));
+        daoRegistry.register(_daoConfig.name, dao, msg.sender);
 
         voting = createWhitelistVoting(dao, _whitelistVoters, _voteConfig);
 
