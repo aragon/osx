@@ -43,7 +43,7 @@ contract ENSSubdomainRegistrar is Component {
         ENS _ens,
         bytes32 _node
     ) external initializer {
-        address nodeOwner = _ens.owner(_node);
+        address nodeOwner = _ens.owner(_node); // the `initializer` modifier acts as a re-entrancy guard so doing an external calls early is ok
 
         // This contract must either be the domain node owner or be an approved operator of the node owner
         if (nodeOwner != address(this) && !_ens.isApprovedForAll(nodeOwner, address(this))) {
