@@ -21,7 +21,7 @@ contract AdaptiveERC165Mock is AdaptiveERC165 {
 contract AdaptiveERC165MockHelper {
     address addr;
 
-    event ReceivedCallback(bytes32 b);
+    event CallbackReceived(bytes32 b);
 
     constructor(address _addr) {
         addr = _addr;
@@ -34,6 +34,6 @@ contract AdaptiveERC165MockHelper {
     function handleCallback(bytes4 selector) external {
         (, bytes memory value) = addr.call(abi.encodeWithSelector(selector));
         bytes32 decoded = abi.decode(value, (bytes32));
-        emit ReceivedCallback(decoded);
+        emit CallbackReceived(decoded);
     }
 }

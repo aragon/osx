@@ -1,9 +1,6 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../test-utils';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
-
-chai.use(chaiUtils);
 
 import {DAO, GovernanceERC20} from '../../typechain';
 
@@ -17,7 +14,7 @@ const dummyMetadata2 = '0x0002';
 const EVENTS = {
   MetadataSet: 'MetadataSet',
   TrustedForwarderSet: 'TrustedForwarderSet',
-  UpdateConfig: 'UpdateConfig',
+  ConfigUpdated: 'ConfigUpdated',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
@@ -165,7 +162,7 @@ describe('DAO', function () {
       {
         to: dummyAddress1,
         data: dummyMetadata1,
-        value: 0,
+        value: ethers.BigNumber.from(0),
       },
     ];
     const expectedDummyResults = ['0x'];
@@ -185,26 +182,29 @@ describe('DAO', function () {
     });
 
     it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions)).to.be.equal(
+      expect(await dao.callStatic.execute(0, dummyActions)).to.deep.equal(
         expectedDummyResults
       );
     });
 
     it('emits an event afterwards', async () => {
-      expect(await dao.execute(0, dummyActions))
-        .to.emit(dao, EVENTS.Executed)
-        .withArgs(
-          ownerAddress,
-          0,
-          [
-            [
-              dummyActions[0].to,
-              ethers.BigNumber.from(dummyActions[0].value),
-              dummyActions[0].data,
-            ],
-          ],
-          expectedDummyResults
-        );
+      let tx = await dao.execute(0, dummyActions);
+      let rc = await tx.wait();
+
+      const {actor, callId, actions, execResults} = dao.interface.parseLog(
+        rc.logs[0]
+      ).args;
+
+      expect(actor).to.equal(ownerAddress);
+      expect(callId).to.equal(0);
+      expect(actions).to.deep.equal([
+        [
+          dummyActions[0].to,
+          ethers.BigNumber.from(dummyActions[0].value),
+          dummyActions[0].data,
+        ],
+      ]);
+      expect(execResults).to.deep.equal(expectedDummyResults);
     });
   });
 

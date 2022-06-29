@@ -24,10 +24,17 @@ contract WhitelistVoting is MajorityVoting {
     mapping(address => Checkpoints.History) private _checkpoints;
     Checkpoints.History private _totalCheckpoints;
 
+    /// @notice Thrown when a sender is not allowed to create a vote
+    /// @param sender The sender address
     error VoteCreationForbidden(address sender);
 
-    event AddUsers(address[] users);
-    event RemoveUsers(address[] users);
+    /// @notice Emitted when new users are added to the whitelist
+    /// @param users The array of user addresses to be added
+    event UsersAdded(address[] users);
+
+    /// @notice Emitted when users are removed from the whitelist
+    /// @param users The array of user addresses to be removed
+    event UsersRemoved(address[] users);
 
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
@@ -64,35 +71,29 @@ contract WhitelistVoting is MajorityVoting {
         return "0.0.1+opengsn.recipient.WhitelistVoting";
     }
 
-    /// @notice add new users to the whitelist.
-    /// @param _users addresses of users to add
+    /// @notice Adds new users to the whitelist
+    /// @param _users The addresses of the users to be added
     function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _addWhitelistedUsers(_users);
     }
 
-    /// @dev Internal function to add new users to the whitelist.
-    /// @param _users addresses of users to add
+    /// @notice Internal function to add new users to the whitelist
+    /// @param _users The addresses of users to be added
     function _addWhitelistedUsers(address[] calldata _users) internal {
         _whitelistUsers(_users, true);
 
-        emit AddUsers(_users);
+        emit UsersAdded(_users);
     }
 
-    /// @notice remove new users to the whitelist.
-    /// @param _users addresses of users to remove
+    /// @notice Removes users from the whitelist
+    /// @param _users The addresses of the users to be removed
     function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _whitelistUsers(_users, false);
 
-        emit RemoveUsers(_users);
+        emit UsersRemoved(_users);
     }
 
-    /// @notice Create a new vote on this concrete implementation
-    /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata
-    /// @param _actions the actions that will be executed after vote passes
-    /// @param _startDate state date of the vote. If 0, uses current timestamp
-    /// @param _endDate end date of the vote. If 0, uses _start + minDuration
-    /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-    /// @param _choice Vote choice to cast on creationr
+    /// @inheritdoc IMajorityVoting
     function newVote(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
@@ -138,17 +139,14 @@ contract WhitelistVoting is MajorityVoting {
             }
         }
 
-        emit StartVote(voteId, _msgSender(), _proposalMetadata);
+        emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
             _vote(voteId, VoterState.Yea, _msgSender(), _executeIfDecided);
         }
     }
 
-    /// @dev Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId voteId
-    /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
+    /// @inheritdoc MajorityVoting
     function _vote(
         uint256 _voteId,
         VoterState _choice,
@@ -179,51 +177,40 @@ contract WhitelistVoting is MajorityVoting {
 
         vote_.voters[_voter] = _choice;
 
-        emit CastVote(_voteId, _voter, uint8(_choice), 1);
+        emit VoteCast(_voteId, _voter, uint8(_choice), 1);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);
         }
     }
 
-    /**
-     *  @dev Tells whether user is whitelisted at specific block or past it.
-     *  @param account user address
-     *  @param blockNumber block number for which it checks if user is whitelisted
-     */
+    /// @notice Checks if a user is whitelisted at given block number
+    /// @param account The user address that is checked
+    /// @param blockNumber The block number
     function isUserWhitelisted(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
-    /**
-     *  @dev returns total count of users that are whitelisted at specific block
-     *  @param blockNumber specific block to get count from
-     *  @return count of users that are whitelisted blockNumber or prior to it.
-     */
+    /// @notice Returns total count of users that are whitelisted at given block number
+    /// @param blockNumber The specific block to get the count from
+    /// @return The user count that were whitelisted at the specified block number
     function whitelistedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 
-    /**
-     * @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-     * @param _voteId The voteId
-     * @param _voter the address of the voter to check
-     * @return True if the given voter can participate a certain vote, false otherwise
-     */
+    /// @inheritdoc MajorityVoting
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);
     }
 
-    /**
-     *  @dev Adds or removes users from whitelist
-     *  @param _users user addresses
-     *  @param _enabled whether to add or remove from whitelist
-     */
+    /// @notice Adds or removes users from whitelist
+    /// @param _users user addresses
+    /// @param _enabled whether to add or remove from whitelist
     function _whitelistUsers(address[] calldata _users, bool _enabled) internal {
         _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
 

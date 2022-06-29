@@ -15,6 +15,9 @@ contract ERC20Voting is MajorityVoting {
 
     ERC20VotesUpgradeable private votingToken;
 
+    /// @notice Thrown if the voting power is zero
+    error NoVotingPower();
+
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
@@ -56,13 +59,7 @@ contract ERC20Voting is MajorityVoting {
         return "0.0.1+opengsn.recipient.ERC20Voting";
     }
 
-    /// @notice Create a new vote on this concrete implementation
-    /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata
-    /// @param _actions the actions that will be executed after vote passes
-    /// @param _startDate state date of the vote. If 0, uses current timestamp
-    /// @param _endDate end date of the vote. If 0, uses _start + minDuration
-    /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-    /// @param _choice Vote choice to cast on creation
+    /// @inheritdoc IMajorityVoting
     function newVote(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
@@ -74,7 +71,7 @@ contract ERC20Voting is MajorityVoting {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         uint256 votingPower = votingToken.getPastTotalSupply(snapshotBlock);
-        if (votingPower == 0) revert VotePowerZero();
+        if (votingPower == 0) revert NoVotingPower();
 
         voteId = votesLength++;
 
@@ -107,17 +104,14 @@ contract ERC20Voting is MajorityVoting {
             }
         }
 
-        emit StartVote(voteId, _msgSender(), _proposalMetadata);
+        emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
             _vote(voteId, _choice, _msgSender(), _executeIfDecided);
         }
     }
 
-    /// @dev Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId voteId
-    /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediatelly executes a vote.
+    /// @inheritdoc MajorityVoting
     function _vote(
         uint256 _voteId,
         VoterState _choice,
@@ -150,17 +144,14 @@ contract ERC20Voting is MajorityVoting {
 
         vote_.voters[_voter] = _choice;
 
-        emit CastVote(_voteId, _voter, uint8(_choice), voterStake);
+        emit VoteCast(_voteId, _voter, uint8(_choice), voterStake);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);
         }
     }
 
-    /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-    /// @param _voteId The voteId
-    /// @param _voter the address of the voter to check
-    /// @return True if the given voter can participate a certain vote, false otherwise
+    /// @inheritdoc MajorityVoting
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && votingToken.getPastVotes(_voter, vote_.snapshotBlock) > 0;

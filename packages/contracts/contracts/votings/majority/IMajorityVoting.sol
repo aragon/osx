@@ -30,45 +30,56 @@ interface IMajorityVoting {
         IDAO.Action[] actions;
     }
 
-    error VoteSupportExceeded(uint64 limit, uint64 actual);
-    error VoteParticipationExceeded(uint64 limit, uint64 actual);
-    error VoteTimesForbidden(uint64 current, uint64 start, uint64 end, uint64 minDuration);
-    error VoteDurationZero();
-    error VoteCastForbidden(uint256 voteId, address sender);
-    error VoteExecutionForbidden(uint256 voteId);
-    error VotePowerZero();
+    /// @notice Emitted when a vote is started
+    /// @param voteId  The ID of the vote
+    /// @param creator  The creator of the vote
+    /// @param metadata The IPFS hash pointing to the proposal metadata
+    event VoteStarted(uint256 indexed voteId, address indexed creator, bytes metadata);
 
-    event StartVote(uint256 indexed voteId, address indexed creator, bytes metadata);
-    event CastVote(
+    /// @notice Emitted when a vote is casted by a voter
+    /// @param voteId The ID of the vote
+    /// @param voter The voter casting the vote
+    /// @param voterState The vote option chosen
+    /// @param voterWeight The weight of the casted vote
+    event VoteCast(
         uint256 indexed voteId,
         address indexed voter,
         uint8 voterState,
         uint256 voterWeight
     );
-    event ExecuteVote(uint256 indexed voteId, bytes[] execResults);
-    event UpdateConfig(
+
+    /// @notice Emitted when a vote is executed
+    /// @param voteId The ID of the vote
+    /// @param execResults The bytes array resulting from the vote execution in the associated DAO
+    event VoteExecuted(uint256 indexed voteId, bytes[] execResults);
+
+    /// @notice Emitted when the vote configuration is updated
+    /// @param participationRequiredPct The required participation in percent
+    /// @param supportRequiredPct The required support in percent
+    /// @param minDuration The minimal duration of a vote
+    event ConfigUpdated(
         uint64 participationRequiredPct,
         uint64 supportRequiredPct,
         uint64 minDuration
     );
 
     /// @notice Change required support and minQuorum
-    /// @param _supportRequiredPct New required support
-    /// @param _participationRequiredPct New acceptance quorum
-    /// @param _minDuration each vote's minimum duration
+    /// @param _participationRequiredPct The required participation in percent
+    /// @param _supportRequiredPct The required support in percent
+    /// @param _minDuration The minimal duration of a vote
     function changeVoteConfig(
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) external;
 
-    /// @notice Create a new vote on this concrete implementation
+    /// @notice Create a new vote
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata
-    /// @param _actions the actions that will be executed after vote passes
-    /// @param _startDate state date of the vote. If 0, uses current timestamp
-    /// @param _endDate end date of the vote. If 0, uses _start + minDuration
-    /// @param _executeIfDecided Configuration to enable automatic execution on the last required vote
-    /// @param _choice Vote choice to cast on creation
+    /// @param _actions The actions that will be executed after vote passes
+    /// @param _startDate The start date of the vote. If 0, uses current timestamp
+    /// @param _endDate The end date of the vote. If 0, uses _start + minDuration
+    /// @param _executeIfDecided Option to enable automatic execution on the last required vote
+    /// @param _choice The vote choice to cast on creation
     /// @return voteId The ID of the vote
     function newVote(
         bytes calldata _proposalMetadata,
@@ -79,8 +90,9 @@ interface IMajorityVoting {
         VoterState _choice
     ) external returns (uint256 voteId);
 
-    /// @notice Vote `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 1 = not supports]
-    /// @param _voteId Id for vote
+    /// @notice Votes for a vote option and optionally executes the vote
+    /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports]
+    /// @param _voteId The ID of the vote
     /// @param  _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided Whether the vote should execute its action if it becomes decided
     function vote(
@@ -89,39 +101,43 @@ interface IMajorityVoting {
         bool _executesIfDecided
     ) external;
 
-    /// @dev Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
     /// @param _voteId the vote Id
     /// @param _voter the address of the voter to check
     /// @return bool true if user is allowed to vote
     function canVote(uint256 _voteId, address _voter) external view returns (bool);
 
-    /// @dev Method to execute a vote if allowed to
+    /// @notice Method to execute a vote if allowed to
     /// @param _voteId The ID of the vote to execute
     function execute(uint256 _voteId) external;
 
-    /// @dev Method to execute a vote if allowed to
+    /// @notice Checks if a vote is allowed to execute
     /// @param _voteId The ID of the vote to execute
     function canExecute(uint256 _voteId) external view returns (bool);
 
-    /// @dev Return the state of a voter for a given vote by its ID
+    /// @notice Returns the state of a voter for a given vote by its ID
     /// @param _voteId The ID of the vote
     /// @return VoterState of the requested voter for a certain vote
     function getVoterState(uint256 _voteId, address _voter) external view returns (VoterState);
 
-    /// @dev Return all information for a vote by its ID
-    /// @param _voteId Vote id
-    /// @return open Vote open status
-    /// @return executed Vote executed status
-    /// @return startDate start date
-    /// @return endDate end date
+    /// @param participationRequiredPct The required participation in percent
+    /// @param supportRequiredPct The required support in percent
+    /// @param minDuration The minimal duration of a vote
+
+    /// @notice Returns all information for a vote by its ID
+    /// @param _voteId The ID of the vote
+    /// @return open Wheter the vote is open or not
+    /// @return executed Wheter the vote is executed or not
+    /// @return startDate The start date of the vote
+    /// @return endDate The end date of the vote
     /// @return snapshotBlock The block number of the snapshot taken for this vote
-    /// @return supportRequired support required
-    /// @return participationRequired minimum participation required
-    /// @return votingPower power
-    /// @return yea yeas amount
-    /// @return nay nays amount
-    /// @return abstain abstain amount
-    /// @return actions Actions
+    /// @return supportRequired The support required
+    /// @return participationRequired The required participation
+    /// @return votingPower The voting power participating in the vote
+    /// @return yea The number of `yes` votes
+    /// @return nay The number of `no` votes
+    /// @return abstain The number of `abstain` votes
+    /// @return actions The actions to be executed in the associated DAO after the vote has passed
     function getVote(uint256 _voteId)
         external
         view
