@@ -126,13 +126,11 @@ describe('ENSSubdomainRegistrar', function () {
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
+
+    [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
   });
 
-  describe('After deployment', () => {
-    beforeEach(async () => {
-      [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
-    });
-
+  describe('The initial ENS subdomain state is correct', async () => {
     it('unregistered domains are owned by the zero address on ENS', async () => {
       expect(await ens.owner(ensDomainHash('test'))).to.equal(
         ethers.constants.AddressZero
@@ -144,39 +142,10 @@ describe('ENSSubdomainRegistrar', function () {
         ethers.constants.AddressZero
       );
     });
-
-    it('reverts during intialization because the registrar is neither the domain node owner nor an approved operator of him/her', async () => {
-      await expect(
-        registrar
-          .connect(signers[1])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-
-      // This is also the case for signers[0] who owns the ENS registries
-      await expect(
-        registrar
-          .connect(signers[0])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
   });
 
-  describe('After deployment and giving ownership of the domain node to the registrar', () => {
+  describe('Registrar is the domain owner but not approved', () => {
     beforeEach(async () => {
-      [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
-
       // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
       registerSubdomainHelper('test', '', signers[0], registrar.address);
     });
@@ -191,7 +160,7 @@ describe('ENSSubdomainRegistrar', function () {
 
     postInitializationTests();
 
-    it('reverts if the ownersghip of the domain node is removed from the registrar', async () => {
+    it('reverts if the ownership of the domain node is removed from the registrar', async () => {
       // Initialize the registrar with the 'test' domain
       registrar.initialize(
         managingDao.address,
@@ -231,10 +200,8 @@ describe('ENSSubdomainRegistrar', function () {
     });
   });
 
-  describe('After deployment and approval of the registrar by the domain node owner', () => {
+  describe('Registrar is NOT the domain owner but it is approved', () => {
     beforeEach(async () => {
-      [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
-
       // Register the parent domain 'test' through signers[0] who owns the ENS root node ('') and make the signers[0] the owner
       registerSubdomainHelper('test', '', signers[0], signers[0].address);
 
@@ -288,6 +255,63 @@ describe('ENSSubdomainRegistrar', function () {
       ).to.be.reverted;
     });
   });
+
+  describe('Registrar is NOT the domain owner and is NOT approved but has permission', () => {
+    beforeEach(async () => {
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+      await managingDao.grant(
+        registrar.address,
+        await signers[1].getAddress(),
+        REGISTER_ENS_SUBDOMAIN_ROLE
+      );
+    });
+
+    expectedUnauthorizedRegistrarReverts();
+  });
+
+  describe('Random signer with no permissions at all', () => {
+    expectedUnauthorizedRegistrarReverts();
+  });
+
+  function expectedUnauthorizedRegistrarReverts() {
+    it('reverts during initialization', async () => {
+      await expect(
+        registrar
+          .connect(signers[1])
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+      ).to.be.revertedWith(
+        customError(
+          'UnauthorizedRegistrar',
+          ethers.constants.AddressZero,
+          registrar.address
+        )
+      );
+    });
+
+    it('reverts during initialization, even for the ENS owner', async () => {
+      // This is also the case for signers[0] who owns the ENS registries
+      await expect(
+        registrar
+          .connect(signers[0])
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+      ).to.be.revertedWith(
+        customError(
+          'UnauthorizedRegistrar',
+          ethers.constants.AddressZero,
+          registrar.address
+        )
+      );
+    });
+
+    it('reverts on attempted subnode registration', async () => {
+      // signers[1] can register subdomain
+      await expect(
+        registrar
+          .connect(signers[1])
+          .registerSubnode(ensLabelHash('my'), await signers[1].getAddress())
+      ).to.be.reverted;
+    });
+  }
 
   function postInitializationTests() {
     describe('and after registrar initialization', () => {
