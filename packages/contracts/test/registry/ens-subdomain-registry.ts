@@ -266,6 +266,21 @@ describe('ENSSubdomainRegistrar', function () {
       );
     });
 
+    it('reverts during initialization, even for the ENS owner', async () => {
+      // This is also the case for signers[0] who owns the ENS registries
+      await expect(
+        registrar
+          .connect(signers[0])
+          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+      ).to.be.revertedWith(
+        customError(
+          'UnauthorizedRegistrar',
+          ethers.constants.AddressZero,
+          registrar.address
+        )
+      );
+    });
+
     expectedUnauthorizedRegistrarReverts();
   });
 
@@ -278,21 +293,6 @@ describe('ENSSubdomainRegistrar', function () {
       await expect(
         registrar
           .connect(signers[1])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
-
-    it('reverts during initialization, even for the ENS owner', async () => {
-      // This is also the case for signers[0] who owns the ENS registries
-      await expect(
-        registrar
-          .connect(signers[0])
           .initialize(managingDao.address, ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
