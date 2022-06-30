@@ -2,12 +2,12 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 /** NOTE:
- * Create an Admin Dao with no Plugin, to be the owner of Dao and Apm registry.
+ * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
  */
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy, save} = deployments;
+  const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
 
