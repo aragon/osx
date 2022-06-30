@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Upcoming]
 
 ### Added
@@ -22,21 +23,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`
-- Changed order of deployment scripts
-- Changed folder struction of tests
-- Refactored event names and NatSpec comments
+- Refactored import statements.
+- Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.
+- Changed order of deployment scripts.
+- Changed folder struction of tests.
+- Refactored event names and NatSpec comments.
 
 ### Removed
 
-- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events
-- Removed `ERC165Registry`
+- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
+- Removed `ERC165Registry`.
 
 ## v0.2.0-alpha
 
 ### Added
 
-- Added tests for the `ACL` and `IACLOracle`
+- Added tests for the `ACL` and `IACLOracle`.
 - Allow tokens to be minted to DAO's treasury by passing address(0) as receiver in `TokenFactory`.
 
 ### Changed
