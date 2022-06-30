@@ -1,13 +1,13 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
 };
 
-describe('Registry', function () {
+describe('DAORegistry', function () {
   let registry: any;
+  let managingDAO: any;
   let ownerAddress: string;
 
   before(async () => {
@@ -16,33 +16,37 @@ describe('Registry', function () {
   });
 
   beforeEach(async function () {
-    const Registry = await ethers.getContractFactory('Registry');
+    // Managing DAO
+    const ManagingDAO = await ethers.getContractFactory('DAO');
+    managingDAO = await ManagingDAO.deploy();
+    await managingDAO.initialize(
+      '0x00',
+      ownerAddress,
+      ethers.constants.AddressZero
+    );
+
+    // DAO Registry
+    const Registry = await ethers.getContractFactory('DAORegistry');
     registry = await Registry.deploy();
+    await registry.initialize(managingDAO.address);
+
+    // Grant REGISTER_ROLE to registrer
+    managingDAO.grant(
+      registry.address,
+      ownerAddress,
+      ethers.utils.id('REGISTER_ROLE')
+    );
   });
 
-  it('Should register a new name successfully', async function () {
-    const wallet = ethers.Wallet.createRandom();
+  it('Should register a new DAO successfully', async function () {
     const daoName = 'my-dao';
-    const daoAddress = wallet.address;
 
     await expect(
-      await registry.register(daoName, daoAddress, ownerAddress, ownerAddress)
+      await registry.register(daoName, managingDAO.address, ownerAddress)
     )
       .to.emit(registry, EVENTS.NewDAORegistered)
-      .withArgs(daoAddress, ownerAddress, ownerAddress, daoName);
+      .withArgs(managingDAO.address, ownerAddress, daoName);
 
-    expect(await registry.daos(daoName)).to.equal(true);
-  });
-
-  it('Should revert if name already exists', async function () {
-    const wallet = ethers.Wallet.createRandom();
-    const daoName = 'my-dao';
-    const daoAddress = wallet.address;
-
-    registry.register(daoName, daoAddress, ownerAddress, ownerAddress);
-
-    await expect(
-      registry.register(daoName, daoAddress, ownerAddress, ownerAddress)
-    ).to.be.revertedWith(customError('RegistryNameAlreadyUsed', daoName));
+    expect(await registry.entries(managingDAO.address)).to.equal(true);
   });
 });
