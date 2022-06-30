@@ -121,5 +121,12 @@ export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
   return ensRegistryAddress;
 }
 
+export const ENS_ADDRESSES: {[key: string]: string} = {
+  mainnet: '0x314159265dD8dbb310642f98f50C066173C1259b',
+  ropsten: '0x112234455C3a32FD11230C42E7Bccd4A84e02010',
+  rinkeby: '0xe7410170f87102DF0055eB195163A03B7F2Bff4A',
+  goerli: '0x112234455C3a32FD11230C42E7Bccd4A84e02010',
+};
+
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
 export default function () {}
