@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bumped `@openzeppelin/contracts` and `@openzeppelin/contracts-upgradeable` to `4.7.0` and fixed `GovernanceWrappedERC20` accordingly.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`
 - Changed order of deployment scripts
 - Changed folder struction of tests

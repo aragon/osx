@@ -62,6 +62,17 @@ contract GovernanceWrappedERC20 is
         __GovernanceWrappedERC20_init(_token, _name, _symbol);
     }
 
+    /// @inheritdoc ERC20WrapperUpgradeable
+    /// @dev Use the `decimals` of the underlying ERC20 token
+    function decimals()
+        public
+        view
+        override(ERC20Upgradeable, ERC20WrapperUpgradeable)
+        returns (uint8)
+    {
+        return ERC20WrapperUpgradeable.decimals();
+    }
+
     /// @dev Since 2 base classes end up having _msgSender(OZ + GSN),
     /// we have to override it and activate GSN's _msgSender.
     /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
