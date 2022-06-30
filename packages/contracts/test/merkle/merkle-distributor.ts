@@ -1,13 +1,10 @@
 // Copied and modified from: https://github.com/Uniswap/merkle-distributor/blob/master/test/MerkleDistributor.spec.ts
 
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../test-utils';
 import {customError} from '../test-utils/custom-error-helper';
 import {BigNumber} from 'ethers';
 import BalanceTree from './src/balance-tree';
-
-chai.use(chaiUtils);
 
 import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

@@ -8,15 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Upcoming]
 
 ### Added
-
-- added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
-- added `IPluginRepo` interface for plugin PluginRepo contract.
-- added `PluginRepo` contract.
-- added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
-- added `AragonPluginRegistry` contract for registering `PluginRepo`s.
-- added `PluginRepoFactory` contract for creating `PluginRepo`s.
-- added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
-- added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
+- Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
+- Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
+- Added `IPluginRepo` interface for plugin PluginRepo contract.
+- Added `PluginRepo` contract.
+- Added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
+- Added `AragonPluginRegistry` contract for registering `PluginRepo`s.
+- Added `PluginRepoFactory` contract for creating `PluginRepo`s.
+- Added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
+- Added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 
@@ -31,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- `ERC165Registry` removed
+- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events
+- Removed `ERC165Registry`
 
 ## v0.2.0-alpha
 
@@ -51,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added workflow and scripts in `.github/helpers/contracts/dummy-dao/` to create dummy daos, deposits and proposals on contract deploy
+- Added workflow and scripts in `.github/helpers/contracts/dummy-dao/` to create dummy daos, deposits and proposals on contract deploy.
 - Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos.
 - Added `MetaTxComponent`.
 

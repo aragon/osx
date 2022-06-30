@@ -1,11 +1,8 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import chaiUtils from '../test-utils';
 import {VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-
-chai.use(chaiUtils);
 
 import {MajorityVotingMock, DAOMock} from '../../typechain';
 

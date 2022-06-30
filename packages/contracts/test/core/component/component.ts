@@ -1,9 +1,6 @@
-import chai, {expect} from 'chai';
+import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import chaiUtils from '../../test-utils';
 import {ERRORS} from '../../test-utils/custom-error-helper';
-
-chai.use(chaiUtils);
 
 import {TestComponent, DAOMock} from '../../../typechain';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
