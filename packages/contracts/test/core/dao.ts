@@ -162,7 +162,7 @@ describe('DAO', function () {
       {
         to: dummyAddress1,
         data: dummyMetadata1,
-        value: ethers.BigNumber.from(0),
+        value: 0,
       },
     ];
     const expectedDummyResults = ['0x'];
