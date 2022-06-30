@@ -1,4 +1,5 @@
 import {Address, BigInt} from '@graphprotocol/graph-ts';
+
 import {Balance, ERC20Token} from '../../generated/schema';
 import {ERC20} from '../../generated/templates/DaoTemplate/ERC20';
 import {ADDRESS_ZERO} from './constants';

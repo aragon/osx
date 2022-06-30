@@ -1,5 +1,6 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
+
 import {
   VoteStarted,
   VoteCast,

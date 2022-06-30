@@ -1,9 +1,4 @@
 import {
-  DaoPackage,
-  ERC20VotingPackage,
-  WhitelistPackage
-} from '../../generated/schema';
-import {
   Address,
   BigInt,
   ByteArray,
@@ -12,16 +7,22 @@ import {
   ethereum,
   store
 } from '@graphprotocol/graph-ts';
+
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
+import {WhitelistVoting as WhitelistVotingContract} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
+import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
 import {ERC20Voting, WhitelistVoting} from '../../generated/templates';
+import {
+  DaoPackage,
+  ERC20VotingPackage,
+  WhitelistPackage
+} from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
   ADDRESS_ZERO,
   ERC20_VOTING_INTERFACE,
   WHITELIST_VOTING_INTERFACE
 } from '../utils/constants';
-import {WhitelistVoting as WhitelistVotingContract} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
-import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
 import {supportsInterface} from '../utils/erc165';
 
 class WithdrawParams {

@@ -1,5 +1,6 @@
-import { ethereum, Bytes, Address, BigInt } from '@graphprotocol/graph-ts';
-import { createMockedFunction, newMockEvent } from 'matchstick-as/assembly/index';
+import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
+import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
+
 import {
   MetadataSet,
   ETHDeposited,
