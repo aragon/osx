@@ -116,7 +116,7 @@ contract DAOFactory {
     ) external returns (DAO dao, WhitelistVoting voting) {
         dao = createDAO(_daoConfig, _gsnForwarder);
 
-        // register dao with its name and token to the registry
+        // register dao with its name and creator to the registry
         daoRegistry.register(_daoConfig.name, dao, msg.sender);
 
         voting = createWhitelistVoting(dao, _whitelistVoters, _voteConfig);

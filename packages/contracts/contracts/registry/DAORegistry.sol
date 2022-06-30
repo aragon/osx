@@ -11,10 +11,6 @@ import "./InterfaceBasedRegistry.sol";
 contract DAORegistry is InterfaceBasedRegistry {
     bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
 
-    /// @notice Thrown if the DAO name is already registered
-    /// @param name The DAO name requested for registration
-    error RegistryNameAlreadyUsed(string name);
-
     /// @notice Emitted when a new DAO is registered
     /// @param dao The address of the DAO contract
     /// @param creator The address of the creator
@@ -22,10 +18,10 @@ contract DAORegistry is InterfaceBasedRegistry {
     event NewDAORegistered(IDAO indexed dao, address indexed creator, string name);
 
     /// @notice Initializes the contract
-    /// @param _dao the managing DAO address
-    function initialize(IDAO _dao) public initializer {
+    /// @param _managingDao the managing DAO address
+    function initialize(IDAO _managingDao) public initializer {
         bytes4 daoInterfaceId = type(IDAO).interfaceId;
-        __InterfaceBasedRegistry_init(_dao, daoInterfaceId);
+        __InterfaceBasedRegistry_init(_managingDao, daoInterfaceId);
     }
 
     /// @notice Registers a DAO by his name
