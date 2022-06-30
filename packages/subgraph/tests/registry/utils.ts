@@ -7,7 +7,6 @@ import {NewDAORegistered} from '../../generated/Registry/Registry';
 export function createNewDaoEvent(
   dao: string,
   creator: string,
-  token: string,
   name: string
 ): NewDAORegistered {
   let newDaoEvent = changetype<NewDAORegistered>(newMockEvent());
@@ -22,10 +21,6 @@ export function createNewDaoEvent(
     'creator',
     ethereum.Value.fromAddress(Address.fromString(creator))
   );
-  let tokenParam = new ethereum.EventParam(
-    'token',
-    ethereum.Value.fromAddress(Address.fromString(token))
-  );
   let nameParam = new ethereum.EventParam(
     'name',
     ethereum.Value.fromString(name)
@@ -33,7 +28,6 @@ export function createNewDaoEvent(
 
   newDaoEvent.parameters.push(daoParam);
   newDaoEvent.parameters.push(creatorParam);
-  newDaoEvent.parameters.push(tokenParam);
   newDaoEvent.parameters.push(nameParam);
 
   return newDaoEvent;

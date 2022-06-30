@@ -11,10 +11,6 @@ export function handleNewDAORegistered(event: NewDAORegistered): void {
   entity.creator = event.params.creator;
   entity.createdAt = event.block.timestamp;
 
-  let tokenId = handleERC20Token(event.params.token);
-
-  entity.token = tokenId;
-
   // subscribe to templates
   DaoTemplate.create(event.params.dao);
 

@@ -22,9 +22,9 @@ dataSources:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: Registry
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/Registry.sol/Registry.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json
       eventHandlers:
-        - event: NewDAORegistered(indexed address,indexed address,indexed address,string)
+        - event: NewDAORegistered(indexed address,indexed address,string)
           handler: handleNewDAORegistered
       file: ./src/registry.ts
 # templates
