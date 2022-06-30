@@ -30,7 +30,7 @@ describe('DAORegistry', function () {
     registry = await Registry.deploy();
     await registry.initialize(managingDAO.address);
 
-    // Grant REGISTER_ROLE to registrer
+    // Grant REGISTER_DAO_ROLE to registrer
     managingDAO.grant(
       registry.address,
       ownerAddress,
