@@ -92,8 +92,6 @@ contract DAOFactory {
         (token, minter) = tokenFactory.newToken(dao, _tokenConfig, _mintConfig);
         dao.revoke(address(dao), address(tokenFactory), dao.ROOT_ROLE());
 
-        // register dao with its name and token to the registry
-        // TODO: shall we add minter as well ?
         daoRegistry.register(_daoConfig.name, dao, msg.sender);
 
         voting = createERC20Voting(dao, token, _voteConfig);
@@ -116,7 +114,6 @@ contract DAOFactory {
     ) external returns (DAO dao, WhitelistVoting voting) {
         dao = createDAO(_daoConfig, _gsnForwarder);
 
-        // register dao with its name and creator to the registry
         daoRegistry.register(_daoConfig.name, dao, msg.sender);
 
         voting = createWhitelistVoting(dao, _whitelistVoters, _voteConfig);

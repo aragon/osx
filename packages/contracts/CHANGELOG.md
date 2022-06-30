@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `registry.ts` to `dao-registry.ts` and updated testing.
+- Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`
 - Changed order of deployment scripts
 - Changed folder struction of tests

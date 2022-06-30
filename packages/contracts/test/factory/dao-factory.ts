@@ -156,7 +156,7 @@ describe('DAOFactory: ', function () {
     managingDAO.grant(
       registry.address,
       daoFactory.address,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_DAO_ROLE')
     );
   });
 

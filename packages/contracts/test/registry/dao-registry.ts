@@ -34,7 +34,7 @@ describe('DAORegistry', function () {
     managingDAO.grant(
       registry.address,
       ownerAddress,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_DAO_ROLE')
     );
   });
 
