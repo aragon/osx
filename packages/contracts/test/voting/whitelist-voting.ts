@@ -170,9 +170,10 @@ describe('WhitelistVoting', function () {
       expect(await voting.canVote(id, user1)).to.equal(false);
       expect(await voting.canVote(1, ownerAddress)).to.equal(false);
 
-      expect(vote.actions).to.deep.equal([
-        [dummyActions[0].to, toBn(dummyActions[0].value), dummyActions[0].data],
-      ]);
+      expect(vote.actions.length).to.equal(1);
+      expect(vote.actions[0].to).to.equal(dummyActions[0].to);
+      expect(vote.actions[0].value).to.equal(dummyActions[0].value);
+      expect(vote.actions[0].data).to.equal(dummyActions[0].data);
     });
 
     it('should create a vote and cast a vote immediately', async () => {
@@ -323,13 +324,10 @@ describe('WhitelistVoting', function () {
 
         expect(actor).to.equal(voting.address);
         expect(callId).to.equal(id);
-        expect(actions).to.deep.equal([
-          [
-            dummyActions[0].to,
-            ethers.BigNumber.from(dummyActions[0].value),
-            dummyActions[0].data,
-          ],
-        ]);
+        expect(actions.length).to.equal(1);
+        expect(actions[0].to).to.equal(dummyActions[0].to);
+        expect(actions[0].value).to.equal(dummyActions[0].value);
+        expect(actions[0].data).to.equal(dummyActions[0].data);
         expect(execResults).to.deep.equal([]);
 
         const vote = await voting.getVote(id);
