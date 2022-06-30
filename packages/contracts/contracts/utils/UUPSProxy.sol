@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 /// @title Proxy contract for UUPSUpgradeable
 /// @author Aragon Association - 2022
 /// @notice This contract is only meant to be used for deploy purposes
+/// TODO: Need to be fully tested
 contract UUPSProxy is ERC1967Proxy {
     constructor(
         address _logic,
