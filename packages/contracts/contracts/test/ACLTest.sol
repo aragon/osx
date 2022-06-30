@@ -20,7 +20,7 @@ contract ACLTest is ACL {
     }
 
     function getFreezePermission(address _where, bytes32 _role) public view returns (bool) {
-        return freezePermissions[freezeHash(_where, _role)];
+        return frozenPermissions[freezeHash(_where, _role)];
     }
 
     function getPermissionHash(

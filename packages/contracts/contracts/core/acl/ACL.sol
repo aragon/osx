@@ -60,7 +60,7 @@ contract ACL is Initializable {
     // hash(where, who, role) => Access flag(unset or allow) or ACLOracle (any other address denominates auth via ACLOracle)
     mapping(bytes32 => address) internal authPermissions;
     // hash(where, role) => true(role froze on the where), false(role is not frozen on the where)
-    mapping(bytes32 => bool) internal freezePermissions;
+    mapping(bytes32 => bool) internal frozenPermissions;
 
     // Events
 
@@ -205,7 +205,7 @@ contract ACL is Initializable {
     /// @param _role The hash of the role identifier
     /// @return bool Returns true if the role identifier has been frozen for the contract address
     function isFrozen(address _where, bytes32 _role) public view returns (bool) {
-        return freezePermissions[freezeHash(_where, _role)];
+        return frozenPermissions[freezeHash(_where, _role)];
     }
 
     /// @notice This method is used in the public `_grant` method of the ACL
@@ -272,9 +272,10 @@ contract ACL is Initializable {
     /// @param _role The hash of the role identifier
     function _freeze(address _where, bytes32 _role) internal {
         bytes32 permission = freezeHash(_where, _role);
-        if (freezePermissions[permission])
+        if (frozenPermissions[permission]) {
             revert ACLData.ACLRoleFrozen({where: _where, role: _role});
-        freezePermissions[freezeHash(_where, _role)] = true;
+        }
+        frozenPermissions[freezeHash(_where, _role)] = true;
 
         emit Frozen(_role, msg.sender, _where);
     }
@@ -320,11 +321,11 @@ contract ACL is Initializable {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _role));
     }
 
-    /// @notice Generates the hash for the `freezePermissions` mapping obtained from the workd "PERMISSION",
+    /// @notice Generates the hash for the `frozenPermissions` mapping obtained from the workd "PERMISSION",
     ///         the contract address, the address owning the permission, and the role identifier.
     /// @param _where The address of the contract
     /// @param _role The hash of the role identifier
-    /// @return bytes32 The freeze hash
+    /// @return bytes32 The freeze hash used in the frozenPermissions mapping
     function freezeHash(address _where, bytes32 _role) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("FREEZE", _where, _role));
     }
