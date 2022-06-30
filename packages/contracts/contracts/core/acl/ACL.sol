@@ -58,7 +58,7 @@ contract ACL is Initializable {
     address internal constant ALLOW_FLAG = address(2);
 
     // hash(where, who, role) => Access flag(unset or allow) or ACLOracle (any other address denominates auth via ACLOracle)
-    mapping(bytes32 => address) internal authPermissions;
+    mapping(bytes32 => address) internal permissions;
     // hash(where, role) => true(role froze on the where), false(role is not frozen on the where)
     mapping(bytes32 => bool) internal frozenPermissions;
 
@@ -241,9 +241,11 @@ contract ACL is Initializable {
         if (isFrozen(_where, _role)) revert ACLData.ACLRoleFrozen({where: _where, role: _role});
 
         bytes32 permission = permissionHash(_where, _who, _role);
-        if (authPermissions[permission] != UNSET_ROLE)
+
+        if (permissions[permission] != UNSET_ROLE) {
             revert ACLData.ACLRoleAlreadyGranted({where: _where, who: _who, role: _role});
-        authPermissions[permission] = address(_oracle);
+        }
+        permissions[permission] = address(_oracle);
 
         emit Granted(_role, msg.sender, _who, _where, _oracle);
     }
@@ -260,9 +262,10 @@ contract ACL is Initializable {
         if (isFrozen(_where, _role)) revert ACLData.ACLRoleFrozen({where: _where, role: _role});
 
         bytes32 permission = permissionHash(_where, _who, _role);
-        if (authPermissions[permission] == UNSET_ROLE)
+        if (permissions[permission] == UNSET_ROLE) {
             revert ACLData.ACLRoleAlreadyRevoked({where: _where, who: _who, role: _role});
-        authPermissions[permission] = UNSET_ROLE;
+        }
+        permissions[permission] = UNSET_ROLE;
 
         emit Revoked(_role, msg.sender, _who, _where);
     }
@@ -292,7 +295,7 @@ contract ACL is Initializable {
         bytes32 _role,
         bytes memory _data
     ) internal returns (bool) {
-        address accessFlagOrAclOracle = authPermissions[permissionHash(_where, _who, _role)];
+        address accessFlagOrAclOracle = permissions[permissionHash(_where, _who, _role)];
 
         if (accessFlagOrAclOracle == UNSET_ROLE) return false;
         if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
