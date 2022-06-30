@@ -7,23 +7,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
-
-  const ret = await deploy('DAORegistry', {
-    from: deployer,
-    log: true,
-  });
-
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  const registryAddress: string = ret.receipt?.contractAddress || '';
-
-  if (registryAddress !== '') {
-    const registryContract = await ethers.getContractAt(
-      'DAORegistry',
-      registryAddress
-    );
-    await registryContract.initialize(managingDAOAddress);
-  }
+  await deploy('DAORegistry', {
+    from: deployer,
+    args: [],
+    log: true,
+    proxy: {
+      owner: deployer,
+      proxyContract: 'UUPSProxy',
+      execute: {
+        init: {
+          methodName: 'initialize',
+          args: [managingDAOAddress],
+        },
+      },
+    },
+  });
 };
 export default func;
 func.tags = ['DAORegistry'];

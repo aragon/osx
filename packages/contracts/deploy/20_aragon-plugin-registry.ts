@@ -8,23 +8,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const adminDaoAddress = await getContractAddress('DAO', hre);
+  const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  const ret = await deploy('AragonPluginRegistry', {
+  await deploy('AragonPluginRegistry', {
     from: deployer,
+    args: [],
     log: true,
+    proxy: {
+      owner: deployer,
+      proxyContract: 'UUPSProxy',
+      execute: {
+        init: {
+          methodName: 'initialize',
+          args: [managingDAOAddress],
+        },
+      },
+    },
   });
-
-  const ampAddress: string = ret.receipt?.contractAddress || '';
-
-  if (ampAddress !== '') {
-    const AragonPluginRegistryContract = await ethers.getContractAt(
-      'AragonPluginRegistry',
-      ampAddress
-    );
-    await AragonPluginRegistryContract.initialize(adminDaoAddress);
-    console.log('AragonPluginRegistryContract initialized', ampAddress);
-  }
 };
 export default func;
 func.runAtTheEnd = true;

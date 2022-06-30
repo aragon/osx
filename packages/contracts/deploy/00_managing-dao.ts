@@ -7,26 +7,25 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
+  const {deploy, save} = deployments;
 
   const {deployer} = await getNamedAccounts();
 
-  const ret = await deploy('DAO', {
+  await deploy('DAO', {
     from: deployer,
+    args: [],
     log: true,
+    proxy: {
+      owner: deployer,
+      proxyContract: 'UUPSProxy',
+      execute: {
+        init: {
+          methodName: 'initialize',
+          args: ['0x00', deployer, ethers.constants.AddressZero],
+        },
+      },
+    },
   });
-
-  const daoAddress: string = ret.receipt?.contractAddress || '';
-
-  if (daoAddress !== '') {
-    const daoContract = await ethers.getContractAt('DAO', daoAddress);
-    await daoContract.initialize(
-      '0x00',
-      deployer,
-      ethers.constants.AddressZero
-    );
-    console.log('Admin DAO Contract initialized');
-  }
 };
 export default func;
 func.tags = ['ManagingDao'];
