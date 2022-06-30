@@ -1,12 +1,13 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {customError} from '../../../test-utils/custom-error-helper';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+
 import {
   TestParameterScopingACLOracle,
   TestComponent,
   DAO,
 } from '../../../../typechain';
+import {customError} from '../../../test-utils/custom-error-helper';
 
 const DO_SOMETHING_ROLE = ethers.utils.id('DO_SOMETHING_ROLE');
 

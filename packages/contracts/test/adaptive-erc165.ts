@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {Signer} from 'ethers';
 import {hexDataSlice, id} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
+
 import {
   AdaptiveERC165Mock,
   AdaptiveERC165MockHelper,
@@ -14,7 +15,7 @@ const EVENTS = {
   REGISTERED_CALLBACK: 'CallbackRegistered',
   REGISTERED_STANDARD: 'StandardRegistered',
   RECEIVED_CALLBACK: 'CallbackReceived',
-}
+};
 
 const beefInterfaceId = '0xbeefbeef';
 const callbackSig = hexDataSlice(id('callbackFunc()'), 0, 4); // 0x1eb2075a
