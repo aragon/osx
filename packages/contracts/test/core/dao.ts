@@ -162,7 +162,7 @@ describe('DAO', function () {
       {
         to: dummyAddress1,
         data: dummyMetadata1,
-        value: ethers.BigNumber.from(0),
+        value: 0,
       },
     ];
     const expectedDummyResults = ['0x'];
@@ -197,13 +197,10 @@ describe('DAO', function () {
 
       expect(actor).to.equal(ownerAddress);
       expect(callId).to.equal(0);
-      expect(actions).to.deep.equal([
-        [
-          dummyActions[0].to,
-          ethers.BigNumber.from(dummyActions[0].value),
-          dummyActions[0].data,
-        ],
-      ]);
+      expect(actions.length).to.equal(1);
+      expect(actions[0].to).to.equal(dummyActions[0].to);
+      expect(actions[0].value).to.equal(dummyActions[0].value);
+      expect(actions[0].data).to.equal(dummyActions[0].data);
       expect(execResults).to.deep.equal(expectedDummyResults);
     });
   });

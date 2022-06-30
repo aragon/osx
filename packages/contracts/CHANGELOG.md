@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Upcoming]
 
 ### Added
-
+- Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
 - Added `IPluginRepo` interface for plugin PluginRepo contract.
 - Added `PluginRepo` contract.
@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added workflow and scripts in `.github/helpers/contracts/dummy-dao/` to create dummy daos, deposits and proposals on contract deploy
+- Added workflow and scripts in `.github/helpers/contracts/dummy-dao/` to create dummy daos, deposits and proposals on contract deploy.
 - Added `VoteConfig` struct in the `DAOFactory` to allow better typechain support for the creation of daos.
 - Added `MetaTxComponent`.
 
