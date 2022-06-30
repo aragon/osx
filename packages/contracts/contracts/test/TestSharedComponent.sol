@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import "../core/component/Component.sol";
-
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+import "../core/component/Component.sol";
 
 /// @notice A test component that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
 /// @dev This is realized by asking an `IACLOracle` that must be authorized in the DAO's ACL.

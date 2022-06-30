@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
+
 import "../../core/component/Component.sol";
 
 /// @title A registrar for ENS subdomains
@@ -51,7 +52,7 @@ contract ENSSubdomainRegistrar is Component {
         }
 
         __Component_init(_managingDao);
-        
+
         // Register the ERC165 interface ID for the `Component`
         _registerStandard(REGISTRY_INTERFACE_ID);
 

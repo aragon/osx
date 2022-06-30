@@ -3,7 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import "./../majority/MajorityVoting.sol";
+import "../majority/MajorityVoting.sol";
 
 /// @title A component for ERC-20 token voting
 /// @author Aragon Association - 2021-2022
