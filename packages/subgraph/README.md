@@ -76,3 +76,20 @@ to stop:
 ```console
 yarn stop:dev
 ```
+
+## Github Labels / Workflows
+
+### Workflows
+
+| Filename            | Description                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| subgraph-deploy.yml | Deploys the subgraph on a push to `main` or `develop` or when a pull request is merged. It also updates the changelog if the proper label is set (see below) |
+| subgraph-tests.yml  | Runs on each push to any branch and runs the tests                                                                                                           |
+
+### Labels
+
+| Label          | Description                                                     |
+| -------------- | --------------------------------------------------------------- |
+| subgraph:patch | Applies a patch version bump for the changelog and package.json |
+| subgraph:minor | Applies a minor version bump for the changelog and package.json |
+| subgraph:major | Applies a major version bump for the changelog and package.json |
