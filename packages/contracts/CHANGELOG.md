@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added deployment script for `ENSSubdomainRegistrar`
+- Added deployment script for `ENSSubdomainRegistrar`.
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
 - Added `IPluginRepo` interface for plugin PluginRepo contract.
