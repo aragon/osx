@@ -6,7 +6,7 @@ import "../core/IDAO.sol";
 import "./InterfaceBasedRegistry.sol";
 
 /// @title Register your unique DAO name
-/// @author Aragon Association - 2021
+/// @author Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a DAO.
 contract DAORegistry is InterfaceBasedRegistry {
     bytes32 public constant REGISTER_DAO_ROLE = keccak256("REGISTER_DAO_ROLE");
@@ -20,11 +20,10 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @notice Initializes the contract
     /// @param _managingDao the managing DAO address
     function initialize(IDAO _managingDao) public initializer {
-        bytes4 daoInterfaceId = type(IDAO).interfaceId;
-        __InterfaceBasedRegistry_init(_managingDao, daoInterfaceId);
+        __InterfaceBasedRegistry_init(_managingDao, type(IDAO).interfaceId);
     }
 
-    /// @notice Registers a DAO by his name
+    /// @notice Registers a DAO by its address
     /// @dev A name is unique within the Aragon DAO framework and can get stored here
     /// @param name The name of the DAO
     /// @param dao The address of the DAO contract

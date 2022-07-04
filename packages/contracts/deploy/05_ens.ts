@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {ENS_ADDRESSES, getContractAddress, setupENS} from './helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts, ethers, getChainId, network} = hre;
+  const {deployments, getNamedAccounts, ethers, network} = hre;
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();

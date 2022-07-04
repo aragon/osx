@@ -152,7 +152,7 @@ describe('DAOFactory: ', function () {
     );
     actionExecuteContract = await ActionExecuteContract.deploy();
 
-    // Grant REGISTER_DAO_ROLE to registrer
+    // Grant the `REGISTER_DAO_ROLE` permission to the `daoFactory`
     managingDAO.grant(
       registry.address,
       daoFactory.address,

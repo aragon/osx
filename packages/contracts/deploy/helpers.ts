@@ -103,12 +103,14 @@ export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
     ensResolverAddress
   );
 
+  // make the deployer owning the root ('') the owner of the subdomain 'eth'
   await ensRegistryContract.setSubnodeOwner(
     ensDomainHash('', ethers),
     ensLabelHash('eth', ethers),
     deployer
   );
 
+  // make the deployer owning the domain 'eth' the owner of the subdomain 'dao.eth'
   await ensRegistryContract.setSubnodeOwner(
     ensDomainHash('eth', ethers),
     ensLabelHash('dao', ethers),
