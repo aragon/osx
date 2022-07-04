@@ -214,20 +214,20 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @param _users user addresses
     /// @param _enabled whether to add or remove from allowlist
     function _allowlistUsers(address[] calldata _users, bool _enabled) internal {
-        _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
+        _totalCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 
         for (uint256 i = 0; i < _users.length; i++) {
             _checkpoints[_users[i]].push(_enabled ? 1 : 0);
         }
     }
 
-    function _add(uint256 a, uint256 b) private pure returns (uint256) {
+    function _uncheckedAdd(uint256 a, uint256 b) private pure returns (uint256) {
         unchecked {
             return a + b;
         }
     }
 
-    function _sub(uint256 a, uint256 b) private pure returns (uint256) {
+    function _uncheckedSub(uint256 a, uint256 b) private pure returns (uint256) {
         unchecked {
             return a - b;
         }
