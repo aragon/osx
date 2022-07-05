@@ -1,9 +1,9 @@
 // JSON artifacts of the contracts
 
 // Core contracts
-import * as ACL from '../artifacts/contracts/core/acl/PermissionManager.sol/ACL.json';
-import * as PermissionLib from '../artifacts/contracts/core/acl/PermissionManager.sol/PermissionLib.json';
-import * as IPermissionOracle from '../artifacts/contracts/core/acl/IPermissionOracle.sol/IPermissionOracle.json';
+import * as ACL from '../artifacts/contracts/core/permission/PermissionManager.sol/ACL.json';
+import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionLib.json';
+import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
 import * as Component from '../artifacts/contracts/core/component/Component.sol/Component.json';

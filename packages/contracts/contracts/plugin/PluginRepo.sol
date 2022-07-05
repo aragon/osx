@@ -7,7 +7,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "../core/acl/PermissionManager.sol";
+import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../utils/UncheckedIncrement.sol";
 import "./IPluginFactory.sol";

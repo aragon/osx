@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/acl/PermissionManager.sol";
+import "../core/permission/PermissionManager.sol";
 import "../core/IDAO.sol";
 
 contract DAOMock is IDAO, ACL {

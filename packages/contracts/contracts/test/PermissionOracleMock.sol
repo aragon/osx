@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "../core/acl/IPermissionOracle.sol";
+import "../core/permission/IPermissionOracle.sol";
 
 contract PermissionOracleMock is IPermissionOracle {
     bool internal _checkPermissionsResult = true;
