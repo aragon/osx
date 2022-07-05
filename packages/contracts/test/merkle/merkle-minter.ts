@@ -93,7 +93,7 @@ describe('MerkleDistributor', function () {
           dummyMintingContext
         )
       )
-        .to.emit(minter, 'MintedMerkle')
+        .to.emit(minter, 'MerkleMinted')
         .withArgs(
           clonedAddress,
           merkleRoot,

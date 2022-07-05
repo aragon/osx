@@ -19,7 +19,7 @@ contract MerkleMinter is MetaTxComponent {
     IERC20MintableUpgradeable public token;
     address public distributorBase;
 
-    event MintedMerkle(
+    event MerkleMinted(
         address indexed distributor,
         bytes32 indexed merkleRoot,
         uint256 totalAmount,
@@ -73,7 +73,7 @@ contract MerkleMinter is MetaTxComponent {
 
         token.mint(distributorAddr, _totalAmount);
 
-        emit MintedMerkle(distributorAddr, _merkleRoot, _totalAmount, _tree, _context);
+        emit MerkleMinted(distributorAddr, _merkleRoot, _totalAmount, _tree, _context);
 
         return MerkleDistributor(distributorAddr);
     }
