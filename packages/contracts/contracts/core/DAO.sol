@@ -28,7 +28,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
         keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION_ID");
-    bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
+    bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID = keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 
     ERC1271 signatureValidator;
 
@@ -75,7 +75,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function setTrustedForwarder(address _newTrustedForwarder)
         external
         override
-        auth(address(this), MODIFY_TRUSTED_FORWARDER)
+        auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID)
     {
         _setTrustedForwarder(_newTrustedForwarder);
     }

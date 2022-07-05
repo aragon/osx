@@ -10,7 +10,7 @@ import "./Component.sol";
 /// @author Aragon Association - 2022
 /// @notice Any component within the Aragon DAO framework using meta transactions has to inherit from this contract
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
-    bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
+    bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID = keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 
     event TrustedForwarderSet(address forwarder);
 
@@ -56,7 +56,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function setTrustedForwarder(address _trustedForwarder)
         public
         virtual
-        auth(MODIFY_TRUSTED_FORWARDER)
+        auth(SET_TRUSTED_FORWARDER_PERMISSION_ID)
     {
         _setTrustedForwarder(_trustedForwarder);
 

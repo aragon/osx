@@ -31,7 +31,9 @@ const PERMISSION_IDS = {
   SET_SIGNATURE_VALIDATOR_PERMISSION_ID: ethers.utils.id(
     'SET_SIGNATURE_VALIDATOR_PERMISSION_ID'
   ),
-  MODIFY_TRUSTED_FORWARDER: ethers.utils.id('MODIFY_TRUSTED_FORWARDER'),
+  SET_TRUSTED_FORWARDER_PERMISSION_ID: ethers.utils.id(
+    'SET_TRUSTED_FORWARDER_PERMISSION_ID'
+  ),
   MINT_PERMISSION_ID: ethers.utils.id('MINT_PERMISSION_ID'),
 };
 
@@ -79,7 +81,7 @@ describe('DAO', function () {
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
+        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       ),
       dao.grant(token.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
     ]);
@@ -102,7 +104,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
+        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       );
 
       await expect(dao.setTrustedForwarder(dummyAddress2)).to.be.revertedWith(
@@ -111,7 +113,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
+          PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
         )
       );
     });

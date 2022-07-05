@@ -171,7 +171,7 @@ contract DAOFactory {
         );
         items[5] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            _dao.MODIFY_TRUSTED_FORWARDER(),
+            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );
         items[6] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.EXEC_PERMISSION_ID(), _voting);
@@ -224,7 +224,7 @@ contract DAOFactory {
         );
         items[2] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            erc20Voting.MODIFY_TRUSTED_FORWARDER(),
+            erc20Voting.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );
 
@@ -274,7 +274,7 @@ contract DAOFactory {
         );
         items[3] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            whitelistVoting.MODIFY_TRUSTED_FORWARDER(),
+            whitelistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );
 
