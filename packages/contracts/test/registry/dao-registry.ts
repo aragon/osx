@@ -81,9 +81,9 @@ describe('DAORegistry', function () {
     );
   });
 
-  it('fail to register more than one DAO with the same name', async function () {
+  it('register more than one DAO with the same name', async function () {
     // TODO: Current behaviour of the DAO Registry allowes for DAO's name to be repeated,
-    // but it should not, will be resolved once ENS subdomain is implemented and this test should be updated.
+    // but it should not, will be resolved once ENS subdomain is implemented and this test should be updated and renamed.
 
     const daoName = 'my-dao';
 
