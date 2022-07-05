@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {VoterState} from '../test-utils/voting';
+import {dummyVoteSettings, VoterState} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
@@ -22,11 +22,6 @@ const ACLAnyAddress = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 const ACLAllowFlagAddress = '0x0000000000000000000000000000000000000002';
 const daoDummyName = 'dao1';
 const daoDummyMetadata = '0x0000';
-const dummyVoteSettings = {
-  participationRequiredPct: 1,
-  supportRequiredPct: 2,
-  minDuration: 3,
-};
 
 async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();

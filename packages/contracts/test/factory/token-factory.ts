@@ -2,7 +2,6 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {
   DAO,
-  ERC20Upgradeable__factory,
   GovernanceERC20,
   GovernanceERC20__factory,
   GovernanceWrappedERC20,
@@ -13,22 +12,12 @@ import {
   TokenFactory__factory,
 } from '../../typechain';
 import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
+import {MintConfig, TokenConfig} from '../test-utils/token';
 
 chai.use(smock.matchers);
 
 const TOKEN_MINTER_ROLE = ethers.utils.id('TOKEN_MINTER_ROLE');
 const MERKLE_MINTER_ROLE = ethers.utils.id('MERKLE_MINTER_ROLE');
-
-interface TokenConfig {
-  addr: string;
-  name: string;
-  symbol: string;
-}
-
-interface MintConfig {
-  receivers: string[];
-  amounts: number[];
-}
 
 describe('Core: TokenFactory', () => {
   let tokenFactory: MockContract<TokenFactory>;
