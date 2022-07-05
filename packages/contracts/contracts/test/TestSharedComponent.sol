@@ -66,7 +66,7 @@ contract TestIdGatingOracle is IACLOracle {
 
     /// @notice Checks the calldata and expects the `id` to be the first argument of type `uint256`
 
-    function willPerform(
+    function checkPermissions(
         address _where,
         address _who,
         bytes32 _permissionID,

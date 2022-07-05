@@ -101,8 +101,8 @@ contract ACL is Initializable {
     /// @param _permissionID The permission identifier required to call the method this modifier is applied to
     modifier auth(address _where, bytes32 _permissionID) {
         if (
-            !(willPerform(_where, msg.sender, _permissionID, msg.data) ||
-                willPerform(address(this), msg.sender, _permissionID, msg.data))
+            !(checkPermissions(_where, msg.sender, _permissionID, msg.data) ||
+                checkPermissions(address(this), msg.sender, _permissionID, msg.data))
         )
             revert ACLData.ACLAuth({
                 here: address(this),
@@ -195,8 +195,8 @@ contract ACL is Initializable {
     /// @param _who The address (EOA or contract) for which the permission is checked
     /// @param _permissionID The permission identifier
     /// @param _data The optional data passed to the `ACLOracle` registered
-    /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionID identifier
-    function willPerform(
+    /// @return bool Returns true if `who` has the permissions on the contract via the specified permission identifier
+    function checkPermissions(
         address _where,
         address _who,
         bytes32 _permissionID,
@@ -320,7 +320,7 @@ contract ACL is Initializable {
 
         // Since it's not a flag, assume it's an ACLOracle and try-catch to skip failures
         try
-            IACLOracle(accessFlagOrAclOracle).willPerform(_where, _who, _permissionID, _data)
+            IACLOracle(accessFlagOrAclOracle).checkPermissions(_where, _who, _permissionID, _data)
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}

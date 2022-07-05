@@ -72,7 +72,7 @@ describe('Core: TokenFactory', () => {
 
     beforeEach(async () => {
       dao = await smock.fake<DAO>('DAO');
-      dao.willPerform.returns(true);
+      dao.checkPermissions.returns(true);
       dao.hasPermission.returns(true);
     });
 

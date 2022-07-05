@@ -12,7 +12,7 @@ interface IACLOracle {
     // @param _permissionID The permission identifier
     // @param _data The optional data passed to the ACLOracle registered.
     // @return bool
-    function willPerform(
+    function checkPermissions(
         address _where,
         address _who,
         bytes32 _permissionID,

@@ -5,18 +5,18 @@ pragma solidity 0.8.10;
 import "../core/acl/IACLOracle.sol";
 
 contract ACLOracleMock is IACLOracle {
-    bool internal _willPerformResult = true;
+    bool internal _checkPermissionsResult = true;
 
-    function willPerform(
+    function checkPermissions(
         address, /* _where */
         address, /* _who */
         bytes32, /* _permissionID */
         bytes memory /* _data */
     ) external view returns (bool) {
-        return _willPerformResult;
+        return _checkPermissionsResult;
     }
 
     function setWillPerform(bool _result) external {
-        _willPerformResult = _result;
+        _checkPermissionsResult = _result;
     }
 }

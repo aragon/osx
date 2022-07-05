@@ -649,62 +649,62 @@ describe('Core: ACL', function () {
     });
   });
 
-  describe('willPerform', () => {
+  describe('checkPermissions', () => {
     it('should return true fcr granted user', async () => {
       await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const willPerform = await acl.callStatic.willPerform(
+      const checkPermissions = await acl.callStatic.checkPermissions(
         acl.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(willPerform).to.be.equal(true);
+      expect(checkPermissions).to.be.equal(true);
     });
 
     it('should return false for non granted user', async () => {
-      const willPerform = await acl.callStatic.willPerform(
+      const checkPermissions = await acl.callStatic.checkPermissions(
         acl.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(willPerform).to.be.equal(false);
+      expect(checkPermissions).to.be.equal(false);
     });
 
     it('should return true for any who granted permissionID', async () => {
       const anyAddr = await acl.getAnyAddr();
       await acl.grant(acl.address, anyAddr, ADMIN_PERMISSION_ID);
-      const willPerform = await acl.callStatic.willPerform(
+      const checkPermissions = await acl.callStatic.checkPermissions(
         acl.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(willPerform).to.be.equal(true);
+      expect(checkPermissions).to.be.equal(true);
     });
 
     it('should return true for any where granted permissionID', async () => {
       const anyAddr = await acl.getAnyAddr();
       await acl.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
-      const willPerform = await acl.callStatic.willPerform(
+      const checkPermissions = await acl.callStatic.checkPermissions(
         acl.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(willPerform).to.be.equal(true);
+      expect(checkPermissions).to.be.equal(true);
     });
 
     it('should be callable by anyone', async () => {
-      const willPerform = await acl
+      const checkPermissions = await acl
         .connect(otherSigner)
-        .callStatic.willPerform(
+        .callStatic.checkPermissions(
           acl.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           []
         );
-      expect(willPerform).to.be.equal(false);
+      expect(checkPermissions).to.be.equal(false);
     });
   });
 
@@ -742,7 +742,7 @@ describe('Core: ACL', function () {
       aclOracle = await aclOracleFactory.deploy();
     });
 
-    it('should call IACLOracle.willPerform', async () => {
+    it('should call IACLOracle.checkPermissions', async () => {
       await acl.grantWithOracle(
         acl.address,
         otherSigner.address,
@@ -750,7 +750,7 @@ describe('Core: ACL', function () {
         aclOracle.address
       );
       expect(
-        await acl.callStatic.willPerform(
+        await acl.callStatic.checkPermissions(
           acl.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
@@ -760,7 +760,7 @@ describe('Core: ACL', function () {
 
       await aclOracle.setWillPerform(false);
       expect(
-        await acl.callStatic.willPerform(
+        await acl.callStatic.checkPermissions(
           acl.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,

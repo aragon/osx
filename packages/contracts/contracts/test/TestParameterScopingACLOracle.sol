@@ -16,7 +16,7 @@ contract TestParameterScopingACLOracle is IACLOracle {
         }
     }
 
-    function willPerform(
+    function checkPermissions(
         address _where,
         address _who,
         bytes32 _permissionID,
