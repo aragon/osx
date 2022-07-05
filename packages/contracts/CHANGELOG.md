@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `1010_erc20-voting-factory` to `/deploy`.
+- Added `1020_whitelist-voting-factory` to `/deploy`.
+- Added `token.ts` at `/test-utils` for shared token related types.
+- Added `ERC20VotingFactory` and its testing at `erc20-voting-factory`.
+- Added `WhitelistVotingFactory` and its testing at `whitelist-voting-factory`.
 - Added deployment script for `ENSSubdomainRegistrar`
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
@@ -24,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated `voting.ts` at `/test-utils` to include `dummyVoteSettings`.
 - Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`
 - Changed `registry.ts` to `dao-registry.ts` and updated testing.
 - Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`
