@@ -26,7 +26,7 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @param _permissionID The permission identifier
     modifier auth(bytes32 _permissionID) {
         if (!dao.hasPermission(address(this), _msgSender(), _permissionID, _msgData()))
-            revert ACLData.ACLAuth({
+            revert ACLData.PermissionUnauthorized({
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),

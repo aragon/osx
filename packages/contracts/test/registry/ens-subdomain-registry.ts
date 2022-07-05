@@ -353,7 +353,7 @@ describe('ENSSubdomainRegistrar', function () {
             .registerSubnode(ensLabelHash('my'), targetAddress)
         ).to.be.revertedWith(
           customError(
-            'ACLAuth',
+            'PermissionUnauthorized',
             registrar.address,
             registrar.address,
             signers[1].address,
@@ -370,7 +370,7 @@ describe('ENSSubdomainRegistrar', function () {
             .setDefaultResolver(ethers.constants.AddressZero)
         ).to.be.revertedWith(
           customError(
-            'ACLAuth',
+            'PermissionUnauthorized',
             registrar.address,
             registrar.address,
             signers[1].address,

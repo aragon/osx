@@ -90,7 +90,7 @@ describe('Core: ACL', function () {
         acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLRoleAlreadyGranted',
+          'PermissionAlreadyGranted',
           acl.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
@@ -103,7 +103,7 @@ describe('Core: ACL', function () {
       await expect(
         acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('ACLRoleFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -114,7 +114,7 @@ describe('Core: ACL', function () {
           .grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -131,7 +131,7 @@ describe('Core: ACL', function () {
           .grant(acl.address, otherSigner.address, ROOT_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -184,7 +184,7 @@ describe('Core: ACL', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'ACLRoleAlreadyGranted',
+          'PermissionAlreadyGranted',
           acl.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
@@ -202,7 +202,7 @@ describe('Core: ACL', function () {
           ALLOW_FLAG
         )
       ).to.be.revertedWith(
-        customError('ACLRoleFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -235,7 +235,7 @@ describe('Core: ACL', function () {
           )
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -262,7 +262,7 @@ describe('Core: ACL', function () {
           )
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -299,7 +299,7 @@ describe('Core: ACL', function () {
           .revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -314,7 +314,7 @@ describe('Core: ACL', function () {
       await expect(
         acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('ACLRoleFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -325,7 +325,7 @@ describe('Core: ACL', function () {
         acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLRoleAlreadyRevoked',
+          'PermissionAlreadyRevoked',
           acl.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
@@ -340,7 +340,7 @@ describe('Core: ACL', function () {
           .revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -357,7 +357,7 @@ describe('Core: ACL', function () {
           .revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -389,7 +389,7 @@ describe('Core: ACL', function () {
       await expect(
         acl.freeze(acl.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('ACLRoleFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -398,7 +398,7 @@ describe('Core: ACL', function () {
         acl.connect(otherSigner).freeze(acl.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -413,7 +413,7 @@ describe('Core: ACL', function () {
         acl.connect(otherSigner).freeze(acl.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -584,7 +584,7 @@ describe('Core: ACL', function () {
       ];
 
       await expect(acl.bulk(acl.address, bulkItems)).to.be.revertedWith(
-        customError('ACLRoleFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
       );
       expect(
         await acl.getAuthPermission(
@@ -617,7 +617,7 @@ describe('Core: ACL', function () {
         acl.connect(otherSigner).bulk(acl.address, bulkItems)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,
@@ -639,7 +639,7 @@ describe('Core: ACL', function () {
         acl.connect(otherSigner).bulk(acl.address, bulkItems)
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           acl.address,
           acl.address,
           otherSigner.address,

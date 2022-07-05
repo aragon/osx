@@ -20,7 +20,7 @@ describe('SharedComponent', function () {
   let dao1: DAO;
   let dao2: DAO;
   let ownerAddress: string;
-  let expectedACLAuthError: string;
+  let expectedPermissionUnauthorizedError: string;
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
@@ -46,8 +46,8 @@ describe('SharedComponent', function () {
     testComponent = await TestSharedComponent.deploy();
     await testComponent.initialize(managingDAO.address);
 
-    expectedACLAuthError = customError(
-      'ACLAuth',
+    expectedPermissionUnauthorizedError = customError(
+      'PermissionUnauthorized',
       testComponent.address,
       testComponent.address,
       ownerAddress,
@@ -171,7 +171,7 @@ describe('SharedComponent', function () {
       // The call fails if the ID differs
       await expect(
         testComponent.callStatic.idGatedAction(existingButNotAllowedId)
-      ).to.be.revertedWith(expectedACLAuthError);
+      ).to.be.revertedWith(expectedPermissionUnauthorizedError);
     });
 
     it('reverts if the permission is missing', async () => {
@@ -188,7 +188,7 @@ describe('SharedComponent', function () {
 
       await expect(
         testComponent.callStatic.idGatedAction(allowedId)
-      ).to.be.revertedWith(expectedACLAuthError);
+      ).to.be.revertedWith(expectedPermissionUnauthorizedError);
     });
 
     it('reverts if the permission is set in the wrong DAO', async () => {
@@ -213,7 +213,7 @@ describe('SharedComponent', function () {
 
       await expect(
         testComponent.callStatic.idGatedAction(allowedId)
-      ).to.be.revertedWith(expectedACLAuthError);
+      ).to.be.revertedWith(expectedPermissionUnauthorizedError);
     });
 
     it('reverts if the object belongs to the wrong DAO', async () => {
@@ -238,7 +238,7 @@ describe('SharedComponent', function () {
 
       await expect(
         testComponent.callStatic.idGatedAction(allowedId)
-      ).to.be.revertedWith(expectedACLAuthError);
+      ).to.be.revertedWith(expectedPermissionUnauthorizedError);
     });
   });
 });

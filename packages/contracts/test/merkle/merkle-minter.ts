@@ -119,7 +119,7 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           minter.address,
           minter.address,
           ownerAddress,
@@ -140,7 +140,7 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'PermissionUnauthorized',
           token.address,
           token.address,
           minter.address,

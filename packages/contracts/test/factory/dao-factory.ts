@@ -226,7 +226,7 @@ describe('DAOFactory: ', function () {
     // should be only callable by ERC20Voting
     await expect(dao.execute(0, [])).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'PermissionUnauthorized',
         dao.address,
         dao.address,
         ownerAddress,
@@ -236,7 +236,7 @@ describe('DAOFactory: ', function () {
 
     await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'PermissionUnauthorized',
         voting.address,
         voting.address,
         ownerAddress,
@@ -368,7 +368,7 @@ describe('DAOFactory: ', function () {
     // should be only callable by WhitelistVoting
     await expect(dao.execute(0, [])).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'PermissionUnauthorized',
         dao.address,
         dao.address,
         ownerAddress,
@@ -378,7 +378,7 @@ describe('DAOFactory: ', function () {
 
     await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'PermissionUnauthorized',
         voting.address,
         voting.address,
         ownerAddress,

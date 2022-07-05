@@ -22,25 +22,25 @@ library ACLData {
     /// @param here The contract containing the function
     /// @param where The contract being called
     /// @param who The address (EOA or contract) owning the permission
-    /// @param permissionID The permissionID required to call the function
-    error ACLAuth(address here, address where, address who, bytes32 permissionID);
+    /// @param permissionID The permission identifier required to call the function
+    error PermissionUnauthorized(address here, address where, address who, bytes32 permissionID);
 
     /// @notice Thrown if the permissionID was already granted to the address interacting with the target
     /// @param where The contract being called
     /// @param who The address (EOA or contract) owning the permission
-    /// @param permissionID The permissionID required to call the function
-    error ACLRoleAlreadyGranted(address where, address who, bytes32 permissionID);
+    /// @param permissionID The permission identifier required to call the function
+    error PermissionAlreadyGranted(address where, address who, bytes32 permissionID);
 
     /// @notice Thrown if the permissionID was already revoked from the address interact with the target
     /// @param where The contract being called
     /// @param who The address (EOA or contract) owning the permission
     /// @param permissionID The permission identifier
-    error ACLRoleAlreadyRevoked(address where, address who, bytes32 permissionID);
+    error PermissionAlreadyRevoked(address where, address who, bytes32 permissionID);
 
     /// @notice Thrown if the address was already granted the permissionID to interact with the target
     /// @param where The contract being called
     /// @param permissionID The permission identifier
-    error ACLRoleFrozen(address where, bytes32 permissionID);
+    error PermissionFrozen(address where, bytes32 permissionID);
 }
 
 /// @title The ACL used in the DAO contract to manage all permissions of a DAO.
@@ -104,7 +104,7 @@ contract ACL is Initializable {
             !(checkPermissions(_where, msg.sender, _permissionID, msg.data) ||
                 checkPermissions(address(this), msg.sender, _permissionID, msg.data))
         )
-            revert ACLData.ACLAuth({
+            revert ACLData.PermissionUnauthorized({
                 here: address(this),
                 where: _where,
                 who: msg.sender,
@@ -247,12 +247,12 @@ contract ACL is Initializable {
         IACLOracle _oracle
     ) internal {
         if (isFrozen(_where, _permissionID))
-            revert ACLData.ACLRoleFrozen({where: _where, permissionID: _permissionID});
+            revert ACLData.PermissionFrozen({where: _where, permissionID: _permissionID});
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
 
         if (permissions[permission] != UNSET_PERMISSION_ID) {
-            revert ACLData.ACLRoleAlreadyGranted({
+            revert ACLData.PermissionAlreadyGranted({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
@@ -272,12 +272,13 @@ contract ACL is Initializable {
         address _who,
         bytes32 _permissionID
     ) internal {
-        if (isFrozen(_where, _permissionID))
-            revert ACLData.ACLRoleFrozen({where: _where, permissionID: _permissionID});
+        if (isFrozen(_where, _permissionID)) {
+            revert ACLData.PermissionFrozen({where: _where, permissionID: _permissionID});
+        }
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
         if (permissions[permission] == UNSET_PERMISSION_ID) {
-            revert ACLData.ACLRoleAlreadyRevoked({
+            revert ACLData.PermissionAlreadyRevoked({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
@@ -294,7 +295,7 @@ contract ACL is Initializable {
     function _freeze(address _where, bytes32 _permissionID) internal {
         bytes32 permission = freezeHash(_where, _permissionID);
         if (frozenPermissions[permission]) {
-            revert ACLData.ACLRoleFrozen({where: _where, permissionID: _permissionID});
+            revert ACLData.PermissionFrozen({where: _where, permissionID: _permissionID});
         }
         frozenPermissions[freezeHash(_where, _permissionID)] = true;
 
