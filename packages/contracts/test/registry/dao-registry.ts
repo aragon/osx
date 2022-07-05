@@ -13,6 +13,14 @@ describe('DAORegistry', function () {
 
   const REGISTER_DAO_ROLE = ethers.utils.id('REGISTER_DAO_ROLE');
 
+  async function deployNewDao(): Promise<any> {
+    const DAO = await ethers.getContractFactory('DAO');
+    let dao = await DAO.deploy();
+    await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
+
+    return dao;
+  }
+
   before(async () => {
     const signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
@@ -20,13 +28,7 @@ describe('DAORegistry', function () {
 
   beforeEach(async function () {
     // Managing DAO
-    const ManagingDAO = await ethers.getContractFactory('DAO');
-    managingDAO = await ManagingDAO.deploy();
-    await managingDAO.initialize(
-      '0x00',
-      ownerAddress,
-      ethers.constants.AddressZero
-    );
+    managingDAO = await deployNewDao();
 
     // DAO Registry
     const Registry = await ethers.getContractFactory('DAORegistry');
@@ -77,5 +79,19 @@ describe('DAORegistry', function () {
     ).to.be.revertedWith(
       customError('ContractAlreadyRegistered', managingDAO.address)
     );
+  });
+
+  it('fail to register more than one DAO with the same name', async function () {
+    // TODO: Current behaviour of the DAO Registry allowes for DAO's name to be repeated,
+    // but it should not, will be resolved once ENS subdomain is implemented and this test should be updated.
+
+    const daoName = 'my-dao';
+
+    await registry.register(daoName, managingDAO.address, ownerAddress);
+
+    let newDao = await deployNewDao();
+
+    await expect(registry.register(daoName, newDao.address, ownerAddress)).not
+      .to.be.reverted;
   });
 });

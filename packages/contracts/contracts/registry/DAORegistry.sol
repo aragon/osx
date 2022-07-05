@@ -33,6 +33,8 @@ contract DAORegistry is InterfaceBasedRegistry {
         IDAO dao,
         address creator
     ) external auth(REGISTER_DAO_ROLE) {
+        // TODO: Implement ENS subdomain. Currently DAO's name can be repeated, will be resolved once the ENS subdomain is implemented.
+
         _register(address(dao));
 
         emit NewDAORegistered(dao, creator, name);
