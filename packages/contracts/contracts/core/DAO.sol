@@ -17,7 +17,7 @@ import "./IDAO.sol";
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework
-contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165 {
+contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -61,7 +61,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_forwarder);
-        __ACL_init(_initialOwner);
+        __PermissionManager_init(_initialOwner);
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ

@@ -7,7 +7,7 @@ import {customError} from '../../test-utils/custom-error-helper';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION_ID');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION_ID');
-const UNSET_PERMISSION_ID = ethers.utils.getAddress(
+const UNSET_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000000'
 );
 const ALLOW_FLAG = ethers.utils.getAddress(
@@ -26,8 +26,8 @@ interface BulkItem {
   who: string;
 }
 
-describe('Core: ACL', function () {
-  let acl: PermissionManagerTest;
+describe('Core: PermissionManager', function () {
+  let pm: PermissionManagerTest;
   let ownerSigner: SignerWithAddress;
   let otherSigner: SignerWithAddress;
 
@@ -38,27 +38,27 @@ describe('Core: ACL', function () {
   });
 
   beforeEach(async () => {
-    const ACL = await ethers.getContractFactory('PermissionManagerTest');
-    acl = await ACL.deploy();
-    await acl.init(ownerSigner.address);
+    const PM = await ethers.getContractFactory('PermissionManagerTest');
+    pm = await PM.deploy();
+    await pm.init(ownerSigner.address);
   });
 
   describe('init', () => {
     it('should allow init call only once', async () => {
-      await expect(acl.init(ownerSigner.address)).to.be.revertedWith(
+      await expect(pm.init(ownerSigner.address)).to.be.revertedWith(
         'Initializable: contract is already initialized'
       );
     });
 
     it('should emit Granted', async () => {
-      const ACL = await ethers.getContractFactory('PermissionManagerTest');
-      acl = await ACL.deploy();
-      await expect(acl.init(ownerSigner.address)).to.emit(acl, 'Granted');
+      const PM = await ethers.getContractFactory('PermissionManagerTest');
+      pm = await PM.deploy();
+      await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
     });
 
     it('should add ROOT_PERMISSION_ID', async () => {
-      const permission = await acl.getAuthPermission(
-        acl.address,
+      const permission = await pm.getAuthPermission(
+        pm.address,
         ownerSigner.address,
         ROOT_PERMISSION_ID
       );
@@ -68,9 +68,9 @@ describe('Core: ACL', function () {
 
   describe('grant', () => {
     it('should add permission', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const permission = await acl.getAuthPermission(
-        acl.address,
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      const permission = await pm.getAuthPermission(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID
       );
@@ -79,18 +79,18 @@ describe('Core: ACL', function () {
 
     it('should emit Granted', async () => {
       await expect(
-        acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
-      ).to.emit(acl, 'Granted');
+        pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
+      ).to.emit(pm, 'Granted');
     });
 
     it('should revert with already granted', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+        pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionAlreadyGranted',
-          acl.address,
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
@@ -98,24 +98,24 @@ describe('Core: ACL', function () {
     });
 
     it('should revert if frozen', async () => {
-      await acl.freeze(acl.address, ADMIN_PERMISSION_ID);
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+        pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
     it('should not allow grant', async () => {
       await expect(
-        acl
+        pm
           .connect(otherSigner)
-          .grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+          .grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -123,16 +123,16 @@ describe('Core: ACL', function () {
     });
 
     it('should not allow for non ROOT', async () => {
-      await acl.grant(acl.address, ownerSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, ownerSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl
+        pm
           .connect(otherSigner)
-          .grant(acl.address, otherSigner.address, ROOT_PERMISSION_ID)
+          .grant(pm.address, otherSigner.address, ROOT_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -140,16 +140,16 @@ describe('Core: ACL', function () {
     });
   });
 
-  describe('grantWithOracle', () => {
+  describe('grantWithOrpme', () => {
     it('should add permission', async () => {
-      await acl.grantWithOracle(
-        acl.address,
+      await pm.grantWithOracle(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         ALLOW_FLAG
       );
-      const permission = await acl.getAuthPermission(
-        acl.address,
+      const permission = await pm.getAuthPermission(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID
       );
@@ -158,25 +158,25 @@ describe('Core: ACL', function () {
 
     it('should emit Granted', async () => {
       await expect(
-        acl.grantWithOracle(
-          acl.address,
+        pm.grantWithOracle(
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           ALLOW_FLAG
         )
-      ).to.emit(acl, 'Granted');
+      ).to.emit(pm, 'Granted');
     });
 
     it('should revert with already granted', async () => {
-      await acl.grantWithOracle(
-        acl.address,
+      await pm.grantWithOracle(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         ALLOW_FLAG
       );
       await expect(
-        acl.grantWithOracle(
-          acl.address,
+        pm.grantWithOracle(
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           ALLOW_FLAG
@@ -184,7 +184,7 @@ describe('Core: ACL', function () {
       ).to.be.revertedWith(
         customError(
           'PermissionAlreadyGranted',
-          acl.address,
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
@@ -192,30 +192,30 @@ describe('Core: ACL', function () {
     });
 
     it('should revert if frozen', async () => {
-      await acl.freeze(acl.address, ADMIN_PERMISSION_ID);
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.grantWithOracle(
-          acl.address,
+        pm.grantWithOracle(
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           ALLOW_FLAG
         )
       ).to.be.revertedWith(
-        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
     it('should set PermissionOracle', async () => {
       const signers = await ethers.getSigners();
-      await acl.grantWithOracle(
-        acl.address,
+      await pm.grantWithOracle(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         signers[2].address
       );
       expect(
-        await acl.getAuthPermission(
-          acl.address,
+        await pm.getAuthPermission(
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
@@ -224,10 +224,10 @@ describe('Core: ACL', function () {
 
     it('should not allow grant', async () => {
       await expect(
-        acl
+        pm
           .connect(otherSigner)
           .grantWithOracle(
-            acl.address,
+            pm.address,
             otherSigner.address,
             ADMIN_PERMISSION_ID,
             ALLOW_FLAG
@@ -235,8 +235,8 @@ describe('Core: ACL', function () {
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -244,17 +244,17 @@ describe('Core: ACL', function () {
     });
 
     it('should not allow for non ROOT', async () => {
-      await acl.grantWithOracle(
-        acl.address,
+      await pm.grantWithOracle(
+        pm.address,
         ownerSigner.address,
         ADMIN_PERMISSION_ID,
         ALLOW_FLAG
       );
       await expect(
-        acl
+        pm
           .connect(otherSigner)
           .grantWithOracle(
-            acl.address,
+            pm.address,
             otherSigner.address,
             ROOT_PERMISSION_ID,
             ALLOW_FLAG
@@ -262,8 +262,8 @@ describe('Core: ACL', function () {
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -273,34 +273,34 @@ describe('Core: ACL', function () {
 
   describe('revoke', () => {
     it('should revoke', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      await acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const permission = await acl.getAuthPermission(
-        acl.address,
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      const permission = await pm.getAuthPermission(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID
       );
-      expect(permission).to.be.equal(UNSET_PERMISSION_ID);
+      expect(permission).to.be.equal(UNSET_FLAG);
     });
 
     it('should emit Revoked', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
-      ).to.emit(acl, 'Revoked');
+        pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
+      ).to.emit(pm, 'Revoked');
     });
 
     it('should revert if not granted', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl
+        pm
           .connect(otherSigner)
-          .revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+          .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -308,24 +308,24 @@ describe('Core: ACL', function () {
     });
 
     it('should revert if frozen', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      await acl.freeze(acl.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+        pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
     it('should revert if already revoked', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      await acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+        pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionAlreadyRevoked',
-          acl.address,
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
@@ -334,14 +334,14 @@ describe('Core: ACL', function () {
 
     it('should not allow', async () => {
       await expect(
-        acl
+        pm
           .connect(otherSigner)
-          .revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+          .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -349,16 +349,16 @@ describe('Core: ACL', function () {
     });
 
     it('should not allow for non ROOT', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl
+        pm
           .connect(otherSigner)
-          .revoke(acl.address, otherSigner.address, ADMIN_PERMISSION_ID)
+          .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -368,38 +368,38 @@ describe('Core: ACL', function () {
 
   describe('freeze', () => {
     it('should freeze', async () => {
-      await acl.freeze(acl.address, ADMIN_PERMISSION_ID);
-      const forzen = await acl.getFreezePermission(
-        acl.address,
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
+      const forzen = await pm.getFreezePermission(
+        pm.address,
         ADMIN_PERMISSION_ID
       );
       expect(forzen).to.be.equal(true);
     });
 
     it('should emit Frozen', async () => {
-      await expect(acl.freeze(acl.address, ADMIN_PERMISSION_ID)).to.emit(
-        acl,
+      await expect(pm.freeze(pm.address, ADMIN_PERMISSION_ID)).to.emit(
+        pm,
         'Frozen'
       );
     });
 
     it('should revert if already frozen', async () => {
-      await acl.freeze(acl.address, ADMIN_PERMISSION_ID);
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.freeze(acl.address, ADMIN_PERMISSION_ID)
+        pm.freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
     it('should not allow', async () => {
       await expect(
-        acl.connect(otherSigner).freeze(acl.address, ADMIN_PERMISSION_ID)
+        pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -407,14 +407,14 @@ describe('Core: ACL', function () {
     });
 
     it('should not allow for non ROOT', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        acl.connect(otherSigner).freeze(acl.address, ADMIN_PERMISSION_ID)
+        pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -442,10 +442,10 @@ describe('Core: ACL', function () {
           who: signers[3].address,
         },
       ];
-      await acl.bulk(acl.address, bulkItems);
+      await pm.bulk(pm.address, bulkItems);
       for (const item of bulkItems) {
-        const permission = await acl.getAuthPermission(
-          acl.address,
+        const permission = await pm.getAuthPermission(
+          pm.address,
           item.who,
           item.permissionID
         );
@@ -472,10 +472,10 @@ describe('Core: ACL', function () {
           who: signers[3].address,
         },
       ];
-      await acl.bulk(acl.address, bulkItems);
+      await pm.bulk(pm.address, bulkItems);
       for (const item of bulkItems) {
-        const permission = await acl.getFreezePermission(
-          acl.address,
+        const permission = await pm.getFreezePermission(
+          pm.address,
           item.permissionID
         );
         expect(permission).to.be.equal(true);
@@ -484,9 +484,9 @@ describe('Core: ACL', function () {
 
     it('should bulk revoke', async () => {
       const signers = await ethers.getSigners();
-      await acl.grant(acl.address, signers[1].address, ADMIN_PERMISSION_ID);
-      await acl.grant(acl.address, signers[2].address, ADMIN_PERMISSION_ID);
-      await acl.grant(acl.address, signers[3].address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, signers[2].address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
           operation: BulkOP.Revoke,
@@ -504,20 +504,20 @@ describe('Core: ACL', function () {
           who: signers[3].address,
         },
       ];
-      await acl.bulk(acl.address, bulkItems);
+      await pm.bulk(pm.address, bulkItems);
       for (const item of bulkItems) {
-        const permission = await acl.getAuthPermission(
-          acl.address,
+        const permission = await pm.getAuthPermission(
+          pm.address,
           item.who,
           item.permissionID
         );
-        expect(permission).to.be.equal(UNSET_PERMISSION_ID);
+        expect(permission).to.be.equal(UNSET_FLAG);
       }
     });
 
     it('should handle bulk mixed', async () => {
       const signers = await ethers.getSigners();
-      await acl.grant(acl.address, signers[1].address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
           operation: BulkOP.Revoke,
@@ -536,29 +536,29 @@ describe('Core: ACL', function () {
         },
       ];
 
-      await acl.bulk(acl.address, bulkItems);
+      await pm.bulk(pm.address, bulkItems);
       expect(
-        await acl.getAuthPermission(
-          acl.address,
+        await pm.getAuthPermission(
+          pm.address,
           signers[1].address,
           ADMIN_PERMISSION_ID
         )
-      ).to.be.equal(UNSET_PERMISSION_ID);
+      ).to.be.equal(UNSET_FLAG);
       expect(
-        await acl.getAuthPermission(
-          acl.address,
+        await pm.getAuthPermission(
+          pm.address,
           signers[2].address,
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
       expect(
-        await acl.getFreezePermission(acl.address, ADMIN_PERMISSION_ID)
+        await pm.getFreezePermission(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.equal(true);
     });
 
     it('should revert on error', async () => {
       const signers = await ethers.getSigners();
-      await acl.grant(acl.address, signers[1].address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
           operation: BulkOP.Revoke,
@@ -582,25 +582,25 @@ describe('Core: ACL', function () {
         },
       ];
 
-      await expect(acl.bulk(acl.address, bulkItems)).to.be.revertedWith(
-        customError('PermissionFrozen', acl.address, ADMIN_PERMISSION_ID)
+      await expect(pm.bulk(pm.address, bulkItems)).to.be.revertedWith(
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
       expect(
-        await acl.getAuthPermission(
-          acl.address,
+        await pm.getAuthPermission(
+          pm.address,
           signers[1].address,
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
       expect(
-        await acl.getAuthPermission(
-          acl.address,
+        await pm.getAuthPermission(
+          pm.address,
           signers[2].address,
           ADMIN_PERMISSION_ID
         )
-      ).to.be.equal(UNSET_PERMISSION_ID);
+      ).to.be.equal(UNSET_FLAG);
       expect(
-        await acl.getFreezePermission(acl.address, ADMIN_PERMISSION_ID)
+        await pm.getFreezePermission(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.equal(false);
     });
 
@@ -613,12 +613,12 @@ describe('Core: ACL', function () {
         },
       ];
       await expect(
-        acl.connect(otherSigner).bulk(acl.address, bulkItems)
+        pm.connect(otherSigner).bulk(pm.address, bulkItems)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -626,7 +626,7 @@ describe('Core: ACL', function () {
     });
 
     it('should not allow for non ROOT', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
           operation: BulkOP.Grant,
@@ -635,12 +635,12 @@ describe('Core: ACL', function () {
         },
       ];
       await expect(
-        acl.connect(otherSigner).bulk(acl.address, bulkItems)
+        pm.connect(otherSigner).bulk(pm.address, bulkItems)
       ).to.be.revertedWith(
         customError(
           'PermissionUnauthorized',
-          acl.address,
-          acl.address,
+          pm.address,
+          pm.address,
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
@@ -650,9 +650,9 @@ describe('Core: ACL', function () {
 
   describe('checkPermissions', () => {
     it('should return true fcr granted user', async () => {
-      await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const checkPermissions = await acl.callStatic.checkPermissions(
-        acl.address,
+      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
+      const checkPermissions = await pm.callStatic.checkPermissions(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
@@ -661,8 +661,8 @@ describe('Core: ACL', function () {
     });
 
     it('should return false for non granted user', async () => {
-      const checkPermissions = await acl.callStatic.checkPermissions(
-        acl.address,
+      const checkPermissions = await pm.callStatic.checkPermissions(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
@@ -670,11 +670,11 @@ describe('Core: ACL', function () {
       expect(checkPermissions).to.be.equal(false);
     });
 
-    it('should return true for any who granted permissionID', async () => {
-      const anyAddr = await acl.getAnyAddr();
-      await acl.grant(acl.address, anyAddr, ADMIN_PERMISSION_ID);
-      const checkPermissions = await acl.callStatic.checkPermissions(
-        acl.address,
+    it('should return true for any who granted permission', async () => {
+      const anyAddr = await pm.getAnyAddr();
+      await pm.grant(pm.address, anyAddr, ADMIN_PERMISSION_ID);
+      const checkPermissions = await pm.callStatic.checkPermissions(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
@@ -682,11 +682,11 @@ describe('Core: ACL', function () {
       expect(checkPermissions).to.be.equal(true);
     });
 
-    it('should return true for any where granted permissionID', async () => {
-      const anyAddr = await acl.getAnyAddr();
-      await acl.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
-      const checkPermissions = await acl.callStatic.checkPermissions(
-        acl.address,
+    it('should return true for any where granted permission', async () => {
+      const anyAddr = await pm.getAnyAddr();
+      await pm.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
+      const checkPermissions = await pm.callStatic.checkPermissions(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
@@ -695,10 +695,10 @@ describe('Core: ACL', function () {
     });
 
     it('should be callable by anyone', async () => {
-      const checkPermissions = await acl
+      const checkPermissions = await pm
         .connect(otherSigner)
         .callStatic.checkPermissions(
-          acl.address,
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           []
@@ -709,26 +709,26 @@ describe('Core: ACL', function () {
 
   describe('isFrozen', () => {
     it('should return true', async () => {
-      await acl.freeze(acl.address, ADMIN_PERMISSION_ID);
-      const isFrozen = await acl.callStatic.isFrozen(
-        acl.address,
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
+      const isFrozen = await pm.callStatic.isFrozen(
+        pm.address,
         ADMIN_PERMISSION_ID
       );
       expect(isFrozen).to.be.equal(true);
     });
 
     it('should return false', async () => {
-      const isFrozen = await acl.callStatic.isFrozen(
-        acl.address,
+      const isFrozen = await pm.callStatic.isFrozen(
+        pm.address,
         ADMIN_PERMISSION_ID
       );
       expect(isFrozen).to.be.equal(false);
     });
 
     it('should be callable by anyone', async () => {
-      const isFrozen = await acl
+      const isFrozen = await pm
         .connect(otherSigner)
-        .callStatic.isFrozen(acl.address, ADMIN_PERMISSION_ID);
+        .callStatic.isFrozen(pm.address, ADMIN_PERMISSION_ID);
       expect(isFrozen).to.be.equal(false);
     });
   });
@@ -744,15 +744,15 @@ describe('Core: ACL', function () {
     });
 
     it('should call IPermissionOracle.checkPermissions', async () => {
-      await acl.grantWithOracle(
-        acl.address,
+      await pm.grantWithOracle(
+        pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         permissionOracle.address
       );
       expect(
-        await acl.callStatic.checkPermissions(
-          acl.address,
+        await pm.callStatic.checkPermissions(
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           []
@@ -761,8 +761,8 @@ describe('Core: ACL', function () {
 
       await permissionOracle.setWillPerform(false);
       expect(
-        await acl.callStatic.checkPermissions(
-          acl.address,
+        await pm.callStatic.checkPermissions(
+          pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           []
@@ -775,11 +775,11 @@ describe('Core: ACL', function () {
     it('should hash PERMISSIONS', async () => {
       const packed = ethers.utils.solidityPack(
         ['string', 'address', 'address', 'address'],
-        ['PERMISSION', ownerSigner.address, acl.address, ROOT_PERMISSION_ID]
+        ['PERMISSION', ownerSigner.address, pm.address, ROOT_PERMISSION_ID]
       );
       const hash = ethers.utils.keccak256(packed);
-      const contractHash = await acl.getPermissionHash(
-        acl.address,
+      const contractHash = await pm.getPermissionHash(
+        pm.address,
         ownerSigner.address,
         ROOT_PERMISSION_ID
       );
@@ -789,11 +789,11 @@ describe('Core: ACL', function () {
     it('should hash FREEZE', async () => {
       const packed = ethers.utils.solidityPack(
         ['string', 'address', 'address'],
-        ['FREEZE', acl.address, ROOT_PERMISSION_ID]
+        ['FREEZE', pm.address, ROOT_PERMISSION_ID]
       );
       const hash = ethers.utils.keccak256(packed);
-      const contractHash = await acl.getFreezeHash(
-        acl.address,
+      const contractHash = await pm.getFreezeHash(
+        pm.address,
         ROOT_PERMISSION_ID
       );
       expect(hash).to.be.equal(contractHash);

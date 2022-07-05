@@ -18,8 +18,10 @@ const EVENTS = {
 const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
 
 const zeroAddress = ethers.constants.AddressZero;
-const ACLAnyAddress = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
-const ACLAllowFlagAddress = '0x0000000000000000000000000000000000000002';
+const PermissionManagerAnyAddress =
+  '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
+const PermissionManagerAllowFlagAddress =
+  '0x0000000000000000000000000000000000000002';
 const daoDummyName = 'dao1';
 const daoDummyMetadata = '0x0000';
 const dummyVoteSettings = {
@@ -172,7 +174,7 @@ describe('DAOFactory: ', function () {
 
     tx = expect(tx);
 
-    // Check if correct ACL events are thrown.
+    // Check if correct PermissionManager events are thrown.
     tx = tx.to
       .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
@@ -192,7 +194,7 @@ describe('DAOFactory: ', function () {
           daoFactory.address,
           dao.address,
           dao.address,
-          ACLAllowFlagAddress
+          PermissionManagerAllowFlagAddress
         );
     });
 
@@ -203,7 +205,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao.address,
         voting.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       )
       .to.emit(dao, EVENTS.Revoked)
       .withArgs(
@@ -218,7 +220,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         voting.address,
         dao.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       );
 
     // ===== Test if user can create a vote and execute it ======
@@ -306,7 +308,7 @@ describe('DAOFactory: ', function () {
 
     tx = expect(tx);
 
-    // Check if correct ACL events are thrown.
+    // Check if correct PermissionManager events are thrown.
     tx = tx.to
       .emit(dao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
@@ -326,7 +328,7 @@ describe('DAOFactory: ', function () {
           daoFactory.address,
           dao.address,
           dao.address,
-          ACLAllowFlagAddress
+          PermissionManagerAllowFlagAddress
         );
     });
 
@@ -337,7 +339,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao.address,
         voting.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       )
       .to.emit(dao, EVENTS.Granted)
       .withArgs(
@@ -345,7 +347,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         dao.address,
         voting.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       )
       .to.emit(dao, EVENTS.Revoked)
       .withArgs(
@@ -360,7 +362,7 @@ describe('DAOFactory: ', function () {
         daoFactory.address,
         voting.address,
         dao.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       );
 
     // ===== Test if user can create a vote and execute it ======

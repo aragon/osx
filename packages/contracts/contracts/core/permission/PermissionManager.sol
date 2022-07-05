@@ -43,18 +43,17 @@ library PermissionLib {
     error PermissionFrozen(address where, bytes32 permissionID);
 }
 
-/// @title The ACL used in the DAO contract to manage all permissions of a DAO.
+/// @title The permission manager used in the DAO contract.
 /// @author Aragon Association - 2021
-/// @notice This contract is used in the DAO contract and handles all the permissions of a DAO. This means it also handles the permissions of the processes or any custom component of the DAO.
-contract ACL is Initializable {
-    // @notice the ROOT_PERMISSION_ID identifier used
+/// @notice This contract is used in the DAO contract and handles the permissions of a DAO and its associated components.
+contract PermissionManager is Initializable {
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
 
     // "Who" constants
     address internal constant ANY_ADDR = address(type(uint160).max);
 
     // "Access" flags
-    address internal constant UNSET_PERMISSION_ID = address(0);
+    address internal constant UNSET_FLAG = address(0);
     address internal constant ALLOW_FLAG = address(2);
 
     // hash(where, who, permission) => Access flag(unset or allow) or PermissionOracle (any other address denominates auth via PermissionOracle)
@@ -113,11 +112,11 @@ contract ACL is Initializable {
         _;
     }
 
-    /// @notice Initialization method to set the initial owner of the ACL
+    /// @notice Initialization method to set the initial owner of the permission manager
     /// @dev The initial owner is granted the `ROOT_PERMISSION_ID` permission
-    /// @param _initialOwner The initial owner of the ACL
-    function __ACL_init(address _initialOwner) internal onlyInitializing {
-        _initializeACL(_initialOwner);
+    /// @param _initialOwner The initial owner of the permission manager
+    function __PermissionManager_init(address _initialOwner) internal onlyInitializing {
+        _initializePermissionManager(_initialOwner);
     }
 
     /// @notice Grants permission to call a contract address from another address via the specified permissionID identifier
@@ -173,10 +172,10 @@ contract ACL is Initializable {
         _freeze(_where, _permissionID);
     }
 
-    /// @notice Method to do bulk operations on the ACL
+    /// @notice Processes bulk items on the permission manager
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the contract
-    /// @param items A list of ACL operations to do
+    /// @param items The array of bulk items to process
     function bulk(address _where, PermissionLib.BulkItem[] calldata items)
         external
         auth(_where, ROOT_PERMISSION_ID)
@@ -219,14 +218,13 @@ contract ACL is Initializable {
         return frozenPermissions[freezeHash(_where, _permissionID)];
     }
 
-    /// @notice This method is used in the public `_grant` method of the ACL
-    /// @notice Grants the `ROOT_PERMISSION_ID` permission during initialization of the ACL
-    /// @param _initialOwner The initial owner of the ACL
-    function _initializeACL(address _initialOwner) internal {
+    /// @notice Grants the `ROOT_PERMISSION_ID` permission during initialization of the permission manager
+    /// @param _initialOwner The initial owner of the permission manager
+    function _initializePermissionManager(address _initialOwner) internal {
         _grant(address(this), _initialOwner, ROOT_PERMISSION_ID);
     }
 
-    /// @notice This method is used in the public `grant` method of the ACL
+    /// @notice This method is used in the public `grant` method of the permission manager
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
@@ -238,7 +236,7 @@ contract ACL is Initializable {
         _grantWithOracle(_where, _who, _permissionID, IPermissionOracle(ALLOW_FLAG));
     }
 
-    /// @notice This method is used in the internal `_grant` method of the ACL
+    /// @notice This method is used in the internal `_grant` method of the permission manager
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
@@ -254,7 +252,7 @@ contract ACL is Initializable {
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
 
-        if (permissions[permission] != UNSET_PERMISSION_ID) {
+        if (permissions[permission] != UNSET_FLAG) {
             revert PermissionLib.PermissionAlreadyGranted({
                 where: _where,
                 who: _who,
@@ -266,7 +264,7 @@ contract ACL is Initializable {
         emit Granted(_permissionID, msg.sender, _who, _where, _oracle);
     }
 
-    /// @notice This method is used in the public `revoke` method of the ACL
+    /// @notice This method is used in the public `revoke` method of the permission manager
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
@@ -280,19 +278,19 @@ contract ACL is Initializable {
         }
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
-        if (permissions[permission] == UNSET_PERMISSION_ID) {
+        if (permissions[permission] == UNSET_FLAG) {
             revert PermissionLib.PermissionAlreadyRevoked({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
             });
         }
-        permissions[permission] = UNSET_PERMISSION_ID;
+        permissions[permission] = UNSET_FLAG;
 
         emit Revoked(_permissionID, msg.sender, _who, _where);
     }
 
-    /// @notice This method is used in the public `freeze` method of the ACL
+    /// @notice This method is used in the public `freeze` method of the permission manager
     /// @param _where The address of the contract
     /// @param _permissionID The permission identifier
     function _freeze(address _where, bytes32 _permissionID) internal {
@@ -319,7 +317,7 @@ contract ACL is Initializable {
     ) internal returns (bool) {
         address accessFlagOrAclOracle = permissions[permissionHash(_where, _who, _permissionID)];
 
-        if (accessFlagOrAclOracle == UNSET_PERMISSION_ID) return false;
+        if (accessFlagOrAclOracle == UNSET_FLAG) return false;
         if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
 
         // Since it's not a flag, assume it's an PermissionOracle and try-catch to skip failures

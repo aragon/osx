@@ -1,7 +1,7 @@
 // JSON artifacts of the contracts
 
 // Core contracts
-import * as ACL from '../artifacts/contracts/core/permission/PermissionManager.sol/ACL.json';
+import * as PermissionManager from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionManager.json';
 import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionLib.json';
 import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
@@ -27,7 +27,7 @@ import * as ERC20Voting from '../artifacts/contracts/votings/ERC20/ERC20Voting.s
 import * as WhitelistVoting from '../artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json';
 
 export default {
-  ACL,
+  PermissionManager,
   PermissionLib,
   IPermissionOracle,
   DAO,

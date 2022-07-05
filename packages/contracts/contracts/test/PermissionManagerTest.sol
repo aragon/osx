@@ -6,9 +6,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../core/permission/PermissionManager.sol";
 
-contract PermissionManagerTest is ACL {
+contract PermissionManagerTest is PermissionManager {
     function init(address _who) public initializer {
-        super.__ACL_init(_who);
+        super.__PermissionManager_init(_who);
     }
 
     function getAuthPermission(

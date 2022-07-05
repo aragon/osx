@@ -15,7 +15,13 @@ import "./IPluginRepo.sol";
 
 /// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
 /// @author Aragon Association - 2020 - 2022
-contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
+contract PluginRepo is
+    IPluginRepo,
+    Initializable,
+    UUPSUpgradeable,
+    PermissionManager,
+    AdaptiveERC165
+{
     bytes32 public constant CREATE_VERSION_PERMISSION_ID =
         keccak256("CREATE_VERSION_PERMISSION_ID");
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
@@ -60,7 +66,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     /// @dev Used for UUPS upgradability pattern
     function initialize(address initialOwner) external initializer {
         _registerStandard(type(IPluginRepo).interfaceId);
-        __ACL_init(initialOwner);
+        __PermissionManager_init(initialOwner);
 
         nextVersionIndex = 1;
 

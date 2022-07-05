@@ -7,12 +7,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../core/permission/PermissionManager.sol";
 import "../core/IDAO.sol";
 
-contract DAOMock is IDAO, ACL {
+contract DAOMock is IDAO, PermissionManager {
     mapping(uint256 => uint256) public totalSupply;
     mapping(address => mapping(uint256 => uint256)) public pastVotes;
 
     constructor(address initialOwner) initializer {
-        __ACL_init(initialOwner);
+        __PermissionManager_init(initialOwner);
     }
 
     function hasPermission(
