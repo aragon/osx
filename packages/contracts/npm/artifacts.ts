@@ -1,13 +1,13 @@
 // JSON artifacts of the contracts
 
 // Core contracts
-import * as ACL from "../artifacts/contracts/core/acl/ACL.sol/ACL.json";
-import * as ACLData from "../artifacts/contracts/core/acl/ACL.sol/ACLData.json";
-import * as IACLOracle from "../artifacts/contracts/core/acl/IACLOracle.sol/IACLOracle.json";
-import * as DAO from "../artifacts/contracts/core/DAO.sol/DAO.json";
-import * as IDAO from "../artifacts/contracts/core/IDAO.sol/IDAO.json";
-import * as Component from "../artifacts/contracts/core/component/Component.sol/Component.json";
-import * as Permissions from "../artifacts/contracts/core/component/Permissions.sol/Permissions.json";
+import * as ACL from '../artifacts/contracts/core/acl/ACL.sol/ACL.json';
+import * as ACLData from '../artifacts/contracts/core/acl/ACL.sol/ACLData.json';
+import * as IACLOracle from '../artifacts/contracts/core/acl/IACLOracle.sol/IACLOracle.json';
+import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
+import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
+import * as Component from '../artifacts/contracts/core/component/Component.sol/Component.json';
+import * as Permissions from '../artifacts/contracts/core/component/DAOPermissioned.sol/Permissions.json';
 
 // Factories
 import * as DAOFactory from "../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json";
@@ -33,7 +33,7 @@ export default {
   DAO,
   IDAO,
   Component,
-  Permissions,
+  DAOPermissioned,
   DAOFactory,
   TokenFactory,
   Registry,

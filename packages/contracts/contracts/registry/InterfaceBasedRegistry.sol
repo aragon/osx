@@ -4,13 +4,13 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "../core/component/Permissions.sol";
+import "../core/component/DAOPermissioned.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 
 /// @title An ERC165-based registry for contracts
 /// @author Aragon Association - 2022
 /// @notice This contract allows to register contracts
-abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
+abstract contract InterfaceBasedRegistry is DAOPermissioned, UUPSUpgradeable {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     bytes4 public targetInterfaceId;
@@ -42,7 +42,7 @@ abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
         virtual
         onlyInitializing
     {
-        __Permissions_init(_managingDao);
+        __DAOPermissioned_init(_managingDao);
 
         targetInterfaceId = _targetInterfaceId;
     }

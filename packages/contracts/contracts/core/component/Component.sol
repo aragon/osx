@@ -7,18 +7,18 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../erc165/AdaptiveERC165.sol";
 import "../IDAO.sol";
-import "./Permissions.sol";
+import "./DAOPermissioned.sol";
 
 /// @title Base component in the Aragon DAO framework
-/// @author Samuel Furter - Aragon Association - 2021
+/// @author Aragon Association - 2021, 2022
 /// @notice Any component within the Aragon DAO framework has to inherit from this contract
-abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
+abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DAOPermissioned {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     /// @notice Initialization
     /// @param _dao the associated DAO address
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
-        __Permissions_init(_dao);
+        __DAOPermissioned_init(_dao);
 
         _registerStandard(type(Component).interfaceId);
     }

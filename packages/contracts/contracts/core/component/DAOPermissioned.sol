@@ -12,13 +12,13 @@ import "../IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
 /// @dev When your contract inherits from this, it is important to call __Permission_init with the associated DAO address.
-abstract contract Permissions is Initializable, ContextUpgradeable {
+abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;
 
     /// @notice Initializes the contract
     /// @param _dao the associated DAO address
-    function __Permissions_init(IDAO _dao) internal virtual onlyInitializing {
+    function __DAOPermissioned_init(IDAO _dao) internal virtual onlyInitializing {
         dao = _dao;
     }
 
