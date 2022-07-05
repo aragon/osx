@@ -13,8 +13,8 @@ import "../core/component/Permissions.sol";
 import "../core/IDAO.sol";
 
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
-    /// @notice The role identifier to mint new tokens
-    bytes32 public constant TOKEN_MINTER_ROLE = keccak256("TOKEN_MINTER_ROLE");
+    /// @notice The permissionID identifier to mint new tokens
+    bytes32 public constant TOKEN_MINTER_PERMISSION_ID = keccak256("TOKEN_MINTER_PERMISSION_ID");
 
     function __GovernanceERC20_init(
         IDAO _dao,
@@ -38,7 +38,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, Permissions {
         __GovernanceERC20_init(_dao, _name, _symbol);
     }
 
-    function mint(address to, uint256 amount) external auth(TOKEN_MINTER_ROLE) {
+    function mint(address to, uint256 amount) external auth(TOKEN_MINTER_PERMISSION_ID) {
         _mint(to, amount);
     }
 

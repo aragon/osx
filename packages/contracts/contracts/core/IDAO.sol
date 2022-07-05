@@ -13,16 +13,16 @@ abstract contract IDAO {
         bytes data; // FuncSig + arguments
     }
 
-    /// @notice Checks if an address has permission on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
+    /// @notice Checks if an address has permission on a contract via a permissionID identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the contract
     /// @param _who The address of a EOA or contract to give the permissions
-    /// @param _role The hash of the role identifier
+    /// @param _permissionID The permission identifier
     /// @param _data The optional data passed to the ACLOracle registered
     /// @return bool Returns whether the address has permission is or not
     function hasPermission(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionID,
         bytes memory _data
     ) external virtual returns (bool);
 

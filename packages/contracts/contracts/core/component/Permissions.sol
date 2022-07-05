@@ -23,14 +23,14 @@ abstract contract Permissions is Initializable, ContextUpgradeable {
     }
 
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
-    /// @param _role The hash of the role identifier
-    modifier auth(bytes32 _role) {
-        if (!dao.hasPermission(address(this), _msgSender(), _role, _msgData()))
+    /// @param _permissionID The permission identifier
+    modifier auth(bytes32 _permissionID) {
+        if (!dao.hasPermission(address(this), _msgSender(), _permissionID, _msgData()))
             revert ACLData.ACLAuth({
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),
-                role: _role
+                permissionID: _permissionID
             });
 
         _;

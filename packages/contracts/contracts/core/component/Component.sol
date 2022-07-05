@@ -13,7 +13,7 @@ import "./Permissions.sol";
 /// @author Samuel Furter - Aragon Association - 2021
 /// @notice Any component within the Aragon DAO framework has to inherit from this contract
 abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     /// @notice Initialization
     /// @param _dao the associated DAO address
@@ -24,7 +24,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_ROLE) {}
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @dev Fallback to handle future versions of the ERC165 standard.
     fallback() external {

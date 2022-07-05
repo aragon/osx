@@ -14,25 +14,25 @@ contract ACLTest is ACL {
     function getAuthPermission(
         address _where,
         address _who,
-        bytes32 _role
+        bytes32 _permissionID
     ) public view returns (address) {
-        return permissions[permissionHash(_where, _who, _role)];
+        return permissions[permissionHash(_where, _who, _permissionID)];
     }
 
-    function getFreezePermission(address _where, bytes32 _role) public view returns (bool) {
-        return frozenPermissions[freezeHash(_where, _role)];
+    function getFreezePermission(address _where, bytes32 _permissionID) public view returns (bool) {
+        return frozenPermissions[freezeHash(_where, _permissionID)];
     }
 
     function getPermissionHash(
         address _where,
         address _who,
-        bytes32 _role
+        bytes32 _permissionID
     ) public pure returns (bytes32) {
-        return permissionHash(_where, _who, _role);
+        return permissionHash(_where, _who, _permissionID);
     }
 
-    function getFreezeHash(address _where, bytes32 _role) public pure returns (bytes32) {
-        return freezeHash(_where, _role);
+    function getFreezeHash(address _where, bytes32 _permissionID) public pure returns (bytes32) {
+        return freezeHash(_where, _permissionID);
     }
 
     function getAnyAddr() public pure returns (address) {
@@ -42,9 +42,9 @@ contract ACLTest is ACL {
     function checkRole(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionID,
         bytes memory _data
     ) public returns (bool) {
-        return _checkRole(_where, _who, _role, _data);
+        return _checkRole(_where, _who, _permissionID, _data);
     }
 }

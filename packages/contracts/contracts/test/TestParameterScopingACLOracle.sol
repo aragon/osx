@@ -19,10 +19,10 @@ contract TestParameterScopingACLOracle is IACLOracle {
     function willPerform(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionID,
         bytes calldata _data
     ) external pure returns (bool) {
-        (_where, _who, _role);
+        (_where, _who, _permissionID);
 
         // Require the function selector to match
         require(getSelector(_data) == ADD_PERMISSIONED_SELECTOR);

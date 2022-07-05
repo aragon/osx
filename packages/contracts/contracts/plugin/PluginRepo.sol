@@ -16,8 +16,9 @@ import "./IPluginRepo.sol";
 /// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
 /// @author Aragon Association - 2020 - 2022
 contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, AdaptiveERC165 {
-    bytes32 public constant CREATE_VERSION_ROLE = keccak256("CREATE_VERSION_ROLE");
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
+    bytes32 public constant CREATE_VERSION_PERMISSION_ID =
+        keccak256("CREATE_VERSION_PERMISSION_ID");
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     /// @notice Thrown if version bump is invalid
     /// @param currentVersion The current semantic version
@@ -63,8 +64,8 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
         nextVersionIndex = 1;
 
-        // set roles.
-        _grant(address(this), initialOwner, CREATE_VERSION_ROLE);
+        // set permissionIDs.
+        _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
@@ -72,7 +73,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         internal
         virtual
         override
-        auth(address(this), UPGRADE_ROLE)
+        auth(address(this), UPGRADE_PERMISSION_ID)
     {}
 
     /// @inheritdoc IPluginRepo
@@ -80,7 +81,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         uint16[3] memory _newSemanticVersion,
         address _pluginFactoryAddress,
         bytes calldata _contentURI
-    ) external auth(address(this), CREATE_VERSION_ROLE) {
+    ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
         // check if _pluginFactoryAddress is IPluginFactory
         if (!Address.isContract(_pluginFactoryAddress)) {
             revert InvalidContractAddress({pluginFactoryAddress: _pluginFactoryAddress});

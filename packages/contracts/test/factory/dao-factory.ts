@@ -157,15 +157,15 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_VOTE_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
-    const EXEC_ROLE = await dao.EXEC_ROLE();
+    const MODIFY_VOTE_CONFIG_PERMISSION_ID = await voting.MODIFY_VOTE_CONFIG();
+    const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
     const DAORoles = await Promise.all([
-      dao.DAO_CONFIG_ROLE(),
-      dao.ROOT_ROLE(),
-      dao.WITHDRAW_ROLE(),
-      dao.UPGRADE_ROLE(),
-      dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+      dao.DAO_CONFIG_PERMISSION_ID(),
+      dao.ROOT_PERMISSION_ID(),
+      dao.WITHDRAW_PERMISSION_ID(),
+      dao.UPGRADE_PERMISSION_ID(),
+      dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
     // ======== Test Role events that were emitted successfully ==========
@@ -199,7 +199,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.Granted)
       .withArgs(
-        MODIFY_VOTE_CONFIG_ROLE,
+        MODIFY_VOTE_CONFIG_PERMISSION_ID,
         daoFactory.address,
         dao.address,
         voting.address,
@@ -214,7 +214,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(dao, EVENTS.Granted)
       .withArgs(
-        EXEC_ROLE,
+        EXEC_PERMISSION_ID,
         daoFactory.address,
         voting.address,
         dao.address,
@@ -225,7 +225,13 @@ describe('DAOFactory: ', function () {
 
     // should be only callable by ERC20Voting
     await expect(dao.execute(0, [])).to.be.revertedWith(
-      customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE)
+      customError(
+        'ACLAuth',
+        dao.address,
+        dao.address,
+        ownerAddress,
+        EXEC_PERMISSION_ID
+      )
     );
 
     await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
@@ -283,17 +289,17 @@ describe('DAOFactory: ', function () {
 
     await ethers.provider.send('evm_mine', []);
 
-    const MODIFY_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
+    const MODIFY_CONFIG_PERMISSION_ID = await voting.MODIFY_VOTE_CONFIG();
     // @ts-ignore
     const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
-    const EXEC_ROLE = await dao.EXEC_ROLE();
+    const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
     const DAORoles = await Promise.all([
-      dao.DAO_CONFIG_ROLE(),
-      dao.ROOT_ROLE(),
-      dao.WITHDRAW_ROLE(),
-      dao.UPGRADE_ROLE(),
-      dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+      dao.DAO_CONFIG_PERMISSION_ID(),
+      dao.ROOT_PERMISSION_ID(),
+      dao.WITHDRAW_PERMISSION_ID(),
+      dao.UPGRADE_PERMISSION_ID(),
+      dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
     // ======== Test Role events that were emitted successfully ==========
@@ -327,7 +333,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.Granted)
       .withArgs(
-        MODIFY_CONFIG_ROLE,
+        MODIFY_CONFIG_PERMISSION_ID,
         daoFactory.address,
         dao.address,
         voting.address,
@@ -350,7 +356,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(dao, EVENTS.Granted)
       .withArgs(
-        EXEC_ROLE,
+        EXEC_PERMISSION_ID,
         daoFactory.address,
         voting.address,
         dao.address,
@@ -361,7 +367,13 @@ describe('DAOFactory: ', function () {
 
     // should be only callable by WhitelistVoting
     await expect(dao.execute(0, [])).to.be.revertedWith(
-      customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE)
+      customError(
+        'ACLAuth',
+        dao.address,
+        dao.address,
+        ownerAddress,
+        EXEC_PERMISSION_ID
+      )
     );
 
     await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(

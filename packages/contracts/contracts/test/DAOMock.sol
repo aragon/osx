@@ -18,7 +18,7 @@ contract DAOMock is IDAO, ACL {
     function hasPermission(
         address, /* _where */
         address, /* _who */
-        bytes32, /* _role */
+        bytes32, /* _permissionID */
         bytes memory /* _data */
     ) public pure override returns (bool) {
         return true;

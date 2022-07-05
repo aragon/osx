@@ -16,8 +16,12 @@ import {
 
 chai.use(smock.matchers);
 
-const TOKEN_MINTER_ROLE = ethers.utils.id('TOKEN_MINTER_ROLE');
-const MERKLE_MINTER_ROLE = ethers.utils.id('MERKLE_MINTER_ROLE');
+const TOKEN_MINTER_PERMISSION_ID = ethers.utils.id(
+  'TOKEN_MINTER_PERMISSION_ID'
+);
+const MERKLE_MINTER_PERMISSION_ID = ethers.utils.id(
+  'MERKLE_MINTER_PERMISSION_ID'
+);
 
 interface TokenConfig {
   addr: string;
@@ -291,27 +295,27 @@ describe('Core: TokenFactory', () => {
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         tokenFactory.address,
-        TOKEN_MINTER_ROLE
+        TOKEN_MINTER_PERMISSION_ID
       );
       expect(dao.revoke).to.have.been.calledWith(
         tx[0],
         tokenFactory.address,
-        TOKEN_MINTER_ROLE
+        TOKEN_MINTER_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         dao.address,
-        TOKEN_MINTER_ROLE
+        TOKEN_MINTER_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         tx[1],
-        TOKEN_MINTER_ROLE
+        TOKEN_MINTER_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[1],
         dao.address,
-        MERKLE_MINTER_ROLE
+        MERKLE_MINTER_PERMISSION_ID
       );
     });
   });

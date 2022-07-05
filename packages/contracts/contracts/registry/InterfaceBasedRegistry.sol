@@ -11,7 +11,7 @@ import "../core/erc165/AdaptiveERC165.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract allows to register contracts
 abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     bytes4 public targetInterfaceId;
 
@@ -48,10 +48,10 @@ abstract contract InterfaceBasedRegistry is Permissions, UUPSUpgradeable {
     }
 
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_ROLE) {}
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @notice Register an ERC165 contract address
-    /// @dev The managing DAO needs to grant REGISTER_ROLE to registrar
+    /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar
     /// @param registrant The address of an ERC165 contract
     function _register(address registrant) internal {
         if (!Address.isContract(registrant)) {

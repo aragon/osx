@@ -57,19 +57,27 @@ contract PluginRepoFactory {
     /// @param pluginRepo The PluginRepo instance just created.
     /// @param dev Address of the developer
     function setPluginRepoPermissions(PluginRepo pluginRepo, address dev) internal {
-        // set roles on the dao itself.
+        // set permissionIDs on the dao itself.
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](5);
 
         // Grant DAO all the permissions required
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.CREATE_VERSION_ROLE(), dev);
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.UPGRADE_ROLE(), dev);
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.ROOT_ROLE(), dev);
+        items[0] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            pluginRepo.CREATE_VERSION_PERMISSION_ID(),
+            dev
+        );
+        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.UPGRADE_PERMISSION_ID(), dev);
+        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.ROOT_PERMISSION_ID(), dev);
 
         // Revoke permissions from APM
-        items[3] = ACLData.BulkItem(ACLData.BulkOp.Revoke, pluginRepo.ROOT_ROLE(), address(this));
+        items[3] = ACLData.BulkItem(
+            ACLData.BulkOp.Revoke,
+            pluginRepo.ROOT_PERMISSION_ID(),
+            address(this)
+        );
         items[4] = ACLData.BulkItem(
             ACLData.BulkOp.Revoke,
-            pluginRepo.CREATE_VERSION_ROLE(),
+            pluginRepo.CREATE_VERSION_PERMISSION_ID(),
             address(this)
         );
 

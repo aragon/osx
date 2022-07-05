@@ -89,19 +89,19 @@ describe('PluginRepoFactory: ', function () {
       aragonPluginRegistry.address
     );
 
-    // grant REGISTER_ROLE to pluginRepoFactory
+    // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     dao.grant(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_PERMISSION_ID')
     );
   });
 
-  it('fail to create new pluginRepo with no REGISTER_ROLE', async () => {
+  it('fail to create new pluginRepo with no REGISTER_PERMISSION_ID', async () => {
     dao.revoke(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_PERMISSION_ID')
     );
 
     const pluginRepoName = 'my-pluginRepo';
@@ -114,7 +114,7 @@ describe('PluginRepoFactory: ', function () {
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,
-        ethers.utils.id('REGISTER_ROLE')
+        ethers.utils.id('REGISTER_PERMISSION_ID')
       )
     );
   });

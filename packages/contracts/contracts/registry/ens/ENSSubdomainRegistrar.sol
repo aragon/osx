@@ -17,7 +17,8 @@ import "../../core/component/Component.sol";
 contract ENSSubdomainRegistrar is Component {
     bytes4 internal constant REGISTRY_INTERFACE_ID =
         this.registerSubnode.selector ^ this.setDefaultResolver.selector;
-    bytes32 public constant REGISTER_ENS_SUBDOMAIN_ROLE = keccak256("REGISTER_ENS_SUBDOMAIN_ROLE");
+    bytes32 public constant REGISTER_ENS_SUBDOMAIN_PERMISSION_ID =
+        keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION_ID");
 
     ENS private ens;
     bytes32 public node;
@@ -66,7 +67,7 @@ contract ENSSubdomainRegistrar is Component {
     /// @param _targetAddress The address to which the subdomain resolves
     function registerSubnode(bytes32 _label, address _targetAddress)
         external
-        auth(REGISTER_ENS_SUBDOMAIN_ROLE)
+        auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID)
     {
         bytes32 subnode = keccak256(abi.encodePacked(node, _label));
         address currentOwner = ens.owner(subnode);
@@ -82,7 +83,10 @@ contract ENSSubdomainRegistrar is Component {
 
     /// @notice Sets the default resolver contract address which the subdomains being registered will use
     /// @param _resolver The resolver contract to be used
-    function setDefaultResolver(Resolver _resolver) external auth(REGISTER_ENS_SUBDOMAIN_ROLE) {
+    function setDefaultResolver(Resolver _resolver)
+        external
+        auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID)
+    {
         resolver = address(_resolver);
     }
 }

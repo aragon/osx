@@ -101,15 +101,17 @@ contract TokenFactory {
             MerkleDistributor(distributorBase)
         );
 
-        bytes32 tokenMinterRole = GovernanceERC20(token).TOKEN_MINTER_ROLE();
-        bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_ROLE();
+        bytes32 tokenMinterRole = GovernanceERC20(token).TOKEN_MINTER_PERMISSION_ID();
+        bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_PERMISSION_ID();
 
         // give tokenFactory the permission to mint.
         _dao.grant(token, address(this), tokenMinterRole);
 
         for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
             // allow minting to treasury
-            address receiver = _mintConfig.receivers[i] == address(0) ? address(_dao) : _mintConfig.receivers[i];
+            address receiver = _mintConfig.receivers[i] == address(0)
+                ? address(_dao)
+                : _mintConfig.receivers[i];
             IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
         }
         // remove the mint permission from tokenFactory

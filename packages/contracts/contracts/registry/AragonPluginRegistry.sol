@@ -12,7 +12,7 @@ import "../plugin/IPluginRepo.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a plugin pluginRepo by a unique address.
 contract AragonPluginRegistry is InterfaceBasedRegistry {
-    bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
+    bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION_ID");
 
     /// @notice Emitted if a new PluginRepo is registered
     /// @param name The name of the PluginRepo
@@ -29,7 +29,10 @@ contract AragonPluginRegistry is InterfaceBasedRegistry {
     /// @notice Registers a PluginRepo
     /// @param name The name of the PluginRepo
     /// @param registrant The address of the PluginRepo contract
-    function register(string calldata name, address registrant) external auth(REGISTER_ROLE) {
+    function register(string calldata name, address registrant)
+        external
+        auth(REGISTER_PERMISSION_ID)
+    {
         _register(registrant);
 
         emit PluginRepoRegistered(name, registrant);

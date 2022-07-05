@@ -14,7 +14,7 @@ import {
   Dao,
   VaultDeposit,
   VaultWithdraw,
-  Role,
+  ContractPermissionID,
   Permission
 } from '../../generated/schema';
 
@@ -177,25 +177,32 @@ export function handleExecuted(event: Executed): void {
 }
 
 export function handleGranted(event: Granted): void {
-  // Role
+  // ContractPermissionID
   let daoId = event.address.toHexString();
-  let roleEntityId =
-    event.params.where.toHexString() + '_' + event.params.role.toHexString();
-  let roleEntity = Role.load(roleEntityId);
-  if (!roleEntity) {
-    roleEntity = new Role(roleEntityId);
-    roleEntity.dao = daoId;
-    roleEntity.where = event.params.where;
-    roleEntity.role = event.params.role;
-    roleEntity.frozen = false;
-    roleEntity.save();
+  let contractPermissionIDEntityId =
+    event.params.where.toHexString() +
+    '_' +
+    event.params.permissionID.toHexString();
+  let contractPermissionIDEntity = ContractPermissionID.load(
+    contractPermissionIDEntityId
+  );
+  if (!contractPermissionIDEntity) {
+    contractPermissionIDEntity = new ContractPermissionID(
+      contractPermissionIDEntityId
+    );
+    contractPermissionIDEntity.dao = daoId;
+    contractPermissionIDEntity.where = event.params.where;
+    contractPermissionIDEntity.permissionID = event.params.permissionID;
+    contractPermissionIDEntity.frozen = false;
+    contractPermissionIDEntity.save();
   }
 
   // Permission
-  let permissionId = roleEntityId + '_' + event.params.who.toHexString();
+  let permissionId =
+    contractPermissionIDEntityId + '_' + event.params.who.toHexString();
   let permissionEntity = new Permission(permissionId);
   permissionEntity.dao = daoId;
-  permissionEntity.role = roleEntityId;
+  permissionEntity.contractPermissionID = contractPermissionIDEntityId;
   permissionEntity.where = event.params.where;
   permissionEntity.who = event.params.who;
   permissionEntity.actor = event.params.actor;
@@ -204,9 +211,12 @@ export function handleGranted(event: Granted): void {
 
   // Package
   let daoContract = DAOContract.bind(event.address);
-  // TODO: perhaps hardcoding exec role will be more efficient.
-  let executionRole = daoContract.try_EXEC_ROLE();
-  if (!executionRole.reverted && event.params.role == executionRole.value) {
+  // TODO: perhaps hardcoding exec contractPermissionID will be more efficient.
+  let executionContractPermissionID = daoContract.try_EXEC_PERMISSION_ID();
+  if (
+    !executionContractPermissionID.reverted &&
+    event.params.permissionID == executionContractPermissionID.value
+  ) {
     addPackage(daoId, event.params.who);
   }
 }
@@ -216,7 +226,7 @@ export function handleRevoked(event: Revoked): void {
   let permissionId =
     event.params.where.toHexString() +
     '_' +
-    event.params.role.toHexString() +
+    event.params.permissionID.toHexString() +
     '_' +
     event.params.who.toHexString();
   let permissionEntity = Permission.load(permissionId);
@@ -228,23 +238,32 @@ export function handleRevoked(event: Revoked): void {
   // TODO: rethink this once the market place is ready
   let daoId = event.address.toHexString();
   let daoContract = DAOContract.bind(event.address);
-  let executionRole = daoContract.try_EXEC_ROLE();
-  if (!executionRole.reverted && event.params.role == executionRole.value) {
+  let executionContractPermissionID = daoContract.try_EXEC_PERMISSION_ID();
+  if (
+    !executionContractPermissionID.reverted &&
+    event.params.permissionID == executionContractPermissionID.value
+  ) {
     removePackage(daoId, event.params.who.toHexString());
   }
 }
 
 export function handleFrozen(event: Frozen): void {
   let daoId = event.address.toHexString();
-  let roleEntityId =
-    event.params.where.toHexString() + '_' + event.params.role.toHexString();
-  let roleEntity = Role.load(roleEntityId);
-  if (!roleEntity) {
-    roleEntity = new Role(roleEntityId);
-    roleEntity.dao = daoId;
-    roleEntity.where = event.params.where;
-    roleEntity.role = event.params.role;
+  let contractPermissionIDEntityId =
+    event.params.where.toHexString() +
+    '_' +
+    event.params.permissionID.toHexString();
+  let contractPermissionIDEntity = ContractPermissionID.load(
+    contractPermissionIDEntityId
+  );
+  if (!contractPermissionIDEntity) {
+    contractPermissionIDEntity = new ContractPermissionID(
+      contractPermissionIDEntityId
+    );
+    contractPermissionIDEntity.dao = daoId;
+    contractPermissionIDEntity.where = event.params.where;
+    contractPermissionIDEntity.permissionID = event.params.permissionID;
   }
-  roleEntity.frozen = true;
-  roleEntity.save();
+  contractPermissionIDEntity.frozen = true;
+  contractPermissionIDEntity.save();
 }

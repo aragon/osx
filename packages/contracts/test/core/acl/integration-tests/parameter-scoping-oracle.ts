@@ -9,7 +9,9 @@ import {
 } from '../../../../typechain';
 import {customError} from '../../../test-utils/custom-error-helper';
 
-const DO_SOMETHING_ROLE = ethers.utils.id('DO_SOMETHING_ROLE');
+const DO_SOMETHING_PERMISSION_ID = ethers.utils.id(
+  'DO_SOMETHING_PERMISSION_ID'
+);
 
 describe('TestParameterScopingOracle', function () {
   let signers: SignerWithAddress[];
@@ -43,11 +45,11 @@ describe('TestParameterScopingOracle', function () {
     );
     parameterOracle = await ParameterOracle.deploy();
 
-    // Give signers[0] the `DO_SOMETHING_ROLE` on the TestComponent
+    // Give signers[0] the `DO_SOMETHING_PERMISSION_ID` on the TestComponent
     managingDao.grantWithOracle(
       testComponent.address,
       ownerAddress,
-      DO_SOMETHING_ROLE,
+      DO_SOMETHING_PERMISSION_ID,
       parameterOracle.address
     );
 
@@ -56,7 +58,7 @@ describe('TestParameterScopingOracle', function () {
       testComponent.address,
       testComponent.address,
       ownerAddress,
-      DO_SOMETHING_ROLE
+      DO_SOMETHING_PERMISSION_ID
     );
   });
 

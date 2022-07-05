@@ -22,12 +22,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     using Address for address;
 
     // Roles
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
-    bytes32 public constant DAO_CONFIG_ROLE = keccak256("DAO_CONFIG_ROLE");
-    bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
-    bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE =
-        keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
+    bytes32 public constant DAO_CONFIG_PERMISSION_ID = keccak256("DAO_CONFIG_PERMISSION_ID");
+    bytes32 public constant EXEC_PERMISSION_ID = keccak256("EXEC_PERMISSION_ID");
+    bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
+    bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
+        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION_ID");
     bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
 
     ERC1271 signatureValidator;
@@ -68,7 +68,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         internal
         virtual
         override
-        auth(address(this), UPGRADE_ROLE)
+        auth(address(this), UPGRADE_PERMISSION_ID)
     {}
 
     /// @inheritdoc IDAO
@@ -89,17 +89,17 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function hasPermission(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionID,
         bytes memory _data
     ) external override returns (bool) {
-        return willPerform(_where, _who, _role, _data);
+        return willPerform(_where, _who, _permissionID, _data);
     }
 
     /// @inheritdoc IDAO
     function setMetadata(bytes calldata _metadata)
         external
         override
-        auth(address(this), DAO_CONFIG_ROLE)
+        auth(address(this), DAO_CONFIG_PERMISSION_ID)
     {
         _setMetadata(_metadata);
     }
@@ -108,7 +108,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function execute(uint256 callId, Action[] memory _actions)
         external
         override
-        auth(address(this), EXEC_ROLE)
+        auth(address(this), EXEC_PERMISSION_ID)
         returns (bytes[] memory)
     {
         bytes[] memory execResults = new bytes[](_actions.length);
@@ -154,7 +154,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         address _to,
         uint256 _amount,
         string memory _reference
-    ) external override auth(address(this), WITHDRAW_ROLE) {
+    ) external override auth(address(this), WITHDRAW_PERMISSION_ID) {
         if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
@@ -171,7 +171,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function setSignatureValidator(address _signatureValidator)
         external
         override
-        auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE)
+        auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID)
     {
         signatureValidator = ERC1271(_signatureValidator);
     }

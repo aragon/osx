@@ -23,14 +23,16 @@ const EVENTS = {
   ETHDeposited: 'ETHDeposited',
 };
 
-const ROLES = {
-  UPGRADE_ROLE: ethers.utils.id('UPGRADE_ROLE'),
-  DAO_CONFIG_ROLE: ethers.utils.id('DAO_CONFIG_ROLE'),
-  EXEC_ROLE: ethers.utils.id('EXEC_ROLE'),
-  WITHDRAW_ROLE: ethers.utils.id('WITHDRAW_ROLE'),
-  SET_SIGNATURE_VALIDATOR_ROLE: ethers.utils.id('SET_SIGNATURE_VALIDATOR_ROLE'),
+const PERMISSION_IDS = {
+  UPGRADE_PERMISSION_ID: ethers.utils.id('UPGRADE_PERMISSION_ID'),
+  DAO_CONFIG_PERMISSION_ID: ethers.utils.id('DAO_CONFIG_PERMISSION_ID'),
+  EXEC_PERMISSION_ID: ethers.utils.id('EXEC_PERMISSION_ID'),
+  WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION_ID'),
+  SET_SIGNATURE_VALIDATOR_PERMISSION_ID: ethers.utils.id(
+    'SET_SIGNATURE_VALIDATOR_PERMISSION_ID'
+  ),
   MODIFY_TRUSTED_FORWARDER: ethers.utils.id('MODIFY_TRUSTED_FORWARDER'),
-  TOKEN_MINTER_ROLE: ethers.utils.id('TOKEN_MINTER_ROLE'),
+  TOKEN_MINTER_PERMISSION_ID: ethers.utils.id('TOKEN_MINTER_PERMISSION_ID'),
 };
 
 describe('DAO', function () {
@@ -53,13 +55,37 @@ describe('DAO', function () {
 
     // Grant Roles
     await Promise.all([
-      dao.grant(dao.address, ownerAddress, ROLES.DAO_CONFIG_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.EXEC_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.WITHDRAW_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.UPGRADE_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.SET_SIGNATURE_VALIDATOR_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.MODIFY_TRUSTED_FORWARDER),
-      dao.grant(token.address, ownerAddress, ROLES.TOKEN_MINTER_ROLE),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.DAO_CONFIG_PERMISSION_ID
+      ),
+      dao.grant(dao.address, ownerAddress, PERMISSION_IDS.EXEC_PERMISSION_ID),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.UPGRADE_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
+      ),
+      dao.grant(
+        token.address,
+        ownerAddress,
+        PERMISSION_IDS.TOKEN_MINTER_PERMISSION_ID
+      ),
     ]);
   });
 
@@ -76,11 +102,11 @@ describe('DAO', function () {
   });
 
   describe('setTrustedForwarder:', async () => {
-    it('reverts if the sender lacks the required role', async () => {
+    it('reverts if the sender lacks the required permissionID', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        ROLES.MODIFY_TRUSTED_FORWARDER
+        PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
       );
 
       await expect(dao.setTrustedForwarder(dummyAddress2)).to.be.revertedWith(
@@ -89,7 +115,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.MODIFY_TRUSTED_FORWARDER
+          PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
         )
       );
     });
@@ -107,8 +133,12 @@ describe('DAO', function () {
   });
 
   describe('setMetadata:', async () => {
-    it('reverts if the sender lacks the required role', async () => {
-      await dao.revoke(dao.address, ownerAddress, ROLES.DAO_CONFIG_ROLE);
+    it('reverts if the sender lacks the required permissionID', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.DAO_CONFIG_PERMISSION_ID
+      );
 
       await expect(dao.setMetadata(dummyMetadata1)).to.be.revertedWith(
         customError(
@@ -116,7 +146,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.DAO_CONFIG_ROLE
+          PERMISSION_IDS.DAO_CONFIG_PERMISSION_ID
         )
       );
     });
@@ -129,11 +159,11 @@ describe('DAO', function () {
   });
 
   describe('setSignatureValidator:', async () => {
-    it('reverts if the sender lacks the required role', async () => {
+    it('reverts if the sender lacks the required permissionID', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        ROLES.SET_SIGNATURE_VALIDATOR_ROLE
+        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
       );
 
       await expect(dao.setSignatureValidator(dummyAddress2)).to.be.revertedWith(
@@ -142,7 +172,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.SET_SIGNATURE_VALIDATOR_ROLE
+          PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
         )
       );
     });
@@ -166,8 +196,12 @@ describe('DAO', function () {
     ];
     const expectedDummyResults = ['0x'];
 
-    it('reverts if the sender lacks the required role', async () => {
-      await dao.revoke(dao.address, ownerAddress, ROLES.EXEC_ROLE);
+    it('reverts if the sender lacks the required permissionID', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.EXEC_PERMISSION_ID
+      );
 
       await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
         customError(
@@ -175,7 +209,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.EXEC_ROLE
+          PERMISSION_IDS.EXEC_PERMISSION_ID
         )
       );
     });
@@ -260,8 +294,12 @@ describe('DAO', function () {
       await token.mint(dao.address, amount);
     });
 
-    it('reverts if the sender lacks the required role', async () => {
-      await dao.revoke(dao.address, ownerAddress, ROLES.WITHDRAW_ROLE);
+    it('reverts if the sender lacks the required permissionID', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
+      );
 
       await expect(
         dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
@@ -271,7 +309,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.WITHDRAW_ROLE
+          PERMISSION_IDS.WITHDRAW_PERMISSION_ID
         )
       );
     });

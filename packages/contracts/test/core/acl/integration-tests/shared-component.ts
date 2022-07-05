@@ -9,7 +9,9 @@ import {
 } from '../../../../typechain';
 import {customError} from '../../../test-utils/custom-error-helper';
 
-const ID_GATED_ACTION_ROLE = ethers.utils.id('ID_GATED_ACTION_ROLE');
+const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
+  'ID_GATED_ACTION_PERMISSION_ID'
+);
 
 describe('SharedComponent', function () {
   let signers: SignerWithAddress[];
@@ -49,7 +51,7 @@ describe('SharedComponent', function () {
       testComponent.address,
       testComponent.address,
       ownerAddress,
-      ID_GATED_ACTION_ROLE
+      ID_GATED_ACTION_PERMISSION_ID
     );
   });
 
@@ -82,7 +84,7 @@ describe('SharedComponent', function () {
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
-        ID_GATED_ACTION_ROLE,
+        ID_GATED_ACTION_PERMISSION_ID,
         oracle.address
       );
 
@@ -108,7 +110,7 @@ describe('SharedComponent', function () {
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
-        ID_GATED_ACTION_ROLE,
+        ID_GATED_ACTION_PERMISSION_ID,
         oracle.address
       );
 
@@ -144,13 +146,13 @@ describe('SharedComponent', function () {
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
-        ID_GATED_ACTION_ROLE,
+        ID_GATED_ACTION_PERMISSION_ID,
         oracle.address
       );
       dao2.grantWithOracle(
         testComponent.address,
         ownerAddress,
-        ID_GATED_ACTION_ROLE,
+        ID_GATED_ACTION_PERMISSION_ID,
         oracle.address
       );
 
@@ -200,7 +202,7 @@ describe('SharedComponent', function () {
       dao2.grantWithOracle(
         testComponent.address,
         ownerAddress,
-        ID_GATED_ACTION_ROLE,
+        ID_GATED_ACTION_PERMISSION_ID,
         oracle.address
       );
 
@@ -225,7 +227,7 @@ describe('SharedComponent', function () {
       dao1.grantWithOracle(
         testComponent.address,
         ownerAddress,
-        ID_GATED_ACTION_ROLE,
+        ID_GATED_ACTION_PERMISSION_ID,
         oracle.address
       );
 

@@ -14,7 +14,7 @@ contract MerkleMinter is MetaTxComponent {
 
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
-    bytes32 public constant MERKLE_MINTER_ROLE = keccak256("MERKLE_MINTER_ROLE");
+    bytes32 public constant MERKLE_MINTER_PERMISSION_ID = keccak256("MERKLE_MINTER_PERMISSION_ID");
 
     IERC20MintableUpgradeable public token;
     address public distributorBase;
@@ -62,7 +62,7 @@ contract MerkleMinter is MetaTxComponent {
         uint256 _totalAmount,
         bytes calldata _tree,
         bytes calldata _context
-    ) external auth(MERKLE_MINTER_ROLE) returns (MerkleDistributor distributor) {
+    ) external auth(MERKLE_MINTER_PERMISSION_ID) returns (MerkleDistributor distributor) {
         address distributorAddr = distributorBase.clone();
         MerkleDistributor(distributorAddr).initialize(
             dao,

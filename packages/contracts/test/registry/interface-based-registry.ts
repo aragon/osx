@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {DAO, InterfaceBasedRegistryMock} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 
-const REGISTER_ROLE = ethers.utils.id('REGISTER_ROLE');
+const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION_ID');
 
 const EVENTS = {
   Registered: 'Registered',
@@ -35,8 +35,12 @@ describe('InterfaceBasedRegistry', function () {
 
     await interfaceBasedRegistryMock.initialize(dao.address);
 
-    // grant REGISTER_ROLE to registrer
-    dao.grant(interfaceBasedRegistryMock.address, ownerAddress, REGISTER_ROLE);
+    // grant REGISTER_PERMISSION_ID to registrer
+    dao.grant(
+      interfaceBasedRegistryMock.address,
+      ownerAddress,
+      REGISTER_PERMISSION_ID
+    );
   });
 
   describe('Register', async () => {
@@ -61,11 +65,11 @@ describe('InterfaceBasedRegistry', function () {
       );
     });
 
-    it('fail to register if the sender lacks the required role', async () => {
+    it('fail to register if the sender lacks the required permissionID', async () => {
       dao.revoke(
         interfaceBasedRegistryMock.address,
         ownerAddress,
-        REGISTER_ROLE
+        REGISTER_PERMISSION_ID
       );
 
       await expect(
@@ -76,7 +80,7 @@ describe('InterfaceBasedRegistry', function () {
           interfaceBasedRegistryMock.address,
           interfaceBasedRegistryMock.address,
           ownerAddress,
-          REGISTER_ROLE
+          REGISTER_PERMISSION_ID
         )
       );
     });

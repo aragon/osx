@@ -14,8 +14,12 @@ import {
 import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 
-const MERKLE_MINTER_ROLE = ethers.utils.id('MERKLE_MINTER_ROLE');
-const TOKEN_MINTER_ROLE = ethers.utils.id('TOKEN_MINTER_ROLE');
+const MERKLE_MINTER_PERMISSION_ID = ethers.utils.id(
+  'MERKLE_MINTER_PERMISSION_ID'
+);
+const TOKEN_MINTER_PERMISSION_ID = ethers.utils.id(
+  'TOKEN_MINTER_PERMISSION_ID'
+);
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
@@ -65,8 +69,8 @@ describe('MerkleDistributor', function () {
       token.address,
       distributor.address
     );
-    await dao.grant(minter.address, ownerAddress, MERKLE_MINTER_ROLE);
-    await dao.grant(token.address, minter.address, TOKEN_MINTER_ROLE);
+    await dao.grant(minter.address, ownerAddress, MERKLE_MINTER_PERMISSION_ID);
+    await dao.grant(token.address, minter.address, TOKEN_MINTER_PERMISSION_ID);
   });
 
   describe('merkleMint:', () => {
@@ -101,8 +105,12 @@ describe('MerkleDistributor', function () {
         );
     });
 
-    it('does not mint if the minting role on the minter is missing', async () => {
-      await dao.revoke(minter.address, ownerAddress, MERKLE_MINTER_ROLE);
+    it('does not mint if the minting permissionID on the minter is missing', async () => {
+      await dao.revoke(
+        minter.address,
+        ownerAddress,
+        MERKLE_MINTER_PERMISSION_ID
+      );
 
       await expect(
         minter.merkleMint(
@@ -117,13 +125,17 @@ describe('MerkleDistributor', function () {
           minter.address,
           minter.address,
           ownerAddress,
-          MERKLE_MINTER_ROLE
+          MERKLE_MINTER_PERMISSION_ID
         )
       );
     });
 
-    it('does not mint if the minting role on the token is missing', async () => {
-      await dao.revoke(token.address, minter.address, TOKEN_MINTER_ROLE);
+    it('does not mint if the minting permissionID on the token is missing', async () => {
+      await dao.revoke(
+        token.address,
+        minter.address,
+        TOKEN_MINTER_PERMISSION_ID
+      );
 
       await expect(
         minter.merkleMint(
@@ -138,7 +150,7 @@ describe('MerkleDistributor', function () {
           token.address,
           token.address,
           minter.address,
-          TOKEN_MINTER_ROLE
+          TOKEN_MINTER_PERMISSION_ID
         )
       );
     });

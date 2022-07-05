@@ -21,20 +21,20 @@ type Balance @entity {
 
 # ACL
 
-type Role @entity {
-  id: ID! # where + role
+type ContractPermissionID @entity {
+  id: ID! # where + permissionID
   dao: Dao!
   where: Bytes!
-  role: Bytes!
+  permissionID: Bytes!
   frozen: Boolean!
 }
 
 type Permission @entity {
   "no need to store granted as we can delete permission when revoked"
-  id: ID! # where + role + who
+  id: ID! # where + permissionID + who
   dao: Dao!
   where: Bytes!
-  role: Role!
+  contractPermissionID: ContractPermissionID!
   who: Bytes!
   actor: Bytes!
   oracle: Bytes!
@@ -90,7 +90,7 @@ type Dao @entity {
   deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
   withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
-  roles: [Role!]! @derivedFrom(field: "dao")
+  contractPermissionIDs: [ContractPermissionID!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")

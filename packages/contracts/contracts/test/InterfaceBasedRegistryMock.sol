@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "../registry/InterfaceBasedRegistry.sol";
 
 contract InterfaceBasedRegistryMock is InterfaceBasedRegistry {
-    bytes32 public constant REGISTER_ROLE = keccak256("REGISTER_ROLE");
+    bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION_ID");
 
     event Registered(address);
 
@@ -13,7 +13,7 @@ contract InterfaceBasedRegistryMock is InterfaceBasedRegistry {
         __InterfaceBasedRegistry_init(_dao, type(IDAO).interfaceId);
     }
 
-    function register(address registrant) external auth(REGISTER_ROLE) {
+    function register(address registrant) external auth(REGISTER_PERMISSION_ID) {
         _register(registrant);
 
         emit Registered(registrant);

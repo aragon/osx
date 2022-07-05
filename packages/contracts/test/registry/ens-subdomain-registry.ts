@@ -18,8 +18,8 @@ function ensDomainHash(name: string): string {
   return ethers.utils.namehash(name);
 }
 
-const REGISTER_ENS_SUBDOMAIN_ROLE = ethers.utils.id(
-  'REGISTER_ENS_SUBDOMAIN_ROLE'
+const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_ENS_SUBDOMAIN_PERMISSION_ID'
 );
 
 const DUMMY_METADATA = '0x';
@@ -168,11 +168,11 @@ describe('ENSSubdomainRegistrar', function () {
         ensDomainHash('test')
       );
 
-      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_ROLE
+        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
 
       // signers[1] can register subdomain
@@ -230,11 +230,11 @@ describe('ENSSubdomainRegistrar', function () {
         ensDomainHash('test')
       );
 
-      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_ROLE
+        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
 
       // signers[1] can register subdomain
@@ -258,11 +258,11 @@ describe('ENSSubdomainRegistrar', function () {
 
   describe('Registrar is not the domain owner and is not approved but has permission', () => {
     beforeEach(async () => {
-      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
       await managingDao.grant(
         registrar.address,
         await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_ROLE
+        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
       );
     });
 
@@ -346,7 +346,7 @@ describe('ENSSubdomainRegistrar', function () {
       it('reverts subnode registration if the calling address lacks permission of the managing DAO', async () => {
         const targetAddress = managingDao.address;
 
-        // Register the subdomain 'my.test' as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_ROLE` granted
+        // Register the subdomain 'my.test' as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` granted
         await expect(
           registrar
             .connect(signers[1])
@@ -357,13 +357,13 @@ describe('ENSSubdomainRegistrar', function () {
             registrar.address,
             registrar.address,
             signers[1].address,
-            REGISTER_ENS_SUBDOMAIN_ROLE
+            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           )
         );
       });
 
       it('reverts setting the resolver if the calling address lacks permission of the managing DAO', async () => {
-        // Set a new resolver as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_ROLE` granted
+        // Set a new resolver as signers[1] who does not have the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` granted
         await expect(
           registrar
             .connect(signers[1])
@@ -374,23 +374,23 @@ describe('ENSSubdomainRegistrar', function () {
             registrar.address,
             registrar.address,
             signers[1].address,
-            REGISTER_ENS_SUBDOMAIN_ROLE
+            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           )
         );
       });
 
       describe('After granting permission to the calling address via the managing DAO', () => {
         beforeEach(async () => {
-          // Grant signers[1] and signers[2] the `REGISTER_ENS_SUBDOMAIN_ROLE` permission
+          // Grant signers[1] and signers[2] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
           await managingDao.grant(
             registrar.address,
             await signers[1].getAddress(),
-            REGISTER_ENS_SUBDOMAIN_ROLE
+            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
           await managingDao.grant(
             registrar.address,
             await signers[2].getAddress(),
-            REGISTER_ENS_SUBDOMAIN_ROLE
+            REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
           );
         });
 

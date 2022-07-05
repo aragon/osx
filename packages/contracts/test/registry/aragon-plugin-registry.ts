@@ -37,11 +37,11 @@ describe('Aragon-Plugin-Registry', function () {
     pluginRepo = await PluginRepo.deploy();
     await pluginRepo.initialize(ownerAddress);
 
-    // grant REGISTER_ROLE to registrer
+    // grant REGISTER_PERMISSION_ID to registrer
     dao.grant(
       aragonPluginRegistry.address,
       ownerAddress,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_PERMISSION_ID')
     );
   });
 

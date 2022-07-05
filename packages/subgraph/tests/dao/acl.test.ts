@@ -8,7 +8,7 @@ import {
 } from '@graphprotocol/graph-ts';
 
 import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
-import {Permission, Role} from '../../generated/schema';
+import {Permission, ContractPermissionID} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -22,8 +22,8 @@ import {
   createNewFrozenEvent,
   createNewGrantedEvent,
   createNewRevokedEvent,
-  getEXEC_ROLE,
-  getEXEC_ROLEreverted,
+  getEXEC_PERMISSION_ID,
+  getEXEC_PERMISSION_IDreverted,
   getParticipationRequiredPct,
   getSupportRequiredPct,
   getVotingToken,
@@ -37,14 +37,14 @@ import {
   WHITELIST_VOTING_INTERFACE
 } from '../../src/utils/constants';
 
-let role = Bytes.fromByteArray(
-  crypto.keccak256(ByteArray.fromUTF8('EXEC_ROLE'))
+let contractPermissionID = Bytes.fromByteArray(
+  crypto.keccak256(ByteArray.fromUTF8('EXEC_PERMISSION_ID'))
 );
 
 function testPackages(supportsErc20VotingInterface: boolean): void {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
-    role,
+    contractPermissionID,
     ADDRESS_ONE,
     VOTING_ADDRESS,
     DAO_ADDRESS,
@@ -53,7 +53,7 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   );
 
   // launch calls
-  getEXEC_ROLE(DAO_ADDRESS, role);
+  getEXEC_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
   getSupportRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getParticipationRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getMinDuration(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
@@ -81,29 +81,48 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   handleGranted(grantedEvent);
 
   // checks
-  // role
-  let roleEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
+  // contractPermissionID
+  let contractPermissionIDEntityID =
+    Address.fromString(DAO_ADDRESS).toHexString() +
+    '_' +
+    contractPermissionID.toHexString();
 
-  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
   assert.fieldEquals(
-    'Role',
-    roleEntityID,
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'id',
+    contractPermissionIDEntityID
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'Role',
-    roleEntityID,
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
     'where',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
-  assert.fieldEquals('Role', roleEntityID, 'role', role.toHexString());
-  assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'permissionID',
+    contractPermissionID.toHexString()
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'frozen',
+    'false'
+  );
 
   // permission
   let permissionEntityID =
-    roleEntityID + '_' + Address.fromString(VOTING_ADDRESS).toHexString();
+    contractPermissionIDEntityID +
+    '_' +
+    Address.fromString(VOTING_ADDRESS).toHexString();
 
   assert.fieldEquals(
     'Permission',
@@ -156,7 +175,7 @@ test('Run dao (handleGranted) mappings with mock event for Whitelist Voting', ()
 test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
-    role,
+    contractPermissionID,
     ADDRESS_ONE,
     VOTING_ADDRESS,
     DAO_ADDRESS,
@@ -165,17 +184,24 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   );
 
   // launch calls
-  getEXEC_ROLEreverted(DAO_ADDRESS);
+  getEXEC_PERMISSION_IDreverted(DAO_ADDRESS);
 
   // handle event
   handleGranted(grantedEvent);
 
   // checks
-  // role
-  let roleEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
+  // contractPermissionID
+  let contractPermissionIDEntityID =
+    Address.fromString(DAO_ADDRESS).toHexString() +
+    '_' +
+    contractPermissionID.toHexString();
 
-  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'id',
+    contractPermissionIDEntityID
+  );
 
   // governance
   let daoPackageEntityID =
@@ -190,21 +216,29 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
 
 test('Run dao (handleRevoked) mappings with mock event', () => {
   // create state
-  let roleEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
+  let contractPermissionIDEntityID =
+    Address.fromString(DAO_ADDRESS).toHexString() +
+    '_' +
+    contractPermissionID.toHexString();
   // permission
   let permissionEntityID =
-    roleEntityID + '_' + Address.fromString(VOTING_ADDRESS).toHexString();
+    contractPermissionIDEntityID +
+    '_' +
+    Address.fromString(VOTING_ADDRESS).toHexString();
 
-  let roleEntity = new Role(roleEntityID);
-  roleEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
-  roleEntity.where = Address.fromString(DAO_ADDRESS);
-  roleEntity.role = role;
-  roleEntity.frozen = false;
-  roleEntity.save();
+  let contractPermissionIDEntity = new ContractPermissionID(
+    contractPermissionIDEntityID
+  );
+  contractPermissionIDEntity.dao = Address.fromString(
+    DAO_ADDRESS
+  ).toHexString();
+  contractPermissionIDEntity.where = Address.fromString(DAO_ADDRESS);
+  contractPermissionIDEntity.permissionID = contractPermissionID;
+  contractPermissionIDEntity.frozen = false;
+  contractPermissionIDEntity.save();
 
   let permissionEntity = new Permission(permissionEntityID);
-  permissionEntity.role = roleEntity.id;
+  permissionEntity.contractPermissionID = contractPermissionIDEntity.id;
   permissionEntity.save();
 
   // check state exist
@@ -217,34 +251,49 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
 
   // create event and run it's handler
   let revokedEvent = createNewRevokedEvent(
-    role,
+    contractPermissionID,
     ADDRESS_ONE,
     VOTING_ADDRESS,
     DAO_ADDRESS,
     DAO_ADDRESS
   );
 
-  getEXEC_ROLE(DAO_ADDRESS, role);
+  getEXEC_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
 
   // handle event
   handleRevoked(revokedEvent);
 
   // checks
-  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
   assert.fieldEquals(
-    'Role',
-    roleEntityID,
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'id',
+    contractPermissionIDEntityID
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'Role',
-    roleEntityID,
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
     'where',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
-  assert.fieldEquals('Role', roleEntityID, 'role', role.toHexString());
-  assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'permissionID',
+    contractPermissionID.toHexString()
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'frozen',
+    'false'
+  );
 
   assert.notInStore('Permission', permissionEntityID);
 
@@ -253,23 +302,39 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
 
 test('Run dao (handleFrozen) mappings with mock event', () => {
   // create state
-  let roleEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() + '_' + role.toHexString();
+  let contractPermissionIDEntityID =
+    Address.fromString(DAO_ADDRESS).toHexString() +
+    '_' +
+    contractPermissionID.toHexString();
 
-  let roleEntity = new Role(roleEntityID);
-  roleEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
-  roleEntity.where = Address.fromString(DAO_ADDRESS);
-  roleEntity.role = role;
-  roleEntity.frozen = false;
-  roleEntity.save();
+  let contractPermissionIDEntity = new ContractPermissionID(
+    contractPermissionIDEntityID
+  );
+  contractPermissionIDEntity.dao = Address.fromString(
+    DAO_ADDRESS
+  ).toHexString();
+  contractPermissionIDEntity.where = Address.fromString(DAO_ADDRESS);
+  contractPermissionIDEntity.permissionID = contractPermissionID;
+  contractPermissionIDEntity.frozen = false;
+  contractPermissionIDEntity.save();
 
   // check state exist
-  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
-  assert.fieldEquals('Role', roleEntityID, 'frozen', 'false');
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'id',
+    contractPermissionIDEntityID
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'frozen',
+    'false'
+  );
 
   // create event and run it's handler
   let frozenEvent = createNewFrozenEvent(
-    role,
+    contractPermissionID,
     ADDRESS_ONE,
     DAO_ADDRESS,
     DAO_ADDRESS
@@ -279,21 +344,36 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   handleFrozen(frozenEvent);
 
   // checks
-  assert.fieldEquals('Role', roleEntityID, 'id', roleEntityID);
   assert.fieldEquals(
-    'Role',
-    roleEntityID,
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'id',
+    contractPermissionIDEntityID
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'Role',
-    roleEntityID,
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
     'where',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
-  assert.fieldEquals('Role', roleEntityID, 'role', role.toHexString());
-  assert.fieldEquals('Role', roleEntityID, 'frozen', 'true');
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'permissionID',
+    contractPermissionID.toHexString()
+  );
+  assert.fieldEquals(
+    'ContractPermissionID',
+    contractPermissionIDEntityID,
+    'frozen',
+    'true'
+  );
 
   clearStore();
 });

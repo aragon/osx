@@ -89,9 +89,9 @@ contract DAOFactory {
         dao = createDAO(_daoConfig, _gsnForwarder);
 
         // Create token and merkle minter
-        dao.grant(address(dao), address(tokenFactory), dao.ROOT_ROLE());
+        dao.grant(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
         (token, minter) = tokenFactory.newToken(dao, _tokenConfig, _mintConfig);
-        dao.revoke(address(dao), address(tokenFactory), dao.ROOT_ROLE());
+        dao.revoke(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
 
         // register dao with its name and token to the registry
         // TODO: shall we add minter as well ?
@@ -136,7 +136,7 @@ contract DAOFactory {
     {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
-        // initialize dao with the ROOT_ROLE as DAOFactory
+        // initialize dao with the ROOT_PERMISSION_ID as DAOFactory
         dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
     }
 
@@ -144,17 +144,29 @@ contract DAOFactory {
     /// @param _dao The DAO instance just created.
     /// @param _voting The voting contract address (whitelist OR ERC20 voting)
     function setDAOPermissions(DAO _dao, address _voting) internal {
-        // set roles on the dao itself.
+        // set permissionIDs on the dao itself.
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](8);
 
         // Grant DAO all the permissions required
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.DAO_CONFIG_ROLE(), address(_dao));
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.WITHDRAW_ROLE(), address(_dao));
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.UPGRADE_ROLE(), address(_dao));
-        items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.ROOT_ROLE(), address(_dao));
+        items[0] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            _dao.DAO_CONFIG_PERMISSION_ID(),
+            address(_dao)
+        );
+        items[1] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            _dao.WITHDRAW_PERMISSION_ID(),
+            address(_dao)
+        );
+        items[2] = ACLData.BulkItem(
+            ACLData.BulkOp.Grant,
+            _dao.UPGRADE_PERMISSION_ID(),
+            address(_dao)
+        );
+        items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.ROOT_PERMISSION_ID(), address(_dao));
         items[4] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            _dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+            _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
             address(_dao)
         );
         items[5] = ACLData.BulkItem(
@@ -162,10 +174,14 @@ contract DAOFactory {
             _dao.MODIFY_TRUSTED_FORWARDER(),
             address(_dao)
         );
-        items[6] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.EXEC_ROLE(), _voting);
+        items[6] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.EXEC_PERMISSION_ID(), _voting);
 
         // Revoke permissions from factory
-        items[7] = ACLData.BulkItem(ACLData.BulkOp.Revoke, _dao.ROOT_ROLE(), address(this));
+        items[7] = ACLData.BulkItem(
+            ACLData.BulkOp.Revoke,
+            _dao.ROOT_PERMISSION_ID(),
+            address(this)
+        );
 
         _dao.bulk(address(_dao), items);
     }
@@ -198,7 +214,7 @@ contract DAOFactory {
         ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
         items[0] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            erc20Voting.UPGRADE_ROLE(),
+            erc20Voting.UPGRADE_PERMISSION_ID(),
             address(_dao)
         );
         items[1] = ACLData.BulkItem(
@@ -253,7 +269,7 @@ contract DAOFactory {
         );
         items[2] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            whitelistVoting.UPGRADE_ROLE(),
+            whitelistVoting.UPGRADE_PERMISSION_ID(),
             address(_dao)
         );
         items[3] = ACLData.BulkItem(
