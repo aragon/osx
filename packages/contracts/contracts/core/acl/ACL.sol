@@ -5,15 +5,15 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IACLOracle.sol";
 
-library ACLData {
-    enum BulkOp {
+library PermissionLib {
+    enum Operation {
         Grant,
         Revoke,
         Freeze
     }
 
     struct BulkItem {
-        BulkOp op;
+        Operation operation;
         bytes32 permissionID;
         address who;
     }
@@ -104,7 +104,7 @@ contract ACL is Initializable {
             !(checkPermissions(_where, msg.sender, _permissionID, msg.data) ||
                 checkPermissions(address(this), msg.sender, _permissionID, msg.data))
         )
-            revert ACLData.PermissionUnauthorized({
+            revert PermissionLib.PermissionUnauthorized({
                 here: address(this),
                 where: _where,
                 who: msg.sender,
@@ -177,16 +177,19 @@ contract ACL is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the contract
     /// @param items A list of ACL operations to do
-    function bulk(address _where, ACLData.BulkItem[] calldata items)
+    function bulk(address _where, PermissionLib.BulkItem[] calldata items)
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
         for (uint256 i = 0; i < items.length; i++) {
-            ACLData.BulkItem memory item = items[i];
+            PermissionLib.BulkItem memory item = items[i];
 
-            if (item.op == ACLData.BulkOp.Grant) _grant(_where, item.who, item.permissionID);
-            else if (item.op == ACLData.BulkOp.Revoke) _revoke(_where, item.who, item.permissionID);
-            else if (item.op == ACLData.BulkOp.Freeze) _freeze(_where, item.permissionID);
+            if (item.operation == PermissionLib.Operation.Grant)
+                _grant(_where, item.who, item.permissionID);
+            else if (item.operation == PermissionLib.Operation.Revoke)
+                _revoke(_where, item.who, item.permissionID);
+            else if (item.operation == PermissionLib.Operation.Freeze)
+                _freeze(_where, item.permissionID);
         }
     }
 
@@ -247,12 +250,12 @@ contract ACL is Initializable {
         IACLOracle _oracle
     ) internal {
         if (isFrozen(_where, _permissionID))
-            revert ACLData.PermissionFrozen({where: _where, permissionID: _permissionID});
+            revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
 
         if (permissions[permission] != UNSET_PERMISSION_ID) {
-            revert ACLData.PermissionAlreadyGranted({
+            revert PermissionLib.PermissionAlreadyGranted({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
@@ -273,12 +276,12 @@ contract ACL is Initializable {
         bytes32 _permissionID
     ) internal {
         if (isFrozen(_where, _permissionID)) {
-            revert ACLData.PermissionFrozen({where: _where, permissionID: _permissionID});
+            revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
         }
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
         if (permissions[permission] == UNSET_PERMISSION_ID) {
-            revert ACLData.PermissionAlreadyRevoked({
+            revert PermissionLib.PermissionAlreadyRevoked({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
@@ -295,7 +298,7 @@ contract ACL is Initializable {
     function _freeze(address _where, bytes32 _permissionID) internal {
         bytes32 permission = freezeHash(_where, _permissionID);
         if (frozenPermissions[permission]) {
-            revert ACLData.PermissionFrozen({where: _where, permissionID: _permissionID});
+            revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
         }
         frozenPermissions[freezeHash(_where, _permissionID)] = true;
 

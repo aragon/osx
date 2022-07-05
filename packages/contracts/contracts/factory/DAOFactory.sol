@@ -145,40 +145,48 @@ contract DAOFactory {
     /// @param _voting The voting contract address (whitelist OR ERC20 voting)
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set permissionIDs on the dao itself.
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](8);
+        PermissionLib.BulkItem[] memory items = new PermissionLib.BulkItem[](8);
 
         // Grant DAO all the permissions required
-        items[0] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[0] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             _dao.SET_METADATA_PERMISSION_ID(),
             address(_dao)
         );
-        items[1] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[1] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             _dao.WITHDRAW_PERMISSION_ID(),
             address(_dao)
         );
-        items[2] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[2] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             _dao.UPGRADE_PERMISSION_ID(),
             address(_dao)
         );
-        items[3] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.ROOT_PERMISSION_ID(), address(_dao));
-        items[4] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[3] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
+            _dao.ROOT_PERMISSION_ID(),
+            address(_dao)
+        );
+        items[4] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
             address(_dao)
         );
-        items[5] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[5] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );
-        items[6] = ACLData.BulkItem(ACLData.BulkOp.Grant, _dao.EXEC_PERMISSION_ID(), _voting);
+        items[6] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
+            _dao.EXEC_PERMISSION_ID(),
+            _voting
+        );
 
         // Revoke permissions from factory
-        items[7] = ACLData.BulkItem(
-            ACLData.BulkOp.Revoke,
+        items[7] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Revoke,
             _dao.ROOT_PERMISSION_ID(),
             address(this)
         );
@@ -211,19 +219,19 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for ERC20Voting
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](3);
-        items[0] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        PermissionLib.BulkItem[] memory items = new PermissionLib.BulkItem[](3);
+        items[0] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             erc20Voting.UPGRADE_PERMISSION_ID(),
             address(_dao)
         );
-        items[1] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[1] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             erc20Voting.MODIFY_VOTE_CONFIG(),
             address(_dao)
         );
-        items[2] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[2] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             erc20Voting.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );
@@ -256,24 +264,24 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for WhitelistVoting
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](4);
-        items[0] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        PermissionLib.BulkItem[] memory items = new PermissionLib.BulkItem[](4);
+        items[0] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             whitelistVoting.MODIFY_WHITELIST(),
             address(_dao)
         );
-        items[1] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[1] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             whitelistVoting.MODIFY_VOTE_CONFIG(),
             address(_dao)
         );
-        items[2] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[2] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             whitelistVoting.UPGRADE_PERMISSION_ID(),
             address(_dao)
         );
-        items[3] = ACLData.BulkItem(
-            ACLData.BulkOp.Grant,
+        items[3] = PermissionLib.BulkItem(
+            PermissionLib.Operation.Grant,
             whitelistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );

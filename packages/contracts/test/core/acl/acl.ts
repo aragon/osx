@@ -22,7 +22,7 @@ enum BulkOP {
 }
 
 interface BulkItem {
-  op: BulkOP;
+  operation: BulkOP;
   permissionID: string;
   who: string;
 }
@@ -428,17 +428,17 @@ describe('Core: ACL', function () {
       const signers = await ethers.getSigners();
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -458,17 +458,17 @@ describe('Core: ACL', function () {
       const signers = await ethers.getSigners();
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Freeze,
+          operation: BulkOP.Freeze,
           permissionID: ethers.utils.id('PERMISSION_ID_1'),
           who: signers[1].address,
         },
         {
-          op: BulkOP.Freeze,
+          operation: BulkOP.Freeze,
           permissionID: ethers.utils.id('PERMISSION_ID_2'),
           who: signers[2].address,
         },
         {
-          op: BulkOP.Freeze,
+          operation: BulkOP.Freeze,
           permissionID: ethers.utils.id('PERMISSION_ID_3'),
           who: signers[3].address,
         },
@@ -490,17 +490,17 @@ describe('Core: ACL', function () {
       await acl.grant(acl.address, signers[3].address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Revoke,
+          operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          op: BulkOP.Revoke,
+          operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          op: BulkOP.Revoke,
+          operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -521,17 +521,17 @@ describe('Core: ACL', function () {
       await acl.grant(acl.address, signers[1].address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Revoke,
+          operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          op: BulkOP.Freeze,
+          operation: BulkOP.Freeze,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -562,22 +562,22 @@ describe('Core: ACL', function () {
       await acl.grant(acl.address, signers[1].address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Revoke,
+          operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          op: BulkOP.Freeze,
+          operation: BulkOP.Freeze,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
         {
-          op: BulkOP.Freeze,
+          operation: BulkOP.Freeze,
           permissionID: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -608,7 +608,7 @@ describe('Core: ACL', function () {
     it('should not allow', async () => {
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: otherSigner.address,
         },
@@ -630,7 +630,7 @@ describe('Core: ACL', function () {
       await acl.grant(acl.address, otherSigner.address, ADMIN_PERMISSION_ID);
       const bulkItems: BulkItem[] = [
         {
-          op: BulkOP.Grant,
+          operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
           who: otherSigner.address,
         },
