@@ -5,9 +5,9 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "./Permissions.sol";
 import "../erc165/AdaptiveERC165.sol";
-import "./../IDAO.sol";
+import "../IDAO.sol";
+import "./Permissions.sol";
 
 /// @title Base component in the Aragon DAO framework
 /// @author Samuel Furter - Aragon Association - 2021

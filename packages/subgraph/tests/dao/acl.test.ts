@@ -1,5 +1,23 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, ByteArray, Bytes} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  crypto
+} from '@graphprotocol/graph-ts';
+
+import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
+import {Permission, Role} from '../../generated/schema';
+import {
+  DAO_ADDRESS,
+  ADDRESS_ONE,
+  DAO_TOKEN_ADDRESS,
+  ONE_ETH,
+  VOTING_ADDRESS,
+  ADDRESS_TWO
+} from '../constants';
+import {createTokenCalls} from '../utils';
 import {
   createNewFrozenEvent,
   createNewGrantedEvent,
@@ -13,18 +31,7 @@ import {
   getMinDuration,
   getSupportsInterface
 } from './utils';
-import {
-  DAO_ADDRESS,
-  ADDRESS_ONE,
-  DAO_TOKEN_ADDRESS,
-  ONE_ETH,
-  VOTING_ADDRESS,
-  ADDRESS_TWO
-} from '../constants';
-import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
-import {crypto} from '@graphprotocol/graph-ts';
-import {createTokenCalls} from '../utils';
-import {Permission, Role} from '../../generated/schema';
+
 import {
   ERC20_VOTING_INTERFACE,
   WHITELIST_VOTING_INTERFACE

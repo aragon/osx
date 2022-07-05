@@ -1,5 +1,13 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
+
+import {
+  handleVoteCast,
+  handleVoteExecuted,
+  handleTrustedForwarderSet,
+  handleConfigUpdated,
+  _handleVoteStarted
+} from '../../src/packages/ERC20Voting/erc20Voting';
 import {ERC20VotingPackage, ERC20VotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
@@ -9,6 +17,7 @@ import {
   DAO_ADDRESS,
   ADDRESS_ZERO
 } from '../constants';
+import {createDummyAcctions, createGetVoteCall} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
@@ -17,14 +26,6 @@ import {
   createNewConfigUpdatedEvent,
   getVotesLengthCall
 } from './utils';
-import {
-  handleVoteCast,
-  handleVoteExecuted,
-  handleTrustedForwarderSet,
-  handleConfigUpdated,
-  _handleVoteStarted
-} from '../../src/packages/ERC20Voting/erc20Voting';
-import {createDummyAcctions, createGetVoteCall} from '../utils';
 
 test('Run ERC Voting (handleVoteStarted) mappings with mock event', () => {
   // create state

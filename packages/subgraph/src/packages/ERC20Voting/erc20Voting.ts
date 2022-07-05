@@ -1,3 +1,5 @@
+import {dataSource} from '@graphprotocol/graph-ts';
+
 import {
   VoteCast,
   VoteStarted,
@@ -13,7 +15,7 @@ import {
   ERC20VotingVoter,
   ERC20Vote
 } from '../../../generated/schema';
-import {dataSource} from '@graphprotocol/graph-ts';
+
 import {VOTER_STATE} from '../../utils/constants';
 
 export function handleVoteStarted(event: VoteStarted): void {

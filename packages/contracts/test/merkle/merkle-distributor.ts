@@ -2,12 +2,13 @@
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {customError} from '../test-utils/custom-error-helper';
+
 import {BigNumber} from 'ethers';
-import BalanceTree from './src/balance-tree';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {customError} from '../test-utils/custom-error-helper';
+import BalanceTree from './src/balance-tree';
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
