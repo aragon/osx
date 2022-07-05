@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const registerDAORole = ethers.utils.id('REGISTER_DAO_ROLE');
 
-  // Grant REGISTER_DAO_ROLE to repo factory
+  // Grant REGISTER_DAO_ROLE to DAOFactory
   const managingDaoContract = await ethers.getContractAt(
     'DAO',
     managingDAOAddress
@@ -34,5 +34,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.runAtTheEnd = true;
 func.tags = ['DAOFactory'];
