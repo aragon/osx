@@ -24,24 +24,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`
+- Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`.
 - Changed `registry.ts` to `dao-registry.ts` and updated testing.
-- Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`
-- Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`
-- Changed order of deployment scripts
-- Changed folder struction of tests
-- Refactored event names and NatSpec comments
+- Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`.
+- Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.
+- Changed order of deployment scripts.
+- Changed folder struction of tests.
+- Refactored event names and NatSpec comments.
 
 ### Removed
 
-- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events
-- Removed `ERC165Registry`
+- Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
+- Removed `ERC165Registry`.
 
 ## v0.2.0-alpha
 
 ### Added
 
-- Added tests for the `ACL` and `IACLOracle`
+- Added tests for the `ACL` and `IACLOracle`.
 - Allow tokens to be minted to DAO's treasury by passing address(0) as receiver in `TokenFactory`.
 
 ### Changed

@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {customError} from '../test-utils/custom-error-helper';
+import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
 
 import {
   ENSSubdomainRegistrar,
@@ -9,14 +10,6 @@ import {
   PublicResolver,
   ENSRegistry,
 } from '../../typechain';
-
-function ensLabelHash(label: string): string {
-  return ethers.utils.id(label);
-}
-
-function ensDomainHash(name: string): string {
-  return ethers.utils.namehash(name);
-}
 
 const REGISTER_ENS_SUBDOMAIN_ROLE = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_ROLE'

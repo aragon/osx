@@ -1,11 +1,11 @@
 import {promises as fs} from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 
+// TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x314159265dD8dbb310642f98f50C066173C1259b',
   ropsten: '0x112234455C3a32FD11230C42E7Bccd4A84e02010',
-  rinkeby: '0xe7410170f87102DF0055eB195163A03B7F2Bff4A',
-  goerli: '0x112234455C3a32FD11230C42E7Bccd4A84e02010',
 };
 
 export async function getContractAddress(
@@ -53,14 +53,6 @@ export async function updateActiveContractsJSON(payload: {
   );
 }
 
-export function ensLabelHash(label: string, ethers: any): string {
-  return ethers.utils.id(label);
-}
-
-export function ensDomainHash(name: string, ethers: any): string {
-  return ethers.utils.namehash(name);
-}
-
 export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deploy} = deployments;
@@ -90,12 +82,12 @@ export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
     ensResolverAddress
   );
   await ensRegistryContract.setSubnodeOwner(
-    ensDomainHash('', ethers),
-    ensLabelHash('resolver', ethers),
+    ensDomainHash(''),
+    ensLabelHash('resolver'),
     deployer
   );
 
-  const resolverNode = ensDomainHash('resolver', ethers);
+  const resolverNode = ensDomainHash('resolver');
 
   await ensRegistryContract.setResolver(resolverNode, ensResolverAddress);
   await ensResolverContract['setAddr(bytes32,address)'](
@@ -105,15 +97,15 @@ export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
 
   // make the deployer owning the root ('') the owner of the subdomain 'eth'
   await ensRegistryContract.setSubnodeOwner(
-    ensDomainHash('', ethers),
-    ensLabelHash('eth', ethers),
+    ensDomainHash(''),
+    ensLabelHash('eth'),
     deployer
   );
 
   // make the deployer owning the domain 'eth' the owner of the subdomain 'dao.eth'
   await ensRegistryContract.setSubnodeOwner(
-    ensDomainHash('eth', ethers),
-    ensLabelHash('dao', ethers),
+    ensDomainHash('eth'),
+    ensLabelHash('dao'),
     deployer
   );
 
