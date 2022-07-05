@@ -3,13 +3,14 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import "../majority/MajorityVoting.sol";
+
+import "../majority/MajorityVotingBase.sol";
 
 /// @title A component for ERC-20 token voting
 /// @author Aragon Association - 2021-2022
 /// @notice The majority voting implementation using an ERC-20 token
-/// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
-contract ERC20Voting is MajorityVoting {
+/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
+contract ERC20Voting is MajorityVotingBase {
     bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
         MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
 
@@ -35,7 +36,7 @@ contract ERC20Voting is MajorityVoting {
         ERC20VotesUpgradeable _token
     ) public initializer {
         _registerStandard(ERC20_VOTING_INTERFACE_ID);
-        __MajorityVoting_init(
+        __MajorityVotingBase_init(
             _dao,
             _gsnForwarder,
             _participationRequiredPct,
@@ -111,7 +112,7 @@ contract ERC20Voting is MajorityVoting {
         }
     }
 
-    /// @inheritdoc MajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _voteId,
         VoterState _choice,
@@ -151,7 +152,7 @@ contract ERC20Voting is MajorityVoting {
         }
     }
 
-    /// @inheritdoc MajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && votingToken.getPastVotes(_voter, vote_.snapshotBlock) > 0;

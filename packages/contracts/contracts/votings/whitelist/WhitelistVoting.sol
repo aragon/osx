@@ -3,14 +3,15 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Checkpoints.sol";
+import "./../majority/MajorityVotingBase.sol";
 
-import "../majority/MajorityVoting.sol";
+import "../majority/MajorityVotingBase.sol";
 
 /// @title A component for whitelist voting
 /// @author Aragon Association - 2021-2022
 /// @notice The majority voting implementation using an ERC-20 token
-/// @dev This contract inherits from `MajorityVoting` and implements the `IMajorityVoting` interface
-contract WhitelistVoting is MajorityVoting {
+/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
+contract WhitelistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
 
     bytes4 internal constant WHITELIST_VOTING_INTERFACE_ID =
@@ -54,7 +55,7 @@ contract WhitelistVoting is MajorityVoting {
         address[] calldata _whitelisted
     ) public initializer {
         _registerStandard(WHITELIST_VOTING_INTERFACE_ID);
-        __MajorityVoting_init(
+        __MajorityVotingBase_init(
             _dao,
             _gsnForwarder,
             _participationRequiredPct,
@@ -147,7 +148,7 @@ contract WhitelistVoting is MajorityVoting {
         }
     }
 
-    /// @inheritdoc MajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _voteId,
         VoterState _choice,
@@ -203,7 +204,7 @@ contract WhitelistVoting is MajorityVoting {
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 
-    /// @inheritdoc MajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);

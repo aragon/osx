@@ -10,7 +10,7 @@ import "./IMajorityVoting.sol";
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
-abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelpers {
+abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHelpers {
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
@@ -58,7 +58,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
-    function __MajorityVoting_init(
+    function __MajorityVotingBase_init(
         IDAO _dao,
         address _gsnForwarder,
         uint64 _participationRequiredPct,

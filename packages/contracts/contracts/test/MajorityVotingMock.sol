@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import "../votings/majority/MajorityVoting.sol";
+import "../votings/majority/MajorityVotingBase.sol";
 
-contract MajorityVotingMock is MajorityVoting {
+contract MajorityVotingMock is MajorityVotingBase {
     function versionRecipient() external pure override returns (string memory) {
         return "MajorityVotingMock";
     }
@@ -16,7 +16,7 @@ contract MajorityVotingMock is MajorityVoting {
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) public initializer {
-        __MajorityVoting_init(
+        __MajorityVotingBase_init(
             _dao,
             _gsnForwarder,
             _participationRequiredPct,
