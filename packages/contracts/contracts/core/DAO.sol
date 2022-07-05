@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
-import "./acl/ACL.sol";
+import "./acl/PermissionManager.sol";
 import "./IDAO.sol";
 
 /// @title The public interface of the Aragon DAO framework.

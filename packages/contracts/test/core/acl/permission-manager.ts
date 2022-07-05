@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ACLTest, PermissionOracleMock} from '../../../typechain';
+import {PermissionManagerTest, PermissionOracleMock} from '../../../typechain';
 import {customError} from '../../test-utils/custom-error-helper';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION_ID');
@@ -27,7 +27,7 @@ interface BulkItem {
 }
 
 describe('Core: ACL', function () {
-  let acl: ACLTest;
+  let acl: PermissionManagerTest;
   let ownerSigner: SignerWithAddress;
   let otherSigner: SignerWithAddress;
 
@@ -38,7 +38,7 @@ describe('Core: ACL', function () {
   });
 
   beforeEach(async () => {
-    const ACL = await ethers.getContractFactory('ACLTest');
+    const ACL = await ethers.getContractFactory('PermissionManagerTest');
     acl = await ACL.deploy();
     await acl.init(ownerSigner.address);
   });
@@ -51,7 +51,7 @@ describe('Core: ACL', function () {
     });
 
     it('should emit Granted', async () => {
-      const ACL = await ethers.getContractFactory('ACLTest');
+      const ACL = await ethers.getContractFactory('PermissionManagerTest');
       acl = await ACL.deploy();
       await expect(acl.init(ownerSigner.address)).to.emit(acl, 'Granted');
     });

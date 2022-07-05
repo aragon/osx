@@ -4,9 +4,9 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/acl/ACL.sol";
+import "../core/acl/PermissionManager.sol";
 
-contract ACLTest is ACL {
+contract PermissionManagerTest is ACL {
     function init(address _who) public initializer {
         super.__ACL_init(_who);
     }
