@@ -32,7 +32,7 @@ const PERMISSION_IDS = {
     'SET_SIGNATURE_VALIDATOR_PERMISSION_ID'
   ),
   MODIFY_TRUSTED_FORWARDER: ethers.utils.id('MODIFY_TRUSTED_FORWARDER'),
-  TOKEN_MINTER_PERMISSION_ID: ethers.utils.id('TOKEN_MINTER_PERMISSION_ID'),
+  MINT_PERMISSION_ID: ethers.utils.id('MINT_PERMISSION_ID'),
 };
 
 describe('DAO', function () {
@@ -81,11 +81,7 @@ describe('DAO', function () {
         ownerAddress,
         PERMISSION_IDS.MODIFY_TRUSTED_FORWARDER
       ),
-      dao.grant(
-        token.address,
-        ownerAddress,
-        PERMISSION_IDS.TOKEN_MINTER_PERMISSION_ID
-      ),
+      dao.grant(token.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
     ]);
   });
 

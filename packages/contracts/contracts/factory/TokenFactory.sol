@@ -101,7 +101,7 @@ contract TokenFactory {
             MerkleDistributor(distributorBase)
         );
 
-        bytes32 tokenMinterRole = GovernanceERC20(token).TOKEN_MINTER_PERMISSION_ID();
+        bytes32 tokenMinterRole = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_PERMISSION_ID();
 
         // give tokenFactory the permission to mint.

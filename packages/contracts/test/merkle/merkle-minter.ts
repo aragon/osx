@@ -17,9 +17,7 @@ import BalanceTree from './src/balance-tree';
 const MERKLE_MINTER_PERMISSION_ID = ethers.utils.id(
   'MERKLE_MINTER_PERMISSION_ID'
 );
-const TOKEN_MINTER_PERMISSION_ID = ethers.utils.id(
-  'TOKEN_MINTER_PERMISSION_ID'
-);
+const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION_ID');
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
@@ -70,7 +68,7 @@ describe('MerkleDistributor', function () {
       distributor.address
     );
     await dao.grant(minter.address, ownerAddress, MERKLE_MINTER_PERMISSION_ID);
-    await dao.grant(token.address, minter.address, TOKEN_MINTER_PERMISSION_ID);
+    await dao.grant(token.address, minter.address, MINT_PERMISSION_ID);
   });
 
   describe('merkleMint:', () => {
@@ -131,11 +129,7 @@ describe('MerkleDistributor', function () {
     });
 
     it('does not mint if the minting permissionID on the token is missing', async () => {
-      await dao.revoke(
-        token.address,
-        minter.address,
-        TOKEN_MINTER_PERMISSION_ID
-      );
+      await dao.revoke(token.address, minter.address, MINT_PERMISSION_ID);
 
       await expect(
         minter.merkleMint(
@@ -150,7 +144,7 @@ describe('MerkleDistributor', function () {
           token.address,
           token.address,
           minter.address,
-          TOKEN_MINTER_PERMISSION_ID
+          MINT_PERMISSION_ID
         )
       );
     });

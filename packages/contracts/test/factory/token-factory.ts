@@ -16,9 +16,7 @@ import {
 
 chai.use(smock.matchers);
 
-const TOKEN_MINTER_PERMISSION_ID = ethers.utils.id(
-  'TOKEN_MINTER_PERMISSION_ID'
-);
+const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION_ID');
 const MERKLE_MINTER_PERMISSION_ID = ethers.utils.id(
   'MERKLE_MINTER_PERMISSION_ID'
 );
@@ -295,22 +293,22 @@ describe('Core: TokenFactory', () => {
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         tokenFactory.address,
-        TOKEN_MINTER_PERMISSION_ID
+        MINT_PERMISSION_ID
       );
       expect(dao.revoke).to.have.been.calledWith(
         tx[0],
         tokenFactory.address,
-        TOKEN_MINTER_PERMISSION_ID
+        MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         dao.address,
-        TOKEN_MINTER_PERMISSION_ID
+        MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         tx[1],
-        TOKEN_MINTER_PERMISSION_ID
+        MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[1],
