@@ -1,10 +1,9 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {ERRORS, customError} from '../test-utils/custom-error-helper';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO, GovernanceERC20} from '../../typechain';
-
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {ERRORS, customError} from '../test-utils/custom-error-helper';
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';

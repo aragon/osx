@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {VoterState, VOTING_EVENTS, pct16} from '../test-utils/voting';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 import {WhitelistVoting, DAOMock} from '../../typechain';
+import {VoterState, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('WhitelistVoting', function () {
   let signers: SignerWithAddress[];

@@ -1,8 +1,9 @@
 import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
+
 import {
   DAO,
-  ERC20Upgradeable__factory,
   GovernanceERC20,
   GovernanceERC20__factory,
   GovernanceWrappedERC20,
@@ -12,7 +13,6 @@ import {
   TokenFactory,
   TokenFactory__factory,
 } from '../../typechain';
-import {FakeContract, MockContract, smock} from '@defi-wonderland/smock';
 
 chai.use(smock.matchers);
 

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "./../../core/IDAO.sol";
+import "../../core/IDAO.sol";
 
 /// @title The interface for majority voting contracts
 /// @author Aragon Association - 2022

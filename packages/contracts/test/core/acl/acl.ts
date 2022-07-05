@@ -1,7 +1,9 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {ACLTest, ACLOracleMock} from '../../../typechain';
+
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+
+import {ACLTest, ACLOracleMock} from '../../../typechain';
 import {customError} from '../../test-utils/custom-error-helper';
 
 const ROOT_ROLE = ethers.utils.id('ROOT_ROLE');

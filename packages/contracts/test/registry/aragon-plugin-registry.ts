@@ -1,7 +1,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {customError} from '../test-utils/custom-error-helper';
+
 import {DAO, PluginRepo} from '../../typechain';
+import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

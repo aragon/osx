@@ -1,11 +1,11 @@
 import {expect} from 'chai';
 import {ethers, waffle} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+
+import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
+import {ERC20Voting, DAOMock} from '../../typechain';
 import {VoterState, VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-
-import {ERC20Voting, DAOMock} from '../../typechain';
-import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 
 const {deployMockContract} = waffle;
 

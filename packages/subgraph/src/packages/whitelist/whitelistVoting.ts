@@ -1,3 +1,5 @@
+import {dataSource, store} from '@graphprotocol/graph-ts';
+
 import {
   VoteCast,
   VoteStarted,
@@ -15,7 +17,6 @@ import {
   WhitelistVoter,
   WhitelistVote
 } from '../../../generated/schema';
-import {dataSource, store} from '@graphprotocol/graph-ts';
 import {VOTER_STATE} from '../../utils/constants';
 
 export function handleVoteStarted(event: VoteStarted): void {

@@ -1,3 +1,5 @@
+import {Address, Bytes, store} from '@graphprotocol/graph-ts';
+
 import {
   DAO as DAOContract,
   MetadataSet,
@@ -15,10 +17,10 @@ import {
   Role,
   Permission
 } from '../../generated/schema';
-import {Address, Bytes, store} from '@graphprotocol/graph-ts';
+
 import {ADDRESS_ZERO} from '../utils/constants';
-import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
+import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();

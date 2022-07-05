@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {ERRORS} from '../../test-utils/custom-error-helper';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {TestComponent, DAOMock} from '../../../typechain';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {ERRORS} from '../../test-utils/custom-error-helper';
 
 describe('Component', function () {
   let signers: SignerWithAddress[];

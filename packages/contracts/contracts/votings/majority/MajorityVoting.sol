@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
+import "../../core/component/MetaTxComponent.sol";
+import "../../utils/TimeHelpers.sol";
 import "./IMajorityVoting.sol";
-import "./../../core/component/MetaTxComponent.sol";
-import "./../../utils/TimeHelpers.sol";
 
 /// @title The abstract implementation of majority voting components
 /// @author Aragon Association - 2022

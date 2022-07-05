@@ -1,5 +1,6 @@
 import {promises as fs} from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+
 import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
