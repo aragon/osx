@@ -1,14 +1,23 @@
 name: Subgraph Deploy
 on:
   push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'active_contracts.json'
+  pull_request:
+    types:
+      - closed
+    branches:
+      - develop
+      - main
     paths:
       - 'packages/subgraph/**'
-    branches:
-      - 'develop'
-      - 'main'
 
 jobs:
   prepare:
+    if: github.actor != 'arabot-1'
     runs-on: ubuntu-latest
     outputs:
       environment: ${{ steps.prepare.outputs.environment }}
@@ -18,6 +27,57 @@ jobs:
       - name: Prepare
         id: prepare
         run: node .github/helpers/subgraph/buildMatrix.js '${{ github.ref }}'
+  changelog:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged && github.actor != 'arabot-1' && contains(github.event.pull_request.labels.*.name, 'subgraph:') 
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ARABOT_PAT }}
+      - name: Is patch
+        id: patch
+        if: contains( github.event.pull_request.labels.*.name, 'subgraph:patch')
+        run: echo "::set-output name=bump::patch"
+      - name: Is minor
+        id: minor
+        if: contains( github.event.pull_request.labels.*.name, 'subgraph:minor')
+        run: echo "::set-output name=bump::minor"
+      - name: Is major
+        id: major
+        if: contains( github.event.pull_request.labels.*.name, 'subgraph:major')
+        run: echo "::set-output name=bump::major"
+      - name: bump version
+        working-directory: packages/subgraph
+        run: |
+          yarn config set version-git-tag false
+          # run the bump twice to remove -alpha first
+          if [[ $(cat package.json | jq -r .version) == *"-alpha" ]]; then
+            yarn version --${{ steps.patch.outputs.bump }}${{ steps.minor.outputs.bump }}${{ steps.major.outputs.bump }}
+          fi
+          yarn version --${{ steps.patch.outputs.bump }}${{ steps.minor.outputs.bump }}${{ steps.major.outputs.bump }}
+      - name: Version add alpha for develop
+        working-directory: packages/subgraph
+        if: ${{ contains(github.base_ref, 'develop') }}
+        run: |
+          VERSION=$(cat package.json | jq -r .version)
+          yarn version --new-version "$VERSION-alpha" --no-git-tag-version
+      - name: update changelog
+        working-directory: packages/subgraph
+        run: |
+          VERSION=$(cat package.json | jq -r .version)
+          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./CHANGELOG.md"
+      - name: Commit changes
+        id: commit
+        run: |
+          git fetch
+          git pull
+          git config --global user.name "Arabot-1"
+          git config --global user.email "arabot-1@users.noreply.github.com"
+          git add packages/subgraph/package.json
+          git add packages/subgraph/CHANGELOG.md
+          git commit -am "Updates package.json version and changelog in subgraph"
+          git push
+
   build-deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
@@ -28,6 +88,8 @@ jobs:
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.base_ref || github.ref }}
       - name: Install node
         uses: actions/setup-node@v1
         with:
