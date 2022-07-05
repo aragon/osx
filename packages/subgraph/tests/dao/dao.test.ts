@@ -1,11 +1,13 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, Bytes} from '@graphprotocol/graph-ts';
+
 import {
-  createNewETHDepositedEvent,
-  createNewDepositedEvent,
-  getBalanceOf,
-  createNewExecutedEvent
-} from './utils';
+  handleETHDeposited,
+  handleDeposited,
+  handleExecuted,
+  _handleMetadataSet
+} from '../../src/dao/dao';
+import {Dao, ERC20VotingProposal} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -16,14 +18,13 @@ import {
   ADDRESS_ZERO,
   VOTING_ADDRESS
 } from '../constants';
-import {
-  handleETHDeposited,
-  handleDeposited,
-  handleExecuted,
-  _handleMetadataSet
-} from '../../src/dao/dao';
 import {createDummyAcctions, createTokenCalls} from '../utils';
-import {Dao, ERC20VotingProposal} from '../../generated/schema';
+import {
+  createNewETHDepositedEvent,
+  createNewDepositedEvent,
+  getBalanceOf,
+  createNewExecutedEvent
+} from './utils';
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // create state

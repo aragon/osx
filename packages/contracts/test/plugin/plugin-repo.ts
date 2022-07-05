@@ -1,15 +1,12 @@
-/// @notice This is an extention (adaptation) of the work at:
-/// https://github.com/aragon/apm/blob/next/test/contracts/apm/apm_repo.js
+// This is an extension (adaptation) of the work at:
+// https://github.com/aragon/apm/blob/next/test/contracts/apm/apm_repo.js
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {PluginRepo, PluginFactoryMock} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
-import {deployMockPluginFactory} from '../test-utils/repo';
 
-const EVENTS = {
-  NewVersion: 'NewVersion',
-};
+import {PluginRepo, PluginFactoryMock} from '../../typechain';
+import {deployMockPluginFactory} from '../test-utils/repo';
+import {customError} from '../test-utils/custom-error-helper';
 
 const emptyBytes = '0x00';
 

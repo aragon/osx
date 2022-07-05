@@ -1,7 +1,8 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {AragonPluginRegistry, DAO, PluginRepoFactory} from '../../typechain';
+import {AragonPluginRegistry, DAO} from '../../typechain';
+
 import {customError} from '../test-utils/custom-error-helper';
 import {deployMockPluginFactory} from '../test-utils/repo';
 
@@ -69,7 +70,7 @@ describe('PluginRepoFactory: ', function () {
     // DAO
     const DAO = await ethers.getContractFactory('DAO');
     dao = await DAO.deploy();
-    await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
+    await dao.initialize('0x00', ownerAddress, zeroAddress);
 
     // deploy and initialize AragonPluginRegistry
     const AragonPluginRegistry = await ethers.getContractFactory(

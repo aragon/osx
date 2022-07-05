@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {customError} from '../test-utils/custom-error-helper';
 
 import {
   ENSSubdomainRegistrar,
@@ -9,6 +8,7 @@ import {
   PublicResolver,
   ENSRegistry,
 } from '../../typechain';
+import {customError} from '../test-utils/custom-error-helper';
 
 function ensLabelHash(label: string): string {
   return ethers.utils.id(label);

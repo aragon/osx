@@ -3,7 +3,8 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Checkpoints.sol";
-import "./../majority/MajorityVoting.sol";
+
+import "../majority/MajorityVoting.sol";
 
 /// @title A component for whitelist voting
 /// @author Aragon Association - 2021-2022

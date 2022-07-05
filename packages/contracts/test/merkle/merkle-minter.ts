@@ -2,9 +2,8 @@
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {customError} from '../test-utils/custom-error-helper';
-import BalanceTree from './src/balance-tree';
 import {BigNumber} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   MerkleMinter,
@@ -12,7 +11,8 @@ import {
   DAO,
   GovernanceERC20,
 } from '../../typechain';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {customError} from '../test-utils/custom-error-helper';
+import BalanceTree from './src/balance-tree';
 
 const MERKLE_MINTER_ROLE = ethers.utils.id('MERKLE_MINTER_ROLE');
 const TOKEN_MINTER_ROLE = ethers.utils.id('TOKEN_MINTER_ROLE');

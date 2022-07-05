@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+
 import "../core/component/Permissions.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 

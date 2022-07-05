@@ -1,5 +1,15 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
+
+import {
+  handleUsersAdded,
+  handleVoteCast,
+  handleVoteExecuted,
+  handleUsersRemoved,
+  handleTrustedForwarderSet,
+  handleConfigUpdated,
+  _handleVoteStarted
+} from '../../src/packages/whitelist/whitelistVoting';
 import {
   WhitelistPackage,
   WhitelistProposal,
@@ -14,6 +24,7 @@ import {
   ADDRESS_TWO,
   ADDRESS_ZERO
 } from '../constants';
+import {createDummyAcctions, createGetVoteCall} from '../utils';
 import {
   createNewUsersAddedEvent,
   createNewVoteCastEvent,
@@ -24,16 +35,6 @@ import {
   createNewConfigUpdatedEvent,
   getVotesLengthCall
 } from './utils';
-import {
-  handleUsersAdded,
-  handleVoteCast,
-  handleVoteExecuted,
-  handleUsersRemoved,
-  handleTrustedForwarderSet,
-  handleConfigUpdated,
-  _handleVoteStarted
-} from '../../src/packages/whitelist/whitelistVoting';
-import {createDummyAcctions, createGetVoteCall} from '../utils';
 
 let voteId = '0';
 let startDate = '1644851000';
