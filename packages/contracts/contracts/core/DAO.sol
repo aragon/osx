@@ -23,7 +23,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     // Roles
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
-    bytes32 public constant DAO_CONFIG_PERMISSION_ID = keccak256("DAO_CONFIG_PERMISSION_ID");
+    bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION_ID");
     bytes32 public constant EXEC_PERMISSION_ID = keccak256("EXEC_PERMISSION_ID");
     bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
@@ -99,7 +99,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function setMetadata(bytes calldata _metadata)
         external
         override
-        auth(address(this), DAO_CONFIG_PERMISSION_ID)
+        auth(address(this), SET_METADATA_PERMISSION_ID)
     {
         _setMetadata(_metadata);
     }

@@ -150,7 +150,7 @@ contract DAOFactory {
         // Grant DAO all the permissions required
         items[0] = ACLData.BulkItem(
             ACLData.BulkOp.Grant,
-            _dao.DAO_CONFIG_PERMISSION_ID(),
+            _dao.SET_METADATA_PERMISSION_ID(),
             address(_dao)
         );
         items[1] = ACLData.BulkItem(

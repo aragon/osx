@@ -161,7 +161,7 @@ describe('DAOFactory: ', function () {
     const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
     const DAORoles = await Promise.all([
-      dao.DAO_CONFIG_PERMISSION_ID(),
+      dao.SET_METADATA_PERMISSION_ID(),
       dao.ROOT_PERMISSION_ID(),
       dao.WITHDRAW_PERMISSION_ID(),
       dao.UPGRADE_PERMISSION_ID(),
@@ -295,7 +295,7 @@ describe('DAOFactory: ', function () {
     const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
     const DAORoles = await Promise.all([
-      dao.DAO_CONFIG_PERMISSION_ID(),
+      dao.SET_METADATA_PERMISSION_ID(),
       dao.ROOT_PERMISSION_ID(),
       dao.WITHDRAW_PERMISSION_ID(),
       dao.UPGRADE_PERMISSION_ID(),
