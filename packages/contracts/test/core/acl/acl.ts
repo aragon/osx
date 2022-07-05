@@ -1,9 +1,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ACLTest, ACLOracleMock} from '../../../typechain';
+import {ACLTest, PermissionOracleMock} from '../../../typechain';
 import {customError} from '../../test-utils/custom-error-helper';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION_ID');
@@ -206,7 +205,7 @@ describe('Core: ACL', function () {
       );
     });
 
-    it('should set ACLOracle', async () => {
+    it('should set PermissionOracle', async () => {
       const signers = await ethers.getSigners();
       await acl.grantWithOracle(
         acl.address,
@@ -734,20 +733,22 @@ describe('Core: ACL', function () {
     });
   });
 
-  describe('_checkRole', () => {
-    let aclOracle: ACLOracleMock;
+  describe('_checkPermission', () => {
+    let permissionOracle: PermissionOracleMock;
 
     beforeEach(async () => {
-      const aclOracleFactory = await ethers.getContractFactory('ACLOracleMock');
-      aclOracle = await aclOracleFactory.deploy();
+      const aclOracleFactory = await ethers.getContractFactory(
+        'PermissionOracleMock'
+      );
+      permissionOracle = await aclOracleFactory.deploy();
     });
 
-    it('should call IACLOracle.checkPermissions', async () => {
+    it('should call IPermissionOracle.checkPermissions', async () => {
       await acl.grantWithOracle(
         acl.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
-        aclOracle.address
+        permissionOracle.address
       );
       expect(
         await acl.callStatic.checkPermissions(
@@ -758,7 +759,7 @@ describe('Core: ACL', function () {
         )
       ).to.be.equal(true);
 
-      await aclOracle.setWillPerform(false);
+      await permissionOracle.setWillPerform(false);
       expect(
         await acl.callStatic.checkPermissions(
           acl.address,

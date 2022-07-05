@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
-  TestParameterScopingACLOracle,
+  TestParameterScopingPermissionOracle,
   TestComponent,
   DAO,
 } from '../../../../typechain';
@@ -15,7 +15,7 @@ const DO_SOMETHING_PERMISSION_ID = ethers.utils.id(
 
 describe('TestParameterScopingOracle', function () {
   let signers: SignerWithAddress[];
-  let parameterOracle: TestParameterScopingACLOracle;
+  let parameterOracle: TestParameterScopingPermissionOracle;
   let testComponent: TestComponent;
   let managingDao: DAO;
   let ownerAddress: string;
@@ -41,7 +41,7 @@ describe('TestParameterScopingOracle', function () {
 
     // Deploy the oracle
     const ParameterOracle = await ethers.getContractFactory(
-      'TestParameterScopingACLOracle'
+      'TestParameterScopingPermissionOracle'
     );
     parameterOracle = await ParameterOracle.deploy();
 

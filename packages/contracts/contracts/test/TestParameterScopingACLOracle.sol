@@ -4,10 +4,10 @@
 
 pragma solidity 0.8.10;
 
-import "../core/acl/IACLOracle.sol";
+import "../core/acl/IPermissionOracle.sol";
 import "./TestComponent.sol";
 
-contract TestParameterScopingACLOracle is IACLOracle {
+contract TestParameterScopingPermissionOracle is IPermissionOracle {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestComponent.addPermissioned.selector;
 
     function getSelector(bytes memory _data) public pure returns (bytes4 sig) {

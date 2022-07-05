@@ -3,11 +3,11 @@
 // Core contracts
 import * as ACL from '../artifacts/contracts/core/acl/ACL.sol/ACL.json';
 import * as PermissionLib from '../artifacts/contracts/core/acl/ACL.sol/PermissionLib.json';
-import * as IACLOracle from '../artifacts/contracts/core/acl/IACLOracle.sol/IACLOracle.json';
+import * as IPermissionOracle from '../artifacts/contracts/core/acl/IPermissionOracle.sol/IPermissionOracle.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
 import * as Component from '../artifacts/contracts/core/component/Component.sol/Component.json';
-import * as Permissions from '../artifacts/contracts/core/component/DAOPermissioned.sol/Permissions.json';
+import * as DAOPermissioned from '../artifacts/contracts/core/component/DAOPermissioned.sol/DAOPermissioned.json';
 
 // Factories
 import * as DAOFactory from '../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json';
@@ -29,7 +29,7 @@ import * as WhitelistVoting from '../artifacts/contracts/votings/whitelist/White
 export default {
   ACL,
   PermissionLib,
-  IACLOracle,
+  IPermissionOracle,
   DAO,
   IDAO,
   Component,

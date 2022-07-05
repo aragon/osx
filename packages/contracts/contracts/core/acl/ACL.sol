@@ -3,7 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./IACLOracle.sol";
+import "./IPermissionOracle.sol";
 
 library PermissionLib {
     enum Operation {
@@ -57,7 +57,7 @@ contract ACL is Initializable {
     address internal constant UNSET_PERMISSION_ID = address(0);
     address internal constant ALLOW_FLAG = address(2);
 
-    // hash(where, who, permissionID) => Access flag(unset or allow) or ACLOracle (any other address denominates auth via ACLOracle)
+    // hash(where, who, permission) => Access flag(unset or allow) or PermissionOracle (any other address denominates auth via PermissionOracle)
     mapping(bytes32 => address) internal permissions;
     // hash(where, permissionID) => true(permissionID froze on the where), false(permissionID is not frozen on the where)
     mapping(bytes32 => bool) internal frozenPermissions;
@@ -69,13 +69,13 @@ contract ACL is Initializable {
     /// @param actor The address receiving the new permissionID
     /// @param who The address (EOA or contract) owning the permission
     /// @param where The address of the contract
-    /// @param oracle The ACLOracle to be used or it is just the ALLOW_FLAG
+    /// @param oracle The PermissionOracle to be used or it is just the ALLOW_FLAG
     event Granted(
         bytes32 indexed permissionID,
         address indexed actor,
         address indexed who,
         address where,
-        IACLOracle oracle
+        IPermissionOracle oracle
     );
 
     /// @notice Emitted when a permission `permissionID` is revoked to the address `actor` by the address `who` in the contract `where`
@@ -138,12 +138,12 @@ contract ACL is Initializable {
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
-    /// @param _oracle The `ACLOracle` that will be asked for authorization on calls connected to the specified permissionID identifier
+    /// @param _oracle The `PermissionOracle` that will be asked for authorization on calls connected to the specified permissionID identifier
     function grantWithOracle(
         address _where,
         address _who,
         bytes32 _permissionID,
-        IACLOracle _oracle
+        IPermissionOracle _oracle
     ) external auth(_where, ROOT_PERMISSION_ID) {
         _grantWithOracle(_where, _who, _permissionID, _oracle);
     }
@@ -197,7 +197,7 @@ contract ACL is Initializable {
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) for which the permission is checked
     /// @param _permissionID The permission identifier
-    /// @param _data The optional data passed to the `ACLOracle` registered
+    /// @param _data The optional data passed to the `PermissionOracle` registered
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permission identifier
     function checkPermissions(
         address _where,
@@ -235,19 +235,19 @@ contract ACL is Initializable {
         address _who,
         bytes32 _permissionID
     ) internal {
-        _grantWithOracle(_where, _who, _permissionID, IACLOracle(ALLOW_FLAG));
+        _grantWithOracle(_where, _who, _permissionID, IPermissionOracle(ALLOW_FLAG));
     }
 
     /// @notice This method is used in the internal `_grant` method of the ACL
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
-    /// @param _oracle The ACLOracle to be used or it is just the ALLOW_FLAG
+    /// @param _oracle The PermissionOracle to be used or it is just the ALLOW_FLAG
     function _grantWithOracle(
         address _where,
         address _who,
         bytes32 _permissionID,
-        IACLOracle _oracle
+        IPermissionOracle _oracle
     ) internal {
         if (isFrozen(_where, _permissionID))
             revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
@@ -305,11 +305,11 @@ contract ACL is Initializable {
         emit Frozen(_permissionID, msg.sender, _where);
     }
 
-    /// @notice Checks if a caller has the permissions on a contract via a permissionID identifier and redirects the approval to an `ACLOracle` if this was in the setup
+    /// @notice Checks if a caller has the permissions on a contract via a permissionID identifier and redirects the approval to an `PermissionOracle` if this was in the setup
     /// @param _where The address of the contract
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
-    /// @param _data The optional data passed to the ACLOracle registered.
+    /// @param _data The optional data passed to the `PermissionOracle` registered.
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionID identifier
     function _checkRole(
         address _where,
@@ -322,9 +322,14 @@ contract ACL is Initializable {
         if (accessFlagOrAclOracle == UNSET_PERMISSION_ID) return false;
         if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
 
-        // Since it's not a flag, assume it's an ACLOracle and try-catch to skip failures
+        // Since it's not a flag, assume it's an PermissionOracle and try-catch to skip failures
         try
-            IACLOracle(accessFlagOrAclOracle).checkPermissions(_where, _who, _permissionID, _data)
+            IPermissionOracle(accessFlagOrAclOracle).checkPermissions(
+                _where,
+                _who,
+                _permissionID,
+                _data
+            )
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}

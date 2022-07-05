@@ -17,7 +17,7 @@ abstract contract IDAO {
     /// @param _where The address of the contract
     /// @param _who The address of a EOA or contract to give the permissions
     /// @param _permissionID The permission identifier
-    /// @param _data The optional data passed to the ACLOracle registered
+    /// @param _data The optional data passed to the `PermissionOracle` registered
     /// @return bool Returns whether the address has permission is or not
     function hasPermission(
         address _where,
