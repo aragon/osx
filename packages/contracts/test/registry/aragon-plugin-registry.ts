@@ -13,6 +13,8 @@ describe('Aragon-Plugin-Registry', function () {
   let dao: DAO;
   let pluginRepo: PluginRepo;
 
+  const REGISTER_ROLE = ethers.utils.id('REGISTER_ROLE');
+
   before(async () => {
     const signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
@@ -37,11 +39,7 @@ describe('Aragon-Plugin-Registry', function () {
     await pluginRepo.initialize(ownerAddress);
 
     // grant REGISTER_ROLE to registrer
-    dao.grant(
-      aragonPluginRegistry.address,
-      ownerAddress,
-      ethers.utils.id('REGISTER_ROLE')
-    );
+    dao.grant(aragonPluginRegistry.address, ownerAddress, REGISTER_ROLE);
   });
 
   it('Should register a new pluginRepo successfully', async function () {
@@ -58,7 +56,25 @@ describe('Aragon-Plugin-Registry', function () {
     );
   });
 
-  it('Should revert if pluginRepo already exists', async function () {
+  it('fail to register if the sender lacks the required role', async () => {
+    const pluginRepoName = 'my-pluginRepo';
+
+    dao.revoke(aragonPluginRegistry.address, ownerAddress, REGISTER_ROLE);
+
+    await expect(
+      aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
+    ).to.be.revertedWith(
+      customError(
+        'ACLAuth',
+        aragonPluginRegistry.address,
+        aragonPluginRegistry.address,
+        ownerAddress,
+        REGISTER_ROLE
+      )
+    );
+  });
+
+  it('fail to register if pluginRepo already exists', async function () {
     const pluginRepoName = 'my-pluginRepo';
 
     await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address);

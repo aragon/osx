@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
   NewDAORegistered: 'NewDAORegistered',
@@ -9,6 +10,8 @@ describe('DAORegistry', function () {
   let registry: any;
   let managingDAO: any;
   let ownerAddress: string;
+
+  const REGISTER_DAO_ROLE = ethers.utils.id('REGISTER_DAO_ROLE');
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -31,11 +34,7 @@ describe('DAORegistry', function () {
     await registry.initialize(managingDAO.address);
 
     // Grant the `REGISTER_DAO_ROLE` permission to `signers[0]`
-    managingDAO.grant(
-      registry.address,
-      ownerAddress,
-      ethers.utils.id('REGISTER_DAO_ROLE')
-    );
+    managingDAO.grant(registry.address, ownerAddress, REGISTER_DAO_ROLE);
   });
 
   it('Should register a new DAO successfully', async function () {
@@ -48,5 +47,35 @@ describe('DAORegistry', function () {
       .withArgs(managingDAO.address, ownerAddress, daoName);
 
     expect(await registry.entries(managingDAO.address)).to.equal(true);
+  });
+
+  it('fail to register if the sender lacks the required role', async () => {
+    const daoName = 'my-dao';
+
+    managingDAO.revoke(registry.address, ownerAddress, REGISTER_DAO_ROLE);
+
+    await expect(
+      registry.register(daoName, managingDAO.address, ownerAddress)
+    ).to.be.revertedWith(
+      customError(
+        'ACLAuth',
+        registry.address,
+        registry.address,
+        ownerAddress,
+        REGISTER_DAO_ROLE
+      )
+    );
+  });
+
+  it('fail to register if DAO already exists', async function () {
+    const daoName = 'my-dao';
+
+    await registry.register(daoName, managingDAO.address, ownerAddress);
+
+    await expect(
+      registry.register(daoName, managingDAO.address, ownerAddress)
+    ).to.be.revertedWith(
+      customError('ContractAlreadyRegistered', managingDAO.address)
+    );
   });
 });
