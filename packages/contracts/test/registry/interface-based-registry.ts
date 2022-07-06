@@ -76,7 +76,7 @@ describe('InterfaceBasedRegistry', function () {
         interfaceBasedRegistryMock.register(dao.address)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           interfaceBasedRegistryMock.address,
           interfaceBasedRegistryMock.address,
           ownerAddress,

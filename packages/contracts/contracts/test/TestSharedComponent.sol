@@ -24,7 +24,7 @@ contract TestSharedComponent is Component {
         }
 
         if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionID, _msgData())) {
-            revert PermissionLib.PermissionUnauthorized({
+            revert PermissionLib.PermissionMissing({
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),

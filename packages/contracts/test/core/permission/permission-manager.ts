@@ -113,7 +113,7 @@ describe('Core: PermissionManager', function () {
           .grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -130,7 +130,7 @@ describe('Core: PermissionManager', function () {
           .grant(pm.address, otherSigner.address, ROOT_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -234,7 +234,7 @@ describe('Core: PermissionManager', function () {
           )
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -261,7 +261,7 @@ describe('Core: PermissionManager', function () {
           )
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -298,7 +298,7 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -339,7 +339,7 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -356,7 +356,7 @@ describe('Core: PermissionManager', function () {
           .revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -397,7 +397,7 @@ describe('Core: PermissionManager', function () {
         pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -412,7 +412,7 @@ describe('Core: PermissionManager', function () {
         pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -616,7 +616,7 @@ describe('Core: PermissionManager', function () {
         pm.connect(otherSigner).bulk(pm.address, bulkItems)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,
@@ -638,7 +638,7 @@ describe('Core: PermissionManager', function () {
         pm.connect(otherSigner).bulk(pm.address, bulkItems)
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           pm.address,
           pm.address,
           otherSigner.address,

@@ -110,7 +110,7 @@ describe('PluginRepoFactory: ', function () {
       pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
     ).to.be.revertedWith(
       customError(
-        'PermissionUnauthorized',
+        'PermissionMissing',
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,

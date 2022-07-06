@@ -18,33 +18,33 @@ library PermissionLib {
         address who;
     }
 
-    /// @notice Thrown if the function is not authorized
-    /// @param here The contract containing the function
-    /// @param where The contract being called
-    /// @param who The address (EOA or contract) owning the permission
-    /// @param permissionID The permission identifier required to call the function
-    error PermissionUnauthorized(address here, address where, address who, bytes32 permissionID);
+    /// @notice Thrown if a permission is missing
+    /// @param here The context in which the authorization reverted
+    /// @param where The contract requiring the permission
+    /// @param who The address (EOA or contract) missing the permission
+    /// @param permissionID The permission identifier
+    error PermissionMissing(address here, address where, address who, bytes32 permissionID);
 
-    /// @notice Thrown if the permissionID was already granted to the address interacting with the target
-    /// @param where The contract being called
-    /// @param who The address (EOA or contract) owning the permission
-    /// @param permissionID The permission identifier required to call the function
+    /// @notice Thrown if a permission has been already granted
+    /// @param where The address of the target contract to grant `who` permission to
+    /// @param who The address (EOA or contract) to which the permission has already been granted
+    /// @param permissionID The permission identifier
     error PermissionAlreadyGranted(address where, address who, bytes32 permissionID);
 
-    /// @notice Thrown if the permissionID was already revoked from the address interact with the target
-    /// @param where The contract being called
-    /// @param who The address (EOA or contract) owning the permission
+    /// @notice Thrown if a permission has been already revoked
+    /// @param where The address of the target contract to revoke `who`s permission from
+    /// @param who The address (EOA or contract) from which the permission has already been revoked
     /// @param permissionID The permission identifier
     error PermissionAlreadyRevoked(address where, address who, bytes32 permissionID);
 
-    /// @notice Thrown if the address was already granted the permissionID to interact with the target
-    /// @param where The contract being called
+    /// @notice Thrown if a permission is frozen
+    /// @param where The address of the target contract for which the permission is frozen
     /// @param permissionID The permission identifier
     error PermissionFrozen(address where, bytes32 permissionID);
 }
 
 /// @title The permission manager used in the DAO contract.
-/// @author Aragon Association - 2021
+/// @author Aragon Association - 2021, 2022
 /// @notice This contract is used in the DAO contract and handles the permissions of a DAO and its associated components.
 contract PermissionManager is Initializable {
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
@@ -56,54 +56,53 @@ contract PermissionManager is Initializable {
     address internal constant UNSET_FLAG = address(0);
     address internal constant ALLOW_FLAG = address(2);
 
-    // hash(where, who, permission) => Access flag(unset or allow) or PermissionOracle (any other address denominates auth via PermissionOracle)
+    // hash(where, who, permission) => Access flag(unset or allow) or an address to a `PermissionOracle`
     mapping(bytes32 => address) internal permissions;
     // hash(where, permissionID) => true(permissionID froze on the where), false(permissionID is not frozen on the where)
     mapping(bytes32 => bool) internal frozenPermissions;
 
     // Events
-
-    /// @notice Emitted when a permission `permissionID` is granted to the address `actor` by the address `who` in the contract `where`
+    /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `who` for the contract `where`
     /// @param permissionID The permission identifier
-    /// @param actor The address receiving the new permissionID
-    /// @param who The address (EOA or contract) owning the permission
-    /// @param where The address of the contract
-    /// @param oracle The PermissionOracle to be used or it is just the ALLOW_FLAG
+    /// @param here The address of the context in which the permission is granted
+    /// @param who The address (EOA or contract) receiving the permission
+    /// @param where The address of the target contract for which `who` receives permission
+    /// @param oracle The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionOracle` to be used
     event Granted(
         bytes32 indexed permissionID,
-        address indexed actor,
+        address indexed here,
         address indexed who,
         address where,
         IPermissionOracle oracle
     );
 
-    /// @notice Emitted when a permission `permissionID` is revoked to the address `actor` by the address `who` in the contract `where`
+    /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `who` for the contract `where`
     /// @param permissionID The permission identifier
-    /// @param actor The address receiving the revoked permissionID
-    /// @param who The address (EOA or contract) owning the permission
-    /// @param where The address of the contract
+    /// @param here The address of the context in which the permission is revoked
+    /// @param who The address (EOA or contract) losing the permission
+    /// @param where The address of the target contract for which `who` loses permission
     event Revoked(
         bytes32 indexed permissionID,
-        address indexed actor,
+        address indexed here,
         address indexed who,
         address where
     );
 
-    /// @notice Emitted when a `permissionID` is frozen to the address `actor` by the contract `where`
+    /// @notice Emitted when a `permission` is frozen to the address `here` by the contract `where`
     /// @param permissionID The permission identifier
-    /// @param actor The address that is frozen
-    /// @param where The address of the contract
-    event Frozen(bytes32 indexed permissionID, address indexed actor, address where);
+    /// @param here The address of the context in which the permission is frozen
+    /// @param where The address of the target contract for which the permission is frozen
+    event Frozen(bytes32 indexed permissionID, address indexed here, address where);
 
-    /// @notice The modifier to be used to check permissions.
-    /// @param _where The address of the contract
+    /// @notice A modifier to be used to check permissions on a target contract
+    /// @param _where The address of the target contract for which the permission is required
     /// @param _permissionID The permission identifier required to call the method this modifier is applied to
     modifier auth(address _where, bytes32 _permissionID) {
         if (
             !(checkPermissions(_where, msg.sender, _permissionID, msg.data) ||
                 checkPermissions(address(this), msg.sender, _permissionID, msg.data))
         )
-            revert PermissionLib.PermissionUnauthorized({
+            revert PermissionLib.PermissionMissing({
                 here: address(this),
                 where: _where,
                 who: msg.sender,
@@ -119,10 +118,10 @@ contract PermissionManager is Initializable {
         _initializePermissionManager(_initialOwner);
     }
 
-    /// @notice Grants permission to call a contract address from another address via the specified permissionID identifier
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the contract
-    /// @param _who The address (EOA or contract) owning the permission
+    /// @notice Grants permission to call a contract address from another address via the specified permission identifier
+    /// @dev Requires the `ROOT_PERM` permission
+    /// @param _where The address of the target contract for which `who` recieves permission
+    /// @param _who The address (EOA or contract) receiving the permission
     /// @param _permissionID The permission identifier
     function grant(
         address _where,
@@ -132,12 +131,12 @@ contract PermissionManager is Initializable {
         _grant(_where, _who, _permissionID);
     }
 
-    /// @notice Grants permission to call a contract address from another address via a permissionID identifier and an `ACLOracle`
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the contract
-    /// @param _who The address (EOA or contract) owning the permission
+    /// @notice Grants permission to call a contract address from another address via a permission identifier and an `PermissionOracle`
+    /// @dev Requires the `ROOT_PERM` permission
+    /// @param _where The address of the target contract for which `who` recieves permission
+    /// @param _who The address (EOA or contract) receiving the permission
     /// @param _permissionID The permission identifier
-    /// @param _oracle The `PermissionOracle` that will be asked for authorization on calls connected to the specified permissionID identifier
+    /// @param _oracle The `PermissionOracle` that will be asked for authorization on calls connected to the specified permission identifier
     function grantWithOracle(
         address _where,
         address _who,
@@ -147,10 +146,10 @@ contract PermissionManager is Initializable {
         _grantWithOracle(_where, _who, _permissionID, _oracle);
     }
 
-    /// @notice Revokes permissions of an address for a permissionID identifier of a contract
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the contract
-    /// @param _who The address (EOA or contract) owning the permission
+    /// @notice Revokes permissions of an address for a permission identifier of a contract
+    /// @dev Requires the `ROOT_PERM` permission
+    /// @param _where The address of the target contract for which `who` loses permission
+    /// @param _who The address (EOA or contract) losing the permission
     /// @param _permissionID The permission identifier
     function revoke(
         address _where,
@@ -163,7 +162,7 @@ contract PermissionManager is Initializable {
     /// @notice Freezes the current permission settings on a contract associated for the specified permissionID identifier.
     ///         This is a permanent operation and permissions on the specified contract with the specified permissionID identifier can never be granted or revoked again.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the contract
+    /// @param _where The address of the target contract for which the permission is frozen
     /// @param _permissionID The permission identifier
     function freeze(address _where, bytes32 _permissionID)
         external
@@ -192,8 +191,8 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if an address has permission on a contract via a permissionID identifier and considers if `ANY_ADDRESS` was used in the granting process.
-    /// @param _where The address of the contract
+    /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) for which the permission is checked
     /// @param _permissionID The permission identifier
     /// @param _data The optional data passed to the `PermissionOracle` registered
@@ -210,10 +209,10 @@ contract PermissionManager is Initializable {
             _checkRole(ANY_ADDR, _who, _permissionID, _data); // check if _who has permission for _permissionID on any contract
     }
 
-    /// @notice This method is used to check if permissions for a given permissionID identifier on a contract are frozen
-    /// @param _where The address of the contract
+    /// @notice This method is used to check if permissions for a given permission identifier on a contract are frozen
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _permissionID The permission identifier
-    /// @return bool Returns true if the permissionID identifier has been frozen for the contract address
+    /// @return bool Returns true if the permission identifier has been frozen for the contract address
     function isFrozen(address _where, bytes32 _permissionID) public view returns (bool) {
         return frozenPermissions[freezeHash(_where, _permissionID)];
     }
@@ -225,7 +224,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `grant` method of the permission manager
-    /// @param _where The address of the contract
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
     function _grant(
@@ -237,7 +236,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the internal `_grant` method of the permission manager
-    /// @param _where The address of the contract
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
     /// @param _oracle The PermissionOracle to be used or it is just the ALLOW_FLAG
@@ -265,7 +264,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager
-    /// @param _where The address of the contract
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
     function _revoke(
@@ -291,7 +290,7 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This method is used in the public `freeze` method of the permission manager
-    /// @param _where The address of the contract
+    /// @param _where The address of the target contract for which the permission is frozen
     /// @param _permissionID The permission identifier
     function _freeze(address _where, bytes32 _permissionID) internal {
         bytes32 permission = freezeHash(_where, _permissionID);
@@ -303,8 +302,8 @@ contract PermissionManager is Initializable {
         emit Frozen(_permissionID, msg.sender, _where);
     }
 
-    /// @notice Checks if a caller has the permissions on a contract via a permissionID identifier and redirects the approval to an `PermissionOracle` if this was in the setup
-    /// @param _where The address of the contract
+    /// @notice Checks if a caller has the permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was in the setup
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
     /// @param _data The optional data passed to the `PermissionOracle` registered.
@@ -336,8 +335,8 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice Generates the hash for the `authPermissions` mapping obtained from the workd "PERMISSION",
-    ///         the contract address, the address owning the permission, and the permissionID identifier.
-    /// @param _where The address of the contract
+    ///         the contract address, the address owning the permission, and the permission identifier.
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) owning the permission
     /// @param _permissionID The permission identifier
     /// @return bytes32 The permission hash
@@ -350,8 +349,8 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice Generates the hash for the `frozenPermissions` mapping obtained from the workd "PERMISSION",
-    ///         the contract address, the address owning the permission, and the permissionID identifier.
-    /// @param _where The address of the contract
+    ///         the contract address, the address owning the permission, and the permission identifier.
+    /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _permissionID The permission identifier
     /// @return bytes32 The freeze hash used in the frozenPermissions mapping
     function freezeHash(address _where, bytes32 _permissionID) internal pure returns (bytes32) {

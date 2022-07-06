@@ -22,11 +22,11 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
         dao = _dao;
     }
 
-    /// @dev Auth modifier used in all components of a DAO to check the permissions.
-    /// @param _permissionID The permission identifier
+    /// @notice A modifier to be used to check permissions on a target contract via the associated DAO
+    /// @param _permissionID The permission identifier required to call the method this modifier is applied to
     modifier auth(bytes32 _permissionID) {
         if (!dao.hasPermission(address(this), _msgSender(), _permissionID, _msgData()))
-            revert PermissionLib.PermissionUnauthorized({
+            revert PermissionLib.PermissionMissing({
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),

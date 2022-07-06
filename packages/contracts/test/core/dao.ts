@@ -109,7 +109,7 @@ describe('DAO', function () {
 
       await expect(dao.setTrustedForwarder(dummyAddress2)).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           dao.address,
           dao.address,
           ownerAddress,
@@ -140,7 +140,7 @@ describe('DAO', function () {
 
       await expect(dao.setMetadata(dummyMetadata1)).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           dao.address,
           dao.address,
           ownerAddress,
@@ -166,7 +166,7 @@ describe('DAO', function () {
 
       await expect(dao.setSignatureValidator(dummyAddress2)).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           dao.address,
           dao.address,
           ownerAddress,
@@ -203,7 +203,7 @@ describe('DAO', function () {
 
       await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           dao.address,
           dao.address,
           ownerAddress,
@@ -303,7 +303,7 @@ describe('DAO', function () {
         dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
       ).to.be.revertedWith(
         customError(
-          'PermissionUnauthorized',
+          'PermissionMissing',
           dao.address,
           dao.address,
           ownerAddress,
