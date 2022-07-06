@@ -19,10 +19,6 @@ contract PermissionManagerTest is PermissionManager {
         return permissions[permissionHash(_where, _who, _permissionID)];
     }
 
-    function getFreezePermission(address _where, bytes32 _permissionID) public view returns (bool) {
-        return frozenPermissions[freezeHash(_where, _permissionID)];
-    }
-
     function getPermissionHash(
         address _where,
         address _who,
@@ -31,8 +27,8 @@ contract PermissionManagerTest is PermissionManager {
         return permissionHash(_where, _who, _permissionID);
     }
 
-    function getFreezeHash(address _where, bytes32 _permissionID) public pure returns (bytes32) {
-        return freezeHash(_where, _permissionID);
+    function getImmutableHash(address _where, bytes32 _permissionID) public pure returns (bytes32) {
+        return immutablePermissionHash(_where, _permissionID);
     }
 
     function getAnyAddr() public pure returns (address) {

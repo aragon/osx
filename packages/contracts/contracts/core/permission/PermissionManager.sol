@@ -9,7 +9,7 @@ library PermissionLib {
     enum Operation {
         Grant,
         Revoke,
-        Freeze
+        MakeImmutable
     }
 
     struct BulkItem {
@@ -37,10 +37,10 @@ library PermissionLib {
     /// @param permissionID The permission identifier
     error PermissionAlreadyRevoked(address where, address who, bytes32 permissionID);
 
-    /// @notice Thrown if a permission is frozen
-    /// @param where The address of the target contract for which the permission is frozen
+    /// @notice Thrown if a permission is immutable
+    /// @param where The address of the target contract for which the permission is immutable
     /// @param permissionID The permission identifier
-    error PermissionFrozen(address where, bytes32 permissionID);
+    error PermissionImmutable(address where, bytes32 permissionID);
 }
 
 /// @title The permission manager used in the DAO contract.
@@ -56,10 +56,10 @@ contract PermissionManager is Initializable {
     address internal constant UNSET_FLAG = address(0);
     address internal constant ALLOW_FLAG = address(2);
 
-    // hash(where, who, permission) => Access flag(unset or allow) or an address to a `PermissionOracle`
+    // permissionHash(where, who, permission) => Access flag(unset or allow) or an address to a `PermissionOracle`
     mapping(bytes32 => address) internal permissions;
-    // hash(where, permissionID) => true(permissionID froze on the where), false(permissionID is not frozen on the where)
-    mapping(bytes32 => bool) internal frozenPermissions;
+    // immutablePermissionHash(where, permissionID) => true (permission for where is immutable), false (permission for where is mutable)
+    mapping(bytes32 => bool) internal immutablePermissions;
 
     // Events
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `who` for the contract `where`
@@ -88,11 +88,11 @@ contract PermissionManager is Initializable {
         address where
     );
 
-    /// @notice Emitted when a `permission` is frozen to the address `here` by the contract `where`
+    /// @notice Emitted when a `permission` is made immutable to the address `here` by the contract `where`
     /// @param permissionID The permission identifier
-    /// @param here The address of the context in which the permission is frozen
-    /// @param where The address of the target contract for which the permission is frozen
-    event Frozen(bytes32 indexed permissionID, address indexed here, address where);
+    /// @param here The address of the context in which the permission is immutable
+    /// @param where The address of the target contract for which the permission is immutable
+    event MadeImmutable(bytes32 indexed permissionID, address indexed here, address where);
 
     /// @notice A modifier to be used to check permissions on a target contract
     /// @param _where The address of the target contract for which the permission is required
@@ -118,8 +118,8 @@ contract PermissionManager is Initializable {
         _initializePermissionManager(_initialOwner);
     }
 
-    /// @notice Grants permission to call a contract address from another address via the specified permission identifier
-    /// @dev Requires the `ROOT_PERM` permission
+    /// @notice Grants permission to an address to call methods in a contract guarded by an auth modifier with the specified permission identifier
+    /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) receiving the permission
     /// @param _permissionID The permission identifier
@@ -131,8 +131,9 @@ contract PermissionManager is Initializable {
         _grant(_where, _who, _permissionID);
     }
 
-    /// @notice Grants permission to call a contract address from another address via a permission identifier and an `PermissionOracle`
-    /// @dev Requires the `ROOT_PERM` permission
+    /// @notice Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier
+    ///         if the referenced oracle permits it
+    /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) receiving the permission
     /// @param _permissionID The permission identifier
@@ -146,8 +147,8 @@ contract PermissionManager is Initializable {
         _grantWithOracle(_where, _who, _permissionID, _oracle);
     }
 
-    /// @notice Revokes permissions of an address for a permission identifier of a contract
-    /// @dev Requires the `ROOT_PERM` permission
+    /// @notice Revokes permission from an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier
+    /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the target contract for which `who` loses permission
     /// @param _who The address (EOA or contract) losing the permission
     /// @param _permissionID The permission identifier
@@ -159,16 +160,16 @@ contract PermissionManager is Initializable {
         _revoke(_where, _who, _permissionID);
     }
 
-    /// @notice Freezes the current permission settings on a contract associated for the specified permissionID identifier.
-    ///         This is a permanent operation and permissions on the specified contract with the specified permissionID identifier can never be granted or revoked again.
+    /// @notice Makes the current permission settings of a target contract immutable
+    ///         This is a permanent operation and permissions on the specified contract with the specified permission identifier can never be granted or revoked again.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
-    /// @param _where The address of the target contract for which the permission is frozen
+    /// @param _where The address of the target contract for which the permission are made immutable
     /// @param _permissionID The permission identifier
-    function freeze(address _where, bytes32 _permissionID)
+    function makeImmutable(address _where, bytes32 _permissionID)
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
-        _freeze(_where, _permissionID);
+        _makeImmutable(_where, _permissionID);
     }
 
     /// @notice Processes bulk items on the permission manager
@@ -186,8 +187,8 @@ contract PermissionManager is Initializable {
                 _grant(_where, item.who, item.permissionID);
             else if (item.operation == PermissionLib.Operation.Revoke)
                 _revoke(_where, item.who, item.permissionID);
-            else if (item.operation == PermissionLib.Operation.Freeze)
-                _freeze(_where, item.permissionID);
+            else if (item.operation == PermissionLib.Operation.MakeImmutable)
+                _makeImmutable(_where, item.permissionID);
         }
     }
 
@@ -209,12 +210,12 @@ contract PermissionManager is Initializable {
             _checkRole(ANY_ADDR, _who, _permissionID, _data); // check if _who has permission for _permissionID on any contract
     }
 
-    /// @notice This method is used to check if permissions for a given permission identifier on a contract are frozen
+    /// @notice This method is used to check if permissions for a given permission identifier on a contract are immutable
     /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _permissionID The permission identifier
-    /// @return bool Returns true if the permission identifier has been frozen for the contract address
-    function isFrozen(address _where, bytes32 _permissionID) public view returns (bool) {
-        return frozenPermissions[freezeHash(_where, _permissionID)];
+    /// @return bool Returns true if the permission identifier is immutable for the contract address
+    function isImmutable(address _where, bytes32 _permissionID) public view returns (bool) {
+        return immutablePermissions[immutablePermissionHash(_where, _permissionID)];
     }
 
     /// @notice Grants the `ROOT_PERMISSION_ID` permission during initialization of the permission manager
@@ -246,8 +247,8 @@ contract PermissionManager is Initializable {
         bytes32 _permissionID,
         IPermissionOracle _oracle
     ) internal {
-        if (isFrozen(_where, _permissionID))
-            revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
+        if (isImmutable(_where, _permissionID))
+            revert PermissionLib.PermissionImmutable({where: _where, permissionID: _permissionID});
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
 
@@ -272,8 +273,8 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionID
     ) internal {
-        if (isFrozen(_where, _permissionID)) {
-            revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
+        if (isImmutable(_where, _permissionID)) {
+            revert PermissionLib.PermissionImmutable({where: _where, permissionID: _permissionID});
         }
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
@@ -289,17 +290,17 @@ contract PermissionManager is Initializable {
         emit Revoked(_permissionID, msg.sender, _who, _where);
     }
 
-    /// @notice This method is used in the public `freeze` method of the permission manager
-    /// @param _where The address of the target contract for which the permission is frozen
+    /// @notice This method is used in the public `makeImmutable` method of the permission manager
+    /// @param _where The address of the target contract for which the permission is immutable
     /// @param _permissionID The permission identifier
-    function _freeze(address _where, bytes32 _permissionID) internal {
-        bytes32 permission = freezeHash(_where, _permissionID);
-        if (frozenPermissions[permission]) {
-            revert PermissionLib.PermissionFrozen({where: _where, permissionID: _permissionID});
+    function _makeImmutable(address _where, bytes32 _permissionID) internal {
+        bytes32 permission = immutablePermissionHash(_where, _permissionID);
+        if (immutablePermissions[permission]) {
+            revert PermissionLib.PermissionImmutable({where: _where, permissionID: _permissionID});
         }
-        frozenPermissions[freezeHash(_where, _permissionID)] = true;
+        immutablePermissions[immutablePermissionHash(_where, _permissionID)] = true;
 
-        emit Frozen(_permissionID, msg.sender, _where);
+        emit MadeImmutable(_permissionID, msg.sender, _where);
     }
 
     /// @notice Checks if a caller has the permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was in the setup
@@ -334,7 +335,7 @@ contract PermissionManager is Initializable {
         return false;
     }
 
-    /// @notice Generates the hash for the `authPermissions` mapping obtained from the workd "PERMISSION",
+    /// @notice Generates the hash for the `authPermissions` mapping obtained from the word "PERMISSION",
     ///         the contract address, the address owning the permission, and the permission identifier.
     /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _who The address (EOA or contract) owning the permission
@@ -348,12 +349,16 @@ contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _permissionID));
     }
 
-    /// @notice Generates the hash for the `frozenPermissions` mapping obtained from the workd "PERMISSION",
+    /// @notice Generates the hash for the `immutablePermissions` mapping obtained from the word "IMMUTABLE",
     ///         the contract address, the address owning the permission, and the permission identifier.
     /// @param _where The address of the target contract for which `who` recieves permission
     /// @param _permissionID The permission identifier
-    /// @return bytes32 The freeze hash used in the frozenPermissions mapping
-    function freezeHash(address _where, bytes32 _permissionID) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked("FREEZE", _where, _permissionID));
+    /// @return bytes32 The hash used in the `immutablePermissions` mapping
+    function immutablePermissionHash(address _where, bytes32 _permissionID)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked("IMMUTABLE", _where, _permissionID));
     }
 }

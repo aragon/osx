@@ -66,8 +66,8 @@ templates:
           handler: handleGranted
         - event: Revoked(indexed bytes32,indexed address,indexed address,address)
           handler: handleRevoked
-        - event: Frozen(indexed bytes32,indexed address,address)
-          handler: handleFrozen
+        - event: MadeImmutable(indexed bytes32,indexed address,address)
+          handler: handleMadeImmutable
   # ERC20Voting (package)
   - name: ERC20Voting
     kind: ethereum/contract

@@ -7,7 +7,7 @@ import {
   Deposited,
   Granted,
   Revoked,
-  Frozen,
+  MadeImmutable,
   Executed
 } from '../../generated/templates/DaoTemplate/DAO';
 
@@ -174,16 +174,16 @@ export function createNewRevokedEvent(
   return newGrantedEvent;
 }
 
-export function createNewFrozenEvent(
+export function createNewMadeImmutableEvent(
   contractPermissionID: Bytes,
   actor: string,
   where: string,
   contractAddress: string
-): Frozen {
-  let newFrozenEvent = changetype<Frozen>(newMockEvent());
+): MadeImmutable {
+  let newMadeImmutableEvent = changetype<MadeImmutable>(newMockEvent());
 
-  newFrozenEvent.address = Address.fromString(contractAddress);
-  newFrozenEvent.parameters = [];
+  newMadeImmutableEvent.address = Address.fromString(contractAddress);
+  newMadeImmutableEvent.parameters = [];
 
   let contractPermissionIDParam = new ethereum.EventParam(
     'contractPermissionID',
@@ -198,11 +198,11 @@ export function createNewFrozenEvent(
     ethereum.Value.fromAddress(Address.fromString(where))
   );
 
-  newFrozenEvent.parameters.push(contractPermissionIDParam);
-  newFrozenEvent.parameters.push(actorParam);
-  newFrozenEvent.parameters.push(whereParam);
+  newMadeImmutableEvent.parameters.push(contractPermissionIDParam);
+  newMadeImmutableEvent.parameters.push(actorParam);
+  newMadeImmutableEvent.parameters.push(whereParam);
 
-  return newFrozenEvent;
+  return newMadeImmutableEvent;
 }
 
 export function createNewExecutedEvent(

@@ -7,7 +7,11 @@ import {
   crypto
 } from '@graphprotocol/graph-ts';
 
-import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
+import {
+  handleMadeImmutable,
+  handleGranted,
+  handleRevoked
+} from '../../src/dao/dao';
 import {Permission, ContractPermissionID} from '../../generated/schema';
 import {
   DAO_ADDRESS,
@@ -19,7 +23,7 @@ import {
 } from '../constants';
 import {createTokenCalls} from '../utils';
 import {
-  createNewFrozenEvent,
+  createNewMadeImmutableEvent,
   createNewGrantedEvent,
   createNewRevokedEvent,
   getEXEC_PERMISSION_ID,
@@ -114,7 +118,7 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   assert.fieldEquals(
     'ContractPermissionID',
     contractPermissionIDEntityID,
-    'frozen',
+    'immutable',
     'false'
   );
 
@@ -234,7 +238,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   ).toHexString();
   contractPermissionIDEntity.where = Address.fromString(DAO_ADDRESS);
   contractPermissionIDEntity.permissionID = contractPermissionID;
-  contractPermissionIDEntity.frozen = false;
+  contractPermissionIDEntity.immutable = false;
   contractPermissionIDEntity.save();
 
   let permissionEntity = new Permission(permissionEntityID);
@@ -291,7 +295,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   assert.fieldEquals(
     'ContractPermissionID',
     contractPermissionIDEntityID,
-    'frozen',
+    'immutable',
     'false'
   );
 
@@ -300,7 +304,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run dao (handleFrozen) mappings with mock event', () => {
+test('Run dao (handleMadeImmutable) mappings with mock event', () => {
   // create state
   let contractPermissionIDEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
@@ -315,7 +319,7 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   ).toHexString();
   contractPermissionIDEntity.where = Address.fromString(DAO_ADDRESS);
   contractPermissionIDEntity.permissionID = contractPermissionID;
-  contractPermissionIDEntity.frozen = false;
+  contractPermissionIDEntity.immutable = false;
   contractPermissionIDEntity.save();
 
   // check state exist
@@ -328,12 +332,12 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   assert.fieldEquals(
     'ContractPermissionID',
     contractPermissionIDEntityID,
-    'frozen',
+    'immutable',
     'false'
   );
 
   // create event and run it's handler
-  let frozenEvent = createNewFrozenEvent(
+  let immutableEvent = createNewMadeImmutableEvent(
     contractPermissionID,
     ADDRESS_ONE,
     DAO_ADDRESS,
@@ -341,7 +345,7 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   );
 
   // handle event
-  handleFrozen(frozenEvent);
+  handleMadeImmutable(immutableEvent);
 
   // checks
   assert.fieldEquals(
@@ -371,7 +375,7 @@ test('Run dao (handleFrozen) mappings with mock event', () => {
   assert.fieldEquals(
     'ContractPermissionID',
     contractPermissionIDEntityID,
-    'frozen',
+    'immutable',
     'true'
   );
 
