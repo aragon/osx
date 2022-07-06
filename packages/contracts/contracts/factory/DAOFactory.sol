@@ -64,13 +64,13 @@ contract DAOFactory {
     /// @param _voteConfig The majority voting configs and minimum duration of voting
     /// @param _tokenConfig The token config used to deploy a new token
     /// @param _mintConfig The config for the minter for the newly created token
-    /// @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
+    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
     function newERC20VotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
         TokenFactory.TokenConfig calldata _tokenConfig,
         TokenFactory.MintConfig calldata _mintConfig,
-        address _gsnForwarder
+        address _trustedForwarder
     )
         external
         returns (
@@ -86,7 +86,7 @@ contract DAOFactory {
                 amountsArrayLength: _mintConfig.amounts.length
             });
 
-        dao = createDAO(_daoConfig, _gsnForwarder);
+        dao = createDAO(_daoConfig, _trustedForwarder);
 
         // Create token and merkle minter
         dao.grant(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
@@ -108,14 +108,14 @@ contract DAOFactory {
     /// @param _daoConfig The name and metadata hash of the DAO it creates
     /// @param _voteConfig The majority voting configs and minimum duration of voting
     /// @param _whitelistVoters An array of addresses that are allowed to vote
-    /// @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
+    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
     function newWhitelistVotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
         address[] calldata _whitelistVoters,
-        address _gsnForwarder
+        address _trustedForwarder
     ) external returns (DAO dao, WhitelistVoting voting) {
-        dao = createDAO(_daoConfig, _gsnForwarder);
+        dao = createDAO(_daoConfig, _trustedForwarder);
 
         // register dao with its name and token to the registry
         registry.register(_daoConfig.name, dao, msg.sender, address(0));
@@ -129,15 +129,16 @@ contract DAOFactory {
 
     /// @dev Creates a new DAO.
     /// @param _daoConfig The name and metadata hash of the DAO it creates
-    /// @param _gsnForwarder The forwarder address for the OpenGSN meta tx solution
-    function createDAO(DAOConfig calldata _daoConfig, address _gsnForwarder)
+    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
+    function createDAO(DAOConfig calldata _daoConfig, address _trustedForwarder)
         internal
         returns (DAO dao)
     {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
-        // initialize dao with the ROOT_PERMISSION_ID as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _gsnForwarder);
+
+        // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory
+        dao.initialize(_daoConfig.metadata, address(this), _trustedForwarder);
     }
 
     /// @dev Does set the required permissions for the new DAO.

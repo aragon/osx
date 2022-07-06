@@ -11,14 +11,14 @@ contract MajorityVotingMock is MajorityVotingBase {
 
     function initializeMock(
         IDAO _dao,
-        address _gsnForwarder,
+        address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
-            _gsnForwarder,
+            _trustedForwarder,
             _participationRequiredPct,
             _supportRequiredPct,
             _minDuration

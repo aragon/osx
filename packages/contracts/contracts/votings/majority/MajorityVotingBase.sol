@@ -54,13 +54,13 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
-    /// @param _gsnForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
-        address _gsnForwarder,
+        address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
@@ -68,7 +68,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         _registerStandard(MAJORITY_VOTING_INTERFACE_ID);
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        __MetaTxComponent_init(_dao, _gsnForwarder);
+        __MetaTxComponent_init(_dao, _trustedForwarder);
 
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }

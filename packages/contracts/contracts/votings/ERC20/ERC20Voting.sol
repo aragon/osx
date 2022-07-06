@@ -22,14 +22,14 @@ contract ERC20Voting is MajorityVotingBase {
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _dao The IDAO interface of the associated DAO
-    /// @param _gsnForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
     /// @param _token The ERC20 token used for voting
     function initialize(
         IDAO _dao,
-        address _gsnForwarder,
+        address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration,
@@ -38,7 +38,7 @@ contract ERC20Voting is MajorityVotingBase {
         _registerStandard(ERC20_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
             _dao,
-            _gsnForwarder,
+            _trustedForwarder,
             _participationRequiredPct,
             _supportRequiredPct,
             _minDuration
