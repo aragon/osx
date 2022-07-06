@@ -6,8 +6,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-import "../votings/allowlist/AllowlistVoting.sol";
-import "../votings/erc20/ERC20Voting.sol";
+import "../voting/allowlist/AllowlistVoting.sol";
+import "../voting/erc20/ERC20Voting.sol";
 import "../tokens/GovernanceERC20.sol";
 import "../tokens/GovernanceWrappedERC20.sol";
 import "../registry/Registry.sol";

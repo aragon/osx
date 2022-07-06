@@ -121,7 +121,7 @@ interface Proposal {
   createdAt: BigInt!
 }
 
-# Votings
+# Voting
 
 enum VoterState {
   None
