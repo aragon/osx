@@ -15,7 +15,9 @@ const EVENTS = {
   Executed: 'Executed',
 };
 
-const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
+const CHANGE_VOTE_CONFIG_PERMISSION_ID = ethers.utils.id(
+  'CHANGE_VOTE_CONFIG_PERMISSION_ID'
+);
 
 const zeroAddress = ethers.constants.AddressZero;
 const PermissionManagerAnyAddress =
@@ -159,7 +161,8 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_VOTE_CONFIG_PERMISSION_ID = await voting.MODIFY_VOTE_CONFIG();
+    const CHANGE_VOTE_CONFIG_PERMISSION_ID_PERMISSION_ID =
+      await voting.CHANGE_VOTE_CONFIG_PERMISSION_ID();
     const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
     const DAORoles = await Promise.all([
@@ -201,7 +204,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(dao, EVENTS.Granted)
       .withArgs(
-        MODIFY_VOTE_CONFIG_PERMISSION_ID,
+        CHANGE_VOTE_CONFIG_PERMISSION_ID_PERMISSION_ID,
         daoFactory.address,
         dao.address,
         voting.address,
@@ -242,7 +245,7 @@ describe('DAOFactory: ', function () {
         voting.address,
         voting.address,
         ownerAddress,
-        MODIFY_VOTE_CONFIG
+        CHANGE_VOTE_CONFIG_PERMISSION_ID
       )
     );
 
@@ -291,7 +294,8 @@ describe('DAOFactory: ', function () {
 
     await ethers.provider.send('evm_mine', []);
 
-    const MODIFY_CONFIG_PERMISSION_ID = await voting.MODIFY_VOTE_CONFIG();
+    const MODIFY_CONFIG_PERMISSION_ID =
+      await voting.CHANGE_VOTE_CONFIG_PERMISSION_ID();
     // @ts-ignore
     const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
     const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
@@ -384,7 +388,7 @@ describe('DAOFactory: ', function () {
         voting.address,
         voting.address,
         ownerAddress,
-        MODIFY_VOTE_CONFIG
+        CHANGE_VOTE_CONFIG_PERMISSION_ID
       )
     );
 

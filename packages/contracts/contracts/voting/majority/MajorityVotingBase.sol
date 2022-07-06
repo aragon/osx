@@ -12,7 +12,8 @@ import "./IMajorityVoting.sol";
 /// @dev This component implements the `IMajorityVoting` interface
 abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHelpers {
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
-    bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
+    bytes32 public constant CHANGE_VOTE_CONFIG_PERMISSION_ID =
+        keccak256("CHANGE_VOTE_CONFIG_PERMISSION_ID");
 
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
@@ -78,7 +79,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
-    ) external auth(MODIFY_VOTE_CONFIG) {
+    ) external auth(CHANGE_VOTE_CONFIG_PERMISSION_ID) {
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
