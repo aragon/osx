@@ -9,11 +9,11 @@ import {
   handleTrustedForwarderSet,
   handleConfigUpdated,
   _handleVoteStarted
-} from '../../src/packages/whitelist/whitelistVoting';
+} from '../../src/packages/allowlist/allowlist-voting';
 import {
-  WhitelistPackage,
-  WhitelistProposal,
-  WhitelistVoter
+  AllowlistPackage,
+  AllowlistProposal,
+  AllowlistVoter
 } from '../../generated/schema';
 import {
   ADDRESS_ONE,
@@ -44,9 +44,9 @@ let supportRequiredPct = '1000';
 let participationRequired = '500';
 let votingPower = '1000';
 
-test('Run Whitelist Voting (handleVoteStarted) mappings with mock event', () => {
+test('Run Allowlist Voting (handleVoteStarted) mappings with mock event', () => {
   // create state
-  let erc20VotingPackage = new WhitelistPackage(
+  let erc20VotingPackage = new AllowlistPackage(
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
   erc20VotingPackage.save();
@@ -90,31 +90,31 @@ test('Run Whitelist Voting (handleVoteStarted) mappings with mock event', () => 
   let packageId = Address.fromString(VOTING_ADDRESS).toHexString();
 
   // checks
-  assert.fieldEquals('WhitelistProposal', entityID, 'id', entityID);
-  assert.fieldEquals('WhitelistProposal', entityID, 'dao', DAO_ADDRESS);
-  assert.fieldEquals('WhitelistProposal', entityID, 'pkg', packageId);
-  assert.fieldEquals('WhitelistProposal', entityID, 'voteId', voteId);
-  assert.fieldEquals('WhitelistProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals('WhitelistProposal', entityID, 'metadata', STRING_DATA);
+  assert.fieldEquals('AllowlistProposal', entityID, 'id', entityID);
+  assert.fieldEquals('AllowlistProposal', entityID, 'dao', DAO_ADDRESS);
+  assert.fieldEquals('AllowlistProposal', entityID, 'pkg', packageId);
+  assert.fieldEquals('AllowlistProposal', entityID, 'voteId', voteId);
+  assert.fieldEquals('AllowlistProposal', entityID, 'creator', ADDRESS_ONE);
+  assert.fieldEquals('AllowlistProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
-    'WhitelistProposal',
+    'AllowlistProposal',
     entityID,
     'createdAt',
     event.block.timestamp.toString()
   );
-  assert.fieldEquals('WhitelistProposal', entityID, 'startDate', startDate);
+  assert.fieldEquals('AllowlistProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
-    'WhitelistProposal',
+    'AllowlistProposal',
     entityID,
     'supportRequiredPct',
     supportRequiredPct
   );
-  // assert.fieldEquals('WhitelistProposal', entityID, 'votingPower', votingPower);
-  assert.fieldEquals('WhitelistProposal', entityID, 'executed', 'false');
+  // assert.fieldEquals('AllowlistProposal', entityID, 'votingPower', votingPower);
+  assert.fieldEquals('AllowlistProposal', entityID, 'executed', 'false');
 
-  // chack WhitelistPackage
+  // chack AllowlistPackage
   assert.fieldEquals(
-    'WhitelistPackage',
+    'AllowlistPackage',
     Address.fromString(VOTING_ADDRESS).toHexString(),
     'votesLength',
     '1'
@@ -123,11 +123,11 @@ test('Run Whitelist Voting (handleVoteStarted) mappings with mock event', () => 
   clearStore();
 });
 
-test('Run Whitelist Voting (handleVoteCast) mappings with mock event', () => {
+test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   // create state
   let proposalId =
     Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let erc20VotingProposal = new WhitelistProposal(proposalId);
+  let erc20VotingProposal = new AllowlistProposal(proposalId);
   erc20VotingProposal.save();
 
   // create calls
@@ -162,18 +162,18 @@ test('Run Whitelist Voting (handleVoteCast) mappings with mock event', () => {
 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposalId;
-  assert.fieldEquals('WhitelistVote', entityID, 'id', entityID);
+  assert.fieldEquals('AllowlistVote', entityID, 'id', entityID);
 
   // check proposal
-  assert.fieldEquals('WhitelistProposal', proposalId, 'yea', '1');
+  assert.fieldEquals('AllowlistProposal', proposalId, 'yea', '1');
 
   clearStore();
 });
 
-test('Run Whitelist Voting (handleVoteExecuted) mappings with mock event', () => {
+test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let erc20VotingProposal = new WhitelistProposal(entityID);
+  let erc20VotingProposal = new AllowlistProposal(entityID);
   erc20VotingProposal.save();
 
   // create event
@@ -183,16 +183,16 @@ test('Run Whitelist Voting (handleVoteExecuted) mappings with mock event', () =>
   handleVoteExecuted(event);
 
   // checks
-  assert.fieldEquals('WhitelistProposal', entityID, 'id', entityID);
-  assert.fieldEquals('WhitelistProposal', entityID, 'executed', 'true');
+  assert.fieldEquals('AllowlistProposal', entityID, 'id', entityID);
+  assert.fieldEquals('AllowlistProposal', entityID, 'executed', 'true');
 
   clearStore();
 });
 
-test('Run Whitelist Voting (handleConfigUpdated) mappings with mock event', () => {
+test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPackage = new WhitelistPackage(entityID);
+  let erc20VotingPackage = new AllowlistPackage(entityID);
   erc20VotingPackage.save();
 
   // create event
@@ -202,20 +202,20 @@ test('Run Whitelist Voting (handleConfigUpdated) mappings with mock event', () =
   handleConfigUpdated(event);
 
   // checks
-  assert.fieldEquals('WhitelistPackage', entityID, 'id', entityID);
+  assert.fieldEquals('AllowlistPackage', entityID, 'id', entityID);
   assert.fieldEquals(
-    'WhitelistPackage',
+    'AllowlistPackage',
     entityID,
     'participationRequiredPct',
     '2'
   );
-  assert.fieldEquals('WhitelistPackage', entityID, 'supportRequiredPct', '1');
-  assert.fieldEquals('WhitelistPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('AllowlistPackage', entityID, 'supportRequiredPct', '1');
+  assert.fieldEquals('AllowlistPackage', entityID, 'minDuration', '3600');
 
   clearStore();
 });
 
-test('Run Whitelist Voting (handleUsersAdded) mappings with mock event', () => {
+test('Run Allowlist Voting (handleUsersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
@@ -229,13 +229,13 @@ test('Run Whitelist Voting (handleUsersAdded) mappings with mock event', () => {
 
   // checks
   assert.fieldEquals(
-    'WhitelistVoter',
+    'AllowlistVoter',
     userArray[0].toHexString(),
     'id',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
-    'WhitelistVoter',
+    'AllowlistVoter',
     userArray[0].toHexString(),
     'pkg',
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -244,7 +244,7 @@ test('Run Whitelist Voting (handleUsersAdded) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Whitelist Voting (UsersRemoved) mappings with mock event', () => {
+test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
   // create state
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -253,7 +253,7 @@ test('Run Whitelist Voting (UsersRemoved) mappings with mock event', () => {
 
   for (let index = 0; index < userArray.length; index++) {
     const user = userArray[index];
-    let userEntity = new WhitelistVoter(user.toHexString());
+    let userEntity = new AllowlistVoter(user.toHexString());
     userEntity.save();
   }
 
@@ -265,21 +265,21 @@ test('Run Whitelist Voting (UsersRemoved) mappings with mock event', () => {
 
   // checks
   assert.fieldEquals(
-    'WhitelistVoter',
+    'AllowlistVoter',
     userArray[0].toHexString(),
     'id',
     userArray[0].toHexString()
   );
-  assert.notInStore('WhitelistVoter', userArray[1].toHexString());
+  assert.notInStore('AllowlistVoter', userArray[1].toHexString());
 
   clearStore();
 });
 
-test('Run Whitelist Voting (handleTrustedForwarderSet) mappings with mock event', () => {
+test('Run Allowlist Voting (handleTrustedForwarderSet) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let whitelistVotingPackage = new WhitelistPackage(entityID);
-  whitelistVotingPackage.save();
+  let allowlistVotingPackage = new AllowlistPackage(entityID);
+  allowlistVotingPackage.save();
 
   // create event
   let event = createNewTrustedForwarderSetEvent(ADDRESS_ZERO, VOTING_ADDRESS);
@@ -288,9 +288,9 @@ test('Run Whitelist Voting (handleTrustedForwarderSet) mappings with mock event'
   handleTrustedForwarderSet(event);
 
   // checks
-  assert.fieldEquals('WhitelistPackage', entityID, 'id', entityID);
+  assert.fieldEquals('AllowlistPackage', entityID, 'id', entityID);
   assert.fieldEquals(
-    'WhitelistPackage',
+    'AllowlistPackage',
     entityID,
     'trustedForwarder',
     Address.fromString(ADDRESS_ZERO).toHexString()

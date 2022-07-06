@@ -158,7 +158,7 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
     );
   } else {
     assert.fieldEquals(
-      'WhitelistPackage',
+      'AllowlistPackage',
       Address.fromString(VOTING_ADDRESS).toHexString(),
       'id',
       Address.fromString(VOTING_ADDRESS).toHexString()
@@ -172,7 +172,7 @@ test('Run dao (handleGranted) mappings with mock event for ERC20 Voting', () => 
   testPackages(true);
 });
 
-test('Run dao (handleGranted) mappings with mock event for Whitelist Voting', () => {
+test('Run dao (handleGranted) mappings with mock event for Allowlist Voting', () => {
   testPackages(false);
 });
 

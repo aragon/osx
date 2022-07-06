@@ -9,13 +9,13 @@ import {
 } from '@graphprotocol/graph-ts';
 
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
-import {WhitelistVoting as WhitelistVotingContract} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
+import {AllowlistVoting as AllowlistVotingContract} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {ERC20Voting, WhitelistVoting} from '../../generated/templates';
+import {ERC20Voting, AllowlistVoting} from '../../generated/templates';
 import {
   DaoPackage,
   ERC20VotingPackage,
-  WhitelistPackage
+  AllowlistPackage
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
@@ -116,11 +116,11 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
   }
 }
 
-function createWhitelistVotingPackage(who: Address, daoId: string): void {
-  let packageEntity = WhitelistPackage.load(who.toHexString());
+function createAllowlistVotingPackage(who: Address, daoId: string): void {
+  let packageEntity = AllowlistPackage.load(who.toHexString());
   if (!packageEntity) {
-    packageEntity = new WhitelistPackage(who.toHexString());
-    let contract = WhitelistVotingContract.bind(who);
+    packageEntity = new AllowlistPackage(who.toHexString());
+    let contract = AllowlistVotingContract.bind(who);
     let supportRequiredPct = contract.try_supportRequiredPct();
     let participationRequiredPct = contract.try_participationRequiredPct();
     let minDuration = contract.try_minDuration();
@@ -136,7 +136,7 @@ function createWhitelistVotingPackage(who: Address, daoId: string): void {
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    WhitelistVoting.createWithContext(who, context);
+    AllowlistVoting.createWithContext(who, context);
 
     packageEntity.save();
   }
@@ -159,7 +159,7 @@ export function addPackage(daoId: string, who: Address): void {
   if (ERC20VotingInterfaceSuppoted) {
     createErc20VotingPackage(who, daoId);
   } else if (whiteListInterfaceSuppoted) {
-    createWhitelistVotingPackage(who, daoId);
+    createAllowlistVotingPackage(who, daoId);
   }
 
   if (ERC20VotingInterfaceSuppoted || whiteListInterfaceSuppoted) {

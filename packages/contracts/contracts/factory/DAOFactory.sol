@@ -6,8 +6,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-import "../votings/whitelist/WhitelistVoting.sol";
-import "../votings/ERC20/ERC20Voting.sol";
+import "../votings/allowlist/AllowlistVoting.sol";
+import "../votings/erc20/ERC20Voting.sol";
 import "../tokens/GovernanceERC20.sol";
 import "../tokens/GovernanceWrappedERC20.sol";
 import "../registry/Registry.sol";
@@ -26,7 +26,7 @@ contract DAOFactory {
     error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
 
     address public erc20VotingBase;
-    address public whitelistVotingBase;
+    address public allowlistVotingBase;
     address public daoBase;
 
     Registry public registry;
@@ -104,23 +104,23 @@ contract DAOFactory {
         emit DAOCreated(_daoConfig.name, address(token), address(voting));
     }
 
-    /// @dev Creates a new DAO with whitelist based voting.
+    /// @dev Creates a new DAO with allowlist based voting.
     /// @param _daoConfig The name and metadata hash of the DAO it creates
     /// @param _voteConfig The majority voting configs and minimum duration of voting
-    /// @param _whitelistVoters An array of addresses that are allowed to vote
+    /// @param _allowlistVoters An array of addresses that are allowed to vote
     /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
-    function newWhitelistVotingDAO(
+    function newAllowlistVotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
-        address[] calldata _whitelistVoters,
+        address[] calldata _allowlistVoters,
         address _trustedForwarder
-    ) external returns (DAO dao, WhitelistVoting voting) {
+    ) external returns (DAO dao, AllowlistVoting voting) {
         dao = createDAO(_daoConfig, _trustedForwarder);
 
         // register dao with its name and token to the registry
         registry.register(_daoConfig.name, dao, msg.sender, address(0));
 
-        voting = createWhitelistVoting(dao, _whitelistVoters, _voteConfig);
+        voting = createAllowlistVoting(dao, _allowlistVoters, _voteConfig);
 
         setDAOPermissions(dao, address(voting));
 
@@ -143,7 +143,7 @@ contract DAOFactory {
 
     /// @dev Does set the required permissions for the new DAO.
     /// @param _dao The DAO instance just created.
-    /// @param _voting The voting contract address (whitelist OR ERC20 voting)
+    /// @param _voting The voting contract address (allowlist OR ERC20 voting)
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set permissionIDs on the dao itself.
         PermissionLib.BulkItem[] memory items = new PermissionLib.BulkItem[](8);
@@ -240,60 +240,60 @@ contract DAOFactory {
         _dao.bulk(address(erc20Voting), items);
     }
 
-    /// @dev Internal helper method to create Whitelist Voting
-    /// @param _dao The DAO address creating the Whitelist Voting
-    /// @param _whitelistVoters The array of the allowed voting addresses
+    /// @dev Internal helper method to create Allowlist Voting
+    /// @param _dao The DAO address creating the Allowlist Voting
+    /// @param _allowlistVoters The array of the allowed voting addresses
     /// @param _voteConfig The voting settings
-    function createWhitelistVoting(
+    function createAllowlistVoting(
         DAO _dao,
-        address[] calldata _whitelistVoters,
+        address[] calldata _allowlistVoters,
         VoteConfig calldata _voteConfig
-    ) internal returns (WhitelistVoting whitelistVoting) {
-        whitelistVoting = WhitelistVoting(
+    ) internal returns (AllowlistVoting allowlistVoting) {
+        allowlistVoting = AllowlistVoting(
             createProxy(
-                whitelistVotingBase,
+                allowlistVotingBase,
                 abi.encodeWithSelector(
-                    WhitelistVoting.initialize.selector,
+                    AllowlistVoting.initialize.selector,
                     _dao,
                     _dao.trustedForwarder(),
                     _voteConfig.participationRequiredPct,
                     _voteConfig.supportRequiredPct,
                     _voteConfig.minDuration,
-                    _whitelistVoters
+                    _allowlistVoters
                 )
             )
         );
 
-        // Grant dao the necessary permissions for WhitelistVoting
+        // Grant dao the necessary permissions for AllowlistVoting
         PermissionLib.BulkItem[] memory items = new PermissionLib.BulkItem[](4);
         items[0] = PermissionLib.BulkItem(
             PermissionLib.Operation.Grant,
-            whitelistVoting.MODIFY_WHITELIST(),
+            allowlistVoting.MODIFY_WHITELIST(),
             address(_dao)
         );
         items[1] = PermissionLib.BulkItem(
             PermissionLib.Operation.Grant,
-            whitelistVoting.MODIFY_VOTE_CONFIG(),
+            allowlistVoting.MODIFY_VOTE_CONFIG(),
             address(_dao)
         );
         items[2] = PermissionLib.BulkItem(
             PermissionLib.Operation.Grant,
-            whitelistVoting.UPGRADE_PERMISSION_ID(),
+            allowlistVoting.UPGRADE_PERMISSION_ID(),
             address(_dao)
         );
         items[3] = PermissionLib.BulkItem(
             PermissionLib.Operation.Grant,
-            whitelistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
+            allowlistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID(),
             address(_dao)
         );
 
-        _dao.bulk(address(whitelistVoting), items);
+        _dao.bulk(address(allowlistVoting), items);
     }
 
     /// @dev Internal helper method to set up the required base contracts on DAOFactory deployment.
     function setupBases() private {
         erc20VotingBase = address(new ERC20Voting());
-        whitelistVotingBase = address(new WhitelistVoting());
+        allowlistVotingBase = address(new AllowlistVoting());
         daoBase = address(new DAO());
     }
 }

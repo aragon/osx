@@ -2,13 +2,13 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {WhitelistVoting, DAOMock} from '../../typechain';
+import {AllowlistVoting, DAOMock} from '../../typechain';
 import {VoterState, VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
-describe('WhitelistVoting', function () {
+describe('AllowlistVoting', function () {
   let signers: SignerWithAddress[];
-  let voting: WhitelistVoting;
+  let voting: AllowlistVoting;
   let daoMock: DAOMock;
   let ownerAddress: string;
   let user1: string;
@@ -32,15 +32,15 @@ describe('WhitelistVoting', function () {
   });
 
   beforeEach(async () => {
-    const WhitelistVoting = await ethers.getContractFactory('WhitelistVoting');
-    voting = await WhitelistVoting.deploy();
+    const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
+    voting = await AllowlistVoting.deploy();
   });
 
   function initializeVoting(
     participationRequired: any,
     supportRequired: any,
     minDuration: any,
-    whitelisted: Array<string>
+    allowlisted: Array<string>
   ) {
     return voting.initialize(
       daoMock.address,
@@ -48,7 +48,7 @@ describe('WhitelistVoting', function () {
       participationRequired,
       supportRequired,
       minDuration,
-      whitelisted
+      allowlisted
     );
   }
 
@@ -62,50 +62,50 @@ describe('WhitelistVoting', function () {
     });
   });
 
-  describe('WhitelistingUsers: ', async () => {
+  describe('AllowlistingUsers: ', async () => {
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, []);
     });
-    it('should return fasle, if user is not whitelisted', async () => {
+    it('should return fasle, if user is not allowlisted', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await voting.isUserWhitelisted(ownerAddress, block1.number)
+        await voting.isUserAllowlisted(ownerAddress, block1.number)
       ).to.equal(false);
     });
 
-    it('should add new users in the whitelist', async () => {
-      await voting.addWhitelistedUsers([ownerAddress, user1]);
+    it('should add new users in the allowlist', async () => {
+      await voting.addAllowlistedUsers([ownerAddress, user1]);
 
       const block = await ethers.provider.getBlock('latest');
 
       await ethers.provider.send('evm_mine', []);
 
       expect(
-        await voting.isUserWhitelisted(ownerAddress, block.number)
+        await voting.isUserAllowlisted(ownerAddress, block.number)
       ).to.equal(true);
-      expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(true);
-      expect(await voting.isUserWhitelisted(user1, 0)).to.equal(true);
+      expect(await voting.isUserAllowlisted(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isUserAllowlisted(user1, 0)).to.equal(true);
     });
 
-    it('should remove users from the whitelist', async () => {
-      await voting.addWhitelistedUsers([ownerAddress]);
+    it('should remove users from the allowlist', async () => {
+      await voting.addAllowlistedUsers([ownerAddress]);
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await voting.isUserWhitelisted(ownerAddress, block1.number)
+        await voting.isUserAllowlisted(ownerAddress, block1.number)
       ).to.equal(true);
-      expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isUserAllowlisted(ownerAddress, 0)).to.equal(true);
 
-      await voting.removeWhitelistedUsers([ownerAddress]);
+      await voting.removeAllowlistedUsers([ownerAddress]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await voting.isUserWhitelisted(ownerAddress, block2.number)
+        await voting.isUserAllowlisted(ownerAddress, block2.number)
       ).to.equal(false);
-      expect(await voting.isUserWhitelisted(ownerAddress, 0)).to.equal(false);
+      expect(await voting.isUserAllowlisted(ownerAddress, 0)).to.equal(false);
     });
   });
 
@@ -116,7 +116,7 @@ describe('WhitelistVoting', function () {
       await initializeVoting(1, 2, 3, [ownerAddress]);
     });
 
-    it('reverts if user is not whitelisted to create a vote', async () => {
+    it('reverts if user is not allowlisted to create a vote', async () => {
       await expect(
         voting
           .connect(signers[1])
@@ -214,7 +214,7 @@ describe('WhitelistVoting', function () {
         addresses.push(addr);
       }
 
-      // voting will be initialized with 10 whitelisted addresses
+      // voting will be initialized with 10 allowlisted addresses
       // Which means votingPower = 10 at this point.
       await initializeVoting(
         minimumQuorom,

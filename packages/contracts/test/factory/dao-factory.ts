@@ -46,7 +46,7 @@ async function getDeployments(tx: any, tokenVoting: boolean) {
     dao: await ethers.getContractAt('DAO', dao),
     voting: tokenVoting
       ? await ethers.getContractAt('ERC20Voting', voting)
-      : await ethers.getContractAt('WhitelistVoting', voting),
+      : await ethers.getContractAt('AllowlistVoting', voting),
     creator,
     name,
   };
@@ -73,7 +73,7 @@ describe('DAOFactory: ', function () {
     // @ts-ignore
     const ERC20Voting = await hre.artifacts.readArtifact('ERC20Voting');
     // @ts-ignore
-    const WhitelistVoting = await hre.artifacts.readArtifact('WhitelistVoting');
+    const AllowlistVoting = await hre.artifacts.readArtifact('AllowlistVoting');
     // @ts-ignore
     const Token = await hre.artifacts.readArtifact('GovernanceERC20');
 
@@ -82,7 +82,7 @@ describe('DAOFactory: ', function () {
         ...DAOFactoryArtifact.abi,
         ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
         ...ERC20Voting.abi.filter((f: any) => f.type === 'event'),
-        ...WhitelistVoting.abi.filter((f: any) => f.type === 'event'),
+        ...AllowlistVoting.abi.filter((f: any) => f.type === 'event'),
         ...Token.abi.filter((f: any) => f.type === 'event'),
       ],
       bytecode: DAOFactoryArtifact.bytecode,
@@ -273,8 +273,8 @@ describe('DAOFactory: ', function () {
     expect(await actionExecuteContract.test()).to.equal(true);
   });
 
-  it('creates WhitelistVoting DAO', async () => {
-    let tx = await daoFactory.newWhitelistVotingDAO(
+  it('creates AllowlistVoting DAO', async () => {
+    let tx = await daoFactory.newAllowlistVotingDAO(
       {
         name: daoDummyName,
         metadata: daoDummyMetadata,
@@ -367,7 +367,7 @@ describe('DAOFactory: ', function () {
 
     // ===== Test if user can create a vote and execute it ======
 
-    // should be only callable by WhitelistVoting
+    // should be only callable by AllowlistVoting
     await expect(dao.execute(0, [])).to.be.revertedWith(
       customError(
         'PermissionMissing',

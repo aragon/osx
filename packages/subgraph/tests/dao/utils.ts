@@ -337,15 +337,15 @@ export function getVotingToken(contractAddress: string, returns: string): void {
     .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }
 
-export function getIsUserWhitelisted(
+export function getIsUserAllowlisted(
   contractAddress: string,
   address: string,
   returns: boolean
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'isUserWhitelisted',
-    'isUserWhitelisted(address,uint256):(bool)'
+    'isUserAllowlisted',
+    'isUserAllowlisted(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),
@@ -354,14 +354,14 @@ export function getIsUserWhitelisted(
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
 
-export function getWhitelistedLength(
+export function getAllowlistedLength(
   contractAddress: string,
   returns: string
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'whitelistedLength',
-    'whitelistedLength():(uint64)'
+    'allowlistedLength',
+    'allowlistedLength():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(returns))]);

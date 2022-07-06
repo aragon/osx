@@ -23,8 +23,8 @@ import * as MerkleDistributor from '../artifacts/contracts/tokens/MerkleDistribu
 import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json';
 
 // Voting (future packages)
-import * as ERC20Voting from '../artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json';
-import * as WhitelistVoting from '../artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json';
+import * as ERC20Voting from '../artifacts/contracts/votings/erc20/ERC20Voting.sol/ERC20Voting.json';
+import * as AllowlistVoting from '../artifacts/contracts/votings/allowlist/AllowlistVoting.sol/AllowlistVoting.json';
 
 export default {
   PermissionManager,
@@ -42,5 +42,5 @@ export default {
   MerkleDistributor,
   MerkleMinter,
   ERC20Voting,
-  WhitelistVoting,
+  AllowlistVoting,
 };

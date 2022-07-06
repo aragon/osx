@@ -7,19 +7,19 @@ import "./../majority/MajorityVotingBase.sol";
 
 import "../majority/MajorityVotingBase.sol";
 
-/// @title A component for whitelist voting
+/// @title A component for allowlist voting
 /// @author Aragon Association - 2021-2022
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
-contract WhitelistVoting is MajorityVotingBase {
+contract AllowlistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
 
     bytes4 internal constant WHITELIST_VOTING_INTERFACE_ID =
         MAJORITY_VOTING_INTERFACE_ID ^
-            this.addWhitelistedUsers.selector ^
-            this.removeWhitelistedUsers.selector ^
-            this.isUserWhitelisted.selector ^
-            this.whitelistedUserCount.selector;
+            this.addAllowlistedUsers.selector ^
+            this.removeAllowlistedUsers.selector ^
+            this.isUserAllowlisted.selector ^
+            this.allowlistedUserCount.selector;
 
     bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
 
@@ -30,11 +30,11 @@ contract WhitelistVoting is MajorityVotingBase {
     /// @param sender The sender address
     error VoteCreationForbidden(address sender);
 
-    /// @notice Emitted when new users are added to the whitelist
+    /// @notice Emitted when new users are added to the allowlist
     /// @param users The array of user addresses to be added
     event UsersAdded(address[] users);
 
-    /// @notice Emitted when users are removed from the whitelist
+    /// @notice Emitted when users are removed from the allowlist
     /// @param users The array of user addresses to be removed
     event UsersRemoved(address[] users);
 
@@ -45,14 +45,14 @@ contract WhitelistVoting is MajorityVotingBase {
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
-    /// @param _whitelisted The whitelisted addresses
+    /// @param _allowlisted The allowlisted addresses
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration,
-        address[] calldata _whitelisted
+        address[] calldata _allowlisted
     ) public initializer {
         _registerStandard(WHITELIST_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
@@ -63,34 +63,34 @@ contract WhitelistVoting is MajorityVotingBase {
             _minDuration
         );
 
-        // add whitelisted users
-        _addWhitelistedUsers(_whitelisted);
+        // add allowlisted users
+        _addAllowlistedUsers(_allowlisted);
     }
 
     /// @notice Returns the version of the GSN relay recipient
     /// @dev Describes the version and contract for GSN compatibility
     function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.WhitelistVoting";
+        return "0.0.1+opengsn.recipient.AllowlistVoting";
     }
 
-    /// @notice Adds new users to the whitelist
+    /// @notice Adds new users to the allowlist
     /// @param _users The addresses of the users to be added
-    function addWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        _addWhitelistedUsers(_users);
+    function addAllowlistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
+        _addAllowlistedUsers(_users);
     }
 
-    /// @notice Internal function to add new users to the whitelist
+    /// @notice Internal function to add new users to the allowlist
     /// @param _users The addresses of users to be added
-    function _addWhitelistedUsers(address[] calldata _users) internal {
-        _whitelistUsers(_users, true);
+    function _addAllowlistedUsers(address[] calldata _users) internal {
+        _allowlistUsers(_users, true);
 
         emit UsersAdded(_users);
     }
 
-    /// @notice Removes users from the whitelist
+    /// @notice Removes users from the allowlist
     /// @param _users The addresses of the users to be removed
-    function removeWhitelistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
-        _whitelistUsers(_users, false);
+    function removeAllowlistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
+        _allowlistUsers(_users, false);
 
         emit UsersRemoved(_users);
     }
@@ -106,7 +106,7 @@ contract WhitelistVoting is MajorityVotingBase {
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isUserWhitelisted(_msgSender(), snapshotBlock)) {
+        if (!isUserAllowlisted(_msgSender(), snapshotBlock)) {
             revert VoteCreationForbidden(_msgSender());
         }
 
@@ -133,7 +133,7 @@ contract WhitelistVoting is MajorityVotingBase {
         vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = whitelistedUserCount(snapshotBlock);
+        vote_.votingPower = allowlistedUserCount(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -186,19 +186,19 @@ contract WhitelistVoting is MajorityVotingBase {
         }
     }
 
-    /// @notice Checks if a user is whitelisted at given block number
+    /// @notice Checks if a user is allowlisted at given block number
     /// @param account The user address that is checked
     /// @param blockNumber The block number
-    function isUserWhitelisted(address account, uint256 blockNumber) public view returns (bool) {
+    function isUserAllowlisted(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
-    /// @notice Returns total count of users that are whitelisted at given block number
+    /// @notice Returns total count of users that are allowlisted at given block number
     /// @param blockNumber The specific block to get the count from
-    /// @return The user count that were whitelisted at the specified block number
-    function whitelistedUserCount(uint256 blockNumber) public view returns (uint256) {
+    /// @return The user count that were allowlisted at the specified block number
+    function allowlistedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _totalCheckpoints.getAtBlock(blockNumber);
@@ -207,13 +207,13 @@ contract WhitelistVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && isUserWhitelisted(_voter, vote_.snapshotBlock);
+        return _isVoteOpen(vote_) && isUserAllowlisted(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Adds or removes users from whitelist
+    /// @notice Adds or removes users from allowlist
     /// @param _users user addresses
-    /// @param _enabled whether to add or remove from whitelist
-    function _whitelistUsers(address[] calldata _users, bool _enabled) internal {
+    /// @param _enabled whether to add or remove from allowlist
+    function _allowlistUsers(address[] calldata _users, bool _enabled) internal {
         _totalCheckpoints.push(_enabled ? _add : _sub, _users.length);
 
         for (uint256 i = 0; i < _users.length; i++) {

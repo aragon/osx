@@ -7,7 +7,7 @@ import {
   handleTrustedForwarderSet,
   handleConfigUpdated,
   _handleVoteStarted
-} from '../../src/packages/ERC20Voting/erc20Voting';
+} from '../../src/packages/erc20/erc20-voting';
 import {ERC20VotingPackage, ERC20VotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,

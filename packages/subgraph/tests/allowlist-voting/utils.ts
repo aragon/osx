@@ -9,7 +9,7 @@ import {
   UsersAdded,
   UsersRemoved,
   TrustedForwarderSet
-} from '../../generated/templates/WhitelistVoting/WhitelistVoting';
+} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
 
 // events
 

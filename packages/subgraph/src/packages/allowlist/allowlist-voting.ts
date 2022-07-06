@@ -7,15 +7,15 @@ import {
   ConfigUpdated,
   UsersAdded,
   UsersRemoved,
-  WhitelistVoting,
+  AllowlistVoting,
   TrustedForwarderSet
-} from '../../../generated/templates/WhitelistVoting/WhitelistVoting';
+} from '../../../generated/templates/AllowlistVoting/AllowlistVoting';
 import {
   Action,
-  WhitelistPackage,
-  WhitelistProposal,
-  WhitelistVoter,
-  WhitelistVote
+  AllowlistPackage,
+  AllowlistProposal,
+  AllowlistVoter,
+  AllowlistVote
 } from '../../../generated/schema';
 import {VOTER_STATE} from '../../utils/constants';
 
@@ -35,7 +35,7 @@ export function _handleVoteStarted(
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
 
-  let proposalEntity = new WhitelistProposal(proposalId);
+  let proposalEntity = new AllowlistProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.pkg = event.address.toHexString();
   proposalEntity.voteId = event.params.voteId;
@@ -43,7 +43,7 @@ export function _handleVoteStarted(
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
 
-  let contract = WhitelistVoting.bind(event.address);
+  let contract = AllowlistVoting.bind(event.address);
   let vote = contract.try_getVote(event.params.voteId);
 
   if (!vote.reverted) {
@@ -81,7 +81,7 @@ export function _handleVoteStarted(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = WhitelistPackage.load(event.address.toHexString());
+  let packageEntity = AllowlistPackage.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_votesLength();
     if (!voteLength.reverted) {
@@ -95,9 +95,9 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = WhitelistVote.load(voterProposalId);
+  let voterProposalEntity = AllowlistVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new WhitelistVote(voterProposalId);
+    voterProposalEntity = new AllowlistVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
@@ -107,9 +107,9 @@ export function handleVoteCast(event: VoteCast): void {
   voterProposalEntity.save();
 
   // update count
-  let proposalEntity = WhitelistProposal.load(proposalId);
+  let proposalEntity = AllowlistProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = WhitelistVoting.bind(event.address);
+    let contract = AllowlistVoting.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
       proposalEntity.yea = vote.value.value8;
@@ -123,14 +123,14 @@ export function handleVoteCast(event: VoteCast): void {
 export function handleVoteExecuted(event: VoteExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
-  let proposalEntity = WhitelistProposal.load(proposalId);
+  let proposalEntity = AllowlistProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
     proposalEntity.save();
   }
 
   // update actions
-  let contract = WhitelistVoting.bind(event.address);
+  let contract = AllowlistVoting.bind(event.address);
   let vote = contract.try_getVote(event.params.voteId);
   if (!vote.reverted) {
     let actions = vote.value.value10;
@@ -152,7 +152,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
 }
 
 export function handleConfigUpdated(event: ConfigUpdated): void {
-  let packageEntity = WhitelistPackage.load(event.address.toHexString());
+  let packageEntity = AllowlistPackage.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.participationRequiredPct =
       event.params.participationRequiredPct;
@@ -166,9 +166,9 @@ export function handleUsersAdded(event: UsersAdded): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
-    let voterEntity = WhitelistVoter.load(user.toHexString());
+    let voterEntity = AllowlistVoter.load(user.toHexString());
     if (!voterEntity) {
-      voterEntity = new WhitelistVoter(user.toHexString());
+      voterEntity = new AllowlistVoter(user.toHexString());
       voterEntity.pkg = event.address.toHexString();
       voterEntity.save();
     }
@@ -179,15 +179,15 @@ export function handleUsersRemoved(event: UsersRemoved): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
-    let voterEntity = WhitelistVoter.load(user.toHexString());
+    let voterEntity = AllowlistVoter.load(user.toHexString());
     if (voterEntity) {
-      store.remove('WhitelistVoter', user.toHexString());
+      store.remove('AllowlistVoter', user.toHexString());
     }
   }
 }
 
 export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
-  let packageEntity = WhitelistPackage.load(event.address.toHexString());
+  let packageEntity = AllowlistPackage.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.trustedForwarder = event.params.forwarder;
     packageEntity.save();
