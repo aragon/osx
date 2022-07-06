@@ -118,8 +118,8 @@ export function handleVoteCast(event: VoteCast): void {
     let contract = ERC20Voting.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
-      proposalEntity.yea = vote.value.value8;
-      proposalEntity.nay = vote.value.value9;
+      proposalEntity.yes = vote.value.value8;
+      proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
       proposalEntity.save();
     }

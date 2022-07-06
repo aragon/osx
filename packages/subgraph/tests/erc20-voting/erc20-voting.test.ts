@@ -166,7 +166,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   let event = createNewVoteCastEvent(
     voteId,
     ADDRESS_ONE,
-    '2', // Yea
+    '2', // Yes
     votingPower,
     VOTING_ADDRESS
   );
@@ -181,7 +181,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals('ERC20VotingVoter', ADDRESS_ONE, 'id', ADDRESS_ONE);
 
   // check proposal
-  assert.fieldEquals('ERC20VotingProposal', proposalId, 'yea', '1');
+  assert.fieldEquals('ERC20VotingProposal', proposalId, 'yes', '1');
 
   clearStore();
 });

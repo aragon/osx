@@ -165,7 +165,7 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals('AllowlistVote', entityID, 'id', entityID);
 
   // check proposal
-  assert.fieldEquals('AllowlistProposal', proposalId, 'yea', '1');
+  assert.fieldEquals('AllowlistProposal', proposalId, 'yes', '1');
 
   clearStore();
 });

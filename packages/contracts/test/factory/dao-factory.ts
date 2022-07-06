@@ -265,9 +265,9 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yea);
+    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
-    expect(await voting.vote(0, VoteOption.Yea, true))
+    expect(await voting.vote(0, VoteOption.Yes, true))
       .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)
@@ -408,9 +408,9 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yea);
+    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
-    expect(await voting.vote(0, VoteOption.Yea, true))
+    expect(await voting.vote(0, VoteOption.Yes, true))
       .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)

@@ -126,8 +126,8 @@ interface Proposal {
 enum VoterState {
   None
   Abstain
-  Yea
-  Nay
+  Yes
+  No
 }
 
 # ERC20Voting
@@ -172,8 +172,8 @@ type ERC20VotingProposal implements Proposal @entity {
   snapshotBlock: BigInt!
   supportRequiredPct: BigInt!
   participationRequiredPct: BigInt!
-  yea: BigInt
-  nay: BigInt
+  yes: BigInt
+  no: BigInt
   abstain: BigInt
   votingPower: BigInt!
   voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
@@ -226,8 +226,8 @@ type AllowlistProposal implements Proposal @entity {
   supportRequiredPct: BigInt!
   participationRequired: BigInt!
   votingPower: BigInt!
-  yea: BigInt
-  nay: BigInt
+  yes: BigInt
+  no: BigInt
   abstain: BigInt
   voters: [AllowlistVote!]! @derivedFrom(field: "proposal")
   open: Boolean!

@@ -140,8 +140,8 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
             uint64 supportRequired,
             uint64 participationRequired,
             uint256 votingPower,
-            uint256 yea,
-            uint256 nay,
+            uint256 yes,
+            uint256 no,
             uint256 abstain,
             IDAO.Action[] memory actions
         )
@@ -156,8 +156,8 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         supportRequired = vote_.supportRequiredPct;
         participationRequired = vote_.participationRequiredPct;
         votingPower = vote_.votingPower;
-        yea = vote_.yea;
-        nay = vote_.nay;
+        yes = vote_.yes;
+        no = vote_.no;
         abstain = vote_.abstain;
         actions = vote_.actions;
     }
@@ -200,7 +200,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         }
 
         // Voting is already decided
-        if (_isValuePct(vote_.yea, vote_.votingPower, vote_.supportRequiredPct)) {
+        if (_isValuePct(vote_.yes, vote_.votingPower, vote_.supportRequiredPct)) {
             return true;
         }
 
@@ -209,7 +209,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
             return false;
         }
 
-        uint256 totalVotes = vote_.yea + vote_.nay;
+        uint256 totalVotes = vote_.yes + vote_.no;
 
         // Have enough people's stakes participated ? then proceed.
         if (
@@ -223,7 +223,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         }
 
         // Has enough support?
-        if (!_isValuePct(vote_.yea, totalVotes, vote_.supportRequiredPct)) {
+        if (!_isValuePct(vote_.yes, totalVotes, vote_.supportRequiredPct)) {
             return false;
         }
 

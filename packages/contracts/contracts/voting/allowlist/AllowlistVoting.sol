@@ -144,7 +144,7 @@ contract AllowlistVoting is MajorityVotingBase {
         emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
         if (_voteOption != VoteOption.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, VoteOption.Yea, _msgSender(), _executeIfDecided);
+            _vote(voteId, VoteOption.Yes, _msgSender(), _executeIfDecided);
         }
     }
 
@@ -160,19 +160,19 @@ contract AllowlistVoting is MajorityVotingBase {
         VoteOption state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
-        if (state == VoteOption.Yea) {
-            vote_.yea = vote_.yea - 1;
-        } else if (state == VoteOption.Nay) {
-            vote_.nay = vote_.nay - 1;
+        if (state == VoteOption.Yes) {
+            vote_.yes = vote_.yes - 1;
+        } else if (state == VoteOption.No) {
+            vote_.no = vote_.no - 1;
         } else if (state == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain - 1;
         }
 
         // write the updated/new vote for the voter.
-        if (_voteOption == VoteOption.Yea) {
-            vote_.yea = vote_.yea + 1;
-        } else if (_voteOption == VoteOption.Nay) {
-            vote_.nay = vote_.nay + 1;
+        if (_voteOption == VoteOption.Yes) {
+            vote_.yes = vote_.yes + 1;
+        } else if (_voteOption == VoteOption.No) {
+            vote_.no = vote_.no + 1;
         } else if (_voteOption == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain + 1;
         }

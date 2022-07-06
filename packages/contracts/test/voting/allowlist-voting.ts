@@ -175,8 +175,8 @@ describe('AllowlistVoting', function () {
       expect(vote.supportRequired).to.equal(2);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.participationRequired).to.equal(1);
-      expect(vote.yea).to.equal(0);
-      expect(vote.nay).to.equal(0);
+      expect(vote.yes).to.equal(0);
+      expect(vote.no).to.equal(0);
 
       expect(vote.startDate.add(minDuration)).to.equal(vote.endDate);
 
@@ -200,13 +200,13 @@ describe('AllowlistVoting', function () {
           0,
           0,
           false,
-          VoteOption.Yea
+          VoteOption.Yes
         )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(id, ownerAddress, '0x00')
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Yea, 1);
+        .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
       const block = await ethers.provider.getBlock('latest');
       const vote = await voting.getVote(id);
@@ -216,8 +216,8 @@ describe('AllowlistVoting', function () {
       expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.participationRequired).to.equal(1);
 
-      expect(vote.yea).to.equal(1);
-      expect(vote.nay).to.equal(0);
+      expect(vote.yes).to.equal(1);
+      expect(vote.no).to.equal(0);
     });
   });
 
@@ -254,21 +254,21 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    // VoteOption.Yea
-    it('increases the yea or nay count and emit correct events', async () => {
-      expect(await voting.vote(id, VoteOption.Yea, false))
+    // VoteOption.Yes
+    it('increases the yes or no count and emit correct events', async () => {
+      expect(await voting.vote(id, VoteOption.Yes, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Yea, 1);
+        .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
       let vote = await voting.getVote(id);
-      expect(vote.yea).to.equal(1);
+      expect(vote.yes).to.equal(1);
 
-      expect(await voting.vote(id, VoteOption.Nay, false))
+      expect(await voting.vote(id, VoteOption.No, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Nay, 1);
+        .withArgs(id, ownerAddress, VoteOption.No, 1);
 
       vote = await voting.getVote(id);
-      expect(vote.nay).to.equal(1);
+      expect(vote.no).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
@@ -278,47 +278,47 @@ describe('AllowlistVoting', function () {
       expect(vote.abstain).to.equal(1);
     });
 
-    it('voting multiple times should not increase yea or nay multiple times', async () => {
-      // yea still ends up to be 1 here even after voting
+    it('voting multiple times should not increase yes or no multiple times', async () => {
+      // yes still ends up to be 1 here even after voting
       // 2 times from the same wallet.
-      await voting.vote(id, VoteOption.Yea, false);
-      await voting.vote(id, VoteOption.Yea, false);
-      expect((await voting.getVote(0)).yea).to.equal(1);
+      await voting.vote(id, VoteOption.Yes, false);
+      await voting.vote(id, VoteOption.Yes, false);
+      expect((await voting.getVote(0)).yes).to.equal(1);
 
-      // yea gets removed, nay ends up as 1.
-      await voting.vote(id, VoteOption.Nay, false);
-      await voting.vote(id, VoteOption.Nay, false);
-      expect((await voting.getVote(0)).nay).to.equal(1);
+      // yes gets removed, no ends up as 1.
+      await voting.vote(id, VoteOption.No, false);
+      await voting.vote(id, VoteOption.No, false);
+      expect((await voting.getVote(0)).no).to.equal(1);
 
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
       expect((await voting.getVote(0)).abstain).to.equal(1);
     });
 
-    it('makes executable if enough yea is given from on voting power', async () => {
+    it('makes executable if enough yes is given from on voting power', async () => {
       // Since voting power is set to 29%, and
-      // whitelised is 10 addresses, voting yea
+      // whitelised is 10 addresses, voting yes
       // from 3 addresses should be enough to
       // make vote executable
-      await voting.vote(id, VoteOption.Yea, false);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yea, false);
+      await voting.vote(id, VoteOption.Yes, false);
+      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
       // // only 2 voted, not enough for 30%
       expect(await voting.canExecute(id)).to.equal(false);
       // // 3rd votes, enough.
-      await voting.connect(signers[2]).vote(id, VoteOption.Yea, false);
+      await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
 
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('makes executable if enough yea is given depending on yea + nay total', async () => {
+    it('makes executable if enough yes is given depending on yes + no total', async () => {
       // 2 supports
-      await voting.connect(signers[0]).vote(id, VoteOption.Yea, false);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yea, false);
+      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
       // 2 not supports
-      await voting.connect(signers[2]).vote(id, VoteOption.Nay, false);
-      await voting.connect(signers[3]).vote(id, VoteOption.Nay, false);
+      await voting.connect(signers[2]).vote(id, VoteOption.No, false);
+      await voting.connect(signers[3]).vote(id, VoteOption.No, false);
 
       // 2 abstain
       await voting.connect(signers[4]).vote(id, VoteOption.Abstain, false);
@@ -330,18 +330,18 @@ describe('AllowlistVoting', function () {
       await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
       await ethers.provider.send('evm_mine', []);
 
-      // 2 voted yea, 2 voted yea. 2 voted abstain.
+      // 2 voted yes, 2 voted yes. 2 voted abstain.
       // Enough to surpass supportedRequired percentage
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('executes the vote immediately while final yea is given', async () => {
-      // 2 votes in favor of yea
-      await voting.connect(signers[0]).vote(id, VoteOption.Yea, false);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yea, false);
+    it('executes the vote immediately while final yes is given', async () => {
+      // 2 votes in favor of yes
+      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
       // 3th supports(which is enough) and should execute right away.
-      let tx = await voting.connect(signers[3]).vote(id, VoteOption.Yea, true);
+      let tx = await voting.connect(signers[3]).vote(id, VoteOption.Yes, true);
       let rc = await tx.wait();
 
       // check for the `Executed` event in the DAO
@@ -378,7 +378,7 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    it('reverts if vote is executed while enough yea is not given ', async () => {
+    it('reverts if vote is executed while enough yes is not given ', async () => {
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('VoteExecutionForbidden', id)
       );

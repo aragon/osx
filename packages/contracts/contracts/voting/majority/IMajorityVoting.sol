@@ -11,8 +11,8 @@ interface IMajorityVoting {
     enum VoteOption {
         None,
         Abstain,
-        Yea,
-        Nay
+        Yes,
+        No
     }
 
     struct Vote {
@@ -22,8 +22,8 @@ interface IMajorityVoting {
         uint64 snapshotBlock;
         uint64 supportRequiredPct;
         uint64 participationRequiredPct;
-        uint256 yea;
-        uint256 nay;
+        uint256 yes;
+        uint256 no;
         uint256 abstain;
         uint256 votingPower;
         mapping(address => VoteOption) voters;
@@ -134,8 +134,8 @@ interface IMajorityVoting {
     /// @return supportRequired The support required
     /// @return participationRequired The required participation
     /// @return votingPower The voting power participating in the vote
-    /// @return yea The number of `yes` votes
-    /// @return nay The number of `no` votes
+    /// @return yes The number of `yes` votes
+    /// @return no The number of `no` votes
     /// @return abstain The number of `abstain` votes
     /// @return actions The actions to be executed in the associated DAO after the vote has passed
     function getVote(uint256 _voteId)
@@ -150,8 +150,8 @@ interface IMajorityVoting {
             uint64 supportRequired,
             uint64 participationRequired,
             uint256 votingPower,
-            uint256 yea,
-            uint256 nay,
+            uint256 yes,
+            uint256 no,
             uint256 abstain,
             IDAO.Action[] memory actions
         );

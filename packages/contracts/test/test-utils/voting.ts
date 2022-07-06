@@ -3,8 +3,8 @@ import {ethers} from 'hardhat';
 export enum VoteOption {
   None,
   Abstain,
-  Yea,
-  Nay,
+  Yes,
+  No,
 }
 
 const toBn = ethers.BigNumber.from;

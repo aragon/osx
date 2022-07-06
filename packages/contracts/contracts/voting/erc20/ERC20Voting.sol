@@ -126,19 +126,19 @@ contract ERC20Voting is MajorityVotingBase {
         VoteOption state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
-        if (state == VoteOption.Yea) {
-            vote_.yea = vote_.yea - voterStake;
-        } else if (state == VoteOption.Nay) {
-            vote_.nay = vote_.nay - voterStake;
+        if (state == VoteOption.Yes) {
+            vote_.yes = vote_.yes - voterStake;
+        } else if (state == VoteOption.No) {
+            vote_.no = vote_.no - voterStake;
         } else if (state == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain - voterStake;
         }
 
         // write the updated/new vote for the voter.
-        if (_voteOption == VoteOption.Yea) {
-            vote_.yea = vote_.yea + voterStake;
-        } else if (_voteOption == VoteOption.Nay) {
-            vote_.nay = vote_.nay + voterStake;
+        if (_voteOption == VoteOption.Yes) {
+            vote_.yes = vote_.yes + voterStake;
+        } else if (_voteOption == VoteOption.No) {
+            vote_.no = vote_.no + voterStake;
         } else if (_voteOption == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain + voterStake;
         }
