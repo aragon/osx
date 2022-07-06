@@ -8,10 +8,12 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./../permission/PermissionManager.sol";
 import "./../IDAO.sol";
 
-/// @title Abstract implementation of the DAO permissions
+/// @title An abstract contract providing a meta transaction compatible modifier to make functions permissioned through an associated DAO
 /// @author Aragon Association - 2022
-/// @notice This contract can be used to include the modifier logic(so contracts don't repeat the same code) that checks permissions on the dao.
-/// @dev When your contract inherits from this, it is important to call __Permission_init with the associated DAO address.
+/// @notice This contract provides an `auth` modifier that can be applied to functions in inheriting contracts.
+////        The permission to call these functions is than managed by the associated DAO.
+/// @dev Make sure to call `__DAOPermissioned_init` during initialization of the inheriting contract.
+/// @dev This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
 abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;

@@ -74,7 +74,8 @@ contract PluginRepo is
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
 
-    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
+    /// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission
     function _authorizeUpgrade(address)
         internal
         virtual

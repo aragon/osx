@@ -47,7 +47,8 @@ abstract contract InterfaceBasedRegistry is DAOPermissioned, UUPSUpgradeable {
         targetInterfaceId = _targetInterfaceId;
     }
 
-    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
+    /// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @notice Register an ERC165 contract address
