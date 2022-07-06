@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AllowlistVoting, DAOMock} from '../../typechain';
-import {VoterState, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('AllowlistVoting', function () {
@@ -120,7 +120,7 @@ describe('AllowlistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .newVote('0x00', [], 0, 0, false, VoterState.None)
+          .newVote('0x00', [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(
         customError('VoteCreationForbidden', signers[1].address)
       );
@@ -132,10 +132,10 @@ describe('AllowlistVoting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.newVote('0x00', [], startDate, endDate, false, VoterState.None)
+        voting.newVote('0x00', [], startDate, endDate, false, VoteOption.None)
       ).to.be.revertedWith(
         customError(
-          'VoteTimesForbidden',
+          'VoteTimesInvalid',
           current + 1, // TODO hacky
           startDate,
           endDate,
@@ -148,7 +148,7 @@ describe('AllowlistVoting', function () {
       const id = 0; // voteId
 
       expect(
-        await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None)
+        await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.None)
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(0, ownerAddress, '0x00');
@@ -180,12 +180,12 @@ describe('AllowlistVoting', function () {
       const id = 0; // voteId
 
       expect(
-        await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.Yea)
+        await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.Yea)
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(id, ownerAddress, '0x00')
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoterState.Yea, 1);
+        .withArgs(id, ownerAddress, VoteOption.Yea, 1);
 
       const block = await ethers.provider.getBlock('latest');
       const vote = await voting.getVote(id);
@@ -223,28 +223,28 @@ describe('AllowlistVoting', function () {
         addresses
       );
 
-      await voting.newVote('0x00', dummyActions, 0, 0, false, VoterState.None);
+      await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.None);
     });
 
-    // VoterState.Yea
+    // VoteOption.Yea
     it('increases the yea or nay count and emit correct events', async () => {
-      expect(await voting.vote(id, VoterState.Yea, false))
+      expect(await voting.vote(id, VoteOption.Yea, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoterState.Yea, 1);
+        .withArgs(id, ownerAddress, VoteOption.Yea, 1);
 
       let vote = await voting.getVote(id);
       expect(vote.yea).to.equal(1);
 
-      expect(await voting.vote(id, VoterState.Nay, false))
+      expect(await voting.vote(id, VoteOption.Nay, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoterState.Nay, 1);
+        .withArgs(id, ownerAddress, VoteOption.Nay, 1);
 
       vote = await voting.getVote(id);
       expect(vote.nay).to.equal(1);
 
-      expect(await voting.vote(id, VoterState.Abstain, false))
+      expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoterState.Abstain, 1);
+        .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
 
       vote = await voting.getVote(id);
       expect(vote.abstain).to.equal(1);
@@ -253,17 +253,17 @@ describe('AllowlistVoting', function () {
     it('voting multiple times should not increase yea or nay multiple times', async () => {
       // yea still ends up to be 1 here even after voting
       // 2 times from the same wallet.
-      await voting.vote(id, VoterState.Yea, false);
-      await voting.vote(id, VoterState.Yea, false);
+      await voting.vote(id, VoteOption.Yea, false);
+      await voting.vote(id, VoteOption.Yea, false);
       expect((await voting.getVote(0)).yea).to.equal(1);
 
       // yea gets removed, nay ends up as 1.
-      await voting.vote(id, VoterState.Nay, false);
-      await voting.vote(id, VoterState.Nay, false);
+      await voting.vote(id, VoteOption.Nay, false);
+      await voting.vote(id, VoteOption.Nay, false);
       expect((await voting.getVote(0)).nay).to.equal(1);
 
-      await voting.vote(id, VoterState.Abstain, false);
-      await voting.vote(id, VoterState.Abstain, false);
+      await voting.vote(id, VoteOption.Abstain, false);
+      await voting.vote(id, VoteOption.Abstain, false);
       expect((await voting.getVote(0)).abstain).to.equal(1);
     });
 
@@ -272,29 +272,29 @@ describe('AllowlistVoting', function () {
       // whitelised is 10 addresses, voting yea
       // from 3 addresses should be enough to
       // make vote executable
-      await voting.vote(id, VoterState.Yea, false);
-      await voting.connect(signers[1]).vote(id, VoterState.Yea, false);
+      await voting.vote(id, VoteOption.Yea, false);
+      await voting.connect(signers[1]).vote(id, VoteOption.Yea, false);
 
       // // only 2 voted, not enough for 30%
       expect(await voting.canExecute(id)).to.equal(false);
       // // 3rd votes, enough.
-      await voting.connect(signers[2]).vote(id, VoterState.Yea, false);
+      await voting.connect(signers[2]).vote(id, VoteOption.Yea, false);
 
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
     it('makes executable if enough yea is given depending on yea + nay total', async () => {
       // 2 supports
-      await voting.connect(signers[0]).vote(id, VoterState.Yea, false);
-      await voting.connect(signers[1]).vote(id, VoterState.Yea, false);
+      await voting.connect(signers[0]).vote(id, VoteOption.Yea, false);
+      await voting.connect(signers[1]).vote(id, VoteOption.Yea, false);
 
       // 2 not supports
-      await voting.connect(signers[2]).vote(id, VoterState.Nay, false);
-      await voting.connect(signers[3]).vote(id, VoterState.Nay, false);
+      await voting.connect(signers[2]).vote(id, VoteOption.Nay, false);
+      await voting.connect(signers[3]).vote(id, VoteOption.Nay, false);
 
       // 2 abstain
-      await voting.connect(signers[4]).vote(id, VoterState.Abstain, false);
-      await voting.connect(signers[5]).vote(id, VoterState.Abstain, false);
+      await voting.connect(signers[4]).vote(id, VoteOption.Abstain, false);
+      await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
 
       expect(await voting.canExecute(id)).to.equal(false);
 
@@ -309,11 +309,11 @@ describe('AllowlistVoting', function () {
 
     it('executes the vote immediately while final yea is given', async () => {
       // 2 votes in favor of yea
-      await voting.connect(signers[0]).vote(id, VoterState.Yea, false);
-      await voting.connect(signers[1]).vote(id, VoterState.Yea, false);
+      await voting.connect(signers[0]).vote(id, VoteOption.Yea, false);
+      await voting.connect(signers[1]).vote(id, VoteOption.Yea, false);
 
       // 3th supports(which is enough) and should execute right away.
-      let tx = await voting.connect(signers[3]).vote(id, VoterState.Yea, true);
+      let tx = await voting.connect(signers[3]).vote(id, VoteOption.Yea, true);
       let rc = await tx.wait();
 
       // check for the `Executed` event in the DAO

@@ -39,7 +39,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     /// @param start The start date of the vote as a unix timestamp
     /// @param end The end date of the vote as a unix timestamp
     /// @param minDuration The minimal duration of the vote in seconds
-    error VoteTimesForbidden(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero();
@@ -47,7 +47,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     /// @notice Thrown if a voter is not allowed to cast a vote
     /// @param voteId The ID of the vote
     /// @param sender The address of the voter
-    error VoteCastForbidden(uint256 voteId, address sender);
+    error VoteCastingForbidden(uint256 voteId, address sender);
 
     /// @notice Thrown if the vote execution is forbidden
     error VoteExecutionForbidden(uint256 voteId);
@@ -92,18 +92,18 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoterState _choice
+        VoteOption _voteOption
     ) external virtual returns (uint256 voteId);
 
     /// @inheritdoc IMajorityVoting
     function vote(
         uint256 _voteId,
-        VoterState _choice,
+        VoteOption _voteOption,
         bool _executesIfDecided
     ) external {
-        if (_choice != VoterState.None && !_canVote(_voteId, _msgSender()))
-            revert VoteCastForbidden(_voteId, _msgSender());
-        _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
+        if (_voteOption != VoteOption.None && !_canVote(_voteId, _msgSender()))
+            revert VoteCastingForbidden(_voteId, _msgSender());
+        _vote(_voteId, _voteOption, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -113,7 +113,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoterState(uint256 _voteId, address _voter) public view returns (VoterState) {
+    function getVoteOption(uint256 _voteId, address _voter) public view returns (VoteOption) {
         return votes[_voteId].voters[_voter];
     }
 
@@ -164,11 +164,11 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote
-    /// @param _choice Whether voter abstains, supports or not supports to vote.
+    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
         uint256 _voteId,
-        VoterState _choice,
+        VoteOption _voteOption,
         address _voter,
         bool _executesIfDecided
     ) internal virtual;

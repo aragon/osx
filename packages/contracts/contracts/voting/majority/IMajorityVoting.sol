@@ -8,7 +8,7 @@ import "../../core/IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice The interface for majority voting contracts
 interface IMajorityVoting {
-    enum VoterState {
+    enum VoteOption {
         None,
         Abstain,
         Yea,
@@ -26,7 +26,7 @@ interface IMajorityVoting {
         uint256 nay;
         uint256 abstain;
         uint256 votingPower;
-        mapping(address => VoterState) voters;
+        mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
     }
 
@@ -39,13 +39,13 @@ interface IMajorityVoting {
     /// @notice Emitted when a vote is casted by a voter
     /// @param voteId The ID of the vote
     /// @param voter The voter casting the vote
-    /// @param voterState The vote option chosen
-    /// @param voterWeight The weight of the casted vote
+    /// @param voteOption The vote option chosen
+    /// @param voteWeight The weight of the casted vote
     event VoteCast(
         uint256 indexed voteId,
         address indexed voter,
-        uint8 voterState,
-        uint256 voterWeight
+        uint8 voteOption,
+        uint256 voteWeight
     );
 
     /// @notice Emitted when a vote is executed
@@ -79,7 +79,7 @@ interface IMajorityVoting {
     /// @param _startDate The start date of the vote. If 0, uses current timestamp
     /// @param _endDate The end date of the vote. If 0, uses _start + minDuration
     /// @param _executeIfDecided Option to enable automatic execution on the last required vote
-    /// @param _choice The vote choice to cast on creation
+    /// @param _voteOption The vote voteOption to cast on creation
     /// @return voteId The ID of the vote
     function newVote(
         bytes calldata _proposalMetadata,
@@ -87,17 +87,17 @@ interface IMajorityVoting {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoterState _choice
+        VoteOption _voteOption
     ) external returns (uint256 voteId);
 
     /// @notice Votes for a vote option and optionally executes the vote
     /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports]
     /// @param _voteId The ID of the vote
-    /// @param  _choice Whether voter abstains, supports or not supports to vote.
+    /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided Whether the vote should execute its action if it becomes decided
     function vote(
         uint256 _voteId,
-        VoterState _choice,
+        VoteOption _voteOption,
         bool _executesIfDecided
     ) external;
 
@@ -117,8 +117,8 @@ interface IMajorityVoting {
 
     /// @notice Returns the state of a voter for a given vote by its ID
     /// @param _voteId The ID of the vote
-    /// @return VoterState of the requested voter for a certain vote
-    function getVoterState(uint256 _voteId, address _voter) external view returns (VoterState);
+    /// @return VoteOption of the requested voter for a certain vote
+    function getVoteOption(uint256 _voteId, address _voter) external view returns (VoteOption);
 
     /// @param participationRequiredPct The required participation in percent
     /// @param supportRequiredPct The required support in percent

@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 
-export enum VoterState {
+export enum VoteOption {
   None,
   Abstain,
   Yea,

@@ -67,7 +67,7 @@ contract ERC20Voting is MajorityVotingBase {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoterState _choice
+        VoteOption _voteOption
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -83,7 +83,7 @@ contract ERC20Voting is MajorityVotingBase {
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
         if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
-            revert VoteTimesForbidden({
+            revert VoteTimesInvalid({
                 current: currentTimestamp,
                 start: _startDate,
                 end: _endDate,
@@ -107,15 +107,15 @@ contract ERC20Voting is MajorityVotingBase {
 
         emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
-        if (_choice != VoterState.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, _choice, _msgSender(), _executeIfDecided);
+        if (_voteOption != VoteOption.None && canVote(voteId, _msgSender())) {
+            _vote(voteId, _voteOption, _msgSender(), _executeIfDecided);
         }
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _voteId,
-        VoterState _choice,
+        VoteOption _voteOption,
         address _voter,
         bool _executesIfDecided
     ) internal override {
@@ -123,29 +123,29 @@ contract ERC20Voting is MajorityVotingBase {
 
         // This could re-enter, though we can assume the governance token is not malicious
         uint256 voterStake = votingToken.getPastVotes(_voter, vote_.snapshotBlock);
-        VoterState state = vote_.voters[_voter];
+        VoteOption state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
-        if (state == VoterState.Yea) {
+        if (state == VoteOption.Yea) {
             vote_.yea = vote_.yea - voterStake;
-        } else if (state == VoterState.Nay) {
+        } else if (state == VoteOption.Nay) {
             vote_.nay = vote_.nay - voterStake;
-        } else if (state == VoterState.Abstain) {
+        } else if (state == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain - voterStake;
         }
 
         // write the updated/new vote for the voter.
-        if (_choice == VoterState.Yea) {
+        if (_voteOption == VoteOption.Yea) {
             vote_.yea = vote_.yea + voterStake;
-        } else if (_choice == VoterState.Nay) {
+        } else if (_voteOption == VoteOption.Nay) {
             vote_.nay = vote_.nay + voterStake;
-        } else if (_choice == VoterState.Abstain) {
+        } else if (_voteOption == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain + voterStake;
         }
 
-        vote_.voters[_voter] = _choice;
+        vote_.voters[_voter] = _voteOption;
 
-        emit VoteCast(_voteId, _voter, uint8(_choice), voterStake);
+        emit VoteCast(_voteId, _voter, uint8(_voteOption), voterStake);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);

@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {VoterState} from '../test-utils/voting';
+import {VoteOption} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
@@ -265,9 +265,9 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
+    await voting.newVote('0x', actions, 0, 0, false, VoteOption.Yea);
 
-    expect(await voting.vote(0, VoterState.Yea, true))
+    expect(await voting.vote(0, VoteOption.Yea, true))
       .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)
@@ -408,9 +408,9 @@ describe('DAOFactory: ', function () {
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
+    await voting.newVote('0x', actions, 0, 0, false, VoteOption.Yea);
 
-    expect(await voting.vote(0, VoterState.Yea, true))
+    expect(await voting.vote(0, VoteOption.Yea, true))
       .to.emit(dao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)

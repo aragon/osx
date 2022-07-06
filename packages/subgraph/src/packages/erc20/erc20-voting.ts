@@ -100,8 +100,8 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
-  voterProposalEntity.vote = VOTER_STATE.get(event.params.voterState);
-  voterProposalEntity.weight = event.params.voterWeight;
+  voterProposalEntity.vote = VOTER_STATE.get(event.params.voteOption);
+  voterProposalEntity.weight = event.params.voteWeight;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 
