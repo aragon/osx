@@ -120,7 +120,7 @@ describe('AllowlistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .newVote('0x00', [], 0, 0, false, VoteOption.None)
+          .createVote('0x00', [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(
         customError('VoteCreationForbidden', signers[1].address)
       );
@@ -132,7 +132,14 @@ describe('AllowlistVoting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.newVote('0x00', [], startDate, endDate, false, VoteOption.None)
+        voting.createVote(
+          '0x00',
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
       ).to.be.revertedWith(
         customError(
           'VoteTimesInvalid',
@@ -148,7 +155,14 @@ describe('AllowlistVoting', function () {
       const id = 0; // voteId
 
       expect(
-        await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.None)
+        await voting.createVote(
+          '0x00',
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.None
+        )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(0, ownerAddress, '0x00');
@@ -180,7 +194,14 @@ describe('AllowlistVoting', function () {
       const id = 0; // voteId
 
       expect(
-        await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.Yea)
+        await voting.createVote(
+          '0x00',
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.Yea
+        )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(id, ownerAddress, '0x00')
@@ -223,7 +244,14 @@ describe('AllowlistVoting', function () {
         addresses
       );
 
-      await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.None);
+      await voting.createVote(
+        '0x00',
+        dummyActions,
+        0,
+        0,
+        false,
+        VoteOption.None
+      );
     });
 
     // VoteOption.Yea

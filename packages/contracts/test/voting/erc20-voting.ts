@@ -80,7 +80,7 @@ describe('ERC20Voting', function () {
     it('reverts total token supply while creating a vote is 0', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.newVote('0x00', [], 0, 0, false, VoteOption.None)
+        voting.createVote('0x00', [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
@@ -91,7 +91,14 @@ describe('ERC20Voting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.newVote('0x00', [], startDate, endDate, false, VoteOption.None)
+        voting.createVote(
+          '0x00',
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
       ).to.be.revertedWith(
         customError(
           'VoteTimesInvalid',
@@ -110,7 +117,14 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       expect(
-        await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.None)
+        await voting.createVote(
+          '0x00',
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.None
+        )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(id, ownerAddress, '0x00');
@@ -144,7 +158,14 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       expect(
-        await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.Yea)
+        await voting.createVote(
+          '0x00',
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.Yea
+        )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
         .withArgs(id, ownerAddress, '0x00')
@@ -179,7 +200,14 @@ describe('ERC20Voting', function () {
       // set voting power to 100
       await erc20VoteMock.mock.getPastTotalSupply.returns(votingPower);
 
-      await voting.newVote('0x00', dummyActions, 0, 0, false, VoteOption.None);
+      await voting.createVote(
+        '0x00',
+        dummyActions,
+        0,
+        0,
+        false,
+        VoteOption.None
+      );
     });
 
     it('should not be able to vote if user has 0 token', async () => {

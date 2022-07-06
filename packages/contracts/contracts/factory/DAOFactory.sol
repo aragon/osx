@@ -90,7 +90,7 @@ contract DAOFactory {
 
         // Create token and merkle minter
         dao.grant(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
-        (token, minter) = tokenFactory.newToken(dao, _tokenConfig, _mintConfig);
+        (token, minter) = tokenFactory.createToken(dao, _tokenConfig, _mintConfig);
         dao.revoke(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
 
         // register dao with its name and token to the registry

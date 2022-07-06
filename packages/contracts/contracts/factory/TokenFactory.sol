@@ -54,7 +54,7 @@ contract TokenFactory {
     /// @param _mintConfig contains addresses and values(where to mint tokens and how much)
     /// @return ERC20VotesUpgradeable new token address
     /// @return MerkleMinter new merkle minter address(zero address in case passed token addr was not zero)
-    function newToken(
+    function createToken(
         DAO _dao,
         TokenConfig calldata _tokenConfig,
         MintConfig calldata _mintConfig

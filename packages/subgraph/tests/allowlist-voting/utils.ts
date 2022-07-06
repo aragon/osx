@@ -40,10 +40,10 @@ export function createNewVoteStartedEvent(
   description: string,
   contractAddress: string
 ): VoteStarted {
-  let newVoteStartedEvent = changetype<VoteStarted>(newMockEvent());
+  let createVoteStartedEvent = changetype<VoteStarted>(newMockEvent());
 
-  newVoteStartedEvent.address = Address.fromString(contractAddress);
-  newVoteStartedEvent.parameters = [];
+  createVoteStartedEvent.address = Address.fromString(contractAddress);
+  createVoteStartedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -58,11 +58,11 @@ export function createNewVoteStartedEvent(
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
 
-  newVoteStartedEvent.parameters.push(voteIdParam);
-  newVoteStartedEvent.parameters.push(creatorParam);
-  newVoteStartedEvent.parameters.push(descriptionParam);
+  createVoteStartedEvent.parameters.push(voteIdParam);
+  createVoteStartedEvent.parameters.push(creatorParam);
+  createVoteStartedEvent.parameters.push(descriptionParam);
 
-  return newVoteStartedEvent;
+  return createVoteStartedEvent;
 }
 
 export function createNewVoteCastEvent(
@@ -72,10 +72,10 @@ export function createNewVoteCastEvent(
   voteWeight: string,
   contractAddress: string
 ): VoteCast {
-  let newVoteCastEvent = changetype<VoteCast>(newMockEvent());
+  let createVoteCastEvent = changetype<VoteCast>(newMockEvent());
 
-  newVoteCastEvent.address = Address.fromString(contractAddress);
-  newVoteCastEvent.parameters = [];
+  createVoteCastEvent.address = Address.fromString(contractAddress);
+  createVoteCastEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -94,22 +94,22 @@ export function createNewVoteCastEvent(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteWeight))
   );
 
-  newVoteCastEvent.parameters.push(voteIdParam);
-  newVoteCastEvent.parameters.push(voterParam);
-  newVoteCastEvent.parameters.push(voteOptionParam);
-  newVoteCastEvent.parameters.push(voteWeightParam);
+  createVoteCastEvent.parameters.push(voteIdParam);
+  createVoteCastEvent.parameters.push(voterParam);
+  createVoteCastEvent.parameters.push(voteOptionParam);
+  createVoteCastEvent.parameters.push(voteWeightParam);
 
-  return newVoteCastEvent;
+  return createVoteCastEvent;
 }
 
 export function createNewVoteExecutedEvent(
   voteId: string,
   contractAddress: string
 ): VoteExecuted {
-  let newVoteExecutedEvent = changetype<VoteExecuted>(newMockEvent());
+  let createVoteExecutedEvent = changetype<VoteExecuted>(newMockEvent());
 
-  newVoteExecutedEvent.address = Address.fromString(contractAddress);
-  newVoteExecutedEvent.parameters = [];
+  createVoteExecutedEvent.address = Address.fromString(contractAddress);
+  createVoteExecutedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -120,10 +120,10 @@ export function createNewVoteExecutedEvent(
     ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
   );
 
-  newVoteExecutedEvent.parameters.push(voteIdParam);
-  newVoteExecutedEvent.parameters.push(execResultsParam);
+  createVoteExecutedEvent.parameters.push(voteIdParam);
+  createVoteExecutedEvent.parameters.push(execResultsParam);
 
-  return newVoteExecutedEvent;
+  return createVoteExecutedEvent;
 }
 
 export function createNewConfigUpdatedEvent(

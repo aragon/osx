@@ -81,7 +81,7 @@ interface IMajorityVoting {
     /// @param _executeIfDecided Option to enable automatic execution on the last required vote
     /// @param _voteOption The vote voteOption to cast on creation
     /// @return voteId The ID of the vote
-    function newVote(
+    function createVote(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
