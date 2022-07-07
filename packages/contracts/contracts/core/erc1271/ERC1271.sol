@@ -13,10 +13,10 @@ abstract contract ERC1271 {
      * MUST NOT modify state (using STATICCALL for solc < 0.5, view modifier for solc > 0.5)
      * MUST allow external calls
      */
-    /// @dev Should return whether the signature provided is valid for the provided data
-    /// @param _hash Keccak256 hash of arbitrary length data signed on the behalf of address(this)
+    /// @notice Checks whether a signature is valid for the provided data
+    /// @param _hash The keccak256 hash of arbitrary length data signed on the behalf of address(this)
     /// @param _signature Signature byte array associated with _data
-    /// @return magicValue The bytes4 magic value 0x1626ba7e when function passes
+    /// @return magicValue Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid
     function isValidSignature(bytes32 _hash, bytes memory _signature)
         external
         view

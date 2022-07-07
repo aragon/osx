@@ -12,7 +12,7 @@ interface IPermissionOracle {
     /// @param _who The address (EOA or contract) for which the permission are checked
     /// @param _permissionID The permission identifier
     /// @param _data Optional data passed to the `PermissionOracle` implementation
-    /// @return allowed Wheter the permission is valid or not
+    /// @return allowed Returns true if the call is permitted by the implementening oracle.
     function checkPermissions(
         address _where,
         address _who,

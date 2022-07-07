@@ -43,7 +43,7 @@ library PermissionLib {
     error PermissionImmutable(address where, bytes32 permissionID);
 }
 
-/// @title The permission manager used in the DAO contract.
+/// @title The permission manager used in the DAO contract
 /// @author Aragon Association - 2021, 2022
 /// @notice This contract is used in the DAO contract and handles the permissions of a DAO and its associated components.
 contract PermissionManager is Initializable {
@@ -197,7 +197,7 @@ contract PermissionManager is Initializable {
     /// @param _who The address (EOA or contract) for which the permission is checked
     /// @param _permissionID The permission identifier
     /// @param _data The optional data passed to the `PermissionOracle` registered
-    /// @return bool Returns true if `who` has the permissions on the contract via the specified permission identifier
+    /// @return bool Returns true if `who` has the permissions on the target contract via the specified permission identifier
     function checkPermissions(
         address _where,
         address _who,
@@ -218,7 +218,7 @@ contract PermissionManager is Initializable {
         return immutablePermissions[immutablePermissionHash(_where, _permissionID)];
     }
 
-    /// @notice Grants the `ROOT_PERMISSION_ID` permission during initialization of the permission manager
+    /// @notice Grants the `ROOT_PERMISSION_ID` permission to the initial owner during initialization of the permission manager
     /// @param _initialOwner The initial owner of the permission manager
     function _initializePermissionManager(address _initialOwner) internal {
         _grant(address(this), _initialOwner, ROOT_PERMISSION_ID);
