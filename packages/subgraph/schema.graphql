@@ -123,7 +123,7 @@ interface Proposal {
 
 # Voting
 
-enum VoterState {
+enum VoteOption {
   None
   Abstain
   Yes
@@ -154,7 +154,7 @@ type ERC20Vote @entity {
   id: ID! # voter + proposal
   voter: ERC20VotingVoter!
   proposal: ERC20VotingProposal!
-  vote: VoterState!
+  vote: VoteOption!
   weight: BigInt!
   createdAt: BigInt!
 }
@@ -207,7 +207,7 @@ type AllowlistVote @entity {
   id: ID! # voter + proposal
   voter: AllowlistVoter!
   proposal: AllowlistProposal!
-  vote: VoterState!
+  vote: VoteOption!
   weight: BigInt!
   createdAt: BigInt!
 }
