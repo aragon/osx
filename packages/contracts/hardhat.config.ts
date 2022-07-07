@@ -68,6 +68,13 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: 0,
   },
+  docgen: {
+    outputDir: 'docs',
+    theme: 'markdown',
+    pages: 'files',
+    collapseNewlines: true,
+    exclude: ['test'],
+  },
 };
 
 export default config;
