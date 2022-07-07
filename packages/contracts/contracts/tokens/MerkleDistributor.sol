@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 import "../core/component/MetaTxComponent.sol";
 
+/// @title MerkleDistributor
+/// @notice A component distributing claimable ERC20 tokens via a merkle tree
 contract MerkleDistributor is MetaTxComponent {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -28,7 +30,7 @@ contract MerkleDistributor is MetaTxComponent {
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
     /// @notice Initializes the component
-    /// @dev This is required for the UUPS upgradability pattern
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _dao The IDAO interface of the associated DAO
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _token A mintable ERC20 token

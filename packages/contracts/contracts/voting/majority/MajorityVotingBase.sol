@@ -6,7 +6,7 @@ import "../../core/component/MetaTxComponent.sol";
 import "../../utils/TimeHelpers.sol";
 import "./IMajorityVoting.sol";
 
-/// @title The abstract implementation of majority voting components
+/// @title MajorityVotingBase
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
@@ -53,7 +53,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     error VoteExecutionForbidden(uint256 voteId);
 
     /// @notice Initializes the component
-    /// @dev This is required for the UUPS upgradability pattern
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _dao The IDAO interface of the associated DAO
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _participationRequiredPct The minimal required participation in percent.

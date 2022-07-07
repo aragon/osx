@@ -9,13 +9,14 @@ import "../erc165/AdaptiveERC165.sol";
 import "../IDAO.sol";
 import "./DAOPermissioned.sol";
 
-/// @title The base component in the Aragon DAO framework
+/// @title Component
 /// @author Aragon Association - 2021, 2022
-/// @notice Any component within the Aragon DAO framework has to inherit from this contract
+/// @notice The base component in the Aragon DAO framework
 abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DAOPermissioned {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
-    /// @notice Initialization
+    /// @notice Initializes the DAO by storing the associated DAO and registering the ERC165 interface ID
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _dao The associated DAO address
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
         __DAOPermissioned_init(_dao);
@@ -24,7 +25,8 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DAOPermissioned 
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
+    ///      The caller must have the `UPGRADE_PERMISSION_ID` permission
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @dev Fallback to handle future versions of the ERC165 standard.

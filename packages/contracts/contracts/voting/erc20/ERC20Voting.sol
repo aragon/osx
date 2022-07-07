@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 
 import "../majority/MajorityVotingBase.sol";
 
-/// @title A component for ERC-20 token voting
+/// @title ERC20Voting
 /// @author Aragon Association - 2021-2022
 /// @notice The majority voting implementation using an ERC-20 token
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
@@ -20,7 +20,7 @@ contract ERC20Voting is MajorityVotingBase {
     error NoVotingPower();
 
     /// @notice Initializes the component
-    /// @dev This is required for the UUPS upgradability pattern
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _dao The IDAO interface of the associated DAO
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _participationRequiredPct The minimal required participation in percent.

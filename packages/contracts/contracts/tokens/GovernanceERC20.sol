@@ -12,6 +12,8 @@ import "../core/component/DAOPermissioned.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
+/// @title GovernanceERC20
+/// @author Aragon Association
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DAOPermissioned {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION_ID");

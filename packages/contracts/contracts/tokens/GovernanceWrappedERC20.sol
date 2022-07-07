@@ -28,6 +28,9 @@ import "../core/IDAO.sol";
 //    GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
 //    EIP712Upgradeable => ERC20Upgradeable => Initializable
 // ]
+
+/// @title GovernanceWrappedERC20
+/// @author Aragon Association
 contract GovernanceWrappedERC20 is
     Initializable,
     AdaptiveERC165,

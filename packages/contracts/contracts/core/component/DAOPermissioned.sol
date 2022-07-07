@@ -10,10 +10,11 @@ import "./../IDAO.sol";
 
 /// @title An abstract contract providing a meta transaction compatible modifier to make functions permissioned through an associated DAO
 /// @author Aragon Association - 2022
-/// @notice This contract provides an `auth` modifier that can be applied to functions in inheriting contracts.
-////        The permission to call these functions is than managed by the associated DAO.
-/// @dev Make sure to call `__DAOPermissioned_init` during initialization of the inheriting contract.
-/// @dev This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
+/// @notice An abstract contract providing a meta transaction compatible modifier to make functions permissioned through an associated DAO
+///         This contract provides an `auth` modifier that can be applied to functions in inheriting contracts
+////        The permission to call these functions is than managed by the associated DAO
+/// @dev Make sure to call `__DAOPermissioned_init` during initialization of the inheriting contract
+///     This contract is compatible with meta transactions through OZ's `ContextUpgradable`
 abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;

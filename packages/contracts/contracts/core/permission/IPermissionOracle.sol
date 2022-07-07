@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.10;
 
-/// @title The IPermissionOracle to have dynamic and more customary permissions
+/// @title IPermissionOracle
 /// @author Aragon Association - 2021
-/// @notice This interface can be implemented to register support more customary permission depending on
-///         on- or off-chain state, e.g., by querying token ownershop or a secondary oracle, respectively.
+/// @notice This interface can be implemented to support more customary permission depending on
+///         on- or off-chain state, e.g., by querying token ownershop or a secondary oracle, respectively
 interface IPermissionOracle {
     /// @notice This method is used to check if a callee has permission
     /// @param _where The address of the target contract

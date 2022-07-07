@@ -6,11 +6,12 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 
 import "./Component.sol";
 
-/// @title Base component in the Aragon DAO framework supporting meta transactions
+/// @title MetaTxComponent
 /// @author Aragon Association - 2022
-/// @notice Any component within the Aragon DAO framework using meta transactions has to inherit from this contract
+/// @notice Base component in the Aragon DAO framework supporting meta transactions
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
-    bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID = keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
+    bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
+        keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 
     event TrustedForwarderSet(address forwarder);
 

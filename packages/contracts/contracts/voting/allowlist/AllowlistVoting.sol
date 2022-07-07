@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/utils/Checkpoints.sol";
 import "../../utils/UncheckedMath.sol";
 import "../majority/MajorityVotingBase.sol";
 
-/// @title A component for allowlist voting
+/// @title AllowlistVoting
 /// @author Aragon Association - 2021-2022
-/// @notice The majority voting implementation using an ERC-20 token
+/// @notice The majority voting implementation using an allowlist
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
 contract AllowlistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
@@ -39,7 +39,7 @@ contract AllowlistVoting is MajorityVotingBase {
     event UsersRemoved(address[] users);
 
     /// @notice Initializes the component
-    /// @dev This is required for the UUPS upgradability pattern
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _dao The IDAO interface of the associated DAO
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _participationRequiredPct The minimal required participation in percent.

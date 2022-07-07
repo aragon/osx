@@ -53,7 +53,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     ///         * registering the ERC165 interface ID
     ///         * setting the trusted forwarder for meta transactions
     ///         * giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup)
-    /// @dev This is required for the Universal Upgradeable Proxy Standard (UUPS)
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
     /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission
     /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions
@@ -71,7 +71,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     }
 
     //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
+    ///      The caller must have the `UPGRADE_PERMISSION_ID` permission
     function _authorizeUpgrade(address)
         internal
         virtual

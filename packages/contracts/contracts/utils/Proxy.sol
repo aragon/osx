@@ -4,9 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-// Free Function Approach...
-
-// @dev Internal helper method to create a proxy contract based on the passed base contract address
+// @notice Free function to create a proxy contract based on the passed base contract address
 // @param _logic The address of the base contract
 // @param _data The constructor arguments for this contract
 // @return addr The address of the proxy contract created

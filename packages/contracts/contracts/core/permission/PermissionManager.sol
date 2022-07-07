@@ -43,9 +43,9 @@ library PermissionLib {
     error PermissionImmutable(address where, bytes32 permissionID);
 }
 
-/// @title The permission manager used in the DAO contract
+/// @title PermissionManager
 /// @author Aragon Association - 2021, 2022
-/// @notice This contract is used in the DAO contract and handles the permissions of a DAO and its associated components.
+/// @notice The permission manager used in a DAO and its associated components
 contract PermissionManager is Initializable {
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
 

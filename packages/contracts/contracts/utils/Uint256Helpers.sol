@@ -10,7 +10,7 @@ library Uint256Helpers {
     /// @param value The compared value
     error OutOfBounds(uint256 maxValue, uint256 value);
 
-    /// @notice Method to safe cast a value to an unsigned 64 integer making sure is not out of the bounds
+    /// @notice Casts a `uint256` safely to `uint64` making sure is not out of the bounds
     /// @param a The value to convert
     function toUint64(uint256 a) internal pure returns (uint64) {
         if (a > MAX_UINT64) revert OutOfBounds({maxValue: MAX_UINT64, value: a});
