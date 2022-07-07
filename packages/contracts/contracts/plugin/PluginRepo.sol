@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
-import "../utils/UncheckedIncrement.sol";
+import "../utils/UncheckedMath.sol";
 import "./IPluginFactory.sol";
 import "./IPluginRepo.sol";
 

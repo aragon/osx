@@ -3,8 +3,8 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Checkpoints.sol";
-import "./../majority/MajorityVotingBase.sol";
 
+import "../../utils/UncheckedMath.sol";
 import "../majority/MajorityVotingBase.sol";
 
 /// @title A component for allowlist voting
@@ -218,18 +218,6 @@ contract AllowlistVoting is MajorityVotingBase {
 
         for (uint256 i = 0; i < _users.length; i++) {
             _checkpoints[_users[i]].push(_enabled ? 1 : 0);
-        }
-    }
-
-    function _uncheckedAdd(uint256 a, uint256 b) private pure returns (uint256) {
-        unchecked {
-            return a + b;
-        }
-    }
-
-    function _uncheckedSub(uint256 a, uint256 b) private pure returns (uint256) {
-        unchecked {
-            return a - b;
         }
     }
 }
