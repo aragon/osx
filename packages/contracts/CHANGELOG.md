@@ -22,7 +22,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a concrete `ERC165Registry` implementation.
 
 ### Changed
+- Renamed folders
+  - `votings` to `voting`
+  - `ERC20` to `erc20`
+  - `whitelist` to `allowlist`
+- Renamed files, contracts, libraries, and structs
+  - `ACL` to `PermissionManger`
+  - `Permissions` to `DAOPermissioned`
+  - `MajorityVoting` to `MajorityVotingBase`
+  - `Whitelist` to `Allowlist`
+  - `ACLData` to `PermissionLib`
+  - `IACLOracle` to `IPermissionOracle`
+  - `BulkOp` to `Operation`
 
+- Renamed variables and constants
+  - `actor` to `here`
+  - `frozen` to `immutable`
+  - `op` to `operation`
+  - `permission` to `permissionID`
+  - `authPermissions` to `permissions`
+  - `freezePermissions` to `immutablePermissions`
+  - `gsnForwarder` to `trustedForwarder`
+  - `role` to `permissionID`, `Role` to `Permission`
+  - `ROLE` to `PERMISSION_ID` as well as
+    - `DAO_CONFIG_ROLE` to `SET_METADATA_PERMISSION_ID`
+    - `MODIFY_TRUSTED_FORWARDER` to `SET_TRUSTED_FORWARDER_PERMISSION_ID`
+    - `MODIFY_VOTE_CONFIG` to `CHANGE_VOTE_CONFIG_PERMISSION_ID`
+    - `TOKEN_MINTER_ROLE` to `MINT_PERMISSION_ID`
+  - `UNSET_ROLE` to `UNSET_FLAG`
+  - `FREEZE` to `IMMUTABLE`
+  - `choice` to `voteOption`
+  - `voterWeight` to `voteWeight`
+- Renamed enums
+  - `VoterState` to `VoteOption`
+  - `Yea` to `Yes`
+  - `Nay` to `No`
+- Renamed events
+  - `Frozen` to `MadeImmutable`
+  - `MintedMerkle` to `MerkleMinted`
+- Renamed methods
+  - `freeze` to `makeImmutable`
+  - `willPerform` to `checkPermissions`
+  - `hasPermission` to `checkPermission`
+  - `getFreezeHash` to `getImmutablePermissionHash`
+  - `newVote` to `createVote`
+  - `add` to `uncheckedAdd`
+  - `sub` to `uncheckedSub`
+- Renamed errors
+  - `ACLAuth` to `PermissionMissing`
+  - `ACLRoleAlreadyGranted` to `PermissionAlreadyGranted`
+  - `ACLRoleAlreadyRevoked` to `PermissionAlreadyRevoked`
+  - `ACLRoleFrozen` to `PermissionImmutable`
 - Bumped `@openzeppelin/contracts` and `@openzeppelin/contracts-upgradeable` to `4.7.0` and fixed `GovernanceWrappedERC20` accordingly.
 - Refactored import statements.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.
