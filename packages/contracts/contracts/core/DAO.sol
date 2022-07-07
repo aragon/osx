@@ -195,12 +195,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// @dev Emits ETHDeposited event to track ETH deposits that weren't done over the deposit method.
+    /// @notice Emits the `ETHDeposited` event to track ETH deposits that weren't done via the deposit method
     receive() external payable {
         emit ETHDeposited(msg.sender, msg.value);
     }
 
-    /// @dev Fallback to handle future versions of the ERC165 standard.
+    /// @notice Fallback to handle future versions of the ERC165 standard.
     fallback() external {
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
