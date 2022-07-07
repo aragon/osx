@@ -6,7 +6,7 @@ import {VoterState} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
-  NewDAORegistered: 'NewDAORegistered',
+  DAORegistered: 'DAORegistered',
   MetadataSet: 'MetadataSet',
   ConfigUpdated: 'ConfigUpdated',
   DAOCreated: 'DAOCreated',
@@ -33,7 +33,7 @@ async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();
   const {events} = data;
   const {name, dao, creator} = events.find(
-    ({event}: {event: any}) => event === EVENTS.NewDAORegistered
+    ({event}: {event: any}) => event === EVENTS.DAORegistered
   ).args;
 
   const token = tokenVoting

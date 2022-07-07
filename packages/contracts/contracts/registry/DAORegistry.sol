@@ -37,6 +37,6 @@ contract DAORegistry is InterfaceBasedRegistry {
 
         _register(address(dao));
 
-        emit NewDAORegistered(dao, creator, name);
+        emit DAORegistered(dao, creator, name);
     }
 }

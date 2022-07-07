@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
-  NewDAORegistered: 'NewDAORegistered',
+  DAORegistered: 'DAORegistered',
 };
 
 describe('DAORegistry', function () {
@@ -46,7 +46,7 @@ describe('DAORegistry', function () {
     await expect(
       await registry.register(daoName, managingDAO.address, ownerAddress)
     )
-      .to.emit(registry, EVENTS.NewDAORegistered)
+      .to.emit(registry, EVENTS.DAORegistered)
       .withArgs(managingDAO.address, ownerAddress, daoName);
 
     expect(await registry.entries(managingDAO.address)).to.equal(true);

@@ -1,7 +1,7 @@
 import {Address, ethereum} from '@graphprotocol/graph-ts';
 import {newMockEvent} from 'matchstick-as/assembly/index';
 
-import {NewDAORegistered} from '../../generated/Registry/Registry';
+import {DAORegistered} from '../../generated/Registry/Registry';
 
 // events
 
@@ -9,8 +9,8 @@ export function createNewDaoEvent(
   dao: string,
   creator: string,
   name: string
-): NewDAORegistered {
-  let newDaoEvent = changetype<NewDAORegistered>(newMockEvent());
+): DAORegistered {
+  let newDaoEvent = changetype<DAORegistered>(newMockEvent());
 
   newDaoEvent.parameters = [];
 
