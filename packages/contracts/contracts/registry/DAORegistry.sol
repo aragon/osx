@@ -15,7 +15,7 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @param dao The address of the DAO contract
     /// @param creator The address of the creator
     /// @param name The name of the DAO
-    event NewDAORegistered(IDAO indexed dao, address indexed creator, string name);
+    event DAORegistered(IDAO indexed dao, address indexed creator, string name);
 
     /// @notice Initializes the contract
     /// @param _managingDao the managing DAO address
