@@ -125,10 +125,10 @@ abstract contract IDAO {
     /// @param _signatureValidator ERC1271 SignatureValidator
     function setSignatureValidator(address _signatureValidator) external virtual;
 
-    /// @notice Validates the signature as described in ERC1271
-    /// @param _hash Hash of the data to be signed
-    /// @param _signature Signature byte array associated with _hash
-    /// @return bytes4
+    /// @notice Checks whether a signature is valid for the provided data
+    /// @param _hash The keccak256 hash of arbitrary length data signed on the behalf of `address(this)`
+    /// @param _signature Signature byte array associated with _data
+    /// @return magicValue Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid
     function isValidSignature(bytes32 _hash, bytes memory _signature)
         external
         virtual
