@@ -34,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `ACLData` to `PermissionLib`
   - `IACLOracle` to `IPermissionOracle`
   - `BulkOp` to `Operation`
-
 - Renamed variables and constants
   - `actor` to `here`
   - `frozen` to `immutable`
@@ -61,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Frozen` to `MadeImmutable`
   - `MintedMerkle` to `MerkleMinted`
 - Renamed methods
+  - `trustedForwarder` to `getTrustedForwarder`
   - `freeze` to `makeImmutable`
   - `willPerform` to `checkPermissions`
   - `hasPermission` to `checkPermission`

@@ -33,7 +33,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
 
     ERC1271 signatureValidator;
 
-    address private _trustedForwarder;
+    address private trustedForwarder;
 
     /// @notice Thrown if action execution has failed
     error ActionFailed();
@@ -51,16 +51,18 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
 
     /// @dev Used for UUPS upgradability pattern
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
+    /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission
+    /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions
     function initialize(
         bytes calldata _metadata,
         address _initialOwner,
-        address _forwarder
+        address _trustedForwarder
     ) external initializer {
         _registerStandard(DAO_INTERFACE_ID);
         _registerStandard(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);
-        _setTrustedForwarder(_forwarder);
+        _setTrustedForwarder(_trustedForwarder);
         __PermissionManager_init(_initialOwner);
     }
 
@@ -83,8 +85,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     }
 
     /// @inheritdoc IDAO
-    function trustedForwarder() public view virtual override returns (address) {
-        return _trustedForwarder;
+    function getTrustedForwarder() public view virtual override returns (address) {
+        return trustedForwarder;
     }
 
     /// @inheritdoc IDAO
@@ -206,10 +208,10 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     }
 
     /// @notice Sets the trusted forwarder on the DAO and emits the associated event
-    /// @param _forwarder Address of the forwarder
-    function _setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
+    /// @param _trustedForwarder Address of the forwarder
+    function _setTrustedForwarder(address _trustedForwarder) internal {
+        trustedForwarder = _trustedForwarder;
 
-        emit TrustedForwarderSet(_forwarder);
+        emit TrustedForwarderSet(_trustedForwarder);
     }
 }

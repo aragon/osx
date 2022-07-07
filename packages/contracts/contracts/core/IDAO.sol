@@ -112,9 +112,9 @@ abstract contract IDAO {
     /// @dev Used to update the trusted forwarder
     function setTrustedForwarder(address _trustedForwarder) external virtual;
 
-    /// @notice Setter for the trusted forwarder verifying the meta transaction
+    /// @notice Getter for the trusted forwarder verifying the meta transaction
     /// @return The trusted forwarder address
-    function trustedForwarder() external virtual returns (address);
+    function getTrustedForwarder() external virtual returns (address);
 
     /// @notice Emitted when a new TrustedForwarder is set on the DAO
     /// @param forwarder the new forwarder address

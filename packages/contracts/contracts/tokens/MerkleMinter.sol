@@ -66,7 +66,7 @@ contract MerkleMinter is MetaTxComponent {
         address distributorAddr = distributorBase.clone();
         MerkleDistributor(distributorAddr).initialize(
             dao,
-            dao.trustedForwarder(),
+            dao.getTrustedForwarder(),
             token,
             _merkleRoot
         );

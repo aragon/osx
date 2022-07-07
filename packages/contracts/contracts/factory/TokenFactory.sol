@@ -89,7 +89,7 @@ contract TokenFactory {
         address merkleMinter = merkleMinterBase.clone();
         MerkleMinter(merkleMinter).initialize(
             _dao,
-            _dao.trustedForwarder(),
+            _dao.getTrustedForwarder(),
             IERC20MintableUpgradeable(token),
             distributorBase
         );

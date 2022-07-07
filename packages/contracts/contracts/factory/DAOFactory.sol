@@ -210,7 +210,7 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     ERC20Voting.initialize.selector,
                     _dao,
-                    _dao.trustedForwarder(),
+                    _dao.getTrustedForwarder(),
                     _voteConfig.participationRequiredPct,
                     _voteConfig.supportRequiredPct,
                     _voteConfig.minDuration,
@@ -255,7 +255,7 @@ contract DAOFactory {
                 abi.encodeWithSelector(
                     AllowlistVoting.initialize.selector,
                     _dao,
-                    _dao.trustedForwarder(),
+                    _dao.getTrustedForwarder(),
                     _voteConfig.participationRequiredPct,
                     _voteConfig.supportRequiredPct,
                     _voteConfig.minDuration,

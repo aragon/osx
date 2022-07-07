@@ -95,7 +95,7 @@ describe('DAO', function () {
     });
 
     it('sets the trusted forwarder correctly', async () => {
-      expect(await dao.trustedForwarder()).to.be.equal(dummyAddress1);
+      expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress1);
     });
   });
 
@@ -120,7 +120,7 @@ describe('DAO', function () {
 
     it('sets a new trusted forwarder', async () => {
       await dao.setTrustedForwarder(dummyAddress2);
-      expect(await dao.trustedForwarder()).to.be.equal(dummyAddress2);
+      expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress2);
     });
 
     it('emits an event containing the address', async () => {
