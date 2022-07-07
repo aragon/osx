@@ -165,7 +165,7 @@ describe('DAOFactory: ', function () {
       await voting.CHANGE_VOTE_CONFIG_PERMISSION_ID();
     const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
-    const DAORoles = await Promise.all([
+    const DAOPermissions = await Promise.all([
       dao.SET_METADATA_PERMISSION_ID(),
       dao.ROOT_PERMISSION_ID(),
       dao.WITHDRAW_PERMISSION_ID(),
@@ -189,7 +189,7 @@ describe('DAOFactory: ', function () {
       );
 
     // @ts-ignore
-    DAORoles.map(item => {
+    DAOPermissions.map(item => {
       tx = tx.to
         .emit(dao, EVENTS.Granted)
         .withArgs(
@@ -212,7 +212,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(dao, EVENTS.Revoked)
       .withArgs(
-        DAORoles[1],
+        DAOPermissions[1],
         daoFactory.address,
         daoFactory.address,
         dao.address
@@ -300,7 +300,7 @@ describe('DAOFactory: ', function () {
     const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
     const EXEC_PERMISSION_ID = await dao.EXEC_PERMISSION_ID();
 
-    const DAORoles = await Promise.all([
+    const DAOPermissions = await Promise.all([
       dao.SET_METADATA_PERMISSION_ID(),
       dao.ROOT_PERMISSION_ID(),
       dao.WITHDRAW_PERMISSION_ID(),
@@ -324,7 +324,7 @@ describe('DAOFactory: ', function () {
       );
 
     // @ts-ignore
-    DAORoles.map(item => {
+    DAOPermissions.map(item => {
       tx = tx.to
         .emit(dao, EVENTS.Granted)
         .withArgs(
@@ -355,7 +355,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(dao, EVENTS.Revoked)
       .withArgs(
-        DAORoles[1],
+        DAOPermissions[1],
         daoFactory.address,
         daoFactory.address,
         dao.address

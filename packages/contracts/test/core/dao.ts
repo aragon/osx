@@ -55,7 +55,7 @@ describe('DAO', function () {
     token = await Token.deploy();
     await token.initialize(dao.address, 'GOV', 'GOV');
 
-    // Grant Roles
+    // Grant permissions
     await Promise.all([
       dao.grant(
         dao.address,

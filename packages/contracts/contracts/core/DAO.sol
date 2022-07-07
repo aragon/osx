@@ -21,7 +21,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     using SafeERC20 for ERC20;
     using Address for address;
 
-    // Roles
+    // Permission IDs
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION_ID");
     bytes32 public constant EXEC_PERMISSION_ID = keccak256("EXEC_PERMISSION_ID");
@@ -50,9 +50,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     error ETHWithdrawFailed();
 
     /// @notice Initializes the DAO by
-    ///         * registering the ERC165 interface ID
-    ///         * setting the trusted forwarder for meta transactions
-    ///         * giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup)
+    /// - registering the ERC165 interface ID
+    /// - setting the trusted forwarder for meta transactions
+    /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup)
     /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
     /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission
