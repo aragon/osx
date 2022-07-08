@@ -5,7 +5,7 @@ import {
   MetadataSet,
   Executed,
   Deposited,
-  ETHDeposited,
+  NativeTokenDeposited,
   Granted,
   MadeImmutable,
   Revoked
@@ -70,7 +70,7 @@ export function handleDeposited(event: Deposited): void {
   entity.save();
 }
 
-export function handleETHDeposited(event: ETHDeposited): void {
+export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
   let daoId = event.address.toHexString();
   let id =
     event.address.toHexString() +

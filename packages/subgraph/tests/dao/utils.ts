@@ -3,7 +3,7 @@ import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 
 import {
   MetadataSet,
-  ETHDeposited,
+  NativeTokenDeposited,
   Deposited,
   Granted,
   Revoked,
@@ -32,12 +32,12 @@ export function createNewMetadataSetEvent(
   return newMetadataSetEvent;
 }
 
-export function createNewETHDepositedEvent(
+export function createNewNativeTokenDepositedEvent(
   sender: string,
   amount: string,
   contractAddress: string
-): ETHDeposited {
-  let newEvent = changetype<ETHDeposited>(newMockEvent());
+): NativeTokenDeposited {
+  let newEvent = changetype<NativeTokenDeposited>(newMockEvent());
 
   newEvent.address = Address.fromString(contractAddress);
   newEvent.parameters = [];

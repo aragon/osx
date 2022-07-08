@@ -11,7 +11,7 @@ type ERC20Token @entity {
 
 type Balance @entity {
   id: ID! # token address + dao address
-  token: ERC20Token! # address(0) will be considered as ETH (or canonical token)
+  token: ERC20Token! # address(0) corresponds to the native token
   dao: Dao!
   balance: BigInt!
   lastUpdated: BigInt!

@@ -58,8 +58,8 @@ templates:
           handler: handleMetadataSet
         - event: Deposited(indexed address,indexed address,uint256,string)
           handler: handleDeposited
-        - event: ETHDeposited(address,uint256)
-          handler: handleETHDeposited
+        - event: NativeTokenDeposited(address,uint256)
+          handler: handleNativeTokenDeposited
         - event: Executed(indexed address,uint256,(address,uint256,bytes)[],bytes[])
           handler: handleExecuted
         - event: Granted(indexed bytes32,indexed address,indexed address,address,address)

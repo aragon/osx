@@ -2,7 +2,7 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, Bytes} from '@graphprotocol/graph-ts';
 
 import {
-  handleETHDeposited,
+  handleNativeTokenDeposited,
   handleDeposited,
   handleExecuted,
   _handleMetadataSet
@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import {createDummyAcctions, createTokenCalls} from '../utils';
 import {
-  createNewETHDepositedEvent,
+  createNewNativeTokenDepositedEvent,
   createNewDepositedEvent,
   getBalanceOf,
   createNewExecutedEvent
@@ -45,9 +45,13 @@ test('Run dao (handleMetadataSet) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run dao (handleDeposited) for ETH mappings with mock event', () => {
+test('Run dao (handleDeposited) for native token mappings with mock event', () => {
   // create event
-  let newEvent = createNewETHDepositedEvent(ADDRESS_ONE, ONE_ETH, DAO_ADDRESS);
+  let newEvent = createNewNativeTokenDepositedEvent(
+    ADDRESS_ONE,
+    ONE_ETH,
+    DAO_ADDRESS
+  );
 
   let entityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
@@ -58,7 +62,7 @@ test('Run dao (handleDeposited) for ETH mappings with mock event', () => {
 
   createTokenCalls(ADDRESS_ZERO, 'Ethereum', 'ETH', '18');
   // handle event
-  handleETHDeposited(newEvent);
+  handleNativeTokenDeposited(newEvent);
 
   // checks
   assert.fieldEquals('VaultDeposit', entityID, 'id', entityID);

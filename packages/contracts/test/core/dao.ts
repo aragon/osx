@@ -20,7 +20,7 @@ const EVENTS = {
   Deposited: 'Deposited',
   Withdrawn: 'Withdrawn',
   Executed: 'Executed',
-  ETHDeposited: 'ETHDeposited',
+  NativeTokenDeposited: 'NativeTokenDeposited',
 };
 
 const PERMISSION_IDS = {
@@ -239,7 +239,7 @@ describe('DAO', function () {
   describe('deposit:', async () => {
     const amount = ethers.utils.parseEther('1.23');
 
-    it('deposits ETH into the DAO', async () => {
+    it('deposits native tokens into the DAO', async () => {
       const options = {value: amount};
 
       // is empty at the beginning
@@ -270,13 +270,15 @@ describe('DAO', function () {
       expect(await token.balanceOf(dao.address)).to.equal(amount);
     });
 
-    it('throws an error if ERC20 and ETH are deposited at the same time', async () => {
+    it('throws an error if ERC20 and native tokens are deposited at the same time', async () => {
       const options = {value: amount};
       await token.mint(ownerAddress, amount);
 
       await expect(
         dao.deposit(token.address, amount, 'ref', options)
-      ).to.be.revertedWith(customError('ETHDepositAmountMismatch', 0, amount));
+      ).to.be.revertedWith(
+        customError('NativeTokenDepositAmountMismatch', 0, amount)
+      );
     });
   });
 
@@ -285,7 +287,7 @@ describe('DAO', function () {
     const options = {value: amount};
 
     beforeEach(async () => {
-      // put ETH into the DAO
+      // put native tokens into the DAO
       await dao.deposit(ethers.constants.AddressZero, amount, 'ref', options);
 
       // put ERC20 into the DAO
@@ -312,7 +314,7 @@ describe('DAO', function () {
       );
     });
 
-    it('withdraws ETH if DAO balance is high enough', async () => {
+    it('withdraws native tokens if DAO balance is high enough', async () => {
       const receiverBalance = await signers[1].getBalance();
 
       expect(
@@ -336,7 +338,7 @@ describe('DAO', function () {
       );
     });
 
-    it('throws an error if the ETH balance is too low', async () => {
+    it('throws an error if the native token balance is too low', async () => {
       await expect(
         dao.withdraw(
           ethers.constants.AddressZero,
@@ -344,7 +346,7 @@ describe('DAO', function () {
           amount.add(1),
           'ref'
         )
-      ).to.be.revertedWith(customError('ETHWithdrawFailed'));
+      ).to.be.revertedWith(customError('NativeTokenWithdrawFailed'));
     });
 
     it('withdraws ERC20 if DAO balance is high enough', async () => {
@@ -377,7 +379,7 @@ describe('DAO', function () {
   describe('receive:', async () => {
     const amount = ethers.utils.parseEther('1.23');
 
-    it('receives ETH ', async () => {
+    it('receives native tokens ', async () => {
       const options = {value: amount};
 
       // is empty at the beginning
@@ -385,7 +387,7 @@ describe('DAO', function () {
 
       // Send a transaction
       expect(await signers[0].sendTransaction({to: dao.address, value: amount}))
-        .to.emit(dao, EVENTS.ETHDeposited)
+        .to.emit(dao, EVENTS.NativeTokenDeposited)
         .withArgs(ownerAddress, amount);
 
       // holds amount now

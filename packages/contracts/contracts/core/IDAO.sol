@@ -56,9 +56,8 @@ abstract contract IDAO {
     /// @param execResults Array with the results of the executed actions.
     event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
 
-    /// @notice Deposit ETH or any token to this contract with a reference string.
-    /// @dev Deposit ETH (token address == 0) or any token with a reference.
-    /// @param _token The address of the token and in case of ETH address(0).
+    /// @notice Deposits (native) tokens to the DAO contract with a reference string.
+    /// @param _token The address of the token or address(0) in case of the native token.
     /// @param _amount The amount of tokens to deposit.
     /// @param _reference The reference describing the deposit reason.
     function deposit(
@@ -67,9 +66,9 @@ abstract contract IDAO {
         string calldata _reference
     ) external payable virtual;
 
-    /// @notice Emitted when a deposit has been made to the DAO.
+    /// @notice Emitted when a token deposit has been made to the DAO.
     /// @param sender The address of the sender.
-    /// @param token The address of the token deposited.
+    /// @param token The address of the deposited token.
     /// @param amount The amount of tokens deposited.
     /// @param _reference The reference describing the deposit reason.
     event Deposited(
@@ -79,19 +78,16 @@ abstract contract IDAO {
         string _reference
     );
 
-    /// @notice Emitted when ETH is deposited.
-    /// @dev `ETHDeposited` and `Deposited` are both needed. `ETHDeposited` makes sure that whoever sends funds
-    ///      with `send`/`transfer`, receive function can still be executed without reverting due to gas cost
-    ///      increases in EIP-2929. To still use `send`/`transfer`, access list is needed that has the address
-    ///      of the contract(base contract) that is behind the proxy.
+    /// @notice Emitted when a native token deposit has been made to the DAO.
+    /// @dev `NativeTokenDeposited` and `Deposited` are both needed. `NativeTokenDeposited` makes sure that the receive function can still be executed without reverting due to gas cost increases in EIP-2929, regardless of who sends the funds with `send`/`transfer`. To still be able to use `send`/`transfer`, an EIP-2930 access list is needed that has the address of the contract (base contract) that is behind the proxy. // TODO clarify with Giorgi
     /// @param sender The address of the sender.
-    /// @param amount The amount of ETH deposited.
-    event ETHDeposited(address sender, uint256 amount);
+    /// @param amount The amount of native tokens deposited.
+    event NativeTokenDeposited(address sender, uint256 amount);
 
-    /// @notice Withdraw tokens or ETH from the DAO with a withdraw reference string.
-    /// @param _token The address of the token and in case of ETH address(0).
-    /// @param _to The target address to send tokens or ETH.
-    /// @param _amount The amount of tokens to withdraw.
+    /// @notice Withdraw (native) tokens from the DAO with a withdraw reference string.
+    /// @param _token The address of the token and address(0) in case of the native token.
+    /// @param _to The target address to send (native) tokens to.
+    /// @param _amount The amount of (native) tokens to withdraw.
     /// @param _reference The reference describing the withdrawal reason.
     function withdraw(
         address _token,
@@ -100,8 +96,8 @@ abstract contract IDAO {
         string memory _reference
     ) external virtual;
 
-    /// @notice Emitted when a withdrawal has been made from the DAO.
-    /// @param token The address of the token withdrawn.
+    /// @notice Emitted when a (native) token withdrawal has been made from the DAO.
+    /// @param token The address of the withdrawn token or address(0) in case of the native token.
     /// @param to The address of the withdrawer.
     /// @param amount The amount of tokens withdrawn.
     /// @param _reference The reference describing the withdrawal reason.

@@ -66,7 +66,7 @@ export function updateBalance(
   }
 
   if (token.toHexString() == ADDRESS_ZERO) {
-    // ETH
+    // native tokens
     entity.balance = isDeposit
       ? entity.balance.plus(amount)
       : entity.balance.minus(amount);

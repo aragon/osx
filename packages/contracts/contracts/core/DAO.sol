@@ -35,23 +35,23 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
 
     address private trustedForwarder;
 
-    /// @notice Thrown if action execution has failed
+    /// @notice Thrown if action execution has failed.
     error ActionFailed();
 
-    /// @notice Thrown if the deposit or withdraw amount is zero
+    /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
 
-    /// @notice Thrown if the expected and actually deposited ETH amount mismatch
-    /// @param expected The expected ETH amount
-    /// @param actual The actual ETH amount
-    error ETHDepositAmountMismatch(uint256 expected, uint256 actual);
+    /// @notice Thrown if the expected and actually deposited native token amount mismatch.
+    /// @param expected The expected native token amount.
+    /// @param actual The actual native token amount.
+    error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
 
-    /// @notice Thrown if an ETH withdraw fails
-    error ETHWithdrawFailed();
+    /// @notice Thrown if an native token withdraw fails.
+    error NativeTokenWithdrawFailed();
 
-    /// @notice Initializes the DAO by
-    /// - registering the ERC165 interface ID
-    /// - setting the trusted forwarder for meta transactions
+    /// @notice Initializes the DAO by.
+    /// - registering the ERC165 interface ID.
+    /// - setting the trusted forwarder for meta transactions.
     /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
     /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO.
@@ -70,7 +70,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         __PermissionManager_init(_initialOwner);
     }
 
-    //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern.abi
+    //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern.
     /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
     ///      The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
@@ -147,9 +147,10 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
 
         if (_token == address(0)) {
             if (msg.value != _amount)
-                revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
+                revert NativeTokenDepositAmountMismatch({expected: _amount, actual: msg.value});
         } else {
-            if (msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
+            if (msg.value != 0)
+                revert NativeTokenDepositAmountMismatch({expected: 0, actual: msg.value});
 
             ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
@@ -168,7 +169,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
 
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
-            if (!ok) revert ETHWithdrawFailed();
+            if (!ok) revert NativeTokenWithdrawFailed();
         } else {
             ERC20(_token).safeTransfer(_to, _amount);
         }
@@ -196,9 +197,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// @notice Emits the `ETHDeposited` event to track ETH deposits that weren't made via the deposit method.
+    /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.
     receive() external payable {
-        emit ETHDeposited(msg.sender, msg.value);
+        emit NativeTokenDeposited(msg.sender, msg.value);
     }
 
     /// @notice Fallback to handle future versions of the ERC165 standard.
