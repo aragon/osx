@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`.
 - Changed `registry.ts` to `dao-registry.ts` and updated testing.
 - Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`.
+- Bumped `@openzeppelin/contracts` and `@openzeppelin/contracts-upgradeable` to `4.7.0` and fixed `GovernanceWrappedERC20` accordingly.
 - Refactored import statements.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.
 - Changed order of deployment scripts.
