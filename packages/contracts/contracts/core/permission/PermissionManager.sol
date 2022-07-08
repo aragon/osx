@@ -10,19 +10,22 @@ import "./BulkPermissionsLib.sol";
 /// @author Aragon Association - 2021, 2022
 /// @notice The permission manager used in a DAO and its associated components
 contract PermissionManager is Initializable {
-    ///@notice bla
+    /// @notice The ID of the permission required for the `grant`, `grantWithOracle`, `revoke`, `makeImmutable`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
 
-    // "Who" constants
+    /// @notice A special address encoding permissions that are valid for any address.
     address internal constant ANY_ADDR = address(type(uint160).max);
 
-    // "Access" flags
+    /// @notice A special address encoding if a permissions is not set and therefore not allowed.
     address internal constant UNSET_FLAG = address(0);
+
+    /// @notice A special address encoding if a permission is allowed.
     address internal constant ALLOW_FLAG = address(2);
 
-    // permissionHash(where, who, permission) => Access flag(unset or allow) or an address to a `PermissionOracle`
+    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permission)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
     mapping(bytes32 => address) internal permissions;
-    // immutablePermissionHash(where, permissionID) => true (permission for where is immutable), false (permission for where is mutable)
+
+    /// @notice A mapping storing immutable permissions as hashes (i.e., `immutablePermissionHash(where, permission)`) and their status (`true` = immutable, `false` = mutable).
     mapping(bytes32 => bool) internal immutablePermissions;
 
     /// @notice Thrown if a permission is missing

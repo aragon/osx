@@ -15,7 +15,7 @@ import "./MerkleDistributor.sol";
 contract MerkleMinter is MetaTxComponent {
     using Clones for address;
 
-    /// @notice The ERC165 interface ID
+    /// @notice The ERC165 interface ID of the contract.
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
     /// @notice The ID of the permission required for the `merkleMint` function
