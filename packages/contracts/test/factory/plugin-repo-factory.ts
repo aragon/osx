@@ -50,7 +50,7 @@ describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let aragonPluginRegistry: AragonPluginRegistry;
   let ownerAddress: string;
-  let dao: DAO;
+  let managingDao: DAO;
   let pluginRepoFactory: any;
 
   let mergedABI: any;
@@ -69,15 +69,15 @@ describe('PluginRepoFactory: ', function () {
   beforeEach(async function () {
     // DAO
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x00', ownerAddress, zeroAddress);
+    managingDao = await DAO.deploy();
+    await managingDao.initialize('0x00', ownerAddress, zeroAddress);
 
     // deploy and initialize AragonPluginRegistry
     const AragonPluginRegistry = await ethers.getContractFactory(
       'AragonPluginRegistry'
     );
     aragonPluginRegistry = await AragonPluginRegistry.deploy();
-    await aragonPluginRegistry.initialize(dao.address);
+    await aragonPluginRegistry.initialize(managingDao.address);
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -90,7 +90,7 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    dao.grant(
+    managingDao.grant(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
       ethers.utils.id('REGISTER_PERMISSION_ID')
@@ -98,7 +98,7 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('fail to create new pluginRepo with no REGISTER_PERMISSION_ID', async () => {
-    dao.revoke(
+    managingDao.revoke(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
       ethers.utils.id('REGISTER_PERMISSION_ID')
@@ -110,7 +110,8 @@ describe('PluginRepoFactory: ', function () {
       pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
     ).to.be.revertedWith(
       customError(
-        'PermissionMissing',
+        'DAOPermissionMissing',
+        managingDao.address,
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,

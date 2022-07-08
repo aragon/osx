@@ -4,27 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IPermissionOracle.sol";
-
-library PermissionLib {
-    enum Operation {
-        Grant,
-        Revoke,
-        MakeImmutable
-    }
-
-    struct BulkItem {
-        Operation operation;
-        bytes32 permissionID;
-        address who;
-    }
-
-    /// @notice Thrown if a permission is missing
-    /// @param here The context in which the authorization reverted
-    /// @param where The contract requiring the permission
-    /// @param who The address (EOA or contract) missing the permission
-    /// @param permissionID The permission identifier
-    error PermissionMissing(address here, address where, address who, bytes32 permissionID);
-}
+import "./BulkPermissionsLib.sol";
 
 /// @title PermissionManager
 /// @author Aragon Association - 2021, 2022
@@ -44,6 +24,13 @@ contract PermissionManager is Initializable {
     mapping(bytes32 => address) internal permissions;
     // immutablePermissionHash(where, permissionID) => true (permission for where is immutable), false (permission for where is mutable)
     mapping(bytes32 => bool) internal immutablePermissions;
+
+    /// @notice Thrown if a permission is missing
+    /// @param here The context in which the authorization reverted
+    /// @param where The contract requiring the permission
+    /// @param who The address (EOA or contract) missing the permission
+    /// @param permissionID The permission identifier
+    error PermissionMissing(address here, address where, address who, bytes32 permissionID);
 
     /// @notice Thrown if a permission has been already granted
     /// @param where The address of the target contract to grant `who` permission to
@@ -103,7 +90,7 @@ contract PermissionManager is Initializable {
             !(checkPermissions(_where, msg.sender, _permissionID, msg.data) ||
                 checkPermissions(address(this), msg.sender, _permissionID, msg.data))
         )
-            revert PermissionLib.PermissionMissing({
+            revert PermissionMissing({
                 here: address(this),
                 where: _where,
                 who: msg.sender,
@@ -177,18 +164,18 @@ contract PermissionManager is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the contract
     /// @param items The array of bulk items to process
-    function bulk(address _where, PermissionLib.BulkItem[] calldata items)
+    function bulk(address _where, BulkPermissionsLib.Item[] calldata items)
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
         for (uint256 i = 0; i < items.length; i++) {
-            PermissionLib.BulkItem memory item = items[i];
+            BulkPermissionsLib.Item memory item = items[i];
 
-            if (item.operation == PermissionLib.Operation.Grant)
+            if (item.operation == BulkPermissionsLib.Operation.Grant)
                 _grant(_where, item.who, item.permissionID);
-            else if (item.operation == PermissionLib.Operation.Revoke)
+            else if (item.operation == BulkPermissionsLib.Operation.Revoke)
                 _revoke(_where, item.who, item.permissionID);
-            else if (item.operation == PermissionLib.Operation.MakeImmutable)
+            else if (item.operation == BulkPermissionsLib.Operation.MakeImmutable)
                 _makeImmutable(_where, item.permissionID);
         }
     }

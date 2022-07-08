@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-import "./../permission/PermissionManager.sol";
+import "../permission/PermissionManager.sol";
 import "./../IDAO.sol";
 
 /// @title An abstract contract providing a meta transaction compatible modifier to make functions permissioned through an associated DAO
@@ -19,6 +19,20 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @dev Every component needs DAO at least for the permission management. See 'auth' modifier.
     IDAO internal dao;
 
+    /// @notice Thrown if a permission is missing
+    /// @param dao The associated DAO
+    /// @param here The context in which the authorization reverted
+    /// @param where The contract requiring the permission
+    /// @param who The address (EOA or contract) missing the permission
+    /// @param permissionID The permission identifier
+    error DAOPermissionMissing(
+        address dao,
+        address here,
+        address where,
+        address who,
+        bytes32 permissionID
+    );
+
     /// @notice Initializes the contract
     /// @param _dao the associated DAO address
     function __DAOPermissioned_init(IDAO _dao) internal virtual onlyInitializing {
@@ -29,7 +43,8 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @param _permissionID The permission identifier required to call the method this modifier is applied to
     modifier auth(bytes32 _permissionID) {
         if (!dao.hasPermission(address(this), _msgSender(), _permissionID, _msgData()))
-            revert PermissionLib.PermissionMissing({
+            revert DAOPermissionMissing({
+                dao: address(dao),
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),

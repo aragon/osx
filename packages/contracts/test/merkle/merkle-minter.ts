@@ -23,7 +23,7 @@ describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
   let minter: MerkleMinter;
   let distributor: MerkleDistributor;
-  let dao: DAO;
+  let managingDao: DAO;
   let token: GovernanceERC20;
   let ownerAddress: string;
 
@@ -47,12 +47,16 @@ describe('MerkleDistributor', function () {
 
     // create a DAO
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    managingDao = await DAO.deploy();
+    await managingDao.initialize(
+      '0x',
+      ownerAddress,
+      ethers.constants.AddressZero
+    );
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
     token = await GovernanceERC20.deploy();
-    await token.initialize(dao.address, 'GOV', 'GOV');
+    await token.initialize(managingDao.address, 'GOV', 'GOV');
 
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
@@ -62,13 +66,17 @@ describe('MerkleDistributor', function () {
     const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
     minter = await MerkleMinter.deploy();
     await minter.initialize(
-      dao.address,
+      managingDao.address,
       ethers.constants.AddressZero,
       token.address,
       distributor.address
     );
-    await dao.grant(minter.address, ownerAddress, MERKLE_MINTER_PERMISSION_ID);
-    await dao.grant(token.address, minter.address, MINT_PERMISSION_ID);
+    await managingDao.grant(
+      minter.address,
+      ownerAddress,
+      MERKLE_MINTER_PERMISSION_ID
+    );
+    await managingDao.grant(token.address, minter.address, MINT_PERMISSION_ID);
   });
 
   describe('merkleMint:', () => {
@@ -104,7 +112,7 @@ describe('MerkleDistributor', function () {
     });
 
     it('does not mint if the minting permissionID on the minter is missing', async () => {
-      await dao.revoke(
+      await managingDao.revoke(
         minter.address,
         ownerAddress,
         MERKLE_MINTER_PERMISSION_ID
@@ -119,7 +127,8 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'PermissionMissing',
+          'DAOPermissionMissing',
+          managingDao.address,
           minter.address,
           minter.address,
           ownerAddress,
@@ -129,7 +138,11 @@ describe('MerkleDistributor', function () {
     });
 
     it('does not mint if the minting permissionID on the token is missing', async () => {
-      await dao.revoke(token.address, minter.address, MINT_PERMISSION_ID);
+      await managingDao.revoke(
+        token.address,
+        minter.address,
+        MINT_PERMISSION_ID
+      );
 
       await expect(
         minter.merkleMint(
@@ -140,7 +153,8 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'PermissionMissing',
+          'DAOPermissionMissing',
+          managingDao.address,
           token.address,
           token.address,
           minter.address,

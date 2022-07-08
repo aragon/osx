@@ -58,33 +58,33 @@ contract PluginRepoFactory {
     /// @param dev Address of the developer
     function setPluginRepoPermissions(PluginRepo pluginRepo, address dev) internal {
         // set permissionIDs on the dao itself.
-        PermissionLib.BulkItem[] memory items = new PermissionLib.BulkItem[](5);
+        BulkPermissionsLib.Item[] memory items = new BulkPermissionsLib.Item[](5);
 
         // Grant DAO all the permissions required
-        items[0] = PermissionLib.BulkItem(
-            PermissionLib.Operation.Grant,
+        items[0] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Grant,
             pluginRepo.CREATE_VERSION_PERMISSION_ID(),
             dev
         );
-        items[1] = PermissionLib.BulkItem(
-            PermissionLib.Operation.Grant,
+        items[1] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Grant,
             pluginRepo.UPGRADE_PERMISSION_ID(),
             dev
         );
-        items[2] = PermissionLib.BulkItem(
-            PermissionLib.Operation.Grant,
+        items[2] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Grant,
             pluginRepo.ROOT_PERMISSION_ID(),
             dev
         );
 
         // Revoke permissions from APM
-        items[3] = PermissionLib.BulkItem(
-            PermissionLib.Operation.Revoke,
+        items[3] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Revoke,
             pluginRepo.ROOT_PERMISSION_ID(),
             address(this)
         );
-        items[4] = PermissionLib.BulkItem(
-            PermissionLib.Operation.Revoke,
+        items[4] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Revoke,
             pluginRepo.CREATE_VERSION_PERMISSION_ID(),
             address(this)
         );

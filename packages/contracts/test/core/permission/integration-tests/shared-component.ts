@@ -47,7 +47,8 @@ describe('SharedComponent', function () {
     await testComponent.initialize(managingDAO.address);
 
     expectedPermissionMissingError = customError(
-      'PermissionMissing',
+      'DAOPermissionMissing',
+      managingDAO.address,
       testComponent.address,
       testComponent.address,
       ownerAddress,

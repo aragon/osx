@@ -20,7 +20,7 @@ enum BulkOP {
   MakeImmutable,
 }
 
-interface BulkItem {
+interface Item {
   operation: BulkOP;
   permissionID: string;
   who: string;
@@ -422,7 +422,7 @@ describe('Core: PermissionManager', function () {
   describe('bulk', () => {
     it('should bulk grant ADMIN_PERMISSION_ID', async () => {
       const signers = await ethers.getSigners();
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
@@ -452,7 +452,7 @@ describe('Core: PermissionManager', function () {
 
     it('should bulk makeImmutable', async () => {
       const signers = await ethers.getSigners();
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.MakeImmutable,
           permissionID: ethers.utils.id('PERMISSION_ID_1'),
@@ -481,7 +481,7 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[2].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
@@ -512,7 +512,7 @@ describe('Core: PermissionManager', function () {
     it('should handle bulk mixed', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
@@ -553,7 +553,7 @@ describe('Core: PermissionManager', function () {
     it('should revert on error', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.Revoke,
           permissionID: ADMIN_PERMISSION_ID,
@@ -599,7 +599,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should not allow', async () => {
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,
@@ -621,7 +621,7 @@ describe('Core: PermissionManager', function () {
 
     it('should not allow for non ROOT', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const bulkItems: BulkItem[] = [
+      const bulkItems: Item[] = [
         {
           operation: BulkOP.Grant,
           permissionID: ADMIN_PERMISSION_ID,

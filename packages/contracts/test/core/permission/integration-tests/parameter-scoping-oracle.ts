@@ -54,7 +54,8 @@ describe('TestParameterScopingOracle', function () {
     );
 
     expectedPermissionMissingError = customError(
-      'PermissionMissing',
+      'DAOPermissionMissing',
+      managingDao.address,
       testComponent.address,
       testComponent.address,
       ownerAddress,
