@@ -171,7 +171,7 @@ export function handleConfigUpdated(event: ConfigUpdated): void {
 export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
   let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.trustedForwarder = event.params.forwarder;
+    packageEntity.trustedForwarder = event.params.trustedForwarder;
     packageEntity.save();
   }
 }

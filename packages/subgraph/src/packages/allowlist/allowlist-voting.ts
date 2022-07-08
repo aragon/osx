@@ -189,7 +189,7 @@ export function handleUsersRemoved(event: UsersRemoved): void {
 export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
   let packageEntity = AllowlistPackage.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.trustedForwarder = event.params.forwarder;
+    packageEntity.trustedForwarder = event.params.trustedForwarder;
     packageEntity.save();
   }
 }

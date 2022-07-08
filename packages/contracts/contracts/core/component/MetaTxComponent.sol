@@ -8,16 +8,20 @@ import "./Component.sol";
 
 /// @title MetaTxComponent
 /// @author Aragon Association - 2022
-/// @notice Base component in the Aragon DAO framework supporting meta transactions
+/// @notice Specialized base component in the Aragon App DAO framework supporting meta transactions.
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
+    /// @notice The ID of the permission required for the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 
-    event TrustedForwarderSet(address forwarder);
+    /// @notice Emitted when the trusted forwarder is set.
+    /// @param trustedForwarder The trusted forwarder address.
+    event TrustedForwarderSet(address trustedForwarder);
 
-    /// @notice Initialization
-    /// @param _dao the associated DAO address
-    /// @param _trustedForwarder the trusted forwarder address who verifies the meta transaction
+    /// @notice Initializes the contract by initializing the underlying `Component`, registering the ERC165 interface ID and setting the trusted forwarder.
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @param _dao The associated DAO address.
+    /// @param _trustedForwarder The address of the trusted forwarder verifying the meta transactions.
     function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder)
         internal
         virtual
@@ -31,7 +35,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
         emit TrustedForwarderSet(_trustedForwarder);
     }
 
-    /// @notice overrides '_msgSender()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'
+    /// @notice Overrides '_msgSender()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'.
     function _msgSender()
         internal
         view
@@ -41,7 +45,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
         return BaseRelayRecipient._msgSender();
     }
 
-    /// @notice overrides '_msgData()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'
+    /// @notice Overrides '_msgData()' from 'Component'->'ContextUpgradeable' with that of 'BaseRelayRecipient'.
     function _msgData()
         internal
         view
@@ -51,9 +55,8 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
         return BaseRelayRecipient._msgData();
     }
 
-    /// @notice Setter for the trusted forwarder verifying the meta transaction
-    /// @param _trustedForwarder the trusted forwarder address
-    /// @dev used to update the trusted forwarder
+    /// @notice Setter for the trusted forwarder verifying the meta transaction.
+    /// @param _trustedForwarder The trusted forwarder address.
     function setTrustedForwarder(address _trustedForwarder)
         public
         virtual
