@@ -102,7 +102,7 @@ contract TokenFactory {
         );
 
         bytes32 tokenMinterRole = GovernanceERC20(token).MINT_PERMISSION_ID();
-        bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINTER_PERMISSION_ID();
+        bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
         // give tokenFactory the permission to mint.
         _dao.grant(token, address(this), tokenMinterRole);

@@ -14,9 +14,7 @@ import {
 import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 
-const MERKLE_MINTER_PERMISSION_ID = ethers.utils.id(
-  'MERKLE_MINTER_PERMISSION_ID'
-);
+const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION_ID');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION_ID');
 
 describe('MerkleDistributor', function () {
@@ -74,7 +72,7 @@ describe('MerkleDistributor', function () {
     await managingDao.grant(
       minter.address,
       ownerAddress,
-      MERKLE_MINTER_PERMISSION_ID
+      MERKLE_MINT_PERMISSION_ID
     );
     await managingDao.grant(token.address, minter.address, MINT_PERMISSION_ID);
   });
@@ -115,7 +113,7 @@ describe('MerkleDistributor', function () {
       await managingDao.revoke(
         minter.address,
         ownerAddress,
-        MERKLE_MINTER_PERMISSION_ID
+        MERKLE_MINT_PERMISSION_ID
       );
 
       await expect(
@@ -132,7 +130,7 @@ describe('MerkleDistributor', function () {
           minter.address,
           minter.address,
           ownerAddress,
-          MERKLE_MINTER_PERMISSION_ID
+          MERKLE_MINT_PERMISSION_ID
         )
       );
     });

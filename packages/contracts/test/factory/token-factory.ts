@@ -17,9 +17,7 @@ import {
 chai.use(smock.matchers);
 
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION_ID');
-const MERKLE_MINTER_PERMISSION_ID = ethers.utils.id(
-  'MERKLE_MINTER_PERMISSION_ID'
-);
+const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION_ID');
 
 interface TokenConfig {
   addr: string;
@@ -321,7 +319,7 @@ describe('Core: TokenFactory', () => {
       expect(dao.grant).to.have.been.calledWith(
         tx[1],
         dao.address,
-        MERKLE_MINTER_PERMISSION_ID
+        MERKLE_MINT_PERMISSION_ID
       );
     });
   });

@@ -11,15 +11,20 @@ import "./MerkleDistributor.sol";
 
 /// @title MerkleMinter
 /// @author Aragon Association
-/// @notice A component minting ERC20 tokens and distributing them on a merkle tree using a `MerkleDistributor`
+/// @notice A component minting ERC20 tokens and distributing them on merkle trees using cloned `MerkleDistributor`s
 contract MerkleMinter is MetaTxComponent {
     using Clones for address;
 
+    /// @notice The ERC165 interface ID
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
-    bytes32 public constant MERKLE_MINTER_PERMISSION_ID = keccak256("MERKLE_MINTER_PERMISSION_ID");
+    /// @notice The ID of the permission required for the `merkleMint` function
+    bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION_ID");
 
+    /// @notice The ERC20 token to be distributed
     IERC20MintableUpgradeable public token;
+
+    /// @notice The address of the `MerkleDistributor` to clone from
     address public distributorBase;
 
     /// @notice Emitted when a token is minted
@@ -72,7 +77,7 @@ contract MerkleMinter is MetaTxComponent {
         uint256 _totalAmount,
         bytes calldata _tree,
         bytes calldata _context
-    ) external auth(MERKLE_MINTER_PERMISSION_ID) returns (MerkleDistributor distributor) {
+    ) external auth(MERKLE_MINT_PERMISSION_ID) returns (MerkleDistributor distributor) {
         address distributorAddr = distributorBase.clone();
         MerkleDistributor(distributorAddr).initialize(
             dao,
