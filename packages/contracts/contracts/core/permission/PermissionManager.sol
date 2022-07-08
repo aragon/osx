@@ -24,6 +24,26 @@ library PermissionLib {
     /// @param who The address (EOA or contract) missing the permission
     /// @param permissionID The permission identifier
     error PermissionMissing(address here, address where, address who, bytes32 permissionID);
+}
+
+/// @title PermissionManager
+/// @author Aragon Association - 2021, 2022
+/// @notice The permission manager used in a DAO and its associated components
+contract PermissionManager is Initializable {
+    ///@notice bla
+    bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
+
+    // "Who" constants
+    address internal constant ANY_ADDR = address(type(uint160).max);
+
+    // "Access" flags
+    address internal constant UNSET_FLAG = address(0);
+    address internal constant ALLOW_FLAG = address(2);
+
+    // permissionHash(where, who, permission) => Access flag(unset or allow) or an address to a `PermissionOracle`
+    mapping(bytes32 => address) internal permissions;
+    // immutablePermissionHash(where, permissionID) => true (permission for where is immutable), false (permission for where is mutable)
+    mapping(bytes32 => bool) internal immutablePermissions;
 
     /// @notice Thrown if a permission has been already granted
     /// @param where The address of the target contract to grant `who` permission to
@@ -41,25 +61,6 @@ library PermissionLib {
     /// @param where The address of the target contract for which the permission is immutable
     /// @param permissionID The permission identifier
     error PermissionImmutable(address where, bytes32 permissionID);
-}
-
-/// @title PermissionManager
-/// @author Aragon Association - 2021, 2022
-/// @notice The permission manager used in a DAO and its associated components
-contract PermissionManager is Initializable {
-    bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
-
-    // "Who" constants
-    address internal constant ANY_ADDR = address(type(uint160).max);
-
-    // "Access" flags
-    address internal constant UNSET_FLAG = address(0);
-    address internal constant ALLOW_FLAG = address(2);
-
-    // permissionHash(where, who, permission) => Access flag(unset or allow) or an address to a `PermissionOracle`
-    mapping(bytes32 => address) internal permissions;
-    // immutablePermissionHash(where, permissionID) => true (permission for where is immutable), false (permission for where is mutable)
-    mapping(bytes32 => bool) internal immutablePermissions;
 
     // Events
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `who` for the contract `where`
@@ -248,12 +249,12 @@ contract PermissionManager is Initializable {
         IPermissionOracle _oracle
     ) internal {
         if (isImmutable(_where, _permissionID))
-            revert PermissionLib.PermissionImmutable({where: _where, permissionID: _permissionID});
+            revert PermissionImmutable({where: _where, permissionID: _permissionID});
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
 
         if (permissions[permission] != UNSET_FLAG) {
-            revert PermissionLib.PermissionAlreadyGranted({
+            revert PermissionAlreadyGranted({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
@@ -274,12 +275,12 @@ contract PermissionManager is Initializable {
         bytes32 _permissionID
     ) internal {
         if (isImmutable(_where, _permissionID)) {
-            revert PermissionLib.PermissionImmutable({where: _where, permissionID: _permissionID});
+            revert PermissionImmutable({where: _where, permissionID: _permissionID});
         }
 
         bytes32 permission = permissionHash(_where, _who, _permissionID);
         if (permissions[permission] == UNSET_FLAG) {
-            revert PermissionLib.PermissionAlreadyRevoked({
+            revert PermissionAlreadyRevoked({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
@@ -296,7 +297,7 @@ contract PermissionManager is Initializable {
     function _makeImmutable(address _where, bytes32 _permissionID) internal {
         bytes32 permission = immutablePermissionHash(_where, _permissionID);
         if (immutablePermissions[permission]) {
-            revert PermissionLib.PermissionImmutable({where: _where, permissionID: _permissionID});
+            revert PermissionImmutable({where: _where, permissionID: _permissionID});
         }
         immutablePermissions[immutablePermissionHash(_where, _permissionID)] = true;
 
