@@ -10,3 +10,11 @@ export async function deployMockPluginFactory(): Promise<PluginFactoryMock> {
 
   return pluginFactoryMockContract;
 }
+
+export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {
+  const PluginRepo = await ethers.getContractFactory('PluginRepo');
+  const newPluginRepo = await PluginRepo.deploy();
+  await newPluginRepo.initialize(ownerAddress);
+
+  return newPluginRepo;
+}

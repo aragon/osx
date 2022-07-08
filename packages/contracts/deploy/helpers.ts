@@ -5,8 +5,8 @@ import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 export const ENS_ADDRESSES: {[key: string]: string} = {
-  mainnet: '0x314159265dD8dbb310642f98f50C066173C1259b',
-  ropsten: '0x112234455C3a32FD11230C42E7Bccd4A84e02010',
+  mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
 };
 
 export async function getContractAddress(

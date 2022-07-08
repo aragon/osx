@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {customError} from '../test-utils/custom-error-helper';
+import {deployNewDAO} from '../test-utils/dao';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -11,16 +12,10 @@ describe('DAORegistry', function () {
   let registry: any;
   let managingDAO: any;
   let ownerAddress: string;
+  let targetDao: any;
 
   const REGISTER_DAO_ROLE = ethers.utils.id('REGISTER_DAO_ROLE');
-
-  async function deployNewDao(): Promise<any> {
-    const DAO = await ethers.getContractFactory('DAO');
-    let dao = await DAO.deploy();
-    await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
-
-    return dao;
-  }
+  const daoSubdomainName = 'my-dao';
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -29,7 +24,10 @@ describe('DAORegistry', function () {
 
   beforeEach(async function () {
     // Managing DAO
-    managingDAO = await deployNewDao();
+    managingDAO = await deployNewDAO(ownerAddress);
+
+    // Target DAO to be used as an example DAO to be registered
+    targetDao = await deployNewDAO(ownerAddress);
 
     // DAO Registry
     const Registry = await ethers.getContractFactory('DAORegistry');
@@ -37,28 +35,30 @@ describe('DAORegistry', function () {
     await registry.initialize(managingDAO.address);
 
     // Grant the `REGISTER_DAO_ROLE` permission to `signers[0]`
-    managingDAO.grant(registry.address, ownerAddress, REGISTER_DAO_ROLE);
+    await managingDAO.grant(registry.address, ownerAddress, REGISTER_DAO_ROLE);
   });
 
   it('Should register a new DAO successfully', async function () {
-    const daoName = 'my-dao';
-
     await expect(
-      await registry.register(daoName, managingDAO.address, ownerAddress)
+      await registry.register(daoSubdomainName, targetDao.address, ownerAddress)
     )
       .to.emit(registry, EVENTS.DAORegistered)
-      .withArgs(managingDAO.address, ownerAddress, daoName);
+      .withArgs(targetDao.address, ownerAddress, daoSubdomainName);
 
-    expect(await registry.entries(managingDAO.address)).to.equal(true);
+    expect(await registry.entries(targetDao.address)).to.equal(true);
   });
 
   it('fail to register if the sender lacks the required role', async () => {
-    const daoName = 'my-dao';
+    // Register a DAO successfully
+    await registry.register(daoSubdomainName, targetDao.address, ownerAddress);
 
-    managingDAO.revoke(registry.address, ownerAddress, REGISTER_DAO_ROLE);
+    // Revoke the permission
+    await managingDAO.revoke(registry.address, ownerAddress, REGISTER_DAO_ROLE);
+
+    const newTargetDao = await deployNewDAO(ownerAddress);
 
     await expect(
-      registry.register(daoName, managingDAO.address, ownerAddress)
+      registry.register(daoSubdomainName, newTargetDao.address, ownerAddress)
     ).to.be.revertedWith(
       customError(
         'ACLAuth',
@@ -71,14 +71,12 @@ describe('DAORegistry', function () {
   });
 
   it('fail to register if DAO already exists', async function () {
-    const daoName = 'my-dao';
-
-    await registry.register(daoName, managingDAO.address, ownerAddress);
+    await registry.register(daoSubdomainName, targetDao.address, ownerAddress);
 
     await expect(
-      registry.register(daoName, managingDAO.address, ownerAddress)
+      registry.register(daoSubdomainName, targetDao.address, ownerAddress)
     ).to.be.revertedWith(
-      customError('ContractAlreadyRegistered', managingDAO.address)
+      customError('ContractAlreadyRegistered', targetDao.address)
     );
   });
 
@@ -86,13 +84,12 @@ describe('DAORegistry', function () {
     // TODO: Current behaviour of the DAO Registry allowes for DAO's name to be repeated,
     // but it should not, will be resolved once ENS subdomain is implemented and this test should be updated and renamed.
 
-    const daoName = 'my-dao';
+    await registry.register(daoSubdomainName, targetDao.address, ownerAddress);
 
-    await registry.register(daoName, managingDAO.address, ownerAddress);
+    let newTargetDao = await deployNewDAO(ownerAddress);
 
-    let newDao = await deployNewDao();
-
-    await expect(registry.register(daoName, newDao.address, ownerAddress)).not
-      .to.be.reverted;
+    await expect(
+      registry.register(daoSubdomainName, newTargetDao.address, ownerAddress)
+    ).not.to.be.reverted;
   });
 });
