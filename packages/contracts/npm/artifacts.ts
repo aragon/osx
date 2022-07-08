@@ -2,7 +2,7 @@
 
 // Core contracts
 import * as PermissionManager from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionManager.json';
-import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionLib.json';
+import * as BulkPermissionsLib from '../artifacts/contracts/core/permission/BulkPermissionsLib.sol/BulkPermissionsLib.json';
 import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
@@ -28,7 +28,7 @@ import * as AllowlistVoting from '../artifacts/contracts/voting/allowlist/Allowl
 
 export default {
   PermissionManager,
-  PermissionLib,
+  BulkPermissionsLib,
   IPermissionOracle,
   DAO,
   IDAO,
