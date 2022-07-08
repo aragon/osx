@@ -10,23 +10,39 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 import "../core/component/MetaTxComponent.sol";
 
-/// @title MerkleDistributor
+/// @title MerkleDistributor'
+/// @author Uniswap 2020
 /// @notice A component distributing claimable ERC20 tokens via a merkle tree
 contract MerkleDistributor is MetaTxComponent {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    /// @notice The ERC165 interface ID of the contract
     bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
         this.claim.selector ^ this.unclaimedBalance.selector ^ this.isClaimed.selector;
 
+    /// @notice The ERC20 token to be distributed
     IERC20Upgradeable public token;
+
+    /// @notice The merkle root of the balance tree storing the claims
     bytes32 public merkleRoot;
 
-    // This is a packed array of booleans.
+    /// @notice A packed array of booleans containing the information who claimed
     mapping(uint256 => uint256) private claimedBitMap;
 
-    error DistTokenClaimedAlready(uint256 index);
-    error DistTokenClaimInvalid(uint256 index, address to, uint256 amount);
+    /// @notice Thrown if tokens have been already claimed from the distributor
+    /// @param index The index in the balance tree that was claimed
+    error TokenAlreadyClaimed(uint256 index);
 
+    /// @notice Thrown if a claim is invalid
+    /// @param index The index in the balance tree to be claimed
+    /// @param to The address to which the tokens should be sent
+    /// @param amount The amount to be claimed
+    error TokenClaimInvalid(uint256 index, address to, uint256 amount);
+
+    /// @notice Emitted when tokens are claimed from the distributor
+    /// @param index The index in the balance tree that was claimed
+    /// @param to The address to which the tokens are send
+    /// @param amount The claimed amount
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
     /// @notice Initializes the component
@@ -54,7 +70,7 @@ contract MerkleDistributor is MetaTxComponent {
         return "0.0.1+opengsn.recipient.MerkleDistributor";
     }
 
-    /// @notice Claims an amount of tokens and sends it to an address
+    /// @notice Claims tokens from the balance tree and sends it to an address
     /// @param _index The index in the balance tree to be claimed
     /// @param _to The receiving address
     /// @param _amount The amount of tokens
@@ -65,9 +81,9 @@ contract MerkleDistributor is MetaTxComponent {
         uint256 _amount,
         bytes32[] calldata _proof
     ) external {
-        if (isClaimed(_index)) revert DistTokenClaimedAlready({index: _index});
+        if (isClaimed(_index)) revert TokenAlreadyClaimed({index: _index});
         if (!_verifyBalanceOnTree(_index, _to, _amount, _proof))
-            revert DistTokenClaimInvalid({index: _index, to: _to, amount: _amount});
+            revert TokenClaimInvalid({index: _index, to: _to, amount: _amount});
 
         _setClaimed(_index);
         token.safeTransfer(_to, _amount);

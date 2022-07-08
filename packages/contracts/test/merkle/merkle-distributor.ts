@@ -64,13 +64,13 @@ describe('MerkleDistributor', function () {
     describe('#claim', () => {
       it('fails for empty proof', async () => {
         await expect(distributor.claim(0, wallet0, 10, [])).to.be.revertedWith(
-          customError('DistTokenClaimInvalid', 0, wallet0, 10)
+          customError('TokenClaimInvalid', 0, wallet0, 10)
         );
       });
 
       it('fails for invalid index', async () => {
         await expect(distributor.claim(0, wallet0, 10, [])).to.be.revertedWith(
-          customError('DistTokenClaimInvalid', 0, wallet0, 10)
+          customError('TokenClaimInvalid', 0, wallet0, 10)
         );
       });
     });
@@ -133,7 +133,7 @@ describe('MerkleDistributor', function () {
       await distributor.claim(0, wallet0, 100, proof0);
       await expect(
         distributor.claim(0, wallet0, 100, proof0)
-      ).to.be.revertedWith(customError('DistTokenClaimedAlready', 0));
+      ).to.be.revertedWith(customError('TokenAlreadyClaimed', 0));
     });
 
     it('cannot claim more than once: 0 and then 1', async () => {
@@ -157,7 +157,7 @@ describe('MerkleDistributor', function () {
           100,
           tree.getProof(0, wallet0, BigNumber.from(100))
         )
-      ).to.be.revertedWith(customError('DistTokenClaimedAlready', 0));
+      ).to.be.revertedWith(customError('TokenAlreadyClaimed', 0));
     });
 
     it('cannot claim more than once: 1 and then 0', async () => {
@@ -181,25 +181,21 @@ describe('MerkleDistributor', function () {
           101,
           tree.getProof(1, wallet1, BigNumber.from(101))
         )
-      ).to.be.revertedWith(customError('DistTokenClaimedAlready', 1));
+      ).to.be.revertedWith(customError('TokenAlreadyClaimed', 1));
     });
 
     it('cannot claim for address other than proof', async () => {
       const proof0 = tree.getProof(0, wallet0, BigNumber.from(100));
       await expect(
         distributor.claim(1, wallet1, 101, proof0)
-      ).to.be.revertedWith(
-        customError('DistTokenClaimInvalid', 1, wallet1, 101)
-      );
+      ).to.be.revertedWith(customError('TokenClaimInvalid', 1, wallet1, 101));
     });
 
     it('cannot claim more than proof', async () => {
       const proof0 = tree.getProof(0, wallet0, BigNumber.from(100));
       await expect(
         distributor.claim(0, wallet0, 101, proof0)
-      ).to.be.revertedWith(
-        customError('DistTokenClaimInvalid', 0, wallet0, 101)
-      );
+      ).to.be.revertedWith(customError('TokenClaimInvalid', 0, wallet0, 101));
     });
   });
 
