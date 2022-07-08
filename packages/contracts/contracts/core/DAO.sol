@@ -52,11 +52,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     /// @notice Initializes the DAO by
     /// - registering the ERC165 interface ID
     /// - setting the trusted forwarder for meta transactions
-    /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup)
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
-    /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
-    /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission
-    /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions
+    /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO.
+    /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission.
+    /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions.
     function initialize(
         bytes calldata _metadata,
         address _initialOwner,
@@ -70,9 +70,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         __PermissionManager_init(_initialOwner);
     }
 
-    //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
-    ///      The caller must have the `UPGRADE_PERMISSION_ID` permission
+    //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern.abi
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    ///      The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
         internal
         virtual
@@ -196,7 +196,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// @notice Emits the `ETHDeposited` event to track ETH deposits that weren't done via the deposit method
+    /// @notice Emits the `ETHDeposited` event to track ETH deposits that weren't made via the deposit method.
     receive() external payable {
         emit ETHDeposited(msg.sender, msg.value);
     }
@@ -206,14 +206,14 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 
-    /// @notice Emits the MetadataSet event if new metadata is set
-    /// @param _metadata Hash of the IPFS metadata object
+    /// @notice Emits the MetadataSet event if new metadata is set.
+    /// @param _metadata Hash of the IPFS metadata object.
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
-    /// @notice Sets the trusted forwarder on the DAO and emits the associated event
-    /// @param _trustedForwarder The trusted forwarder address
+    /// @notice Sets the trusted forwarder on the DAO and emits the associated event.
+    /// @param _trustedForwarder The trusted forwarder address.
     function _setTrustedForwarder(address _trustedForwarder) internal {
         trustedForwarder = _trustedForwarder;
 
