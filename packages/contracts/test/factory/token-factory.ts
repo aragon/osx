@@ -71,7 +71,7 @@ describe('Core: TokenFactory', () => {
     beforeEach(async () => {
       dao = await smock.fake<DAO>('DAO');
       dao.checkPermissions.returns(true);
-      dao.hasPermission.returns(true);
+      dao.checkPermission.returns(true);
     });
 
     it('should fail if token addr is no ERC20 contract', async () => {

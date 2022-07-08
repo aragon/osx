@@ -15,7 +15,7 @@ contract DAOMock is IDAO, PermissionManager {
         __PermissionManager_init(initialOwner);
     }
 
-    function hasPermission(
+    function checkPermission(
         address, /* _where */
         address, /* _who */
         bytes32, /* _permissionID */

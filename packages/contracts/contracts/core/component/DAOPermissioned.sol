@@ -42,7 +42,7 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
     /// @param _permissionID The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionID) {
-        if (!dao.hasPermission(address(this), _msgSender(), _permissionID, _msgData()))
+        if (!dao.checkPermission(address(this), _msgSender(), _permissionID, _msgData()))
             revert DAOPermissionMissing({
                 dao: address(dao),
                 here: address(this),
