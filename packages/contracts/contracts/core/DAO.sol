@@ -16,7 +16,7 @@ import "./IDAO.sol";
 /// @title The public interface of the Aragon DAO framework.
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
-/// @dev Public API of the Aragon DAO framework
+/// @dev Public API of the Aragon DAO framework.
 contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
     using SafeERC20 for ERC20;
     using Address for address;
@@ -71,8 +71,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     }
 
     //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern.
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
-    ///      The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS). The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
         internal
         virtual

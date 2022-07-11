@@ -8,9 +8,9 @@ import "../../utils/UncheckedMath.sol";
 import "../majority/MajorityVotingBase.sol";
 
 /// @title AllowlistVoting
-/// @author Aragon Association - 2021-2022
-/// @notice The majority voting implementation using an allowlist
-/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
+/// @author Aragon Association - 2021-2022.
+/// @notice The majority voting implementation using an list of allowed addresses.
+/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AllowlistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
 
@@ -26,26 +26,26 @@ contract AllowlistVoting is MajorityVotingBase {
     mapping(address => Checkpoints.History) private _checkpoints;
     Checkpoints.History private _totalCheckpoints;
 
-    /// @notice Thrown when a sender is not allowed to create a vote
-    /// @param sender The sender address
+    /// @notice Thrown when a sender is not allowed to create a vote.
+    /// @param sender The sender address.
     error VoteCreationForbidden(address sender);
 
-    /// @notice Emitted when new users are added to the allowlist
-    /// @param users The array of user addresses to be added
+    /// @notice Emitted when new users are added to the allowlist.
+    /// @param users The array of user addresses to be added.
     event UsersAdded(address[] users);
 
-    /// @notice Emitted when users are removed from the allowlist
-    /// @param users The array of user addresses to be removed
+    /// @notice Emitted when users are removed from the allowlist.
+    /// @param users The array of user addresses to be removed.
     event UsersRemoved(address[] users);
 
-    /// @notice Initializes the component
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
-    /// @param _dao The IDAO interface of the associated DAO
-    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @notice Initializes the component.
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
-    /// @param _minDuration The minimal duration of a vote
-    /// @param _allowlisted The allowlisted addresses
+    /// @param _minDuration The minimal duration of a vote.
+    /// @param _allowlisted The allowlisted addresses.
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
@@ -67,28 +67,28 @@ contract AllowlistVoting is MajorityVotingBase {
         _addAllowlistedUsers(_allowlisted);
     }
 
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
+    /// @notice Returns the version of the GSN relay recipient.
+    /// @dev Describes the version and contract for GSN compatibility.
     function versionRecipient() external view virtual override returns (string memory) {
         return "0.0.1+opengsn.recipient.AllowlistVoting";
     }
 
-    /// @notice Adds new users to the allowlist
-    /// @param _users The addresses of the users to be added
+    /// @notice Adds new users to the allowlist.
+    /// @param _users The addresses of the users to be added.
     function addAllowlistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _addAllowlistedUsers(_users);
     }
 
-    /// @notice Internal function to add new users to the allowlist
-    /// @param _users The addresses of users to be added
+    /// @notice Internal function to add new users to the allowlist.
+    /// @param _users The addresses of users to be added.
     function _addAllowlistedUsers(address[] calldata _users) internal {
         _allowlistUsers(_users, true);
 
         emit UsersAdded(_users);
     }
 
-    /// @notice Removes users from the allowlist
-    /// @param _users The addresses of the users to be removed
+    /// @notice Removes users from the allowlist.
+    /// @param _users The addresses of the users to be removed.
     function removeAllowlistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
         _allowlistUsers(_users, false);
 
@@ -186,18 +186,18 @@ contract AllowlistVoting is MajorityVotingBase {
         }
     }
 
-    /// @notice Checks if a user is allowlisted at given block number
-    /// @param account The user address that is checked
-    /// @param blockNumber The block number
+    /// @notice Checks if a user is allowlisted at given block number.
+    /// @param account The user address that is checked.
+    /// @param blockNumber The block number.
     function isUserAllowlisted(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _checkpoints[account].getAtBlock(blockNumber) == 1;
     }
 
-    /// @notice Returns total count of users that are allowlisted at given block number
-    /// @param blockNumber The specific block to get the count from
-    /// @return The user count that were allowlisted at the specified block number
+    /// @notice Returns total count of users that are allowlisted at given block number.
+    /// @param blockNumber The specific block to get the count from.
+    /// @return The count of users that were allowlisted at the specified block number.
     function allowlistedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
@@ -210,9 +210,9 @@ contract AllowlistVoting is MajorityVotingBase {
         return _isVoteOpen(vote_) && isUserAllowlisted(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Adds or removes users from allowlist
-    /// @param _users user addresses
-    /// @param _enabled whether to add or remove from allowlist
+    /// @notice Adds or removes users from allowlist.
+    /// @param _users The user addresses.
+    /// @param _enabled Whether to add or remove users from the allowlist.
     function _allowlistUsers(address[] calldata _users, bool _enabled) internal {
         _totalCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 

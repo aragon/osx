@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 /// @title IDAO
 /// @author Aragon Association - 2022
-/// @notice The interface required for DAOs within the Aragon App DAO framework
+/// @notice The interface required for DAOs within the Aragon App DAO framework.
 abstract contract IDAO {
     /// @notice The `IDAO` interface ID.
     bytes4 internal constant DAO_INTERFACE_ID = type(IDAO).interfaceId;
@@ -37,7 +37,7 @@ abstract contract IDAO {
     event MetadataSet(bytes metadata);
 
     /// @notice Executes a list of actions.
-    /// @dev Runs a loop through the array of actions and executes them one by one.abi
+    /// @dev Runs a loop through the array of actions and executes them one by one.
     ///      If one action fails, all will be reverted.
     /// @param callId The id of the call. The definition of the value of callId is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.

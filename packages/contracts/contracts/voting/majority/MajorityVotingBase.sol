@@ -8,8 +8,8 @@ import "./IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting components
-/// @dev This component implements the `IMajorityVoting` interface
+/// @notice The abstract implementation of majority voting components.
+/// @dev This component implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHelpers {
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
     bytes32 public constant CHANGE_VOTE_CONFIG_PERMISSION_ID =
@@ -24,38 +24,38 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     uint64 public minDuration;
     uint256 public votesLength;
 
-    /// @notice Thrown if the maximal possible support is exceeded
-    /// @param limit The maximal value
-    /// @param actual The actual value
+    /// @notice Thrown if the maximal possible support is exceeded.
+    /// @param limit The maximal value.
+    /// @param actual The actual value.
     error VoteSupportExceeded(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the maximal possible participation is exceeded
-    /// @param limit The maximal value
-    /// @param actual The actual value
+    /// @notice Thrown if the maximal possible participation is exceeded.
+    /// @param limit The maximal value.
+    /// @param actual The actual value.
     error VoteParticipationExceeded(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the selected vote times are not allowed
-    /// @param current The maximal value
-    /// @param start The start date of the vote as a unix timestamp
-    /// @param end The end date of the vote as a unix timestamp
-    /// @param minDuration The minimal duration of the vote in seconds
+    /// @notice Thrown if the selected vote times are not allowed.
+    /// @param current The maximal value.
+    /// @param start The start date of the vote as a unix timestamp.
+    /// @param end The end date of the vote as a unix timestamp.
+    /// @param minDuration The minimal duration of the vote in seconds.
     error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero();
 
-    /// @notice Thrown if a voter is not allowed to cast a vote
-    /// @param voteId The ID of the vote
-    /// @param sender The address of the voter
+    /// @notice Thrown if a voter is not allowed to cast a vote.
+    /// @param voteId The ID of the vote.
+    /// @param sender The address of the voter.
     error VoteCastingForbidden(uint256 voteId, address sender);
 
     /// @notice Thrown if the vote execution is forbidden
     error VoteExecutionForbidden(uint256 voteId);
 
-    /// @notice Initializes the component
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
-    /// @param _dao The IDAO interface of the associated DAO
-    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
+    /// @notice Initializes the component to be used by inheriting contracts.
+    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
@@ -163,7 +163,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     }
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote
+    /// @param _voteId The ID of the vote.
     /// @param _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
@@ -174,7 +174,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     ) internal virtual;
 
     /// @notice Internal function to execute a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote
+    /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
@@ -184,14 +184,14 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     }
 
     /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote
-    /// @param _voter the address of the voter to check
-    /// @return True if the given voter can participate a certain vote, false otherwise
+    /// @param _voteId The ID of the vote.
+    /// @param _voter the address of the voter to check.
+    /// @return True if the given voter can participate a certain vote, false otherwise.
     function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote
-    /// @return True if the given vote can be executed, false otherwise
+    /// @param _voteId The ID of the vote.
+    /// @return True if the given vote can be executed, false otherwise.
     function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
         Vote storage vote_ = votes[_voteId];
 
@@ -230,9 +230,9 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         return true;
     }
 
-    /// @notice Internal function to check if a vote is still open
-    /// @param vote_ the vote struct
-    /// @return True if the given vote is open, false otherwise
+    /// @notice Internal function to check if a vote is still open.
+    /// @param vote_ the vote struct.
+    /// @return True if the given vote is open, false otherwise.
     function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
         return
             getTimestamp64() < vote_.endDate &&
@@ -240,10 +240,10 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
             !vote_.executed;
     }
 
-    /// @notice Calculates whether `_value` is more than a percentage `_pct` of `_total`
-    /// @param _value the current value
-    /// @param _total the total value
-    /// @param _pct the required support percentage
+    /// @notice Calculates whether `_value` is more than a percentage `_pct` of `_total`.
+    /// @param _value the current value.
+    /// @param _total the total value.
+    /// @param _pct the required support percentage.
     /// @return returns if the _value is _pct or more percentage of _total.
     function _isValuePct(
         uint256 _value,
