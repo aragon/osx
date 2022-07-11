@@ -6,12 +6,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Registry
+    name: DAORegistry
     network: {{network}}
     source:
-      abi: Registry
-      address: '{{dataSources.Registry.address}}'
-      startBlock: {{dataSources.Registry.startBlock}}
+      abi: DAORegistry
+      address: '{{dataSources.DAORegistry.address}}'
+      startBlock: {{dataSources.DAORegistry.startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -21,7 +21,7 @@ dataSources:
       abis:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
-        - name: Registry
+        - name: DAORegistry
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)

@@ -14,7 +14,7 @@ import * as DAOFactory from '../artifacts/contracts/factory/DAOFactory.sol/DAOFa
 import * as TokenFactory from '../artifacts/contracts/factory/TokenFactory.sol/TokenFactory.json';
 
 // Registry
-import * as Registry from '../artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json';
+import * as DAORegistry from '../artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json';
 
 // Tokens
 import * as GovernanceERC20 from '../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
@@ -36,7 +36,7 @@ export default {
   DAOPermissioned,
   DAOFactory,
   TokenFactory,
-  Registry,
+  DAORegistry,
   GovernanceERC20,
   GovernanceWrappedERC20,
   MerkleDistributor,
