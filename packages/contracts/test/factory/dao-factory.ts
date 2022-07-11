@@ -19,6 +19,10 @@ const EVENTS = {
 const CHANGE_VOTE_CONFIG_PERMISSION_ID = ethers.utils.id(
   'CHANGE_VOTE_CONFIG_PERMISSION_ID'
 );
+const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
+  'MODIFY_ALLOWLIST_PERMISSION_ID'
+);
+const EXEC_PERMISSION_ID = ethers.utils.id('EXEC_PERMISSION_ID');
 
 const zeroAddress = ethers.constants.AddressZero;
 const PermissionManagerAnyAddress =
@@ -344,13 +348,6 @@ describe('DAOFactory: ', function () {
     expect(creator).to.equal(ownerAddress);
 
     await ethers.provider.send('evm_mine', []);
-
-    const CHANGE_VOTE_CONFIG_PERMISSION_ID =
-      await voting.CHANGE_VOTE_CONFIG_PERMISSION_ID();
-    // @ts-ignore
-    const MODIFY_ALLOWLIST_PERMISSION_ID =
-      await voting.MODIFY_ALLOWLIST_PERMISSION_ID();
-    const EXEC_PERMISSION_ID = await managingDao.EXEC_PERMISSION_ID();
 
     const DAOPermissions = await Promise.all([
       managingDao.SET_METADATA_PERMISSION_ID(),
