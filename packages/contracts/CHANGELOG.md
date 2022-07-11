@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [UPCOMING]
 
 ### Added
+
+- Added deployment script for `ENSSubdomainRegistrar`.
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginFactory` abstract contract to be used in developing a pluginfactory.
 - Added `IPluginRepo` interface for plugin PluginRepo contract.
@@ -17,11 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `AragonPluginRegistry` contract for registering `PluginRepo`s.
 - Added `PluginRepoFactory` contract for creating `PluginRepo`s.
 - Added testing for `PluginRepo`, `InterfaceBasedRegistry`, `AragonPluginRegistry` and `PluginRepoFactory`.
-- Added deployment script for `admin-dao`, `apm-registry` and `pluginRepo-factory`.
+- Added deployment script for `managing-dao`, `plugin-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 
 ### Changed
+
 - Renamed folders
   - `votings` to `voting`
   - `ERC20` to `erc20`
@@ -73,6 +75,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `ACLRoleAlreadyGranted` to `PermissionAlreadyGranted`
   - `ACLRoleAlreadyRevoked` to `PermissionAlreadyRevoked`
   - `ACLRoleFrozen` to `PermissionImmutable`
+- Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`.
+- Changed `registry.ts` to `dao-registry.ts` and updated testing.
+- Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`.
 - Bumped `@openzeppelin/contracts` and `@openzeppelin/contracts-upgradeable` to `4.7.0` and fixed `GovernanceWrappedERC20` accordingly.
 - Refactored import statements.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.

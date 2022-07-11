@@ -1,17 +1,23 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {getContractAddress} from './helpers';
+import {ENS_ADDRESSES, getContractAddress, setupENS} from './helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deployments, getNamedAccounts, ethers, network} = hre;
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
+  const node = ethers.utils.namehash('dao.eth');
 
-  await deploy('AragonPluginRegistry', {
+  let ensRegistryAddress = ENS_ADDRESSES[network.name];
+  if (!ensRegistryAddress) {
+    ensRegistryAddress = await setupENS(hre);
+  }
+
+  await deploy('ENSSubdomainRegistrar', {
     from: deployer,
     args: [],
     log: true,
@@ -21,12 +27,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managingDAOAddress],
+          args: [managingDAOAddress, ensRegistryAddress, node],
         },
       },
     },
   });
 };
 export default func;
-func.runAtTheEnd = true;
-func.tags = ['AragonPluginRegistry'];
+func.tags = ['ENSSubdomainRegistrar'];

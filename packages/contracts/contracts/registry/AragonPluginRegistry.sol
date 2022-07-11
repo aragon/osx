@@ -33,6 +33,8 @@ contract AragonPluginRegistry is InterfaceBasedRegistry {
         external
         auth(REGISTER_PERMISSION_ID)
     {
+        // TODO: Implement ENS subdomain. Currently plugin's name can be repeated, will be resolved once the ENS subdomain is implemented.
+
         _register(registrant);
 
         emit PluginRepoRegistered(name, registrant);

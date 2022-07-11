@@ -1,17 +1,16 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-/** NOTE:
- * Create a (Managing DAO) with no Plugin, to be the owner DAO for the framework, temporarily.
- */
+import {getContractAddress} from './helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
+  const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  await deploy('DAO', {
+  await deploy('DAORegistry', {
     from: deployer,
     args: [],
     log: true,
@@ -21,11 +20,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: ['0x00', deployer, ethers.constants.AddressZero],
+          args: [managingDAOAddress],
         },
       },
     },
   });
 };
 export default func;
-func.tags = ['ManagingDao'];
+func.tags = ['DAORegistry'];

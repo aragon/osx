@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [UPCOMING]
 
 ### Changed
+
 - Renamed folders
   - `votings` to `voting`
   - `ERC20` to `erc20`
@@ -26,9 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Nay` to `No`
 - Renamed methods
   - `newVote` to `createVote`
+- Updated `manifest`, `registry`, `registry.test`
 - Refactored import statements.
 - Refactored event names.
-  
+
 ## v0.2.0-alpha
 
 ### Added

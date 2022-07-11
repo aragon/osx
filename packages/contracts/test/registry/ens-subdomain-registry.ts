@@ -9,14 +9,7 @@ import {
   ENSRegistry,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
-
-function ensLabelHash(label: string): string {
-  return ethers.utils.id(label);
-}
-
-function ensDomainHash(name: string): string {
-  return ethers.utils.namehash(name);
-}
+import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION_ID'
