@@ -88,7 +88,7 @@ async function createDao() {
 
   const eventRegistry = reciept.events.find(event =>
     event.topics.includes(
-      ethers.utils.id('NewDAORegistered(address,address,address,string)')
+      ethers.utils.id('DAORegistered(address,address,address,string)')
     )
   );
   const eventFactory = reciept.events.find(event =>

@@ -30,6 +30,8 @@ contract AragonPluginRegistry is InterfaceBasedRegistry {
     /// @param name The name of the PluginRepo
     /// @param registrant The address of the PluginRepo contract
     function register(string calldata name, address registrant) external auth(REGISTER_ROLE) {
+        // TODO: Implement ENS subdomain. Currently plugin's name can be repeated, will be resolved once the ENS subdomain is implemented.
+
         _register(registrant);
 
         emit PluginRepoRegistered(name, registrant);

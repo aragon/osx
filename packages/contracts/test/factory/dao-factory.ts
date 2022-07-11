@@ -6,13 +6,14 @@ import {VoterState} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
-  NewDAORegistered: 'NewDAORegistered',
+  DAORegistered: 'DAORegistered',
   MetadataSet: 'MetadataSet',
   ConfigUpdated: 'ConfigUpdated',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
   Executed: 'Executed',
+  TokenCreated: 'TokenCreated',
 };
 
 const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
@@ -31,9 +32,14 @@ const dummyVoteSettings = {
 async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();
   const {events} = data;
-  const {name, dao, token, creator} = events.find(
-    ({event}: {event: any}) => event === EVENTS.NewDAORegistered
+  const {name, dao, creator} = events.find(
+    ({event}: {event: any}) => event === EVENTS.DAORegistered
   ).args;
+
+  const token = tokenVoting
+    ? events.find(({event}: {event: any}) => event === EVENTS.TokenCreated).args
+        .token
+    : zeroAddress;
 
   const {voting} = events.find(
     ({event}: {event: any}) => event === EVENTS.DAOCreated
@@ -54,6 +60,7 @@ async function getDeployments(tx: any, tokenVoting: boolean) {
 
 describe('DAOFactory: ', function () {
   let daoFactory: any;
+  let managingDAO: any;
 
   let actionExecuteContract: any; // contract
 
@@ -65,7 +72,11 @@ describe('DAOFactory: ', function () {
 
   async function getMergedABI() {
     // @ts-ignore
-    const RegistryArtifact = await hre.artifacts.readArtifact('Registry');
+    const RegistryArtifact = await hre.artifacts.readArtifact('DAORegistry');
+    // @ts-ignore
+    const TokenFactoryArtifact = await hre.artifacts.readArtifact(
+      'TokenFactory'
+    );
     // @ts-ignore
     const DAOFactoryArtifact = await hre.artifacts.readArtifact('DAOFactory');
     // @ts-ignore
@@ -75,14 +86,23 @@ describe('DAOFactory: ', function () {
     // @ts-ignore
     const Token = await hre.artifacts.readArtifact('GovernanceERC20');
 
+    const _merged = [
+      ...DAOFactoryArtifact.abi,
+      ...TokenFactoryArtifact.abi.filter((f: any) => f.type === 'event'),
+      ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
+      ...ERC20Voting.abi.filter((f: any) => f.type === 'event'),
+      ...WhitelistVoting.abi.filter((f: any) => f.type === 'event'),
+      ...Token.abi.filter((f: any) => f.type === 'event'),
+    ];
+
+    // remove duplicated events
+    const merged = _merged.filter(
+      (value, index, self) =>
+        index === self.findIndex(event => event.name === value.name)
+    );
+
     return {
-      abi: [
-        ...DAOFactoryArtifact.abi,
-        ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-        ...ERC20Voting.abi.filter((f: any) => f.type === 'event'),
-        ...WhitelistVoting.abi.filter((f: any) => f.type === 'event'),
-        ...Token.abi.filter((f: any) => f.type === 'event'),
-      ],
+      abi: merged,
       bytecode: DAOFactoryArtifact.bytecode,
     };
   }
@@ -98,12 +118,25 @@ describe('DAOFactory: ', function () {
   });
 
   beforeEach(async function () {
-    const Registry = await ethers.getContractFactory('Registry');
-    const registry = await Registry.deploy();
+    // Managing DAO
+    const ManagingDAO = await ethers.getContractFactory('DAO');
+    managingDAO = await ManagingDAO.deploy();
+    await managingDAO.initialize(
+      '0x00',
+      ownerAddress,
+      ethers.constants.AddressZero
+    );
 
+    // DAO Registry
+    const Registry = await ethers.getContractFactory('DAORegistry');
+    const registry = await Registry.deploy();
+    await registry.initialize(managingDAO.address);
+
+    // Token Facotry
     const TokenFactory = await ethers.getContractFactory('TokenFactory');
     const tokenFactory = await TokenFactory.deploy();
 
+    // Dao Facotry
     const DAOFactory = new ethers.ContractFactory(
       mergedABI,
       daoFactoryBytecode,
@@ -119,6 +152,13 @@ describe('DAOFactory: ', function () {
       'ActionExecute'
     );
     actionExecuteContract = await ActionExecuteContract.deploy();
+
+    // Grant the `REGISTER_DAO_ROLE` permission to the `daoFactory`
+    managingDAO.grant(
+      registry.address,
+      daoFactory.address,
+      ethers.utils.id('REGISTER_DAO_ROLE')
+    );
   });
 
   it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
