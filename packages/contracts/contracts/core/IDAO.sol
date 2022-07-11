@@ -79,7 +79,7 @@ abstract contract IDAO {
     );
 
     /// @notice Emitted when a native token deposit has been made to the DAO.
-    /// @dev `NativeTokenDeposited` and `Deposited` are both needed. `NativeTokenDeposited` makes sure that the receive function can still be executed without reverting due to gas cost increases in EIP-2929, regardless of who sends the funds with `send`/`transfer`. To still be able to use `send`/`transfer`, an EIP-2930 access list is needed that has the address of the contract (base contract) that is behind the proxy. // TODO clarify with Giorgi
+    /// @dev This event is intended to be emitted in the `receive` function and is therefore bound by the gas limitations for `send`/`transfer` calls introduced by EIP-2929.
     /// @param sender The address of the sender.
     /// @param amount The amount of native tokens deposited.
     event NativeTokenDeposited(address sender, uint256 amount);

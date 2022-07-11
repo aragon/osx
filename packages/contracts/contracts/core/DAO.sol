@@ -197,6 +197,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     }
 
     /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.
+    /// @dev This call is bound by the gas limitations for `send`/`transfer` calls introduced by EIP-2929.
+    /// Gas cost increases in future hard forks might break this function. As an alternative, EIP-2930-type transactions using access lists can be employed.
     receive() external payable {
         emit NativeTokenDeposited(msg.sender, msg.value);
     }
