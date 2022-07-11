@@ -14,10 +14,15 @@ import "../core/IDAO.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
+/// @notice An ERC20 token that can be used for voting and is managed by a DAO.
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DAOPermissioned {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION_ID");
 
+    /// @notice Internal initialization method.
+    /// @param _dao The managing DAO.
+    /// @param _name The name of the wrapped token.
+    /// @param _symbol The symbol fo the wrapped token.
     function __GovernanceERC20_init(
         IDAO _dao,
         string calldata _name,
@@ -32,6 +37,10 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DAOPermission
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
 
+    /// @notice Initializes the component.
+    /// @param _dao The managing DAO.
+    /// @param _name The name of the wrapped token.
+    /// @param _symbol The symbol fo the wrapped token.
     function initialize(
         IDAO _dao,
         string calldata _name,
@@ -40,12 +49,16 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DAOPermission
         __GovernanceERC20_init(_dao, _name, _symbol);
     }
 
+    /// @notice Mints tokens to an address.
+    /// @param to The address receiving the tokens.
+    /// @param amount The amount of tokens to be minted.
     function mint(address to, uint256 amount) external auth(MINT_PERMISSION_ID) {
         _mint(to, amount);
     }
 
     // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
+    /// @inheritdoc ERC20VotesUpgradeable
     function _afterTokenTransfer(
         address from,
         address to,
@@ -58,10 +71,12 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DAOPermission
         }
     }
 
+    /// @inheritdoc ERC20VotesUpgradeable
     function _mint(address to, uint256 amount) internal override {
         super._mint(to, amount);
     }
 
+    /// @inheritdoc ERC20VotesUpgradeable
     function _burn(address account, uint256 amount) internal override {
         super._burn(account, amount);
     }
