@@ -59,7 +59,7 @@ async function createDao() {
       'DMDT',
     ];
     let mintConfig = [[signer.address], ['10000000000000000000000']];
-    tx = await DAOFactoryContract.newERC20VotingDAO(
+    tx = await DAOFactoryContract.createERC20VotingDAO(
       daoConfig,
       votingSettings,
       tokenConfig,
@@ -68,7 +68,7 @@ async function createDao() {
       overrides
     );
   } else {
-    tx = await DAOFactoryContract.newAllowlistVotingDAO(
+    tx = await DAOFactoryContract.createAllowlistVotingDAO(
       daoConfig,
       votingSettings,
       [signer.address],

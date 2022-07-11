@@ -65,7 +65,7 @@ contract DAOFactory {
     /// @param _tokenConfig The token config used to deploy a new token
     /// @param _mintConfig The config for the minter for the newly created token
     /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
-    function newERC20VotingDAO(
+    function createERC20VotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
         TokenFactory.TokenConfig calldata _tokenConfig,
@@ -107,7 +107,7 @@ contract DAOFactory {
     /// @param _voteConfig The majority voting configs and minimum duration of voting
     /// @param _allowlistVoters An array of addresses that are allowed to vote
     /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
-    function newAllowlistVotingDAO(
+    function createAllowlistVotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
         address[] calldata _allowlistVoters,

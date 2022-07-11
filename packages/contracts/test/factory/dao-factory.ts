@@ -172,7 +172,7 @@ describe('DAOFactory: ', function () {
   it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
     const mintAmount = 100;
 
-    let tx = await daoFactory.newERC20VotingDAO(
+    let tx = await daoFactory.createERC20VotingDAO(
       {
         name: daoDummyName,
         metadata: daoDummyMetadata,
@@ -326,7 +326,7 @@ describe('DAOFactory: ', function () {
   });
 
   it('creates AllowlistVoting DAO', async () => {
-    let tx = await daoFactory.newAllowlistVotingDAO(
+    let tx = await daoFactory.createAllowlistVotingDAO(
       {
         name: daoDummyName,
         metadata: daoDummyMetadata,
