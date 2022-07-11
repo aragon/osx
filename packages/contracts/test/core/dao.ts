@@ -26,7 +26,7 @@ const EVENTS = {
 const PERMISSION_IDS = {
   UPGRADE_PERMISSION_ID: ethers.utils.id('UPGRADE_PERMISSION_ID'),
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION_ID'),
-  EXEC_PERMISSION_ID: ethers.utils.id('EXEC_PERMISSION_ID'),
+  EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION_ID'),
   WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION_ID'),
   SET_SIGNATURE_VALIDATOR_PERMISSION_ID: ethers.utils.id(
     'SET_SIGNATURE_VALIDATOR_PERMISSION_ID'
@@ -62,7 +62,11 @@ describe('DAO', function () {
         ownerAddress,
         PERMISSION_IDS.SET_METADATA_PERMISSION_ID
       ),
-      dao.grant(dao.address, ownerAddress, PERMISSION_IDS.EXEC_PERMISSION_ID),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      ),
       dao.grant(
         dao.address,
         ownerAddress,
@@ -198,7 +202,7 @@ describe('DAO', function () {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.EXEC_PERMISSION_ID
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
       await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
@@ -207,7 +211,7 @@ describe('DAO', function () {
           dao.address,
           dao.address,
           ownerAddress,
-          PERMISSION_IDS.EXEC_PERMISSION_ID
+          PERMISSION_IDS.EXECUTE_PERMISSION_ID
         )
       );
     });

@@ -178,7 +178,7 @@ contract DAOFactory {
         );
         items[6] = BulkPermissionsLib.Item(
             BulkPermissionsLib.Operation.Grant,
-            _dao.EXEC_PERMISSION_ID(),
+            _dao.EXECUTE_PERMISSION_ID(),
             _voting
         );
 

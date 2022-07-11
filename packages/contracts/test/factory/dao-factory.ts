@@ -22,7 +22,7 @@ const CHANGE_VOTE_CONFIG_PERMISSION_ID = ethers.utils.id(
 const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
   'MODIFY_ALLOWLIST_PERMISSION_ID'
 );
-const EXEC_PERMISSION_ID = ethers.utils.id('EXEC_PERMISSION_ID');
+const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION_ID');
 
 const zeroAddress = ethers.constants.AddressZero;
 const PermissionManagerAnyAddress =
@@ -211,7 +211,7 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const EXEC_PERMISSION_ID = await managingDao.EXEC_PERMISSION_ID();
+    const EXECUTE_PERMISSION_ID = await managingDao.EXECUTE_PERMISSION_ID();
 
     const DAOPermissions = await Promise.all([
       managingDao.SET_METADATA_PERMISSION_ID(),
@@ -267,7 +267,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(managingDao, EVENTS.Granted)
       .withArgs(
-        EXEC_PERMISSION_ID,
+        EXECUTE_PERMISSION_ID,
         daoFactory.address,
         voting.address,
         managingDao.address,
@@ -283,7 +283,7 @@ describe('DAOFactory: ', function () {
         managingDao.address,
         managingDao.address,
         ownerAddress,
-        EXEC_PERMISSION_ID
+        EXECUTE_PERMISSION_ID
       )
     );
 
@@ -411,7 +411,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(managingDao, EVENTS.Granted)
       .withArgs(
-        EXEC_PERMISSION_ID,
+        EXECUTE_PERMISSION_ID,
         daoFactory.address,
         voting.address,
         managingDao.address,
@@ -427,7 +427,7 @@ describe('DAOFactory: ', function () {
         managingDao.address,
         managingDao.address,
         ownerAddress,
-        EXEC_PERMISSION_ID
+        EXECUTE_PERMISSION_ID
       )
     );
 

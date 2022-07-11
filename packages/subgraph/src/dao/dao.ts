@@ -212,7 +212,7 @@ export function handleGranted(event: Granted): void {
   // Package
   let daoContract = DAOContract.bind(event.address);
   // TODO: perhaps hardcoding exec contractPermissionID will be more efficient.
-  let executionContractPermissionID = daoContract.try_EXEC_PERMISSION_ID();
+  let executionContractPermissionID = daoContract.try_EXECUTE_PERMISSION_ID();
   if (
     !executionContractPermissionID.reverted &&
     event.params.permissionID == executionContractPermissionID.value
@@ -238,7 +238,7 @@ export function handleRevoked(event: Revoked): void {
   // TODO: rethink this once the market place is ready
   let daoId = event.address.toHexString();
   let daoContract = DAOContract.bind(event.address);
-  let executionContractPermissionID = daoContract.try_EXEC_PERMISSION_ID();
+  let executionContractPermissionID = daoContract.try_EXECUTE_PERMISSION_ID();
   if (
     !executionContractPermissionID.reverted &&
     event.params.permissionID == executionContractPermissionID.value

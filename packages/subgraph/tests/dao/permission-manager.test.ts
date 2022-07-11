@@ -26,8 +26,8 @@ import {
   createNewMadeImmutableEvent,
   createNewGrantedEvent,
   createNewRevokedEvent,
-  getEXEC_PERMISSION_ID,
-  getEXEC_PERMISSION_IDreverted,
+  getEXECUTE_PERMISSION_ID,
+  getEXECUTE_PERMISSION_IDreverted,
   getParticipationRequiredPct,
   getSupportRequiredPct,
   getVotingToken,
@@ -42,7 +42,7 @@ import {
 } from '../../src/utils/constants';
 
 let contractPermissionID = Bytes.fromByteArray(
-  crypto.keccak256(ByteArray.fromUTF8('EXEC_PERMISSION_ID'))
+  crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION_ID'))
 );
 
 function testPackages(supportsErc20VotingInterface: boolean): void {
@@ -57,7 +57,7 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   );
 
   // launch calls
-  getEXEC_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
+  getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
   getSupportRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getParticipationRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getMinDuration(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
@@ -188,7 +188,7 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   );
 
   // launch calls
-  getEXEC_PERMISSION_IDreverted(DAO_ADDRESS);
+  getEXECUTE_PERMISSION_IDreverted(DAO_ADDRESS);
 
   // handle event
   handleGranted(grantedEvent);
@@ -262,7 +262,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
     DAO_ADDRESS
   );
 
-  getEXEC_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
+  getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
 
   // handle event
   handleRevoked(revokedEvent);

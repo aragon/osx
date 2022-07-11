@@ -258,24 +258,26 @@ export function getBalanceOf(
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
 
-export function getEXEC_PERMISSION_ID(
+export function getEXECUTE_PERMISSION_ID(
   contractAddress: string,
   returns: Bytes
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'EXEC_PERMISSION_ID',
-    'EXEC_PERMISSION_ID():(bytes32)'
+    'EXECUTE_PERMISSION_ID',
+    'EXECUTE_PERMISSION_ID():(bytes32)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromBytes(returns)]);
 }
 
-export function getEXEC_PERMISSION_IDreverted(contractAddress: string): void {
+export function getEXECUTE_PERMISSION_IDreverted(
+  contractAddress: string
+): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'EXEC_PERMISSION_ID',
-    'EXEC_PERMISSION_ID():(bytes32)'
+    'EXECUTE_PERMISSION_ID',
+    'EXECUTE_PERMISSION_ID():(bytes32)'
   )
     .withArgs([])
     .reverts();

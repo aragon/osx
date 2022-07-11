@@ -24,7 +24,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     // Permission IDs
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION_ID");
-    bytes32 public constant EXEC_PERMISSION_ID = keccak256("EXEC_PERMISSION_ID");
+    bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION_ID");
     bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
     bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
         keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION_ID");
@@ -116,7 +116,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     function execute(uint256 callId, Action[] memory _actions)
         external
         override
-        auth(address(this), EXEC_PERMISSION_ID)
+        auth(address(this), EXECUTE_PERMISSION_ID)
         returns (bytes[] memory)
     {
         bytes[] memory execResults = new bytes[](_actions.length);
