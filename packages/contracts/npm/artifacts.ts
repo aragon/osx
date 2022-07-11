@@ -19,12 +19,12 @@ import * as DAORegistry from '../artifacts/contracts/registry/DAORegistry.sol/DA
 // Tokens
 import * as GovernanceERC20 from '../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import * as GovernanceWrappedERC20 from '../artifacts/contracts/tokens/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
-import * as MerkleDistributor from '../artifacts/contracts/tokens/MerkleDistributor.sol/MerkleDistributor.json';
-import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json';
 
-// Voting (future packages)
+// DAO Plugins
 import * as ERC20Voting from '../artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json';
 import * as AllowlistVoting from '../artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json';
+import * as MerkleDistributor from '../artifacts/contracts/tokens/MerkleDistributor.sol/MerkleDistributor.json';
+import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json';
 
 export default {
   PermissionManager,
