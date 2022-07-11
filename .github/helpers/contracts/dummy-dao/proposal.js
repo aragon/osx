@@ -4,8 +4,8 @@ const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
 const networks = require('../../../../packages/contracts/networks.json');
-const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json');
-const WhiteVotingJson = require('../../../../packages/contracts/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json');
+const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/ERC20/ERC20Voting.sol/ERC20Voting.json');
+const WhiteVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 
@@ -25,11 +25,11 @@ async function proposal() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].address;
   const votingAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].voting;
 
   // metadata
@@ -37,7 +37,7 @@ async function proposal() {
     name:
       isERC20Voting === 'erc20'
         ? 'ERC20Voting Dummy Proposal'
-        : 'WhitelistVoting Dummy Proposal',
+        : 'AllowlistVoting Dummy Proposal',
     description: 'Dummy withdraw proposal for QA and testing purposes...',
     links: [
       {label: 'link01', url: 'https://link.01'},
@@ -58,7 +58,7 @@ async function proposal() {
 
   const deposits =
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].deposits;
 
   const deposit = deposits[getRandomInt(deposits.length)];
@@ -118,15 +118,15 @@ async function proposal() {
   // edit or add property
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].proposal
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].proposal = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
   ].proposal = resultObj;
   //write file
   await fs.writeFile(

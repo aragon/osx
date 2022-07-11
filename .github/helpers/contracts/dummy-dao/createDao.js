@@ -26,9 +26,9 @@ async function createDao() {
     signer
   );
 
-  const votings = ['ERC20', 'Whitelist'];
+  const votingTypes = ['ERC20', 'Allowlist'];
   let tx;
-  let name = 'DummyDAO_' + votings[isERC20Voting === 'erc20' ? 0 : 1];
+  let name = 'DummyDAO_' + votingTypes[isERC20Voting === 'erc20' ? 0 : 1];
   const daoName = name + `_Voting_` + new Date().getTime();
 
   const metaObj = {
@@ -68,7 +68,7 @@ async function createDao() {
       overrides
     );
   } else {
-    tx = await DAOFactoryContract.newWhitelistVotingDAO(
+    tx = await DAOFactoryContract.newAllowlistVotingDAO(
       daoConfig,
       votingSettings,
       [signer.address],
@@ -115,7 +115,7 @@ async function createDao() {
   let resultObj = {
     tx: tx.hash,
     name: daoName,
-    votingType: isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting',
+    votingType: isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting',
     address: daoAddress[0],
     token: daoToken[0],
     voting: daoVoting[0],
@@ -132,15 +132,15 @@ async function createDao() {
   if (!content[networkName].dao) content[networkName].dao = {};
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ]
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ] = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
   ] = resultObj;
 
   //write file

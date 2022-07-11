@@ -21,7 +21,7 @@ async function deposit() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].address;
   // initiate DAO contract
   const DaoContract = new ethers.Contract(daoAddress, daoJson.abi, signer);
@@ -137,15 +137,15 @@ async function deposit() {
   // edit or add property
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].deposits
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
     ].deposits = [];
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'WhitelistVoting'
+    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
   ].deposits = results;
   //write file
   await fs.writeFile(
