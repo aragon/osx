@@ -16,7 +16,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DAOPermissioned 
     /// @notice The ID of the permission required for the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
-    /// @notice Initializes the DAO by storing the associated DAO and registering the ERC165 interface ID.
+    /// @notice Initializes the DAO by storing the associated DAO and registering the contract's ERC165 interface ID.
     /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
     /// @param _dao The associated DAO address.
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
@@ -27,7 +27,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DAOPermissioned 
 
     /// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern.
     /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
-    ///      The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    /// The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @dev Fallback to handle future versions of the ERC165 standard.
