@@ -14,14 +14,15 @@ import "../majority/MajorityVotingBase.sol";
 contract AllowlistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
 
-    bytes4 internal constant WHITELIST_VOTING_INTERFACE_ID =
+    bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
         MAJORITY_VOTING_INTERFACE_ID ^
             this.addAllowlistedUsers.selector ^
             this.removeAllowlistedUsers.selector ^
             this.isUserAllowlisted.selector ^
             this.allowlistedUserCount.selector;
 
-    bytes32 public constant MODIFY_WHITELIST = keccak256("MODIFY_WHITELIST");
+    bytes32 public constant MODIFY_ALLOWLIST_PERMISSION_ID =
+        keccak256("MODIFY_ALLOWLIST_PERMISSION_ID");
 
     mapping(address => Checkpoints.History) private _checkpoints;
     Checkpoints.History private _totalCheckpoints;
@@ -54,7 +55,7 @@ contract AllowlistVoting is MajorityVotingBase {
         uint64 _minDuration,
         address[] calldata _allowlisted
     ) public initializer {
-        _registerStandard(WHITELIST_VOTING_INTERFACE_ID);
+        _registerStandard(ALLOWLIST_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
             _dao,
             _trustedForwarder,
@@ -75,7 +76,10 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice Adds new users to the allowlist.
     /// @param _users The addresses of the users to be added.
-    function addAllowlistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
+    function addAllowlistedUsers(address[] calldata _users)
+        external
+        auth(MODIFY_ALLOWLIST_PERMISSION_ID)
+    {
         _addAllowlistedUsers(_users);
     }
 
@@ -89,7 +93,10 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice Removes users from the allowlist.
     /// @param _users The addresses of the users to be removed.
-    function removeAllowlistedUsers(address[] calldata _users) external auth(MODIFY_WHITELIST) {
+    function removeAllowlistedUsers(address[] calldata _users)
+        external
+        auth(MODIFY_ALLOWLIST_PERMISSION_ID)
+    {
         _allowlistUsers(_users, false);
 
         emit UsersRemoved(_users);

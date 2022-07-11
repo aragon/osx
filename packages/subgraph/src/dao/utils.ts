@@ -21,7 +21,7 @@ import {handleERC20Token} from '../utils/tokens';
 import {
   ADDRESS_ZERO,
   ERC20_VOTING_INTERFACE,
-  WHITELIST_VOTING_INTERFACE
+  ALLOWLIST_VOTING_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
@@ -153,7 +153,7 @@ export function addPackage(daoId: string, who: Address): void {
   );
   let whiteListInterfaceSuppoted = supportsInterface(
     contract,
-    WHITELIST_VOTING_INTERFACE
+    ALLOWLIST_VOTING_INTERFACE
   );
 
   if (ERC20VotingInterfaceSuppoted) {

@@ -38,7 +38,7 @@ import {
 
 import {
   ERC20_VOTING_INTERFACE,
-  WHITELIST_VOTING_INTERFACE
+  ALLOWLIST_VOTING_INTERFACE
 } from '../../src/utils/constants';
 
 let contractPermissionID = Bytes.fromByteArray(
@@ -71,14 +71,14 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
       ERC20_VOTING_INTERFACE,
       supportsErc20VotingInterface
     );
-    getSupportsInterface(VOTING_ADDRESS, WHITELIST_VOTING_INTERFACE, false);
+    getSupportsInterface(VOTING_ADDRESS, ALLOWLIST_VOTING_INTERFACE, false);
   } else {
     getSupportsInterface(
       VOTING_ADDRESS,
       ERC20_VOTING_INTERFACE,
       supportsErc20VotingInterface
     );
-    getSupportsInterface(VOTING_ADDRESS, WHITELIST_VOTING_INTERFACE, true);
+    getSupportsInterface(VOTING_ADDRESS, ALLOWLIST_VOTING_INTERFACE, true);
   }
 
   // handle event

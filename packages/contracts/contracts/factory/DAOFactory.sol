@@ -265,7 +265,7 @@ contract DAOFactory {
         BulkPermissionsLib.Item[] memory items = new BulkPermissionsLib.Item[](4);
         items[0] = BulkPermissionsLib.Item(
             BulkPermissionsLib.Operation.Grant,
-            allowlistVoting.MODIFY_WHITELIST(),
+            allowlistVoting.MODIFY_ALLOWLIST_PERMISSION_ID(),
             address(_dao)
         );
         items[1] = BulkPermissionsLib.Item(

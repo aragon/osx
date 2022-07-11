@@ -9,4 +9,4 @@ export const VOTER_STATE = new Map<number, string>()
 
 export const MAJORITY_VOTING_INTERFACE = '0xc52cd5d9';
 export const ERC20_VOTING_INTERFACE = '0x27a0eec0';
-export const WHITELIST_VOTING_INTERFACE = '0x9dd60761';
+export const ALLOWLIST_VOTING_INTERFACE = '0x9dd60761';

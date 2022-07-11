@@ -348,7 +348,8 @@ describe('DAOFactory: ', function () {
     const CHANGE_VOTE_CONFIG_PERMISSION_ID =
       await voting.CHANGE_VOTE_CONFIG_PERMISSION_ID();
     // @ts-ignore
-    const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
+    const MODIFY_ALLOWLIST_PERMISSION_ID =
+      await voting.MODIFY_ALLOWLIST_PERMISSION_ID();
     const EXEC_PERMISSION_ID = await managingDao.EXEC_PERMISSION_ID();
 
     const DAOPermissions = await Promise.all([
@@ -398,7 +399,7 @@ describe('DAOFactory: ', function () {
       )
       .to.emit(managingDao, EVENTS.Granted)
       .withArgs(
-        MODIFY_WHITELIST,
+        MODIFY_ALLOWLIST_PERMISSION_ID,
         daoFactory.address,
         managingDao.address,
         voting.address,
