@@ -297,7 +297,7 @@ describe('AllowlistVoting', function () {
 
     it('makes executable if enough yes is given from on voting power', async () => {
       // Since voting power is set to 29%, and
-      // whitelised is 10 addresses, voting yes
+      // allowlisted is 10 addresses, voting yes
       // from 3 addresses should be enough to
       // make vote executable
       await voting.vote(id, VoteOption.Yes, false);

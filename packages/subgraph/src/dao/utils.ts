@@ -151,18 +151,18 @@ export function addPackage(daoId: string, who: Address): void {
     contract,
     ERC20_VOTING_INTERFACE
   );
-  let whiteListInterfaceSuppoted = supportsInterface(
+  let allowlistInterfaceSuppoted = supportsInterface(
     contract,
     ALLOWLIST_VOTING_INTERFACE
   );
 
   if (ERC20VotingInterfaceSuppoted) {
     createErc20VotingPackage(who, daoId);
-  } else if (whiteListInterfaceSuppoted) {
+  } else if (allowlistInterfaceSuppoted) {
     createAllowlistVotingPackage(who, daoId);
   }
 
-  if (ERC20VotingInterfaceSuppoted || whiteListInterfaceSuppoted) {
+  if (ERC20VotingInterfaceSuppoted || allowlistInterfaceSuppoted) {
     let daoPackageEntityId = daoId + '_' + who.toHexString();
     let daoPackageEntity = new DaoPackage(daoPackageEntityId);
     daoPackageEntity.pkg = who.toHexString();
