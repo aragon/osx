@@ -16,7 +16,7 @@ import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
 import "./TokenFactory.sol";
 
-/// @title DAOFactory to create a DAO
+/// @title DAOFactory
 /// @author Aragon Association - 2022
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
@@ -43,15 +43,15 @@ contract DAOFactory {
         uint64 minDuration;
     }
 
-    /// @notice Emitted when a new DAO is created
-    /// @param name The DAO name
-    /// @param token ERC20 DAO token address or address(0) no token was created
-    /// @param voting The address of the voting component of the new DAO
+    /// @notice Emitted when a new DAO is created.
+    /// @param name The DAO name.
+    /// @param token The ERC20 governance token address or `address(0)` if no token was created.
+    /// @param voting The address of the voting component of the new DAO.
     event DAOCreated(string name, address indexed token, address indexed voting);
 
-    /// @dev Stores the registry and token factory address and creates the base contracts required for the factory
-    /// @param _registry The DAO registry to register the DAO with his name
-    /// @param _tokenFactory The Token Factory to register tokens
+    /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
+    /// @param _registry The DAO registry to register the DAO by its name.
+    /// @param _tokenFactory The token factory for optional governance token creation.
     constructor(DAORegistry _registry, TokenFactory _tokenFactory) {
         daoRegistry = _registry;
         tokenFactory = _tokenFactory;
@@ -59,12 +59,12 @@ contract DAOFactory {
         setupBases();
     }
 
-    /// @dev Creates a new DAO with ERC20 based voting. It also will deploy a new token if the corresponding config is passed.
-    /// @param _daoConfig The name and metadata hash of the DAO it creates
-    /// @param _voteConfig The majority voting configs and minimum duration of voting
-    /// @param _tokenConfig The token config used to deploy a new token
-    /// @param _mintConfig The config for the minter for the newly created token
-    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
+    /// @notice Creates a new DAO with the `ERC20Voting` component installed and deploys a new ERC20 governance token if the corresponding configuration is passed.
+    /// @param _daoConfig The name and metadata hash of the DAO.
+    /// @param _voteConfig The configuration used to set up the the majority voting.
+    /// @param _tokenConfig The configuration used to create a new token.
+    /// @param _mintConfig The configuration used to mint the newly created tokens.
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
     function createERC20VotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
@@ -102,11 +102,11 @@ contract DAOFactory {
         emit DAOCreated(_daoConfig.name, address(token), address(voting));
     }
 
-    /// @dev Creates a new DAO with allowlist based voting.
-    /// @param _daoConfig The name and metadata hash of the DAO it creates
-    /// @param _voteConfig The majority voting configs and minimum duration of voting
-    /// @param _allowlistVoters An array of addresses that are allowed to vote
-    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
+    /// @notice Creates a new DAO with the `AllowlistVoting` component installed.
+    /// @param _daoConfig The name and metadata hash of the DAO.
+    /// @param _voteConfig The configuration used to set up the the majority voting.
+    /// @param _allowlistVoters An array of addresses that are allowed to vote.
+    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
     function createAllowlistVotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
@@ -124,9 +124,9 @@ contract DAOFactory {
         emit DAOCreated(_daoConfig.name, address(0), address(voting));
     }
 
-    /// @dev Creates a new DAO.
-    /// @param _daoConfig The name and metadata hash of the DAO it creates
-    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution
+    /// @notice Creates a new DAO.
+    /// @param _daoConfig The name and metadata hash of the DAO it creates.
+    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution.
     function createDAO(DAOConfig calldata _daoConfig, address _trustedForwarder)
         internal
         returns (DAO dao)
@@ -138,9 +138,9 @@ contract DAOFactory {
         dao.initialize(_daoConfig.metadata, address(this), _trustedForwarder);
     }
 
-    /// @dev Does set the required permissions for the new DAO.
+    /// @notice Sets the required permissions for the new DAO.
     /// @param _dao The DAO instance just created.
-    /// @param _voting The voting contract address (allowlist OR ERC20 voting)
+    /// @param _voting The voting contract address (`AllowlistVoting` or `ERC20Voting`).
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set permissionIDs on the dao itself.
         BulkPermissionsLib.Item[] memory items = new BulkPermissionsLib.Item[](8);
@@ -192,10 +192,10 @@ contract DAOFactory {
         _dao.bulk(address(_dao), items);
     }
 
-    /// @dev Internal helper method to create ERC20Voting
-    /// @param _dao The DAO address
-    /// @param _token The ERC20 Upgradeable token address
-    /// @param _voteConfig The ERC20 voting settings for the DAO
+    /// @notice Internal helper method to create and setup an `ERC20Voting` contract for a DAO.
+    /// @param _dao The associated DAO.
+    /// @param _token The ERC20 Upgradeable token address.
+    /// @param _voteConfig The vote configuration.
     function createERC20Voting(
         DAO _dao,
         ERC20VotesUpgradeable _token,
@@ -237,10 +237,10 @@ contract DAOFactory {
         _dao.bulk(address(erc20Voting), items);
     }
 
-    /// @dev Internal helper method to create Allowlist Voting
-    /// @param _dao The DAO address creating the Allowlist Voting
-    /// @param _allowlistVoters The array of the allowed voting addresses
-    /// @param _voteConfig The voting settings
+    /// @notice Internal helper method to create and setup an `AllowlistVoting` contract for a DAO.
+    /// @param _dao The associated DAO.
+    /// @param _allowlistVoters The array of the allowed voting addresses.
+    /// @param _voteConfig The vote configuration.
     function createAllowlistVoting(
         DAO _dao,
         address[] calldata _allowlistVoters,
@@ -287,7 +287,7 @@ contract DAOFactory {
         _dao.bulk(address(allowlistVoting), items);
     }
 
-    /// @dev Internal helper method to set up the required base contracts on DAOFactory deployment.
+    /// @notice Internal helper method to set up the required base contracts on `DAOFactory` deployment.
     function setupBases() private {
         erc20VotingBase = address(new ERC20Voting());
         allowlistVotingBase = address(new AllowlistVoting());
