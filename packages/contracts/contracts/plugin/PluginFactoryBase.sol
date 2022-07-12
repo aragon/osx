@@ -7,12 +7,13 @@ pragma solidity 0.8.10;
 import "../core/erc165/AdaptiveERC165.sol";
 
 library PluginFactoryIDs {
-    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(IPluginFactory).interfaceId;
+    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginFactoryBase).interfaceId;
 }
 
-/// @title The interface required for plugin factory
+/// @title PluginFactoryBase
 /// @author Aragon Association - 2022
-abstract contract IPluginFactory is AdaptiveERC165 {
+/// @notice The abstract base contract of the plugin factory.
+abstract contract PluginFactoryBase is AdaptiveERC165 {
     address internal basePluginAddress;
 
     constructor() {

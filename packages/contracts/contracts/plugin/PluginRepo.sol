@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../utils/UncheckedMath.sol";
-import "./IPluginFactory.sol";
+import "./PluginFactoryBase.sol";
 import "./IPluginRepo.sol";
 
 /// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
@@ -38,7 +38,7 @@ contract PluginRepo is
     /// @param versionIdx The index of the version
     error VersionIdxDoesNotExist(uint256 versionIdx);
 
-    /// @notice Thrown if contract does not have `IPluginFactory` interface
+    /// @notice Thrown if contract does not have `PluginFactoryBase` interface
     /// @param pluginFactoryAddress The address of the contract
     error InvalidPluginInterface(address pluginFactoryAddress);
 
@@ -89,13 +89,13 @@ contract PluginRepo is
         address _pluginFactoryAddress,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
-        // check if _pluginFactoryAddress is IPluginFactory
+        // check if _pluginFactoryAddress is PluginFactoryBase
         if (!Address.isContract(_pluginFactoryAddress)) {
             revert InvalidContractAddress({pluginFactoryAddress: _pluginFactoryAddress});
         }
 
         try
-            IPluginFactory(_pluginFactoryAddress).supportsInterface(
+            PluginFactoryBase(_pluginFactoryAddress).supportsInterface(
                 PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
             )
         returns (bool result) {
@@ -106,7 +106,7 @@ contract PluginRepo is
             revert InvalidPluginFactoryContract({pluginFactoryAddress: _pluginFactoryAddress});
         }
 
-        address basePluginAddress = IPluginFactory(_pluginFactoryAddress).getBasePluginAddress();
+        address basePluginAddress = PluginFactoryBase(_pluginFactoryAddress).getBasePluginAddress();
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
         uint16[3] memory currentSematicVersion;
@@ -115,8 +115,9 @@ contract PluginRepo is
             Version memory currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
 
-            address currentBasePluginAddress = IPluginFactory(currentVersion.pluginFactoryAddress)
-                .getBasePluginAddress();
+            address currentBasePluginAddress = PluginFactoryBase(
+                currentVersion.pluginFactoryAddress
+            ).getBasePluginAddress();
 
             // Only allows base smart contract change on major version bumps
             if (
