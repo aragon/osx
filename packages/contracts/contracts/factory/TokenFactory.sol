@@ -101,11 +101,11 @@ contract TokenFactory {
             MerkleDistributor(distributorBase)
         );
 
-        bytes32 tokenMinterRole = GovernanceERC20(token).MINT_PERMISSION_ID();
-        bytes32 merkleMinterRole = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
+        bytes32 tokenMinterPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
+        bytes32 merkleMinterPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
         // give tokenFactory the permission to mint.
-        _dao.grant(token, address(this), tokenMinterRole);
+        _dao.grant(token, address(this), tokenMinterPermission);
 
         for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
             // allow minting to treasury
@@ -115,11 +115,11 @@ contract TokenFactory {
             IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
         }
         // remove the mint permission from tokenFactory
-        _dao.revoke(token, address(this), tokenMinterRole);
+        _dao.revoke(token, address(this), tokenMinterPermission);
 
-        _dao.grant(token, address(_dao), tokenMinterRole);
-        _dao.grant(token, merkleMinter, tokenMinterRole);
-        _dao.grant(merkleMinter, address(_dao), merkleMinterRole);
+        _dao.grant(token, address(_dao), tokenMinterPermission);
+        _dao.grant(token, merkleMinter, tokenMinterPermission);
+        _dao.grant(merkleMinter, address(_dao), merkleMinterPermission);
 
         return (ERC20VotesUpgradeable(token), MerkleMinter(merkleMinter));
     }

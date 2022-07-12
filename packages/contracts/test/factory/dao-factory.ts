@@ -221,7 +221,7 @@ describe('DAOFactory: ', function () {
       managingDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
-    // ======== Test Role events that were emitted successfully ==========
+    // ======== Test Permission events that were emitted successfully ==========
 
     tx = expect(tx);
 
@@ -357,7 +357,7 @@ describe('DAOFactory: ', function () {
       managingDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
-    // ======== Test Role events that were emitted successfully ==========
+    // ======== Test Permission events that were emitted successfully ==========
 
     tx = expect(tx);
 

@@ -35,12 +35,12 @@ contract PermissionManagerTest is PermissionManager {
         return ANY_ADDR;
     }
 
-    function checkRole(
+    function checkPermission(
         address _where,
         address _who,
         bytes32 _permissionID,
         bytes memory _data
     ) public returns (bool) {
-        return _checkRole(_where, _who, _permissionID, _data);
+        return _checkPermission(_where, _who, _permissionID, _data);
     }
 }

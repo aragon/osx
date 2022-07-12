@@ -195,9 +195,9 @@ contract PermissionManager is Initializable {
         bytes memory _data
     ) public returns (bool) {
         return
-            _checkRole(_where, _who, _permissionID, _data) || // check if _who has permission for _permissionID on _where
-            _checkRole(_where, ANY_ADDR, _permissionID, _data) || // check if anyone has permission for _permissionID on _where
-            _checkRole(ANY_ADDR, _who, _permissionID, _data); // check if _who has permission for _permissionID on any contract
+            _checkPermission(_where, _who, _permissionID, _data) || // check if _who has permission for _permissionID on _where
+            _checkPermission(_where, ANY_ADDR, _permissionID, _data) || // check if anyone has permission for _permissionID on _where
+            _checkPermission(ANY_ADDR, _who, _permissionID, _data); // check if _who has permission for _permissionID on any contract
     }
 
     /// @notice This method is used to check if permissions for a given permission identifier on a contract are immutable.
@@ -299,7 +299,7 @@ contract PermissionManager is Initializable {
     /// @param _permissionID The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered..
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionID identifier.
-    function _checkRole(
+    function _checkPermission(
         address _where,
         address _who,
         bytes32 _permissionID,
