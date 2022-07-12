@@ -107,7 +107,7 @@ describe('PluginRepoFactory: ', function () {
     const pluginRepoName = 'my-pluginRepo';
 
     await expect(
-      pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
+      pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
     ).to.be.revertedWith(
       customError(
         'DAOPermissionMissing',
@@ -124,14 +124,14 @@ describe('PluginRepoFactory: ', function () {
     const pluginRepoName = '';
 
     await expect(
-      pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWith(customError('EmptyName'));
+      pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
+    ).to.be.revertedWith(customError('EmptyPluginRepoName'));
   });
 
   it('create new pluginRepo', async () => {
     const pluginRepoName = 'my-pluginRepo';
 
-    let tx = await pluginRepoFactory.newPluginRepo(
+    let tx = await pluginRepoFactory.createPluginRepo(
       pluginRepoName,
       ownerAddress
     );
@@ -151,7 +151,7 @@ describe('PluginRepoFactory: ', function () {
     const contentURI = '0x00';
 
     await expect(
-      pluginRepoFactory.newPluginRepoWithVersion(
+      pluginRepoFactory.createPluginRepoWithVersion(
         pluginRepoName,
         initialSemanticVersion,
         pluginFactoryAddress,
@@ -169,7 +169,7 @@ describe('PluginRepoFactory: ', function () {
     const pluginFactoryAddress = pluginFactoryMock.address;
     const contentURI = '0x00';
 
-    let tx = await pluginRepoFactory.newPluginRepoWithVersion(
+    let tx = await pluginRepoFactory.createPluginRepoWithVersion(
       pluginRepoName,
       initialSemanticVersion,
       pluginFactoryAddress,
