@@ -12,23 +12,29 @@ import "../core/DAO.sol";
 import "../tokens/MerkleMinter.sol";
 import "../tokens/MerkleDistributor.sol";
 
-/// @title TokenFactory to create a DAO
+/// @title TokenFactory
 /// @author Aragon Association - 2022
-/// @notice This contract is used to create a Token.
+/// @notice This contract creates ERC20 governance tokens.
 contract TokenFactory {
     using Address for address;
     using Clones for address;
 
+    /// @notice The address of the `GovernanceERC20` base contract to clone from.
     address public governanceERC20Base;
+
+    /// @notice The address of the `GovernanceWrappedERC20` base contract to clone from.
     address public governanceWrappedERC20Base;
+
+    /// @notice The address of the `MerkleMinter` base contract to clone from.
     address public merkleMinterBase;
 
+    /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter` clones.
     MerkleDistributor public distributorBase;
 
-    /// @notice Emitted when a new token is created
-    /// @param token ERC20 Upgradeable token address
-    /// @param minter The `MerkleMinter` contract minting the new token
-    /// @param distributor The `MerkleDistibutor` contract distributing the new token
+    /// @notice Emitted when a new token is created.
+    /// @param token ERC20 Upgradeable token address.
+    /// @param minter The `MerkleMinter` contract minting the new token.
+    /// @param distributor The `MerkleDistibutor` contract distributing the new token.
     event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
 
     struct TokenConfig {
@@ -42,20 +48,20 @@ contract TokenFactory {
         uint256[] amounts;
     }
 
+    /// @notice Initializes the different base contracts for the factory to clone from.
     constructor() {
         setupBases();
     }
 
     /// TODO: Worth considering the decimals ?
-    /// @notice If addr is zero, creates new token + merkle minter, otherwise, creates a wrapped token only.
-    /// @notice If receiver address is zero, mint token to DAO's address.
-    /// @param _dao The dao address
-    /// @param _tokenConfig The address of the token, name, and symbol. If no addr is passed will a new token get created.
-    /// @param _mintConfig contains addresses and values(where to mint tokens and how much)
-    /// @return ERC20VotesUpgradeable new token address
-    /// @return MerkleMinter new merkle minter address(zero address in case passed token addr was not zero)
+    /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing ERC20 token depending on the address used in the `TokenConfig` provided.
+    /// @param _managingDao The address of the DAO managing the token.
+    /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be create, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an ERC20 compatible contract, a wrapped governance token is created.
+    /// @param _mintConfig The token mint configuration struct containing the `receivers` and `amounts`.
+    /// @return ERC20VotesUpgradeable The address of the created token.
+    /// @return MerkleMinter The `MerkleMinter` contract address being used to mint token address(zero address in case passed token addr was not zero)
     function createToken(
-        DAO _dao,
+        DAO _managingDao,
         TokenConfig calldata _tokenConfig,
         MintConfig calldata _mintConfig
     ) external returns (ERC20VotesUpgradeable, MerkleMinter) {
@@ -83,48 +89,56 @@ contract TokenFactory {
         }
 
         token = governanceERC20Base.clone();
-        GovernanceERC20(token).initialize(_dao, _tokenConfig.name, _tokenConfig.symbol);
+        GovernanceERC20(token).initialize(_managingDao, _tokenConfig.name, _tokenConfig.symbol);
 
-        // deploy and initialize minter
+        // Clone and initialize a `MerkleMinter`
+        // TODO Why is this needed for `GovernanceWrappedERC20`?
         address merkleMinter = merkleMinterBase.clone();
         MerkleMinter(merkleMinter).initialize(
-            _dao,
-            _dao.getTrustedForwarder(),
+            _managingDao,
+            _managingDao.getTrustedForwarder(),
             IERC20MintableUpgradeable(token),
             distributorBase
         );
 
-        // emit event for new token
+        // Emit the event
         emit TokenCreated(
             IERC20Upgradeable(token),
             MerkleMinter(merkleMinter),
             MerkleDistributor(distributorBase)
         );
 
-        bytes32 tokenMinterPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
-        bytes32 merkleMinterPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
+        bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
+        bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
-        // give tokenFactory the permission to mint.
-        _dao.grant(token, address(this), tokenMinterPermission);
+        // Grant the permission to mint to the token factory (`address(this)`).
+        _managingDao.grant(token, address(this), tokenMintPermission);
 
         for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
             // allow minting to treasury
             address receiver = _mintConfig.receivers[i] == address(0)
-                ? address(_dao)
+                ? address(_managingDao)
                 : _mintConfig.receivers[i];
             IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
         }
-        // remove the mint permission from tokenFactory
-        _dao.revoke(token, address(this), tokenMinterPermission);
 
-        _dao.grant(token, address(_dao), tokenMinterPermission);
-        _dao.grant(token, merkleMinter, tokenMinterPermission);
-        _dao.grant(merkleMinter, address(_dao), merkleMinterPermission);
+        // Revoke the mint permission from the token factory (`address(this)`).
+        _managingDao.revoke(token, address(this), tokenMintPermission);
+
+        // Grant the managing DAO permission to directly mint tokens to an receiving address.
+        // TODO Because the `GovernanceWrappedERC20` has no public mint function, this makes no sense in this case. An `if` should be added.
+        _managingDao.grant(token, address(_managingDao), tokenMintPermission);
+
+        // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.
+        // TODO Because the `GovernanceWrappedERC20` has no public mint function, this makes no sense in this case. An `if` should be added.
+        _managingDao.grant(token, merkleMinter, tokenMintPermission);
+        _managingDao.grant(merkleMinter, address(_managingDao), merkleMintPermission);
 
         return (ERC20VotesUpgradeable(token), MerkleMinter(merkleMinter));
     }
 
-    // @dev Private helper method to set up the required base contracts on TokenFactory deployment.
+    /// @notice Private helper method to set up the required base contracts on TokenFactory deployment.
+    // TODO: Why is this outside the constructor?
     function setupBases() private {
         distributorBase = new MerkleDistributor();
         governanceERC20Base = address(new GovernanceERC20());
