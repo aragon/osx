@@ -21,18 +21,30 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     using SafeERC20 for ERC20;
     using Address for address;
 
-    // Permission IDs
+    /// @notice The ID of the permission required for the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
+
+    /// @notice The ID of the permission required for the `setMetadata` function.
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION_ID");
+
+    /// @notice The ID of the permission required for the `execute` function.
     bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION_ID");
+
+    /// @notice The ID of the permission required for the `withdraw` function.
     bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
+
+    /// @notice The ID of the permission required for the `setSignatureValidator` function.
     bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
         keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION_ID");
+
+    /// @notice The ID of the permission required for the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 
+    /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     ERC1271 signatureValidator;
 
+    /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
 
     /// @notice Thrown if action execution has failed.
@@ -49,9 +61,9 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     /// @notice Thrown if an native token withdraw fails.
     error NativeTokenWithdrawFailed();
 
-    /// @notice Initializes the DAO by.
-    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID,
-    /// - setting the trusted forwarder for meta transactions.
+    /// @notice Initializes the DAO by
+    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
+    /// - setting the trusted forwarder for meta transactions
     /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO.
