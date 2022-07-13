@@ -92,7 +92,6 @@ contract TokenFactory {
         GovernanceERC20(token).initialize(_managingDao, _tokenConfig.name, _tokenConfig.symbol);
 
         // Clone and initialize a `MerkleMinter`
-        // TODO Why is this needed for `GovernanceWrappedERC20`?
         address merkleMinter = merkleMinterBase.clone();
         MerkleMinter(merkleMinter).initialize(
             _managingDao,
@@ -126,11 +125,9 @@ contract TokenFactory {
         _managingDao.revoke(token, address(this), tokenMintPermission);
 
         // Grant the managing DAO permission to directly mint tokens to an receiving address.
-        // TODO Because the `GovernanceWrappedERC20` has no public mint function, this makes no sense in this case. An `if` should be added.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 
         // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.
-        // TODO Because the `GovernanceWrappedERC20` has no public mint function, this makes no sense in this case. An `if` should be added.
         _managingDao.grant(token, merkleMinter, tokenMintPermission);
         _managingDao.grant(merkleMinter, address(_managingDao), merkleMintPermission);
 
