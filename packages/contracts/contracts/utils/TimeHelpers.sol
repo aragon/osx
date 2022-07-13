@@ -7,14 +7,14 @@ import "./Uint256Helpers.sol";
 contract TimeHelpers {
     using Uint256Helpers for uint256;
 
-    //// @notice Getter for the block number
+    /// @notice Getter for the block number
     /// @return The block number
     /// @dev Using a function rather than `block.number` allows us to easily mock the block number in tests
     function getBlockNumber() internal view virtual returns (uint256) {
         return block.number;
     }
 
-    //// @notice Getter for the block number converted to `uint64`
+    /// @notice Getter for the block number converted to `uint64`
     /// @return The block number converted to `uint64`
     /// @dev Using a function rather than `block.number` allows us to easily mock the block number in tests
     function getBlockNumber64() internal view virtual returns (uint64) {
