@@ -53,7 +53,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     error VoteExecutionForbidden(uint256 voteId);
 
     /// @notice Initializes the component to be used by inheriting contracts.
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.

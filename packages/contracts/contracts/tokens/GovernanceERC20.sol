@@ -14,7 +14,7 @@ import "../core/IDAO.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
-/// @notice An ERC20 token that can be used for voting and is managed by a DAO.
+/// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
 contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DAOPermissioned {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION_ID");

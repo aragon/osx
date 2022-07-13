@@ -20,13 +20,13 @@ contract ERC20Voting is MajorityVotingBase {
     error NoVotingPower();
 
     /// @notice Initializes the component
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS)
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)
     /// @param _dao The IDAO interface of the associated DAO
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
-    /// @param _token The ERC20 token used for voting
+    /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting
     function initialize(
         IDAO _dao,
         address _trustedForwarder,

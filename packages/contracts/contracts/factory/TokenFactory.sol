@@ -14,7 +14,7 @@ import "../tokens/MerkleDistributor.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022
-/// @notice This contract creates ERC20 governance tokens.
+/// @notice This contract creates [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance tokens.
 contract TokenFactory {
     using Address for address;
     using Clones for address;
@@ -32,7 +32,7 @@ contract TokenFactory {
     MerkleDistributor public distributorBase;
 
     /// @notice Emitted when a new token is created.
-    /// @param token ERC20 Upgradeable token address.
+    /// @param token [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token address.
     /// @param minter The `MerkleMinter` contract minting the new token.
     /// @param distributor The `MerkleDistibutor` contract distributing the new token.
     event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
@@ -54,9 +54,9 @@ contract TokenFactory {
     }
 
     /// TODO: Worth considering the decimals ?
-    /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing ERC20 token depending on the address used in the `TokenConfig` provided.
+    /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token depending on the address used in the `TokenConfig` provided.
     /// @param _managingDao The address of the DAO managing the token.
-    /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be create, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an ERC20 compatible contract, a wrapped governance token is created.
+    /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be create, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an [ERC-20](https://eips.ethereum.org/EIPS/eip-20)-compatible contract, a wrapped governance token is created.
     /// @param _mintConfig The token mint configuration struct containing the `receivers` and `amounts`.
     /// @return ERC20VotesUpgradeable The address of the created token.
     /// @return MerkleMinter The `MerkleMinter` contract address being used to mint token address(zero address in case passed token addr was not zero)

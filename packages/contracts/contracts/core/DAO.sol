@@ -50,10 +50,10 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     error NativeTokenWithdrawFailed();
 
     /// @notice Initializes the DAO by.
-    /// - registering the ERC165 interface ID.
+    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID,
     /// - setting the trusted forwarder for meta transactions.
     /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO.
     /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission.
     /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions.
@@ -70,8 +70,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         __PermissionManager_init(_initialOwner);
     }
 
-    //// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern.
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS). The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
         internal
         virtual
@@ -203,7 +203,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         emit NativeTokenDeposited(msg.sender, msg.value);
     }
 
-    /// @notice Fallback to handle future versions of the ERC165 standard.
+    /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
     fallback() external {
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }

@@ -13,8 +13,9 @@ import "../utils/UncheckedMath.sol";
 import "./PluginFactoryBase.sol";
 import "./IPluginRepo.sol";
 
-/// @title The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
+/// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
+/// @notice The repository contract required for managing and publishing different version of a plugin within the Aragon DAO framework
 contract PluginRepo is
     IPluginRepo,
     Initializable,
@@ -26,28 +27,28 @@ contract PluginRepo is
         keccak256("CREATE_VERSION_PERMISSION_ID");
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
-    /// @notice Thrown if version bump is invalid
-    /// @param currentVersion The current semantic version
-    /// @param nextVersion The next semantic version
+    /// @notice Thrown if version bump is invalid.
+    /// @param currentVersion The current semantic version.
+    /// @param nextVersion The next semantic version.
     error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
 
-    /// @notice Thrown if contract does not change on major bump
+    /// @notice Thrown if contract does not change on major bump.
     error InvalidContractAddressForMajorBump();
 
-    /// @notice Thrown if version does not exist
-    /// @param versionIdx The index of the version
+    /// @notice Thrown if version does not exist.
+    /// @param versionIdx The index of the version.
     error VersionIdxDoesNotExist(uint256 versionIdx);
 
-    /// @notice Thrown if contract does not have `PluginFactoryBase` interface
-    /// @param pluginFactoryAddress The address of the contract
+    /// @notice Thrown if contract does not have `PluginFactoryBase` interface.
+    /// @param pluginFactoryAddress The address of the contract.
     error InvalidPluginInterface(address pluginFactoryAddress);
 
-    /// @notice Thrown if address is not a `PluginFactory` contract
-    /// @param pluginFactoryAddress The address of the contract
+    /// @notice Thrown if address is not a `PluginFactory` contract.
+    /// @param pluginFactoryAddress The address of the contract.
     error InvalidPluginFactoryContract(address pluginFactoryAddress);
 
-    /// @notice Thrown if address is not a contract
-    /// @param pluginFactoryAddress The address of the contract
+    /// @notice Thrown if address is not a contract.
+    /// @param pluginFactoryAddress The address of the contract.
     error InvalidContractAddress(address pluginFactoryAddress);
 
     struct Version {
@@ -63,7 +64,7 @@ contract PluginRepo is
 
     event NewVersion(uint256 versionId, uint16[3] semanticVersion);
 
-    /// @dev Used for UUPS upgradability pattern
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     function initialize(address initialOwner) external initializer {
         _registerStandard(type(IPluginRepo).interfaceId);
         __PermissionManager_init(initialOwner);
@@ -73,15 +74,6 @@ contract PluginRepo is
         // set permissionIDs.
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
-
-    /// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(address(this), UPGRADE_PERMISSION_ID)
-    {}
 
     /// @inheritdoc IPluginRepo
     function newVersion(
@@ -250,4 +242,13 @@ contract PluginRepo is
     function semanticVersionHash(uint16[3] memory version) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(version[0], version[1], version[2]));
     }
+
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    function _authorizeUpgrade(address)
+        internal
+        virtual
+        override
+        auth(address(this), UPGRADE_PERMISSION_ID)
+    {}
 }

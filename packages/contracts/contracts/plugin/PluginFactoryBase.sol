@@ -19,7 +19,7 @@ abstract contract PluginFactoryBase is AdaptiveERC165 {
     /// @notice The base plugin address to clone from.
     address internal basePluginAddress;
 
-    /// @notice Initializes the plugin factory by registering its ERC165 interface ID.
+    /// @notice Initializes the plugin factory by registering its [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID.
     constructor() {
         _registerStandard(PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID);
     }

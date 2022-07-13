@@ -45,7 +45,7 @@ contract DAOFactory {
 
     /// @notice Emitted when a new DAO is created.
     /// @param name The DAO name.
-    /// @param token The ERC20 governance token address or `address(0)` if no token was created.
+    /// @param token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token address or `address(0)` if no token was created.
     /// @param voting The address of the voting component of the new DAO.
     event DAOCreated(string name, address indexed token, address indexed voting);
 
@@ -59,7 +59,7 @@ contract DAOFactory {
         setupBases();
     }
 
-    /// @notice Creates a new DAO with the `ERC20Voting` component installed and deploys a new ERC20 governance token if the corresponding configuration is passed.
+    /// @notice Creates a new DAO with the `ERC20Voting` component installed and deploys a new [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token if the corresponding configuration is passed.
     /// @param _daoConfig The name and metadata hash of the DAO.
     /// @param _voteConfig The configuration used to set up the the majority voting.
     /// @param _tokenConfig The configuration used to create a new token.
@@ -194,7 +194,7 @@ contract DAOFactory {
 
     /// @notice Internal helper method to create and setup an `ERC20Voting` contract for a DAO.
     /// @param _dao The associated DAO.
-    /// @param _token The ERC20 Upgradeable token address.
+    /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token address.
     /// @param _voteConfig The vote configuration.
     function createERC20Voting(
         DAO _dao,

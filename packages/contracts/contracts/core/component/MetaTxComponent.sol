@@ -18,8 +18,8 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @param trustedForwarder The trusted forwarder address.
     event TrustedForwarderSet(address trustedForwarder);
 
-    /// @notice Initializes the contract by initializing the underlying `Component`, registering the contract's ERC165 interface ID and setting the trusted forwarder.
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @notice Initializes the contract by initializing the underlying `Component`, registering the contract's [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and setting the trusted forwarder.
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The associated DAO address.
     /// @param _trustedForwarder The address of the trusted forwarder verifying the meta transactions.
     function __MetaTxComponent_init(IDAO _dao, address _trustedForwarder)

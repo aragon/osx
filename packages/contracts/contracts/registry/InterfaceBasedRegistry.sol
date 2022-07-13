@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "../core/component/DAOPermissioned.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 
-/// @title An ERC165-based registry for contracts
+/// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022
-/// @notice This contract allows to register contracts
+/// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 abstract contract InterfaceBasedRegistry is DAOPermissioned, UUPSUpgradeable {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
@@ -36,7 +36,7 @@ abstract contract InterfaceBasedRegistry is DAOPermissioned, UUPSUpgradeable {
     /// @notice Initializes the component
     /// @dev This is required for the UUPS upgradability pattern
     /// @param _managingDao The interface of the DAO managing the components permissions
-    /// @param _targetInterfaceId The ERC165 interface id of the contracts to be registered
+    /// @param _targetInterfaceId The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface id of the contracts to be registered
     function __InterfaceBasedRegistry_init(IDAO _managingDao, bytes4 _targetInterfaceId)
         internal
         virtual
@@ -47,13 +47,13 @@ abstract contract InterfaceBasedRegistry is DAOPermissioned, UUPSUpgradeable {
         targetInterfaceId = _targetInterfaceId;
     }
 
-    /// @notice Internal method authorizing the upgrade of the contract via the `UUPSUpgradeable` pattern
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
-    /// @notice Register an ERC165 contract address
+    /// @notice Register an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract address
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar
-    /// @param registrant The address of an ERC165 contract
+    /// @param registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract
     function _register(address registrant) internal {
         if (!Address.isContract(registrant)) {
             revert ContractAddressInvalid({registrant: registrant});

@@ -15,12 +15,12 @@ import "../core/IDAO.sol";
 
 /// @title GovernanceWrappedERC20
 /// @author Aragon Association
-/// @notice Wraps an existing ERC20 token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`.
+/// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`.
 /// The contract also supports meta transactions. To use an `amount` of underlying tokens for voting, the token owner has to
 /// 1. call `approve` for the tokens to be used by this contract
-/// 2. call `depositFor` to wrap them, which safely transfers the underlying ERC20 tokens to the contract and mints wrapped ERC20 tokens.
-/// To get the ERC20 tokens back, the owner of the wrapped tokens can call `withdrawFor`, which  burns the wrapped tokens ERC20 tokens are safely transfers the underlying tokens back to the owner.
-/// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying ERC20 token contract.
+/// 2. call `depositFor` to wrap them, which safely transfers the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens to the contract and mints wrapped [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens.
+/// To get the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens back, the owner of the wrapped tokens can call `withdrawFor`, which  burns the wrapped tokens [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens are safely transfers the underlying tokens back to the owner.
+/// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token contract.
 contract GovernanceWrappedERC20 is
     Initializable,
     AdaptiveERC165,
@@ -36,7 +36,7 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @notice Internal initialization method.
-    /// @param _token The underlying ERC20 token.
+    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
     function __GovernanceWrappedERC20_init(
@@ -54,7 +54,7 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @notice Initializes the component.
-    /// @param _token The underlying ERC20 token.
+    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
     function initialize(
@@ -66,7 +66,7 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @inheritdoc ERC20WrapperUpgradeable
-    /// @dev Uses the `decimals` of the underlying ERC20 token.
+    /// @dev Uses the `decimals` of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     function decimals()
         public
         view

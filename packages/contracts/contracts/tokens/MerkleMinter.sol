@@ -11,17 +11,17 @@ import "./MerkleDistributor.sol";
 
 /// @title MerkleMinter
 /// @author Aragon Association
-/// @notice A component minting ERC20 tokens and distributing them on merkle trees using `MerkleDistributor` clones.
+/// @notice A component minting [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributing them on merkle trees using `MerkleDistributor` clones.
 contract MerkleMinter is MetaTxComponent {
     using Clones for address;
 
-    /// @notice The ERC165 interface ID of the contract.
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
     /// @notice The ID of the permission required for the `merkleMint` function.
     bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION_ID");
 
-    /// @notice The ERC20 token to be distributed.
+    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
     IERC20MintableUpgradeable public token;
 
     /// @notice The address of the `MerkleDistributor` to clone from.
@@ -42,10 +42,10 @@ contract MerkleMinter is MetaTxComponent {
     );
 
     /// @notice Initializes the component.
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
-    /// @param _token A mintable ERC20 token.
+    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _distributorBase A `MerkleDistributor` to be cloned.
     function initialize(
         IDAO _dao,
@@ -66,7 +66,7 @@ contract MerkleMinter is MetaTxComponent {
         return "0.0.1+opengsn.recipient.MerkleMinter";
     }
 
-    /// @notice Mints ERC20 tokens and distributes them using a `MerkleDistributor`.
+    /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributes them using a `MerkleDistributor`.
     /// @param _merkleRoot The root of the merkle balance tree.
     /// @param _totalAmount The total amount of tokens to be minted.
     /// @param _tree The link to the stored merkle tree.

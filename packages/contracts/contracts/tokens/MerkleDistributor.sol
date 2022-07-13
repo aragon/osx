@@ -12,15 +12,15 @@ import "../core/component/MetaTxComponent.sol";
 
 /// @title MerkleDistributor'
 /// @author Uniswap 2020
-/// @notice A component distributing claimable ERC20 tokens via a merkle tree.
+/// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is MetaTxComponent {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    /// @notice The ERC165 interface ID of the contract
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract
     bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
         this.claim.selector ^ this.unclaimedBalance.selector ^ this.isClaimed.selector;
 
-    /// @notice The ERC20 token to be distributed.
+    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
     IERC20Upgradeable public token;
 
     /// @notice The merkle root of the balance tree storing the claims.
@@ -46,10 +46,10 @@ contract MerkleDistributor is MetaTxComponent {
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
     /// @notice Initializes the component.
-    /// @dev This method is required to support the Universal Upgradeable Proxy Standard (UUPS).
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
-    /// @param _token A mintable ERC20 token.
+    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _merkleRoot The merkle root of the balance tree.
     function initialize(
         IDAO _dao,
