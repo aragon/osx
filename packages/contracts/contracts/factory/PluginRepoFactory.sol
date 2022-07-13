@@ -103,7 +103,7 @@ contract PluginRepoFactory {
         pluginRepo.bulk(address(pluginRepo), items);
     }
 
-    /// @notice Internal method creating a `PluginRepo` via the ERC-1967 proxy patter from the provided base contract and registering it in the Aragon plugin registry.
+    /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
     /// @param _name The plugin repository name.
     /// @param _initialOwner The initial owner address.
     function _createPluginRepo(string calldata _name, address _initialOwner)
