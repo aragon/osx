@@ -57,7 +57,7 @@ contract PluginRepoFactory {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_name, address(this));
 
-        pluginRepo.newVersion(_initialSemanticVersion, _pluginFactory, _contentURI);
+        pluginRepo.createVersion(_initialSemanticVersion, _pluginFactory, _contentURI);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         setPluginRepoPermissions(pluginRepo, _maintainer);
