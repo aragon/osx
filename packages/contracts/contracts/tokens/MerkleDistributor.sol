@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 import "../core/component/MetaTxComponent.sol";
 
-/// @title MerkleDistributor'
+/// @title MerkleDistributor
 /// @author Uniswap 2020
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is MetaTxComponent {
