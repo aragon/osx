@@ -9,24 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed folders
-  - `votings` to `voting`
-  - `ERC20` to `erc20`
-  - `whitelist` to `allowlist`
-- Renamed files and contracts
-  - `Whitelist` to `Allowlist`
-  - `whitelistVoting` to `allowlist-voting`
-  - `erc20Voting` to `erc20-voting`
-- Renamed variables
-  - `voterState` to `voteOption`
-  - `voterWeight` to `voteWeight`
-- Renamed enums
-  - `VoterState` to `VoteOption`
-  - `Yea` to `Yes`
-  - `Nay` to `No`
-- Renamed methods
-  - `newVote` to `createVote`
-- Updated `manifest`, `registry`, `registry.test`
+- Adapted subgraph names according to the renaming of the contracts.
+- Updated `manifest`, `registry`, `registry.test`.
 - Refactored import statements.
 - Refactored event names.
 
