@@ -10,7 +10,7 @@ import {customError} from '../test-utils/custom-error-helper';
 
 const emptyBytes = '0x00';
 
-describe.only('PluginRepo', function () {
+describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: any;
