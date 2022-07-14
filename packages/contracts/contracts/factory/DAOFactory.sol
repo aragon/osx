@@ -64,7 +64,7 @@ contract DAOFactory {
     /// @param _voteConfig The configuration used to set up the the majority voting.
     /// @param _tokenConfig The configuration used to create a new token.
     /// @param _mintConfig The configuration used to mint the newly created tokens.
-    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
+    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     function createERC20VotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
@@ -106,7 +106,7 @@ contract DAOFactory {
     /// @param _daoConfig The name and metadata hash of the DAO.
     /// @param _voteConfig The configuration used to set up the the majority voting.
     /// @param _allowlistVoters An array of addresses that are allowed to vote.
-    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
+    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     function createAllowlistVotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,

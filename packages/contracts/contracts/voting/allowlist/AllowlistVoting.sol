@@ -42,7 +42,7 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions.
+    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote.
