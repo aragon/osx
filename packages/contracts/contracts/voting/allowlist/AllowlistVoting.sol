@@ -14,6 +14,7 @@ import "../majority/MajorityVotingBase.sol";
 contract AllowlistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
         MAJORITY_VOTING_INTERFACE_ID ^
             this.addAllowlistedUsers.selector ^
@@ -21,11 +22,15 @@ contract AllowlistVoting is MajorityVotingBase {
             this.isUserAllowlisted.selector ^
             this.allowlistedUserCount.selector;
 
+    /// @notice The ID of the permission required for the `addAllowlistedUsers` and `removeAllowlistedUsers` function.
     bytes32 public constant MODIFY_ALLOWLIST_PERMISSION_ID =
         keccak256("MODIFY_ALLOWLIST_PERMISSION_ID");
 
-    mapping(address => Checkpoints.History) private _checkpoints;
-    Checkpoints.History private _totalCheckpoints;
+    /// @notice The mapping containing the checkpointed history of addresses being allowlisted.
+    mapping(address => Checkpoints.History) private _allowlistedAddressesCheckpoints;
+
+    /// @notice The checkpointed history of the length of the allowlist.
+    Checkpoints.History private _allowlistLengthCheckpoints;
 
     /// @notice Thrown when a sender is not allowed to create a vote.
     /// @param sender The sender address.
@@ -199,7 +204,7 @@ contract AllowlistVoting is MajorityVotingBase {
     function isUserAllowlisted(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
-        return _checkpoints[account].getAtBlock(blockNumber) == 1;
+        return _allowlistedAddressesCheckpoints[account].getAtBlock(blockNumber) == 1;
     }
 
     /// @notice Returns total count of users that are allowlisted at given block number.
@@ -208,7 +213,7 @@ contract AllowlistVoting is MajorityVotingBase {
     function allowlistedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
-        return _totalCheckpoints.getAtBlock(blockNumber);
+        return _allowlistLengthCheckpoints.getAtBlock(blockNumber);
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -217,14 +222,14 @@ contract AllowlistVoting is MajorityVotingBase {
         return _isVoteOpen(vote_) && isUserAllowlisted(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Adds or removes users from allowlist.
+    /// @notice Adds or removes users from the allowlist.
     /// @param _users The user addresses.
     /// @param _enabled Whether to add or remove users from the allowlist.
     function _allowlistUsers(address[] calldata _users, bool _enabled) internal {
-        _totalCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
+        _allowlistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 
         for (uint256 i = 0; i < _users.length; i++) {
-            _checkpoints[_users[i]].push(_enabled ? 1 : 0);
+            _allowlistedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
         }
     }
 }

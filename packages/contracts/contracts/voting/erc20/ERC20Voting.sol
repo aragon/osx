@@ -8,25 +8,27 @@ import "../majority/MajorityVotingBase.sol";
 
 /// @title ERC20Voting
 /// @author Aragon Association - 2021-2022
-/// @notice The majority voting implementation using an ERC-20 token
-/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface
+/// @notice The majority voting implementation using an ERC-20 token.
+/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract ERC20Voting is MajorityVotingBase {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
         MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
 
+    /// @notice An [ERC20Votes](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Votes) compatible contract referencing the token being used for voting.
     ERC20VotesUpgradeable private votingToken;
 
     /// @notice Thrown if the voting power is zero
     error NoVotingPower();
 
-    /// @notice Initializes the component
-    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)
-    /// @param _dao The IDAO interface of the associated DAO
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions
+    /// @notice Initializes the component.
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
-    /// @param _minDuration The minimal duration of a vote
-    /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting
+    /// @param _minDuration The minimal duration of a vote.
+    /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
@@ -47,15 +49,15 @@ contract ERC20Voting is MajorityVotingBase {
         votingToken = _token;
     }
 
-    /// @notice getter function for the voting token
-    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface
-    /// @return ERC20VotesUpgradeable the token used for voting
+    /// @notice getter function for the voting token.
+    /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface.
+    /// @return ERC20VotesUpgradeable the token used for voting.
     function getVotingToken() public view returns (ERC20VotesUpgradeable) {
         return votingToken;
     }
 
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
+    /// @notice Returns the version of the GSN relay recipient.
+    /// @dev Describes the version and contract for GSN compatibility.
     function versionRecipient() external view virtual override returns (string memory) {
         return "0.0.1+opengsn.recipient.ERC20Voting";
     }
@@ -76,7 +78,7 @@ contract ERC20Voting is MajorityVotingBase {
 
         voteId = votesLength++;
 
-        // calculate start and end time for the vote
+        // Calculate the start and end time of the vote
         uint64 currentTimestamp = getTimestamp64();
 
         if (_startDate == 0) _startDate = currentTimestamp;
@@ -90,7 +92,7 @@ contract ERC20Voting is MajorityVotingBase {
                 minDuration: minDuration
             });
 
-        // create a vote.
+        // Create the vote
         Vote storage vote_ = votes[voteId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;

@@ -11,12 +11,17 @@ import "./IMajorityVoting.sol";
 /// @notice The abstract implementation of majority voting components.
 /// @dev This component implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHelpers {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
+
+    /// @notice The ID of the permission required for the `changeVoteConfig` function.
     bytes32 public constant CHANGE_VOTE_CONFIG_PERMISSION_ID =
         keccak256("CHANGE_VOTE_CONFIG_PERMISSION_ID");
 
+    /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
+    /// @notice A mapping between vote IDs and vote information.
     mapping(uint256 => Vote) internal votes;
 
     uint64 public supportRequiredPct;
