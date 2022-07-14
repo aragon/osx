@@ -23,7 +23,6 @@ contract ENSSubdomainRegistrar is Component {
     ENS private ens;
     bytes32 public node;
     address public resolver;
-    address public reverseRegistrar;
 
     /// @notice Thrown if the registrar is not authorized and is neither the domain node owner
     ///         nor an approved operator of the domain node owner
