@@ -1,0 +1,35 @@
+{{h 2}} {{visibility}} {{toLowerCase type}} `{{name}}`
+
+{{{natspec.notice}}}
+
+{{#if signature}}
+```solidity
+{{{signature}}} 
+```
+{{/if}}
+
+{{#if natspec.params}}
+| Input | Type | Description |
+|:----- | ---- | ----------- |
+{{#each params}}
+| {{name}} | {{type}} | {{{joinLines natspec}}} |
+{{/each}}
+{{#if natspec.returns}}
+{{#each returns}}
+| **Output** | |
+| {{#if name}}{{name}}{{else}}[{{@index}}]{{/if}} | {{type}} | {{{joinLines natspec}}} |
+{{/each}}
+{{/if}}
+{{else}}
+{{#if natspec.returns}}
+| Output | Type | Description |
+| ------ | ---- | ----------- |
+{{#each returns}}
+| {{#if name}}{{name}}{{else}}[{{@index}}]{{/if}} | {{type}} | {{{joinLines natspec}}} |
+{{/each}}
+{{/if}}
+{{/if}}
+
+{{#if natspec.dev}}
+*{{{natspec.dev}}}*
+{{/if}}

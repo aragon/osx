@@ -9,6 +9,7 @@ import '@typechain/hardhat';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
+import 'solidity-docgen';
 
 dotenv.config();
 
@@ -66,6 +67,14 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: 0,
+  },
+  docgen: {
+    outputDir: 'docs/generated',
+    theme: 'markdown',
+    pages: 'files',
+    templates: 'docs/templates',
+    collapseNewlines: true,
+    exclude: ['test'],
   },
 };
 
