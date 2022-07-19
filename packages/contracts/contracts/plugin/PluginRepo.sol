@@ -98,7 +98,8 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             revert InvalidPluginFactoryContract({pluginFactoryAddress: _pluginFactoryAddress});
         }
 
-        address basePluginAddress = IPluginFactory(_pluginFactoryAddress).getBasePluginAddress();
+        // TODO: to be removed
+        // address basePluginAddress = IPluginFactory(_pluginFactoryAddress).getBasePluginAddress();
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
         uint16[3] memory currentSematicVersion;
@@ -107,16 +108,17 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             Version memory currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
 
-            address currentBasePluginAddress = IPluginFactory(currentVersion.pluginFactoryAddress)
-                .getBasePluginAddress();
+            // TODO: to be removed
+            // address currentBasePluginAddress = IPluginFactory(currentVersion.pluginFactoryAddress)
+            //     .getBasePluginAddress();
 
-            // Only allows base smart contract change on major version bumps
-            if (
-                currentBasePluginAddress != basePluginAddress &&
-                _newSemanticVersion[0] <= currentVersion.semanticVersion[0]
-            ) {
-                revert InvalidContractAddressForMajorBump();
-            }
+            // // Only allows base smart contract change on major version bumps
+            // if (
+            //     currentBasePluginAddress != basePluginAddress &&
+            //     _newSemanticVersion[0] <= currentVersion.semanticVersion[0]
+            // ) {
+            //     revert InvalidContractAddressForMajorBump();
+            // }
         }
 
         if (!isValidBump(currentSematicVersion, _newSemanticVersion)) {
