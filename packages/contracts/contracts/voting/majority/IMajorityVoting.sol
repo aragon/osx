@@ -39,14 +39,9 @@ interface IMajorityVoting {
     /// @notice Emitted when a vote is casted by a voter.
     /// @param voteId The ID of the vote.
     /// @param voter The voter casting the vote.
-    /// @param voteOption The vote option chosen.
+    /// @param choice The vote option chosen.
     /// @param voteWeight The weight of the casted vote.
-    event VoteCast(
-        uint256 indexed voteId,
-        address indexed voter,
-        uint8 voteOption,
-        uint256 voteWeight
-    );
+    event VoteCast(uint256 indexed voteId, address indexed voter, uint8 choice, uint256 voteWeight);
 
     /// @notice Emitted when a vote is executed.
     /// @param voteId The ID of the vote.
@@ -78,8 +73,8 @@ interface IMajorityVoting {
     /// @param _actions The actions that will be executed after vote passes.
     /// @param _startDate The start date of the vote. If 0, uses current timestamp.
     /// @param _endDate The end date of the vote. If 0, uses `_start` + `minDuration`.
-    /// @param _executeIfDecided Option to enable automatic execution on the last required vote.
-    /// @param _voteOption The vote voteOption to cast on creation.
+    /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
+    /// @param _choice The vote choice to cast on creation.
     /// @return voteId The ID of the vote.
     function createVote(
         bytes calldata _proposalMetadata,
@@ -87,17 +82,17 @@ interface IMajorityVoting {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoteOption _voteOption
+        VoteOption _choice
     ) external returns (uint256 voteId);
 
     /// @notice Votes for a vote option and optionally executes the vote.
     /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports].
     /// @param _voteId The ID of the vote.
-    /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param  _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided Whether the vote should execute its action if it becomes decided.
     function vote(
         uint256 _voteId,
-        VoteOption _voteOption,
+        VoteOption _choice,
         bool _executesIfDecided
     ) external;
 

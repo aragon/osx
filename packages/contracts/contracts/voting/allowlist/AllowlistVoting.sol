@@ -114,7 +114,7 @@ contract AllowlistVoting is MajorityVotingBase {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoteOption _voteOption
+        VoteOption _choice
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -155,7 +155,7 @@ contract AllowlistVoting is MajorityVotingBase {
 
         emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
-        if (_voteOption != VoteOption.None && canVote(voteId, _msgSender())) {
+        if (_choice != VoteOption.None && canVote(voteId, _msgSender())) {
             _vote(voteId, VoteOption.Yes, _msgSender(), _executeIfDecided);
         }
     }
@@ -163,7 +163,7 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _voteId,
-        VoteOption _voteOption,
+        VoteOption _choice,
         address _voter,
         bool _executesIfDecided
     ) internal override {
@@ -181,17 +181,17 @@ contract AllowlistVoting is MajorityVotingBase {
         }
 
         // write the updated/new vote for the voter.
-        if (_voteOption == VoteOption.Yes) {
+        if (_choice == VoteOption.Yes) {
             vote_.yes = vote_.yes + 1;
-        } else if (_voteOption == VoteOption.No) {
+        } else if (_choice == VoteOption.No) {
             vote_.no = vote_.no + 1;
-        } else if (_voteOption == VoteOption.Abstain) {
+        } else if (_choice == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain + 1;
         }
 
-        vote_.voters[_voter] = _voteOption;
+        vote_.voters[_voter] = _choice;
 
-        emit VoteCast(_voteId, _voter, uint8(_voteOption), 1);
+        emit VoteCast(_voteId, _voter, uint8(_choice), 1);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);

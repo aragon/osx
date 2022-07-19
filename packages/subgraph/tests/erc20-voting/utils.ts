@@ -66,7 +66,7 @@ export function createNewVoteStartedEvent(
 export function createNewVoteCastEvent(
   voteId: string,
   voter: string,
-  voteOption: string,
+  choice: string,
   voteWeight: string,
   contractAddress: string
 ): VoteCast {
@@ -83,9 +83,9 @@ export function createNewVoteCastEvent(
     'voter',
     ethereum.Value.fromAddress(Address.fromString(voter))
   );
-  let voteOptionParam = new ethereum.EventParam(
-    'voteOption',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteOption))
+  let choiceParam = new ethereum.EventParam(
+    'choice',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(choice))
   );
   let stakeParam = new ethereum.EventParam(
     'voteWeight',
@@ -94,7 +94,7 @@ export function createNewVoteCastEvent(
 
   createVoteCastEvent.parameters.push(voteIdParam);
   createVoteCastEvent.parameters.push(voterParam);
-  createVoteCastEvent.parameters.push(voteOptionParam);
+  createVoteCastEvent.parameters.push(choiceParam);
   createVoteCastEvent.parameters.push(stakeParam);
 
   return createVoteCastEvent;

@@ -97,18 +97,18 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoteOption _voteOption
+        VoteOption _choice
     ) external virtual returns (uint256 voteId);
 
     /// @inheritdoc IMajorityVoting
     function vote(
         uint256 _voteId,
-        VoteOption _voteOption,
+        VoteOption _choice,
         bool _executesIfDecided
     ) external {
-        if (_voteOption != VoteOption.None && !_canVote(_voteId, _msgSender()))
+        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender()))
             revert VoteCastingForbidden(_voteId, _msgSender());
-        _vote(_voteId, _voteOption, _msgSender(), _executesIfDecided);
+        _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -169,11 +169,11 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
-    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
         uint256 _voteId,
-        VoteOption _voteOption,
+        VoteOption _choice,
         address _voter,
         bool _executesIfDecided
     ) internal virtual;

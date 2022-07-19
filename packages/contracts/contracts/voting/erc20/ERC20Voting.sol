@@ -69,7 +69,7 @@ contract ERC20Voting is MajorityVotingBase {
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
-        VoteOption _voteOption
+        VoteOption _choice
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -109,15 +109,15 @@ contract ERC20Voting is MajorityVotingBase {
 
         emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
 
-        if (_voteOption != VoteOption.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, _voteOption, _msgSender(), _executeIfDecided);
+        if (_choice != VoteOption.None && canVote(voteId, _msgSender())) {
+            _vote(voteId, _choice, _msgSender(), _executeIfDecided);
         }
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _voteId,
-        VoteOption _voteOption,
+        VoteOption _choice,
         address _voter,
         bool _executesIfDecided
     ) internal override {
@@ -137,17 +137,17 @@ contract ERC20Voting is MajorityVotingBase {
         }
 
         // write the updated/new vote for the voter.
-        if (_voteOption == VoteOption.Yes) {
+        if (_choice == VoteOption.Yes) {
             vote_.yes = vote_.yes + voterStake;
-        } else if (_voteOption == VoteOption.No) {
+        } else if (_choice == VoteOption.No) {
             vote_.no = vote_.no + voterStake;
-        } else if (_voteOption == VoteOption.Abstain) {
+        } else if (_choice == VoteOption.Abstain) {
             vote_.abstain = vote_.abstain + voterStake;
         }
 
-        vote_.voters[_voter] = _voteOption;
+        vote_.voters[_voter] = _choice;
 
-        emit VoteCast(_voteId, _voter, uint8(_voteOption), voterStake);
+        emit VoteCast(_voteId, _voter, uint8(_choice), voterStake);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);
