@@ -25,7 +25,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
 
     /// @notice Thrown if contract does not change on major bump
-    error InvalidContractAddressForMajorBump();
+    // error InvalidContractAddressForMajorBump();
 
     /// @notice Thrown if version does not exist
     /// @param versionIdx The index of the version
