@@ -47,6 +47,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         uint16[3] semanticVersion;
         address pluginFactoryAddress;
         bytes contentURI;
+        bool redFlaged;
     }
 
     uint256 internal nextVersionIndex;
@@ -121,6 +122,12 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             // }
         }
 
+        //Todo: we can flag previouse version bad, if we recieve a patch version bump
+        if (_newSemanticVersion[2] + 1 == currentSematicVersion[2]) {
+            // then it is a patch, flag perviouse version as bad
+            versions[currentVersionIndex].redFlaged = true;
+        }
+
         if (!isValidBump(currentSematicVersion, _newSemanticVersion)) {
             revert InvalidBump({
                 currentVersion: currentSematicVersion,
@@ -130,7 +137,12 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
         uint256 versionIdx = nextVersionIndex;
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
-        versions[versionIdx] = Version(_newSemanticVersion, _pluginFactoryAddress, _contentURI);
+        versions[versionIdx] = Version(
+            _newSemanticVersion,
+            _pluginFactoryAddress,
+            _contentURI,
+            false
+        );
         versionIdxForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIdx;
         versionIdxForContract[_pluginFactoryAddress] = versionIdx;
 
