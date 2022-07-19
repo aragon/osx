@@ -62,6 +62,7 @@ contract TestERC20VotingFactory is IPluginFactory {
         ) = abi.decode(_params, (VoteConfig, TokenFactory.TokenConfig, TokenFactory.MintConfig));
 
         // this require that the dao had given the necesary permission before
+        // TODO: there must be a login here to determine if creating new token is needed
         (ERC20VotesUpgradeable token, ) = tokenFactory.newToken(dao, _tokenConfig, _mintConfig);
 
         pluginAddress = payable(
