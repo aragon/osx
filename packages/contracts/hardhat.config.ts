@@ -69,9 +69,10 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   docgen: {
-    outputDir: 'docs',
+    outputDir: 'docs/generated',
     theme: 'markdown',
     pages: 'files',
+    templates: 'docs/templates',
     collapseNewlines: true,
     exclude: ['test'],
   },
