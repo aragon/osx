@@ -20,7 +20,6 @@ contract PluginInstaller is Permissions, UUPSUpgradeable {
 
     struct ExternalPermission {
         bytes32 role;
-        address where;
         address who;
     }
 
@@ -57,8 +56,10 @@ contract PluginInstaller is Permissions, UUPSUpgradeable {
     }
 
     function installPlugins(DAO dao, PluginConfig[] calldata pluginConfigs) public {
+        address[PluginConfig.length] pluginStack;
+
         for (uint256 i; i < pluginConfigs.length; i = _uncheckedIncrement(i)) {
-            _installPlugin(dao, pluginConfigs[i]);
+            pluginStack[i] = _installPlugin(dao, pluginConfigs[i], pluginStack);
         }
     }
 
@@ -74,7 +75,7 @@ contract PluginInstaller is Permissions, UUPSUpgradeable {
                 i = _uncheckedIncrement(i)
             ) {
                 dao.grant(
-                    pluginConfig.externalPermissions[i].where,
+                    address(dao),
                     pluginConfig.externalPermissions[i].who,
                     pluginConfig.externalPermissions[i].role
                 );
@@ -97,7 +98,7 @@ contract PluginInstaller is Permissions, UUPSUpgradeable {
                 i = _uncheckedIncrement(i)
             ) {
                 dao.revoke(
-                    pluginConfig.externalPermissions[i].where,
+                    address(dao),
                     pluginConfig.externalPermissions[i].who,
                     pluginConfig.externalPermissions[i].role
                 );
