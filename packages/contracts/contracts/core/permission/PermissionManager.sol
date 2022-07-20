@@ -22,10 +22,10 @@ contract PermissionManager is Initializable {
     /// @notice A special address encoding if a permission is allowed.
     address internal constant ALLOW_FLAG = address(2);
 
-    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permission)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
+    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
     mapping(bytes32 => address) internal permissions;
 
-    /// @notice A mapping storing immutable permissions as hashes (i.e., `immutablePermissionHash(where, permission)`) and their status (`true` = immutable, `false` = mutable).
+    /// @notice A mapping storing immutable permissions as hashes (i.e., `immutablePermissionHash(where, permissionId)`) and their status (`true` = immutable, `false` = mutable).
     mapping(bytes32 => bool) internal immutablePermissions;
 
     /// @notice Thrown if a permission is missing.
@@ -325,7 +325,7 @@ contract PermissionManager is Initializable {
         return false;
     }
 
-    /// @notice Generates the hash for the `authPermissions` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
+    /// @notice Generates the hash for the `permissions` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionID The permission identifier.
