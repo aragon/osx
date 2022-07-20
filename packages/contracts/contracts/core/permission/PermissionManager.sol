@@ -10,7 +10,7 @@ import "./BulkPermissionsLib.sol";
 /// @author Aragon Association - 2021, 2022
 /// @notice The permission manager used in a DAO and its associated components.
 contract PermissionManager is Initializable {
-    /// @notice The ID of the permission required for the `grant`, `grantWithOracle`, `revoke`, `makeImmutable`, and `bulk` function.
+    /// @notice The ID of the permission required to call the `grant`, `grantWithOracle`, `revoke`, `makeImmutable`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION_ID");
 
     /// @notice A special address encoding permissions that are valid for any address.

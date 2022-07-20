@@ -11,7 +11,7 @@ import "../core/erc165/AdaptiveERC165.sol";
 /// @author Aragon Association - 2022
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 abstract contract InterfaceBasedRegistry is DAOPermissioned, UUPSUpgradeable {
-    /// @notice The ID of the permission required for the `_authorizeUpgrade` function.
+    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID that the target contracts being registered must support.

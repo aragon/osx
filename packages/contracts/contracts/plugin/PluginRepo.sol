@@ -29,11 +29,11 @@ contract PluginRepo is
         bytes contentURI;
     }
 
-    /// @notice The ID of the permission required for the `createVersion` function.
+    /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant CREATE_VERSION_PERMISSION_ID =
         keccak256("CREATE_VERSION_PERMISSION_ID");
 
-    /// @notice The ID of the permission required for the `createVersion` function.
+    /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
     /// @notice The index of the next version to be created.

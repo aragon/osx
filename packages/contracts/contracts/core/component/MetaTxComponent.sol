@@ -10,7 +10,7 @@ import "./Component.sol";
 /// @author Aragon Association - 2022
 /// @notice Specialized base component in the Aragon App DAO framework supporting meta transactions.
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
-    /// @notice The ID of the permission required for the `setTrustedForwarder` function.
+    /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 

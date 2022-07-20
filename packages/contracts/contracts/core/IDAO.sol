@@ -15,7 +15,7 @@ abstract contract IDAO {
         bytes data; // FuncSig + arguments
     }
 
-    /// @notice Checks if an address has permission on a contract via a permissionID identifier and considers if `ANY_ADDRESS` was used in the granting process.
+    /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the contract.
     /// @param _who The address of a EOA or contract to give the permissions.
     /// @param _permissionID The permission identifier.
@@ -33,12 +33,11 @@ abstract contract IDAO {
     function setMetadata(bytes calldata _metadata) external virtual;
 
     /// @notice Emitted when the DAO metadata is updated.
-    /// @param metadata The IPFS hash of the new metadata object/
+    /// @param metadata The IPFS hash of the new metadata object.
     event MetadataSet(bytes metadata);
 
     /// @notice Executes a list of actions.
-    /// @dev Runs a loop through the array of actions and executes them one by one.
-    ///      If one action fails, all will be reverted.
+    /// @dev Runs a loop through the array of actions and executes them one by one. If one action fails, all will be reverted.
     /// @param callId The id of the call. The definition of the value of callId is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.

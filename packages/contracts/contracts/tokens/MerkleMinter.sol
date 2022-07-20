@@ -18,7 +18,7 @@ contract MerkleMinter is MetaTxComponent {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
-    /// @notice The ID of the permission required for the `merkleMint` function.
+    /// @notice The ID of the permission required to call the `merkleMint` function.
     bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION_ID");
 
     /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.

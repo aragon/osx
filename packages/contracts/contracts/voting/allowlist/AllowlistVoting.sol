@@ -22,7 +22,7 @@ contract AllowlistVoting is MajorityVotingBase {
             this.isUserAllowlisted.selector ^
             this.allowlistedUserCount.selector;
 
-    /// @notice The ID of the permission required for the `addAllowlistedUsers` and `removeAllowlistedUsers` function.
+    /// @notice The ID of the permission required to call the `addAllowlistedUsers` and `removeAllowlistedUsers` function.
     bytes32 public constant MODIFY_ALLOWLIST_PERMISSION_ID =
         keccak256("MODIFY_ALLOWLIST_PERMISSION_ID");
 

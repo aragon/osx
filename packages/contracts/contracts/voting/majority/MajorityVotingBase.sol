@@ -14,7 +14,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required for the `changeVoteConfig` function.
+    /// @notice The ID of the permission required to call the `changeVoteConfig` function.
     bytes32 public constant CHANGE_VOTE_CONFIG_PERMISSION_ID =
         keccak256("CHANGE_VOTE_CONFIG_PERMISSION_ID");
 

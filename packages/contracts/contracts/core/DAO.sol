@@ -21,23 +21,23 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     using SafeERC20 for ERC20;
     using Address for address;
 
-    /// @notice The ID of the permission required for the `_authorizeUpgrade` function.
+    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
 
-    /// @notice The ID of the permission required for the `setMetadata` function.
+    /// @notice The ID of the permission required to call the `setMetadata` function.
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION_ID");
 
-    /// @notice The ID of the permission required for the `execute` function.
+    /// @notice The ID of the permission required to call the `execute` function.
     bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION_ID");
 
-    /// @notice The ID of the permission required for the `withdraw` function.
+    /// @notice The ID of the permission required to call the `withdraw` function.
     bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
 
-    /// @notice The ID of the permission required for the `setSignatureValidator` function.
+    /// @notice The ID of the permission required to call the `setSignatureValidator` function.
     bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
         keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION_ID");
 
-    /// @notice The ID of the permission required for the `setTrustedForwarder` function.
+    /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
 
@@ -53,12 +53,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
 
-    /// @notice Thrown if the expected and actually deposited native token amount mismatch.
+    /// @notice Thrown if there is a mismatch between the expected and actually deposited amount of native tokens.
     /// @param expected The expected native token amount.
-    /// @param actual The actual native token amount.
+    /// @param actual The actual native token amount deposited.
     error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
 
-    /// @notice Thrown if an native token withdraw fails.
+    /// @notice Thrown if a native token withdraw fails.
     error NativeTokenWithdrawFailed();
 
     /// @notice Initializes the DAO by

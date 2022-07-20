@@ -15,7 +15,7 @@ contract ENSSubdomainRegistrar is Component {
     bytes4 internal constant REGISTRY_INTERFACE_ID =
         this.registerSubnode.selector ^ this.setDefaultResolver.selector;
 
-    /// @notice The ID of the permission required for the `registerSubnode` and `setDefaultResolver` function.
+    /// @notice The ID of the permission required to call the `registerSubnode` and `setDefaultResolver` function.
     bytes32 public constant REGISTER_ENS_SUBDOMAIN_PERMISSION_ID =
         keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION_ID");
 
