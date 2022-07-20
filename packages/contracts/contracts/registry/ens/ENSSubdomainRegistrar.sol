@@ -17,7 +17,7 @@ contract ENSSubdomainRegistrar is Component {
 
     /// @notice The ID of the permission required to call the `registerSubnode` and `setDefaultResolver` function.
     bytes32 public constant REGISTER_ENS_SUBDOMAIN_PERMISSION_ID =
-        keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION_ID");
+        keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION");
 
     /// @notice The ENS registry contract
     ENS private ens;

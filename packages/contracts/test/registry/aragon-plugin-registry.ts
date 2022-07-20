@@ -16,7 +16,7 @@ describe('Aragon-Plugin-Registry', function () {
   let managingDAO: DAO;
   let pluginRepo: PluginRepo;
 
-  const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION_ID');
+  const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
   const pluginRepoName = 'my-pluginRepo';
 
   before(async () => {

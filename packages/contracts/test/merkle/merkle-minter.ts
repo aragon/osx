@@ -14,8 +14,8 @@ import {
 import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 
-const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION_ID');
-const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION_ID');
+const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
+const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];

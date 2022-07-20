@@ -19,7 +19,7 @@ contract MerkleMinter is MetaTxComponent {
     bytes4 internal constant MERKLE_MINTER_INTERFACE_ID = this.merkleMint.selector;
 
     /// @notice The ID of the permission required to call the `merkleMint` function.
-    bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION_ID");
+    bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION");
 
     /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
     IERC20MintableUpgradeable public token;

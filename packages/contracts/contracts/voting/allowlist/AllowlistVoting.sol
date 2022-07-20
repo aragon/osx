@@ -24,7 +24,7 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice The ID of the permission required to call the `addAllowlistedUsers` and `removeAllowlistedUsers` function.
     bytes32 public constant MODIFY_ALLOWLIST_PERMISSION_ID =
-        keccak256("MODIFY_ALLOWLIST_PERMISSION_ID");
+        keccak256("MODIFY_ALLOWLIST_PERMISSION");
 
     /// @notice The mapping containing the checkpointed history of addresses being allowlisted.
     mapping(address => Checkpoints.History) private _allowlistedAddressesCheckpoints;

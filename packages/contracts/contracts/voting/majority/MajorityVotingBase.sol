@@ -16,7 +16,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
 
     /// @notice The ID of the permission required to call the `changeVoteConfig` function.
     bytes32 public constant CHANGE_VOTE_CONFIG_PERMISSION_ID =
-        keccak256("CHANGE_VOTE_CONFIG_PERMISSION_ID");
+        keccak256("CHANGE_VOTE_CONFIG_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18

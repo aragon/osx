@@ -9,7 +9,7 @@ import "./InterfaceBasedRegistry.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a DAO.
 contract DAORegistry is InterfaceBasedRegistry {
-    bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION_ID");
+    bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
     /// @notice Emitted when a new DAO is registered
     /// @param dao The address of the DAO contract

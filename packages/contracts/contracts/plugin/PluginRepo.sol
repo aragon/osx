@@ -31,10 +31,10 @@ contract PluginRepo is
 
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant CREATE_VERSION_PERMISSION_ID =
-        keccak256("CREATE_VERSION_PERMISSION_ID");
+        keccak256("CREATE_VERSION_PERMISSION");
 
     /// @notice The ID of the permission required to call the `createVersion` function.
-    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
     /// @notice The index of the next version to be created.
     uint256 internal nextVersionIndex;

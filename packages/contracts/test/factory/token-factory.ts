@@ -16,8 +16,8 @@ import {
 
 chai.use(smock.matchers);
 
-const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION_ID');
-const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION_ID');
+const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
+const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 
 interface TokenConfig {
   addr: string;

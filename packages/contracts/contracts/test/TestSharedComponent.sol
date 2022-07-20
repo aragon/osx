@@ -10,7 +10,7 @@ import "../core/component/Component.sol";
 /// @dev This is realized by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager.
 contract TestSharedComponent is Component {
     bytes32 public constant ID_GATED_ACTION_PERMISSION_ID =
-        keccak256("ID_GATED_ACTION_PERMISSION_ID");
+        keccak256("ID_GATED_ACTION_PERMISSION");
 
     mapping(uint256 => IDAO) public ownedIds;
 

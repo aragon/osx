@@ -13,7 +13,7 @@ import "../plugin/IPluginRepo.sol";
 /// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
 contract AragonPluginRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
-    bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION_ID");
+    bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION");
 
     /// @notice Emitted if a new plugin repository is registered.
     /// @param name The name of the plugin repository.

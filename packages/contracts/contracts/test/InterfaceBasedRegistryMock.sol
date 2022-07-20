@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "../registry/InterfaceBasedRegistry.sol";
 
 contract InterfaceBasedRegistryMock is InterfaceBasedRegistry {
-    bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION_ID");
+    bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION");
 
     event Registered(address);
 

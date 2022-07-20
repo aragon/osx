@@ -10,7 +10,7 @@ import {
 import {customError} from '../../../test-utils/custom-error-helper';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
-  'ID_GATED_ACTION_PERMISSION_ID'
+  'ID_GATED_ACTION_PERMISSION'
 );
 
 describe('SharedComponent', function () {

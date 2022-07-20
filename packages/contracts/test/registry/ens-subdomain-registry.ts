@@ -12,7 +12,7 @@ import {customError} from '../test-utils/custom-error-helper';
 import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
-  'REGISTER_ENS_SUBDOMAIN_PERMISSION_ID'
+  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
 const DUMMY_METADATA = '0x';

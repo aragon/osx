@@ -12,7 +12,7 @@ import "./Component.sol";
 abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
-        keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
+        keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
 
     /// @notice Emitted when the trusted forwarder is set.
     /// @param trustedForwarder The trusted forwarder address.

@@ -17,12 +17,12 @@ const EVENTS = {
 };
 
 const CHANGE_VOTE_CONFIG_PERMISSION_ID = ethers.utils.id(
-  'CHANGE_VOTE_CONFIG_PERMISSION_ID'
+  'CHANGE_VOTE_CONFIG_PERMISSION'
 );
 const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
-  'MODIFY_ALLOWLIST_PERMISSION_ID'
+  'MODIFY_ALLOWLIST_PERMISSION'
 );
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION_ID');
+const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 const zeroAddress = ethers.constants.AddressZero;
 const PermissionManagerAnyAddress =
@@ -165,7 +165,7 @@ describe('DAOFactory: ', function () {
     managingDAO.grant(
       registry.address,
       daoFactory.address,
-      ethers.utils.id('REGISTER_DAO_PERMISSION_ID')
+      ethers.utils.id('REGISTER_DAO_PERMISSION')
     );
   });
 

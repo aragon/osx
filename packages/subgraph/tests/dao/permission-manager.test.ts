@@ -42,7 +42,7 @@ import {
 } from '../../src/utils/constants';
 
 let contractPermissionID = Bytes.fromByteArray(
-  crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION_ID'))
+  crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION'))
 );
 
 function testPackages(supportsErc20VotingInterface: boolean): void {

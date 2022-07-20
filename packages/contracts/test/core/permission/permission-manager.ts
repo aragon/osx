@@ -5,8 +5,8 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {PermissionManagerTest, PermissionOracleMock} from '../../../typechain';
 import {customError} from '../../test-utils/custom-error-helper';
 
-const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION_ID');
-const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION_ID');
+const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
+const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
 const UNSET_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000000'
 );
@@ -56,7 +56,7 @@ describe('Core: PermissionManager', function () {
       await expect(pm.init(ownerSigner.address)).to.emit(pm, 'Granted');
     });
 
-    it('should add ROOT_PERMISSION_ID', async () => {
+    it('should add ROOT_PERMISSION', async () => {
       const permission = await pm.getAuthPermission(
         pm.address,
         ownerSigner.address,
@@ -420,7 +420,7 @@ describe('Core: PermissionManager', function () {
   });
 
   describe('bulk', () => {
-    it('should bulk grant ADMIN_PERMISSION_ID', async () => {
+    it('should bulk grant ADMIN_PERMISSION', async () => {
       const signers = await ethers.getSigners();
       const bulkItems: Item[] = [
         {

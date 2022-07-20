@@ -14,9 +14,7 @@ describe('DAORegistry', function () {
   let ownerAddress: string;
   let targetDao: any;
 
-  const REGISTER_DAO_PERMISSION_ID = ethers.utils.id(
-    'REGISTER_DAO_PERMISSION_ID'
-  );
+  const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
   const daoSubdomainName = 'my-dao';
 
   before(async () => {

@@ -22,24 +22,24 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     using Address for address;
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
-    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION_ID");
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
     /// @notice The ID of the permission required to call the `setMetadata` function.
-    bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION_ID");
+    bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION");
 
     /// @notice The ID of the permission required to call the `execute` function.
-    bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION_ID");
+    bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
 
     /// @notice The ID of the permission required to call the `withdraw` function.
-    bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION_ID");
+    bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION");
 
     /// @notice The ID of the permission required to call the `setSignatureValidator` function.
     bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
-        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION_ID");
+        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
 
     /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
-        keccak256("SET_TRUSTED_FORWARDER_PERMISSION_ID");
+        keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     ERC1271 signatureValidator;
