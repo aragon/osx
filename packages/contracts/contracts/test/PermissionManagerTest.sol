@@ -16,7 +16,7 @@ contract PermissionManagerTest is PermissionManager {
         address _who,
         bytes32 _permissionID
     ) public view returns (address) {
-        return permissions[permissionHash(_where, _who, _permissionID)];
+        return permissionsHashed[permissionHash(_where, _who, _permissionID)];
     }
 
     function getPermissionHash(

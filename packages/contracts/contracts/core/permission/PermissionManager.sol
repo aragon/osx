@@ -23,10 +23,10 @@ contract PermissionManager is Initializable {
     address internal constant ALLOW_FLAG = address(2);
 
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
-    mapping(bytes32 => address) internal permissions;
+    mapping(bytes32 => address) internal permissionsHashed;
 
     /// @notice A mapping storing immutable permissions as hashes (i.e., `immutablePermissionHash(where, permissionId)`) and their status (`true` = immutable, `false` = mutable).
-    mapping(bytes32 => bool) internal immutablePermissions;
+    mapping(bytes32 => bool) internal immutablePermissionsHashed;
 
     /// @notice Thrown if a permission is missing.
     /// @param here The context in which the authorization reverted.
@@ -205,7 +205,7 @@ contract PermissionManager is Initializable {
     /// @param _permissionID The permission identifier.
     /// @return bool Returns true if the permission identifier is immutable for the contract address.
     function isImmutable(address _where, bytes32 _permissionID) public view returns (bool) {
-        return immutablePermissions[immutablePermissionHash(_where, _permissionID)];
+        return immutablePermissionsHashed[immutablePermissionHash(_where, _permissionID)];
     }
 
     /// @notice Grants the `ROOT_PERMISSION_ID` permission to the initial owner during initialization of the permission manager.
@@ -240,16 +240,16 @@ contract PermissionManager is Initializable {
         if (isImmutable(_where, _permissionID))
             revert PermissionImmutable({where: _where, permissionID: _permissionID});
 
-        bytes32 permission = permissionHash(_where, _who, _permissionID);
+        bytes32 permHash = permissionHash(_where, _who, _permissionID);
 
-        if (permissions[permission] != UNSET_FLAG) {
+        if (permissionsHashed[permHash] != UNSET_FLAG) {
             revert PermissionAlreadyGranted({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
             });
         }
-        permissions[permission] = address(_oracle);
+        permissionsHashed[permHash] = address(_oracle);
 
         emit Granted(_permissionID, msg.sender, _who, _where, _oracle);
     }
@@ -267,15 +267,15 @@ contract PermissionManager is Initializable {
             revert PermissionImmutable({where: _where, permissionID: _permissionID});
         }
 
-        bytes32 permission = permissionHash(_where, _who, _permissionID);
-        if (permissions[permission] == UNSET_FLAG) {
+        bytes32 permHash = permissionHash(_where, _who, _permissionID);
+        if (permissionsHashed[permHash] == UNSET_FLAG) {
             revert PermissionAlreadyRevoked({
                 where: _where,
                 who: _who,
                 permissionID: _permissionID
             });
         }
-        permissions[permission] = UNSET_FLAG;
+        permissionsHashed[permHash] = UNSET_FLAG;
 
         emit Revoked(_permissionID, msg.sender, _who, _where);
     }
@@ -284,11 +284,11 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which the permission is immutable.
     /// @param _permissionID The permission identifier.
     function _makeImmutable(address _where, bytes32 _permissionID) internal {
-        bytes32 permission = immutablePermissionHash(_where, _permissionID);
-        if (immutablePermissions[permission]) {
+        bytes32 immutablePermHash = immutablePermissionHash(_where, _permissionID);
+        if (immutablePermissionsHashed[immutablePermHash]) {
             revert PermissionImmutable({where: _where, permissionID: _permissionID});
         }
-        immutablePermissions[immutablePermissionHash(_where, _permissionID)] = true;
+        immutablePermissionsHashed[immutablePermHash] = true;
 
         emit MadeImmutable(_permissionID, msg.sender, _where);
     }
@@ -305,7 +305,9 @@ contract PermissionManager is Initializable {
         bytes32 _permissionID,
         bytes memory _data
     ) internal returns (bool) {
-        address accessFlagOrAclOracle = permissions[permissionHash(_where, _who, _permissionID)];
+        address accessFlagOrAclOracle = permissionsHashed[
+            permissionHash(_where, _who, _permissionID)
+        ];
 
         if (accessFlagOrAclOracle == UNSET_FLAG) return false;
         if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
@@ -325,7 +327,7 @@ contract PermissionManager is Initializable {
         return false;
     }
 
-    /// @notice Generates the hash for the `permissions` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
+    /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionID The permission identifier.
@@ -338,7 +340,7 @@ contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _permissionID));
     }
 
-    /// @notice Generates the hash for the `immutablePermissions` mapping obtained from the word "IMMUTABLE", the contract address, and the permission identifier.
+    /// @notice Generates the hash for the `immutablePermissionsHashed` mapping obtained from the word "IMMUTABLE", the contract address, and the permission identifier.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _permissionID The permission identifier.
     /// @return bytes32 The hash used in the `immutablePermissions` mapping.
