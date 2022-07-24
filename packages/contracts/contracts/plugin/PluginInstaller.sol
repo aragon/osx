@@ -21,8 +21,7 @@ contract PluginInstaller {
     ENS public ens;
 
     struct PluginConfig {
-        bytes32 node; // namehash of the plugin (e.x - finance.aragonpm.eth) on the ens
-        uint16[3] semanticVersion; // the version of plugin to be installed
+        DAO.DAOPlugin daoPlugin;
         bytes32[] pluginPermissions; // Plugin permissions to be granted to DAO
         bytes32[] desintaionPermissions; // Dao permission to be granted to the plugin, such as: exec_role
         bytes initCallData;
@@ -55,10 +54,10 @@ contract PluginInstaller {
         internal
         returns (address pluginAddress)
     {
-        bytes32 node = pluginConfig.node;
+        bytes32 node = pluginConfig.daoPlugin.node;
         address repo = ens.resolve(node).addr(node);
         PluginRepo.Version memory pluginVersion = repo.getBySemanticVersion(
-            pluginConfig.semanticVersion
+            pluginConfig.daoPlugin.semanticVersion
         );
 
         address pluginAddress = payable(
@@ -97,7 +96,6 @@ contract PluginInstaller {
         }
         dao.bulk(address(dao), daoItems);
 
-        DAO.DAOPlugin memory daoPlugin = DAO.DAOPlugin(node, pluginConfig.semanticVersion);
-        dao.setPlugin(daoPlugin, pluginAddress);
+        dao.setPlugin(pluginConfig.daoPlugin, pluginAddress);
     }
 }
