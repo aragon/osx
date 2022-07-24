@@ -67,6 +67,8 @@ abstract contract AragonApp is AppStorage, UUPSUpgradeable, ContextUpgradeable {
     /// TODO: if the we make `_update` reinforced, then we also do this as reinforced
     function updateSignatureABI() external view virtual returns (string memory);
 
+    function getDependencies() external virtual returns (IDAO.DAOPlugin[] memory);
+
     /**
      * @dev Upgrade the implementation of the proxy to `newImplementation`, and subsequently execute the function call
      * encoded in `data`. NOTE: overrides the OZ's `upgradeToAndCall` to include the custom logic in the end.

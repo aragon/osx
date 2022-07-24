@@ -32,20 +32,20 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     error VersionIdxDoesNotExist(uint256 versionIdx);
 
     /// @notice Thrown if contract does not have `IPluginFactory` interface
-    /// @param pluginFactoryAddress The address of the contract
-    error InvalidPluginInterface(address pluginFactoryAddress);
+    /// @param implementationAddress The address of the contract
+    error InvalidPluginInterface(address implementationAddress);
 
     /// @notice Thrown if address is not a `PluginFactory` contract
-    /// @param pluginFactoryAddress The address of the contract
-    error InvalidPluginFactoryContract(address pluginFactoryAddress);
+    /// @param implementationAddress The address of the contract
+    error InvalidPluginFactoryContract(address implementationAddress);
 
     /// @notice Thrown if address is not a contract
-    /// @param pluginFactoryAddress The address of the contract
-    error InvalidContractAddress(address pluginFactoryAddress);
+    /// @param implementationAddress The address of the contract
+    error InvalidContractAddress(address implementationAddress);
 
     struct Version {
         uint16[3] semanticVersion;
-        address pluginFactoryAddress;
+        address implementationAddress;
         bytes contentURI;
         bool redFlaged;
     }
@@ -79,28 +79,32 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
     /// @inheritdoc IPluginRepo
     function newVersion(
         uint16[3] memory _newSemanticVersion,
-        address _pluginFactoryAddress,
+        address _implementationAddress,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_ROLE) {
-        // check if _pluginFactoryAddress is IPluginFactory
-        if (!Address.isContract(_pluginFactoryAddress)) {
-            revert InvalidContractAddress({pluginFactoryAddress: _pluginFactoryAddress});
+        // check if _implementationAddress is IPluginFactory
+        if (!Address.isContract(_implementationAddress)) {
+            revert InvalidContractAddress({implementationAddress: _implementationAddress});
         }
 
-        try
-            IPluginFactory(_pluginFactoryAddress).supportsInterface(
-                PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
-            )
-        returns (bool result) {
-            if (!result) {
-                revert InvalidPluginInterface({pluginFactoryAddress: _pluginFactoryAddress});
-            }
-        } catch {
-            revert InvalidPluginFactoryContract({pluginFactoryAddress: _pluginFactoryAddress});
-        }
+        // try
+        //     IPluginFactory(_implementationAddress).supportsInterface(
+        //         PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
+        //     )
+        // returns (bool result) {
+        //     if (!result) {
+        //         revert InvalidPluginInterface({
+        //             implementationAddress: _implementationAddress
+        //         });
+        //     }
+        // } catch {
+        //     revert InvalidPluginFactoryContract({
+        //         implementationAddress: _implementationAddress
+        //     });
+        // }
 
         // TODO: to be removed
-        // address basePluginAddress = IPluginFactory(_pluginFactoryAddress).getBasePluginAddress();
+        // address basePluginAddress = IPluginFactory(_implementationAddress).getBasePluginAddress();
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
         uint16[3] memory currentSematicVersion;
@@ -110,7 +114,7 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
             currentSematicVersion = currentVersion.semanticVersion;
 
             // TODO: to be removed
-            // address currentBasePluginAddress = IPluginFactory(currentVersion.pluginFactoryAddress)
+            // address currentBasePluginAddress = IPluginFactory(currentVersion.implementationAddress)
             //     .getBasePluginAddress();
 
             // // Only allows base smart contract change on major version bumps
@@ -139,26 +143,26 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
         versions[versionIdx] = Version(
             _newSemanticVersion,
-            _pluginFactoryAddress,
+            _implementationAddress,
             _contentURI,
             false
         );
         versionIdxForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIdx;
-        versionIdxForContract[_pluginFactoryAddress] = versionIdx;
+        versionIdxForContract[_implementationAddress] = versionIdx;
 
         emit NewVersion(versionIdx, _newSemanticVersion);
     }
 
     /// @notice get latest plugin
     /// @return semanticVersion Semantic version for latest pluginRepo version
-    /// @return pluginFactoryAddress Address of latest plugin factory for version
+    /// @return implementationAddress Address of latest plugin factory for version
     /// @return contentURI External URI for fetching latest version's content
     function getLatest()
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginFactoryAddress,
+            address implementationAddress,
             bytes memory contentURI
         )
     {
@@ -167,30 +171,30 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
     /// @notice get latest by plugin factory address
     /// @return semanticVersion Semantic version for pluginRepo version
-    /// @return pluginFactoryAddress Address of plugin factory for version
+    /// @return implementationAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching version's content
-    function getLatestForContractAddress(address _pluginFactoryAddress)
+    function getLatestForContractAddress(address _implementationAddress)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginFactoryAddress,
+            address implementationAddress,
             bytes memory contentURI
         )
     {
-        return getByVersionId(versionIdxForContract[_pluginFactoryAddress]);
+        return getByVersionId(versionIdxForContract[_implementationAddress]);
     }
 
     /// @notice get latest by semantic version
     /// @return semanticVersion Semantic version for latest pluginRepo version
-    /// @return pluginFactoryAddress Address of plugin factory for version
+    /// @return implementationAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching latest version's content
     function getBySemanticVersion(uint16[3] memory _semanticVersion)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginFactoryAddress,
+            address implementationAddress,
             bytes memory contentURI
         )
     {
@@ -199,21 +203,21 @@ contract PluginRepo is IPluginRepo, Initializable, UUPSUpgradeable, ACL, Adaptiv
 
     /// @notice get latest by version id
     /// @return semanticVersion Semantic version for pluginRepo version
-    /// @return pluginFactoryAddress Address of plugin factory for version
+    /// @return implementationAddress Address of plugin factory for version
     /// @return contentURI External URI for fetching version's content
     function getByVersionId(uint256 _versionIdx)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginFactoryAddress,
+            address implementationAddress,
             bytes memory contentURI
         )
     {
         if (_versionIdx <= 0 || _versionIdx >= nextVersionIndex)
             revert VersionIdxDoesNotExist({versionIdx: _versionIdx});
         Version storage version = versions[_versionIdx];
-        return (version.semanticVersion, version.pluginFactoryAddress, version.contentURI);
+        return (version.semanticVersion, version.implementationAddress, version.contentURI);
     }
 
     /// @notice get version count

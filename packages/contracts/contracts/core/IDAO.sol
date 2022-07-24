@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.10;
 
+import "../plugin/PluginRepo.sol";
+
 /// @title The interface required to have a DAO contract within the Aragon DAO framework
 /// @author Aragon Association - 2022
 abstract contract IDAO {
@@ -11,6 +13,12 @@ abstract contract IDAO {
         address to; // Address to call
         uint256 value; // Value to be sent with the call (for example ETH if on mainnet)
         bytes data; // FuncSig + arguments
+    }
+
+    struct DAOPlugin {
+        bytes32 node;
+        uint16[3] semanticVersion;
+        uint256 count; // number of same plugin installed
     }
 
     /// @notice Checks if an address has permission on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
@@ -34,6 +42,10 @@ abstract contract IDAO {
     /// @notice Emitted when the DAO metadata is updated
     /// @param metadata The IPFS hash of the new metadata object
     event MetadataSet(bytes metadata);
+
+    function setPlugin(DAOPlugin memory _daoPlugin, address _proxyAddress) external virtual;
+
+    event PluginSet(address proxyAddress, DAOPlugin daoPlugin);
 
     /// @notice Executes a list of actions
     /// @dev It runs a loop through the array of actions and executes them one by one.
