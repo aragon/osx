@@ -39,12 +39,12 @@ contract PermissionManagerTest is PermissionManager {
         return ANY_ADDR;
     }
 
-    function checkPermission(
+    function hasPermission(
         address _where,
         address _who,
         bytes32 _permissionID,
         bytes memory _data
     ) public returns (bool) {
-        return _checkPermission(_where, _who, _permissionID, _data);
+        return _hasPermission(_where, _who, _permissionID, _data);
     }
 }

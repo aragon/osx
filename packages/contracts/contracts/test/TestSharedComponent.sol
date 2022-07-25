@@ -9,8 +9,7 @@ import "../core/component/Component.sol";
 /// @notice A test component that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
 /// @dev This is realized by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager.
 contract TestSharedComponent is Component {
-    bytes32 public constant ID_GATED_ACTION_PERMISSION_ID =
-        keccak256("ID_GATED_ACTION_PERMISSION");
+    bytes32 public constant ID_GATED_ACTION_PERMISSION_ID = keccak256("ID_GATED_ACTION_PERMISSION");
 
     mapping(uint256 => IDAO) public ownedIds;
 
@@ -23,7 +22,7 @@ contract TestSharedComponent is Component {
             revert ObjectIdNotAssigned(_id);
         }
 
-        if (!ownedIds[_id].checkPermission(address(this), _msgSender(), _permissionID, _msgData())) {
+        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionID, _msgData())) {
             revert DAOPermissionMissing({
                 dao: address(dao),
                 here: address(this),
@@ -67,7 +66,7 @@ contract TestIdGatingOracle is IPermissionOracle {
 
     /// @notice Checks the calldata and expects the `id` to be the first argument of type `uint256`
 
-    function checkPermissions(
+    function hasPermissions(
         address _where,
         address _who,
         bytes32 _permissionID,

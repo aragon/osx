@@ -106,13 +106,13 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     }
 
     /// @inheritdoc IDAO
-    function checkPermission(
+    function hasPermission(
         address _where,
         address _who,
         bytes32 _permissionID,
         bytes memory _data
     ) external override returns (bool) {
-        return checkPermissions(_where, _who, _permissionID, _data);
+        return hasPermissions(_where, _who, _permissionID, _data);
     }
 
     /// @inheritdoc IDAO

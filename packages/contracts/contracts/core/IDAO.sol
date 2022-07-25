@@ -21,7 +21,7 @@ abstract contract IDAO {
     /// @param _permissionID The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered.
     /// @return bool Returns true if the address has permission, false if not.
-    function checkPermission(
+    function hasPermission(
         address _where,
         address _who,
         bytes32 _permissionID,

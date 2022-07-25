@@ -91,8 +91,8 @@ contract PermissionManager is Initializable {
     /// @param _permissionID The permission identifier required to call the method this modifier is applied to.
     modifier auth(address _where, bytes32 _permissionID) {
         if (
-            !(checkPermissions(_where, msg.sender, _permissionID, msg.data) ||
-                checkPermissions(address(this), msg.sender, _permissionID, msg.data))
+            !(hasPermissions(_where, msg.sender, _permissionID, msg.data) ||
+                hasPermissions(address(this), msg.sender, _permissionID, msg.data))
         )
             revert PermissionMissing({
                 here: address(this),
@@ -188,16 +188,16 @@ contract PermissionManager is Initializable {
     /// @param _permissionID The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered.
     /// @return bool Returns true if `who` has the permissions on the target contract via the specified permission identifier.
-    function checkPermissions(
+    function hasPermissions(
         address _where,
         address _who,
         bytes32 _permissionID,
         bytes memory _data
     ) public returns (bool) {
         return
-            _checkPermission(_where, _who, _permissionID, _data) || // check if _who has permission for _permissionID on _where
-            _checkPermission(_where, ANY_ADDR, _permissionID, _data) || // check if anyone has permission for _permissionID on _where
-            _checkPermission(ANY_ADDR, _who, _permissionID, _data); // check if _who has permission for _permissionID on any contract
+            _hasPermission(_where, _who, _permissionID, _data) || // check if _who has permission for _permissionID on _where
+            _hasPermission(_where, ANY_ADDR, _permissionID, _data) || // check if anyone has permission for _permissionID on _where
+            _hasPermission(ANY_ADDR, _who, _permissionID, _data); // check if _who has permission for _permissionID on any contract
     }
 
     /// @notice This method is used to check if permissions for a given permission identifier on a contract are immutable.
@@ -237,8 +237,9 @@ contract PermissionManager is Initializable {
         bytes32 _permissionID,
         IPermissionOracle _oracle
     ) internal {
-        if (isImmutable(_where, _permissionID))
+        if (isImmutable(_where, _permissionID)) {
             revert PermissionImmutable({where: _where, permissionID: _permissionID});
+        }
 
         bytes32 permHash = permissionHash(_where, _who, _permissionID);
 
@@ -299,7 +300,7 @@ contract PermissionManager is Initializable {
     /// @param _permissionID The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered..
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionID identifier.
-    function _checkPermission(
+    function _hasPermission(
         address _where,
         address _who,
         bytes32 _permissionID,
@@ -314,7 +315,7 @@ contract PermissionManager is Initializable {
 
         // Since it's not a flag, assume it's an PermissionOracle and try-catch to skip failures
         try
-            IPermissionOracle(accessFlagOrAclOracle).checkPermissions(
+            IPermissionOracle(accessFlagOrAclOracle).hasPermissions(
                 _where,
                 _who,
                 _permissionID,
