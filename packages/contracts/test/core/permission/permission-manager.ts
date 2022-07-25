@@ -786,7 +786,7 @@ describe('Core: PermissionManager', function () {
         ['IMMUTABLE', pm.address, ROOT_PERMISSION_ID]
       );
       const hash = ethers.utils.keccak256(packed);
-      const contractHash = await pm.getImmutableHash(
+      const contractHash = await pm.getImmutablePermissionHash(
         pm.address,
         ROOT_PERMISSION_ID
       );

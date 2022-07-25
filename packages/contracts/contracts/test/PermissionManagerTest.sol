@@ -27,7 +27,11 @@ contract PermissionManagerTest is PermissionManager {
         return permissionHash(_where, _who, _permissionID);
     }
 
-    function getImmutableHash(address _where, bytes32 _permissionID) public pure returns (bytes32) {
+    function getImmutablePermissionHash(address _where, bytes32 _permissionID)
+        public
+        pure
+        returns (bytes32)
+    {
         return immutablePermissionHash(_where, _permissionID);
     }
 
