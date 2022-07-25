@@ -15,8 +15,6 @@ import "./IPluginFactory.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract is used to create/deploy new plugins and instaling them on a DAO.
 contract PluginInstaller {
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
-
     address public daoFactory;
     ENS public ens;
 
