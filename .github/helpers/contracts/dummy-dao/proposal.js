@@ -33,7 +33,7 @@ async function proposal() {
     ].voting;
 
   // metadata
-  const metaObj = {
+  const metadataObj = {
     name:
       isERC20Voting === 'erc20'
         ? 'ERC20Voting Dummy Proposal'
@@ -45,7 +45,7 @@ async function proposal() {
     ],
   };
   const client = IPFS.create('https://ipfs.infura.io:5001/api/v0');
-  const cid = await client.add(JSON.stringify(metaObj));
+  const cid = await client.add(JSON.stringify(metadataObj));
 
   console.log('ipfs cid', cid.path);
 
@@ -109,7 +109,7 @@ async function proposal() {
 
   const resultObj = {
     proposalTx: proposalTx.hash,
-    metadata: metaObj,
+    metadata: metadataObj,
     dao: daoAddress,
   };
 

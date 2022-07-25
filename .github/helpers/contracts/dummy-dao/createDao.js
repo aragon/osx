@@ -31,7 +31,7 @@ async function createDao() {
   let name = 'DummyDAO_' + votingTypes[isERC20Voting === 'erc20' ? 0 : 1];
   const daoName = name + `_Voting_` + new Date().getTime();
 
-  const metaObj = {
+  const metadataObj = {
     name: daoName,
     description: 'Dummy Dao for QA and testing purposes...',
     parentDao: '',
@@ -41,7 +41,7 @@ async function createDao() {
     ],
   };
   const client = IPFS.create('https://ipfs.infura.io:5001/api/v0');
-  const cid = await client.add(JSON.stringify(metaObj));
+  const cid = await client.add(JSON.stringify(metadataObj));
 
   console.log('ipfs cid', cid.path);
 
