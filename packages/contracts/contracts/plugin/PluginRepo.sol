@@ -30,8 +30,7 @@ contract PluginRepo is
     }
 
     /// @notice The ID of the permission required to call the `createVersion` function.
-    bytes32 public constant CREATE_VERSION_PERMISSION_ID =
-        keccak256("CREATE_VERSION_PERMISSION");
+    bytes32 public constant CREATE_VERSION_PERMISSION_ID = keccak256("CREATE_VERSION_PERMISSION");
 
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
@@ -228,9 +227,9 @@ contract PluginRepo is
 
     /// @notice Checks if a version bump is valid.
     /// @param _oldVersion The old semantic version number.
-    /// @param _createVersion The new semantic version number.
+    /// @param _newVersion The new semantic version number.
     /// @return bool True if the bump is valid.
-    function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _createVersion)
+    function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
         public
         pure
         returns (bool)
@@ -239,11 +238,11 @@ contract PluginRepo is
         uint256 i = 0;
         while (i < 3) {
             if (hasBumped) {
-                if (_createVersion[i] != 0) {
+                if (_newVersion[i] != 0) {
                     return false;
                 }
-            } else if (_createVersion[i] != _oldVersion[i]) {
-                if (_oldVersion[i] > _createVersion[i] || _createVersion[i] - _oldVersion[i] != 1) {
+            } else if (_newVersion[i] != _oldVersion[i]) {
+                if (_oldVersion[i] > _newVersion[i] || _newVersion[i] - _oldVersion[i] != 1) {
                     return false;
                 }
                 hasBumped = true;
