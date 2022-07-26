@@ -12,7 +12,7 @@ import {
   handleGranted,
   handleRevoked
 } from '../../src/dao/dao';
-import {Permission, ContractPermissionID} from '../../generated/schema';
+import {Permission, ContractPermissionId} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -41,14 +41,14 @@ import {
   ALLOWLIST_VOTING_INTERFACE
 } from '../../src/utils/constants';
 
-let contractPermissionID = Bytes.fromByteArray(
+let contractPermissionId = Bytes.fromByteArray(
   crypto.keccak256(ByteArray.fromUTF8('EXECUTE_PERMISSION'))
 );
 
 function testPackages(supportsErc20VotingInterface: boolean): void {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
-    contractPermissionID,
+    contractPermissionId,
     ADDRESS_ONE,
     VOTING_ADDRESS,
     DAO_ADDRESS,
@@ -57,7 +57,7 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   );
 
   // launch calls
-  getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
+  getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionId);
   getSupportRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getParticipationRequiredPct(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
   getMinDuration(VOTING_ADDRESS, BigInt.fromString(ONE_ETH));
@@ -85,46 +85,46 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   handleGranted(grantedEvent);
 
   // checks
-  // contractPermissionID
-  let contractPermissionIDEntityID =
+  // contractPermissionId
+  let contractPermissionIdEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    contractPermissionID.toHexString();
+    contractPermissionId.toHexString();
 
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'id',
-    contractPermissionIDEntityID
+    contractPermissionIdEntityID
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'where',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'permissionID',
-    contractPermissionID.toHexString()
+    contractPermissionId.toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'immutable',
     'false'
   );
 
   // permission
   let permissionEntityID =
-    contractPermissionIDEntityID +
+    contractPermissionIdEntityID +
     '_' +
     Address.fromString(VOTING_ADDRESS).toHexString();
 
@@ -179,7 +179,7 @@ test('Run dao (handleGranted) mappings with mock event for Allowlist Voting', ()
 test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   // create event and run it's handler
   let grantedEvent = createNewGrantedEvent(
-    contractPermissionID,
+    contractPermissionId,
     ADDRESS_ONE,
     VOTING_ADDRESS,
     DAO_ADDRESS,
@@ -194,17 +194,17 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   handleGranted(grantedEvent);
 
   // checks
-  // contractPermissionID
-  let contractPermissionIDEntityID =
+  // contractPermissionId
+  let contractPermissionIdEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    contractPermissionID.toHexString();
+    contractPermissionId.toHexString();
 
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'id',
-    contractPermissionIDEntityID
+    contractPermissionIdEntityID
   );
 
   // governance
@@ -220,29 +220,29 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
 
 test('Run dao (handleRevoked) mappings with mock event', () => {
   // create state
-  let contractPermissionIDEntityID =
+  let contractPermissionIdEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    contractPermissionID.toHexString();
+    contractPermissionId.toHexString();
   // permission
   let permissionEntityID =
-    contractPermissionIDEntityID +
+    contractPermissionIdEntityID +
     '_' +
     Address.fromString(VOTING_ADDRESS).toHexString();
 
-  let contractPermissionIDEntity = new ContractPermissionID(
-    contractPermissionIDEntityID
+  let contractPermissionIdEntity = new ContractPermissionId(
+    contractPermissionIdEntityID
   );
-  contractPermissionIDEntity.dao = Address.fromString(
+  contractPermissionIdEntity.dao = Address.fromString(
     DAO_ADDRESS
   ).toHexString();
-  contractPermissionIDEntity.where = Address.fromString(DAO_ADDRESS);
-  contractPermissionIDEntity.permissionID = contractPermissionID;
-  contractPermissionIDEntity.immutable = false;
-  contractPermissionIDEntity.save();
+  contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
+  contractPermissionIdEntity.permissionID = contractPermissionId;
+  contractPermissionIdEntity.immutable = false;
+  contractPermissionIdEntity.save();
 
   let permissionEntity = new Permission(permissionEntityID);
-  permissionEntity.contractPermissionID = contractPermissionIDEntity.id;
+  permissionEntity.contractPermissionId = contractPermissionIdEntity.id;
   permissionEntity.save();
 
   // check state exist
@@ -255,46 +255,46 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
 
   // create event and run it's handler
   let revokedEvent = createNewRevokedEvent(
-    contractPermissionID,
+    contractPermissionId,
     ADDRESS_ONE,
     VOTING_ADDRESS,
     DAO_ADDRESS,
     DAO_ADDRESS
   );
 
-  getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionID);
+  getEXECUTE_PERMISSION_ID(DAO_ADDRESS, contractPermissionId);
 
   // handle event
   handleRevoked(revokedEvent);
 
   // checks
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'id',
-    contractPermissionIDEntityID
+    contractPermissionIdEntityID
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'where',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'permissionID',
-    contractPermissionID.toHexString()
+    contractPermissionId.toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'immutable',
     'false'
   );
@@ -306,39 +306,39 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
 
 test('Run dao (handleMadeImmutable) mappings with mock event', () => {
   // create state
-  let contractPermissionIDEntityID =
+  let contractPermissionIdEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    contractPermissionID.toHexString();
+    contractPermissionId.toHexString();
 
-  let contractPermissionIDEntity = new ContractPermissionID(
-    contractPermissionIDEntityID
+  let contractPermissionIdEntity = new ContractPermissionId(
+    contractPermissionIdEntityID
   );
-  contractPermissionIDEntity.dao = Address.fromString(
+  contractPermissionIdEntity.dao = Address.fromString(
     DAO_ADDRESS
   ).toHexString();
-  contractPermissionIDEntity.where = Address.fromString(DAO_ADDRESS);
-  contractPermissionIDEntity.permissionID = contractPermissionID;
-  contractPermissionIDEntity.immutable = false;
-  contractPermissionIDEntity.save();
+  contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
+  contractPermissionIdEntity.permissionID = contractPermissionId;
+  contractPermissionIdEntity.immutable = false;
+  contractPermissionIdEntity.save();
 
   // check state exist
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'id',
-    contractPermissionIDEntityID
+    contractPermissionIdEntityID
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'immutable',
     'false'
   );
 
   // create event and run it's handler
   let immutableEvent = createNewMadeImmutableEvent(
-    contractPermissionID,
+    contractPermissionId,
     ADDRESS_ONE,
     DAO_ADDRESS,
     DAO_ADDRESS
@@ -349,32 +349,32 @@ test('Run dao (handleMadeImmutable) mappings with mock event', () => {
 
   // checks
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'id',
-    contractPermissionIDEntityID
+    contractPermissionIdEntityID
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'where',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'permissionID',
-    contractPermissionID.toHexString()
+    contractPermissionId.toHexString()
   );
   assert.fieldEquals(
-    'ContractPermissionID',
-    contractPermissionIDEntityID,
+    'ContractPermissionId',
+    contractPermissionIdEntityID,
     'immutable',
     'true'
   );

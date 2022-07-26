@@ -95,7 +95,7 @@ export function createNewDepositedEvent(
 }
 
 export function createNewGrantedEvent(
-  contractPermissionID: Bytes,
+  contractPermissionId: Bytes,
   actor: string,
   who: string,
   where: string,
@@ -107,9 +107,9 @@ export function createNewGrantedEvent(
   newGrantedEvent.address = Address.fromString(contractAddress);
   newGrantedEvent.parameters = [];
 
-  let contractPermissionIDParam = new ethereum.EventParam(
-    'contractPermissionID',
-    ethereum.Value.fromBytes(contractPermissionID)
+  let contractPermissionIdParam = new ethereum.EventParam(
+    'contractPermissionId',
+    ethereum.Value.fromBytes(contractPermissionId)
   );
   let actorParam = new ethereum.EventParam(
     'actor',
@@ -128,7 +128,7 @@ export function createNewGrantedEvent(
     ethereum.Value.fromAddress(Address.fromString(oracle))
   );
 
-  newGrantedEvent.parameters.push(contractPermissionIDParam);
+  newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
   newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
@@ -138,7 +138,7 @@ export function createNewGrantedEvent(
 }
 
 export function createNewRevokedEvent(
-  contractPermissionID: Bytes,
+  contractPermissionId: Bytes,
   actor: string,
   who: string,
   where: string,
@@ -149,9 +149,9 @@ export function createNewRevokedEvent(
   newGrantedEvent.address = Address.fromString(contractAddress);
   newGrantedEvent.parameters = [];
 
-  let contractPermissionIDParam = new ethereum.EventParam(
-    'contractPermissionID',
-    ethereum.Value.fromBytes(contractPermissionID)
+  let contractPermissionIdParam = new ethereum.EventParam(
+    'contractPermissionId',
+    ethereum.Value.fromBytes(contractPermissionId)
   );
   let actorParam = new ethereum.EventParam(
     'actor',
@@ -166,7 +166,7 @@ export function createNewRevokedEvent(
     ethereum.Value.fromAddress(Address.fromString(where))
   );
 
-  newGrantedEvent.parameters.push(contractPermissionIDParam);
+  newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
   newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
@@ -175,7 +175,7 @@ export function createNewRevokedEvent(
 }
 
 export function createNewMadeImmutableEvent(
-  contractPermissionID: Bytes,
+  contractPermissionId: Bytes,
   actor: string,
   where: string,
   contractAddress: string
@@ -185,9 +185,9 @@ export function createNewMadeImmutableEvent(
   newMadeImmutableEvent.address = Address.fromString(contractAddress);
   newMadeImmutableEvent.parameters = [];
 
-  let contractPermissionIDParam = new ethereum.EventParam(
-    'contractPermissionID',
-    ethereum.Value.fromBytes(contractPermissionID)
+  let contractPermissionIdParam = new ethereum.EventParam(
+    'contractPermissionId',
+    ethereum.Value.fromBytes(contractPermissionId)
   );
   let actorParam = new ethereum.EventParam(
     'actor',
@@ -198,7 +198,7 @@ export function createNewMadeImmutableEvent(
     ethereum.Value.fromAddress(Address.fromString(where))
   );
 
-  newMadeImmutableEvent.parameters.push(contractPermissionIDParam);
+  newMadeImmutableEvent.parameters.push(contractPermissionIdParam);
   newMadeImmutableEvent.parameters.push(actorParam);
   newMadeImmutableEvent.parameters.push(whereParam);
 

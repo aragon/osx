@@ -21,7 +21,7 @@ type Balance @entity {
 
 # ACL
 
-type ContractPermissionID @entity {
+type ContractPermissionId @entity {
   id: ID! # where + permissionID
   dao: Dao!
   where: Bytes!
@@ -34,7 +34,7 @@ type Permission @entity {
   id: ID! # where + permissionID + who
   dao: Dao!
   where: Bytes!
-  contractPermissionID: ContractPermissionID!
+  contractPermissionId: ContractPermissionId!
   who: Bytes!
   actor: Bytes!
   oracle: Bytes!
@@ -90,7 +90,7 @@ type Dao @entity {
   deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
   withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
-  contractPermissionIDs: [ContractPermissionID!]! @derivedFrom(field: "dao")
+  contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
