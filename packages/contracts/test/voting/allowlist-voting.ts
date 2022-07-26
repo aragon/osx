@@ -40,7 +40,7 @@ describe('AllowlistVoting', function () {
     participationRequired: any,
     supportRequired: any,
     minDuration: any,
-    allowlisted: Array<string>
+    allowed: Array<string>
   ) {
     return voting.initialize(
       daoMock.address,
@@ -48,7 +48,7 @@ describe('AllowlistVoting', function () {
       participationRequired,
       supportRequired,
       minDuration,
-      allowlisted
+      allowed
     );
   }
 
@@ -66,46 +66,44 @@ describe('AllowlistVoting', function () {
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, []);
     });
-    it('should return fasle, if user is not allowlisted', async () => {
+    it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(
-        await voting.isUserAllowlisted(ownerAddress, block1.number)
-      ).to.equal(false);
+      expect(await voting.isAllowed(ownerAddress, block1.number)).to.equal(
+        false
+      );
     });
 
     it('should add new users in the allowlist', async () => {
-      await voting.addAllowlistedUsers([ownerAddress, user1]);
+      await voting.addAllowedUsers([ownerAddress, user1]);
 
       const block = await ethers.provider.getBlock('latest');
 
       await ethers.provider.send('evm_mine', []);
 
-      expect(
-        await voting.isUserAllowlisted(ownerAddress, block.number)
-      ).to.equal(true);
-      expect(await voting.isUserAllowlisted(ownerAddress, 0)).to.equal(true);
-      expect(await voting.isUserAllowlisted(user1, 0)).to.equal(true);
+      expect(await voting.isAllowed(ownerAddress, block.number)).to.equal(true);
+      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isAllowed(user1, 0)).to.equal(true);
     });
 
     it('should remove users from the allowlist', async () => {
-      await voting.addAllowlistedUsers([ownerAddress]);
+      await voting.addAllowedUsers([ownerAddress]);
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(
-        await voting.isUserAllowlisted(ownerAddress, block1.number)
-      ).to.equal(true);
-      expect(await voting.isUserAllowlisted(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isAllowed(ownerAddress, block1.number)).to.equal(
+        true
+      );
+      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(true);
 
-      await voting.removeAllowlistedUsers([ownerAddress]);
+      await voting.removeAllowedUsers([ownerAddress]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(
-        await voting.isUserAllowlisted(ownerAddress, block2.number)
-      ).to.equal(false);
-      expect(await voting.isUserAllowlisted(ownerAddress, 0)).to.equal(false);
+      expect(await voting.isAllowed(ownerAddress, block2.number)).to.equal(
+        false
+      );
+      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(false);
     });
   });
 
@@ -116,7 +114,7 @@ describe('AllowlistVoting', function () {
       await initializeVoting(1, 2, 3, [ownerAddress]);
     });
 
-    it('reverts if user is not allowlisted to create a vote', async () => {
+    it('reverts if user is not allowed to create a vote', async () => {
       await expect(
         voting
           .connect(signers[1])
@@ -235,7 +233,7 @@ describe('AllowlistVoting', function () {
         addresses.push(addr);
       }
 
-      // voting will be initialized with 10 allowlisted addresses
+      // voting will be initialized with 10 allowed addresses
       // Which means votingPower = 10 at this point.
       await initializeVoting(
         minimumQuorom,
@@ -297,7 +295,7 @@ describe('AllowlistVoting', function () {
 
     it('makes executable if enough yes is given from on voting power', async () => {
       // Since voting power is set to 29%, and
-      // allowlisted is 10 addresses, voting yes
+      // allowed is 10 addresses, voting yes
       // from 3 addresses should be enough to
       // make vote executable
       await voting.vote(id, VoteOption.Yes, false);

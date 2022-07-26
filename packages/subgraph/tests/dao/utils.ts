@@ -339,15 +339,15 @@ export function getVotingToken(contractAddress: string, returns: string): void {
     .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }
 
-export function getIsUserAllowlisted(
+export function getIsUserAllowed(
   contractAddress: string,
   address: string,
   returns: boolean
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'isUserAllowlisted',
-    'isUserAllowlisted(address,uint256):(bool)'
+    'isAllowed',
+    'isAllowed(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),
@@ -356,14 +356,14 @@ export function getIsUserAllowlisted(
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
 
-export function getAllowlistedLength(
+export function getAllowedLength(
   contractAddress: string,
   returns: string
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'allowlistedLength',
-    'allowlistedLength():(uint64)'
+    'allowedLength',
+    'allowedLength():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(returns))]);

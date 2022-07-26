@@ -89,8 +89,8 @@ templates:
           handler: handleVoteCast
         - event: VoteExecuted(indexed uint256,bytes[])
           handler: handleVoteExecuted
-        - event: VoteStarted(indexed uint256,indexed address,bytes)
-          handler: handleVoteStarted
+        - event: VoteCreated(indexed uint256,indexed address,bytes)
+          handler: handleVoteCreated
         - event: ConfigUpdated(uint64,uint64,uint64)
           handler: handleConfigUpdated
         - event: TrustedForwarderSet(address)
@@ -116,8 +116,8 @@ templates:
           handler: handleVoteCast
         - event: VoteExecuted(indexed uint256,bytes[])
           handler: handleVoteExecuted
-        - event: VoteStarted(indexed uint256,indexed address,bytes)
-          handler: handleVoteStarted
+        - event: VoteCreated(indexed uint256,indexed address,bytes)
+          handler: handleVoteCreated
         - event: ConfigUpdated(uint64,uint64,uint64)
           handler: handleConfigUpdated
         - event: UsersAdded(address[])

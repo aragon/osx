@@ -2,7 +2,7 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  VoteStarted,
+  VoteCreated,
   VoteCast,
   VoteExecuted,
   ConfigUpdated,
@@ -32,16 +32,16 @@ export function createNewTrustedForwarderSetEvent(
   return newTrustedForwarderSetEvent;
 }
 
-export function createNewVoteStartedEvent(
+export function createNewVoteCreatedEvent(
   voteId: string,
   creator: string,
   description: string,
   contractAddress: string
-): VoteStarted {
-  let createVoteStartedEvent = changetype<VoteStarted>(newMockEvent());
+): VoteCreated {
+  let createVoteCreatedEvent = changetype<VoteCreated>(newMockEvent());
 
-  createVoteStartedEvent.address = Address.fromString(contractAddress);
-  createVoteStartedEvent.parameters = [];
+  createVoteCreatedEvent.address = Address.fromString(contractAddress);
+  createVoteCreatedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -56,11 +56,11 @@ export function createNewVoteStartedEvent(
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
 
-  createVoteStartedEvent.parameters.push(voteIdParam);
-  createVoteStartedEvent.parameters.push(creatorParam);
-  createVoteStartedEvent.parameters.push(descriptionParam);
+  createVoteCreatedEvent.parameters.push(voteIdParam);
+  createVoteCreatedEvent.parameters.push(creatorParam);
+  createVoteCreatedEvent.parameters.push(descriptionParam);
 
-  return createVoteStartedEvent;
+  return createVoteCreatedEvent;
 }
 
 export function createNewVoteCastEvent(

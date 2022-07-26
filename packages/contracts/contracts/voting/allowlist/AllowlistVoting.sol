@@ -17,17 +17,17 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
         MAJORITY_VOTING_INTERFACE_ID ^
-            this.addAllowlistedUsers.selector ^
-            this.removeAllowlistedUsers.selector ^
-            this.isUserAllowlisted.selector ^
-            this.allowlistedUserCount.selector;
+            this.addAllowedUsers.selector ^
+            this.removeAllowedUsers.selector ^
+            this.isAllowed.selector ^
+            this.allowedUserCount.selector;
 
-    /// @notice The ID of the permission required to call the `addAllowlistedUsers` and `removeAllowlistedUsers` function.
+    /// @notice The ID of the permission required to call the `addAllowedUsers` and `removeAllowedUsers` function.
     bytes32 public constant MODIFY_ALLOWLIST_PERMISSION_ID =
         keccak256("MODIFY_ALLOWLIST_PERMISSION");
 
-    /// @notice The mapping containing the checkpointed history of addresses being allowlisted.
-    mapping(address => Checkpoints.History) private _allowlistedAddressesCheckpoints;
+    /// @notice The mapping containing the checkpointed history of addresses being allowed.
+    mapping(address => Checkpoints.History) private _allowedAddressesCheckpoints;
 
     /// @notice The checkpointed history of the length of the allowlist.
     Checkpoints.History private _allowlistLengthCheckpoints;
@@ -51,14 +51,14 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote.
-    /// @param _allowlisted The allowlisted addresses.
+    /// @param _allowed The allowed addresses.
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration,
-        address[] calldata _allowlisted
+        address[] calldata _allowed
     ) public initializer {
         _registerStandard(ALLOWLIST_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
@@ -69,8 +69,8 @@ contract AllowlistVoting is MajorityVotingBase {
             _minDuration
         );
 
-        // add allowlisted users
-        _addAllowlistedUsers(_allowlisted);
+        // add allowed users
+        _addAllowedUsers(_allowed);
     }
 
     /// @notice Returns the version of the GSN relay recipient.
@@ -81,28 +81,28 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice Adds new users to the allowlist.
     /// @param _users The addresses of the users to be added.
-    function addAllowlistedUsers(address[] calldata _users)
+    function addAllowedUsers(address[] calldata _users)
         external
         auth(MODIFY_ALLOWLIST_PERMISSION_ID)
     {
-        _addAllowlistedUsers(_users);
+        _addAllowedUsers(_users);
     }
 
     /// @notice Internal function to add new users to the allowlist.
     /// @param _users The addresses of users to be added.
-    function _addAllowlistedUsers(address[] calldata _users) internal {
-        _allowlistUsers(_users, true);
+    function _addAllowedUsers(address[] calldata _users) internal {
+        _updateAllowedUsers(_users, true);
 
         emit UsersAdded(_users);
     }
 
     /// @notice Removes users from the allowlist.
     /// @param _users The addresses of the users to be removed.
-    function removeAllowlistedUsers(address[] calldata _users)
+    function removeAllowedUsers(address[] calldata _users)
         external
         auth(MODIFY_ALLOWLIST_PERMISSION_ID)
     {
-        _allowlistUsers(_users, false);
+        _updateAllowedUsers(_users, false);
 
         emit UsersRemoved(_users);
     }
@@ -118,7 +118,7 @@ contract AllowlistVoting is MajorityVotingBase {
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isUserAllowlisted(_msgSender(), snapshotBlock)) {
+        if (!isAllowed(_msgSender(), snapshotBlock)) {
             revert VoteCreationForbidden(_msgSender());
         }
 
@@ -145,7 +145,7 @@ contract AllowlistVoting is MajorityVotingBase {
         vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = allowlistedUserCount(snapshotBlock);
+        vote_.votingPower = allowedUserCount(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -153,7 +153,7 @@ contract AllowlistVoting is MajorityVotingBase {
             }
         }
 
-        emit VoteStarted(voteId, _msgSender(), _proposalMetadata);
+        emit VoteCreated(voteId, _msgSender(), _proposalMetadata);
 
         if (_choice != VoteOption.None && canVote(voteId, _msgSender())) {
             _vote(voteId, VoteOption.Yes, _msgSender(), _executeIfDecided);
@@ -198,19 +198,19 @@ contract AllowlistVoting is MajorityVotingBase {
         }
     }
 
-    /// @notice Checks if a user is allowlisted at given block number.
+    /// @notice Checks if a user is allowed at given block number.
     /// @param account The user address that is checked.
     /// @param blockNumber The block number.
-    function isUserAllowlisted(address account, uint256 blockNumber) public view returns (bool) {
+    function isAllowed(address account, uint256 blockNumber) public view returns (bool) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
-        return _allowlistedAddressesCheckpoints[account].getAtBlock(blockNumber) == 1;
+        return _allowedAddressesCheckpoints[account].getAtBlock(blockNumber) == 1;
     }
 
-    /// @notice Returns total count of users that are allowlisted at given block number.
+    /// @notice Returns total count of users that are allowed at given block number.
     /// @param blockNumber The specific block to get the count from.
-    /// @return The count of users that were allowlisted at the specified block number.
-    function allowlistedUserCount(uint256 blockNumber) public view returns (uint256) {
+    /// @return The count of users that were allowed at the specified block number.
+    function allowedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
         return _allowlistLengthCheckpoints.getAtBlock(blockNumber);
@@ -219,17 +219,17 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && isUserAllowlisted(_voter, vote_.snapshotBlock);
+        return _isVoteOpen(vote_) && isAllowed(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Adds or removes users from the allowlist.
+    /// @notice Updates the allowlist by adding or removing users.
     /// @param _users The user addresses.
     /// @param _enabled Whether to add or remove users from the allowlist.
-    function _allowlistUsers(address[] calldata _users, bool _enabled) internal {
+    function _updateAllowedUsers(address[] calldata _users, bool _enabled) internal {
         _allowlistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 
         for (uint256 i = 0; i < _users.length; i++) {
-            _allowlistedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
+            _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
         }
     }
 }

@@ -8,7 +8,7 @@ import {
   handleUsersRemoved,
   handleTrustedForwarderSet,
   handleConfigUpdated,
-  _handleVoteStarted
+  _handleVoteCreated
 } from '../../src/packages/allowlist/allowlist-voting';
 import {
   AllowlistPackage,
@@ -30,7 +30,7 @@ import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
   createNewUsersRemovedEvent,
-  createNewVoteStartedEvent,
+  createNewVoteCreatedEvent,
   createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
   getVotesLengthCall
@@ -44,7 +44,7 @@ let supportRequiredPct = '1000';
 let participationRequired = '500';
 let votingPower = '1000';
 
-test('Run Allowlist Voting (handleVoteStarted) mappings with mock event', () => {
+test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
   let erc20VotingPackage = new AllowlistPackage(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -73,7 +73,7 @@ test('Run Allowlist Voting (handleVoteStarted) mappings with mock event', () => 
   );
 
   // create event
-  let event = createNewVoteStartedEvent(
+  let event = createNewVoteCreatedEvent(
     voteId,
     ADDRESS_ONE,
     STRING_DATA,
@@ -81,7 +81,7 @@ test('Run Allowlist Voting (handleVoteStarted) mappings with mock event', () => 
   );
 
   // handle event
-  _handleVoteStarted(event, DAO_ADDRESS, STRING_DATA);
+  _handleVoteCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +

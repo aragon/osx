@@ -6,7 +6,7 @@ import {
   handleVoteExecuted,
   handleTrustedForwarderSet,
   handleConfigUpdated,
-  _handleVoteStarted
+  _handleVoteCreated
 } from '../../src/packages/erc20/erc20-voting';
 import {ERC20VotingPackage, ERC20VotingProposal} from '../../generated/schema';
 import {
@@ -21,13 +21,13 @@ import {createDummyAcctions, createGetVoteCall} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
-  createNewVoteStartedEvent,
+  createNewVoteCreatedEvent,
   createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
   getVotesLengthCall
 } from './utils';
 
-test('Run ERC Voting (handleVoteStarted) mappings with mock event', () => {
+test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
   let erc20VotingPackage = new ERC20VotingPackage(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -62,7 +62,7 @@ test('Run ERC Voting (handleVoteStarted) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewVoteStartedEvent(
+  let event = createNewVoteCreatedEvent(
     voteId,
     ADDRESS_ONE,
     STRING_DATA,
@@ -70,7 +70,7 @@ test('Run ERC Voting (handleVoteStarted) mappings with mock event', () => {
   );
 
   // handle event
-  _handleVoteStarted(event, DAO_ADDRESS, STRING_DATA);
+  _handleVoteCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +

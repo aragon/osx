@@ -22,14 +22,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   const pluginRepoFactoryAddress: string = ret.receipt?.contractAddress || '';
-  const registerPermission = ethers.utils.id('REGISTER_PERMISSION');
+  const registerPermissionId = ethers.utils.id('REGISTER_PERMISSION');
 
   // Grant REGISTER_PERMISSION_ID to pluginRepo factory
   const adminDaoContract = await ethers.getContractAt('DAO', adminDaoAddress);
   await adminDaoContract.grant(
     aragonPluginRegistryAddress,
     pluginRepoFactoryAddress,
-    registerPermission
+    registerPermissionId
   );
 };
 export default func;
