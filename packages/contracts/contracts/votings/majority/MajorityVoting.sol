@@ -2,7 +2,10 @@
 
 pragma solidity 0.8.10;
 
-import "../../core/component/MetaTxComponent.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+
+import "../../core/erc165/AdaptiveERC165.sol";
 import "../../utils/TimeHelpers.sol";
 import "./IMajorityVoting.sol";
 
@@ -10,7 +13,13 @@ import "./IMajorityVoting.sol";
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components
 /// @dev This component implements the `IMajorityVoting` interface
-abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelpers {
+abstract contract MajorityVoting is
+    IMajorityVoting,
+    Initializable,
+    ContextUpgradeable,
+    AdaptiveERC165,
+    TimeHelpers
+{
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
     bytes32 public constant MODIFY_VOTE_CONFIG = keccak256("MODIFY_VOTE_CONFIG");
 
@@ -68,7 +77,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         _registerStandard(MAJORITY_VOTING_INTERFACE_ID);
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        __MetaTxComponent_init(_dao, _gsnForwarder);
+        // __MetaTxComponent_init(_dao, _gsnForwarder);
 
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
@@ -78,7 +87,7 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
-    ) external auth(MODIFY_VOTE_CONFIG) {
+    ) internal {
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
@@ -105,10 +114,9 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
-    /// @inheritdoc IMajorityVoting
-    function execute(uint256 _voteId) public {
+    function execute(IDAO _dao, uint256 _voteId) public {
         if (!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
-        _execute(_voteId);
+        _execute(_dao, _voteId);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -174,8 +182,8 @@ abstract contract MajorityVoting is IMajorityVoting, MetaTxComponent, TimeHelper
 
     /// @notice Internal function to execute a vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote
-    function _execute(uint256 _voteId) internal virtual {
-        bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
+    function _execute(IDAO _dao, uint256 _voteId) internal virtual {
+        bytes[] memory execResults = _dao.execute(_voteId, votes[_voteId].actions);
 
         votes[_voteId].executed = true;
 

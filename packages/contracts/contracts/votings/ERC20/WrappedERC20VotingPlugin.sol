@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+
 import "../../plugin/aragonPlugin/AragonApp.sol";
 import "./ERC20Voting.sol";
 
@@ -17,14 +19,8 @@ contract WrappedERC20VotingPlugin is AragonApp, ERC20Voting {
         IDAO dao = dao();
 
         // get dependecy from dao's installed plugins
-        address _token = dao.installedPlugins(
-            keccak256(
-                abi.encodePacked(
-                    _tokenPlugin.node,
-                    _tokenPlugin.semanticVersion,
-                    _tokenPlugin.count
-                )
-            )
+        address _token = dao.getPluginAddress(
+            keccak256(abi.encodePacked(_tokenPlugin.node, _tokenPlugin.semanticVersion))
         );
 
         // check if token or it's version is valid,
@@ -38,22 +34,33 @@ contract WrappedERC20VotingPlugin is AragonApp, ERC20Voting {
             _participationRequiredPct,
             _supportRequiredPct,
             _minDuration,
-            _token
+            ERC20VotesUpgradeable(_token)
         );
     }
 
     function getDependencies() external returns (IDAO.DAOPlugin[] memory) {
-        IDAO.DAOPlugin[] memory deps = IDAO.DAOPlugin[](2);
+        IDAO.DAOPlugin[] memory deps = new IDAO.DAOPlugin[](2);
 
-        deps[0] = IDAO.DAOPlugin(
-            "0x746f6b656e2e617261676f6e2e657468000000000000000000000000000000",
-            [1, 0, 0]
-        ); // minter.aragon.eth
-        deps[1] = IDAO.DAOPlugin(
-            "0x6572633230766f74696e672e617261676f6e2e657468000000000000000000",
-            [1, 0, 0]
-        ); // token.aragon.eth
+        uint16[3] memory version;
+        version[0] = 1;
+        version[1] = 0;
+        version[2] = 0;
+
+        deps[0] = IDAO.DAOPlugin(keccak256("minter.aragon.eth"), version); // minter.aragon.eth
+        deps[1] = IDAO.DAOPlugin(keccak256("token.aragon.eth"), version); // token.aragon.eth
 
         return deps;
+    }
+
+    function changeVoteConfig(
+        uint64 _participationRequiredPct,
+        uint64 _supportRequiredPct,
+        uint64 _minDuration
+    ) external auth(MODIFY_VOTE_CONFIG) {
+        super.changeVoteConfig(_participationRequiredPct, _supportRequiredPct, _minDuration);
+    }
+
+    function execute(uint256 _voteId) public {
+        super.execute(dao(), _voteId);
     }
 }

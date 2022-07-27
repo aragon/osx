@@ -54,12 +54,6 @@ contract ERC20Voting is MajorityVoting {
         return votingToken;
     }
 
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.ERC20Voting";
-    }
-
     /// @inheritdoc IMajorityVoting
     function newVote(
         bytes calldata _proposalMetadata,
@@ -112,13 +106,13 @@ contract ERC20Voting is MajorityVoting {
         }
     }
 
-    /// @inheritdoc MajorityVoting
     function _vote(
+        IDAO _dao,
         uint256 _voteId,
         VoterState _choice,
         address _voter,
         bool _executesIfDecided
-    ) internal override {
+    ) internal {
         Vote storage vote_ = votes[_voteId];
 
         // This could re-enter, though we can assume the governance token is not malicious
@@ -148,7 +142,7 @@ contract ERC20Voting is MajorityVoting {
         emit VoteCast(_voteId, _voter, uint8(_choice), voterStake);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
-            _execute(_voteId);
+            _execute(_dao, _voteId);
         }
     }
 

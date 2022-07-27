@@ -35,7 +35,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
     address private _trustedForwarder;
 
-    mapping(bytes32 => address) installedPlugins; // keccak256({node, version, count}) => proxyAddress
+    mapping(bytes32 => address) internal installedPlugins; // keccak256({node, version}) => proxyAddress
 
     /// @notice Thrown if action execution has failed
     error ActionFailed();
@@ -113,17 +113,16 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         auth(address(this), DAO_SET_PLUGIN_ROLE)
     {
         bytes32 pluginHash = keccak256(
-            abi.encodePacked(_daoPlugin.node, _daoPlugin.semanticVersion, _daoPlugin.count)
-        );
-
-        require(
-            installedPlugins[pluginHash] == address(0),
-            "Can not install the with the same index twice"
+            abi.encodePacked(_daoPlugin.node, _daoPlugin.semanticVersion)
         );
 
         installedPlugins[pluginHash] = _proxyAddress;
 
         emit PluginSet(_proxyAddress, _daoPlugin);
+    }
+
+    function getPluginAddress(bytes32 _pluginHash) external override returns (address) {
+        return installedPlugins[_pluginHash];
     }
 
     /// @inheritdoc IDAO

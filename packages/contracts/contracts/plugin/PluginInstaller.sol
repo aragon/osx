@@ -5,8 +5,10 @@
 pragma solidity 0.8.10;
 
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
 import "../core/DAO.sol";
+import "../plugin/PluginRepo.sol";
 import "../utils/UncheckedIncrement.sol";
 import "./aragonPlugin/PluginUUPSProxy.sol";
 import "./IPluginFactory.sol";
@@ -21,7 +23,7 @@ contract PluginInstaller {
     struct PluginConfig {
         DAO.DAOPlugin daoPlugin;
         bytes32[] pluginPermissions; // Plugin permissions to be granted to DAO
-        bytes32[] desintaionPermissions; // Dao permission to be granted to the plugin, such as: exec_role
+        bytes32[] daoPermissions; // Dao permission to be granted to the plugin, such as: exec_role
         bytes initCallData;
     }
 
@@ -53,20 +55,27 @@ contract PluginInstaller {
         returns (address pluginAddress)
     {
         bytes32 node = pluginConfig.daoPlugin.node;
-        address repo = ens.resolve(node).addr(node);
-        PluginRepo.Version memory pluginVersion = repo.getBySemanticVersion(
+        Resolver resolver = Resolver(ens.resolver(node));
+        PluginRepo repo = PluginRepo(resolver.addr(node));
+        (, address implementationAddress, ) = repo.getBySemanticVersion(
             pluginConfig.daoPlugin.semanticVersion
         );
 
         address pluginAddress = payable(
             address(
-                new PluginUUPSProxy(
-                    dao,
-                    pluginVersion.implementationAddress,
-                    pluginConfig.initCallData
-                )
+                new PluginUUPSProxy(address(dao), implementationAddress, pluginConfig.initCallData)
             )
         );
+
+        // option 2 if we get permission back from the deployed plugin
+        AragonApp installedPlugin = AragonApp(pluginAddress);
+
+        Permissions permissions = installedPlugin.getPermissions();
+        for (uint256 i = 0; i < permissions.length; i++) {
+            // grant permissions
+        }
+
+        // option 1 if permission is passed from UI and known manifestJson
 
         // Grant dao the necessary permissions on the plugin
         ACLData.BulkItem[] memory packageItems = new ACLData.BulkItem[](

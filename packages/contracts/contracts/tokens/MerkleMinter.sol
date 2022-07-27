@@ -33,12 +33,12 @@ contract MerkleMinter is MetaTxComponent {
     /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
     /// @param _token A mintable ERC20 token
     /// @param _distributorBase A `MerkleDistributor` to be cloned
-    function initialize(
+    function __MerkleMinter_init(
         IDAO _dao,
         address _trustedForwarder,
         IERC20MintableUpgradeable _token,
         MerkleDistributor _distributorBase
-    ) external initializer {
+    ) external onlyInitializing {
         _registerStandard(MERKLE_MINTER_INTERFACE_ID);
         __MetaTxComponent_init(_dao, _trustedForwarder);
 

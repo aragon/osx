@@ -18,7 +18,6 @@ abstract contract IDAO {
     struct DAOPlugin {
         bytes32 node;
         uint16[3] semanticVersion;
-        uint256 count; // number of same plugin installed
     }
 
     /// @notice Checks if an address has permission on a contract via a role identifier and considers if `ANY_ADDRESS` was used in the granting process.
@@ -44,6 +43,8 @@ abstract contract IDAO {
     event MetadataSet(bytes metadata);
 
     function setPlugin(DAOPlugin memory _daoPlugin, address _proxyAddress) external virtual;
+
+    function getPluginAddress(bytes32 _pluginHash) external virtual returns (address);
 
     event PluginSet(address proxyAddress, DAOPlugin daoPlugin);
 

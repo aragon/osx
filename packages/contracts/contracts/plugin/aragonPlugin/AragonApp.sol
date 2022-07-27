@@ -15,6 +15,12 @@ import "./AppStorage.sol";
 abstract contract AragonApp is AppStorage, UUPSUpgradeable, ContextUpgradeable {
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
+    struct Permissions {
+        address from;
+        address to;
+        string role;
+    }
+
     error CantUpdate();
 
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
@@ -48,7 +54,7 @@ abstract contract AragonApp is AppStorage, UUPSUpgradeable, ContextUpgradeable {
     /// v1.0.0 is developed, they would need to include this without body.. Maybe we don't reinforce
     /// and up to the dev to include it or not. Problem with NOT reinforcing seems to be that
     /// in v1.1.0, dev might include it and in v1.2.0 dev mightn't include it even though it's Highly needed.
-    function _update(uint256 oldVersion, bytes memory data) internal virtual;
+    function _update(uint256 oldVersion, bytes memory data) internal virtual {}
 
     /// @notice The `initialize` kind of function that gets called for upgrades.
     /// @dev Inheritting contracts must override _update to include what logic they want to run per each update.
@@ -65,9 +71,11 @@ abstract contract AragonApp is AppStorage, UUPSUpgradeable, ContextUpgradeable {
 
     /// @dev This is for the front-end to detect what arguments it needs to provide to the update function.
     /// TODO: if the we make `_update` reinforced, then we also do this as reinforced
-    function updateSignatureABI() external view virtual returns (string memory);
+    function updateSignatureABI() external view virtual returns (string memory) {}
 
-    function getDependencies() external virtual returns (IDAO.DAOPlugin[] memory);
+    function getDependencies() external virtual returns (IDAO.DAOPlugin[] memory) {}
+
+    function getPermissions() external virtual returns (Permissions[]) {}
 
     /**
      * @dev Upgrade the implementation of the proxy to `newImplementation`, and subsequently execute the function call
