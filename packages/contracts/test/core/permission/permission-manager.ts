@@ -14,14 +14,14 @@ const ALLOW_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000002'
 );
 
-enum BulkOP {
+enum Operation {
   Grant,
   Revoke,
   MakeImmutable,
 }
 
 interface Item {
-  operation: BulkOP;
+  operation: Operation;
   permissionId: string;
   who: string;
 }
@@ -424,17 +424,17 @@ describe('Core: PermissionManager', function () {
       const signers = await ethers.getSigners();
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -454,17 +454,17 @@ describe('Core: PermissionManager', function () {
       const signers = await ethers.getSigners();
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.MakeImmutable,
+          operation: Operation.MakeImmutable,
           permissionId: ethers.utils.id('PERMISSION_ID_1'),
           who: signers[1].address,
         },
         {
-          operation: BulkOP.MakeImmutable,
+          operation: Operation.MakeImmutable,
           permissionId: ethers.utils.id('PERMISSION_ID_2'),
           who: signers[2].address,
         },
         {
-          operation: BulkOP.MakeImmutable,
+          operation: Operation.MakeImmutable,
           permissionId: ethers.utils.id('PERMISSION_ID_3'),
           who: signers[3].address,
         },
@@ -483,17 +483,17 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.Revoke,
+          operation: Operation.Revoke,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          operation: BulkOP.Revoke,
+          operation: Operation.Revoke,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          operation: BulkOP.Revoke,
+          operation: Operation.Revoke,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -514,17 +514,17 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.Revoke,
+          operation: Operation.Revoke,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          operation: BulkOP.MakeImmutable,
+          operation: Operation.MakeImmutable,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -555,22 +555,22 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.Revoke,
+          operation: Operation.Revoke,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
         },
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
         },
         {
-          operation: BulkOP.MakeImmutable,
+          operation: Operation.MakeImmutable,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
         {
-          operation: BulkOP.MakeImmutable,
+          operation: Operation.MakeImmutable,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -601,7 +601,7 @@ describe('Core: PermissionManager', function () {
     it('should not allow', async () => {
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: otherSigner.address,
         },
@@ -623,7 +623,7 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       const bulkItems: Item[] = [
         {
-          operation: BulkOP.Grant,
+          operation: Operation.Grant,
           permissionId: ADMIN_PERMISSION_ID,
           who: otherSigner.address,
         },
