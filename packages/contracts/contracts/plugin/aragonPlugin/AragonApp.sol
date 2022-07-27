@@ -15,9 +15,14 @@ import "./AppStorage.sol";
 abstract contract AragonApp is AppStorage, UUPSUpgradeable, ContextUpgradeable {
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
 
+    struct Dependency {
+        string id;
+        uint16[3] version;
+    }
+
     struct Permissions {
-        address from;
-        address to;
+        Dependency from;
+        Dependency to;
         string role;
     }
 
@@ -75,7 +80,7 @@ abstract contract AragonApp is AppStorage, UUPSUpgradeable, ContextUpgradeable {
 
     function getDependencies() external virtual returns (IDAO.DAOPlugin[] memory) {}
 
-    function getPermissions() external virtual returns (Permissions[]) {}
+    function getPermissions() external virtual returns (Permissions[] memory) {}
 
     /**
      * @dev Upgrade the implementation of the proxy to `newImplementation`, and subsequently execute the function call

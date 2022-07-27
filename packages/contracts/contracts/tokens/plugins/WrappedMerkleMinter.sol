@@ -32,59 +32,37 @@ contract WrappedMerkleMinter is AragonApp, MerkleMinter {
         );
     }
 
-    function getDependencies() external override returns (IDAO.DAOPlugin[] memory) {
-        IDAO.DAOPlugin[] memory deps = new IDAO.DAOPlugin[](1);
+    function getDependencies() external override returns (Dependency[] memory) {
+        Dependency[] memory deps = new Dependency[](1);
 
         uint16[3] memory version;
         version[0] = 1;
         version[1] = 0;
         version[2] = 0;
 
-        deps[1] = IDAO.DAOPlugin(keccak256("token.aragon.eth"), version); // token.aragon.eth
+        deps[1] = Dependency("token.aragon.eth", version);
 
         return deps;
     }
 
-    function getPermissions() external override returns (Permissions[]) {
+    function getPermissions() external override returns (Permissions[] memory) {
         uint16[3] memory version;
         version[0] = 1;
         version[1] = 0;
         version[2] = 0;
 
-        IDAO.DAOPlugin _tokenPlugin = IDAO.DAOPlugin(keccak256("token.aragon.eth"), version);
+        Dependency memory _daoElement = Dependency("", version);
+        Dependency memory _tokenPlugin = Dependency("token.aragon.eth", version);
+        Dependency memory _merkleMinterPlugin = Dependency("merkleminter.aragon.eth", version);
 
-        address _token = IDAO(dao()).getPluginAddress(
-            keccak256(abi.encodePacked(_tokenPlugin.node, _tokenPlugin.semanticVersion))
-        );
-
-        Permissions[] permissions = new Permissions[](2);
-        permissions[0] = Permissions(_token, address(this), "MINT_ROLE");
-        permissions[1] = Permissions(
-            _token,
-            dao(), // on implementation this address will be zero, it change to dao once deployed
-            "MINT_ROLE"
-        );
-    }
-
-    // option 2
-    function getPermissions2() external override returns (Permissions[]) {
-        uint16[3] memory version;
-        version[0] = 1;
-        version[1] = 0;
-        version[2] = 0;
-
-        IDAO.DAOPlugin _tokenPlugin = IDAO.DAOPlugin(keccak256("token.aragon.eth"), version);
-        IDAO.DAOPlugin _merkleMinterPlugin = IDAO.DAOPlugin(
-            keccak256("merkleminter.aragon.eth"),
-            version
-        );
-
-        Permissions[] permissions = new Permissions[](2);
+        Permissions[] memory permissions = new Permissions[](2);
         permissions[0] = Permissions(_tokenPlugin, _merkleMinterPlugin, "MINT_ROLE");
         permissions[1] = Permissions(
-            _token,
-            dao(), // on implementation this address will be zero, it change to dao once deployed
+            _tokenPlugin,
+            _daoElement, // may be if id & version is ("",[0,0,0]), that mean its the dao
             "MINT_ROLE"
         );
+
+        return permissions;
     }
 }

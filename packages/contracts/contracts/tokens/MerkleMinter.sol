@@ -38,7 +38,7 @@ contract MerkleMinter is MetaTxComponent {
         address _trustedForwarder,
         IERC20MintableUpgradeable _token,
         MerkleDistributor _distributorBase
-    ) external onlyInitializing {
+    ) public onlyInitializing {
         _registerStandard(MERKLE_MINTER_INTERFACE_ID);
         __MetaTxComponent_init(_dao, _trustedForwarder);
 

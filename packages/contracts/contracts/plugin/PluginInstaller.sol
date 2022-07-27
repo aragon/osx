@@ -12,6 +12,7 @@ import "../plugin/PluginRepo.sol";
 import "../utils/UncheckedIncrement.sol";
 import "./aragonPlugin/PluginUUPSProxy.sol";
 import "./IPluginFactory.sol";
+import "../plugin/aragonPlugin/AragonApp.sol";
 
 /// @title PluginInstaller to install plugins on a DAO.
 /// @author Aragon Association - 2022
@@ -70,9 +71,12 @@ contract PluginInstaller {
         // option 2 if we get permission back from the deployed plugin
         AragonApp installedPlugin = AragonApp(pluginAddress);
 
-        Permissions permissions = installedPlugin.getPermissions();
+        AragonApp.Permissions memory permissions = installedPlugin.getPermissions();
         for (uint256 i = 0; i < permissions.length; i++) {
-            // grant permissions
+            // convert deps and permissions
+            // ....
+            // handle permissions
+            // ....
         }
 
         // option 1 if permission is passed from UI and known manifestJson
