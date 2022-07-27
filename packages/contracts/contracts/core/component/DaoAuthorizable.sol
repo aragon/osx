@@ -10,7 +10,7 @@ import "./../IDAO.sol";
 
 /// @title DaoAuthorizable
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta transaction compatible modifier to make functions permissioned through an associated DAO.
+/// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
 /// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
 /// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
 ///      This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
