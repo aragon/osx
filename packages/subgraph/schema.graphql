@@ -22,16 +22,16 @@ type Balance @entity {
 # ACL
 
 type ContractPermissionId @entity {
-  id: ID! # where + permissionID
+  id: ID! # where + permissionId
   dao: Dao!
   where: Bytes!
-  permissionID: Bytes!
+  permissionId: Bytes!
   immutable: Boolean!
 }
 
 type Permission @entity {
   "no need to store granted as we can delete permission when revoked"
-  id: ID! # where + permissionID + who
+  id: ID! # where + permissionId + who
   dao: Dao!
   where: Bytes!
   contractPermissionId: ContractPermissionId!

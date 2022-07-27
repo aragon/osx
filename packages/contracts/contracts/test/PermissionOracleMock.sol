@@ -10,7 +10,7 @@ contract PermissionOracleMock is IPermissionOracle {
     function hasPermissions(
         address, /* _where */
         address, /* _who */
-        bytes32, /* _permissionID */
+        bytes32, /* _permissionId */
         bytes memory /* _data */
     ) external view returns (bool) {
         return _hasPermissionsResult;

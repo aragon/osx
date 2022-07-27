@@ -23,13 +23,13 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     /// @param here The context in which the authorization reverted.
     /// @param where The contract requiring the permission.
     /// @param who The address (EOA or contract) missing the permission.
-    /// @param permissionID The permission identifier.
+    /// @param permissionId The permission identifier.
     error DAOPermissionMissing(
         address dao,
         address here,
         address where,
         address who,
-        bytes32 permissionID
+        bytes32 permissionId
     );
 
     /// @notice Initializes the contract by setting the associated DAO.
@@ -39,15 +39,15 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
     }
 
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
-    /// @param _permissionID The permission identifier required to call the method this modifier is applied to.
-    modifier auth(bytes32 _permissionID) {
-        if (!dao.hasPermission(address(this), _msgSender(), _permissionID, _msgData()))
+    /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
+    modifier auth(bytes32 _permissionId) {
+        if (!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData()))
             revert DAOPermissionMissing({
                 dao: address(dao),
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),
-                permissionID: _permissionID
+                permissionId: _permissionId
             });
 
         _;

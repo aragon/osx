@@ -17,18 +17,18 @@ contract TestSharedComponent is Component {
 
     error ObjectIdNotAssigned(uint256 _id);
 
-    modifier sharedAuth(uint256 _id, bytes32 _permissionID) {
+    modifier sharedAuth(uint256 _id, bytes32 _permissionId) {
         if (address(ownedIds[_id]) == address(0)) {
             revert ObjectIdNotAssigned(_id);
         }
 
-        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionID, _msgData())) {
+        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
             revert DAOPermissionMissing({
                 dao: address(dao),
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),
-                permissionID: _permissionID
+                permissionId: _permissionId
             });
         }
 
@@ -69,10 +69,10 @@ contract TestIdGatingOracle is IPermissionOracle {
     function hasPermissions(
         address _where,
         address _who,
-        bytes32 _permissionID,
+        bytes32 _permissionId,
         bytes calldata _data
     ) external view returns (bool) {
-        (_where, _who, _permissionID);
+        (_where, _who, _permissionId);
 
         // Security issue? Can the method be wrapped?
 

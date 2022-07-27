@@ -19,10 +19,10 @@ contract TestParameterScopingPermissionOracle is IPermissionOracle {
     function hasPermissions(
         address _where,
         address _who,
-        bytes32 _permissionID,
+        bytes32 _permissionId,
         bytes calldata _data
     ) external pure returns (bool) {
-        (_where, _who, _permissionID);
+        (_where, _who, _permissionId);
 
         // Require the function selector to match
         require(getSelector(_data) == ADD_PERMISSIONED_SELECTOR);

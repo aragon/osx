@@ -88,7 +88,7 @@ contract PluginRepo is
 
         nextVersionIndex = 1;
 
-        // set permissionIDs.
+        // set permissionIds.
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
 

@@ -14,7 +14,7 @@ library BulkPermissionsLib {
 
     struct Item {
         Operation operation;
-        bytes32 permissionID;
+        bytes32 permissionId;
         address who;
     }
 }

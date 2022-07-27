@@ -142,7 +142,7 @@ contract DAOFactory {
     /// @param _dao The DAO instance just created.
     /// @param _voting The voting contract address (`AllowlistVoting` or `ERC20Voting`).
     function setDAOPermissions(DAO _dao, address _voting) internal {
-        // set permissionIDs on the dao itself.
+        // set permissionIds on the dao itself.
         BulkPermissionsLib.Item[] memory items = new BulkPermissionsLib.Item[](8);
 
         // Grant DAO all the permissions required

@@ -14,25 +14,25 @@ contract PermissionManagerTest is PermissionManager {
     function getAuthPermission(
         address _where,
         address _who,
-        bytes32 _permissionID
+        bytes32 _permissionId
     ) public view returns (address) {
-        return permissionsHashed[permissionHash(_where, _who, _permissionID)];
+        return permissionsHashed[permissionHash(_where, _who, _permissionId)];
     }
 
     function getPermissionHash(
         address _where,
         address _who,
-        bytes32 _permissionID
+        bytes32 _permissionId
     ) public pure returns (bytes32) {
-        return permissionHash(_where, _who, _permissionID);
+        return permissionHash(_where, _who, _permissionId);
     }
 
-    function getImmutablePermissionHash(address _where, bytes32 _permissionID)
+    function getImmutablePermissionHash(address _where, bytes32 _permissionId)
         public
         pure
         returns (bytes32)
     {
-        return immutablePermissionHash(_where, _permissionID);
+        return immutablePermissionHash(_where, _permissionId);
     }
 
     function getAnyAddr() public pure returns (address) {
@@ -42,9 +42,9 @@ contract PermissionManagerTest is PermissionManager {
     function hasPermission(
         address _where,
         address _who,
-        bytes32 _permissionID,
+        bytes32 _permissionId,
         bytes memory _data
     ) public returns (bool) {
-        return _hasPermission(_where, _who, _permissionID, _data);
+        return _hasPermission(_where, _who, _permissionId, _data);
     }
 }

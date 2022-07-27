@@ -104,7 +104,7 @@ describe('DAO', function () {
   });
 
   describe('setTrustedForwarder:', async () => {
-    it('reverts if the sender lacks the required permissionID', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
@@ -135,7 +135,7 @@ describe('DAO', function () {
   });
 
   describe('setMetadata:', async () => {
-    it('reverts if the sender lacks the required permissionID', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
@@ -161,7 +161,7 @@ describe('DAO', function () {
   });
 
   describe('setSignatureValidator:', async () => {
-    it('reverts if the sender lacks the required permissionID', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
@@ -198,7 +198,7 @@ describe('DAO', function () {
     ];
     const expectedDummyResults = ['0x'];
 
-    it('reverts if the sender lacks the required permissionID', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
@@ -298,7 +298,7 @@ describe('DAO', function () {
       await token.mint(dao.address, amount);
     });
 
-    it('reverts if the sender lacks the required permissionID', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,

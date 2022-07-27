@@ -18,13 +18,13 @@ abstract contract IDAO {
     /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the contract.
     /// @param _who The address of a EOA or contract to give the permissions.
-    /// @param _permissionID The permission identifier.
+    /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered.
     /// @return bool Returns true if the address has permission, false if not.
     function hasPermission(
         address _where,
         address _who,
-        bytes32 _permissionID,
+        bytes32 _permissionId,
         bytes memory _data
     ) external virtual returns (bool);
 

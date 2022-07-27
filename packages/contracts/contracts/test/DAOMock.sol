@@ -18,7 +18,7 @@ contract DAOMock is IDAO, PermissionManager {
     function hasPermission(
         address, /* _where */
         address, /* _who */
-        bytes32, /* _permissionID */
+        bytes32, /* _permissionId */
         bytes memory /* _data */
     ) public pure override returns (bool) {
         return true;

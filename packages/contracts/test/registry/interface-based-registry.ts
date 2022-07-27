@@ -65,7 +65,7 @@ describe('InterfaceBasedRegistry', function () {
       );
     });
 
-    it('fail to register if the sender lacks the required permissionID', async () => {
+    it('fail to register if the sender lacks the required permissionId', async () => {
       dao.revoke(
         interfaceBasedRegistryMock.address,
         ownerAddress,

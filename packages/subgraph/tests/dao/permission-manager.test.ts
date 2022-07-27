@@ -112,7 +112,7 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   assert.fieldEquals(
     'ContractPermissionId',
     contractPermissionIdEntityID,
-    'permissionID',
+    'permissionId',
     contractPermissionId.toHexString()
   );
   assert.fieldEquals(
@@ -237,7 +237,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
     DAO_ADDRESS
   ).toHexString();
   contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
-  contractPermissionIdEntity.permissionID = contractPermissionId;
+  contractPermissionIdEntity.permissionId = contractPermissionId;
   contractPermissionIdEntity.immutable = false;
   contractPermissionIdEntity.save();
 
@@ -289,7 +289,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   assert.fieldEquals(
     'ContractPermissionId',
     contractPermissionIdEntityID,
-    'permissionID',
+    'permissionId',
     contractPermissionId.toHexString()
   );
   assert.fieldEquals(
@@ -318,7 +318,7 @@ test('Run dao (handleMadeImmutable) mappings with mock event', () => {
     DAO_ADDRESS
   ).toHexString();
   contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
-  contractPermissionIdEntity.permissionID = contractPermissionId;
+  contractPermissionIdEntity.permissionId = contractPermissionId;
   contractPermissionIdEntity.immutable = false;
   contractPermissionIdEntity.save();
 
@@ -369,7 +369,7 @@ test('Run dao (handleMadeImmutable) mappings with mock event', () => {
   assert.fieldEquals(
     'ContractPermissionId',
     contractPermissionIdEntityID,
-    'permissionID',
+    'permissionId',
     contractPermissionId.toHexString()
   );
   assert.fieldEquals(

@@ -182,7 +182,7 @@ export function handleGranted(event: Granted): void {
   let contractPermissionIdEntityId =
     event.params.where.toHexString() +
     '_' +
-    event.params.permissionID.toHexString();
+    event.params.permissionId.toHexString();
   let contractPermissionIdEntity = ContractPermissionId.load(
     contractPermissionIdEntityId
   );
@@ -192,7 +192,7 @@ export function handleGranted(event: Granted): void {
     );
     contractPermissionIdEntity.dao = daoId;
     contractPermissionIdEntity.where = event.params.where;
-    contractPermissionIdEntity.permissionID = event.params.permissionID;
+    contractPermissionIdEntity.permissionId = event.params.permissionId;
     contractPermissionIdEntity.immutable = false;
     contractPermissionIdEntity.save();
   }
@@ -215,7 +215,7 @@ export function handleGranted(event: Granted): void {
   let executionContractPermissionId = daoContract.try_EXECUTE_PERMISSION_ID();
   if (
     !executionContractPermissionId.reverted &&
-    event.params.permissionID == executionContractPermissionId.value
+    event.params.permissionId == executionContractPermissionId.value
   ) {
     addPackage(daoId, event.params.who);
   }
@@ -226,7 +226,7 @@ export function handleRevoked(event: Revoked): void {
   let permissionId =
     event.params.where.toHexString() +
     '_' +
-    event.params.permissionID.toHexString() +
+    event.params.permissionId.toHexString() +
     '_' +
     event.params.who.toHexString();
   let permissionEntity = Permission.load(permissionId);
@@ -241,7 +241,7 @@ export function handleRevoked(event: Revoked): void {
   let executionContractPermissionId = daoContract.try_EXECUTE_PERMISSION_ID();
   if (
     !executionContractPermissionId.reverted &&
-    event.params.permissionID == executionContractPermissionId.value
+    event.params.permissionId == executionContractPermissionId.value
   ) {
     removePackage(daoId, event.params.who.toHexString());
   }
@@ -252,7 +252,7 @@ export function handleMadeImmutable(event: MadeImmutable): void {
   let contractPermissionIdEntityId =
     event.params.where.toHexString() +
     '_' +
-    event.params.permissionID.toHexString();
+    event.params.permissionId.toHexString();
   let contractPermissionIdEntity = ContractPermissionId.load(
     contractPermissionIdEntityId
   );
@@ -262,7 +262,7 @@ export function handleMadeImmutable(event: MadeImmutable): void {
     );
     contractPermissionIdEntity.dao = daoId;
     contractPermissionIdEntity.where = event.params.where;
-    contractPermissionIdEntity.permissionID = event.params.permissionID;
+    contractPermissionIdEntity.permissionId = event.params.permissionId;
   }
   contractPermissionIdEntity.immutable = true;
   contractPermissionIdEntity.save();

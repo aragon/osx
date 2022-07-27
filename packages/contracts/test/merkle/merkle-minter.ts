@@ -109,7 +109,7 @@ describe('MerkleDistributor', function () {
         );
     });
 
-    it('does not mint if the minting permissionID on the minter is missing', async () => {
+    it('does not mint if the minting permissionId on the minter is missing', async () => {
       await managingDao.revoke(
         minter.address,
         ownerAddress,
@@ -135,7 +135,7 @@ describe('MerkleDistributor', function () {
       );
     });
 
-    it('does not mint if the minting permissionID on the token is missing', async () => {
+    it('does not mint if the minting permissionId on the token is missing', async () => {
       await managingDao.revoke(
         token.address,
         minter.address,
