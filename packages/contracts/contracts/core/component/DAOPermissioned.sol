@@ -8,13 +8,13 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "../permission/PermissionManager.sol";
 import "./../IDAO.sol";
 
-/// @title DAOPermissioned
+/// @title DaoAuthorizable
 /// @author Aragon Association - 2022
 /// @notice An abstract contract providing a meta transaction compatible modifier to make functions permissioned through an associated DAO.
 /// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
-/// @dev Make sure to call `__DAOPermissioned_init` during initialization of the inheriting contract.
+/// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
 ///      This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
-abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
+abstract contract DaoAuthorizable is Initializable, ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
@@ -34,7 +34,7 @@ abstract contract DAOPermissioned is Initializable, ContextUpgradeable {
 
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
-    function __DAOPermissioned_init(IDAO _dao) internal virtual onlyInitializing {
+    function __DaoAuthorizable_init(IDAO _dao) internal virtual onlyInitializing {
         dao = _dao;
     }
 
