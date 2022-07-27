@@ -69,7 +69,7 @@ describe('DAORegistry', function () {
       registry.register(daoSubdomainName, newTargetDao.address, ownerAddress)
     ).to.be.revertedWith(
       customError(
-        'DAOPermissionMissing',
+        'DaoUnauthorized',
         managingDAO.address,
         registry.address,
         registry.address,

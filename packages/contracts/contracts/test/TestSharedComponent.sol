@@ -23,7 +23,7 @@ contract TestSharedComponent is Component {
         }
 
         if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
-            revert DAOPermissionMissing({
+            revert DaoUnauthorized({
                 dao: address(dao),
                 here: address(this),
                 where: address(this),

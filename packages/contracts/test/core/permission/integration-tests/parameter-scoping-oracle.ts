@@ -17,7 +17,7 @@ describe('TestParameterScopingOracle', function () {
   let testComponent: TestComponent;
   let managingDao: DAO;
   let ownerAddress: string;
-  let expectedPermissionMissingError: string;
+  let expectedUnauthorizedError: string;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -51,8 +51,8 @@ describe('TestParameterScopingOracle', function () {
       parameterOracle.address
     );
 
-    expectedPermissionMissingError = customError(
-      'DAOPermissionMissing',
+    expectedUnauthorizedError = customError(
+      'DaoUnauthorized',
       managingDao.address,
       testComponent.address,
       testComponent.address,
@@ -77,7 +77,7 @@ describe('TestParameterScopingOracle', function () {
 
       await expect(
         testComponent.callStatic.subPermissioned(param1, param2)
-      ).to.be.revertedWith(expectedPermissionMissingError);
+      ).to.be.revertedWith(expectedUnauthorizedError);
     });
 
     it('reverts if the first parameter is equal to the second', async () => {
@@ -86,7 +86,7 @@ describe('TestParameterScopingOracle', function () {
 
       await expect(
         testComponent.callStatic.addPermissioned(param1, param2)
-      ).to.be.revertedWith(expectedPermissionMissingError);
+      ).to.be.revertedWith(expectedUnauthorizedError);
     });
 
     it('reverts if the first parameter is smaller than the second', async () => {
@@ -95,7 +95,7 @@ describe('TestParameterScopingOracle', function () {
 
       await expect(
         testComponent.callStatic.addPermissioned(param1, param2)
-      ).to.be.revertedWith(expectedPermissionMissingError);
+      ).to.be.revertedWith(expectedUnauthorizedError);
     });
   });
 });

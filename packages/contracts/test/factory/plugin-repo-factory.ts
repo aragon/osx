@@ -110,7 +110,7 @@ describe('PluginRepoFactory: ', function () {
       pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
     ).to.be.revertedWith(
       customError(
-        'DAOPermissionMissing',
+        'DaoUnauthorized',
         managingDao.address,
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,

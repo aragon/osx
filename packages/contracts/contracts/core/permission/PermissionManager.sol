@@ -28,12 +28,12 @@ contract PermissionManager is Initializable {
     /// @notice A mapping storing frozen permissions as hashes (i.e., `frozenPermissionHash(where, permissionId)`) and their status (`true` = frozen (immutable), `false` = not frozen (mutable)).
     mapping(bytes32 => bool) internal frozenPermissionsHashed;
 
-    /// @notice Thrown if a permission is missing.
+    /// @notice Thrown if a call is unauthorized.
     /// @param here The context in which the authorization reverted.
     /// @param where The contract requiring the permission.
     /// @param who The address (EOA or contract) missing the permission.
     /// @param permissionId The permission identifier.
-    error PermissionMissing(address here, address where, address who, bytes32 permissionId);
+    error Unauthorized(address here, address where, address who, bytes32 permissionId);
 
     /// @notice Thrown if a permission has been already granted.
     /// @param where The address of the target contract to grant `who` permission to.
@@ -94,7 +94,7 @@ contract PermissionManager is Initializable {
             !(hasPermissions(_where, msg.sender, _permissionId, msg.data) ||
                 hasPermissions(address(this), msg.sender, _permissionId, msg.data))
         )
-            revert PermissionMissing({
+            revert Unauthorized({
                 here: address(this),
                 where: _where,
                 who: msg.sender,

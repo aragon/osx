@@ -346,7 +346,7 @@ describe('ENSSubdomainRegistrar', function () {
             .registerSubnode(ensLabelHash('my'), targetAddress)
         ).to.be.revertedWith(
           customError(
-            'DAOPermissionMissing',
+            'DaoUnauthorized',
             managingDao.address,
             registrar.address,
             registrar.address,
@@ -364,7 +364,7 @@ describe('ENSSubdomainRegistrar', function () {
             .setDefaultResolver(ethers.constants.AddressZero)
         ).to.be.revertedWith(
           customError(
-            'DAOPermissionMissing',
+            'DaoUnauthorized',
             managingDao.address,
             registrar.address,
             registrar.address,

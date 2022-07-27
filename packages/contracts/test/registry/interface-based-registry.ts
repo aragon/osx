@@ -76,7 +76,7 @@ describe('InterfaceBasedRegistry', function () {
         interfaceBasedRegistryMock.register(dao.address)
       ).to.be.revertedWith(
         customError(
-          'DAOPermissionMissing',
+          'DaoUnauthorized',
           dao.address,
           interfaceBasedRegistryMock.address,
           interfaceBasedRegistryMock.address,

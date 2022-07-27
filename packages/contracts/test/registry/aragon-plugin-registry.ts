@@ -76,7 +76,7 @@ describe('Aragon-Plugin-Registry', function () {
       aragonPluginRegistry.register(pluginRepoName, newPluginRepo.address)
     ).to.be.revertedWith(
       customError(
-        'DAOPermissionMissing',
+        'DaoUnauthorized',
         managingDAO.address,
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,

@@ -18,13 +18,13 @@ abstract contract DaoAuthorizable is Initializable, ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
-    /// @notice Thrown if a permission is missing.
+    /// @notice Thrown if a call is unauthorized in the associated DAO.
     /// @param dao The associated DAO.
     /// @param here The context in which the authorization reverted.
     /// @param where The contract requiring the permission.
     /// @param who The address (EOA or contract) missing the permission.
     /// @param permissionId The permission identifier.
-    error DAOPermissionMissing(
+    error DaoUnauthorized(
         address dao,
         address here,
         address where,
@@ -42,7 +42,7 @@ abstract contract DaoAuthorizable is Initializable, ContextUpgradeable {
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
         if (!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData()))
-            revert DAOPermissionMissing({
+            revert DaoUnauthorized({
                 dao: address(dao),
                 here: address(this),
                 where: address(this),

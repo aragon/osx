@@ -125,7 +125,7 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'DAOPermissionMissing',
+          'DaoUnauthorized',
           managingDao.address,
           minter.address,
           minter.address,
@@ -151,7 +151,7 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'DAOPermissionMissing',
+          'DaoUnauthorized',
           managingDao.address,
           token.address,
           token.address,

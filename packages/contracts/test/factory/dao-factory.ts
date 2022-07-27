@@ -279,7 +279,7 @@ describe('DAOFactory: ', function () {
     // should be only callable by ERC20Voting
     await expect(managingDao.execute(0, [])).to.be.revertedWith(
       customError(
-        'PermissionMissing',
+        'Unauthorized',
         managingDao.address,
         managingDao.address,
         ownerAddress,
@@ -289,7 +289,7 @@ describe('DAOFactory: ', function () {
 
     await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
-        'DAOPermissionMissing',
+        'DaoUnauthorized',
         managingDao.address,
         voting.address,
         voting.address,
@@ -423,7 +423,7 @@ describe('DAOFactory: ', function () {
     // should be only callable by AllowlistVoting
     await expect(managingDao.execute(0, [])).to.be.revertedWith(
       customError(
-        'PermissionMissing',
+        'Unauthorized',
         managingDao.address,
         managingDao.address,
         ownerAddress,
@@ -433,7 +433,7 @@ describe('DAOFactory: ', function () {
 
     await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
-        'DAOPermissionMissing',
+        'DaoUnauthorized',
         managingDao.address,
         voting.address,
         voting.address,
