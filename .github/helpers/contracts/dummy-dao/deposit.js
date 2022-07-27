@@ -147,6 +147,7 @@ async function deposit() {
   content[networkName].dao[
     isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
   ].deposits = results;
+  
   //write file
   await fs.writeFile(
     path.join('./', 'dummy_daos.json'),

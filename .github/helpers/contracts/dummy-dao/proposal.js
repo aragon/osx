@@ -128,6 +128,7 @@ async function proposal() {
   content[networkName].dao[
     isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
   ].proposal = resultObj;
+  
   //write file
   await fs.writeFile(
     path.join('./', 'dummy_daos.json'),
