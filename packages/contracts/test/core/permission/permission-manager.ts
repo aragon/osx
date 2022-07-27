@@ -17,7 +17,7 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 enum Operation {
   Grant,
   Revoke,
-  MakeImmutable,
+  Freeze,
 }
 
 interface Item {
@@ -97,12 +97,12 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should revert if immutable', async () => {
-      await pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID);
+    it('should revert if frozen', async () => {
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
         pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('PermissionImmutable', pm.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -191,8 +191,8 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should revert if immutable', async () => {
-      await pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID);
+    it('should revert if frozen', async () => {
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
         pm.grantWithOracle(
           pm.address,
@@ -201,7 +201,7 @@ describe('Core: PermissionManager', function () {
           ALLOW_FLAG
         )
       ).to.be.revertedWith(
-        customError('PermissionImmutable', pm.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -307,13 +307,13 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should revert if immutable', async () => {
+    it('should revert if frozen', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      await pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID);
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
         pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('PermissionImmutable', pm.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
@@ -366,32 +366,32 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('makeImmutable', () => {
-    it('should makeImmutable', async () => {
-      await pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID);
-      const immutable = await pm.isImmutable(pm.address, ADMIN_PERMISSION_ID);
-      expect(immutable).to.be.equal(true);
+  describe('freeze', () => {
+    it('should freeze', async () => {
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
+      const frozen = await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID);
+      expect(frozen).to.be.equal(true);
     });
 
-    it('should emit MadeImmutable', async () => {
-      await expect(pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID)).to.emit(
+    it('should emit Frozen', async () => {
+      await expect(pm.freeze(pm.address, ADMIN_PERMISSION_ID)).to.emit(
         pm,
-        'MadeImmutable'
+        'Frozen'
       );
     });
 
-    it('should revert if already immutable', async () => {
-      await pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID);
+    it('should revert if already frozen', async () => {
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
       await expect(
-        pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID)
+        pm.freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
-        customError('PermissionImmutable', pm.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
     });
 
     it('should not allow', async () => {
       await expect(
-        pm.connect(otherSigner).makeImmutable(pm.address, ADMIN_PERMISSION_ID)
+        pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionMissing',
@@ -406,7 +406,7 @@ describe('Core: PermissionManager', function () {
     it('should not allow for non ROOT', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
-        pm.connect(otherSigner).makeImmutable(pm.address, ADMIN_PERMISSION_ID)
+        pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError(
           'PermissionMissing',
@@ -450,28 +450,28 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    it('should bulk makeImmutable', async () => {
+    it('should bulk freeze', async () => {
       const signers = await ethers.getSigners();
       const bulkItems: Item[] = [
         {
-          operation: Operation.MakeImmutable,
+          operation: Operation.Freeze,
           permissionId: ethers.utils.id('PERMISSION_ID_1'),
           who: signers[1].address,
         },
         {
-          operation: Operation.MakeImmutable,
+          operation: Operation.Freeze,
           permissionId: ethers.utils.id('PERMISSION_ID_2'),
           who: signers[2].address,
         },
         {
-          operation: Operation.MakeImmutable,
+          operation: Operation.Freeze,
           permissionId: ethers.utils.id('PERMISSION_ID_3'),
           who: signers[3].address,
         },
       ];
       await pm.bulk(pm.address, bulkItems);
       for (const item of bulkItems) {
-        const permission = await pm.isImmutable(pm.address, item.permissionId);
+        const permission = await pm.isFrozen(pm.address, item.permissionId);
         expect(permission).to.be.equal(true);
       }
     });
@@ -524,7 +524,7 @@ describe('Core: PermissionManager', function () {
           who: signers[2].address,
         },
         {
-          operation: Operation.MakeImmutable,
+          operation: Operation.Freeze,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
@@ -545,7 +545,7 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
-      expect(await pm.isImmutable(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
+      expect(await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
         true
       );
     });
@@ -565,19 +565,19 @@ describe('Core: PermissionManager', function () {
           who: signers[2].address,
         },
         {
-          operation: Operation.MakeImmutable,
+          operation: Operation.Freeze,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
         {
-          operation: Operation.MakeImmutable,
+          operation: Operation.Freeze,
           permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
         },
       ];
 
       await expect(pm.bulk(pm.address, bulkItems)).to.be.revertedWith(
-        customError('PermissionImmutable', pm.address, ADMIN_PERMISSION_ID)
+        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
       expect(
         await pm.getAuthPermission(
@@ -593,7 +593,7 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(UNSET_FLAG);
-      expect(await pm.isImmutable(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
+      expect(await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
         false
       );
     });
@@ -701,29 +701,29 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('isImmutable', () => {
+  describe('isFrozen', () => {
     it('should return true', async () => {
-      await pm.makeImmutable(pm.address, ADMIN_PERMISSION_ID);
-      const isImmutable = await pm.callStatic.isImmutable(
+      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
+      const isFrozen = await pm.callStatic.isFrozen(
         pm.address,
         ADMIN_PERMISSION_ID
       );
-      expect(isImmutable).to.be.equal(true);
+      expect(isFrozen).to.be.equal(true);
     });
 
     it('should return false', async () => {
-      const isImmutable = await pm.callStatic.isImmutable(
+      const isFrozen = await pm.callStatic.isFrozen(
         pm.address,
         ADMIN_PERMISSION_ID
       );
-      expect(isImmutable).to.be.equal(false);
+      expect(isFrozen).to.be.equal(false);
     });
 
     it('should be callable by anyone', async () => {
-      const isImmutable = await pm
+      const isFrozen = await pm
         .connect(otherSigner)
-        .callStatic.isImmutable(pm.address, ADMIN_PERMISSION_ID);
-      expect(isImmutable).to.be.equal(false);
+        .callStatic.isFrozen(pm.address, ADMIN_PERMISSION_ID);
+      expect(isFrozen).to.be.equal(false);
     });
   });
 
@@ -786,7 +786,7 @@ describe('Core: PermissionManager', function () {
         ['IMMUTABLE', pm.address, ROOT_PERMISSION_ID]
       );
       const hash = ethers.utils.keccak256(packed);
-      const contractHash = await pm.getImmutablePermissionHash(
+      const contractHash = await pm.getFrozenPermissionHash(
         pm.address,
         ROOT_PERMISSION_ID
       );

@@ -7,7 +7,7 @@ import {
   Deposited,
   NativeTokenDeposited,
   Granted,
-  MadeImmutable,
+  Frozen,
   Revoked
 } from '../../generated/templates/DaoTemplate/DAO';
 import {
@@ -193,7 +193,7 @@ export function handleGranted(event: Granted): void {
     contractPermissionIdEntity.dao = daoId;
     contractPermissionIdEntity.where = event.params.where;
     contractPermissionIdEntity.permissionId = event.params.permissionId;
-    contractPermissionIdEntity.immutable = false;
+    contractPermissionIdEntity.frozen = false;
     contractPermissionIdEntity.save();
   }
 
@@ -247,7 +247,7 @@ export function handleRevoked(event: Revoked): void {
   }
 }
 
-export function handleMadeImmutable(event: MadeImmutable): void {
+export function handleFrozen(event: Frozen): void {
   let daoId = event.address.toHexString();
   let contractPermissionIdEntityId =
     event.params.where.toHexString() +
@@ -264,6 +264,6 @@ export function handleMadeImmutable(event: MadeImmutable): void {
     contractPermissionIdEntity.where = event.params.where;
     contractPermissionIdEntity.permissionId = event.params.permissionId;
   }
-  contractPermissionIdEntity.immutable = true;
+  contractPermissionIdEntity.frozen = true;
   contractPermissionIdEntity.save();
 }

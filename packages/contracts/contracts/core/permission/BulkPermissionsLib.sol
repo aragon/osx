@@ -9,7 +9,7 @@ library BulkPermissionsLib {
     enum Operation {
         Grant,
         Revoke,
-        MakeImmutable
+        Freeze
     }
 
     struct Item {

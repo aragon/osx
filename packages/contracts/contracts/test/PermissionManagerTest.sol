@@ -27,12 +27,12 @@ contract PermissionManagerTest is PermissionManager {
         return permissionHash(_where, _who, _permissionId);
     }
 
-    function getImmutablePermissionHash(address _where, bytes32 _permissionId)
+    function getFrozenPermissionHash(address _where, bytes32 _permissionId)
         public
         pure
         returns (bytes32)
     {
-        return immutablePermissionHash(_where, _permissionId);
+        return frozenPermissionHash(_where, _permissionId);
     }
 
     function getAnyAddr() public pure returns (address) {
