@@ -16,8 +16,8 @@ const EVENTS = {
   TokenCreated: 'TokenCreated',
 };
 
-const CHANGE_VOTE_CONFIG_PERMISSION_ID = ethers.utils.id(
-  'CHANGE_VOTE_CONFIG_PERMISSION'
+const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
+  'SET_CONFIGURATION_PERMISSION'
 );
 const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
   'MODIFY_ALLOWLIST_PERMISSION'
@@ -252,7 +252,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(managingDao, EVENTS.Granted)
       .withArgs(
-        CHANGE_VOTE_CONFIG_PERMISSION_ID,
+        SET_CONFIGURATION_PERMISSION_ID,
         daoFactory.address,
         managingDao.address,
         voting.address,
@@ -287,14 +287,14 @@ describe('DAOFactory: ', function () {
       )
     );
 
-    await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
+    await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
         'DAOPermissionMissing',
         managingDao.address,
         voting.address,
         voting.address,
         ownerAddress,
-        CHANGE_VOTE_CONFIG_PERMISSION_ID
+        SET_CONFIGURATION_PERMISSION_ID
       )
     );
 
@@ -308,7 +308,7 @@ describe('DAOFactory: ', function () {
         to: voting.address,
         value: 0,
         data: voting.interface.encodeFunctionData(
-          'changeVoteConfig',
+          'setConfiguration',
           [3, 4, 5]
         ),
       },
@@ -388,7 +388,7 @@ describe('DAOFactory: ', function () {
     tx = tx.to
       .emit(managingDao, EVENTS.Granted)
       .withArgs(
-        CHANGE_VOTE_CONFIG_PERMISSION_ID,
+        SET_CONFIGURATION_PERMISSION_ID,
         daoFactory.address,
         managingDao.address,
         voting.address,
@@ -431,14 +431,14 @@ describe('DAOFactory: ', function () {
       )
     );
 
-    await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
+    await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
         'DAOPermissionMissing',
         managingDao.address,
         voting.address,
         voting.address,
         ownerAddress,
-        CHANGE_VOTE_CONFIG_PERMISSION_ID
+        SET_CONFIGURATION_PERMISSION_ID
       )
     );
 
@@ -452,7 +452,7 @@ describe('DAOFactory: ', function () {
         to: voting.address,
         value: 0,
         data: voting.interface.encodeFunctionData(
-          'changeVoteConfig',
+          'setConfiguration',
           [3, 4, 5]
         ),
       },

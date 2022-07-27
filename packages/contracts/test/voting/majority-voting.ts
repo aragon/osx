@@ -65,30 +65,30 @@ describe('MajorityVotingMock', function () {
     });
   });
 
-  describe('changeVoteConfig: ', async () => {
+  describe('setConfiguration: ', async () => {
     beforeEach(async () => {
       await initializeMock(1, 2, 3);
     });
     it('reverts if wrong config is set', async () => {
       await expect(
-        votingBase.changeVoteConfig(1, pct16(1000), 3)
+        votingBase.setConfiguration(1, pct16(1000), 3)
       ).to.be.revertedWith(
         customError('VoteSupportExceeded', pct16(100), pct16(1000))
       );
 
       await expect(
-        votingBase.changeVoteConfig(pct16(1000), 2, 3)
+        votingBase.setConfiguration(pct16(1000), 2, 3)
       ).to.be.revertedWith(
         customError('VoteParticipationExceeded', pct16(100), pct16(1000))
       );
 
-      await expect(votingBase.changeVoteConfig(1, 2, 0)).to.be.revertedWith(
+      await expect(votingBase.setConfiguration(1, 2, 0)).to.be.revertedWith(
         customError('VoteDurationZero')
       );
     });
 
     it('should change config successfully', async () => {
-      expect(await votingBase.changeVoteConfig(2, 4, 8))
+      expect(await votingBase.setConfiguration(2, 4, 8))
         .to.emit(votingBase, VOTING_EVENTS.CONFIG_UPDATED)
         .withArgs(2, 4, 8);
     });

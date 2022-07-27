@@ -225,7 +225,7 @@ contract DAOFactory {
         );
         items[1] = BulkPermissionsLib.Item(
             BulkPermissionsLib.Operation.Grant,
-            erc20Voting.CHANGE_VOTE_CONFIG_PERMISSION_ID(),
+            erc20Voting.SET_CONFIGURATION_PERMISSION_ID(),
             address(_dao)
         );
         items[2] = BulkPermissionsLib.Item(
@@ -270,7 +270,7 @@ contract DAOFactory {
         );
         items[1] = BulkPermissionsLib.Item(
             BulkPermissionsLib.Operation.Grant,
-            allowlistVoting.CHANGE_VOTE_CONFIG_PERMISSION_ID(),
+            allowlistVoting.SET_CONFIGURATION_PERMISSION_ID(),
             address(_dao)
         );
         items[2] = BulkPermissionsLib.Item(

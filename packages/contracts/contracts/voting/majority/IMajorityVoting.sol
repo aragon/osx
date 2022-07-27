@@ -58,17 +58,17 @@ interface IMajorityVoting {
         uint64 minDuration
     );
 
-    /// @notice Change required support and minQuorum.
+    /// @notice Sets the vote configuration.
     /// @param _participationRequiredPct The required participation in percent.
     /// @param _supportRequiredPct The required support in percent.
     /// @param _minDuration The minimal duration of a vote.
-    function changeVoteConfig(
+    function setConfiguration(
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) external;
 
-    /// @notice Create a new vote.
+    /// @notice Creates a new vote.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed after vote passes.
     /// @param _startDate The start date of the vote. If 0, uses current timestamp.
