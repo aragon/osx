@@ -4,27 +4,27 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/acl/ACL.sol";
+import "../core/permission/PermissionManager.sol";
 import "../core/IDAO.sol";
 
-contract DAOMock is IDAO, ACL {
+contract DAOMock is IDAO, PermissionManager {
     mapping(uint256 => uint256) public totalSupply;
     mapping(address => mapping(uint256 => uint256)) public pastVotes;
 
     constructor(address initialOwner) initializer {
-        __ACL_init(initialOwner);
+        __PermissionManager_init(initialOwner);
     }
 
     function hasPermission(
         address, /* _where */
         address, /* _who */
-        bytes32, /* _role */
+        bytes32, /* _permissionId */
         bytes memory /* _data */
     ) public pure override returns (bool) {
         return true;
     }
 
-    function trustedForwarder() public pure override returns (address) {
+    function getTrustedForwarder() public pure override returns (address) {
         return address(0);
     }
 

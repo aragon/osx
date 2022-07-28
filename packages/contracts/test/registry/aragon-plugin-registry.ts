@@ -16,7 +16,7 @@ describe('Aragon-Plugin-Registry', function () {
   let managingDAO: DAO;
   let pluginRepo: PluginRepo;
 
-  const REGISTER_ROLE = ethers.utils.id('REGISTER_ROLE');
+  const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
   const pluginRepoName = 'my-pluginRepo';
 
   before(async () => {
@@ -38,11 +38,11 @@ describe('Aragon-Plugin-Registry', function () {
     // deploy a pluginRepo and initialize
     pluginRepo = await deployNewPluginRepo(ownerAddress);
 
-    // grant REGISTER_ROLE to registrer
-    await managingDAO.grant(
+    // grant REGISTER_PERMISSION_ID to registrer
+    managingDAO.grant(
       aragonPluginRegistry.address,
       ownerAddress,
-      REGISTER_ROLE
+      REGISTER_PERMISSION_ID
     );
   });
 
@@ -66,7 +66,7 @@ describe('Aragon-Plugin-Registry', function () {
     await managingDAO.revoke(
       aragonPluginRegistry.address,
       ownerAddress,
-      REGISTER_ROLE
+      REGISTER_PERMISSION_ID
     );
 
     // deploy a pluginRepo
@@ -76,11 +76,12 @@ describe('Aragon-Plugin-Registry', function () {
       aragonPluginRegistry.register(pluginRepoName, newPluginRepo.address)
     ).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'DaoUnauthorized',
+        managingDAO.address,
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         ownerAddress,
-        REGISTER_ROLE
+        REGISTER_PERMISSION_ID
       )
     );
   });

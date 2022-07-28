@@ -11,7 +11,7 @@ interface IPluginRepo {
     /// @param _newSemanticVersion Semantic version for new pluginRepo version
     /// @param _pluginFactoryAddress Address for smart contract logic for version (if set to 0, it uses last versions' pluginFactoryAddress)
     /// @param _contentURI External URI where the plugin metadata and subsequent resources can be fetched from
-    function newVersion(
+    function createVersion(
         uint16[3] memory _newSemanticVersion,
         address _pluginFactoryAddress,
         bytes calldata _contentURI

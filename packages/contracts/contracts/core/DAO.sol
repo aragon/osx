@@ -10,96 +10,116 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
-import "./acl/ACL.sol";
+import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
 
 /// @title The public interface of the Aragon DAO framework.
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
-/// @dev Public API of the Aragon DAO framework
-contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC165 {
+/// @dev Public API of the Aragon DAO framework.
+contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
     using SafeERC20 for ERC20;
     using Address for address;
 
-    // Roles
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
-    bytes32 public constant DAO_CONFIG_ROLE = keccak256("DAO_CONFIG_ROLE");
-    bytes32 public constant EXEC_ROLE = keccak256("EXEC_ROLE");
-    bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_ROLE =
-        keccak256("SET_SIGNATURE_VALIDATOR_ROLE");
-    bytes32 public constant MODIFY_TRUSTED_FORWARDER = keccak256("MODIFY_TRUSTED_FORWARDER");
+    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
+    /// @notice The ID of the permission required to call the `setMetadata` function.
+    bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `execute` function.
+    bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `withdraw` function.
+    bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `setSignatureValidator` function.
+    bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
+        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
+    bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
+        keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
+
+    /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     ERC1271 signatureValidator;
 
-    address private _trustedForwarder;
+    /// @notice The address of the trusted forwarder verifying meta transactions.
+    address private trustedForwarder;
 
-    /// @notice Thrown if action execution has failed
+    /// @notice Thrown if action execution has failed.
     error ActionFailed();
 
-    /// @notice Thrown if the deposit or withdraw amount is zero
+    /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
 
-    /// @notice Thrown if the expected and actually deposited ETH amount mismatch
-    /// @param expected Expected ETH amount
-    /// @param actual Actual ETH amount
-    error ETHDepositAmountMismatch(uint256 expected, uint256 actual);
+    /// @notice Thrown if there is a mismatch between the expected and actually deposited amount of native tokens.
+    /// @param expected The expected native token amount.
+    /// @param actual The actual native token amount deposited.
+    error NativeTokenDepositAmountMismatch(uint256 expected, uint256 actual);
 
-    /// @notice Thrown if an ETH withdraw fails
-    error ETHWithdrawFailed();
+    /// @notice Thrown if a native token withdraw fails.
+    error NativeTokenWithdrawFailed();
 
-    /// @dev Used for UUPS upgradability pattern
-    /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO
+    /// @notice Initializes the DAO by
+    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
+    /// - setting the trusted forwarder for meta transactions
+    /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @param _metadata IPFS hash that points to all the metadata (logo, description, tags, etc.) of a DAO.
+    /// @param _initialOwner The initial owner of the DAO having the `ROOT_PERMISSION_ID` permission.
+    /// @param _trustedForwarder The trusted forwarder responsible for verifying meta transactions.
     function initialize(
         bytes calldata _metadata,
         address _initialOwner,
-        address _forwarder
+        address _trustedForwarder
     ) external initializer {
         _registerStandard(DAO_INTERFACE_ID);
         _registerStandard(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);
-        _setTrustedForwarder(_forwarder);
-        __ACL_init(_initialOwner);
+        _setTrustedForwarder(_trustedForwarder);
+        __PermissionManager_init(_initialOwner);
     }
 
-    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
         internal
         virtual
         override
-        auth(address(this), UPGRADE_ROLE)
+        auth(address(this), UPGRADE_PERMISSION_ID)
     {}
 
     /// @inheritdoc IDAO
     function setTrustedForwarder(address _newTrustedForwarder)
         external
         override
-        auth(address(this), MODIFY_TRUSTED_FORWARDER)
+        auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID)
     {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
     /// @inheritdoc IDAO
-    function trustedForwarder() public view virtual override returns (address) {
-        return _trustedForwarder;
+    function getTrustedForwarder() public view virtual override returns (address) {
+        return trustedForwarder;
     }
 
     /// @inheritdoc IDAO
     function hasPermission(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionId,
         bytes memory _data
     ) external override returns (bool) {
-        return willPerform(_where, _who, _role, _data);
+        return hasPermissions(_where, _who, _permissionId, _data);
     }
 
     /// @inheritdoc IDAO
     function setMetadata(bytes calldata _metadata)
         external
         override
-        auth(address(this), DAO_CONFIG_ROLE)
+        auth(address(this), SET_METADATA_PERMISSION_ID)
     {
         _setMetadata(_metadata);
     }
@@ -108,7 +128,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function execute(uint256 callId, Action[] memory _actions)
         external
         override
-        auth(address(this), EXEC_ROLE)
+        auth(address(this), EXECUTE_PERMISSION_ID)
         returns (bytes[] memory)
     {
         bytes[] memory execResults = new bytes[](_actions.length);
@@ -138,9 +158,10 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
 
         if (_token == address(0)) {
             if (msg.value != _amount)
-                revert ETHDepositAmountMismatch({expected: _amount, actual: msg.value});
+                revert NativeTokenDepositAmountMismatch({expected: _amount, actual: msg.value});
         } else {
-            if (msg.value != 0) revert ETHDepositAmountMismatch({expected: 0, actual: msg.value});
+            if (msg.value != 0)
+                revert NativeTokenDepositAmountMismatch({expected: 0, actual: msg.value});
 
             ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
@@ -154,12 +175,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         address _to,
         uint256 _amount,
         string memory _reference
-    ) external override auth(address(this), WITHDRAW_ROLE) {
+    ) external override auth(address(this), WITHDRAW_PERMISSION_ID) {
         if (_amount == 0) revert ZeroAmount();
 
         if (_token == address(0)) {
             (bool ok, ) = _to.call{value: _amount}("");
-            if (!ok) revert ETHWithdrawFailed();
+            if (!ok) revert NativeTokenWithdrawFailed();
         } else {
             ERC20(_token).safeTransfer(_to, _amount);
         }
@@ -171,7 +192,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
     function setSignatureValidator(address _signatureValidator)
         external
         override
-        auth(address(this), SET_SIGNATURE_VALIDATOR_ROLE)
+        auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID)
     {
         signatureValidator = ERC1271(_signatureValidator);
     }
@@ -187,27 +208,29 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, ACL, ERC1271, AdaptiveERC1
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
 
-    /// @dev Emits ETHDeposited event to track ETH deposits that weren't done over the deposit method.
+    /// @notice Emits the `NativeTokenDeposited` event to track native token deposits that weren't made via the deposit method.
+    /// @dev This call is bound by the gas limitations for `send`/`transfer` calls introduced by EIP-2929.
+    /// Gas cost increases in future hard forks might break this function. As an alternative, EIP-2930-type transactions using access lists can be employed.
     receive() external payable {
-        emit ETHDeposited(msg.sender, msg.value);
+        emit NativeTokenDeposited(msg.sender, msg.value);
     }
 
-    /// @dev Fallback to handle future versions of the ERC165 standard.
+    /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
     fallback() external {
         _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
     }
 
-    /// @notice Emits the MetadataSet event if new metadata is set
-    /// @param _metadata Hash of the IPFS metadata object
+    /// @notice Emits the MetadataSet event if new metadata is set.
+    /// @param _metadata Hash of the IPFS metadata object.
     function _setMetadata(bytes calldata _metadata) internal {
         emit MetadataSet(_metadata);
     }
 
-    /// @notice Sets the trusted forwarder on the DAO and emits the associated event
-    /// @param _forwarder Address of the forwarder
-    function _setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
+    /// @notice Sets the trusted forwarder on the DAO and emits the associated event.
+    /// @param _trustedForwarder The trusted forwarder address.
+    function _setTrustedForwarder(address _trustedForwarder) internal {
+        trustedForwarder = _trustedForwarder;
 
-        emit TrustedForwarderSet(_forwarder);
+        emit TrustedForwarderSet(_trustedForwarder);
     }
 }

@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import "../plugin/IPluginFactory.sol";
+import "../plugin/PluginFactoryBase.sol";
 import "./MajorityVotingMock.sol";
 import "../utils/Proxy.sol";
 
-contract PluginFactoryMock is IPluginFactory {
+contract PluginFactoryMock is PluginFactoryBase {
     event NewPluginDeployed(address dao, bytes params);
 
     constructor() {

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-// Useful contract to test if dao can successfully call the action.
+/// @notice A dummy contract to test if DAO can successfully execute an action
 contract ActionExecute {
     bool public test;
 

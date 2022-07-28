@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated `manifest`, `registry`, `registry.test`
+- Adapted subgraph names according to the renaming of the contracts.
+- Updated `manifest`, `registry`, `registry.test`.
 - Refactored import statements.
 - Refactored event names.
 

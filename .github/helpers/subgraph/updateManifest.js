@@ -18,7 +18,7 @@ async function main() {
 
       const contracts = await fs.readdir(networkPath, {withFileTypes: true});
       for (const contract of contracts) {
-        if (contract.isFile() && contract.name === 'Registry.json') {
+        if (contract.isFile() && contract.name === 'DAORegistry.json') {
           const contractPath = path.join(networkPath, contract.name);
           const contractContent = await fs.readFile(contractPath);
           const contractJson = JSON.parse(contractContent.toString());
@@ -27,7 +27,7 @@ async function main() {
             network: networkName,
             dataSources: {
               Registry: {
-                name: 'Registry',
+                name: 'DAORegistry',
                 address: contractJson.address,
                 startBlock: contractJson.receipt.blockNumber,
               },

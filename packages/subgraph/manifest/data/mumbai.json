@@ -2,8 +2,8 @@
   "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
   "network": "mumbai",
   "dataSources": {
-    "Registry": {
-      "name": "Registry",
+    "DAORegistry": {
+      "name": "DAORegistry",
       "address": "0xaB7807aA4755F2D93dE59f6eaA9764c14B71cAf7",
       "startBlock": 27066791
     }

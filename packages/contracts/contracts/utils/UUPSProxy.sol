@@ -4,9 +4,9 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-/// @title Proxy contract for UUPSUpgradeable
+/// @title UUPSProxy
 /// @author Aragon Association - 2022
-/// @notice This contract is only meant to be used for deploy purposes
+/// @notice This contract is only meant to be used for deploy purposes.
 /// TODO: Need to be fully tested, and decide to use the second address param as admin address.
 contract UUPSProxy is ERC1967Proxy {
     constructor(

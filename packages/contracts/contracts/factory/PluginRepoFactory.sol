@@ -8,82 +8,111 @@ import "../utils/Proxy.sol";
 import "../registry/AragonPluginRegistry.sol";
 import "../plugin/PluginRepo.sol";
 
-/// @title PluginRepoFactory to create a PluginRepo
+/// @title PluginRepoFactory
 /// @author Aragon Association - 2022
-/// @notice This contract is used to create a PluginRepo and register it on AragonPluginRegistry contract.
+/// @notice This contract creates `PluginRepo` proxies and registers them on an `AragonPluginRegistry` contract.
 contract PluginRepoFactory {
+    /// @notice The Aragon plugin registry contract.
     AragonPluginRegistry public aragonPluginRegistry;
+
+    /// @notice The address of the `PluginRepo` base contract.
     address public pluginRepoBase;
 
-    // @notice Thrown if the repo name is empty
-    error EmptyName();
+    // @notice Thrown if the plugin repository name is empty.
+    error EmptyPluginRepoName();
 
+    /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
+    /// @param _aragonPluginRegistry The aragon plugin registry address.
     constructor(AragonPluginRegistry _aragonPluginRegistry) {
         aragonPluginRegistry = _aragonPluginRegistry;
 
         pluginRepoBase = address(new PluginRepo());
     }
 
-    /// @notice Create new pluginRepo in registry with `_name`
-    /// @param _name PluginRepo name, must be ununsed
-    /// @param _dev Address of the developer of the plugin
-    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for newPluginRepoWithVersion
-    function newPluginRepo(string calldata _name, address _dev) external returns (PluginRepo) {
-        return _newPluginRepo(_name, _dev);
+    /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
+    /// @param _name The plugin repository name.
+    /// @param _initialOwner The plugin maintainer address.
+    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithVersion`.
+    function createPluginRepo(string calldata _name, address _initialOwner)
+        external
+        returns (PluginRepo)
+    {
+        return _createPluginRepo(_name, _initialOwner);
     }
 
-    /// @notice Creates and registers a new, named `PluginRepo` and publishes an initial version with contract
-    /// @dev Initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the `_dev`
-    /// @param _name PluginRepo name
-    /// @param _initialSemanticVersion Semantic version for new pluginRepo version
-    /// @param _pluginFactoryAddress address for the factory smart contract of the version
-    /// @param _contentURI External URI for fetching new version's content
-    /// @param _dev Address of the developer of the plugin
-    function newPluginRepoWithVersion(
+    /// @notice Creates and registers a named `PluginRepo` and publishes an initial version.
+    /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the address `_maintainer`.
+    /// @param _name The plugin repository name.
+    /// @param _initialSemanticVersion The semantic version for the new plugin repository version.
+    /// @param _pluginFactory The plugin factory contract associated with the plugin version.
+    /// @param _contentURI The external URI for fetching the new version's content.
+    /// @param _maintainer The plugin maintainer address.
+    function createPluginRepoWithVersion(
         string calldata _name,
         uint16[3] memory _initialSemanticVersion,
-        address _pluginFactoryAddress,
+        address _pluginFactory,
         bytes memory _contentURI,
-        address _dev
+        address _maintainer
     ) external returns (PluginRepo pluginRepo) {
-        pluginRepo = _newPluginRepo(_name, address(this)); // Set `address(this)` as initial owner
-        pluginRepo.newVersion(_initialSemanticVersion, _pluginFactoryAddress, _contentURI);
+        // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
+        pluginRepo = _createPluginRepo(_name, address(this));
 
-        // Setup permissions and transfer ownership to `_dev`
-        setPluginRepoPermissions(pluginRepo, _dev);
+        pluginRepo.createVersion(_initialSemanticVersion, _pluginFactory, _contentURI);
+
+        // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
+        setPluginRepoPermissions(pluginRepo, _maintainer);
     }
 
-    /// @dev Does set the required permissions for the new PluginRepo.
-    /// @param pluginRepo The PluginRepo instance just created.
-    /// @param dev Address of the developer
-    function setPluginRepoPermissions(PluginRepo pluginRepo, address dev) internal {
-        // set roles on the dao itself.
-        ACLData.BulkItem[] memory items = new ACLData.BulkItem[](5);
+    /// @notice Set the final permissions for the published plugin repository maintainer. All permissions are revoked from the the plugin factory and granted to the specified plugin maintainer.
+    /// @param pluginRepo The plugin repository instance just created.
+    /// @param maintainer The plugin maintainer address.
+    /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
+    function setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
+        // Set permissions on the `PluginRepo`s `PermissionManager`
+        BulkPermissionsLib.Item[] memory items = new BulkPermissionsLib.Item[](5);
 
-        // Grant DAO all the permissions required
-        items[0] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.CREATE_VERSION_ROLE(), dev);
-        items[1] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.UPGRADE_ROLE(), dev);
-        items[2] = ACLData.BulkItem(ACLData.BulkOp.Grant, pluginRepo.ROOT_ROLE(), dev);
+        // Grant the plugin maintainer all the permissions required
+        items[0] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Grant,
+            pluginRepo.CREATE_VERSION_PERMISSION_ID(),
+            maintainer
+        );
+        items[1] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Grant,
+            pluginRepo.UPGRADE_PERMISSION_ID(),
+            maintainer
+        );
+        items[2] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Grant,
+            pluginRepo.ROOT_PERMISSION_ID(),
+            maintainer
+        );
 
-        // Revoke permissions from APM
-        items[3] = ACLData.BulkItem(ACLData.BulkOp.Revoke, pluginRepo.ROOT_ROLE(), address(this));
-        items[4] = ACLData.BulkItem(
-            ACLData.BulkOp.Revoke,
-            pluginRepo.CREATE_VERSION_ROLE(),
+        // Revoke permissions from the plugin repository factory (`address(this)`).
+        items[3] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Revoke,
+            pluginRepo.ROOT_PERMISSION_ID(),
+            address(this)
+        );
+        items[4] = BulkPermissionsLib.Item(
+            BulkPermissionsLib.Operation.Revoke,
+            pluginRepo.CREATE_VERSION_PERMISSION_ID(),
             address(this)
         );
 
         pluginRepo.bulk(address(pluginRepo), items);
     }
 
-    /// @dev Does set the required permissions for the new PluginRepo.
-    /// @param _name The PluginRepo instance just created.
-    /// @param _initialOwner The initial owner address
-    function _newPluginRepo(string calldata _name, address _initialOwner)
+    /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
+    /// @param _name The plugin repository name.
+    /// @param _initialOwner The initial owner address.
+    function _createPluginRepo(string calldata _name, address _initialOwner)
         internal
         returns (PluginRepo pluginRepo)
     {
-        if (!(bytes(_name).length > 0)) revert EmptyName();
+        if (!(bytes(_name).length > 0)) {
+            revert EmptyPluginRepoName();
+        }
 
         pluginRepo = PluginRepo(
             createProxy(

@@ -16,8 +16,8 @@ import {
 
 chai.use(smock.matchers);
 
-const TOKEN_MINTER_ROLE = ethers.utils.id('TOKEN_MINTER_ROLE');
-const MERKLE_MINTER_ROLE = ethers.utils.id('MERKLE_MINTER_ROLE');
+const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
+const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 
 interface TokenConfig {
   addr: string;
@@ -65,12 +65,12 @@ describe('Core: TokenFactory', () => {
     tokenFactory.setVariable('merkleMinterBase', merkleMinterBase.address);
   });
 
-  describe('newToken', () => {
+  describe('createToken', () => {
     let dao: FakeContract<DAO>;
 
     beforeEach(async () => {
       dao = await smock.fake<DAO>('DAO');
-      dao.willPerform.returns(true);
+      dao.hasPermissions.returns(true);
       dao.hasPermission.returns(true);
     });
 
@@ -91,7 +91,7 @@ describe('Core: TokenFactory', () => {
       };
 
       await expect(
-        tokenFactory.callStatic.newToken(dao.address, config, mintConfig)
+        tokenFactory.callStatic.createToken(dao.address, config, mintConfig)
       ).to.revertedWith('Address: low-level call failed');
     });
 
@@ -110,7 +110,7 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const tx = await tokenFactory.callStatic.newToken(
+      const tx = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
@@ -134,7 +134,7 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      let tx = await tokenFactory.callStatic.newToken(
+      let tx = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
@@ -155,7 +155,7 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      let tx = await tokenFactory.callStatic.newToken(
+      let tx = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
@@ -176,7 +176,7 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      let tx = await tokenFactory.callStatic.newToken(
+      let tx = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
@@ -199,7 +199,7 @@ describe('Core: TokenFactory', () => {
       };
 
       await expect(
-        tokenFactory.newToken(dao.address, config, mintConfig)
+        tokenFactory.createToken(dao.address, config, mintConfig)
       ).to.emit(tokenFactory, 'TokenCreated');
     });
 
@@ -218,7 +218,11 @@ describe('Core: TokenFactory', () => {
         amounts: [1, 5],
       };
 
-      const tx = await tokenFactory.newToken(dao.address, config, mintConfig);
+      const tx = await tokenFactory.createToken(
+        dao.address,
+        config,
+        mintConfig
+      );
       const rc = await tx.wait();
       const eventArgs =
         rc.events?.find(e => e.event === 'TokenCreated')?.args || [];
@@ -251,7 +255,11 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const tx = await tokenFactory.newToken(dao.address, config, mintConfig);
+      const tx = await tokenFactory.createToken(
+        dao.address,
+        config,
+        mintConfig
+      );
       const rc = await tx.wait();
       const eventArgs =
         rc.events?.find(e => e.event === 'TokenCreated')?.args || [];
@@ -282,7 +290,7 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const tx = await tokenFactory.callStatic.newToken(
+      const tx = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
@@ -291,27 +299,27 @@ describe('Core: TokenFactory', () => {
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         tokenFactory.address,
-        TOKEN_MINTER_ROLE
+        MINT_PERMISSION_ID
       );
       expect(dao.revoke).to.have.been.calledWith(
         tx[0],
         tokenFactory.address,
-        TOKEN_MINTER_ROLE
+        MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         dao.address,
-        TOKEN_MINTER_ROLE
+        MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
         tx[1],
-        TOKEN_MINTER_ROLE
+        MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
         tx[1],
         dao.address,
-        MERKLE_MINTER_ROLE
+        MERKLE_MINT_PERMISSION_ID
       );
     });
   });

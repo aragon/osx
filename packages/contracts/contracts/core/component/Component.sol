@@ -7,26 +7,29 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../erc165/AdaptiveERC165.sol";
 import "../IDAO.sol";
-import "./Permissions.sol";
+import "./DaoAuthorizable.sol";
 
-/// @title Base component in the Aragon DAO framework
-/// @author Samuel Furter - Aragon Association - 2021
-/// @notice Any component within the Aragon DAO framework has to inherit from this contract
-abstract contract Component is UUPSUpgradeable, AdaptiveERC165, Permissions {
-    bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
+/// @title Component
+/// @author Aragon Association - 2021, 2022
+/// @notice The base component in the Aragon App DAO framework.
+abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DaoAuthorizable {
+    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
+    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
-    /// @notice Initialization
-    /// @param _dao the associated DAO address
+    /// @notice Initializes the DAO by storing the associated DAO and registering the contract's [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID.
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @param _dao The associated DAO address.
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
-        __Permissions_init(_dao);
+        __DaoAuthorizable_init(_dao);
 
         _registerStandard(type(Component).interfaceId);
     }
 
-    /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_ROLE) {}
+    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
-    /// @dev Fallback to handle future versions of the ERC165 standard.
+    /// @dev Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
     fallback() external {
         _handleCallback(msg.sig, _msgData()); // WARN: does a low-level return, any code below would be unreacheable
     }

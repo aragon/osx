@@ -14,14 +14,14 @@ import {
 import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 
-const MERKLE_MINTER_ROLE = ethers.utils.id('MERKLE_MINTER_ROLE');
-const TOKEN_MINTER_ROLE = ethers.utils.id('TOKEN_MINTER_ROLE');
+const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
+const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
   let minter: MerkleMinter;
   let distributor: MerkleDistributor;
-  let dao: DAO;
+  let managingDao: DAO;
   let token: GovernanceERC20;
   let ownerAddress: string;
 
@@ -45,12 +45,16 @@ describe('MerkleDistributor', function () {
 
     // create a DAO
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    managingDao = await DAO.deploy();
+    await managingDao.initialize(
+      '0x',
+      ownerAddress,
+      ethers.constants.AddressZero
+    );
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
     token = await GovernanceERC20.deploy();
-    await token.initialize(dao.address, 'GOV', 'GOV');
+    await token.initialize(managingDao.address, 'GOV', 'GOV');
 
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
@@ -60,13 +64,17 @@ describe('MerkleDistributor', function () {
     const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
     minter = await MerkleMinter.deploy();
     await minter.initialize(
-      dao.address,
+      managingDao.address,
       ethers.constants.AddressZero,
       token.address,
       distributor.address
     );
-    await dao.grant(minter.address, ownerAddress, MERKLE_MINTER_ROLE);
-    await dao.grant(token.address, minter.address, TOKEN_MINTER_ROLE);
+    await managingDao.grant(
+      minter.address,
+      ownerAddress,
+      MERKLE_MINT_PERMISSION_ID
+    );
+    await managingDao.grant(token.address, minter.address, MINT_PERMISSION_ID);
   });
 
   describe('merkleMint:', () => {
@@ -91,7 +99,7 @@ describe('MerkleDistributor', function () {
           dummyMintingContext
         )
       )
-        .to.emit(minter, 'MintedMerkle')
+        .to.emit(minter, 'MerkleMinted')
         .withArgs(
           clonedAddress,
           merkleRoot,
@@ -101,8 +109,12 @@ describe('MerkleDistributor', function () {
         );
     });
 
-    it('does not mint if the minting role on the minter is missing', async () => {
-      await dao.revoke(minter.address, ownerAddress, MERKLE_MINTER_ROLE);
+    it('does not mint if the minting permissionId on the minter is missing', async () => {
+      await managingDao.revoke(
+        minter.address,
+        ownerAddress,
+        MERKLE_MINT_PERMISSION_ID
+      );
 
       await expect(
         minter.merkleMint(
@@ -113,17 +125,22 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'DaoUnauthorized',
+          managingDao.address,
           minter.address,
           minter.address,
           ownerAddress,
-          MERKLE_MINTER_ROLE
+          MERKLE_MINT_PERMISSION_ID
         )
       );
     });
 
-    it('does not mint if the minting role on the token is missing', async () => {
-      await dao.revoke(token.address, minter.address, TOKEN_MINTER_ROLE);
+    it('does not mint if the minting permissionId on the token is missing', async () => {
+      await managingDao.revoke(
+        token.address,
+        minter.address,
+        MINT_PERMISSION_ID
+      );
 
       await expect(
         minter.merkleMint(
@@ -134,11 +151,12 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'DaoUnauthorized',
+          managingDao.address,
           token.address,
           token.address,
           minter.address,
-          TOKEN_MINTER_ROLE
+          MINT_PERMISSION_ID
         )
       );
     });

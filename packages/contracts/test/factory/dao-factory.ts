@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {VoterState} from '../test-utils/voting';
+import {VoteOption} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
 const EVENTS = {
@@ -16,11 +16,19 @@ const EVENTS = {
   TokenCreated: 'TokenCreated',
 };
 
-const MODIFY_VOTE_CONFIG = ethers.utils.id('MODIFY_VOTE_CONFIG');
+const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
+  'SET_CONFIGURATION_PERMISSION'
+);
+const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
+  'MODIFY_ALLOWLIST_PERMISSION'
+);
+const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 const zeroAddress = ethers.constants.AddressZero;
-const ACLAnyAddress = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
-const ACLAllowFlagAddress = '0x0000000000000000000000000000000000000002';
+const PermissionManagerAnyAddress =
+  '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
+const PermissionManagerAllowFlagAddress =
+  '0x0000000000000000000000000000000000000002';
 const daoDummyName = 'dao1';
 const daoDummyMetadata = '0x0000';
 const dummyVoteSettings = {
@@ -50,7 +58,7 @@ async function getDeployments(tx: any, tokenVoting: boolean) {
     dao: await ethers.getContractAt('DAO', dao),
     voting: tokenVoting
       ? await ethers.getContractAt('ERC20Voting', voting)
-      : await ethers.getContractAt('WhitelistVoting', voting),
+      : await ethers.getContractAt('AllowlistVoting', voting),
     creator,
     name,
   };
@@ -82,7 +90,7 @@ describe('DAOFactory: ', function () {
     // @ts-ignore
     const ERC20Voting = await hre.artifacts.readArtifact('ERC20Voting');
     // @ts-ignore
-    const WhitelistVoting = await hre.artifacts.readArtifact('WhitelistVoting');
+    const AllowlistVoting = await hre.artifacts.readArtifact('AllowlistVoting');
     // @ts-ignore
     const Token = await hre.artifacts.readArtifact('GovernanceERC20');
 
@@ -91,7 +99,7 @@ describe('DAOFactory: ', function () {
       ...TokenFactoryArtifact.abi.filter((f: any) => f.type === 'event'),
       ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
       ...ERC20Voting.abi.filter((f: any) => f.type === 'event'),
-      ...WhitelistVoting.abi.filter((f: any) => f.type === 'event'),
+      ...AllowlistVoting.abi.filter((f: any) => f.type === 'event'),
       ...Token.abi.filter((f: any) => f.type === 'event'),
     ];
 
@@ -153,18 +161,18 @@ describe('DAOFactory: ', function () {
     );
     actionExecuteContract = await ActionExecuteContract.deploy();
 
-    // Grant the `REGISTER_DAO_ROLE` permission to the `daoFactory`
+    // Grant the `REGISTER_DAO_PERMISSION_ID` permission to the `daoFactory`
     managingDAO.grant(
       registry.address,
       daoFactory.address,
-      ethers.utils.id('REGISTER_DAO_ROLE')
+      ethers.utils.id('REGISTER_DAO_PERMISSION')
     );
   });
 
   it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
     const mintAmount = 100;
 
-    let tx = await daoFactory.newERC20VotingDAO(
+    let tx = await daoFactory.createERC20VotingDAO(
       {
         name: daoDummyName,
         metadata: daoDummyMetadata,
@@ -185,7 +193,13 @@ describe('DAOFactory: ', function () {
     // get block that tx was mined
     const blockNum = await ethers.provider.getBlockNumber();
 
-    const {name, dao, token, creator, voting} = await getDeployments(tx, true);
+    const {
+      name,
+      dao: managingDao,
+      token,
+      creator,
+      voting,
+    } = await getDeployments(tx, true);
 
     expect(name).to.equal(daoDummyName);
 
@@ -197,24 +211,23 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const MODIFY_VOTE_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
-    const EXEC_ROLE = await dao.EXEC_ROLE();
+    const EXECUTE_PERMISSION_ID = await managingDao.EXECUTE_PERMISSION_ID();
 
-    const DAORoles = await Promise.all([
-      dao.DAO_CONFIG_ROLE(),
-      dao.ROOT_ROLE(),
-      dao.WITHDRAW_ROLE(),
-      dao.UPGRADE_ROLE(),
-      dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+    const DAOPermissions = await Promise.all([
+      managingDao.SET_METADATA_PERMISSION_ID(),
+      managingDao.ROOT_PERMISSION_ID(),
+      managingDao.WITHDRAW_PERMISSION_ID(),
+      managingDao.UPGRADE_PERMISSION_ID(),
+      managingDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
-    // ======== Test Role events that were emitted successfully ==========
+    // ======== Test Permission events that were emitted successfully ==========
 
     tx = expect(tx);
 
-    // Check if correct ACL events are thrown.
+    // Check if correct PermissionManager events are thrown.
     tx = tx.to
-      .emit(dao, EVENTS.MetadataSet)
+      .emit(managingDao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(
@@ -224,57 +237,64 @@ describe('DAOFactory: ', function () {
       );
 
     // @ts-ignore
-    DAORoles.map(item => {
+    DAOPermissions.map(item => {
       tx = tx.to
-        .emit(dao, EVENTS.Granted)
+        .emit(managingDao, EVENTS.Granted)
         .withArgs(
           item,
           daoFactory.address,
-          dao.address,
-          dao.address,
-          ACLAllowFlagAddress
+          managingDao.address,
+          managingDao.address,
+          PermissionManagerAllowFlagAddress
         );
     });
 
     tx = tx.to
-      .emit(dao, EVENTS.Granted)
+      .emit(managingDao, EVENTS.Granted)
       .withArgs(
-        MODIFY_VOTE_CONFIG_ROLE,
+        SET_CONFIGURATION_PERMISSION_ID,
         daoFactory.address,
-        dao.address,
+        managingDao.address,
         voting.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       )
-      .to.emit(dao, EVENTS.Revoked)
+      .to.emit(managingDao, EVENTS.Revoked)
       .withArgs(
-        DAORoles[1],
+        DAOPermissions[1],
         daoFactory.address,
         daoFactory.address,
-        dao.address
+        managingDao.address
       )
-      .to.emit(dao, EVENTS.Granted)
+      .to.emit(managingDao, EVENTS.Granted)
       .withArgs(
-        EXEC_ROLE,
+        EXECUTE_PERMISSION_ID,
         daoFactory.address,
         voting.address,
-        dao.address,
-        ACLAllowFlagAddress
+        managingDao.address,
+        PermissionManagerAllowFlagAddress
       );
 
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by ERC20Voting
-    await expect(dao.execute(0, [])).to.be.revertedWith(
-      customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE)
+    await expect(managingDao.execute(0, [])).to.be.revertedWith(
+      customError(
+        'Unauthorized',
+        managingDao.address,
+        managingDao.address,
+        ownerAddress,
+        EXECUTE_PERMISSION_ID
+      )
     );
 
-    await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
+    await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'DaoUnauthorized',
+        managingDao.address,
         voting.address,
         voting.address,
         ownerAddress,
-        MODIFY_VOTE_CONFIG
+        SET_CONFIGURATION_PERMISSION_ID
       )
     );
 
@@ -288,16 +308,16 @@ describe('DAOFactory: ', function () {
         to: voting.address,
         value: 0,
         data: voting.interface.encodeFunctionData(
-          'changeVoteConfig',
+          'setConfiguration',
           [3, 4, 5]
         ),
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
+    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
-    expect(await voting.vote(0, VoterState.Yea, true))
-      .to.emit(dao, EVENTS.Executed)
+    expect(await voting.vote(0, VoteOption.Yes, true))
+      .to.emit(managingDao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(3, 4, 5);
@@ -305,8 +325,8 @@ describe('DAOFactory: ', function () {
     expect(await actionExecuteContract.test()).to.equal(true);
   });
 
-  it('creates WhitelistVoting DAO', async () => {
-    let tx = await daoFactory.newWhitelistVotingDAO(
+  it('creates AllowlistVoting DAO', async () => {
+    let tx = await daoFactory.createAllowlistVotingDAO(
       {
         name: daoDummyName,
         metadata: daoDummyMetadata,
@@ -316,33 +336,34 @@ describe('DAOFactory: ', function () {
       zeroAddress
     );
 
-    const {name, dao, token, creator, voting} = await getDeployments(tx, false);
+    const {
+      name,
+      dao: managingDao,
+      token,
+      creator,
+      voting,
+    } = await getDeployments(tx, false);
 
     expect(name).to.equal(daoDummyName);
     expect(creator).to.equal(ownerAddress);
 
     await ethers.provider.send('evm_mine', []);
 
-    const MODIFY_CONFIG_ROLE = await voting.MODIFY_VOTE_CONFIG();
-    // @ts-ignore
-    const MODIFY_WHITELIST = await voting.MODIFY_WHITELIST();
-    const EXEC_ROLE = await dao.EXEC_ROLE();
-
-    const DAORoles = await Promise.all([
-      dao.DAO_CONFIG_ROLE(),
-      dao.ROOT_ROLE(),
-      dao.WITHDRAW_ROLE(),
-      dao.UPGRADE_ROLE(),
-      dao.SET_SIGNATURE_VALIDATOR_ROLE(),
+    const DAOPermissions = await Promise.all([
+      managingDao.SET_METADATA_PERMISSION_ID(),
+      managingDao.ROOT_PERMISSION_ID(),
+      managingDao.WITHDRAW_PERMISSION_ID(),
+      managingDao.UPGRADE_PERMISSION_ID(),
+      managingDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
-    // ======== Test Role events that were emitted successfully ==========
+    // ======== Test Permission events that were emitted successfully ==========
 
     tx = expect(tx);
 
-    // Check if correct ACL events are thrown.
+    // Check if correct PermissionManager events are thrown.
     tx = tx.to
-      .emit(dao, EVENTS.MetadataSet)
+      .emit(managingDao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(
@@ -352,65 +373,72 @@ describe('DAOFactory: ', function () {
       );
 
     // @ts-ignore
-    DAORoles.map(item => {
+    DAOPermissions.map(item => {
       tx = tx.to
-        .emit(dao, EVENTS.Granted)
+        .emit(managingDao, EVENTS.Granted)
         .withArgs(
           item,
           daoFactory.address,
-          dao.address,
-          dao.address,
-          ACLAllowFlagAddress
+          managingDao.address,
+          managingDao.address,
+          PermissionManagerAllowFlagAddress
         );
     });
 
     tx = tx.to
-      .emit(dao, EVENTS.Granted)
+      .emit(managingDao, EVENTS.Granted)
       .withArgs(
-        MODIFY_CONFIG_ROLE,
+        SET_CONFIGURATION_PERMISSION_ID,
         daoFactory.address,
-        dao.address,
+        managingDao.address,
         voting.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       )
-      .to.emit(dao, EVENTS.Granted)
+      .to.emit(managingDao, EVENTS.Granted)
       .withArgs(
-        MODIFY_WHITELIST,
+        MODIFY_ALLOWLIST_PERMISSION_ID,
         daoFactory.address,
-        dao.address,
+        managingDao.address,
         voting.address,
-        ACLAllowFlagAddress
+        PermissionManagerAllowFlagAddress
       )
-      .to.emit(dao, EVENTS.Revoked)
+      .to.emit(managingDao, EVENTS.Revoked)
       .withArgs(
-        DAORoles[1],
+        DAOPermissions[1],
         daoFactory.address,
         daoFactory.address,
-        dao.address
+        managingDao.address
       )
-      .to.emit(dao, EVENTS.Granted)
+      .to.emit(managingDao, EVENTS.Granted)
       .withArgs(
-        EXEC_ROLE,
+        EXECUTE_PERMISSION_ID,
         daoFactory.address,
         voting.address,
-        dao.address,
-        ACLAllowFlagAddress
+        managingDao.address,
+        PermissionManagerAllowFlagAddress
       );
 
     // ===== Test if user can create a vote and execute it ======
 
-    // should be only callable by WhitelistVoting
-    await expect(dao.execute(0, [])).to.be.revertedWith(
-      customError('ACLAuth', dao.address, dao.address, ownerAddress, EXEC_ROLE)
+    // should be only callable by AllowlistVoting
+    await expect(managingDao.execute(0, [])).to.be.revertedWith(
+      customError(
+        'Unauthorized',
+        managingDao.address,
+        managingDao.address,
+        ownerAddress,
+        EXECUTE_PERMISSION_ID
+      )
     );
 
-    await expect(voting.changeVoteConfig(1, 2, 3)).to.be.revertedWith(
+    await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'DaoUnauthorized',
+        managingDao.address,
         voting.address,
         voting.address,
         ownerAddress,
-        MODIFY_VOTE_CONFIG
+        SET_CONFIGURATION_PERMISSION_ID
       )
     );
 
@@ -424,16 +452,16 @@ describe('DAOFactory: ', function () {
         to: voting.address,
         value: 0,
         data: voting.interface.encodeFunctionData(
-          'changeVoteConfig',
+          'setConfiguration',
           [3, 4, 5]
         ),
       },
     ];
 
-    await voting.newVote('0x', actions, 0, 0, false, VoterState.Yea);
+    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
-    expect(await voting.vote(0, VoterState.Yea, true))
-      .to.emit(dao, EVENTS.Executed)
+    expect(await voting.vote(0, VoteOption.Yes, true))
+      .to.emit(managingDao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(3, 4, 5);

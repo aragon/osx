@@ -10,29 +10,47 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 import "../core/component/MetaTxComponent.sol";
 
+/// @title MerkleDistributor
+/// @author Uniswap 2020
+/// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
 contract MerkleDistributor is MetaTxComponent {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract
     bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
         this.claim.selector ^ this.unclaimedBalance.selector ^ this.isClaimed.selector;
 
+    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
     IERC20Upgradeable public token;
+
+    /// @notice The merkle root of the balance tree storing the claims.
     bytes32 public merkleRoot;
 
-    // This is a packed array of booleans.
+    /// @notice A packed array of booleans containing the information who claimed.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    error DistTokenClaimedAlready(uint256 index);
-    error DistTokenClaimInvalid(uint256 index, address to, uint256 amount);
+    /// @notice Thrown if tokens have been already claimed from the distributor.
+    /// @param index The index in the balance tree that was claimed.
+    error TokenAlreadyClaimed(uint256 index);
 
+    /// @notice Thrown if a claim is invalid.
+    /// @param index The index in the balance tree to be claimed.
+    /// @param to The address to which the tokens should be sent.
+    /// @param amount The amount to be claimed.
+    error TokenClaimInvalid(uint256 index, address to, uint256 amount);
+
+    /// @notice Emitted when tokens are claimed from the distributor.
+    /// @param index The index in the balance tree that was claimed.
+    /// @param to The address to which the tokens are send.
+    /// @param amount The claimed amount.
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
-    /// @notice Initializes the component
-    /// @dev This is required for the UUPS upgradability pattern
-    /// @param _dao The IDAO interface of the associated DAO
-    /// @param _trustedForwarder The address of the trusted GSN forwarder required for meta transactions
-    /// @param _token A mintable ERC20 token
-    /// @param _merkleRoot The merkle root of the balance tree
+    /// @notice Initializes the component.
+    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @param _dao The IDAO interface of the associated DAO.
+    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
+    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @param _merkleRoot The merkle root of the balance tree.
     function initialize(
         IDAO _dao,
         address _trustedForwarder,
@@ -46,26 +64,26 @@ contract MerkleDistributor is MetaTxComponent {
         merkleRoot = _merkleRoot;
     }
 
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
+    /// @notice Returns the version of the GSN relay recipient.
+    /// @dev Describes the version and contract for GSN compatibility.
     function versionRecipient() external view virtual override returns (string memory) {
         return "0.0.1+opengsn.recipient.MerkleDistributor";
     }
 
-    /// @notice Claims an amount of tokens and sends it to an address
-    /// @param _index The index in the balance tree to be claimed
-    /// @param _to The receiving address
-    /// @param _amount The amount of tokens
-    /// @param _proof The merkle proof to be verified
+    /// @notice Claims tokens from the balance tree and sends it to an address.
+    /// @param _index The index in the balance tree to be claimed.
+    /// @param _to The receiving address.
+    /// @param _amount The amount of tokens.
+    /// @param _proof The merkle proof to be verified.
     function claim(
         uint256 _index,
         address _to,
         uint256 _amount,
         bytes32[] calldata _proof
     ) external {
-        if (isClaimed(_index)) revert DistTokenClaimedAlready({index: _index});
+        if (isClaimed(_index)) revert TokenAlreadyClaimed({index: _index});
         if (!_verifyBalanceOnTree(_index, _to, _amount, _proof))
-            revert DistTokenClaimInvalid({index: _index, to: _to, amount: _amount});
+            revert TokenClaimInvalid({index: _index, to: _to, amount: _amount});
 
         _setClaimed(_index);
         token.safeTransfer(_to, _amount);
@@ -73,12 +91,12 @@ contract MerkleDistributor is MetaTxComponent {
         emit Claimed(_index, _to, _amount);
     }
 
-    /// @notice Returns the amount of unclaimed tokens
-    /// @param _index The index in the balance tree to be claimed
-    /// @param _to The receiving address
-    /// @param _amount The amount of tokens
-    /// @param _proof The merkle proof to be verified
-    /// @return The unclaimed amount
+    /// @notice Returns the amount of unclaimed tokens.
+    /// @param _index The index in the balance tree to be claimed.
+    /// @param _to The receiving address.
+    /// @param _amount The amount of tokens.
+    /// @param _proof The merkle proof to be verified.
+    /// @return The unclaimed amount.
     function unclaimedBalance(
         uint256 _index,
         address _to,
@@ -89,12 +107,12 @@ contract MerkleDistributor is MetaTxComponent {
         return _verifyBalanceOnTree(_index, _to, _amount, _proof) ? _amount : 0;
     }
 
-    /// @notice Verifies a balance on a merkle tree
-    /// @param _index The index in the balance tree to be claimed
-    /// @param _to The receiving address
-    /// @param _amount The amount of tokens
-    /// @param _proof The merkle proof to be verified
-    /// @return True if the given proof is correct
+    /// @notice Verifies a balance on a merkle tree.
+    /// @param _index The index in the balance tree to be claimed.
+    /// @param _to The receiving address.
+    /// @param _amount The amount of tokens.
+    /// @param _proof The merkle proof to be verified.
+    /// @return True if the given proof is correct.
     function _verifyBalanceOnTree(
         uint256 _index,
         address _to,
@@ -105,9 +123,9 @@ contract MerkleDistributor is MetaTxComponent {
         return MerkleProof.verify(_proof, merkleRoot, node);
     }
 
-    /// @notice Checks if an index on the merkle tree is claimed
-    /// @param _index The index in the balance tree to be claimed
-    /// @return True if the index is claimed
+    /// @notice Checks if an index on the merkle tree is claimed.
+    /// @param _index The index in the balance tree to be claimed.
+    /// @return True if the index is claimed.
     function isClaimed(uint256 _index) public view returns (bool) {
         uint256 claimedWord_index = _index / 256;
         uint256 claimedBit_index = _index % 256;
@@ -116,8 +134,8 @@ contract MerkleDistributor is MetaTxComponent {
         return claimedWord & mask == mask;
     }
 
-    /// @notice Sets an index in the merkle tree to be claimed
-    /// @param _index The index in the balance tree to be claimed
+    /// @notice Sets an index in the merkle tree to be claimed.
+    /// @param _index The index in the balance tree to be claimed.
     function _setClaimed(uint256 _index) private {
         uint256 claimedWord_index = _index / 256;
         uint256 claimedBit_index = _index % 256;

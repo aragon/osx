@@ -1,10 +1,10 @@
 import {ethers} from 'hardhat';
 
-export enum VoterState {
+export enum VoteOption {
   None,
   Abstain,
-  Yea,
-  Nay,
+  Yes,
+  No,
 }
 
 const toBn = ethers.BigNumber.from;
@@ -13,7 +13,7 @@ export const pct16 = (x: number) => bigExp(x, 16);
 
 export const VOTING_EVENTS = {
   CONFIG_UPDATED: 'ConfigUpdated',
-  VOTE_STARTED: 'VoteStarted',
+  VOTE_STARTED: 'VoteCreated',
   VOTE_CAST: 'VoteCast',
   VOTE_EXECUTED: 'VoteExecuted',
 };

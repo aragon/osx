@@ -6,12 +6,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Registry
+    name: DAORegistry
     network: {{network}}
     source:
-      abi: Registry
-      address: '{{dataSources.Registry.address}}'
-      startBlock: {{dataSources.Registry.startBlock}}
+      abi: DAORegistry
+      address: '{{dataSources.DAORegistry.address}}'
+      startBlock: {{dataSources.DAORegistry.startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -21,7 +21,7 @@ dataSources:
       abis:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
-        - name: Registry
+        - name: DAORegistry
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
@@ -48,9 +48,9 @@ templates:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json
-        - name: WhitelistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
+        - name: AllowlistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
         - name: ERC165
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/erc165/ERC165.sol/ERC165.json
       eventHandlers:
@@ -58,8 +58,8 @@ templates:
           handler: handleMetadataSet
         - event: Deposited(indexed address,indexed address,uint256,string)
           handler: handleDeposited
-        - event: ETHDeposited(address,uint256)
-          handler: handleETHDeposited
+        - event: NativeTokenDeposited(address,uint256)
+          handler: handleNativeTokenDeposited
         - event: Executed(indexed address,uint256,(address,uint256,bytes)[],bytes[])
           handler: handleExecuted
         - event: Granted(indexed bytes32,indexed address,indexed address,address,address)
@@ -78,46 +78,46 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/ERC20Voting/erc20Voting.ts
+      file: ./src/packages/erc20/erc20-voting.ts
       entities:
         - Dao
       abis:
         - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/ERC20/ERC20Voting.sol/ERC20Voting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
         - event: VoteExecuted(indexed uint256,bytes[])
           handler: handleVoteExecuted
-        - event: VoteStarted(indexed uint256,indexed address,bytes)
-          handler: handleVoteStarted
+        - event: VoteCreated(indexed uint256,indexed address,bytes)
+          handler: handleVoteCreated
         - event: ConfigUpdated(uint64,uint64,uint64)
           handler: handleConfigUpdated
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
-  # WhitelistVoting (package)
-  - name: WhitelistVoting
+  # AllowlistVoting (package)
+  - name: AllowlistVoting
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: WhitelistVoting
+      abi: AllowlistVoting
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/whitelist/whitelistVoting.ts
+      file: ./src/packages/allowlist/allowlist-voting.ts
       entities:
         - Dao
       abis:
-        - name: WhitelistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/votings/whitelist/WhitelistVoting.sol/WhitelistVoting.json
+        - name: AllowlistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
         - event: VoteExecuted(indexed uint256,bytes[])
           handler: handleVoteExecuted
-        - event: VoteStarted(indexed uint256,indexed address,bytes)
-          handler: handleVoteStarted
+        - event: VoteCreated(indexed uint256,indexed address,bytes)
+          handler: handleVoteCreated
         - event: ConfigUpdated(uint64,uint64,uint64)
           handler: handleConfigUpdated
         - event: UsersAdded(address[])

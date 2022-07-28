@@ -52,15 +52,15 @@ jobs:
         run: cd packages/contracts && yarn run build
       - name: create Dummy DAOs erc20
         run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: create Dummy DAOs whitelist
+      - name: create Dummy DAOs allowlist
         run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - name: Deposit to Erc20 DAO
         run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: Deposit to Whitelist DAO
+      - name: Deposit to Allowlist DAO
         run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - name: Proposal of Erc20
         run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: Proposal of Whitelist
+      - name: Proposal of Allowlist
         run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - uses: actions/upload-artifact@v2
         with:

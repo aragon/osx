@@ -9,7 +9,7 @@ import "./InterfaceBasedRegistry.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract provides the possiblity to register a DAO.
 contract DAORegistry is InterfaceBasedRegistry {
-    bytes32 public constant REGISTER_DAO_ROLE = keccak256("REGISTER_DAO_ROLE");
+    bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
     /// @notice Emitted when a new DAO is registered
     /// @param dao The address of the DAO contract
@@ -32,7 +32,7 @@ contract DAORegistry is InterfaceBasedRegistry {
         string calldata name,
         IDAO dao,
         address creator
-    ) external auth(REGISTER_DAO_ROLE) {
+    ) external auth(REGISTER_DAO_PERMISSION_ID) {
         // TODO: Implement ENS subdomain. Currently DAO's name can be repeated, will be resolved once the ENS subdomain is implemented.
 
         _register(address(dao));

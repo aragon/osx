@@ -20,17 +20,21 @@ const EVENTS = {
   Deposited: 'Deposited',
   Withdrawn: 'Withdrawn',
   Executed: 'Executed',
-  ETHDeposited: 'ETHDeposited',
+  NativeTokenDeposited: 'NativeTokenDeposited',
 };
 
-const ROLES = {
-  UPGRADE_ROLE: ethers.utils.id('UPGRADE_ROLE'),
-  DAO_CONFIG_ROLE: ethers.utils.id('DAO_CONFIG_ROLE'),
-  EXEC_ROLE: ethers.utils.id('EXEC_ROLE'),
-  WITHDRAW_ROLE: ethers.utils.id('WITHDRAW_ROLE'),
-  SET_SIGNATURE_VALIDATOR_ROLE: ethers.utils.id('SET_SIGNATURE_VALIDATOR_ROLE'),
-  MODIFY_TRUSTED_FORWARDER: ethers.utils.id('MODIFY_TRUSTED_FORWARDER'),
-  TOKEN_MINTER_ROLE: ethers.utils.id('TOKEN_MINTER_ROLE'),
+const PERMISSION_IDS = {
+  UPGRADE_PERMISSION_ID: ethers.utils.id('UPGRADE_PERMISSION'),
+  SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
+  EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
+  WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION'),
+  SET_SIGNATURE_VALIDATOR_PERMISSION_ID: ethers.utils.id(
+    'SET_SIGNATURE_VALIDATOR_PERMISSION'
+  ),
+  SET_TRUSTED_FORWARDER_PERMISSION_ID: ethers.utils.id(
+    'SET_TRUSTED_FORWARDER_PERMISSION'
+  ),
+  MINT_PERMISSION_ID: ethers.utils.id('MINT_PERMISSION'),
 };
 
 describe('DAO', function () {
@@ -51,15 +55,39 @@ describe('DAO', function () {
     token = await Token.deploy();
     await token.initialize(dao.address, 'GOV', 'GOV');
 
-    // Grant Roles
+    // Grant permissions
     await Promise.all([
-      dao.grant(dao.address, ownerAddress, ROLES.DAO_CONFIG_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.EXEC_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.WITHDRAW_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.UPGRADE_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.SET_SIGNATURE_VALIDATOR_ROLE),
-      dao.grant(dao.address, ownerAddress, ROLES.MODIFY_TRUSTED_FORWARDER),
-      dao.grant(token.address, ownerAddress, ROLES.TOKEN_MINTER_ROLE),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.UPGRADE_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
+      ),
+      dao.grant(token.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
     ]);
   });
 
@@ -71,32 +99,32 @@ describe('DAO', function () {
     });
 
     it('sets the trusted forwarder correctly', async () => {
-      expect(await dao.trustedForwarder()).to.be.equal(dummyAddress1);
+      expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress1);
     });
   });
 
   describe('setTrustedForwarder:', async () => {
-    it('reverts if the sender lacks the required role', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        ROLES.MODIFY_TRUSTED_FORWARDER
+        PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       );
 
       await expect(dao.setTrustedForwarder(dummyAddress2)).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'Unauthorized',
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.MODIFY_TRUSTED_FORWARDER
+          PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
         )
       );
     });
 
     it('sets a new trusted forwarder', async () => {
       await dao.setTrustedForwarder(dummyAddress2);
-      expect(await dao.trustedForwarder()).to.be.equal(dummyAddress2);
+      expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress2);
     });
 
     it('emits an event containing the address', async () => {
@@ -107,16 +135,20 @@ describe('DAO', function () {
   });
 
   describe('setMetadata:', async () => {
-    it('reverts if the sender lacks the required role', async () => {
-      await dao.revoke(dao.address, ownerAddress, ROLES.DAO_CONFIG_ROLE);
+    it('reverts if the sender lacks the required permissionId', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+      );
 
       await expect(dao.setMetadata(dummyMetadata1)).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'Unauthorized',
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.DAO_CONFIG_ROLE
+          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
         )
       );
     });
@@ -129,20 +161,20 @@ describe('DAO', function () {
   });
 
   describe('setSignatureValidator:', async () => {
-    it('reverts if the sender lacks the required role', async () => {
+    it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
         dao.address,
         ownerAddress,
-        ROLES.SET_SIGNATURE_VALIDATOR_ROLE
+        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
       );
 
       await expect(dao.setSignatureValidator(dummyAddress2)).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'Unauthorized',
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.SET_SIGNATURE_VALIDATOR_ROLE
+          PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
         )
       );
     });
@@ -166,16 +198,20 @@ describe('DAO', function () {
     ];
     const expectedDummyResults = ['0x'];
 
-    it('reverts if the sender lacks the required role', async () => {
-      await dao.revoke(dao.address, ownerAddress, ROLES.EXEC_ROLE);
+    it('reverts if the sender lacks the required permissionId', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.EXECUTE_PERMISSION_ID
+      );
 
       await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'Unauthorized',
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.EXEC_ROLE
+          PERMISSION_IDS.EXECUTE_PERMISSION_ID
         )
       );
     });
@@ -207,7 +243,7 @@ describe('DAO', function () {
   describe('deposit:', async () => {
     const amount = ethers.utils.parseEther('1.23');
 
-    it('deposits ETH into the DAO', async () => {
+    it('deposits native tokens into the DAO', async () => {
       const options = {value: amount};
 
       // is empty at the beginning
@@ -238,13 +274,15 @@ describe('DAO', function () {
       expect(await token.balanceOf(dao.address)).to.equal(amount);
     });
 
-    it('throws an error if ERC20 and ETH are deposited at the same time', async () => {
+    it('throws an error if ERC20 and native tokens are deposited at the same time', async () => {
       const options = {value: amount};
       await token.mint(ownerAddress, amount);
 
       await expect(
         dao.deposit(token.address, amount, 'ref', options)
-      ).to.be.revertedWith(customError('ETHDepositAmountMismatch', 0, amount));
+      ).to.be.revertedWith(
+        customError('NativeTokenDepositAmountMismatch', 0, amount)
+      );
     });
   });
 
@@ -253,30 +291,34 @@ describe('DAO', function () {
     const options = {value: amount};
 
     beforeEach(async () => {
-      // put ETH into the DAO
+      // put native tokens into the DAO
       await dao.deposit(ethers.constants.AddressZero, amount, 'ref', options);
 
       // put ERC20 into the DAO
       await token.mint(dao.address, amount);
     });
 
-    it('reverts if the sender lacks the required role', async () => {
-      await dao.revoke(dao.address, ownerAddress, ROLES.WITHDRAW_ROLE);
+    it('reverts if the sender lacks the required permissionId', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
+      );
 
       await expect(
         dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
       ).to.be.revertedWith(
         customError(
-          'ACLAuth',
+          'Unauthorized',
           dao.address,
           dao.address,
           ownerAddress,
-          ROLES.WITHDRAW_ROLE
+          PERMISSION_IDS.WITHDRAW_PERMISSION_ID
         )
       );
     });
 
-    it('withdraws ETH if DAO balance is high enough', async () => {
+    it('withdraws native tokens if DAO balance is high enough', async () => {
       const receiverBalance = await signers[1].getBalance();
 
       expect(
@@ -300,7 +342,7 @@ describe('DAO', function () {
       );
     });
 
-    it('throws an error if the ETH balance is too low', async () => {
+    it('throws an error if the native token balance is too low', async () => {
       await expect(
         dao.withdraw(
           ethers.constants.AddressZero,
@@ -308,7 +350,7 @@ describe('DAO', function () {
           amount.add(1),
           'ref'
         )
-      ).to.be.revertedWith(customError('ETHWithdrawFailed'));
+      ).to.be.revertedWith(customError('NativeTokenWithdrawFailed'));
     });
 
     it('withdraws ERC20 if DAO balance is high enough', async () => {
@@ -341,7 +383,7 @@ describe('DAO', function () {
   describe('receive:', async () => {
     const amount = ethers.utils.parseEther('1.23');
 
-    it('receives ETH ', async () => {
+    it('receives native tokens ', async () => {
       const options = {value: amount};
 
       // is empty at the beginning
@@ -349,7 +391,7 @@ describe('DAO', function () {
 
       // Send a transaction
       expect(await signers[0].sendTransaction({to: dao.address, value: amount}))
-        .to.emit(dao, EVENTS.ETHDeposited)
+        .to.emit(dao, EVENTS.NativeTokenDeposited)
         .withArgs(ownerAddress, amount);
 
       // holds amount now

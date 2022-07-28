@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed several contracts, methods, variables, and constants as well as associated folder names.
 - Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`.
 - Changed `registry.ts` to `dao-registry.ts` and updated testing.
 - Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`.

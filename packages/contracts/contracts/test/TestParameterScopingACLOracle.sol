@@ -4,10 +4,10 @@
 
 pragma solidity 0.8.10;
 
-import "../core/acl/IACLOracle.sol";
+import "../core/permission/IPermissionOracle.sol";
 import "./TestComponent.sol";
 
-contract TestParameterScopingACLOracle is IACLOracle {
+contract TestParameterScopingPermissionOracle is IPermissionOracle {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestComponent.addPermissioned.selector;
 
     function getSelector(bytes memory _data) public pure returns (bytes4 sig) {
@@ -16,13 +16,13 @@ contract TestParameterScopingACLOracle is IACLOracle {
         }
     }
 
-    function willPerform(
+    function hasPermissions(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionId,
         bytes calldata _data
     ) external pure returns (bool) {
-        (_where, _who, _role);
+        (_where, _who, _permissionId);
 
         // Require the function selector to match
         require(getSelector(_data) == ADD_PERMISSIONED_SELECTOR);

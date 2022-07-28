@@ -60,8 +60,8 @@ export function createGetVoteCall(
   supportRequired: string,
   participationRequired: string,
   votingPower: string,
-  yea: string,
-  nay: string,
+  yes: string,
+  no: string,
   abstain: string,
   actions: ethereum.Tuple[]
 ): void {
@@ -82,8 +82,8 @@ export function createGetVoteCall(
         BigInt.fromString(participationRequired)
       ),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingPower)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yea)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(nay)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yes)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(no)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(abstain)),
       ethereum.Value.fromTupleArray(actions)
     ]);

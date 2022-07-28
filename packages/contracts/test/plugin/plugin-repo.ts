@@ -17,23 +17,23 @@ describe('PluginRepo', function () {
   let pluginFactoryMock: PluginFactoryMock;
 
   function assertVersion(
-    versionData: any,
-    semanticVersion: any,
-    pluginAddress: any,
-    contentUri: any
+    actualVersionData: any,
+    expectedSemanticVersion: any,
+    expectedPluginFactory: any,
+    expectedContentUri: any
   ) {
     const {
       semanticVersion: [maj, min, pat],
-      pluginFactoryAddress,
+      pluginFactory,
       contentURI,
-    } = versionData;
+    } = actualVersionData;
 
-    expect(maj).to.equal(semanticVersion[0]); // major should match
-    expect(min).to.equal(semanticVersion[1]); // minor should match
-    expect(pat).to.equal(semanticVersion[2]); // patch should match
+    expect(maj).to.equal(expectedSemanticVersion[0]); // major should match
+    expect(min).to.equal(expectedSemanticVersion[1]); // minor should match
+    expect(pat).to.equal(expectedSemanticVersion[2]); // patch should match
 
-    expect(pluginFactoryAddress).to.equal(pluginAddress); // code should match
-    expect(contentURI).to.equal(contentUri); // content should match
+    expect(pluginFactory).to.equal(expectedPluginFactory); // code should match
+    expect(contentURI).to.equal(expectedContentUri); // content should match
   }
 
   before(async () => {
@@ -80,7 +80,7 @@ describe('PluginRepo', function () {
   // valid version as being a correct bump from 0.0.0
   it('cannot create invalid first version', async function () {
     await expect(
-      pluginRepo.newVersion([1, 1, 0], pluginFactoryMock.address, emptyBytes)
+      pluginRepo.createVersion([1, 1, 0], pluginFactoryMock.address, emptyBytes)
     ).to.be.revertedWith('InvalidBump([0, 0, 0], [1, 1, 0])');
   });
 
@@ -89,9 +89,9 @@ describe('PluginRepo', function () {
     let adaptiveERC165 = await AdaptiveERC165.deploy();
 
     await expect(
-      pluginRepo.newVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
+      pluginRepo.createVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
     ).to.be.revertedWith(
-      customError('InvalidPluginInterface', adaptiveERC165.address)
+      customError('InvalidPluginFactoryInterface', adaptiveERC165.address)
     );
   });
 
@@ -99,59 +99,59 @@ describe('PluginRepo', function () {
     const randomAddress = await signers[8].getAddress();
 
     await expect(
-      pluginRepo.newVersion([1, 0, 0], randomAddress, emptyBytes)
+      pluginRepo.createVersion([1, 0, 0], randomAddress, emptyBytes)
     ).to.be.revertedWith(customError('InvalidContractAddress', randomAddress));
   });
 
   context('creating initial version', async function () {
-    let initialPluginAddress: any;
+    let initialPluginFactory: any;
     const initialContent = '0x12';
 
     before(async function () {
       const pluginFactoryMock = await deployMockPluginFactory();
-      initialPluginAddress = pluginFactoryMock.address;
+      initialPluginFactory = pluginFactoryMock.address;
     });
 
     beforeEach(async function () {
-      await pluginRepo.newVersion(
+      await pluginRepo.createVersion(
         [1, 0, 0],
-        initialPluginAddress,
+        initialPluginFactory,
         initialContent
       );
     });
 
     it('version is fetchable as latest', async () => {
       assertVersion(
-        await pluginRepo.getLatest(),
+        await pluginRepo.getLatestVersion(),
         [1, 0, 0],
-        initialPluginAddress,
+        initialPluginFactory,
         initialContent
       );
     });
 
     it('version is fetchable by semantic version', async () => {
       assertVersion(
-        await pluginRepo.getBySemanticVersion([1, 0, 0]),
+        await pluginRepo.getVersionBySemanticVersion([1, 0, 0]),
         [1, 0, 0],
-        initialPluginAddress,
+        initialPluginFactory,
         initialContent
       );
     });
 
-    it('version is fetchable by contract address', async () => {
+    it('version is fetchable by plugin factory address', async () => {
       assertVersion(
-        await pluginRepo.getLatestForContractAddress(initialPluginAddress),
+        await pluginRepo.getVersionByPluginFactory(initialPluginFactory),
         [1, 0, 0],
-        initialPluginAddress,
+        initialPluginFactory,
         initialContent
       );
     });
 
     it('version is fetchable by version id', async () => {
       assertVersion(
-        await pluginRepo.getByVersionId(1),
+        await pluginRepo.getVersionById(1),
         [1, 0, 0],
-        initialPluginAddress,
+        initialPluginFactory,
         initialContent
       );
     });
@@ -160,7 +160,7 @@ describe('PluginRepo', function () {
       const pluginFactoryMock = await deployMockPluginFactory();
 
       await expect(
-        pluginRepo.newVersion(
+        pluginRepo.createVersion(
           [1, 1, 0],
           pluginFactoryMock.address,
           initialContent
@@ -170,89 +170,93 @@ describe('PluginRepo', function () {
 
     it('fails when version bump is invalid', async () => {
       await expect(
-        pluginRepo.newVersion([1, 2, 0], initialPluginAddress, initialContent)
+        pluginRepo.createVersion(
+          [1, 2, 0],
+          initialPluginFactory,
+          initialContent
+        )
       ).to.be.revertedWith('InvalidBump([1, 0, 0], [1, 2, 0])');
     });
 
     it('fails if requesting version 0', async () => {
       const versionIdx = 0;
-      await expect(pluginRepo.getByVersionId(versionIdx)).to.be.revertedWith(
-        customError('VersionIdxDoesNotExist', versionIdx)
+      await expect(pluginRepo.getVersionById(versionIdx)).to.be.revertedWith(
+        customError('VersionIndexDoesNotExist', versionIdx)
       );
     });
 
     context('adding new version', () => {
-      let newPluginAddress: any;
+      let newPluginFactory: string;
       const newContent = '0x13';
 
       before(async function () {
         const pluginFactoryMock = await deployMockPluginFactory();
-        newPluginAddress = pluginFactoryMock.address;
+        newPluginFactory = pluginFactoryMock.address;
       });
 
       beforeEach(async function () {
-        await pluginRepo.newVersion([2, 0, 0], newPluginAddress, newContent);
+        await pluginRepo.createVersion([2, 0, 0], newPluginFactory, newContent);
       });
 
       it('new version is fetchable as latest', async () => {
         assertVersion(
-          await pluginRepo.getLatest(),
+          await pluginRepo.getLatestVersion(),
           [2, 0, 0],
-          newPluginAddress,
+          newPluginFactory,
           newContent
         );
       });
 
       it('new version is fetchable by semantic version', async () => {
         assertVersion(
-          await pluginRepo.getBySemanticVersion([2, 0, 0]),
+          await pluginRepo.getVersionBySemanticVersion([2, 0, 0]),
           [2, 0, 0],
-          newPluginAddress,
+          newPluginFactory,
           newContent
         );
       });
 
       it('new version is fetchable by contract address', async () => {
         assertVersion(
-          await pluginRepo.getLatestForContractAddress(newPluginAddress),
+          await pluginRepo.getVersionByPluginFactory(newPluginFactory),
           [2, 0, 0],
-          newPluginAddress,
+          newPluginFactory,
           newContent
         );
       });
 
       it('new version is fetchable by version id', async () => {
         assertVersion(
-          await pluginRepo.getByVersionId(2),
+          await pluginRepo.getVersionById(2),
           [2, 0, 0],
-          newPluginAddress,
+          newPluginFactory,
           newContent
         );
       });
 
       it('old version is fetchable by semantic version', async () => {
         assertVersion(
-          await pluginRepo.getBySemanticVersion([1, 0, 0]),
+          await pluginRepo.getVersionBySemanticVersion([1, 0, 0]),
           [1, 0, 0],
-          initialPluginAddress,
+          initialPluginFactory,
           initialContent
         );
       });
 
       it('old version is fetchable by contract address', async () => {
         assertVersion(
-          await pluginRepo.getLatestForContractAddress(initialPluginAddress),
+          await pluginRepo.getVersionByPluginFactory(initialPluginFactory),
           [1, 0, 0],
-          initialPluginAddress,
+          initialPluginFactory,
           initialContent
         );
       });
 
       it('old version is fetchable by version id', async () => {
         assertVersion(
-          await pluginRepo.getByVersionId(1),
+          await pluginRepo.getVersionById(1),
           [1, 0, 0],
-          initialPluginAddress,
+          initialPluginFactory,
           initialContent
         );
       });

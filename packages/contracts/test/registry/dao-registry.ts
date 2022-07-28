@@ -14,7 +14,7 @@ describe('DAORegistry', function () {
   let ownerAddress: string;
   let targetDao: any;
 
-  const REGISTER_DAO_ROLE = ethers.utils.id('REGISTER_DAO_ROLE');
+  const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
   const daoSubdomainName = 'my-dao';
 
   before(async () => {
@@ -34,8 +34,12 @@ describe('DAORegistry', function () {
     registry = await Registry.deploy();
     await registry.initialize(managingDAO.address);
 
-    // Grant the `REGISTER_DAO_ROLE` permission to `signers[0]`
-    await managingDAO.grant(registry.address, ownerAddress, REGISTER_DAO_ROLE);
+    // Grant the `REGISTER_DAO_PERMISSION_ID` permission to `signers[0]`
+    await managingDAO.grant(
+      registry.address,
+      ownerAddress,
+      REGISTER_DAO_PERMISSION_ID
+    );
   });
 
   it('Should register a new DAO successfully', async function () {
@@ -53,7 +57,11 @@ describe('DAORegistry', function () {
     await registry.register(daoSubdomainName, targetDao.address, ownerAddress);
 
     // Revoke the permission
-    await managingDAO.revoke(registry.address, ownerAddress, REGISTER_DAO_ROLE);
+    await managingDAO.revoke(
+      registry.address,
+      ownerAddress,
+      REGISTER_DAO_PERMISSION_ID
+    );
 
     const newTargetDao = await deployNewDAO(ownerAddress);
 
@@ -61,11 +69,12 @@ describe('DAORegistry', function () {
       registry.register(daoSubdomainName, newTargetDao.address, ownerAddress)
     ).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'DaoUnauthorized',
+        managingDAO.address,
         registry.address,
         registry.address,
         ownerAddress,
-        REGISTER_DAO_ROLE
+        REGISTER_DAO_PERMISSION_ID
       )
     );
   });

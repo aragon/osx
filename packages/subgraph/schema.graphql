@@ -11,7 +11,7 @@ type ERC20Token @entity {
 
 type Balance @entity {
   id: ID! # token address + dao address
-  token: ERC20Token! # address(0) will be considered as ETH (or canonical token)
+  token: ERC20Token! # address(0) corresponds to the native token
   dao: Dao!
   balance: BigInt!
   lastUpdated: BigInt!
@@ -21,20 +21,20 @@ type Balance @entity {
 
 # ACL
 
-type Role @entity {
-  id: ID! # where + role
+type ContractPermissionId @entity {
+  id: ID! # where + permissionId
   dao: Dao!
   where: Bytes!
-  role: Bytes!
+  permissionId: Bytes!
   frozen: Boolean!
 }
 
 type Permission @entity {
   "no need to store granted as we can delete permission when revoked"
-  id: ID! # where + role + who
+  id: ID! # where + permissionId + who
   dao: Dao!
   where: Bytes!
-  role: Role!
+  contractPermissionId: ContractPermissionId!
   who: Bytes!
   actor: Bytes!
   oracle: Bytes!
@@ -90,7 +90,7 @@ type Dao @entity {
   deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
   withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
-  roles: [Role!]! @derivedFrom(field: "dao")
+  contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
@@ -121,13 +121,13 @@ interface Proposal {
   createdAt: BigInt!
 }
 
-# Votings
+# Voting
 
-enum VoterState {
+enum VoteOption {
   None
   Abstain
-  Yea
-  Nay
+  Yes
+  No
 }
 
 # ERC20Voting
@@ -154,7 +154,7 @@ type ERC20Vote @entity {
   id: ID! # voter + proposal
   voter: ERC20VotingVoter!
   proposal: ERC20VotingProposal!
-  vote: VoterState!
+  vote: VoteOption!
   weight: BigInt!
   createdAt: BigInt!
 }
@@ -172,8 +172,8 @@ type ERC20VotingProposal implements Proposal @entity {
   snapshotBlock: BigInt!
   supportRequiredPct: BigInt!
   participationRequiredPct: BigInt!
-  yea: BigInt
-  nay: BigInt
+  yes: BigInt
+  no: BigInt
   abstain: BigInt
   votingPower: BigInt!
   voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
@@ -182,41 +182,41 @@ type ERC20VotingProposal implements Proposal @entity {
   createdAt: BigInt!
 }
 
-# WhitelistVoting
+# AllowlistVoting
 
-type WhitelistPackage implements Package @entity {
+type AllowlistPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
   trustedForwarder: Bytes!
-  proposals: [WhitelistProposal!]! @derivedFrom(field: "pkg")
+  proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
   supportRequiredPct: BigInt
   participationRequiredPct: BigInt
   minDuration: BigInt
   votesLength: BigInt
-  users: [WhitelistVoter!]! @derivedFrom(field: "pkg")
+  users: [AllowlistVoter!]! @derivedFrom(field: "pkg")
 }
 
-type WhitelistVoter @entity {
+type AllowlistVoter @entity {
   id: ID! # address
-  proposals: [WhitelistVote!]! @derivedFrom(field: "voter")
-  pkg: WhitelistPackage!
+  proposals: [AllowlistVote!]! @derivedFrom(field: "voter")
+  pkg: AllowlistPackage!
 }
 
-type WhitelistVote @entity {
+type AllowlistVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
-  voter: WhitelistVoter!
-  proposal: WhitelistProposal!
-  vote: VoterState!
+  voter: AllowlistVoter!
+  proposal: AllowlistProposal!
+  vote: VoteOption!
   weight: BigInt!
   createdAt: BigInt!
 }
 
-type WhitelistProposal implements Proposal @entity {
+type AllowlistProposal implements Proposal @entity {
   id: ID! # package + voteId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: WhitelistPackage!
+  pkg: AllowlistPackage!
   voteId: BigInt!
   creator: Bytes!
   metadata: String!
@@ -226,10 +226,10 @@ type WhitelistProposal implements Proposal @entity {
   supportRequiredPct: BigInt!
   participationRequired: BigInt!
   votingPower: BigInt!
-  yea: BigInt
-  nay: BigInt
+  yes: BigInt
+  no: BigInt
   abstain: BigInt
-  voters: [WhitelistVote!]! @derivedFrom(field: "proposal")
+  voters: [AllowlistVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!

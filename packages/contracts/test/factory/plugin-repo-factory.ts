@@ -50,7 +50,7 @@ describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let aragonPluginRegistry: AragonPluginRegistry;
   let ownerAddress: string;
-  let dao: DAO;
+  let managingDao: DAO;
   let pluginRepoFactory: any;
 
   let mergedABI: any;
@@ -69,15 +69,15 @@ describe('PluginRepoFactory: ', function () {
   beforeEach(async function () {
     // DAO
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x00', ownerAddress, zeroAddress);
+    managingDao = await DAO.deploy();
+    await managingDao.initialize('0x00', ownerAddress, zeroAddress);
 
     // deploy and initialize AragonPluginRegistry
     const AragonPluginRegistry = await ethers.getContractFactory(
       'AragonPluginRegistry'
     );
     aragonPluginRegistry = await AragonPluginRegistry.deploy();
-    await aragonPluginRegistry.initialize(dao.address);
+    await aragonPluginRegistry.initialize(managingDao.address);
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -89,32 +89,33 @@ describe('PluginRepoFactory: ', function () {
       aragonPluginRegistry.address
     );
 
-    // grant REGISTER_ROLE to pluginRepoFactory
-    dao.grant(
+    // grant REGISTER_PERMISSION_ID to pluginRepoFactory
+    managingDao.grant(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_PERMISSION')
     );
   });
 
-  it('fail to create new pluginRepo with no REGISTER_ROLE', async () => {
-    dao.revoke(
+  it('fail to create new pluginRepo with no REGISTER_PERMISSION', async () => {
+    managingDao.revoke(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_ROLE')
+      ethers.utils.id('REGISTER_PERMISSION')
     );
 
     const pluginRepoName = 'my-pluginRepo';
 
     await expect(
-      pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
+      pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
     ).to.be.revertedWith(
       customError(
-        'ACLAuth',
+        'DaoUnauthorized',
+        managingDao.address,
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,
-        ethers.utils.id('REGISTER_ROLE')
+        ethers.utils.id('REGISTER_PERMISSION')
       )
     );
   });
@@ -123,14 +124,14 @@ describe('PluginRepoFactory: ', function () {
     const pluginRepoName = '';
 
     await expect(
-      pluginRepoFactory.newPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWith(customError('EmptyName'));
+      pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
+    ).to.be.revertedWith(customError('EmptyPluginRepoName'));
   });
 
   it('create new pluginRepo', async () => {
     const pluginRepoName = 'my-pluginRepo';
 
-    let tx = await pluginRepoFactory.newPluginRepo(
+    let tx = await pluginRepoFactory.createPluginRepo(
       pluginRepoName,
       ownerAddress
     );
@@ -150,7 +151,7 @@ describe('PluginRepoFactory: ', function () {
     const contentURI = '0x00';
 
     await expect(
-      pluginRepoFactory.newPluginRepoWithVersion(
+      pluginRepoFactory.createPluginRepoWithVersion(
         pluginRepoName,
         initialSemanticVersion,
         pluginFactoryAddress,
@@ -168,7 +169,7 @@ describe('PluginRepoFactory: ', function () {
     const pluginFactoryAddress = pluginFactoryMock.address;
     const contentURI = '0x00';
 
-    let tx = await pluginRepoFactory.newPluginRepoWithVersion(
+    let tx = await pluginRepoFactory.createPluginRepoWithVersion(
       pluginRepoName,
       initialSemanticVersion,
       pluginFactoryAddress,

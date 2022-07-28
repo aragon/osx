@@ -13,33 +13,32 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
-// NOTE: If user already has a ERC20 token, it's important to wrap it inside This
-// to make it have ERC20Votes functionality. For the voting contract, it works like this:
-// 1. user first calls approve on his own ERC20 to make `amount` spendable by GovernanceWrappedERC20
-// 2. Then calls `depositFor` for `amount` on GovernanceWrappedERC20
-// After those, Users can now participate in the voting. If user doesn't want to make votes anymore,
-// he can call `withdrawTo` to take his tokens back to his ERC20.
-
-// IMPORTANT: In this token, no need to have mint functionality,
-// as it's the wrapped token's responsibility to mint whenever needed
-
-// Inheritance Chain ->
-// [
-//    GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable =>
-//    EIP712Upgradeable => ERC20Upgradeable => Initializable
-// ]
+/// @title GovernanceWrappedERC20
+/// @author Aragon Association
+/// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`.
+/// The contract also supports meta transactions. To use an `amount` of underlying tokens for voting, the token owner has to
+/// 1. call `approve` for the tokens to be used by this contract
+/// 2. call `depositFor` to wrap them, which safely transfers the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens to the contract and mints wrapped [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens.
+/// To get the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens back, the owner of the wrapped tokens can call `withdrawFor`, which  burns the wrapped tokens [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and safely transfers the underlying tokens back to the owner.
+/// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token contract.
 contract GovernanceWrappedERC20 is
     Initializable,
     AdaptiveERC165,
     ERC20VotesUpgradeable,
     ERC20WrapperUpgradeable,
     BaseRelayRecipient
+    // Inheritance Chain: GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable => EIP712Upgradeable => ERC20Upgradeable => Initializable => BaseRelayRecipient
 {
-    /// @dev describes the version and contract for GSN compatibility.
+    /// @notice Returns the version of the GSN relay recipient
+    /// @dev Describes the version and contract for GSN compatibility
     function versionRecipient() external view virtual override returns (string memory) {
         return "0.0.1+opengsn.recipient.GovernanceWrappedERC20";
     }
 
+    /// @notice Internal initialization method.
+    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @param _name The name of the wrapped token.
+    /// @param _symbol The symbol fo the wrapped token.
     function __GovernanceWrappedERC20_init(
         IERC20Upgradeable _token,
         string calldata _name,
@@ -54,6 +53,10 @@ contract GovernanceWrappedERC20 is
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
 
+    /// @notice Initializes the component.
+    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @param _name The name of the wrapped token.
+    /// @param _symbol The symbol fo the wrapped token.
     function initialize(
         IERC20Upgradeable _token,
         string calldata _name,
@@ -63,7 +66,7 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @inheritdoc ERC20WrapperUpgradeable
-    /// @dev Use the `decimals` of the underlying ERC20 token
+    /// @dev Uses the `decimals` of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     function decimals()
         public
         view
@@ -73,10 +76,8 @@ contract GovernanceWrappedERC20 is
         return ERC20WrapperUpgradeable.decimals();
     }
 
-    /// @dev Since 2 base classes end up having _msgSender(OZ + GSN),
-    /// we have to override it and activate GSN's _msgSender.
-    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    /// ends up first and that's what gets called by super._msgSender
+    /// @notice Uses the `BaseRelayRecipient` `_msgSender()` context.
+    /// @dev `BaseRelayRecipient` is the first contract in the inheritance chain and is thus called by `super._msgSender()`.
     function _msgSender()
         internal
         view
@@ -87,10 +88,8 @@ contract GovernanceWrappedERC20 is
         return super._msgSender();
     }
 
-    /// @dev Since 2 base classes end up having _msgData(OZ + GSN),
-    /// we have to override it and activate GSN's _msgData.
-    /// NOTE: In the inheritance chain, Permissions a.k.a RelayRecipient
-    /// ends up first and that's what gets called by super._msgData
+    /// @notice Uses the `BaseRelayRecipient` `_msgData()` context.
+    /// @dev `BaseRelayRecipient` is the first contract in the inheritance chain and is thus called by `super._msgData()`.
     function _msgData()
         internal
         view
@@ -103,6 +102,8 @@ contract GovernanceWrappedERC20 is
 
     // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
+
+    /// @inheritdoc ERC20Upgradeable
     function _afterTokenTransfer(
         address from,
         address to,
@@ -115,6 +116,7 @@ contract GovernanceWrappedERC20 is
         }
     }
 
+    /// @inheritdoc ERC20Upgradeable
     function _mint(address to, uint256 amount)
         internal
         override(ERC20VotesUpgradeable, ERC20Upgradeable)
@@ -122,6 +124,7 @@ contract GovernanceWrappedERC20 is
         super._mint(to, amount);
     }
 
+    /// @inheritdoc ERC20Upgradeable
     function _burn(address account, uint256 amount)
         internal
         override(ERC20VotesUpgradeable, ERC20Upgradeable)

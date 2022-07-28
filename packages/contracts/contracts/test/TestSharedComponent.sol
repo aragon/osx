@@ -7,9 +7,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../core/component/Component.sol";
 
 /// @notice A test component that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
-/// @dev This is realized by asking an `IACLOracle` that must be authorized in the DAO's ACL.
+/// @dev This is realized by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager.
 contract TestSharedComponent is Component {
-    bytes32 public constant ID_GATED_ACTION_ROLE = keccak256("ID_GATED_ACTION_ROLE");
+    bytes32 public constant ID_GATED_ACTION_PERMISSION_ID = keccak256("ID_GATED_ACTION_PERMISSION");
 
     mapping(uint256 => IDAO) public ownedIds;
 
@@ -17,17 +17,18 @@ contract TestSharedComponent is Component {
 
     error ObjectIdNotAssigned(uint256 _id);
 
-    modifier sharedAuth(uint256 _id, bytes32 _role) {
+    modifier sharedAuth(uint256 _id, bytes32 _permissionId) {
         if (address(ownedIds[_id]) == address(0)) {
             revert ObjectIdNotAssigned(_id);
         }
 
-        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _role, _msgData())) {
-            revert ACLData.ACLAuth({
+        if (!ownedIds[_id].hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
+            revert DaoUnauthorized({
+                dao: address(dao),
                 here: address(this),
                 where: address(this),
                 who: _msgSender(),
-                role: _role
+                permissionId: _permissionId
             });
         }
 
@@ -48,15 +49,15 @@ contract TestSharedComponent is Component {
     }
 
     /// @notice Executes something if the `id` parameter is authorized by the DAO associated through `ownedIds`.
-    ///         This is done by asking an `IACLOracle` that must be authorized in the DAO's ACL via `grantWithOracle` and the `ID_GATED_ACTION_ROLE`.
+    ///         This is done by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager via `grantWithOracle` and the `ID_GATED_ACTION_PERMISSION_ID`.
     /// @param _id The ID that is associated with a specific DAO
-    function idGatedAction(uint256 _id) external sharedAuth(_id, ID_GATED_ACTION_ROLE) {
+    function idGatedAction(uint256 _id) external sharedAuth(_id, ID_GATED_ACTION_PERMISSION_ID) {
         // do something
     }
 }
 
 /// @notice The oracle associated with `TestSharedComponent`
-contract TestIdGatingOracle is IACLOracle {
+contract TestIdGatingOracle is IPermissionOracle {
     uint256 public allowedId;
 
     constructor(uint256 _id) {
@@ -65,13 +66,13 @@ contract TestIdGatingOracle is IACLOracle {
 
     /// @notice Checks the calldata and expects the `id` to be the first argument of type `uint256`
 
-    function willPerform(
+    function hasPermissions(
         address _where,
         address _who,
-        bytes32 _role,
+        bytes32 _permissionId,
         bytes calldata _data
     ) external view returns (bool) {
-        (_where, _who, _role);
+        (_where, _who, _permissionId);
 
         // Security issue? Can the method be wrapped?
 

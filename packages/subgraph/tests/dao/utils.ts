@@ -3,7 +3,7 @@ import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
 
 import {
   MetadataSet,
-  ETHDeposited,
+  NativeTokenDeposited,
   Deposited,
   Granted,
   Revoked,
@@ -32,12 +32,12 @@ export function createNewMetadataSetEvent(
   return newMetadataSetEvent;
 }
 
-export function createNewETHDepositedEvent(
+export function createNewNativeTokenDepositedEvent(
   sender: string,
   amount: string,
   contractAddress: string
-): ETHDeposited {
-  let newEvent = changetype<ETHDeposited>(newMockEvent());
+): NativeTokenDeposited {
+  let newEvent = changetype<NativeTokenDeposited>(newMockEvent());
 
   newEvent.address = Address.fromString(contractAddress);
   newEvent.parameters = [];
@@ -95,7 +95,7 @@ export function createNewDepositedEvent(
 }
 
 export function createNewGrantedEvent(
-  role: Bytes,
+  contractPermissionId: Bytes,
   actor: string,
   who: string,
   where: string,
@@ -107,9 +107,9 @@ export function createNewGrantedEvent(
   newGrantedEvent.address = Address.fromString(contractAddress);
   newGrantedEvent.parameters = [];
 
-  let roleParam = new ethereum.EventParam(
-    'role',
-    ethereum.Value.fromBytes(role)
+  let contractPermissionIdParam = new ethereum.EventParam(
+    'contractPermissionId',
+    ethereum.Value.fromBytes(contractPermissionId)
   );
   let actorParam = new ethereum.EventParam(
     'actor',
@@ -128,7 +128,7 @@ export function createNewGrantedEvent(
     ethereum.Value.fromAddress(Address.fromString(oracle))
   );
 
-  newGrantedEvent.parameters.push(roleParam);
+  newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
   newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
@@ -138,7 +138,7 @@ export function createNewGrantedEvent(
 }
 
 export function createNewRevokedEvent(
-  role: Bytes,
+  contractPermissionId: Bytes,
   actor: string,
   who: string,
   where: string,
@@ -149,9 +149,9 @@ export function createNewRevokedEvent(
   newGrantedEvent.address = Address.fromString(contractAddress);
   newGrantedEvent.parameters = [];
 
-  let roleParam = new ethereum.EventParam(
-    'role',
-    ethereum.Value.fromBytes(role)
+  let contractPermissionIdParam = new ethereum.EventParam(
+    'contractPermissionId',
+    ethereum.Value.fromBytes(contractPermissionId)
   );
   let actorParam = new ethereum.EventParam(
     'actor',
@@ -166,7 +166,7 @@ export function createNewRevokedEvent(
     ethereum.Value.fromAddress(Address.fromString(where))
   );
 
-  newGrantedEvent.parameters.push(roleParam);
+  newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
   newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
@@ -175,7 +175,7 @@ export function createNewRevokedEvent(
 }
 
 export function createNewFrozenEvent(
-  role: Bytes,
+  contractPermissionId: Bytes,
   actor: string,
   where: string,
   contractAddress: string
@@ -185,9 +185,9 @@ export function createNewFrozenEvent(
   newFrozenEvent.address = Address.fromString(contractAddress);
   newFrozenEvent.parameters = [];
 
-  let roleParam = new ethereum.EventParam(
-    'role',
-    ethereum.Value.fromBytes(role)
+  let contractPermissionIdParam = new ethereum.EventParam(
+    'contractPermissionId',
+    ethereum.Value.fromBytes(contractPermissionId)
   );
   let actorParam = new ethereum.EventParam(
     'actor',
@@ -198,7 +198,7 @@ export function createNewFrozenEvent(
     ethereum.Value.fromAddress(Address.fromString(where))
   );
 
-  newFrozenEvent.parameters.push(roleParam);
+  newFrozenEvent.parameters.push(contractPermissionIdParam);
   newFrozenEvent.parameters.push(actorParam);
   newFrozenEvent.parameters.push(whereParam);
 
@@ -258,21 +258,26 @@ export function getBalanceOf(
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
 }
 
-export function getEXEC_ROLE(contractAddress: string, returns: Bytes): void {
+export function getEXECUTE_PERMISSION_ID(
+  contractAddress: string,
+  returns: Bytes
+): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'EXEC_ROLE',
-    'EXEC_ROLE():(bytes32)'
+    'EXECUTE_PERMISSION_ID',
+    'EXECUTE_PERMISSION_ID():(bytes32)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromBytes(returns)]);
 }
 
-export function getEXEC_ROLEreverted(contractAddress: string): void {
+export function getEXECUTE_PERMISSION_IDreverted(
+  contractAddress: string
+): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'EXEC_ROLE',
-    'EXEC_ROLE():(bytes32)'
+    'EXECUTE_PERMISSION_ID',
+    'EXECUTE_PERMISSION_ID():(bytes32)'
   )
     .withArgs([])
     .reverts();
@@ -334,15 +339,15 @@ export function getVotingToken(contractAddress: string, returns: string): void {
     .returns([ethereum.Value.fromAddress(Address.fromString(returns))]);
 }
 
-export function getIsUserWhitelisted(
+export function getIsUserAllowed(
   contractAddress: string,
   address: string,
   returns: boolean
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'isUserWhitelisted',
-    'isUserWhitelisted(address,uint256):(bool)'
+    'isAllowed',
+    'isAllowed(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),
@@ -351,14 +356,14 @@ export function getIsUserWhitelisted(
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
 
-export function getWhitelistedLength(
+export function getAllowedLength(
   contractAddress: string,
   returns: string
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'whitelistedLength',
-    'whitelistedLength():(uint64)'
+    'allowedLength',
+    'allowedLength():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(returns))]);
