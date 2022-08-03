@@ -5,10 +5,13 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./AppStorage.sol";
 
-/// @title UUPSProxy
+/// @title UpgradableProxy
 /// @author Giorgi Lagidze - Aragon Association - 2022
-/// @notice This contract is only meant to be used for deploy purposes.
-contract UUPSProxy is ERC1967Proxy, AppStorage {
+/// @notice The proxy that delegates calls to the implementation address.
+/// @dev This proxy doesn't include the upgradability logic and presumes
+/// that implementation contracts are UUPSUpgradable... If you want the proxy
+/// to contain upgrade logic, you have to use TransparentUpgradableProxy.
+contract UpgradableProxy is ERC1967Proxy, AppStorage {
     constructor(
         address _dao,
         address _logic, 
