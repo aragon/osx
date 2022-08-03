@@ -41,7 +41,11 @@ abstract contract AragonUpgradablePlugin is Initializable, AppStorage, ContextUp
     /// @param oldVersion The old version of logic contract from which contract is upgrading.
     /// @param newVersion The new version of logic contract to which contract is upgrading.
     /// @param data the init data for the update
-    function _update(uint8[3] calldata oldVersion, uint8[3] calldata newVersion, bytes memory data) internal virtual;
+    function _update(
+        uint8[3] calldata oldVersion, 
+        uint8[3] calldata newVersion, 
+        bytes memory data
+    ) internal virtual;
     
     /// @notice allows to call `update` through `reinitializer` modifier if it was not called with this version yet.
     /// @dev dev can override this and increment it if he/she wants update to be allowed to be called.
