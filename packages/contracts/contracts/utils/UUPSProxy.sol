@@ -3,15 +3,19 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import "./AppStorage.sol";
 
 /// @title UUPSProxy
-/// @author Aragon Association - 2022
+/// @author Giorgi Lagidze - Aragon Association - 2022
 /// @notice This contract is only meant to be used for deploy purposes.
-/// TODO: Need to be fully tested, and decide to use the second address param as admin address.
-contract UUPSProxy is ERC1967Proxy {
+contract UUPSProxy is ERC1967Proxy, AppStorage {
     constructor(
-        address _logic,
-        address, // This is passed by hardhat deploy plugin, and not passed on to ERC1967Proxy. See: https://github.com/wighawag/hardhat-deploy/issues/146
+        address _dao,
+        address _logic, 
         bytes memory _data
-    ) payable ERC1967Proxy(_logic, _data) {}
+    ) ERC1967Proxy(_logic, _data) { // here data should also include function selector already (there's no other way )))
+        if(_dao != address(0)) {
+            setDAO(_dao);
+        }
+    }   
 }
