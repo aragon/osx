@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./AppStorage.sol";
 
 /// @title UpgradableProxy
-/// @author Giorgi Lagidze - Aragon Association - 2022
 /// @notice The proxy that delegates calls to the implementation address.
 /// @dev This proxy doesn't include the upgradability logic and presumes
 /// that implementation contracts are UUPSUpgradable... If you want the proxy

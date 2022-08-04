@@ -10,7 +10,6 @@ import "../permission/PermissionManager.sol";
 import "../../utils/AppStorage.sol";
 
 /// @title AragonUpgradablePlugin
-/// @author Aragon Association - Giorgi Lagidze - 2022
 /// @notice An Abtract Aragon Plugin(UUPS-UPGRADABLE) that plugin developers have to inherit from.
 abstract contract AragonUpgradablePlugin is Initializable, AppStorage, ContextUpgradeable, UUPSUpgradeable {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
