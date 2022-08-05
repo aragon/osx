@@ -142,11 +142,14 @@ type ERC20VotingPackage implements Package @entity {
   minDuration: BigInt
   votesLength: BigInt
   token: ERC20Token
+  members: [ERC20VotingVoter!]! @derivedFrom(field: "pkg")
 }
 
 type ERC20VotingVoter @entity {
   id: ID! # address
   proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
+  pkg: ERC20VotingPackage!
+  lastUpdated: BigInt
 }
 
 type ERC20Vote @entity {
@@ -193,7 +196,7 @@ type AllowlistPackage implements Package @entity {
   participationRequiredPct: BigInt
   minDuration: BigInt
   votesLength: BigInt
-  users: [AllowlistVoter!]! @derivedFrom(field: "pkg")
+  members: [AllowlistVoter!]! @derivedFrom(field: "pkg")
 }
 
 type AllowlistVoter @entity {
