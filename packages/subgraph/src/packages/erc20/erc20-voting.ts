@@ -109,6 +109,11 @@ export function handleVoteCast(event: VoteCast): void {
   let voterEntity = ERC20VotingVoter.load(event.params.voter.toHexString());
   if (!voterEntity) {
     voterEntity = new ERC20VotingVoter(event.params.voter.toHexString());
+    voterEntity.pkg = event.address.toHexString();
+    voterEntity.lastUpdated = event.block.timestamp;
+    voterEntity.save();
+  } else {
+    voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
   }
 
