@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
+
 ### Changed
 
 - Adapted subgraph names according to the renaming of the contracts.
