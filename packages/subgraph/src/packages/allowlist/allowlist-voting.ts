@@ -174,6 +174,7 @@ export function handleUsersAdded(event: UsersAdded): void {
     let voterEntity = AllowlistVoter.load(user.toHexString());
     if (!voterEntity) {
       voterEntity = new AllowlistVoter(user.toHexString());
+      voterEntity.address = user.toHexString();
       voterEntity.pkg = event.address.toHexString();
       voterEntity.save();
     }

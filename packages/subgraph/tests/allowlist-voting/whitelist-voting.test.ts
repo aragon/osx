@@ -267,6 +267,12 @@ test('Run Allowlist Voting (handleUsersAdded) mappings with mock event', () => {
   assert.fieldEquals(
     'AllowlistVoter',
     userArray[0].toHexString(),
+    'address',
+    userArray[0].toHexString()
+  );
+  assert.fieldEquals(
+    'AllowlistVoter',
+    userArray[0].toHexString(),
     'pkg',
     Address.fromString(VOTING_ADDRESS).toHexString()
   );

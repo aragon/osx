@@ -172,6 +172,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
 
   // check voter
   assert.fieldEquals('ERC20VotingVoter', ADDRESS_ONE, 'id', ADDRESS_ONE);
+  assert.fieldEquals('ERC20VotingVoter', ADDRESS_ONE, 'address', ADDRESS_ONE);
   assert.fieldEquals(
     'ERC20VotingVoter',
     ADDRESS_ONE,

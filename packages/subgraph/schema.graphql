@@ -147,6 +147,7 @@ type ERC20VotingPackage implements Package @entity {
 
 type ERC20VotingVoter @entity {
   id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
   proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
   pkg: ERC20VotingPackage!
   lastUpdated: BigInt
@@ -202,6 +203,7 @@ type AllowlistPackage implements Package @entity {
 
 type AllowlistVoter @entity {
   id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
   proposals: [AllowlistVote!]! @derivedFrom(field: "voter")
   pkg: AllowlistPackage!
 }
