@@ -27,6 +27,15 @@ import {
   getVotesLengthCall
 } from './utils';
 
+let voteId = '0';
+let startDate = '1644851000';
+let endDate = '1644852000';
+let snapshotBlock = '100';
+let supportRequiredPct = '1000';
+let participationRequiredPct = '500';
+let votingPower = '1000';
+let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+
 test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
   let erc20VotingPackage = new ERC20VotingPackage(
@@ -35,15 +44,7 @@ test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   erc20VotingPackage.save();
 
   // create calls
-  let voteId = '0';
-  let startDate = '1644851000';
-  let endDate = '1644852000';
-  let snapshotBlock = '100';
-  let supportRequiredPct = '1000';
-  let participationRequiredPct = '500';
-  let votingPower = '1000';
   getVotesLengthCall(VOTING_ADDRESS, '1');
-  let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
     VOTING_ADDRESS,
     voteId,
@@ -137,14 +138,6 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   erc20VotingProposal.save();
 
   // create calls
-  let voteId = '0';
-  let startDate = '1644851000';
-  let endDate = '1644852000';
-  let snapshotBlock = '100';
-  let supportRequiredPct = '1000';
-  let participationRequired = '500';
-  let votingPower = '1000';
-  let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
     VOTING_ADDRESS,
     voteId,
@@ -154,7 +147,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
     endDate,
     snapshotBlock,
     supportRequiredPct,
-    participationRequired,
+    participationRequiredPct,
     votingPower,
     '1',
     '0',
@@ -183,6 +176,38 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   // check proposal
   assert.fieldEquals('ERC20VotingProposal', proposalId, 'yes', '1');
 
+  // check vote count
+  assert.fieldEquals('ERC20VotingProposal', proposalId, 'voteCount', '1');
+  // create calls
+  createGetVoteCall(
+    VOTING_ADDRESS,
+    voteId,
+    true,
+    false,
+    startDate,
+    endDate,
+    snapshotBlock,
+    supportRequiredPct,
+    participationRequiredPct,
+    votingPower,
+    '1',
+    '0',
+    '1',
+    actions
+  );
+  // create event
+  let event2 = createNewVoteCastEvent(
+    voteId,
+    ADDRESS_ONE,
+    '1', // abstain
+    votingPower,
+    VOTING_ADDRESS
+  );
+
+  handleVoteCast(event2);
+
+  assert.fieldEquals('ERC20VotingProposal', proposalId, 'voteCount', '2');
+
   clearStore();
 });
 
@@ -193,14 +218,6 @@ test('Run ERC Voting (handleVoteExecuted) mappings with mock event', () => {
   erc20VotingProposal.save();
 
   // create calls
-  let voteId = '0';
-  let startDate = '1644851000';
-  let endDate = '1644852000';
-  let snapshotBlock = '100';
-  let supportRequiredPct = '1000';
-  let participationRequiredPct = '500';
-  let votingPower = '1000';
-  let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
     VOTING_ADDRESS,
     voteId,

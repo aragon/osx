@@ -175,6 +175,7 @@ type ERC20VotingProposal implements Proposal @entity {
   yes: BigInt
   no: BigInt
   abstain: BigInt
+  voteCount: BigInt
   votingPower: BigInt!
   voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
   open: Boolean!
@@ -229,6 +230,7 @@ type AllowlistProposal implements Proposal @entity {
   yes: BigInt
   no: BigInt
   abstain: BigInt
+  voteCount: BigInt
   voters: [AllowlistVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!

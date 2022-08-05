@@ -1,4 +1,4 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
+import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -115,6 +115,11 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.yes = vote.value.value8;
       proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
+      proposalEntity.voteCount = BigInt.fromI64(
+        vote.value.value8.toI64() +
+          vote.value.value9.toI64() +
+          vote.value.value10.toI64()
+      );
       proposalEntity.save();
     }
   }

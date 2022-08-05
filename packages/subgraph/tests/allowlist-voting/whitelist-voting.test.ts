@@ -41,8 +41,9 @@ let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
 let supportRequiredPct = '1000';
-let participationRequired = '500';
+let participationRequiredPct = '500';
 let votingPower = '1000';
+let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
@@ -52,9 +53,7 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
   erc20VotingPackage.save();
 
   // create calls
-
   getVotesLengthCall(VOTING_ADDRESS, '1');
-  let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
     VOTING_ADDRESS,
     voteId,
@@ -64,7 +63,7 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
     endDate,
     snapshotBlock,
     supportRequiredPct,
-    participationRequired,
+    participationRequiredPct,
     votingPower,
     '0',
     '0',
@@ -131,7 +130,6 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   erc20VotingProposal.save();
 
   // create calls
-  let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
   createGetVoteCall(
     VOTING_ADDRESS,
     voteId,
@@ -141,7 +139,7 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
     endDate,
     snapshotBlock,
     supportRequiredPct,
-    participationRequired,
+    participationRequiredPct,
     votingPower,
     '1',
     '0',
@@ -166,6 +164,38 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
 
   // check proposal
   assert.fieldEquals('AllowlistProposal', proposalId, 'yes', '1');
+
+  // check vote count
+  assert.fieldEquals('AllowlistProposal', proposalId, 'voteCount', '1');
+  // create calls
+  createGetVoteCall(
+    VOTING_ADDRESS,
+    voteId,
+    true,
+    false,
+    startDate,
+    endDate,
+    snapshotBlock,
+    supportRequiredPct,
+    participationRequiredPct,
+    votingPower,
+    '1',
+    '0',
+    '1',
+    actions
+  );
+  // create event
+  let event2 = createNewVoteCastEvent(
+    voteId,
+    ADDRESS_ONE,
+    '1', // abstain
+    votingPower,
+    VOTING_ADDRESS
+  );
+
+  handleVoteCast(event2);
+
+  assert.fieldEquals('AllowlistProposal', proposalId, 'voteCount', '2');
 
   clearStore();
 });
