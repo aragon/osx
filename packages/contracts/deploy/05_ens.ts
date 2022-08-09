@@ -1,7 +1,12 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {ENS_ADDRESSES, getContractAddress, setupENS} from './helpers';
+import {
+  detemineAccountNextAddress,
+  ENS_ADDRESSES,
+  getContractAddress,
+  setupENS,
+} from './helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers, network} = hre;
@@ -15,6 +20,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let ensRegistryAddress = ENS_ADDRESSES[network.name];
   if (!ensRegistryAddress) {
     ensRegistryAddress = await setupENS(hre);
+  } else {
+    const ensRegistryContract = await ethers.getContractAt(
+      'ENSRegistry',
+      ensRegistryAddress
+    );
+
+    // deterministic
+    const futureAddress = await detemineAccountNextAddress(2, hre);
+
+    const approveTx = await ensRegistryContract.setApprovalForAll(
+      futureAddress,
+      true
+    );
+
+    await approveTx.wait();
   }
 
   await deploy('ENSSubdomainRegistrar', {
