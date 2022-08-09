@@ -51,6 +51,7 @@ async function createDao() {
 
   let overrides = await gas.setGasOverride(provider);
   console.log('Setting fee data:', overrides);
+  console.log('Calling Dao Factory at:', DAOFactoryContract.address);
 
   if (isERC20Voting) {
     let tokenConfig = [
@@ -59,6 +60,7 @@ async function createDao() {
       'DMDT',
     ];
     let mintConfig = [[signer.address], ['10000000000000000000000']];
+
     tx = await DAOFactoryContract.createERC20VotingDAO(
       daoConfig,
       votingSettings,
@@ -88,7 +90,7 @@ async function createDao() {
 
   const eventRegistry = reciept.events.find(event =>
     event.topics.includes(
-      ethers.utils.id('DAORegistered(address,address,address,string)')
+      ethers.utils.id('DAORegistered(address,address,string)')
     )
   );
   const eventFactory = reciept.events.find(event =>
