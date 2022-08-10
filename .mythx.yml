@@ -1,0 +1,11 @@
+output: mythx.json
+format: json
+
+analyze:
+    create-group: true
+    group-name: Core
+    solc: 0.8.10
+    remappings:
+        - "@openzeppelin/=./node_modules/@openzeppelin/"
+        - "@opengsn/=./node_modules/@opengsn/"
+        - "@ensdomains/=./node_modules/@ensdomains/"
