@@ -7,6 +7,8 @@ const networks = require('../../../../packages/contracts/networks.json');
 const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json');
 const gas = require('./estimateGas');
 
+// call from root folder as : node .github/helpers/contracts/dummy-dao/createDao.js <network-name> <creator-wallet-priv-key> <erc20 for ERC20 DAOs & none for allowList DAOs>
+
 async function createDao() {
   const args = process.argv.slice(2);
   const networkName = args[0];
