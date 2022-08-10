@@ -25,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let ensRegistryAddress = ENS_ADDRESSES[network.name];
 
   if (!ensRegistryAddress) {
-    ensRegistryAddress = await setupENS(hre);
+    ensRegistryAddress = await setupENS(hre, daoDomain.split('.')[0]);
   } else {
     const ensRegistryContract = await ethers.getContractAt(
       'ENSRegistry',

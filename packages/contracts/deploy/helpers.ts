@@ -7,7 +7,7 @@ import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  // rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
 };
 
 export async function getContractAddress(
@@ -55,7 +55,10 @@ export async function updateActiveContractsJSON(payload: {
   );
 }
 
-export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
+export async function setupENS(
+  hre: HardhatRuntimeEnvironment,
+  subDomain: string
+): Promise<any> {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
@@ -114,7 +117,7 @@ export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
   // make the deployer owning the domain 'eth' the owner of the subdomain 'dao.eth'
   const setSubnodeOwnerDAO = await ensRegistryContract.setSubnodeOwner(
     ensDomainHash('eth'),
-    ensLabelHash('dao'),
+    ensLabelHash(subDomain),
     deployer
   );
   await setSubnodeOwnerDAO.wait();
