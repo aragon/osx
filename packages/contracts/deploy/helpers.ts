@@ -7,7 +7,7 @@ import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  // rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
 };
 
 export async function getContractAddress(
