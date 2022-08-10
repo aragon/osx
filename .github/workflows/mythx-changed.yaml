@@ -32,4 +32,4 @@ jobs:
       - name: Install deps
         run: yarn
       - name: Run mythx
-        run: mythx --ci --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --mode ${{ inputs.mode }} ${{ steps.files.outputs.all }}
+        run: mythx --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --mode ${{ inputs.mode }} ${{ steps.files.outputs.all }}
