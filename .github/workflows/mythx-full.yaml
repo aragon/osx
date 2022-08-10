@@ -1,4 +1,4 @@
-name: Mythx Changed only
+name: Mythx Full
 
 on:
   workflow_dispatch:
