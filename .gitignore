@@ -38,3 +38,4 @@ deployments
 generated
 subgraph.yaml
 .bin
+mythx.json
