@@ -2,12 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import "./UnstructuredStorage.sol";
+import "@openzeppelin/contracts/utils/StorageSlot.sol";
 import "../core/IDAO.sol";
 
 /// @notice Core storage that stores information at very specific slots.
-contract AppStorage {
-    using UnstructuredStorage for bytes32;
+contract AppStorage {    
     
     /* Hardcoded constants to save gas
     bytes32 internal constant DAO_POSITION = keccak256("core.storage.dao");
@@ -17,12 +16,12 @@ contract AppStorage {
     /// @notice Gets the dao(DAO.sol contract) address which is set at DAO_POSITION slot.
     /// @return IDAO address of the DAO
     function dao() public view returns (IDAO) {
-        return IDAO(DAO_POSITION.getStorageAddress());
+        return IDAO(StorageSlot.getAddressSlot(DAO_POSITION).value);
     }
 
     /// @notice Sets the dao(DAO.sol contract) address at DAO_POSITION slot.
     function setDAO(address _dao) internal {
-        DAO_POSITION.setStorageAddress(_dao);
+        StorageSlot.getAddressSlot(DAO_POSITION).value = _dao;
     }
 
 }

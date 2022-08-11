@@ -21,5 +21,5 @@ contract PluginERC1967Proxy is ERC1967Proxy, AppStorage {
             setDAO(_dao);
         }
     }
-
+    
 }
