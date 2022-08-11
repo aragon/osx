@@ -36,9 +36,7 @@ abstract contract AragonUpgradablePlugin is Initializable, AppStorage, ContextUp
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) { }
 
-    /// @notice Used by AragonUpgradablePlugin to reserve storage space in 
-    /// case of state variable additions for this contract.
-    /// @dev Note that after adding one or multiple state variables, 
-    /// _gap size below + all state variables this contract uses should be 50.
+    /// @notice Used by `AragonUpgradablePlugin` to reserve storage space in case of state variable additions for this contract.
+    /// @dev After the addition of state variables, the number of storage slots including `_gap` size must add up to 50.
     uint256[50] private __gap;
 }
