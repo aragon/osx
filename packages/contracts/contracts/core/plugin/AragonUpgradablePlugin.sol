@@ -16,7 +16,7 @@ import "../IDAO.sol";
 abstract contract AragonUpgradablePlugin is Initializable, AppStorage, ContextUpgradeable, UUPSUpgradeable {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
-    // NOTE: Newly added contract variables should always have the size of _gap adapted below as well
+    // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _permissionId The hash of the permission identifier
