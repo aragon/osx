@@ -182,7 +182,7 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
+    /// @notice Checks if a permission is granted to an address on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
@@ -294,7 +294,7 @@ contract PermissionManager is Initializable {
         emit Frozen(_permissionId, msg.sender, _where);
     }
 
-    /// @notice Checks if a caller has the permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was in the setup.
+    /// @notice Checks if a caller has the permissions granted on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was in the setup.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
