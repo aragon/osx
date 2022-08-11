@@ -11,7 +11,7 @@ import "../permission/PermissionManager.sol";
 import "../../utils/AppStorage.sol";
 
 /// @title AragonPlugin
-/// @notice An Abtract Aragon Plugin(NON-UPGRADABLE) that plugin developers have to inherit from.
+/// @notice An abstract contract to inherit from when creating a non-upgradable plugin.
 abstract contract AragonPlugin is AppStorage, Context {
 
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
