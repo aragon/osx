@@ -18,7 +18,8 @@ contract AppStorage {
         return IDAO(StorageSlot.getAddressSlot(DAO_POSITION).value);
     }
 
-    /// @notice Sets the dao(DAO.sol contract) address at DAO_POSITION slot.
+    /// @notice Stores the`IDAO` contract in the `DAO_POSITION` storage slot.
+    /// @param _dao The address of the `IDAO` contract to be stored.
     function setDAO(address _dao) internal {
         StorageSlot.getAddressSlot(DAO_POSITION).value = _dao;
     }
