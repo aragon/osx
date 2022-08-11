@@ -115,7 +115,6 @@ contract PluginRepo is
             revert InvalidPluginFactoryContract({invalidPluginFactory: _pluginFactory});
         }
 
-        address basePluginAddress = PluginFactoryBase(_pluginFactory).getBasePluginAddress();
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
         uint16[3] memory currentSematicVersion;
@@ -123,17 +122,6 @@ contract PluginRepo is
         if (currentVersionIndex > 0) {
             Version memory currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
-
-            address currentBasePluginAddress = PluginFactoryBase(currentVersion.pluginFactory)
-                .getBasePluginAddress();
-
-            // Only allows base smart contract change on major version bumps
-            if (
-                currentBasePluginAddress != basePluginAddress &&
-                _newSemanticVersion[0] <= currentVersion.semanticVersion[0]
-            ) {
-                revert InvalidContractAddressForMajorBump();
-            }
         }
 
         if (!isValidBump(currentSematicVersion, _newSemanticVersion)) {
