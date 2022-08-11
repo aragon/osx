@@ -7,7 +7,7 @@ import "../core/permission/IPermissionOracle.sol";
 contract PermissionOracleMock is IPermissionOracle {
     bool internal _hasPermissionsResult = true;
 
-    function hasPermission(
+    function isGranted(
         address, /* _where */
         address, /* _who */
         bytes32, /* _permissionId */

@@ -16,7 +16,7 @@ contract TestParameterScopingPermissionOracle is IPermissionOracle {
         }
     }
 
-    function hasPermission(
+    function isGranted(
         address _where,
         address _who,
         bytes32 _permissionId,

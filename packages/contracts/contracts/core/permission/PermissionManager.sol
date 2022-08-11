@@ -315,12 +315,7 @@ contract PermissionManager is Initializable {
 
         // Since it's not a flag, assume it's an PermissionOracle and try-catch to skip failures
         try
-            IPermissionOracle(accessFlagOrAclOracle).hasPermission(
-                _where,
-                _who,
-                _permissionId,
-                _data
-            )
+            IPermissionOracle(accessFlagOrAclOracle).isGranted(_where, _who, _permissionId, _data)
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}
