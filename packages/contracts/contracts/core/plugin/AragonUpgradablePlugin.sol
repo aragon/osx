@@ -12,7 +12,7 @@ import "../../utils/AppStorage.sol";
 import "../IDAO.sol";
 
 /// @title AragonUpgradablePlugin
-/// @notice An Abtract Aragon Plugin(UUPS-UPGRADABLE) that plugin developers have to inherit from.
+/// @notice An abstract contract to inherit from when creating an `UUPSUpgradable` plugin.
 abstract contract AragonUpgradablePlugin is Initializable, AppStorage, ContextUpgradeable, UUPSUpgradeable {
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
