@@ -111,8 +111,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) external override returns (bool) {
-        return hasPermissions(_where, _who, _permissionId, _data);
+    ) external view override returns (bool) {
+        return isGranted(_where, _who, _permissionId, _data);
     }
 
     /// @inheritdoc IDAO
