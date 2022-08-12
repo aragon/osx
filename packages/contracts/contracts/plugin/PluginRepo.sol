@@ -52,9 +52,6 @@ contract PluginRepo is
     /// @param nextVersion The next semantic version number.
     error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
 
-    /// @notice Thrown if the contract does not change on a major version bump.
-    error InvalidContractAddressForMajorBump();
-
     /// @notice Thrown if version does not exist.
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);

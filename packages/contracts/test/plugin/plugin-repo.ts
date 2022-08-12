@@ -156,18 +156,6 @@ describe('PluginRepo', function () {
       );
     });
 
-    it.skip('fails when changing base contract address in non major version', async () => {
-      const pluginFactoryMock = await deployMockPluginFactory();
-
-      await expect(
-        pluginRepo.createVersion(
-          [1, 1, 0],
-          pluginFactoryMock.address,
-          initialContent
-        )
-      ).to.be.revertedWith(customError('InvalidContractAddressForMajorBump'));
-    });
-
     it('fails when version bump is invalid', async () => {
       await expect(
         pluginRepo.createVersion(
