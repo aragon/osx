@@ -69,38 +69,38 @@ contract PluginRepoFactory {
     /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
-        BulkPermissionsLib.Item[] memory items = new BulkPermissionsLib.Item[](5);
+        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](5);
 
         // Grant the plugin maintainer all the permissions required
-        items[0] = BulkPermissionsLib.Item(
+        items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
-            pluginRepo.CREATE_VERSION_PERMISSION_ID(),
-            maintainer
+            maintainer,
+            pluginRepo.CREATE_VERSION_PERMISSION_ID()
         );
-        items[1] = BulkPermissionsLib.Item(
+        items[1] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
-            pluginRepo.UPGRADE_PERMISSION_ID(),
-            maintainer
+            maintainer,
+            pluginRepo.UPGRADE_PERMISSION_ID()
         );
-        items[2] = BulkPermissionsLib.Item(
+        items[2] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
-            pluginRepo.ROOT_PERMISSION_ID(),
-            maintainer
+            maintainer,
+            pluginRepo.ROOT_PERMISSION_ID()
         );
 
         // Revoke permissions from the plugin repository factory (`address(this)`).
-        items[3] = BulkPermissionsLib.Item(
+        items[3] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Revoke,
-            pluginRepo.ROOT_PERMISSION_ID(),
-            address(this)
+            address(this),
+            pluginRepo.ROOT_PERMISSION_ID()
         );
-        items[4] = BulkPermissionsLib.Item(
+        items[4] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Revoke,
-            pluginRepo.CREATE_VERSION_PERMISSION_ID(),
-            address(this)
+            address(this),
+            pluginRepo.CREATE_VERSION_PERMISSION_ID()
         );
 
-        pluginRepo.bulk(address(pluginRepo), items);
+        pluginRepo.bulkOnSingleTarget(address(pluginRepo), items);
     }
 
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.

@@ -9,12 +9,22 @@ library BulkPermissionsLib {
     enum Operation {
         Grant,
         Revoke,
-        Freeze
+        Freeze,
+        GrantWithOracle
     }
 
-    struct Item {
+    struct ItemSingleTarget {
         Operation operation;
-        bytes32 permissionId;
         address who;
+        bytes32 permissionId;
     }
+
+    struct ItemMultiTarget {
+        Operation operation;
+        address where;
+        address who;
+        address oracle;
+        bytes32 permissionId;
+    }
+
 }
