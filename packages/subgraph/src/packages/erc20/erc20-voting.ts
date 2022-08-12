@@ -1,4 +1,4 @@
-import {dataSource} from '@graphprotocol/graph-ts';
+import {BigInt, dataSource} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -109,6 +109,12 @@ export function handleVoteCast(event: VoteCast): void {
   let voterEntity = ERC20VotingVoter.load(event.params.voter.toHexString());
   if (!voterEntity) {
     voterEntity = new ERC20VotingVoter(event.params.voter.toHexString());
+    voterEntity.address = event.params.voter.toHexString();
+    voterEntity.pkg = event.address.toHexString();
+    voterEntity.lastUpdated = event.block.timestamp;
+    voterEntity.save();
+  } else {
+    voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
   }
 
@@ -121,6 +127,9 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.yes = vote.value.value8;
       proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
+      proposalEntity.voteCount = vote.value.value8.plus(
+        vote.value.value9.plus(vote.value.value10)
+      );
       proposalEntity.save();
     }
   }

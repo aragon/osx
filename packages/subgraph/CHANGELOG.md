@@ -7,8 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added `members` to `ERC20VotingPackage`.
+- Added `lastUpdated` to `ERC20VotingVoter`.
+- added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
+
 ### Changed
 
+- Changed `users` to `members` in `AllowlistPackage`.
 - Adapted subgraph names according to the renaming of the contracts.
 - Updated `manifest`, `registry`, `registry.test`.
 - Refactored import statements.

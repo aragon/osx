@@ -2,10 +2,13 @@ const fs = require('fs/promises');
 const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
+
 const activeContracts = require('../../../../active_contracts.json');
 const networks = require('../../../../packages/contracts/networks.json');
 const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json');
 const gas = require('./estimateGas');
+
+// call from root folder as : node .github/helpers/contracts/dummy-dao/createDao.js <network-name> <creator-wallet-priv-key> <erc20 for ERC20 DAOs & none for allowList DAOs>
 
 async function createDao() {
   const args = process.argv.slice(2);
@@ -51,6 +54,7 @@ async function createDao() {
 
   let overrides = await gas.setGasOverride(provider);
   console.log('Setting fee data:', overrides);
+  console.log('Calling Dao Factory at:', DAOFactoryContract.address);
 
   if (isERC20Voting) {
     let tokenConfig = [
@@ -59,6 +63,7 @@ async function createDao() {
       'DMDT',
     ];
     let mintConfig = [[signer.address], ['10000000000000000000000']];
+
     tx = await DAOFactoryContract.createERC20VotingDAO(
       daoConfig,
       votingSettings,
@@ -88,7 +93,7 @@ async function createDao() {
 
   const eventRegistry = reciept.events.find(event =>
     event.topics.includes(
-      ethers.utils.id('DAORegistered(address,address,address,string)')
+      ethers.utils.id('DAORegistered(address,address,string)')
     )
   );
   const eventFactory = reciept.events.find(event =>

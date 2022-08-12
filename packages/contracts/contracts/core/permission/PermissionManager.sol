@@ -91,8 +91,8 @@ contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(address _where, bytes32 _permissionId) {
         if (
-            !(hasPermissions(_where, msg.sender, _permissionId, msg.data) ||
-                hasPermissions(address(this), msg.sender, _permissionId, msg.data))
+            !(isGranted(_where, msg.sender, _permissionId, msg.data) ||
+                isGranted(address(this), msg.sender, _permissionId, msg.data))
         )
             revert Unauthorized({
                 here: address(this),
@@ -182,22 +182,22 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
+    /// @notice Checks if a permission is granted to an address on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered.
     /// @return bool Returns true if `who` has the permissions on the target contract via the specified permission identifier.
-    function hasPermissions(
+    function isGranted(
         address _where,
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) public returns (bool) {
+    ) public view returns (bool) {
         return
-            _hasPermission(_where, _who, _permissionId, _data) || // check if _who has permission for _permissionId on _where
-            _hasPermission(_where, ANY_ADDR, _permissionId, _data) || // check if anyone has permission for _permissionId on _where
-            _hasPermission(ANY_ADDR, _who, _permissionId, _data); // check if _who has permission for _permissionId on any contract
+            _isGranted(_where, _who, _permissionId, _data) || // check if _who has permission for _permissionId on _where
+            _isGranted(_where, ANY_ADDR, _permissionId, _data) || // check if anyone has permission for _permissionId on _where
+            _isGranted(ANY_ADDR, _who, _permissionId, _data); // check if _who has permission for _permissionId on any contract
     }
 
     /// @notice This method is used to check if permissions for a given permission identifier on a contract are frozen.
@@ -294,18 +294,18 @@ contract PermissionManager is Initializable {
         emit Frozen(_permissionId, msg.sender, _where);
     }
 
-    /// @notice Checks if a caller has the permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was in the setup.
+    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was specified in the setup.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
     /// @param _data The optional data passed to the `PermissionOracle` registered..
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionId identifier.
-    function _hasPermission(
+    function _isGranted(
         address _where,
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) internal returns (bool) {
+    ) internal view returns (bool) {
         address accessFlagOrAclOracle = permissionsHashed[
             permissionHash(_where, _who, _permissionId)
         ];
@@ -315,12 +315,7 @@ contract PermissionManager is Initializable {
 
         // Since it's not a flag, assume it's an PermissionOracle and try-catch to skip failures
         try
-            IPermissionOracle(accessFlagOrAclOracle).hasPermissions(
-                _where,
-                _who,
-                _permissionId,
-                _data
-            )
+            IPermissionOracle(accessFlagOrAclOracle).isGranted(_where, _who, _permissionId, _data)
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}

@@ -103,9 +103,7 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
       : participationRequiredPct.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
-    let tokenId = handleERC20Token(token.value);
-
-    packageEntity.token = token.reverted ? null : tokenId;
+    packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
 
     // Create template
     let context = new DataSourceContext();
