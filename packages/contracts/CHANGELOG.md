@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed restrictions regarding plugin's address in `PluginRepo`.
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
 - Removed `ERC165Registry`.
 
