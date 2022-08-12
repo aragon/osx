@@ -26,7 +26,7 @@ abstract contract IDAO {
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) external virtual returns (bool);
+    ) external view virtual returns (bool);
 
     /// @notice Updates the DAO metadata (e.g., an IPFS hash).
     /// @param _metadata The IPFS hash of the new metadata object.

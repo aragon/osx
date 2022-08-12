@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const {ethers} = require('ethers');
+
 const networks = require('../../../../packages/contracts/networks.json');
 
 async function setGasOverride(provider) {

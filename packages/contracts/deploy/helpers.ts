@@ -7,6 +7,7 @@ import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
 };
 
 export async function getContractAddress(
@@ -54,7 +55,10 @@ export async function updateActiveContractsJSON(payload: {
   );
 }
 
-export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
+export async function setupENS(
+  hre: HardhatRuntimeEnvironment,
+  subDomain: string
+): Promise<any> {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
@@ -82,45 +86,68 @@ export async function setupENS(hre: HardhatRuntimeEnvironment): Promise<any> {
     'PublicResolver',
     ensResolverAddress
   );
-  await ensRegistryContract.setSubnodeOwner(
+  const setSubnodeOwnerTx = await ensRegistryContract.setSubnodeOwner(
     ensDomainHash(''),
     ensLabelHash('resolver'),
     deployer
   );
+  await setSubnodeOwnerTx.wait();
 
   const resolverNode = ensDomainHash('resolver');
 
-  await ensRegistryContract.setResolver(resolverNode, ensResolverAddress);
+  const setResolverTx = await ensRegistryContract.setResolver(
+    resolverNode,
+    ensResolverAddress
+  );
+  await setResolverTx.wait();
+
   await ensResolverContract['setAddr(bytes32,address)'](
     resolverNode,
     ensResolverAddress
   );
 
   // make the deployer owning the root ('') the owner of the subdomain 'eth'
-  await ensRegistryContract.setSubnodeOwner(
+  const setSubnodeOwnerETH = await ensRegistryContract.setSubnodeOwner(
     ensDomainHash(''),
     ensLabelHash('eth'),
     deployer
   );
+  await setSubnodeOwnerETH.wait();
 
   // make the deployer owning the domain 'eth' the owner of the subdomain 'dao.eth'
-  await ensRegistryContract.setSubnodeOwner(
+  const setSubnodeOwnerDAO = await ensRegistryContract.setSubnodeOwner(
     ensDomainHash('eth'),
-    ensLabelHash('dao'),
+    ensLabelHash(subDomain),
     deployer
   );
+  await setSubnodeOwnerDAO.wait();
 
   // deterministic
+  const futureAddress = await detemineAccountNextAddress(2, hre);
+  const setApprovalForAll = await ensRegistryContract.setApprovalForAll(
+    futureAddress,
+    true
+  );
+  await setApprovalForAll.wait();
+
+  return ensRegistryAddress;
+}
+
+export async function detemineAccountNextAddress(
+  index: number,
+  hre: HardhatRuntimeEnvironment
+): Promise<string> {
+  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deploy} = deployments;
+  const {deployer} = await getNamedAccounts();
+
   const [owner] = await ethers.getSigners();
   const nonce = await owner.getTransactionCount();
   const futureAddress = ethers.utils.getContractAddress({
     from: deployer,
-    nonce: nonce + 2, // next address is implementation, so we use +2 for the proxy address
+    nonce: nonce + index,
   });
-
-  await ensRegistryContract.setApprovalForAll(futureAddress, true);
-
-  return ensRegistryAddress;
+  return futureAddress;
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

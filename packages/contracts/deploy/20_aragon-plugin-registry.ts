@@ -17,7 +17,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     proxy: {
       owner: deployer,
-      proxyContract: 'UUPSProxy',
+      proxyContract: 'ERC1967Proxy',
+      proxyArgs: ['{implementation}', '{data}'],
       execute: {
         init: {
           methodName: 'initialize',
@@ -28,5 +29,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.runAtTheEnd = true;
+// func.runAtTheEnd = true;
 func.tags = ['AragonPluginRegistry'];

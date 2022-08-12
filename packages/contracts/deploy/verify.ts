@@ -25,9 +25,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 
   const RegistryContract = await ethers.getContractAt(
-    'Registry',
+    'DAORegistry',
     (
-      await deployments.get('Registry')
+      await deployments.get('DAORegistry')
     ).address
   );
 

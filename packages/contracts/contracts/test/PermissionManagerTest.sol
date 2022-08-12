@@ -44,7 +44,7 @@ contract PermissionManagerTest is PermissionManager {
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) public returns (bool) {
-        return _hasPermission(_where, _who, _permissionId, _data);
+    ) public view returns (bool) {
+        return _isGranted(_where, _who, _permissionId, _data);
     }
 }

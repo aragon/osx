@@ -642,62 +642,62 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('hasPermissions', () => {
-    it('should return true fcr granted user', async () => {
+  describe('isGranted', () => {
+    it('should return true if the permission is granted to the user', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const hasPermissions = await pm.callStatic.hasPermissions(
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(true);
+      expect(isGranted).to.be.equal(true);
     });
 
-    it('should return false for non granted user', async () => {
-      const hasPermissions = await pm.callStatic.hasPermissions(
+    it('should return false if the permissions is not granted to the user', async () => {
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(false);
+      expect(isGranted).to.be.equal(false);
     });
 
-    it('should return true for any who granted permission', async () => {
+    it('should return true for permissions granted to any address on a specific target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
       await pm.grant(pm.address, anyAddr, ADMIN_PERMISSION_ID);
-      const hasPermissions = await pm.callStatic.hasPermissions(
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(true);
+      expect(isGranted).to.be.equal(true);
     });
 
-    it('should return true for any where granted permission', async () => {
+    it('should return true for permissions granted to a specifc address on any target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
       await pm.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
-      const hasPermissions = await pm.callStatic.hasPermissions(
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(true);
+      expect(isGranted).to.be.equal(true);
     });
 
     it('should be callable by anyone', async () => {
-      const hasPermissions = await pm
+      const isGranted = await pm
         .connect(otherSigner)
-        .callStatic.hasPermissions(
+        .callStatic.isGranted(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           []
         );
-      expect(hasPermissions).to.be.equal(false);
+      expect(isGranted).to.be.equal(false);
     });
   });
 
@@ -737,7 +737,7 @@ describe('Core: PermissionManager', function () {
       permissionOracle = await aclOracleFactory.deploy();
     });
 
-    it('should call IPermissionOracle.hasPermissions', async () => {
+    it('should call IPermissionOracle.isGranted', async () => {
       await pm.grantWithOracle(
         pm.address,
         otherSigner.address,
@@ -745,7 +745,7 @@ describe('Core: PermissionManager', function () {
         permissionOracle.address
       );
       expect(
-        await pm.callStatic.hasPermissions(
+        await pm.callStatic.isGranted(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
@@ -755,7 +755,7 @@ describe('Core: PermissionManager', function () {
 
       await permissionOracle.setWillPerform(false);
       expect(
-        await pm.callStatic.hasPermissions(
+        await pm.callStatic.isGranted(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
