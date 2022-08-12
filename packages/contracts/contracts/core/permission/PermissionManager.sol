@@ -107,9 +107,9 @@ contract PermissionManager is Initializable {
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
     function grant(
-        address _where, // erc20voting
-        address _who, // giorgi
-        bytes32 _permissionId // create_vote
+        address _where,
+        address _who,
+        bytes32 _permissionId
     ) external auth(_where, ROOT_PERMISSION_ID) {
         _grant(_where, _who, _permissionId);
     }
@@ -190,7 +190,12 @@ contract PermissionManager is Initializable {
             else if (item.operation == BulkPermissionsLib.Operation.Freeze)
                 _freeze(item.where, item.permissionId);
             else if (item.operation == BulkPermissionsLib.Operation.GrantWithOracle)
-                _grantWithOracle(item.where, item.who, item.permissionId, IPermissionOracle(item.oracle));
+                _grantWithOracle(
+                    item.where, 
+                    item.who, 
+                    item.permissionId,
+                    IPermissionOracle(item.oracle)
+                );
         }
     }
     
