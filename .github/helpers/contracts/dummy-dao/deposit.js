@@ -2,6 +2,7 @@ const fs = require('fs/promises');
 const fetch = require('node-fetch');
 const path = require('path');
 const {ethers} = require('ethers');
+
 const networks = require('../../../../packages/contracts/networks.json');
 const daoJson = require('../../../../packages/contracts/artifacts/contracts/core/IDAO.sol/IDAO.json');
 const erc20Json = require('../../../../packages/contracts/artifacts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json');
@@ -147,7 +148,7 @@ async function deposit() {
   content[networkName].dao[
     isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
   ].deposits = results;
-  
+
   //write file
   await fs.writeFile(
     path.join('./', 'dummy_daos.json'),

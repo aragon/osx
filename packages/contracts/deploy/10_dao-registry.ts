@@ -16,7 +16,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     proxy: {
       owner: deployer,
-      proxyContract: 'PluginERC1967Proxy',
+      proxyContract: 'ERC1967Proxy',
+      proxyArgs: ['{implementation}', '{data}'],
       execute: {
         init: {
           methodName: 'initialize',

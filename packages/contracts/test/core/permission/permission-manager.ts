@@ -14,16 +14,27 @@ const ALLOW_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000002'
 );
 
+const addressZero = ethers.constants.AddressZero;
+
 enum Operation {
   Grant,
   Revoke,
   Freeze,
+  GrantWithOracle
 }
 
-interface Item {
+interface ItemSingleTarget {
   operation: Operation;
-  permissionId: string;
   who: string;
+  permissionId: string;
+}
+
+interface ItemMultiTarget {
+  operation: Operation;
+  where: string;
+  who: string;
+  oracle: string;
+  permissionId: string;
 }
 
 describe('Core: PermissionManager', function () {
@@ -419,27 +430,164 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('bulk', () => {
+  describe('bulk on multiple target', () => {
+    it('should bulk grant ADMIN_PERMISSION on different targets', async () => {
+      const signers = await ethers.getSigners();
+      await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID)
+      const bulkItems: ItemMultiTarget[] = [
+        {
+          operation: Operation.Grant,
+          where: signers[1].address,
+          who: signers[2].address,
+          oracle: addressZero,
+          permissionId: ADMIN_PERMISSION_ID
+        },
+        {
+          operation: Operation.Grant,
+          where: signers[2].address,
+          who: signers[3].address,
+          oracle: addressZero,
+          permissionId: ADMIN_PERMISSION_ID
+        },
+      ]
+
+      await pm.bulkOnMultiTarget(bulkItems);
+      for (const item of bulkItems) {
+        const permission = await pm.getAuthPermission(
+          item.where,
+          item.who,
+          item.permissionId
+        );
+        expect(permission).to.be.equal(ALLOW_FLAG);
+      }
+    })
+
+    it('should bulk freeze', async () => {
+      const signers = await ethers.getSigners();
+      await pm.grant(pm.address, signers[0].address, ethers.utils.id('PERMISSION_ID_1'))
+      await pm.grant(pm.address, signers[0].address, ethers.utils.id('PERMISSION_ID_2'))
+      const bulkItems: ItemMultiTarget[] = [
+        {
+          operation: Operation.Freeze,
+          where: signers[1].address,
+          who: signers[2].address,
+          oracle: addressZero,
+          permissionId: ethers.utils.id('PERMISSION_ID_1')
+        },
+        {
+          operation: Operation.Freeze,
+          where: signers[2].address,
+          who: signers[3].address,
+          oracle: addressZero,
+          permissionId: ethers.utils.id('PERMISSION_ID_2')
+        }
+      ];
+      await pm.bulkOnMultiTarget(bulkItems);
+      for (const item of bulkItems) {
+        const permission = await pm.isFrozen(item.where, item.permissionId);
+        expect(permission).to.be.equal(true);
+      }
+    });
+
+    it('should bulk revoke', async () => {
+      const signers = await ethers.getSigners();
+      await pm.grant(signers[1].address, signers[0].address, ADMIN_PERMISSION_ID);
+      await pm.grant(signers[2].address, signers[0].address, ADMIN_PERMISSION_ID);
+      const bulkItems: ItemMultiTarget[] = [
+        {
+          operation: Operation.Revoke,
+          where: signers[1].address,
+          who: signers[0].address,
+          oracle: addressZero,
+          permissionId: ADMIN_PERMISSION_ID
+        },
+        {
+          operation: Operation.Revoke,
+          where: signers[2].address,
+          who: signers[0].address,
+          oracle: addressZero,
+          permissionId: ADMIN_PERMISSION_ID
+        }
+      ];
+      await pm.bulkOnMultiTarget(bulkItems);
+      for (const item of bulkItems) {
+        const permission = await pm.getAuthPermission(
+          item.where,
+          item.who,
+          item.permissionId
+        );
+        expect(permission).to.be.equal(UNSET_FLAG);
+      }
+    });
+
+    it('should grant with oracle', async () => {
+      const signers = await ethers.getSigners();
+      await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
+      const bulkItems: ItemMultiTarget[] = [
+        {
+          operation: Operation.GrantWithOracle,
+          where: signers[1].address,
+          who: signers[0].address,
+          oracle: signers[3].address,
+          permissionId: ADMIN_PERMISSION_ID
+        },
+        {
+          operation: Operation.GrantWithOracle,
+          where: signers[2].address,
+          who: signers[0].address,
+          oracle: signers[4].address,
+          permissionId: ADMIN_PERMISSION_ID
+        }
+      ];
+      await pm.bulkOnMultiTarget(bulkItems);
+      for (const item of bulkItems) {
+        const permission = await pm.getAuthPermission(
+          item.where,
+          item.who,
+          item.permissionId
+        );
+        expect(permission).to.be.equal(item.oracle);
+      }
+    });
+
+    it('should revert on errors', async () => {
+      const signers = await ethers.getSigners();
+      const bulkItems: ItemMultiTarget[] = [
+        {
+          operation: Operation.Grant,
+          where: signers[1].address,
+          who: signers[0].address,
+          oracle: addressZero,
+          permissionId: ADMIN_PERMISSION_ID
+        }
+      ];
+
+      await expect(pm.bulkOnMultiTarget(bulkItems)).to.be.revertedWith(
+        customError('Unauthorized', pm.address, signers[1].address, signers[0].address, ADMIN_PERMISSION_ID)
+      )
+    });
+  })
+  describe('bulk on single target', () => {
     it('should bulk grant ADMIN_PERMISSION', async () => {
       const signers = await ethers.getSigners();
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
       ];
-      await pm.bulk(pm.address, bulkItems);
+      await pm.bulkOnSingleTarget(pm.address, bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           pm.address,
@@ -452,24 +600,24 @@ describe('Core: PermissionManager', function () {
 
     it('should bulk freeze', async () => {
       const signers = await ethers.getSigners();
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Freeze,
-          permissionId: ethers.utils.id('PERMISSION_ID_1'),
           who: signers[1].address,
+          permissionId: ethers.utils.id('PERMISSION_ID_1')
         },
         {
           operation: Operation.Freeze,
-          permissionId: ethers.utils.id('PERMISSION_ID_2'),
           who: signers[2].address,
+          permissionId: ethers.utils.id('PERMISSION_ID_2')
         },
         {
           operation: Operation.Freeze,
-          permissionId: ethers.utils.id('PERMISSION_ID_3'),
           who: signers[3].address,
+          permissionId: ethers.utils.id('PERMISSION_ID_3')
         },
       ];
-      await pm.bulk(pm.address, bulkItems);
+      await pm.bulkOnSingleTarget(pm.address, bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.isFrozen(pm.address, item.permissionId);
         expect(permission).to.be.equal(true);
@@ -481,24 +629,24 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[2].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Revoke,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Revoke,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Revoke,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
       ];
-      await pm.bulk(pm.address, bulkItems);
+      await pm.bulkOnSingleTarget(pm.address, bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           pm.address,
@@ -512,25 +660,25 @@ describe('Core: PermissionManager', function () {
     it('should handle bulk mixed', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Revoke,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Freeze,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
       ];
 
-      await pm.bulk(pm.address, bulkItems);
+      await pm.bulkOnSingleTarget(pm.address, bulkItems);
       expect(
         await pm.getAuthPermission(
           pm.address,
@@ -553,30 +701,30 @@ describe('Core: PermissionManager', function () {
     it('should revert on error', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Revoke,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[1].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[2].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Freeze,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
         {
           operation: Operation.Freeze,
-          permissionId: ADMIN_PERMISSION_ID,
           who: signers[3].address,
+          permissionId: ADMIN_PERMISSION_ID
         },
       ];
 
-      await expect(pm.bulk(pm.address, bulkItems)).to.be.revertedWith(
+      await expect(pm.bulkOnSingleTarget(pm.address, bulkItems)).to.be.revertedWith(
         customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
       );
       expect(
@@ -599,15 +747,15 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should not allow', async () => {
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: otherSigner.address,
+          permissionId: ADMIN_PERMISSION_ID
         },
       ];
       await expect(
-        pm.connect(otherSigner).bulk(pm.address, bulkItems)
+        pm.connect(otherSigner).bulkOnSingleTarget(pm.address, bulkItems)
       ).to.be.revertedWith(
         customError(
           'Unauthorized',
@@ -621,15 +769,15 @@ describe('Core: PermissionManager', function () {
 
     it('should not allow for non ROOT', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const bulkItems: Item[] = [
+      const bulkItems: ItemSingleTarget[] = [
         {
           operation: Operation.Grant,
-          permissionId: ADMIN_PERMISSION_ID,
           who: otherSigner.address,
+          permissionId: ADMIN_PERMISSION_ID
         },
       ];
       await expect(
-        pm.connect(otherSigner).bulk(pm.address, bulkItems)
+        pm.connect(otherSigner).bulkOnSingleTarget(pm.address, bulkItems)
       ).to.be.revertedWith(
         customError(
           'Unauthorized',
@@ -642,62 +790,62 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('hasPermissions', () => {
-    it('should return true fcr granted user', async () => {
+  describe('isGranted', () => {
+    it('should return true if the permission is granted to the user', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const hasPermissions = await pm.callStatic.hasPermissions(
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(true);
+      expect(isGranted).to.be.equal(true);
     });
 
-    it('should return false for non granted user', async () => {
-      const hasPermissions = await pm.callStatic.hasPermissions(
+    it('should return false if the permissions is not granted to the user', async () => {
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(false);
+      expect(isGranted).to.be.equal(false);
     });
 
-    it('should return true for any who granted permission', async () => {
+    it('should return true for permissions granted to any address on a specific target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
       await pm.grant(pm.address, anyAddr, ADMIN_PERMISSION_ID);
-      const hasPermissions = await pm.callStatic.hasPermissions(
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(true);
+      expect(isGranted).to.be.equal(true);
     });
 
-    it('should return true for any where granted permission', async () => {
+    it('should return true for permissions granted to a specifc address on any target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
       await pm.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
-      const hasPermissions = await pm.callStatic.hasPermissions(
+      const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
         ADMIN_PERMISSION_ID,
         []
       );
-      expect(hasPermissions).to.be.equal(true);
+      expect(isGranted).to.be.equal(true);
     });
 
     it('should be callable by anyone', async () => {
-      const hasPermissions = await pm
+      const isGranted = await pm
         .connect(otherSigner)
-        .callStatic.hasPermissions(
+        .callStatic.isGranted(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
           []
         );
-      expect(hasPermissions).to.be.equal(false);
+      expect(isGranted).to.be.equal(false);
     });
   });
 
@@ -737,7 +885,7 @@ describe('Core: PermissionManager', function () {
       permissionOracle = await aclOracleFactory.deploy();
     });
 
-    it('should call IPermissionOracle.hasPermissions', async () => {
+    it('should call IPermissionOracle.isGranted', async () => {
       await pm.grantWithOracle(
         pm.address,
         otherSigner.address,
@@ -745,7 +893,7 @@ describe('Core: PermissionManager', function () {
         permissionOracle.address
       );
       expect(
-        await pm.callStatic.hasPermissions(
+        await pm.callStatic.isGranted(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,
@@ -755,7 +903,7 @@ describe('Core: PermissionManager', function () {
 
       await permissionOracle.setWillPerform(false);
       expect(
-        await pm.callStatic.hasPermissions(
+        await pm.callStatic.isGranted(
           pm.address,
           otherSigner.address,
           ADMIN_PERMISSION_ID,

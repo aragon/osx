@@ -12,10 +12,10 @@ interface IPermissionOracle {
     /// @param _permissionId The permission identifier.
     /// @param _data Optional data passed to the `PermissionOracle` implementation.
     /// @return allowed Returns true if the call is permitted.
-    function hasPermissions(
+    function isGranted(
         address _where,
         address _who,
         bytes32 _permissionId,
         bytes calldata _data
-    ) external returns (bool allowed);
+    ) external view returns (bool allowed);
 }

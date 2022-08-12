@@ -1,4 +1,4 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
+import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -115,6 +115,10 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.yes = vote.value.value8;
       proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
+      proposalEntity.voteCount = vote.value.value8.plus(
+        vote.value.value9.plus(vote.value.value10)
+      );
+
       proposalEntity.save();
     }
   }
@@ -169,6 +173,7 @@ export function handleUsersAdded(event: UsersAdded): void {
     let voterEntity = AllowlistVoter.load(user.toHexString());
     if (!voterEntity) {
       voterEntity = new AllowlistVoter(user.toHexString());
+      voterEntity.address = user.toHexString();
       voterEntity.pkg = event.address.toHexString();
       voterEntity.save();
     }

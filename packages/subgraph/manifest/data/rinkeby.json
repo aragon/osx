@@ -4,8 +4,8 @@
   "dataSources": {
     "DAORegistry": {
       "name": "DAORegistry",
-      "address": "0xCC5FD930dcbA825e9686F987A9243036Db4A317D",
-      "startBlock": 10981816
+      "address": "0xeacB900925d8300e3501df13F0Dc6930892060f4",
+      "startBlock": 11168251
     }
   }
 }

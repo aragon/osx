@@ -66,7 +66,7 @@ contract TestIdGatingOracle is IPermissionOracle {
 
     /// @notice Checks the calldata and expects the `id` to be the first argument of type `uint256`
 
-    function hasPermissions(
+    function isGranted(
         address _where,
         address _who,
         bytes32 _permissionId,
