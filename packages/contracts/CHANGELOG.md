@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated deploy script to correctly use `ERC1967Proxy`.
-- Renamed `hasPermission` to `isGranted` in both `PermissionManager` and `IPermissionOracle`
+- Renamed `hasPermission` to `isGranted` in both `PermissionManager` and `IPermissionOracle`.
 - Renamed several contracts, methods, variables, and constants as well as associated folder names.
 - Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`.
 - Changed `registry.ts` to `dao-registry.ts` and updated testing.

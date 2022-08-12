@@ -2,6 +2,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
+
 const activeContracts = require('../../../../active_contracts.json');
 const networks = require('../../../../packages/contracts/networks.json');
 const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json');

@@ -3,9 +3,10 @@ const fetch = require('node-fetch');
 const path = require('path');
 const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
+
 const networks = require('../../../../packages/contracts/networks.json');
 const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json');
-const WhiteVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
+const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 
@@ -41,7 +42,7 @@ async function vote() {
   } else {
     VotingContract = new ethers.Contract(
       votingAddress,
-      WhiteVotingJson.abi,
+      AllowVotingJson.abi,
       signer
     );
   }

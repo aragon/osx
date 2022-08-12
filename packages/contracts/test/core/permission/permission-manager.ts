@@ -643,7 +643,7 @@ describe('Core: PermissionManager', function () {
   });
 
   describe('isGranted', () => {
-    it('should return true fcr granted user', async () => {
+    it('should return true if the permission is granted to the user', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       const isGranted = await pm.callStatic.isGranted(
         pm.address,
@@ -654,7 +654,7 @@ describe('Core: PermissionManager', function () {
       expect(isGranted).to.be.equal(true);
     });
 
-    it('should return false for non granted user', async () => {
+    it('should return false if the permissions is not granted to the user', async () => {
       const isGranted = await pm.callStatic.isGranted(
         pm.address,
         otherSigner.address,
@@ -664,7 +664,7 @@ describe('Core: PermissionManager', function () {
       expect(isGranted).to.be.equal(false);
     });
 
-    it('should return true for any who granted permission', async () => {
+    it('should return true for permissions granted to any address on a specific target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
       await pm.grant(pm.address, anyAddr, ADMIN_PERMISSION_ID);
       const isGranted = await pm.callStatic.isGranted(
@@ -676,7 +676,7 @@ describe('Core: PermissionManager', function () {
       expect(isGranted).to.be.equal(true);
     });
 
-    it('should return true for any where granted permission', async () => {
+    it('should return true for permissions granted to a specifc address on any target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
       await pm.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
       const isGranted = await pm.callStatic.isGranted(
