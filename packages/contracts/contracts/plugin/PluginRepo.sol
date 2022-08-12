@@ -52,9 +52,6 @@ contract PluginRepo is
     /// @param nextVersion The next semantic version number.
     error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
 
-    /// @notice Thrown if the contract does not change on a major version bump.
-    error InvalidContractAddressForMajorBump();
-
     /// @notice Thrown if version does not exist.
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);
@@ -115,7 +112,6 @@ contract PluginRepo is
             revert InvalidPluginFactoryContract({invalidPluginFactory: _pluginFactory});
         }
 
-        address basePluginAddress = PluginFactoryBase(_pluginFactory).getBasePluginAddress();
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
         uint16[3] memory currentSematicVersion;
@@ -123,17 +119,6 @@ contract PluginRepo is
         if (currentVersionIndex > 0) {
             Version memory currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
-
-            address currentBasePluginAddress = PluginFactoryBase(currentVersion.pluginFactory)
-                .getBasePluginAddress();
-
-            // Only allows base smart contract change on major version bumps
-            if (
-                currentBasePluginAddress != basePluginAddress &&
-                _newSemanticVersion[0] <= currentVersion.semanticVersion[0]
-            ) {
-                revert InvalidContractAddressForMajorBump();
-            }
         }
 
         if (!isValidBump(currentSematicVersion, _newSemanticVersion)) {
