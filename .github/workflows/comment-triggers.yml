@@ -11,7 +11,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     outputs:
       run: ${{ steps.check.outputs.triggered }}
-      mode: ${{ steps.mode.outputs.moode }}
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
@@ -40,7 +40,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     outputs:
       run: ${{ steps.check.outputs.triggered }}
-      mode: ${{ steps.mode.outputs.moode }}
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
