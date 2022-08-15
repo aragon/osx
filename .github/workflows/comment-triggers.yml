@@ -24,7 +24,7 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment }}"" | sed "s|/mythx partial ||" | sed "s/ //")
+          mode=$(echo "${{ github.event.comment.body }}"" | sed "s|/mythx partial ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
   mythx_partial_run:
     needs: ['mythx_partial']
@@ -53,7 +53,7 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment }}"" | sed "s|/mythx full ||" | sed "s/ //")
+          mode=$(echo "${{ github.event.comment.body }}"" | sed "s|/mythx full ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
   mythx_full_run:
     needs: ['mythx_full']
@@ -80,7 +80,7 @@ jobs:
       - name: Get type
         id: type
         run: |
-          type=$(echo "${{ github.event.comment }}"" | sed "s|/release ||" | sed "s/ //")
+          type=$(echo "${{ github.event.comment.body }}"" | sed "s|/release ||" | sed "s/ //")
           echo "::set-output name=type::$type"
       - name: add label
         uses: actions-ecosystem/action-add-labels@v1
@@ -102,7 +102,7 @@ jobs:
       - name: Get type
         id: type
         run: |
-          type=$(echo "${{ github.event.comment }}"" | sed "s|/subgraph ||" | sed "s/ //")
+          type=$(echo "${{ github.event.comment.body }}"" | sed "s|/subgraph ||" | sed "s/ //")
           echo "::set-output name=type::$type"
       - name: add label
         uses: actions-ecosystem/action-add-labels@v1
