@@ -20,7 +20,7 @@ contract CountPluginManagerV1 is PluginManager {
         external
         virtual
         override
-        returns (bytes memory init, address[] memory relatedContracts)
+        returns (address plugin, address[] memory relatedContracts)
     {   
         // This changes as in V2, initialize now expects 3 arguments..
         (address _multiplyHelper, uint256 _num, uint256 _newVariable) = abi.decode(
@@ -34,7 +34,7 @@ contract CountPluginManagerV1 is PluginManager {
             _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
         }
 
-        init = abi.encodeWithSelector(
+        bytes memory init = abi.encodeWithSelector(
             bytes4(keccak256("initialize(address,uint256)")),
             _multiplyHelper,
             _num,
@@ -42,15 +42,26 @@ contract CountPluginManagerV1 is PluginManager {
         );
 
         relatedContracts[0] = _multiplyHelper;
+
+        plugin = createProxy(dao, getImplementationAddress(), init);
     }
 
     function update(
+        address proxy,
         uint16[3] calldata oldVersion,
-        uint16[3] calldata newVersion,
-        bytes memory updateInitData,
         bytes memory data
-    ) external virtual override returns (bytes memory init, address[] memory relatedContracts) {
-        init = abi.encodeWithSelector(bytes4(keccak256("update(uint)")), updateInitData);
+    ) external virtual override returns (address[] memory relatedContracts) {
+        uint _newVariable;
+        if(oldVersion[0] == 1) {
+            (_newVariable) = abi.decode(data, (uint));
+        }
+
+        // TODO: Shall we leave it here or make devs call `upgrade` from our abstract factory
+        // Just a way of reinforcing...
+        // TODO1: proxy needs casting to UUPSSUpgradable
+        // TODO2: 2nd line needs casting to CountV2
+        // proxy.upgradeTo(getImplementationAddress());
+        CountV2(proxy).setNewVariable(_newVariable);
     }
 
     // TODO: WOULD THIS NEED dao as well to be passed
@@ -101,10 +112,9 @@ contract CountPluginManagerV1 is PluginManager {
         helperNames[0] = "MultiplyHelper";
     }
 
+    // TODO: will this need `proxy` address as well ? 
     function getUpdatePermissions(
         uint16[3] calldata oldVersion,
-        uint16[3] calldata newVersion,
-        bytes memory updateInitData,
         bytes memory data
     )
         external
@@ -139,7 +149,7 @@ contract CountPluginManagerV1 is PluginManager {
         );
     }
 
-    function getBaseAddress() external view virtual override returns (address) {
+    function getImplementationAddress() public view virtual override returns (address) {
         return address(countBase);
     }
 
@@ -147,19 +157,7 @@ contract CountPluginManagerV1 is PluginManager {
         return "(address multiplyHelper, uint num, uint newVariable)";
     }
 
-    // With this approach, dev can anytime overwrite
-    function updateInitABI(uint16[3] calldata oldVersion, uint16[3] calldata newVersion)
-        external
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-
-        return "(uint _newVariable)";
-    }
-
     function updateABI() external view virtual override returns (string memory) {
-        return "(address whoCanCallMultiply)";
+        return "(address whoCanMultiply, uint _newVariable)";
     }
 }

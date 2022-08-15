@@ -19,7 +19,7 @@ contract CountPluginManagerV1 is PluginManager {
         external
         virtual
         override
-        returns (bytes memory init, address[] memory relatedContracts)
+        returns (address plugin, address[] memory relatedContracts)
     {
         (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
 
@@ -29,13 +29,15 @@ contract CountPluginManagerV1 is PluginManager {
             _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
         }
 
-        init = abi.encodeWithSelector(
+        bytes memory init = abi.encodeWithSelector(
             bytes4(keccak256("function initialize(address,uint256))")),
             _multiplyHelper,
             _num
         );
 
         relatedContracts[0] = _multiplyHelper;
+
+        plugin = createProxy(dao, getImplementationAddress(), init);
     }
 
     // TODO: WOULD THIS NEED dao as well to be passed
@@ -86,7 +88,7 @@ contract CountPluginManagerV1 is PluginManager {
         helperNames[0] = "MultiplyHelper";
     }
 
-    function getBaseAddress() external view virtual override returns (address) {
+    function getImplementationAddress() public view virtual override returns (address) {
         return address(countBase);
     }
 

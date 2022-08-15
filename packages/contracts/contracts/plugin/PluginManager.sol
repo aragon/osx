@@ -14,7 +14,7 @@ library PluginFactoryIDs {
 
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager is PluginConstants {
-
+    
     struct Permission {
         BulkPermissionsLib.Operation op;
         uint where; // index from relatedContracts or the actual address
@@ -98,33 +98,38 @@ abstract contract PluginManager is PluginConstants {
         return address(new PluginERC1967Proxy(dao, logic, init));
     }
 
+    /// @notice helper function to deploy Custom ERC1967Proxy that includes dao slot on it.
+    /// @param proxy proxy address
+    /// @param logic the base contract address proxy has to delegate calls to.
+    /// @param init the initialization data(function selector + encoded data)
+    function upgrade(address proxy, address logic, bytes memory init) internal {
+        // TODO: shall we implement this ?    
+    }
+
     /// @notice the function dev has to override/implement for the plugin deployment.
     /// @param dao dao address where plugin will be installed to in the end.
     /// @param data the ABI encoded data that deploy needs for its work.
-    /// @return init the initialization data that will be called right after proxy deployment(selector + encoded data)
+    /// @return plugin the plugin address
     /// @return relatedContracts array of helper contract addresses that dev deploys beforehand the plugin.
     function deploy(
         address dao, 
         bytes memory data
-    ) external virtual returns(bytes memory init, address[] memory relatedContracts);
+    ) external virtual returns(address plugin, address[] memory relatedContracts);
     
     /// @notice the function dev has to override/implement for the plugin update.
+    /// @param proxy proxy address
     /// @param oldVersion the version plugin is updating from.
-    /// @param newVersion the version plugin is updating to.
-    /// @param updateInitData data that contains ABI encoded parameters that will be passed to initialization function for the update(if any).
     /// @param data the other data that deploy needs.
-    /// @return init the initialization data that will be called right after proxy update(selector + encoded data)
     /// @return relatedContracts array of helper contract addresses that dev deploys to do some work before plugin update.
     function update(
+        address proxy,
         uint16[3] calldata oldVersion, 
-        uint16[3] calldata newVersion, 
-        bytes memory updateInitData, 
         bytes memory data
-    ) external virtual returns(bytes memory init, address[] memory relatedContracts) {}
+    ) external virtual returns(address[] memory relatedContracts) {}
 
-    /// @notice the plugin's base address proxies need to delegate calls.
+    /// @notice the plugin's base implementation address proxies need to delegate calls.
     /// @return address of the base contract address.
-    function getBaseAddress() external virtual view returns(address);
+    function getImplementationAddress() public virtual view returns(address);
 
     /// @notice the ABI in string format that deploy function needs to use.
     /// @return ABI in string format.
@@ -134,16 +139,6 @@ abstract contract PluginManager is PluginConstants {
     /// @dev Not required to be overriden as there might be no update at all by dev.
     /// @return ABI in string format.
     function updateABI() external virtual view returns (string memory) {}
-
-    /// @notice The ABI in string format that initialization function needs right after update.
-    /// @dev Not required to be overriden as there might be no update at all by dev.
-    ///      Dev can choose 2 different ways how to handle this.
-    ///      1. Each time new update comes in, dev appends the new ABI to the old one
-    ///      2. Depending on versions, dev returns specific ABI
-    /// @param oldVersion the version plugin is updating from.
-    /// @param newVersion the version plugin is updating to.
-    /// @return ABI in string format.
-    function updateInitABI(uint16[3] calldata oldVersion, uint16[3] calldata newVersion) external virtual view returns (string memory) {}
 
     /// @notice the view function called by UI to detect the permissions that will be applied before installing the plugin.
     /// @dev This corresponds to the permissions for installing the plugin.
@@ -155,15 +150,11 @@ abstract contract PluginManager is PluginConstants {
     /// @notice the view function called by UI to detect the permissions that will be applied before updating the plugin.
     /// @dev This corresponds to the permissions for updating the plugin.
     /// @param oldVersion the version plugin is updating from.
-    /// @param newVersion the version plugin is updating to.
-    /// @param updateInitData data that contains ABI encoded parameters that will be passed to initialization function for the update(if any).
     /// @param data the exact same data that is passed to the update function.
     /// @return Permissions the permissions struct array that contain all the permissions that should be set.
     /// @return array of strings(names of helper contracts). This corresponds to the relatedContracts.
     function getUpdatePermissions(
         uint16[3] calldata oldVersion, 
-        uint16[3] calldata newVersion, 
-        bytes memory updateInitData, 
         bytes memory data
     ) external virtual returns(Permission[] memory, string[] memory) {}
 }

@@ -35,9 +35,9 @@ contract CountV2 is AragonUpgradablePlugin {
     }
 
     // This gets called when dao already has some previous version installed(in our case, CountV1)
-    // and updates to this CountV2. for these daos, this update can only be called once(this is achieved by reinitializer(2))
-    // TODO: This might still be called by daos that install CountV2 for the first time, calls initialize and then calls update..
-    function update(uint _newVariable) external reinitializer(2) {
+    // and updates to this CountV2. for these daos, this setNewVariable can only be called once(this is achieved by reinitializer(2))
+    // TODO: This might still be called by daos that install CountV2 for the first time, calls initialize and then calls setNewVariable..
+    function setNewVariable(uint _newVariable) external reinitializer(2) {
         newVariable = _newVariable;
     }
 
