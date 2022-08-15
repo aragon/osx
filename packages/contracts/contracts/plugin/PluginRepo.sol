@@ -103,7 +103,7 @@ contract PluginRepo is
         // TODO: uncommment
         // try
         //     PluginManager(_pluginFactory).supportsInterface(
-        //         PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
+        //         PluginManager.PLUGIN_FACTORY_INTERFACE_ID
         //     )
         // returns (bool result) {
         //     if (!result) {

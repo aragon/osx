@@ -6,15 +6,11 @@ import "../utils/PluginERC1967Proxy.sol";
 import "../core/permission/BulkPermissionsLib.sol";
 import "./PluginConstants.sol";
 
-/// @notice A library to share the interface ID of the abstract `PluginFactoryBase` contract.
-library PluginFactoryIDs {
-    /// @notice The interface ID of the `PluginFactoryBase` contract.
-    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginManager).interfaceId;
-}
-
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager is PluginConstants {
     
+    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginManager).interfaceId;
+
     struct Permission {
         BulkPermissionsLib.Operation op;
         uint where; // index from relatedContracts or the actual address
