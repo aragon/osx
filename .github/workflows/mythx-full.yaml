@@ -41,4 +41,9 @@ jobs:
       - name: Install deps
         run: yarn
       - name: Run mythx
-        run: mythx --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --mode ${{ inputs.mode }} packages/contracts/contracts
+        run: mythx --output id --format json --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --async --mode ${{ inputs.mode }} packages/contracts/contracts
+      - name: SEE HERE FOR DASHBOARD LINK
+        run: |
+          id=$(cat id)
+          group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq .group_id)
+          echo "Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/$group_id"
