@@ -9,6 +9,9 @@ jobs:
   mythx_partial:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
+    outputs:
+      run: ${{ steps.check.outputs.triggered }}
+      mode: ${{ steps.mode.outputs.moode }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
@@ -23,17 +26,21 @@ jobs:
         run: |
           mode=$(echo "${{ github.event.comment }}"" | sed "s|/mythx partial ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
-      - name: run partial "Scan
-        if: steps.check.outputs.triggered == 'true'
-        uses: './.github/workflows/mythx-changed.yml'
-        with:
-          pr_number: ${{ github.event.issue.number }}
-          mode: $ {{ steps.mode.outputs.moode }}
-        secrets:
-          MYTHX_API_KEY: ${{ secrets.MYTHX_API_KEY }}
+  mythx_partial_run:
+    needs: ['mythx_partial']
+    if: ${{ needs.mythx_partial.outputs.run }}
+    uses: './.github/workflows/mythx-changed.yml'
+    with:
+      pr_number: ${{ github.event.issue.number }}
+      mode: $ {{ needs.mythx_partial.outputs.mode }}
+    secrets: inherit
+
   mythx_full:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
+    outputs:
+      run: ${{ steps.check.outputs.triggered }}
+      mode: ${{ steps.mode.outputs.moode }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
@@ -46,15 +53,18 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment }}"" | sed "s|/mythx partial ||" | sed "s/ //")
+          mode=$(echo "${{ github.event.comment }}"" | sed "s|/mythx full ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
-      - name: run partial "Scan
-        if: steps.check.outputs.triggered == 'true'
-        uses: './.github/workflows/mythx-full.yml'
-        with:
-          mode: $ {{ steps.mode.outputs.moode }}
-        secrets:
-          MYTHX_API_KEY: ${{ secrets.MYTHX_API_KEY }}
+  mythx_full_run:
+    needs: ['mythx_full']
+    if: ${{ needs.mythx_full.outputs.run }}
+    uses: './.github/workflows/mythx-full.yml'
+    with:
+      mode: $ {{ needs.mythx_full.outputs.mode }}
+    secrets: inherit
+
+
+
   release_label:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
@@ -76,6 +86,7 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: release:${{ steps.type.outputs.type }}
+
   subgraph_label:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
