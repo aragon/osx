@@ -46,6 +46,7 @@ jobs:
       - name: Install mythx-cli
         run: pip install mythx-cli
       - name: Changed Files Exporter
+        id: files
         uses: umani/changed-files@v3.3.0
         with:
           repo-token: ${{ github.token }}
