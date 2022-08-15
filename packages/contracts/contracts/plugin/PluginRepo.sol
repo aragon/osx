@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../utils/UncheckedMath.sol";
-import "./PluginFactoryBase.sol";
+import "./PluginManager.sol";
 import "./IPluginRepo.sol";
 
 /// @title PluginRepo
@@ -56,8 +56,8 @@ contract PluginRepo is
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);
 
-    /// @notice Thrown if a contract does not inherit from `PluginFactoryBase`.
-    /// @param invalidPluginFactory The address of the contract missing the `PluginFactoryBase` interface.
+    /// @notice Thrown if a contract does not inherit from `PluginManager`.
+    /// @param invalidPluginFactory The address of the contract missing the `PluginManager` interface.
     error InvalidPluginFactoryInterface(address invalidPluginFactory);
 
     /// @notice Thrown if a contract is not a `PluginFactory` contract.
@@ -95,22 +95,23 @@ contract PluginRepo is
         address _pluginFactory,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
-        // Check if `_pluginFactory` is a `PluginFactoryBase` contract
+        // Check if `_pluginFactory` is a `PluginManager` contract
         if (!Address.isContract(_pluginFactory)) {
             revert InvalidContractAddress({invalidContract: _pluginFactory});
         }
-
-        try
-            PluginFactoryBase(_pluginFactory).supportsInterface(
-                PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
-            )
-        returns (bool result) {
-            if (!result) {
-                revert InvalidPluginFactoryInterface({invalidPluginFactory: _pluginFactory});
-            }
-        } catch {
-            revert InvalidPluginFactoryContract({invalidPluginFactory: _pluginFactory});
-        }
+        
+        // TODO: uncommment
+        // try
+        //     PluginManager(_pluginFactory).supportsInterface(
+        //         PluginFactoryIDs.PLUGIN_FACTORY_INTERFACE_ID
+        //     )
+        // returns (bool result) {
+        //     if (!result) {
+        //         revert InvalidPluginFactoryInterface({invalidPluginFactory: _pluginFactory});
+        //     }
+        // } catch {
+        //     revert InvalidPluginFactoryContract({invalidPluginFactory: _pluginFactory});
+        // }
 
         uint256 currentVersionIndex = nextVersionIndex - 1;
 

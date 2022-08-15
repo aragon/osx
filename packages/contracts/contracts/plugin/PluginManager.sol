@@ -6,10 +6,16 @@ import "../utils/PluginERC1967Proxy.sol";
 import "../core/permission/BulkPermissionsLib.sol";
 import "./PluginConstants.sol";
 
+/// @notice A library to share the interface ID of the abstract `PluginFactoryBase` contract.
+library PluginFactoryIDs {
+    /// @notice The interface ID of the `PluginFactoryBase` contract.
+    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginManager).interfaceId;
+}
+
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager is PluginConstants {
 
-    struct Permissions {
+    struct Permission {
         BulkPermissionsLib.Operation op;
         uint where; // index from relatedContracts or the actual address
         bool isWhereAddres; // whether or not `where` is index from relatedContracts or address directly.
@@ -31,8 +37,8 @@ abstract contract PluginManager is PluginConstants {
         uint256 who,
         address oracle,
         bytes32 role
-    ) internal returns (Permission) {
-        return Permissions(Op, where, false, who, false, oracle, role);
+    ) internal pure returns (Permission memory) {
+        return Permission(op, where, false, who, false, oracle, role);
     }
 
     /// @notice creates Permission struct
@@ -47,8 +53,8 @@ abstract contract PluginManager is PluginConstants {
         address who,
         address oracle, 
         bytes32 role
-    ) internal returns (Permission) {
-        return Permissions(Op, uint(where), true, uint(who), true, oracle, role);
+    ) internal pure returns (Permission memory) {
+        return Permission(op, uint(uint160(where)), true, uint(uint160(who)), true, oracle, role);
     }
 
     /// @notice creates Permission struct
@@ -63,8 +69,8 @@ abstract contract PluginManager is PluginConstants {
         address who,
         address oracle,
         bytes32 role
-    ) internal returns (Permission) {
-        return Permissions(Op, where, false, uint(who), true, oracle, role);
+    ) internal pure returns (Permission memory) {
+        return Permission(op, where, false, uint(uint160(who)), true, oracle, role);
     }
 
     /// @notice creates Permission struct
@@ -79,17 +85,17 @@ abstract contract PluginManager is PluginConstants {
         uint256 who,
         address oracle,
         bytes32 role
-    ) internal returns (Permission) {
-        return Permissions(Op, uint(where), true, who, false, oracle, role);
+    ) internal pure returns (Permission memory) {
+        return Permission(op, uint(uint160(where)), true, who, false, oracle, role);
     }
 
     /// @notice helper function to deploy Custom ERC1967Proxy that includes dao slot on it.
-    /// @param _dao dao address
+    /// @param dao dao address
     /// @param logic the base contract address proxy has to delegate calls to.
     /// @param init the initialization data(function selector + encoded data)
     /// @return address of the proxy.
     function createProxy(address dao, address logic, bytes memory init) internal returns(address) {
-        return address(new PluginERC1967Proxy(_dao, logic, init));
+        return address(new PluginERC1967Proxy(dao, logic, init));
     }
 
     /// @notice the function dev has to override/implement for the plugin deployment.
@@ -100,7 +106,7 @@ abstract contract PluginManager is PluginConstants {
     function deploy(
         address dao, 
         bytes memory data
-    ) external virtual returns(bytes memory init, address[] relatedContracts);
+    ) external virtual returns(bytes memory init, address[] memory relatedContracts);
     
     /// @notice the function dev has to override/implement for the plugin update.
     /// @param oldVersion the version plugin is updating from.
@@ -110,11 +116,11 @@ abstract contract PluginManager is PluginConstants {
     /// @return init the initialization data that will be called right after proxy update(selector + encoded data)
     /// @return relatedContracts array of helper contract addresses that dev deploys to do some work before plugin update.
     function update(
-        uint16[3] oldVersion, 
-        uint16[3] newVersion, 
+        uint16[3] calldata oldVersion, 
+        uint16[3] calldata newVersion, 
         bytes memory updateInitData, 
         bytes memory data
-    ) external virtual returns(bytes memory init, address[] relatedContracts) {}
+    ) external virtual returns(bytes memory init, address[] memory relatedContracts) {}
 
     /// @notice the plugin's base address proxies need to delegate calls.
     /// @return address of the base contract address.
@@ -137,14 +143,14 @@ abstract contract PluginManager is PluginConstants {
     /// @param oldVersion the version plugin is updating from.
     /// @param newVersion the version plugin is updating to.
     /// @return ABI in string format.
-    function updateInitABI(uint16[3] oldVersion, uint16[3] newVersion) external virtual view returns (string memory) {}
+    function updateInitABI(uint16[3] calldata oldVersion, uint16[3] calldata newVersion) external virtual view returns (string memory) {}
 
     /// @notice the view function called by UI to detect the permissions that will be applied before installing the plugin.
     /// @dev This corresponds to the permissions for installing the plugin.
     /// @param data the exact same data that is passed to the deploy function.
-    /// @return Permissions the permissions struct array that contain all the permissions that should be set.
+    /// @return Permissions the permission struct array that contain all the permissions that should be set.
     /// @return array of strings(names of helper contracts). This corresponds to the relatedContracts.
-    function getInstallPermissions(bytes memory data) external view virtual returns(Permissions[], string[]);
+    function getInstallPermissions(bytes memory data) external view virtual returns(Permission[] memory, string[] memory);
 
     /// @notice the view function called by UI to detect the permissions that will be applied before updating the plugin.
     /// @dev This corresponds to the permissions for updating the plugin.
@@ -155,9 +161,9 @@ abstract contract PluginManager is PluginConstants {
     /// @return Permissions the permissions struct array that contain all the permissions that should be set.
     /// @return array of strings(names of helper contracts). This corresponds to the relatedContracts.
     function getUpdatePermissions(
-        uint16[3] oldVersion, 
-        uint16[3] newVersion, 
+        uint16[3] calldata oldVersion, 
+        uint16[3] calldata newVersion, 
         bytes memory updateInitData, 
         bytes memory data
-    ) external virtual returns(Permissions, string[]) {}
+    ) external virtual returns(Permission[] memory, string[] memory) {}
 }

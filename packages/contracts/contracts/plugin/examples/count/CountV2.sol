@@ -2,8 +2,15 @@
  
 pragma solidity 0.8.10;
 
-import "../../../core/plugin/AragonUpgradablePlugin.sol";
+import { AragonUpgradablePlugin } from "../../../core/plugin/AragonUpgradablePlugin.sol";
 import "./MultiplyHelper.sol";
+
+/**
+ * The updated version of example plugin - CountV2.
+ * It expects another helper to do its work. Dev decides that only DAO should be able to call `multiply` on CountV1
+ * Then only CountV1 should be able to call the final/actual multiply on the helper.
+ * 
+*/
 
 contract CountV2 is AragonUpgradablePlugin {
     
@@ -12,27 +19,31 @@ contract CountV2 is AragonUpgradablePlugin {
     uint public count;
     MultiplyHelper public multiplyHelper;
 
-    // Appending SLOT (Be Careful....)
+    // dev appends a new slot.. (BE CAREFUL)
     uint public newVariable;
 
-    function initialize(MultiplyHelper _multiplyHelper) external initializer {
-        count = 1;
-        
+    // This only gets called for daos that install it for the first time.
+    // initializer modifier protects it from being called 2nd time for old proxies.
+    function initialize(MultiplyHelper _multiplyHelper, uint _num, uint _newVariable) external initializer {
+        count = _num;
+
         // Since this is V2 version, and some daos might want to install this right away
         // without installing CountV1, dev decides to also include setting newVariable
-        newVariable = 1;
+        newVariable = _newVariable;
 
         multiplyHelper = _multiplyHelper;
     }
 
-    // This should get called when dao already has some previous version installed
-    // and updates to this.
+    // This gets called when dao already has some previous version installed(in our case, CountV1)
+    // and updates to this CountV2. for these daos, this update can only be called once(this is achieved by reinitializer(2))
+    // TODO: This might still be called by daos that install CountV2 for the first time, calls initialize and then calls update..
     function update(uint _newVariable) external reinitializer(2) {
         newVariable = _newVariable;
     }
 
     function multiply(uint a) public auth(MULTIPLY_PERMISSION_ID) returns (uint) {
-        return multiplyHelper.multiply(count, b);
+        count = multiplyHelper.multiply(count, a);
+        return count;
     }
 
     function execute() public {
