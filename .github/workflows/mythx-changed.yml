@@ -59,11 +59,15 @@ jobs:
       - name: Comment Prepare
         id: comment_prepare
         run: |
-          id=$(cat id)
+          id=$(cat id | head -1)
           group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq .group_id)
           echo "::set-output name=group_id::$group_id"
       - name: Comment a pull_request
-        uses: mb2dev/github-action-comment-pull-request@1.0.0
+        uses: thollander/actions-comment-pull-request@v1
         with:
+          pr_number: ${{ inputs.pr_number }}
           message: "Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }})"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: SEE HERE FOR DASHBOARD LINK
+        run: |
+          echo "Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}"
