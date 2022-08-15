@@ -1,8 +1,26 @@
 name: Mythx Changed only
 
 on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: PR Number to run this test against
+        required: true
+        type: string
+      mode:
+        description: "Mythx scan mode (quick|standard|deep)"
+        required: true
+        type: string
+    secrets:
+      MYTHX_API_KEY:
+        description: 'mythx api token'
+        required: true
   workflow_dispatch:
     inputs:
+      pr_number:
+        description: PR Number to run this test against
+        required: true
+        type: string
       mode:
         description: "Mythx scan mode (quick|standard|deep)"
         required: true
@@ -27,9 +45,24 @@ jobs:
       - uses: actions/setup-python@v4
       - name: Install mythx-cli
         run: pip install mythx-cli
-      - id: files
-        uses: jitterbit/get-changed-files@v1
+      - name: Changed Files Exporter
+        uses: umani/changed-files@v3.3.0
+        with:
+          repo-token: ${{ github.token }}
+          pr-number: ${{ inputs.pr_number }}
+          pattern: '^.*\.sol$'
       - name: Install deps
         run: yarn
       - name: Run mythx
-        run: mythx --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --mode ${{ inputs.mode }} ${{ steps.files.outputs.all }}
+        run: mythx --yes --output id --format json --api-key ${{ secrets.MYTHX_API_KEY }} analyze --async --mode ${{ inputs.mode }} ${{ steps.files.outputs.all }}
+      - name: Comment Prepare
+        id: comment_prepare
+        run: |
+          id=$(cat id)
+          group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq .group_id)
+          echo "::set-output name=group_id::$group_id"
+      - name: Comment a pull_request
+        uses: mb2dev/github-action-comment-pull-request@1.0.0
+        with:
+          message: "Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }})"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

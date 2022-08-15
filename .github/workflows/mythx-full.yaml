@@ -1,6 +1,16 @@
 name: Mythx Full
 
 on:
+  workflow_call:
+    inputs:
+      mode:
+        description: "Mythx scan mode (quick|standard|deep)"
+        required: true
+        type: string
+    secrets:
+      MYTHX_API_KEY:
+        description: 'mythx api token'
+        required: true
   workflow_dispatch:
     inputs:
       mode:
@@ -12,6 +22,7 @@ on:
           - quick
           - standard
           - deep
+    
 
 jobs:
   mythx:
