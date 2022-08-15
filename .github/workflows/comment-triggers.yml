@@ -32,7 +32,7 @@ jobs:
     uses: './.github/workflows/mythx-changed.yml'
     with:
       pr_number: ${{ github.event.issue.number }}
-      mode: $ {{ needs.mythx_partial.outputs.mode }}
+      mode: ${{ needs.mythx_partial.outputs.mode }}
     secrets: inherit
 
   mythx_full:
@@ -60,7 +60,7 @@ jobs:
     if: needs.mythx_full.outputs.run == 'true'
     uses: './.github/workflows/mythx-full.yml'
     with:
-      mode: $ {{ needs.mythx_full.outputs.mode }}
+      mode: ${{ needs.mythx_full.outputs.mode }}
     secrets: inherit
 
 
