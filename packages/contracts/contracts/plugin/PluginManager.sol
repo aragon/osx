@@ -6,6 +6,7 @@ import "../utils/PluginERC1967Proxy.sol";
 import "../core/permission/BulkPermissionsLib.sol";
 import "./PluginConstants.sol";
 
+/// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager is PluginConstants {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
