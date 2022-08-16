@@ -21,7 +21,7 @@ contract CountPluginManagerV1 is PluginManager {
         virtual
         override
         returns (address plugin, address[] memory relatedContracts)
-    {   
+    {
         // This changes as in V2, initialize now expects 3 arguments..
         (address _multiplyHelper, uint256 _num, uint256 _newVariable) = abi.decode(
             data,
@@ -51,9 +51,9 @@ contract CountPluginManagerV1 is PluginManager {
         uint16[3] calldata oldVersion,
         bytes memory data
     ) external virtual override returns (address[] memory relatedContracts) {
-        uint _newVariable;
-        if(oldVersion[0] == 1) {
-            (_newVariable) = abi.decode(data, (uint));
+        uint256 _newVariable;
+        if (oldVersion[0] == 1) {
+            (_newVariable) = abi.decode(data, (uint256));
         }
 
         // TODO: Shall we leave it here or make devs call `upgrade` from our abstract factory
@@ -70,11 +70,11 @@ contract CountPluginManagerV1 is PluginManager {
         view
         virtual
         override
-        returns (Permission[] memory permissions, string[] memory helperNames)
+        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
     {
         address _multiplyHelper = abi.decode(data, (address));
 
-        permissions = new Permission[](_multiplyHelper == address(0) ? 2 : 3);
+        permissions = new RequestedPermission[](_multiplyHelper == address(0) ? 2 : 3);
         helperNames = new string[](1);
 
         // Allows plugin Count to call execute on DAO
@@ -112,23 +112,20 @@ contract CountPluginManagerV1 is PluginManager {
         helperNames[0] = "MultiplyHelper";
     }
 
-    // TODO: will this need `proxy` address as well ? 
-    function getUpdatePermissions(
-        uint16[3] calldata oldVersion,
-        bytes memory data
-    )
+    // TODO: will this need `proxy` address as well ?
+    function getUpdatePermissions(uint16[3] calldata oldVersion, bytes memory data)
         external
         view
         virtual
         override
         returns (
-            Permission[] memory permissions,
+            RequestedPermission[] memory permissions,
             string[] memory /* helperNames */
         )
     {
         address whoCanCallMultiply = abi.decode(data, (address));
 
-        permissions = new Permission[](2);
+        permissions = new RequestedPermission[](2);
 
         // Now, revoke permission so dao can't call anymore this multiply function on plugin.
         permissions[0] = createPermission(

@@ -14,7 +14,7 @@ contract CountPluginManagerV1 is PluginManager {
         multiplyHelperBase = new MultiplyHelper();
         countBase = new CountV1();
     }
-    
+
     function deploy(address dao, bytes memory data)
         external
         virtual
@@ -46,11 +46,11 @@ contract CountPluginManagerV1 is PluginManager {
         view
         virtual
         override
-        returns (Permission[] memory permissions, string[] memory helperNames)
+        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
     {
         address _multiplyHelper = abi.decode(data, (address));
 
-        permissions = new Permission[](_multiplyHelper == address(0) ? 2 : 3);
+        permissions = new RequestedPermission[](_multiplyHelper == address(0) ? 2 : 3);
         helperNames = new string[](1);
 
         // Allows plugin Count to call execute on DAO
