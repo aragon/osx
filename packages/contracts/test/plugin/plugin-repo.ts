@@ -95,7 +95,7 @@ describe('PluginRepo', function () {
     //   customError('InvalidPluginManagerInterface', adaptiveERC165.address)
     // );
   });
-  test.todo("cannot create version with unsupported interface contract");
+  it("TODO: cannot create version with unsupported interface contract");
 
   it('cannot create version with random address', async function () {
     const randomAddress = await signers[8].getAddress();
