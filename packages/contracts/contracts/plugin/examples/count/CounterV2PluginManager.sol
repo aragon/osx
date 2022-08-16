@@ -1,4 +1,4 @@
-// SPDX-License-Identifier:    MIT
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -26,27 +26,35 @@ contract CounterV2PluginManager is PluginManager {
         returns (address plugin, address[] memory relatedContracts)
     {
         // This changes as in V2, initialize now expects 3 arguments..
+        // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num, uint256 _newVariable) = abi.decode(
             data,
             (address, uint256, uint256)
         );
 
+        // Allocate space for one address for the helper contracts for which we
+        // also want to define permissions
         relatedContracts = new address[](1);
-
+        
         if (_multiplyHelper == address(0)) {
             _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
         }
 
-        bytes memory init = abi.encodeWithSelector(
+
+        // Encode the parameters that will be passed to initialize() on the Plugin
+        bytes memory initData = abi.encodeWithSelector(
             bytes4(keccak256("initialize(address,uint256)")),
             _multiplyHelper,
             _num,
             _newVariable
         );
 
+        // Address of the helper so that PluginInstaller can grant the requested permissions on it
         relatedContracts[0] = _multiplyHelper;
 
-        plugin = createProxy(dao, getImplementationAddress(), init);
+        // Deploy the Plugin itself, make it point to the implementation and
+        // pass it the initialization params
+        plugin = createProxy(dao, getImplementationAddress(), initData);
     }
 
     function update(
@@ -55,6 +63,8 @@ contract CounterV2PluginManager is PluginManager {
         bytes memory data
     ) external virtual override returns (address[] memory relatedContracts) {
         uint256 _newVariable;
+
+        // TODO: improve the example to handle more complicated scenario...
         if (oldVersion[0] == 1) {
             (_newVariable) = abi.decode(data, (uint256));
         }
@@ -81,7 +91,8 @@ contract CounterV2PluginManager is PluginManager {
         helperNames = new string[](1);
 
         // Allows plugin Count to call execute on DAO
-        permissions[0] = createPermission(
+
+        permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
             PLUGIN_PLACEHOLDER,
@@ -90,7 +101,7 @@ contract CounterV2PluginManager is PluginManager {
         );
 
         // Allows DAO to call Multiply on plugin Count
-        permissions[1] = createPermission(
+        permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
@@ -98,21 +109,23 @@ contract CounterV2PluginManager is PluginManager {
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
+        uint MULTIPLY_HELPER_IDX = 0;
+
         // MultiplyHelper could be something that dev already has it from outside
         // which mightn't be a aragon plugin. It's dev's responsibility to do checks
         // and risk whether or not to still set the permission.
         if (_multiplyHelper == address(0)) {
             // Allows Count plugin to call MultiplyHelper's multiply function.
-            permissions[2] = createPermission(
+            permissions[2] = buildPermission(
                 BulkPermissionsLib.Operation.Grant,
-                0, // Index from relatedContracts (multiplyHelper)
+                MULTIPLY_HELPER_IDX, // Index from relatedContracts (multiplyHelper)
                 PLUGIN_PLACEHOLDER,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
 
-        helperNames[0] = "MultiplyHelper";
+        helperNames[MULTIPLY_HELPER_IDX] = "MultiplyHelper";
     }
 
     // TODO: will this need `proxy` address as well ?
@@ -131,7 +144,7 @@ contract CounterV2PluginManager is PluginManager {
         permissions = new RequestedPermission[](2);
 
         // Now, revoke permission so dao can't call anymore this multiply function on plugin.
-        permissions[0] = createPermission(
+        permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Revoke,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
@@ -140,7 +153,7 @@ contract CounterV2PluginManager is PluginManager {
         );
 
         // ALLOW Some 3rd party to be able to call multiply on plugin after update.
-        permissions[1] = createPermission(
+        permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             whoCanCallMultiply,

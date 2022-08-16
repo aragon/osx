@@ -23,3 +23,13 @@ The labels also indicate how the npm packages will be bumped to the next version
 | release:patch | patch bump for `@aragon/core-contracts` and `@aragon/core-contracts-ethers` |
 | release:minor | minor bump for `@aragon/core-contracts` and `@aragon/core-contracts-ethers` |
 | release:major | major bump for `@aragon/core-contracts` and `@aragon/core-contracts-ethers` |
+
+## Pull request commands
+Certain actions can be triggered via a command to a pull request. To issue a command just comment on a pull request with one of these commands.
+
+| Command                                      | Description                                                 |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `/mythx partial (quick \| standard \| deep)` | Scans the changed files for this pull request               |
+| `/mythx full (quick \| standard \| deep)`    | Scans the all files for this pull request                   |
+| `/release (patch \| minor \| major)`         | Adds the proper release label to this pull request          |
+| `/subgraph (patch \| minor \| major)`        | Adds the proper subgraph release label to this pull request |

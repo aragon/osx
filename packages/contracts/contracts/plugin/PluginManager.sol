@@ -1,4 +1,4 @@
-// SPDX-License-Identifier:    MIT
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -6,9 +6,10 @@ import "../utils/PluginERC1967Proxy.sol";
 import "../core/permission/BulkPermissionsLib.sol";
 import "./PluginConstants.sol";
 
+/// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager is PluginConstants {
-    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginManager).interfaceId;
+    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
 
     // TODO: come up with a better naming for isWhereAddress, isWhoAddress, or come up with another struct.
     struct RequestedPermission {
@@ -27,7 +28,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who index from the dev's deployed addresses array
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         uint256 where,
         uint256 who,
@@ -43,7 +44,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who Address who will have the permission.
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         address where,
         address who,
@@ -68,7 +69,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who Address who will have the permission.
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         uint256 where,
         address who,
@@ -84,7 +85,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who index from the dev's deployed addresses array that will have permission.
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         address where,
         uint256 who,
