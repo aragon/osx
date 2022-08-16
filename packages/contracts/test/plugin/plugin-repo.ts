@@ -84,18 +84,17 @@ describe('PluginRepo', function () {
     ).to.be.revertedWith('InvalidBump([0, 0, 0], [1, 1, 0])');
   });
 
-  it('cannot create version with unsupported interface contract', async function () {
+  it.skip('cannot create version with unsupported interface contract', async function () {
     const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
     let adaptiveERC165 = await AdaptiveERC165.deploy();
     
     // TODO: GIORGI fix after the repo is fixed...
-    // await expect(
-    //   pluginRepo.createVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
-    // ).to.be.revertedWith(
-    //   customError('InvalidPluginManagerInterface', adaptiveERC165.address)
-    // );
+    await expect(
+      pluginRepo.createVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
+    ).to.be.revertedWith(
+      customError('InvalidPluginManagerInterface', adaptiveERC165.address)
+    );
   });
-  it("TODO: cannot create version with unsupported interface contract");
 
   it('cannot create version with random address', async function () {
     const randomAddress = await signers[8].getAddress();
