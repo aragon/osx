@@ -1,5 +1,3 @@
-output: mythx.json
-format: json
 
 analyze:
     create-group: true
