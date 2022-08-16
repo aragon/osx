@@ -36,7 +36,7 @@ abstract contract AragonUpgradablePlugin is Initializable, ERC165Upgradeable, Ap
 
     /// @notice used to check the current base logic contract proxy delegates to.
     /// @return address the address of current base logic contract.
-    function getBaseImplementation() public view returns (address) {
+    function getImplementationAddress() public view returns (address) {
         return _getImplementation();
     }
 

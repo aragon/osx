@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+
 import "./PluginManager.sol";
 import "./PluginConstants.sol";
-import  "../core/DAO.sol";
+import "../core/DAO.sol";
 import "../utils/PluginERC1967Proxy.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import { AragonUpgradablePlugin } from "../core/plugin/AragonUpgradablePlugin.sol";
-import { AragonPlugin } from "../core/plugin/AragonPlugin.sol";
+import {AragonUpgradablePlugin} from "../core/plugin/AragonUpgradablePlugin.sol";
+import {AragonPlugin} from "../core/plugin/AragonPlugin.sol";
 
 /// @notice Plugin Installer that has root permissions to install plugin on the dao and apply permissions.
 contract PluginInstaller is PluginConstants {
-
     using ERC165Checker for address payable;
 
     error InstallNotAllowed();
@@ -34,8 +34,8 @@ contract PluginInstaller is PluginConstants {
     /// @notice Installs plugin on the dao by emitting the event and sets up permissions.
     /// @dev It's dev's responsibility to deploy the plugin inside the plugin manager.
     /// @param dao the dao address where the plugin should be installed.
-    /// @param plugin the plugin struct that contains manager address and encoded data. 
-    function installPlugin(address payable dao, InstallPlugin calldata plugin) public {
+    /// @param plugin the plugin struct that contains manager address and encoded data.
+    function installPlugin(address dao, InstallPlugin calldata plugin) public {
         if (msg.sender != dao) {
             revert InstallNotAllowed();
         }
@@ -49,7 +49,7 @@ contract PluginInstaller is PluginConstants {
             .manager
             .getInstallPermissions(plugin.data);
 
-        DAO(dao).bulkOnMultiTarget(
+        DAO(payable(dao)).bulkOnMultiTarget(
             createFinalPermissions(dao, pluginAddress, permissions, relatedContracts)
         );
 
@@ -62,26 +62,35 @@ contract PluginInstaller is PluginConstants {
     /// @param proxy the plugin proxy address.
     /// @param plugin the plugin struct that contains manager address, encoded data and old version.
     function updatePlugin(
-        address payable dao,
-        address payable proxy,
+        address dao,
+        address proxy,
         UpdatePlugin calldata plugin
     ) public {
-        if(proxy.supportsInterface(type(AragonPlugin).interfaceId)) {
-           revert UpdateNotAllowed();
-        }
+        bool supportsAragonPlugin = payable(proxy).supportsInterface(
+            type(AragonPlugin).interfaceId
+        );
+        if (supportsAragonPlugin) revert UpdateNotAllowed();
 
-        if(proxy.supportsInterface(type(AragonUpgradablePlugin).interfaceId)) {
+        bool supportsAragonUpgradablePlugin = payable(proxy).supportsInterface(
+            type(AragonUpgradablePlugin).interfaceId
+        );
+
+        // if(!supportsAragonUpgradablePlugin) {
+        //     // TODO: shall we revert at least in first release to minimize errors?
+        // }
+
+        if (supportsAragonUpgradablePlugin) {
             address newBaseAddress = plugin.manager.getImplementationAddress();
-            if (AragonUpgradablePlugin(proxy).getBaseImplementation() == newBaseAddress) {
+            if (AragonUpgradablePlugin(proxy).getImplementationAddress() == newBaseAddress) {
                 revert AlreadyThisVersion();
             }
 
-            address daoOnProxy = address(PluginERC1967Proxy(proxy).dao());
+            address daoOnProxy = address(PluginERC1967Proxy(payable(proxy)).dao());
             if (daoOnProxy != msg.sender || daoOnProxy != dao) {
                 revert UpdateNotAllowed();
             }
         }
-        
+
         address[] memory relatedContracts = plugin.manager.update(
             proxy,
             plugin.oldVersion,
@@ -92,7 +101,7 @@ contract PluginInstaller is PluginConstants {
             .manager
             .getUpdatePermissions(plugin.oldVersion, plugin.data);
 
-        DAO(dao).bulkOnMultiTarget(
+        DAO(payable(dao)).bulkOnMultiTarget(
             createFinalPermissions(dao, proxy, permissions, relatedContracts)
         );
 
