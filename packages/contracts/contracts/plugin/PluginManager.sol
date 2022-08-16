@@ -27,7 +27,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who index from the dev's deployed addresses array
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         uint256 where,
         uint256 who,
@@ -43,7 +43,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who Address who will have the permission.
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         address where,
         address who,
@@ -68,7 +68,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who Address who will have the permission.
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         uint256 where,
         address who,
@@ -84,7 +84,7 @@ abstract contract PluginManager is PluginConstants {
     /// @param who index from the dev's deployed addresses array that will have permission.
     /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
-    function createPermission(
+    function buildPermission(
         BulkPermissionsLib.Operation op,
         address where,
         uint256 who,

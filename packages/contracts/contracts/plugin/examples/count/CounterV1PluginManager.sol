@@ -82,6 +82,7 @@ contract CounterV1PluginManager is PluginManager {
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
+        uint MULTIPLY_HELPER_IDX = 0;
         // MultiplyHelper could be something that dev already has it from outside
         // which mightn't be a aragon plugin. It's dev's responsibility to do checks
         // and risk whether or not to still set the permission.
@@ -89,7 +90,7 @@ contract CounterV1PluginManager is PluginManager {
             // Allows Count plugin to call MultiplyHelper's multiply function.
             permissions[2] = createPermission(
                 BulkPermissionsLib.Operation.Grant,
-                0, // Index from relatedContracts (multiplyHelper)
+                MULTIPLY_HELPER_IDX, // Index from relatedContracts (multiplyHelper)
                 PLUGIN_PLACEHOLDER,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
