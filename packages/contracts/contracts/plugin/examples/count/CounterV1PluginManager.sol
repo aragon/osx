@@ -65,7 +65,7 @@ contract CounterV1PluginManager is PluginManager {
         helperNames = new string[](1);
 
         // Allows plugin Count to call execute on DAO
-        permissions[0] = createPermission(
+        permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
             PLUGIN_PLACEHOLDER,
@@ -74,7 +74,7 @@ contract CounterV1PluginManager is PluginManager {
         );
 
         // Allows DAO to call Multiply on plugin Count
-        permissions[1] = createPermission(
+        permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
@@ -83,12 +83,13 @@ contract CounterV1PluginManager is PluginManager {
         );
 
         uint MULTIPLY_HELPER_IDX = 0;
+
         // MultiplyHelper could be something that dev already has it from outside
         // which mightn't be a aragon plugin. It's dev's responsibility to do checks
         // and risk whether or not to still set the permission.
         if (_multiplyHelper == address(0)) {
             // Allows Count plugin to call MultiplyHelper's multiply function.
-            permissions[2] = createPermission(
+            permissions[2] = buildPermission(
                 BulkPermissionsLib.Operation.Grant,
                 MULTIPLY_HELPER_IDX, // Index from relatedContracts (multiplyHelper)
                 PLUGIN_PLACEHOLDER,
@@ -97,7 +98,7 @@ contract CounterV1PluginManager is PluginManager {
             );
         }
 
-        helperNames[0] = "MultiplyHelper";
+        helperNames[MULTIPLY_HELPER_IDX] = "MultiplyHelper";
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
