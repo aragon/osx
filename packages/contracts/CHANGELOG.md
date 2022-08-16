@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `AllowlistManager` & `Erc20VotingManager`.
 - Added the `solidity-docgen` hardhat plugin by OpenZepplin to automatically generate documentation via `yarn docgen`.
 - Added deployment script for `ENSSubdomainRegistrar`.
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
