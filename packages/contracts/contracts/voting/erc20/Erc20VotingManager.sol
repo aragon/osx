@@ -2,9 +2,6 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-
 import "../../core/IDAO.sol";
 import "../tokens/GovernanceERC20.sol";
 import "../tokens/GovernanceWrappedERC20.sol";
@@ -14,9 +11,6 @@ import "./Erc20Voting.sol";
 import "../../plugin/PluginManager.sol";
 
 contract Erc20VotingManager is PluginManager {
-    using Address for address;
-    using Clones for address;
-
     Erc20Voting private erc20VotingBase;
 
     /// @notice The address of the `GovernanceERC20` base contract to clone from.
@@ -201,7 +195,7 @@ contract Erc20VotingManager is PluginManager {
                 1, // Index from relatedContracts (merkleMinter)
                 DAO_PLACEHOLDER,
                 NO_ORACLE,
-                GovernanceERC20.MERKLE_MINT_PERMISSION_ID()
+                MerkleMinter.MERKLE_MINT_PERMISSION_ID()
             );
         }
     }
@@ -211,6 +205,6 @@ contract Erc20VotingManager is PluginManager {
     }
 
     function deployABI() external view virtual override returns (string memory) {
-        return "(VoteConfig, TokenFactory.TokenConfig, TokenFactory.MintConfig)";
+        return "((uint64,uint64,uint64),(address,string,string),(address[],uint256[]))";
     }
 }

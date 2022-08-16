@@ -102,7 +102,6 @@ contract AllowlistManager is PluginManager {
     }
 
     function deployABI() external view virtual override returns (string memory) {
-        return
-            "(uint256 participationRequiredPct, uint256 supportRequiredPct, uint256 minDuration, address[] allowlistVoters)";
+        return "(uint256,uint256,uint256,address[])";
     }
 }
