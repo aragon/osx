@@ -24,23 +24,31 @@ contract CounterV1PluginManager is PluginManager {
         override
         returns (address plugin, address[] memory relatedContracts)
     {
+        // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
 
+        // Allocate space for one address for the helper contracts for which we
+        // also want to define permissions
         relatedContracts = new address[](1);
 
         if (_multiplyHelper == address(0)) {
+            // Deploy some internal helper contract for the Plugin
             _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
         }
 
-        bytes memory init = abi.encodeWithSelector(
+        // Encode the parameters that will be passed to initialize() on the Plugin
+        bytes memory initData = abi.encodeWithSelector(
             bytes4(keccak256("function initialize(address,uint256))")),
             _multiplyHelper,
             _num
         );
 
+        // Address of the helper so that PluginInstaller can grant the requested permissions on it
         relatedContracts[0] = _multiplyHelper;
 
-        plugin = createProxy(dao, getImplementationAddress(), init);
+        // Deploy the Plugin itself, make it point to the implementation and
+        // pass it the initialization params
+        plugin = createProxy(dao, getImplementationAddress(), initData);
     }
 
     // TODO: WOULD THIS NEED dao as well to be passed
