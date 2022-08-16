@@ -3,6 +3,10 @@ name: Mythx Full
 on:
   workflow_call:
     inputs:
+      pr_number:
+        description: PR Number to run this test against
+        required: false
+        type: string
       mode:
         description: "Mythx scan mode (quick|standard|deep)"
         required: true
@@ -29,6 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        if: ${{ inputs.pr_number != '' }}
+        with:
+          ref: refs/pull/${{ inputs.pr_number }}/merge
+          fetch-depth: 0
+      - uses: actions/checkout@v3
+        if: ${{ inputs.pr_number == '' }}
         with:
           fetch-depth: 0
       - name: Install node
@@ -42,8 +52,18 @@ jobs:
         run: yarn
       - name: Run mythx
         run: mythx --output id --format json --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --async --mode ${{ inputs.mode }} packages/contracts/contracts
+      - name: Comment Prepare
+        id: comment_prepare
+        run: |
+          id=$(cat id | head -1)
+          group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq .group_id)
+          echo "::set-output name=group_id::$group_id"
+      - name: Comment a pull_request
+        if: ${{ inputs.pr_number != '' }}
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: "Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }})"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: SEE HERE FOR DASHBOARD LINK
         run: |
-          id=$(cat id)
-          group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq .group_id)
-          echo "Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/$group_id"
+          echo "Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}"
