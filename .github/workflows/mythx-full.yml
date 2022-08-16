@@ -62,8 +62,9 @@ jobs:
         if: ${{ inputs.pr_number != '' }}
         uses: thollander/actions-comment-pull-request@v1
         with:
-          message: "Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }})"
+          pr_number: ${{ inputs.pr_number }}
+          message: 'Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }})'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: SEE HERE FOR DASHBOARD LINK
         run: |
-          echo "Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}"
+          echo 'Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}'
