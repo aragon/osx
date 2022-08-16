@@ -38,6 +38,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: refs/pull/${{ inputs.pr_number }}/merge
       - name: Install node
         uses: actions/setup-node@v1
         with:

@@ -33,6 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        if: ${{ inputs.pr_number != '' }}
+        with:
+          ref: refs/pull/${{ inputs.pr_number }}/merge
+          fetch-depth: 0
+      - uses: actions/checkout@v3
+        if: ${{ inputs.pr_number == '' }}
         with:
           fetch-depth: 0
       - name: Install node
