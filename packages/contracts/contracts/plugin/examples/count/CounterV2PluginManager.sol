@@ -46,7 +46,7 @@ contract CounterV2PluginManager is PluginManager {
 
         relatedContracts[0] = _multiplyHelper;
 
-        plugin = createProxy(dao, getImplementationAddress(), init);
+        plugin = createProxy(dao, getImplementationAddress(), initData);
     }
 
     function update(
