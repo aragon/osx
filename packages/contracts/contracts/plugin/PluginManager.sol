@@ -8,7 +8,7 @@ import "./PluginConstants.sol";
 
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager is PluginConstants {
-    bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginManager).interfaceId;
+    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
 
     // TODO: come up with a better naming for isWhereAddress, isWhoAddress, or come up with another struct.
     struct RequestedPermission {
