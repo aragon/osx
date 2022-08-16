@@ -143,11 +143,11 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('fail creating new pluginRepo with wrong major version', async () => {
-    const pluginFactoryMock = await deployMockPluginFactory();
+    const pluginManagerMock = await deployMockPluginFactory();
 
     const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [0, 0, 0];
-    const pluginFactoryAddress = pluginFactoryMock.address;
+    const pluginFactoryAddress = pluginManagerMock.address;
     const contentURI = '0x00';
 
     await expect(
@@ -162,11 +162,11 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('create new pluginRepo with version', async () => {
-    const pluginFactoryMock = await deployMockPluginFactory();
+    const pluginManagerMock = await deployMockPluginFactory();
 
     const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [1, 0, 0];
-    const pluginFactoryAddress = pluginFactoryMock.address;
+    const pluginFactoryAddress = pluginManagerMock.address;
     const contentURI = '0x00';
 
     let tx = await pluginRepoFactory.createPluginRepoWithVersion(

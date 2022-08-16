@@ -1,27 +1,43 @@
-// // SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: GPL-3.0
 
-// pragma solidity 0.8.10;
+pragma solidity 0.8.10;
 
-// import "../plugin/PluginManager.sol";
-// import "./MajorityVotingMock.sol";
-// import "../utils/Proxy.sol";
+import "../plugin/PluginManager.sol";
+import "./MajorityVotingMock.sol";
+import "../utils/Proxy.sol";
 
-// contract PluginFactoryMock is PluginManager {
-//     event NewPluginDeployed(address dao, bytes params);
+contract PluginManagerMock is PluginManager {
+    event NewPluginDeployed(address dao, bytes params);
 
-//     constructor() {
-//         basePluginAddress = address(new MajorityVotingMock());
-//     }
+    address public basePluginAddress;
 
-//     function deploy(address dao, bytes calldata params)
-//         external
-//         override
-//         returns (address packageAddress)
-//     {
-//         packageAddress = basePluginAddress;
+    constructor() {
+        basePluginAddress = address(new MajorityVotingMock());
+    }
 
-//         emit NewPluginDeployed(dao, params);
+    function deploy(address dao, bytes calldata params)
+        external
+        override
+        returns (address plugin, address[] memory relatedContracts)
+    {
+        plugin = basePluginAddress;
 
-//         return packageAddress;
-//     }
-// }
+        emit NewPluginDeployed(dao, params);
+    }
+
+    function getImplementationAddress() public view virtual override returns (address) {
+        return basePluginAddress;
+    }
+
+    function deployABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
+    function getInstallPermissions(bytes memory data)
+        external
+        view
+        virtual
+        override
+        returns (RequestedPermission[] memory, string[] memory)
+    {}
+}
