@@ -2,7 +2,7 @@ import {ethers} from 'hardhat';
 
 import {PluginManagerMock} from '../../typechain';
 
-export async function deployMockPluginFactory(): Promise<PluginManagerMock> {
+export async function deployMockPluginManager(): Promise<PluginManagerMock> {
   const PluginManagerMock = await ethers.getContractFactory(
     'PluginManagerMock'
   );
