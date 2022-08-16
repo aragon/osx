@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol"; 
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 import { PermissionManager } from "../permission/PermissionManager.sol";
 
@@ -12,7 +13,7 @@ import "../IDAO.sol";
 
 /// @title AragonPlugin
 /// @notice An abstract contract to inherit from when creating a non-upgradable plugin.
-abstract contract AragonPlugin is Initializable, AppStorage, Context {
+abstract contract AragonPlugin is Initializable, ERC165, AppStorage, Context {
 
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _permissionId The hash of the permission identifier
@@ -27,6 +28,13 @@ abstract contract AragonPlugin is Initializable, AppStorage, Context {
             });
         }
         _;
+    }
+
+    /// @notice adds a IERC165 to check whether contract supports AragonPlugin interface or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or AragonPlugin
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(AragonPlugin).interfaceId || super.supportsInterface(interfaceId);
     }
 
 }
