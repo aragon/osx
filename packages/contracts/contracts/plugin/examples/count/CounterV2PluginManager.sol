@@ -37,7 +37,7 @@ contract CounterV2PluginManager is PluginManager {
             _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
         }
 
-        bytes memory init = abi.encodeWithSelector(
+        bytes memory initData = abi.encodeWithSelector(
             bytes4(keccak256("initialize(address,uint256)")),
             _multiplyHelper,
             _num,
@@ -46,7 +46,7 @@ contract CounterV2PluginManager is PluginManager {
 
         relatedContracts[0] = _multiplyHelper;
 
-        plugin = createProxy(dao, getImplementationAddress(), init);
+        plugin = createProxy(dao, getImplementationAddress(), initData);
     }
 
     function update(
