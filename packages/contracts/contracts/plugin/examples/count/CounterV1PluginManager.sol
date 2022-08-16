@@ -4,15 +4,18 @@ pragma solidity 0.8.10;
 
 import "../../PluginManager.sol";
 import "./MultiplyHelper.sol";
-import "./CountV1.sol";
+import "./CounterV1.sol";
 
-contract CountPluginManagerV1 is PluginManager {
-    MultiplyHelper public multiplyHelperBase;
-    CountV1 public countBase;
+contract CounterV1PluginManager is PluginManager {
+    
+    MultiplyHelper private multiplyHelperBase;
+    CounterV1 private counterBase;
+
+    address private constant NO_ORACLE = address(0);
 
     constructor() {
         multiplyHelperBase = new MultiplyHelper();
-        countBase = new CountV1();
+        counterBase = new CounterV1();
     }
 
     function deploy(address dao, bytes memory data)
@@ -58,7 +61,7 @@ contract CountPluginManagerV1 is PluginManager {
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
             PLUGIN_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
@@ -67,8 +70,8 @@ contract CountPluginManagerV1 is PluginManager {
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
-            countBase.MULTIPLY_PERMISSION_ID()
+            NO_ORACLE,
+            counterBase.MULTIPLY_PERMISSION_ID()
         );
 
         // MultiplyHelper could be something that dev already has it from outside
@@ -80,7 +83,7 @@ contract CountPluginManagerV1 is PluginManager {
                 BulkPermissionsLib.Operation.Grant,
                 0, // Index from relatedContracts (multiplyHelper)
                 PLUGIN_PLACEHOLDER,
-                address(0),
+                NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -89,7 +92,7 @@ contract CountPluginManagerV1 is PluginManager {
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
-        return address(countBase);
+        return address(counterBase);
     }
 
     function deployABI() external view virtual override returns (string memory) {

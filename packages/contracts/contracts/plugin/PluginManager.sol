@@ -10,44 +10,45 @@ import "./PluginConstants.sol";
 abstract contract PluginManager is PluginConstants {
     bytes4 public constant PLUGIN_FACTORY_INTERFACE_ID = type(PluginManager).interfaceId;
 
+    // TODO: come up with a better naming for isWhereAddress, isWhoAddress, or come up with another struct.
     struct RequestedPermission {
         BulkPermissionsLib.Operation op;
         uint256 where; // index from relatedContracts or the actual address
-        bool isWhereAddres; // whether or not `where` is index from relatedContracts or address directly.
+        bool isWhereAddress; // whether or not `where` is index from relatedContracts or address directly.
         uint256 who; // index from relatedContracts or the actual address
         bool isWhoAddress; // whether or not `who` is index from relatedContracts or address directly.
         address oracle;
-        bytes32 role;
+        bytes32 permissionId;
     }
 
-    /// @notice creates Permission struct
+    /// @notice creates Permission struct 
     /// @param op Whether grants, revokes, freezes...
     /// @param where index from the dev's deployed addresses array where permission will be set.
     /// @param who index from the dev's deployed addresses array
-    /// @param role role that will be set
+    /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
     function createPermission(
         BulkPermissionsLib.Operation op,
         uint256 where,
         uint256 who,
         address oracle,
-        bytes32 role
+        bytes32 permissionId
     ) internal pure returns (RequestedPermission memory) {
-        return RequestedPermission(op, where, false, who, false, oracle, role);
+        return RequestedPermission(op, where, false, who, false, oracle, permissionId);
     }
 
     /// @notice creates Permission struct
     /// @param op Whether grants, revokes, freezes...
     /// @param where Address where permission will be granted.
     /// @param who Address who will have the permission.
-    /// @param role role that will be set
+    /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
     function createPermission(
         BulkPermissionsLib.Operation op,
         address where,
         address who,
         address oracle,
-        bytes32 role
+        bytes32 permissionId
     ) internal pure returns (RequestedPermission memory) {
         return
             RequestedPermission(
@@ -57,7 +58,7 @@ abstract contract PluginManager is PluginConstants {
                 uint256(uint160(who)),
                 true,
                 oracle,
-                role
+                permissionId
             );
     }
 
@@ -65,32 +66,32 @@ abstract contract PluginManager is PluginConstants {
     /// @param op Whether grants, revokes, freezes...
     /// @param where index from the dev's deployed addresses array where permission will be set.
     /// @param who Address who will have the permission.
-    /// @param role role that will be set
+    /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
     function createPermission(
         BulkPermissionsLib.Operation op,
         uint256 where,
         address who,
         address oracle,
-        bytes32 role
+        bytes32 permissionId
     ) internal pure returns (RequestedPermission memory) {
-        return RequestedPermission(op, where, false, uint256(uint160(who)), true, oracle, role);
+        return RequestedPermission(op, where, false, uint256(uint160(who)), true, oracle, permissionId);
     }
 
     /// @notice creates Permission struct
     /// @param op Whether grants, revokes, freezes...
     /// @param where Address who will have the permission.
     /// @param who index from the dev's deployed addresses array that will have permission.
-    /// @param role role that will be set
+    /// @param permissionId permissionId that will be set
     /// @return Permission The final permission struct
     function createPermission(
         BulkPermissionsLib.Operation op,
         address where,
         uint256 who,
         address oracle,
-        bytes32 role
+        bytes32 permissionId
     ) internal pure returns (RequestedPermission memory) {
-        return RequestedPermission(op, uint256(uint160(where)), true, who, false, oracle, role);
+        return RequestedPermission(op, uint256(uint160(where)), true, who, false, oracle, permissionId);
     }
 
     /// @notice helper function to deploy Custom ERC1967Proxy that includes dao slot on it.

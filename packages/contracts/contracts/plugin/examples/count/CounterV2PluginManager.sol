@@ -4,16 +4,19 @@ pragma solidity 0.8.10;
 
 import "../../PluginManager.sol";
 import "./MultiplyHelper.sol";
-import "./CountV2.sol";
+import "./CounterV2.sol";
 
-contract CountPluginManagerV1 is PluginManager {
-    MultiplyHelper public multiplyHelperBase;
-    CountV2 public countBase;
+contract CounterV2PluginManager is PluginManager {
+    
+    MultiplyHelper private multiplyHelperBase;
+    CounterV2 private counterBase;
+
+    address private constant NO_ORACLE = address(0);
 
     // MultiplyHelper doesn't change. so dev decides to pass the old one.
     constructor(MultiplyHelper _helper) {
         multiplyHelperBase = _helper;
-        countBase = new CountV2();
+        counterBase = new CounterV2();
     }
 
     function deploy(address dao, bytes memory data)
@@ -59,9 +62,9 @@ contract CountPluginManagerV1 is PluginManager {
         // TODO: Shall we leave it here or make devs call `upgrade` from our abstract factory
         // Just a way of reinforcing...
         // TODO1: proxy needs casting to UUPSSUpgradable
-        // TODO2: 2nd line needs casting to CountV2
+        // TODO2: 2nd line needs casting to CounterV2
         // proxy.upgradeTo(getImplementationAddress());
-        CountV2(proxy).setNewVariable(_newVariable);
+        CounterV2(proxy).setNewVariable(_newVariable);
     }
 
     // TODO: WOULD THIS NEED dao as well to be passed
@@ -82,7 +85,7 @@ contract CountPluginManagerV1 is PluginManager {
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
             PLUGIN_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
@@ -91,8 +94,8 @@ contract CountPluginManagerV1 is PluginManager {
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
-            countBase.MULTIPLY_PERMISSION_ID()
+            NO_ORACLE,
+            counterBase.MULTIPLY_PERMISSION_ID()
         );
 
         // MultiplyHelper could be something that dev already has it from outside
@@ -104,7 +107,7 @@ contract CountPluginManagerV1 is PluginManager {
                 BulkPermissionsLib.Operation.Grant,
                 0, // Index from relatedContracts (multiplyHelper)
                 PLUGIN_PLACEHOLDER,
-                address(0),
+                NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -132,8 +135,8 @@ contract CountPluginManagerV1 is PluginManager {
             BulkPermissionsLib.Operation.Revoke,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
-            countBase.MULTIPLY_PERMISSION_ID()
+            NO_ORACLE,
+            counterBase.MULTIPLY_PERMISSION_ID()
         );
 
         // ALLOW Some 3rd party to be able to call multiply on plugin after update.
@@ -141,13 +144,13 @@ contract CountPluginManagerV1 is PluginManager {
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             whoCanCallMultiply,
-            address(0),
-            countBase.MULTIPLY_PERMISSION_ID()
+            NO_ORACLE,
+            counterBase.MULTIPLY_PERMISSION_ID()
         );
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
-        return address(countBase);
+        return address(counterBase);
     }
 
     function deployABI() external view virtual override returns (string memory) {

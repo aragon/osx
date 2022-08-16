@@ -5,14 +5,8 @@ pragma solidity 0.8.10;
 import { AragonUpgradablePlugin } from "../../../core/plugin/AragonUpgradablePlugin.sol";
 import "./MultiplyHelper.sol";
 
-/**
- * The updated version of example plugin - CountV2.
- * It expects another helper to do its work. Dev decides that only DAO should be able to call `multiply` on CountV1
- * Then only CountV1 should be able to call the final/actual multiply on the helper.
- * 
-*/
-
-contract CountV2 is AragonUpgradablePlugin {
+/// @notice The updated version of example plugin - CounterV2.
+contract CounterV2 is AragonUpgradablePlugin {
     
     bytes32 public constant MULTIPLY_PERMISSION_ID = keccak256("MULTIPLY_PERMISSION");
 
