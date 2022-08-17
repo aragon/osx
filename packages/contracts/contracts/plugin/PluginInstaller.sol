@@ -13,10 +13,6 @@ import {AragonPlugin} from "../core/plugin/AragonPlugin.sol";
 contract PluginInstaller is PluginConstants {
     using ERC165Checker for address payable;
 
-    error InstallNotAllowed();
-    error UpdateNotAllowed();
-    error AlreadyThisVersion();
-
     struct InstallPlugin {
         PluginManager manager;
         bytes data;
@@ -28,9 +24,26 @@ contract PluginInstaller is PluginConstants {
         uint16[3] oldVersion;
     }
 
-    event PluginUpdated(address dao, address proxy, uint16[3] oldVersion, bytes data);
+    error InstallNotAllowed();
+    error UpdateNotAllowed();
+    error AlreadyThisVersion();
+
+    /// @notice Thrown if there's a mismatch between the lengths.
+    /// @param relatedContractsLength the dev's relatedContract's array length.
+    /// @param helperNamesLength the length of helperNames
+    error LengthMismatch(uint256 relatedContractsLength, uint256 helperNamesLength);
+
+    /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
+    /// @param dao The dao address that plugin belongs to.
+    /// @param proxy The proxy address of the plugin.
     event PluginInstalled(address dao, address proxy);
 
+    /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
+    /// @param dao The dao address that plugin belongs to.
+    /// @param proxy The proxy address of the plugin.
+    /// @param oldVersion the old version plugin is upgrading from.
+    event PluginUpdated(address dao, address proxy, uint16[3] oldVersion, bytes data);
+    
     /// @notice Installs plugin on the dao by emitting the event and sets up permissions.
     /// @dev It's dev's responsibility to deploy the plugin inside the plugin manager.
     /// @param dao the dao address where the plugin should be installed.
@@ -45,9 +58,18 @@ contract PluginInstaller is PluginConstants {
             plugin.data
         );
 
-        (PluginManager.RequestedPermission[] memory permissions, ) = plugin
-            .manager
-            .getInstallPermissions(plugin.data);
+        (
+            PluginManager.RequestedPermission[] memory permissions,
+            string[] memory helperNames
+        ) = plugin.manager.getInstallPermissions(plugin.data);
+
+        // Extra check to ensure consistency is protected
+        if (relatedContracts.length != helperNames.length) {
+            revert LengthMismatch({
+                relatedContractsLength: relatedContracts.length,
+                helperNamesLength: helperNames.length
+            });
+        }
 
         DAO(payable(dao)).bulkOnMultiTarget(
             createFinalPermissions(dao, pluginAddress, permissions, relatedContracts)
@@ -97,9 +119,18 @@ contract PluginInstaller is PluginConstants {
             plugin.data
         );
 
-        (PluginManager.RequestedPermission[] memory permissions, ) = plugin
-            .manager
-            .getUpdatePermissions(plugin.oldVersion, plugin.data);
+        (
+            PluginManager.RequestedPermission[] memory permissions,
+            string[] memory helperNames
+        ) = plugin.manager.getUpdatePermissions(plugin.oldVersion, plugin.data);
+
+        // Extra check to ensure consistency is protected
+        if (relatedContracts.length != helperNames.length) {
+            revert LengthMismatch({
+                relatedContractsLength: relatedContracts.length,
+                helperNamesLength: helperNames.length
+            });
+        }
 
         DAO(payable(dao)).bulkOnMultiTarget(
             createFinalPermissions(dao, proxy, permissions, relatedContracts)
