@@ -41,12 +41,7 @@ contract AragonPluginRegistry is Initializable, UUPSUpgradeable, DaoAuthorizable
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(UPGRADE_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @notice Registers a plugin repository with a name and address.
     /// @param name The name of the PluginRepo.
@@ -57,7 +52,7 @@ contract AragonPluginRegistry is Initializable, UUPSUpgradeable, DaoAuthorizable
     {
         // TODO: Implement ENS subdomain. Currently plugin's name can be repeated, will be resolved once the ENS subdomain is implemented.
 
-        if(!registrant.supportsInterface(type(IPluginRepo).interfaceId)) {
+        if (!registrant.supportsInterface(type(IPluginRepo).interfaceId)) {
             revert ContractInterfaceInvalid(registrant);
         }
 

@@ -131,7 +131,7 @@ contract DAOFactory {
         internal
         returns (DAO dao)
     {
-        // create dao TODO:GIORGI
+        // create dao
         dao = DAO(createProxy(address(0), daoBase, bytes("")));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory

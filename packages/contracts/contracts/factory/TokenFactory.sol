@@ -91,7 +91,7 @@ contract TokenFactory {
         token = createProxy(address(_managingDao), governanceERC20Base, bytes(""));
         GovernanceERC20(token).initialize(_tokenConfig.name, _tokenConfig.symbol);
 
-        // // Clone and initialize a `MerkleMinter`
+        // Clone and initialize a `MerkleMinter`
         address merkleMinter = createProxy(address(_managingDao), merkleMinterBase, bytes(""));
         MerkleMinter(merkleMinter).initialize(
             _managingDao.getTrustedForwarder(),
@@ -109,7 +109,7 @@ contract TokenFactory {
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
-        // // Grant the permission to mint to the token factory (`address(this)`).
+        // Grant the permission to mint to the token factory (`address(this)`).
         _managingDao.grant(token, address(this), tokenMintPermission);
 
         for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
@@ -120,13 +120,13 @@ contract TokenFactory {
             IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
         }
 
-        // // Revoke the mint permission from the token factory (`address(this)`).
+        // Revoke the mint permission from the token factory (`address(this)`).
         _managingDao.revoke(token, address(this), tokenMintPermission);
 
-        // // Grant the managing DAO permission to directly mint tokens to an receiving address.
+        // Grant the managing DAO permission to directly mint tokens to an receiving address.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 
-        // // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.
+        // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.
         _managingDao.grant(token, merkleMinter, tokenMintPermission);
         _managingDao.grant(merkleMinter, address(_managingDao), merkleMintPermission);
 
