@@ -3,15 +3,16 @@
 pragma solidity 0.8.10;
 
 import "../../core/IDAO.sol";
-import "../tokens/GovernanceERC20.sol";
-import "../tokens/GovernanceWrappedERC20.sol";
-import "../tokens/MerkleMinter.sol";
-import "../tokens/MerkleDistributor.sol";
-import "./Erc20Voting.sol";
+import "../../core/DAO.sol";
+import "../../tokens/GovernanceERC20.sol";
+import "../../tokens/GovernanceWrappedERC20.sol";
+import "../../tokens/MerkleMinter.sol";
+import "../../tokens/MerkleDistributor.sol";
+import "./ERC20Voting.sol";
 import "../../plugin/PluginManager.sol";
 
 contract Erc20VotingManager is PluginManager {
-    Erc20Voting private erc20VotingBase;
+    ERC20Voting private erc20VotingBase;
 
     /// @notice The address of the `GovernanceERC20` base contract to clone from.
     address public governanceERC20Base;
@@ -29,11 +30,7 @@ contract Erc20VotingManager is PluginManager {
         address addr;
         string name;
         string symbol;
-    }
-
-    struct MintConfig {
-        address[] receivers;
-        uint256[] amounts;
+        GovernanceERC20.MintConfig mintConfig;
     }
 
     struct VoteConfig {
@@ -43,7 +40,7 @@ contract Erc20VotingManager is PluginManager {
     }
 
     constructor() {
-        erc20VotingBase = new Erc20Voting();
+        erc20VotingBase = new ERC20Voting();
         distributorBase = new MerkleDistributor();
         governanceERC20Base = address(new GovernanceERC20());
         governanceWrappedERC20Base = address(new GovernanceWrappedERC20());
@@ -58,18 +55,17 @@ contract Erc20VotingManager is PluginManager {
     {
         IDAO _dao = IDAO(payable(dao));
 
-        (
-            VoteConfig memory _voteConfig,
-            TokenFactory.TokenConfig memory _tokenConfig,
-            TokenFactory.MintConfig memory _mintConfig
-        ) = abi.decode(params, (VoteConfig, TokenFactory.TokenConfig, TokenFactory.MintConfig));
+        (VoteConfig memory _voteConfig, TokenConfig memory _tokenConfig) = abi.decode(
+            data,
+            (VoteConfig, TokenConfig)
+        );
 
-        relatedContracts = new address[](_tokenConfig.addr == address(0) ? 2 : 0);
+        relatedContracts = new address[](_tokenConfig.addr == address(0) ? 1 : 0);
 
         if (_tokenConfig.addr == address(0)) {
             // Create `GovernanceERC20`
             _tokenConfig.addr = createProxy(
-                _dao,
+                address(_dao),
                 governanceERC20Base,
                 abi.encodeWithSelector(
                     GovernanceERC20.initialize.selector,
@@ -79,27 +75,6 @@ contract Erc20VotingManager is PluginManager {
             );
 
             relatedContracts[0] = _tokenConfig.addr;
-
-            // Create `MerkleMinter`
-            address merkleMinter = createProxy(
-                _dao,
-                merkleMinterBase,
-                abi.encodeWithSelector(
-                    MerkleMinter.initialize.selector,
-                    _dao,
-                    _dao.getTrustedForwarder(),
-                    IERC20MintableUpgradeable(_tokenConfig.addr),
-                    distributorBase
-                )
-            );
-
-            relatedContracts[1] = merkleMinter;
-
-            // TODO: Problem:
-            // we can not mint any token here
-            // because we don't have permission to mint yet
-            // as of now we don't have a way to call functions that have auth on them
-            // as discussed we might need a solution for this, such as postHook()
         } else {
             // check token address interface
             // TODO
@@ -108,13 +83,13 @@ contract Erc20VotingManager is PluginManager {
         }
 
         bytes memory init = abi.encodeWithSelector(
-            Erc20Voting.initialize.selector,
+            ERC20Voting.initialize.selector,
             _dao,
-            _dao.trustedForwarder(),
+            _dao.getTrustedForwarder(),
             _voteConfig.participationRequiredPct,
             _voteConfig.supportRequiredPct,
             _voteConfig.minDuration,
-            token
+            GovernanceERC20(_tokenConfig.addr)
         );
 
         plugin = createProxy(dao, getImplementationAddress(), init);
@@ -125,17 +100,17 @@ contract Erc20VotingManager is PluginManager {
         view
         virtual
         override
-        returns (Permission[] memory permissions, string[] memory helperNames)
+        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
     {
-        (, TokenFactory.TokenConfig memory _tokenConfig, ) = abi.decode(
-            params,
-            (VoteConfig, TokenFactory.TokenConfig, TokenFactory.MintConfig)
-        );
+        (, TokenConfig memory _tokenConfig) = abi.decode(data, (VoteConfig, TokenConfig));
 
-        permissions = new Permission[](_tokenConfig.addr == address(0) ? 7 : 4);
+        permissions = new RequestedPermission[](_tokenConfig.addr == address(0) ? 5 : 4);
+        helperNames = new string[](1);
+
+        address NO_ORACLE = address(0);
 
         // Allows plugin to call DAO with EXEC_PERMISSION
-        permissions[0] = createPermission(
+        permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
             PLUGIN_PLACEHOLDER,
@@ -144,7 +119,7 @@ contract Erc20VotingManager is PluginManager {
         );
 
         // Allows DAO to call plugin with SET_CONFIGURATION_PERMISSION
-        permissions[1] = createPermission(
+        permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
@@ -153,7 +128,7 @@ contract Erc20VotingManager is PluginManager {
         );
 
         // Allows DAO to call plugin with UPGRADE_PERMISSION
-        permissions[2] = createPermission(
+        permissions[2] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
@@ -162,7 +137,7 @@ contract Erc20VotingManager is PluginManager {
         );
 
         // Allows DAO to call plugin with SET_TRUSTED_FORWARDER_PERMISSION
-        permissions[3] = createPermission(
+        permissions[3] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
@@ -170,34 +145,20 @@ contract Erc20VotingManager is PluginManager {
             erc20VotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
 
+        uint256 GOVERNANCE_ERC20_HELPER_IDX = 0;
+
         if (_tokenConfig.addr == address(0)) {
             // Allows DAO to call relatedContracts (token) with MINT_PERMISSION.
-            permissions[4] = createPermission(
+            permissions[4] = buildPermission(
                 BulkPermissionsLib.Operation.Grant,
-                0, // Index from relatedContracts (token)
+                GOVERNANCE_ERC20_HELPER_IDX,
                 DAO_PLACEHOLDER,
                 NO_ORACLE,
-                GovernanceERC20.MINT_PERMISSION_ID()
-            );
-
-            // Allows relatedContracts (merkleMinter) to call relatedContracts (token) with MINT_PERMISSION.
-            permissions[5] = createPermission(
-                BulkPermissionsLib.Operation.Grant,
-                1, // Index from relatedContracts (merkleMinter)
-                0, // Index from relatedContracts (token)
-                NO_ORACLE,
-                GovernanceERC20.MINT_PERMISSION_ID()
-            );
-
-            // Allows DAO to call relatedContracts (merkleMinter) with MERKLE_MINT_PERMISSION.
-            permissions[6] = createPermission(
-                BulkPermissionsLib.Operation.Grant,
-                1, // Index from relatedContracts (merkleMinter)
-                DAO_PLACEHOLDER,
-                NO_ORACLE,
-                MerkleMinter.MERKLE_MINT_PERMISSION_ID()
+                keccak256("MINT_PERMISSION")
             );
         }
+
+        helperNames[GOVERNANCE_ERC20_HELPER_IDX] = "GovernanceERC20";
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
@@ -205,6 +166,7 @@ contract Erc20VotingManager is PluginManager {
     }
 
     function deployABI() external view virtual override returns (string memory) {
-        return "((uint64,uint64,uint64),(address,string,string),(address[],uint256[]))";
+        return
+            "((tuple(uint64,uint64,uint64) voteConfig),(tuple(address addr,string name,string symbol, (tuple(address[],uint256[]) mintConfig)) tokenConfig))";
     }
 }

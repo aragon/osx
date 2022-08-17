@@ -43,11 +43,6 @@ contract TokenFactory {
         string symbol;
     }
 
-    struct MintConfig {
-        address[] receivers;
-        uint256[] amounts;
-    }
-
     /// @notice Initializes the different base contracts for the factory to clone from.
     constructor() {
         setupBases();
@@ -63,7 +58,7 @@ contract TokenFactory {
     function createToken(
         DAO _managingDao,
         TokenConfig calldata _tokenConfig,
-        MintConfig calldata _mintConfig
+        GovernanceERC20.MintConfig calldata _mintConfig
     ) external returns (ERC20VotesUpgradeable, MerkleMinter) {
         address token = _tokenConfig.addr;
 
@@ -89,7 +84,12 @@ contract TokenFactory {
         }
 
         token = governanceERC20Base.clone();
-        GovernanceERC20(token).initialize(_managingDao, _tokenConfig.name, _tokenConfig.symbol);
+        GovernanceERC20(token).initialize(
+            _managingDao,
+            _tokenConfig.name,
+            _tokenConfig.symbol,
+            _mintConfig
+        );
 
         // Clone and initialize a `MerkleMinter`
         address merkleMinter = merkleMinterBase.clone();

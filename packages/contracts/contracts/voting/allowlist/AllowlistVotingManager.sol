@@ -26,12 +26,12 @@ contract AllowlistManager is PluginManager {
             uint256 supportRequiredPct,
             uint256 minDuration,
             address[] memory allowlistVoters
-        ) = abi.decode(params, (uint256, uint256, uint256, address[]));
+        ) = abi.decode(data, (uint256, uint256, uint256, address[]));
 
         bytes memory init = abi.encodeWithSelector(
-            WhitelistVoting.initialize.selector,
+            AllowlistVoting.initialize.selector,
             _dao,
-            _dao.trustedForwarder(),
+            _dao.getTrustedForwarder(),
             participationRequiredPct,
             supportRequiredPct,
             minDuration,
@@ -42,57 +42,60 @@ contract AllowlistManager is PluginManager {
         plugin = createProxy(dao, getImplementationAddress(), init);
     }
 
-    function getInstallPermissions(bytes memory data)
+    function getInstallPermissions(bytes memory)
         external
         view
         virtual
         override
-        returns (Permission[] memory permissions, string[] memory helperNames)
+        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
     {
-        permissions = new Permission[](5);
+        permissions = new RequestedPermission[](5);
+        helperNames = new string[](0);
+
+        address NO_ORACLE = address(0);
 
         // Allows plugin to call DAO with EXEC_PERMISSION
-        permissions[0] = createPermission(
+        permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
             PLUGIN_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
         // Allows DAO to call plugin with MODIFY_ALLOWLIST_PERMISSION
-        permissions[1] = createPermission(
+        permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             allowlistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
         );
 
         // Allows DAO to call plugin with SET_CONFIGURATION_PERMISSION
-        permissions[2] = createPermission(
+        permissions[2] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             allowlistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
         );
 
         // Allows DAO to call plugin with UPGRADE_PERMISSION
-        permissions[3] = createPermission(
+        permissions[3] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             allowlistVotingBase.UPGRADE_PERMISSION_ID()
         );
 
         // Allows DAO to call plugin with SET_TRUSTED_FORWARDER_PERMISSION
-        permissions[4] = createPermission(
+        permissions[4] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
-            address(0),
+            NO_ORACLE,
             allowlistVotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
     }
@@ -102,6 +105,7 @@ contract AllowlistManager is PluginManager {
     }
 
     function deployABI() external view virtual override returns (string memory) {
-        return "(uint256,uint256,uint256,address[])";
+        return
+            "(uint256 participationRequiredPct, uint256 supportRequiredPct, uint256 minDuration, address[] allowlistVoters)";
     }
 }

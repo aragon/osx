@@ -69,7 +69,7 @@ contract DAOFactory {
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
         TokenFactory.TokenConfig calldata _tokenConfig,
-        TokenFactory.MintConfig calldata _mintConfig,
+        GovernanceERC20.MintConfig calldata _mintConfig,
         address _trustedForwarder
     )
         external
@@ -143,7 +143,8 @@ contract DAOFactory {
     /// @param _voting The voting contract address (`AllowlistVoting` or `ERC20Voting`).
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set permissionIds on the dao itself.
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
 
         // Grant DAO all the permissions required
         items[0] = BulkPermissionsLib.ItemSingleTarget(
@@ -217,7 +218,8 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for ERC20Voting
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
@@ -262,7 +264,8 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for AllowlistVoting
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
