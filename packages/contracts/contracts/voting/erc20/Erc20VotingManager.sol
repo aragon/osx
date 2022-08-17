@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
@@ -15,6 +16,7 @@ import "./ERC20Voting.sol";
 
 contract Erc20VotingManager is PluginManager {
     using Address for address;
+    using ERC165Checker for address;
 
     /// @notice The logic contract of the `ERC20Voting`.
     ERC20Voting private erc20VotingBase;
@@ -58,11 +60,28 @@ contract Erc20VotingManager is PluginManager {
             (VoteConfig, TokenConfig)
         );
 
-        bool isGovernanceErc20Token = isGovernanceErc20(_tokenConfig.addr);
+        (bool isGovernanceErc20, bool isGovernanceErc20Wrapped) = isGovernanceToken(
+            _tokenConfig.addr
+        );
 
-        relatedContracts = new address[](!isGovernanceErc20Token ? 1 : 0);
+        relatedContracts = new address[](_tokenConfig.addr == address(0) ? 1 : 0);
 
-        if (_tokenConfig.addr != address(0) && !isGovernanceErc20Token) {
+        if (_tokenConfig.addr == address(0)) {
+            // Create `GovernanceERC20`
+            _tokenConfig.addr = createProxy(
+                address(_dao),
+                governanceERC20Base,
+                abi.encodeWithSelector(
+                    GovernanceERC20.initialize.selector,
+                    address(_dao),
+                    _tokenConfig.name,
+                    _tokenConfig.symbol,
+                    _tokenConfig.mintConfig
+                )
+            );
+
+            relatedContracts[0] = _tokenConfig.addr;
+        } else if (!isGovernanceErc20 && !isGovernanceErc20Wrapped) {
             // user already has a token. we need to wrap it in
             // GovernanceWrappedERC20 in order to make the token
             // include governance functionality.
@@ -83,21 +102,6 @@ contract Erc20VotingManager is PluginManager {
                     _tokenConfig.symbol
                 )
             );
-
-            relatedContracts[0] = _tokenConfig.addr;
-        } else if (_tokenConfig.addr == address(0)) {
-            // Create `GovernanceERC20`
-            _tokenConfig.addr = createProxy(
-                address(_dao),
-                governanceERC20Base,
-                abi.encodeWithSelector(
-                    GovernanceERC20.initialize.selector,
-                    _tokenConfig.name,
-                    _tokenConfig.symbol
-                )
-            );
-
-            relatedContracts[0] = _tokenConfig.addr;
         }
 
         bytes memory init = abi.encodeWithSelector(
@@ -123,8 +127,8 @@ contract Erc20VotingManager is PluginManager {
     {
         (, TokenConfig memory _tokenConfig) = abi.decode(data, (VoteConfig, TokenConfig));
 
-        permissions = new RequestedPermission[](!isGovernanceErc20(_tokenConfig.addr) ? 5 : 4);
-        helperNames = new string[](1);
+        permissions = new RequestedPermission[](_tokenConfig.addr == address(0) ? 5 : 4);
+        helperNames = new string[](_tokenConfig.addr == address(0) ? 1 : 0);
 
         address NO_ORACLE = address(0);
 
@@ -175,9 +179,9 @@ contract Erc20VotingManager is PluginManager {
                 NO_ORACLE,
                 keccak256("MINT_PERMISSION")
             );
-        }
 
-        helperNames[GOVERNANCE_ERC20_HELPER_IDX] = "GovernanceERC20";
+            helperNames[GOVERNANCE_ERC20_HELPER_IDX] = "GovernanceERC20";
+        }
     }
 
     /// @inheritdoc PluginManager
@@ -193,12 +197,19 @@ contract Erc20VotingManager is PluginManager {
 
     /// @notice Check if a contract address supports `ERC165Upgradeable` interface.
     /// @param _tokenAddress The address of the token contract.
-    /// @return bool The boolean to show if the address supports the interface or not.
-    function isGovernanceErc20(address _tokenAddress) public view returns (bool) {
-        bool isGovernanceErc20Token = ERC165Upgradeable(_tokenAddress).supportsInterface(
+    /// @return isGovernanceErc20 The boolean to show if the address supports the interface or not.
+    /// @return isGovernanceErc20Wrapped The boolean to show if the address supports the interface or not.
+    function isGovernanceToken(address _tokenAddress)
+        public
+        view
+        returns (bool isGovernanceErc20, bool isGovernanceErc20Wrapped)
+    {
+        isGovernanceErc20 = _tokenAddress.supportsInterface(
             type(ERC20VotesUpgradeable).interfaceId
         );
 
-        return isGovernanceErc20Token;
+        isGovernanceErc20Wrapped = _tokenAddress.supportsInterface(
+            type(ERC20WrapperUpgradeable).interfaceId
+        );
     }
 }

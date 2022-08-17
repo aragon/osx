@@ -48,6 +48,8 @@ contract GovernanceWrappedERC20 is
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
 
+        _registerStandard(type(ERC20WrapperUpgradeable).interfaceId);
+        _registerStandard(type(ERC20VotesUpgradeable).interfaceId);
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
