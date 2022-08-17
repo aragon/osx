@@ -3,16 +3,18 @@
 pragma solidity 0.8.10;
 
 import "../../core/IDAO.sol";
-import "./AllowlistVoting.sol";
 import "../../plugin/PluginManager.sol";
+import "./AllowlistVoting.sol";
 
 contract AllowlistManager is PluginManager {
+    /// @notice The logic contract of the `AllowlistVoting`.
     AllowlistVoting private allowlistVotingBase;
 
     constructor() {
         allowlistVotingBase = new AllowlistVoting();
     }
 
+    /// @inheritdoc PluginManager
     function deploy(address dao, bytes memory data)
         external
         virtual
@@ -42,6 +44,7 @@ contract AllowlistManager is PluginManager {
         plugin = createProxy(dao, getImplementationAddress(), init);
     }
 
+    /// @inheritdoc PluginManager
     function getInstallPermissions(bytes memory)
         external
         view
@@ -100,10 +103,12 @@ contract AllowlistManager is PluginManager {
         );
     }
 
+    /// @inheritdoc PluginManager
     function getImplementationAddress() public view virtual override returns (address) {
         return address(allowlistVotingBase);
     }
 
+    /// @inheritdoc PluginManager
     function deployABI() external view virtual override returns (string memory) {
         return
             "(uint256 participationRequiredPct, uint256 supportRequiredPct, uint256 minDuration, address[] allowlistVoters)";

@@ -37,6 +37,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
         __ERC20Permit_init(_name);
         __DaoAuthorizable_init(_dao);
 
+        _registerStandard(type(ERC20VotesUpgradeable).interfaceId);
         _registerStandard(type(IERC20Upgradeable).interfaceId);
         _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
         _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);

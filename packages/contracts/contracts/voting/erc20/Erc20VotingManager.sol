@@ -2,29 +2,28 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+
 import "../../core/IDAO.sol";
-import "../../core/DAO.sol";
 import "../../tokens/GovernanceERC20.sol";
 import "../../tokens/GovernanceWrappedERC20.sol";
-import "../../tokens/MerkleMinter.sol";
-import "../../tokens/MerkleDistributor.sol";
-import "./ERC20Voting.sol";
 import "../../plugin/PluginManager.sol";
+import "./ERC20Voting.sol";
 
 contract Erc20VotingManager is PluginManager {
+    using Address for address;
+
+    /// @notice The logic contract of the `ERC20Voting`.
     ERC20Voting private erc20VotingBase;
 
-    /// @notice The address of the `GovernanceERC20` base contract to clone from.
+    /// @notice The logic contract of the `GovernanceERC20`.
     address public governanceERC20Base;
 
-    /// @notice The address of the `GovernanceWrappedERC20` base contract to clone from.
+    /// @notice The logic contract of the `GovernanceWrappedERC20`.
     address public governanceWrappedERC20Base;
-
-    /// @notice The address of the `MerkleMinter` base contract to clone from.
-    address public merkleMinterBase;
-
-    /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter` clones.
-    MerkleDistributor public distributorBase;
 
     struct TokenConfig {
         address addr;
@@ -41,12 +40,11 @@ contract Erc20VotingManager is PluginManager {
 
     constructor() {
         erc20VotingBase = new ERC20Voting();
-        distributorBase = new MerkleDistributor();
         governanceERC20Base = address(new GovernanceERC20());
         governanceWrappedERC20Base = address(new GovernanceWrappedERC20());
-        merkleMinterBase = address(new MerkleMinter());
     }
 
+    /// @inheritdoc PluginManager
     function deploy(address dao, bytes memory data)
         external
         virtual
@@ -60,9 +58,34 @@ contract Erc20VotingManager is PluginManager {
             (VoteConfig, TokenConfig)
         );
 
-        relatedContracts = new address[](_tokenConfig.addr == address(0) ? 1 : 0);
+        bool isGovernanceErc20Token = isGovernanceErc20(_tokenConfig.addr);
 
-        if (_tokenConfig.addr == address(0)) {
+        relatedContracts = new address[](!isGovernanceErc20Token ? 1 : 0);
+
+        if (_tokenConfig.addr != address(0) && !isGovernanceErc20Token) {
+            // user already has a token. we need to wrap it in
+            // GovernanceWrappedERC20 in order to make the token
+            // include governance functionality.
+
+            // Validate if token is ERC20
+            // Not Enough Checks, but better than nothing.
+            _tokenConfig.addr.functionCall(
+                abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
+            );
+
+            _tokenConfig.addr = createProxy(
+                address(_dao),
+                governanceWrappedERC20Base,
+                abi.encodeWithSelector(
+                    GovernanceWrappedERC20.initialize.selector,
+                    IERC20Upgradeable(_tokenConfig.addr),
+                    _tokenConfig.name,
+                    _tokenConfig.symbol
+                )
+            );
+
+            relatedContracts[0] = _tokenConfig.addr;
+        } else if (_tokenConfig.addr == address(0)) {
             // Create `GovernanceERC20`
             _tokenConfig.addr = createProxy(
                 address(_dao),
@@ -75,11 +98,6 @@ contract Erc20VotingManager is PluginManager {
             );
 
             relatedContracts[0] = _tokenConfig.addr;
-        } else {
-            // check token address interface
-            // TODO
-            // if not comply then
-            // revert()
         }
 
         bytes memory init = abi.encodeWithSelector(
@@ -95,6 +113,7 @@ contract Erc20VotingManager is PluginManager {
         plugin = createProxy(dao, getImplementationAddress(), init);
     }
 
+    /// @inheritdoc PluginManager
     function getInstallPermissions(bytes memory data)
         external
         view
@@ -104,7 +123,7 @@ contract Erc20VotingManager is PluginManager {
     {
         (, TokenConfig memory _tokenConfig) = abi.decode(data, (VoteConfig, TokenConfig));
 
-        permissions = new RequestedPermission[](_tokenConfig.addr == address(0) ? 5 : 4);
+        permissions = new RequestedPermission[](!isGovernanceErc20(_tokenConfig.addr) ? 5 : 4);
         helperNames = new string[](1);
 
         address NO_ORACLE = address(0);
@@ -161,12 +180,25 @@ contract Erc20VotingManager is PluginManager {
         helperNames[GOVERNANCE_ERC20_HELPER_IDX] = "GovernanceERC20";
     }
 
+    /// @inheritdoc PluginManager
     function getImplementationAddress() public view virtual override returns (address) {
         return address(erc20VotingBase);
     }
 
+    /// @inheritdoc PluginManager
     function deployABI() external view virtual override returns (string memory) {
         return
             "((tuple(uint64,uint64,uint64) voteConfig),(tuple(address addr,string name,string symbol, (tuple(address[],uint256[]) mintConfig)) tokenConfig))";
+    }
+
+    /// @notice Check if a contract address supports `ERC165Upgradeable` interface.
+    /// @param _tokenAddress The address of the token contract.
+    /// @return bool The boolean to show if the address supports the interface or not.
+    function isGovernanceErc20(address _tokenAddress) public view returns (bool) {
+        bool isGovernanceErc20Token = ERC165Upgradeable(_tokenAddress).supportsInterface(
+            type(ERC20VotesUpgradeable).interfaceId
+        );
+
+        return isGovernanceErc20Token;
     }
 }
