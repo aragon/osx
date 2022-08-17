@@ -2,7 +2,7 @@
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
+import {BigNumber, BigNumberish} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -54,7 +54,18 @@ describe('MerkleDistributor', function () {
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
     token = await GovernanceERC20.deploy();
-    await token.initialize(managingDao.address, 'GOV', 'GOV');
+
+    const initialMintConfig: {receivers: string[]; amounts: BigNumberish[]} = {
+      receivers: [],
+      amounts: [],
+    };
+
+    await token.initialize(
+      managingDao.address,
+      'GOV',
+      'GOV',
+      initialMintConfig
+    );
 
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'

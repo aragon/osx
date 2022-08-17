@@ -110,20 +110,6 @@ contract TokenFactory {
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
-        // Grant the permission to mint to the token factory (`address(this)`).
-        _managingDao.grant(token, address(this), tokenMintPermission);
-
-        for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
-            // allow minting to treasury
-            address receiver = _mintConfig.receivers[i] == address(0)
-                ? address(_managingDao)
-                : _mintConfig.receivers[i];
-            IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
-        }
-
-        // Revoke the mint permission from the token factory (`address(this)`).
-        _managingDao.revoke(token, address(this), tokenMintPermission);
-
         // Grant the managing DAO permission to directly mint tokens to an receiving address.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 

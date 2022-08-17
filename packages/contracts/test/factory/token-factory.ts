@@ -298,16 +298,6 @@ describe('Core: TokenFactory', () => {
 
       expect(dao.grant).to.have.been.calledWith(
         tx[0],
-        tokenFactory.address,
-        MINT_PERMISSION_ID
-      );
-      expect(dao.revoke).to.have.been.calledWith(
-        tx[0],
-        tokenFactory.address,
-        MINT_PERMISSION_ID
-      );
-      expect(dao.grant).to.have.been.calledWith(
-        tx[0],
         dao.address,
         MINT_PERMISSION_ID
       );

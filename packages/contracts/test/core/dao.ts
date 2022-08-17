@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {BigNumberish} from 'ethers';
 
 import {DAO, GovernanceERC20} from '../../typechain';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
@@ -53,7 +54,13 @@ describe('DAO', function () {
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
     token = await Token.deploy();
-    await token.initialize(dao.address, 'GOV', 'GOV');
+
+    const initialMintConfig: {receivers: string[]; amounts: BigNumberish[]} = {
+      receivers: [],
+      amounts: [],
+    };
+
+    await token.initialize(dao.address, 'GOV', 'GOV', initialMintConfig);
 
     // Grant permissions
     await Promise.all([
