@@ -2,12 +2,14 @@
 
 pragma solidity 0.8.10;
 
-import "../plugin/PluginFactoryBase.sol";
+import "../plugin/PluginManager.sol";
 import "./MajorityVotingMock.sol";
 import "../utils/Proxy.sol";
 
-contract PluginFactoryMock is PluginFactoryBase {
+contract PluginManagerMock is PluginManager {
     event NewPluginDeployed(address dao, bytes params);
+
+    address public basePluginAddress;
 
     constructor() {
         basePluginAddress = address(new MajorityVotingMock());
@@ -16,12 +18,26 @@ contract PluginFactoryMock is PluginFactoryBase {
     function deploy(address dao, bytes calldata params)
         external
         override
-        returns (address packageAddress)
+        returns (address plugin, address[] memory relatedContracts)
     {
-        packageAddress = basePluginAddress;
+        plugin = basePluginAddress;
 
         emit NewPluginDeployed(dao, params);
-
-        return packageAddress;
     }
+
+    function getImplementationAddress() public view virtual override returns (address) {
+        return basePluginAddress;
+    }
+
+    function deployABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
+    function getInstallPermissions(bytes memory data)
+        external
+        view
+        virtual
+        override
+        returns (RequestedPermission[] memory, string[] memory)
+    {}
 }
