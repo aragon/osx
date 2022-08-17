@@ -12,41 +12,45 @@ import "../core/component/DaoAuthorizable.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
+import "../core/plugin/AragonUpgradablePlugin.sol";
+
 /// @title GovernanceERC20
 /// @author Aragon Association
 /// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
-contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizable {
+contract GovernanceERC20 is AragonUpgradablePlugin, ERC20VotesUpgradeable {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 
     /// @notice Internal initialization method.
-    /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
     function __GovernanceERC20_init(
-        IDAO _dao,
         string calldata _name,
         string calldata _symbol
     ) internal onlyInitializing {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
-        __DaoAuthorizable_init(_dao);
+    }
 
-        _registerStandard(type(IERC20Upgradeable).interfaceId);
-        _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
-        _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
+    /// @notice adds a IERC165 to check whether contract supports GovernanceERC20 interface or not.
+    /// @dev See {AragonUpgradablePlugin-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or GovernanceERC20
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC20Upgradeable).interfaceId ||
+            interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
+            interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice Initializes the component.
-    /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
     function initialize(
-        IDAO _dao,
         string calldata _name,
         string calldata _symbol
     ) external initializer {
-        __GovernanceERC20_init(_dao, _name, _symbol);
+        __GovernanceERC20_init(_name, _symbol);
     }
 
     /// @notice Mints tokens to an address.
@@ -80,4 +84,8 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
     function _burn(address account, uint256 amount) internal override {
         super._burn(account, amount);
     }
+
+    /// @notice reserves storage space in case of state variable additions for this contract.
+    /// @dev After the addition of state variables, the number of storage slots including `_gap` size must add up to 50.
+    uint256[50] private __gap;
 }

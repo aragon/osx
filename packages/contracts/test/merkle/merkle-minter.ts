@@ -12,12 +12,13 @@ import {
   GovernanceERC20,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import { createProxy } from '../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe('MerkleDistributor', function () {
+describe('MerkleMinter', function () {
   let signers: SignerWithAddress[];
   let minter: MerkleMinter;
   let distributor: MerkleDistributor;
@@ -52,19 +53,25 @@ describe('MerkleDistributor', function () {
       ethers.constants.AddressZero
     );
 
+    // deploy token
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
-    token = await GovernanceERC20.deploy();
-    await token.initialize(managingDao.address, 'GOV', 'GOV');
+    token = await GovernanceERC20.deploy()
+    token = await createProxy(managingDao.address, token) as GovernanceERC20
+    await token.initialize('GOV', 'GOV');
 
+    // deploy merkledistributor
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
     );
-    distributor = await MerkleDistributor.deploy();
-
+    distributor = await MerkleDistributor.deploy()
+    distributor = await createProxy(managingDao.address, distributor) as MerkleDistributor
+    
+    // deploy merkleminter
     const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
-    minter = await MerkleMinter.deploy();
+    minter = await MerkleMinter.deploy()
+    minter = await createProxy(managingDao.address, minter) as MerkleMinter
+
     await minter.initialize(
-      managingDao.address,
       ethers.constants.AddressZero,
       token.address,
       distributor.address
@@ -125,8 +132,8 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'DaoUnauthorized',
-          managingDao.address,
+          'Unauthorized',
+          // managingDao.address,
           minter.address,
           minter.address,
           ownerAddress,
@@ -151,8 +158,8 @@ describe('MerkleDistributor', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'DaoUnauthorized',
-          managingDao.address,
+          'Unauthorized',
+          // managingDao.address,
           token.address,
           token.address,
           minter.address,

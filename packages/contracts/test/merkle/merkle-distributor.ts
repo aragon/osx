@@ -5,6 +5,7 @@ import {ethers} from 'hardhat';
 
 import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import { createProxy } from '../test-utils/proxy';
 
 import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
@@ -35,6 +36,7 @@ describe('MerkleDistributor', function () {
       'MerkleDistributor'
     );
     distributor = await MerkleDistributor.deploy();
+    distributor = await createProxy(dao.address, distributor) as MerkleDistributor
   });
 
   describe('general', () => {
@@ -42,7 +44,6 @@ describe('MerkleDistributor', function () {
 
     beforeEach(async () => {
       await distributor.initialize(
-        dao.address,
         ethers.constants.AddressZero,
         token.address,
         ZERO_BYTES32
@@ -85,7 +86,6 @@ describe('MerkleDistributor', function () {
       ]);
 
       await distributor.initialize(
-        dao.address,
         ethers.constants.AddressZero,
         token.address,
         tree.getHexRoot()
@@ -208,7 +208,6 @@ describe('MerkleDistributor', function () {
         })
       );
       await distributor.initialize(
-        dao.address,
         ethers.constants.AddressZero,
         token.address,
         tree.getHexRoot()

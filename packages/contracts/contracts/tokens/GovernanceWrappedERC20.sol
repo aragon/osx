@@ -13,6 +13,8 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
+import "../core/plugin/AragonUpgradablePlugin.sol";
+
 /// @title GovernanceWrappedERC20
 /// @author Aragon Association
 /// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`.
@@ -23,10 +25,10 @@ import "../core/IDAO.sol";
 /// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token contract.
 contract GovernanceWrappedERC20 is
     Initializable,
-    AdaptiveERC165,
+    AragonUpgradablePlugin,
     ERC20VotesUpgradeable,
     ERC20WrapperUpgradeable,
-    BaseRelayRecipient
+    BaseRelayRecipient // TODO: GIORGI
     // Inheritance Chain: GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable => EIP712Upgradeable => ERC20Upgradeable => Initializable => BaseRelayRecipient
 {
     /// @notice Returns the version of the GSN relay recipient
@@ -47,10 +49,17 @@ contract GovernanceWrappedERC20 is
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
+    }
 
-        _registerStandard(type(IERC20Upgradeable).interfaceId);
-        _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
-        _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
+    /// @notice adds a IERC165 to check whether contract supports GovernanceWrappedERC20 interface or not.
+    /// @dev See {AragonUpgradablePlugin-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or GovernanceWrappedERC20
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC20Upgradeable).interfaceId ||
+            interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
+            interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice Initializes the component.
@@ -131,4 +140,8 @@ contract GovernanceWrappedERC20 is
     {
         super._burn(account, amount);
     }
+
+    /// @notice reserves storage space in case of state variable additions for this contract.
+    /// @dev After the addition of state variables, the number of storage slots including `_gap` size must add up to 50.
+    uint256[50] private __gap;
 }

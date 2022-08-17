@@ -116,6 +116,7 @@ contract PluginRepoFactory {
 
         pluginRepo = PluginRepo(
             createProxy(
+                address(0),
                 pluginRepoBase,
                 abi.encodeWithSelector(PluginRepo.initialize.selector, _initialOwner)
             )

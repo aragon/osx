@@ -1,9 +1,10 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20} from '../../typechain';
-import {ERRORS, customError} from '../test-utils/custom-error-helper';
+import { DAO, GovernanceERC20 } from '../../typechain';
+import { ERRORS, customError } from '../test-utils/custom-error-helper';
+import { createProxy } from '../test-utils/proxy'
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
@@ -52,8 +53,10 @@ describe('DAO', function () {
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
-    token = await Token.deploy();
-    await token.initialize(dao.address, 'GOV', 'GOV');
+    token = await Token.deploy()
+    token = await createProxy(dao.address, token) as GovernanceERC20
+
+    await token.initialize('GOV', 'GOV');
 
     // Grant permissions
     await Promise.all([
@@ -226,7 +229,7 @@ describe('DAO', function () {
       let tx = await dao.execute(0, dummyActions);
       let rc = await tx.wait();
 
-      const {actor, callId, actions, execResults} = dao.interface.parseLog(
+      const { actor, callId, actions, execResults } = dao.interface.parseLog(
         rc.logs[0]
       ).args;
 
@@ -244,7 +247,7 @@ describe('DAO', function () {
     const amount = ethers.utils.parseEther('1.23');
 
     it('deposits native tokens into the DAO', async () => {
-      const options = {value: amount};
+      const options = { value: amount };
 
       // is empty at the beginning
       expect(await ethers.provider.getBalance(dao.address)).to.equal(0);
@@ -275,7 +278,7 @@ describe('DAO', function () {
     });
 
     it('throws an error if ERC20 and native tokens are deposited at the same time', async () => {
-      const options = {value: amount};
+      const options = { value: amount };
       await token.mint(ownerAddress, amount);
 
       await expect(
@@ -288,7 +291,7 @@ describe('DAO', function () {
 
   describe('withdraw:', async () => {
     const amount = ethers.utils.parseEther('1.23');
-    const options = {value: amount};
+    const options = { value: amount };
 
     beforeEach(async () => {
       // put native tokens into the DAO
@@ -384,13 +387,13 @@ describe('DAO', function () {
     const amount = ethers.utils.parseEther('1.23');
 
     it('receives native tokens ', async () => {
-      const options = {value: amount};
+      const options = { value: amount };
 
       // is empty at the beginning
       expect(await ethers.provider.getBalance(dao.address)).to.equal(0);
 
       // Send a transaction
-      expect(await signers[0].sendTransaction({to: dao.address, value: amount}))
+      expect(await signers[0].sendTransaction({ to: dao.address, value: amount }))
         .to.emit(dao, EVENTS.NativeTokenDeposited)
         .withArgs(ownerAddress, amount);
 

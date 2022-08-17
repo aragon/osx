@@ -5,12 +5,12 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-
+import { createProxy } from '../utils/Proxy.sol';
 import "../tokens/GovernanceERC20.sol";
 import "../tokens/GovernanceWrappedERC20.sol";
-import "../core/DAO.sol";
-import "../tokens/MerkleMinter.sol";
-import "../tokens/MerkleDistributor.sol";
+import { DAO } from "../core/DAO.sol";
+import { MerkleMinter, IERC20MintableUpgradeable } from "../tokens/MerkleMinter.sol";
+import { MerkleDistributor } from "../tokens/MerkleDistributor.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022
@@ -88,13 +88,12 @@ contract TokenFactory {
             return (ERC20VotesUpgradeable(token), MerkleMinter(address(0)));
         }
 
-        token = governanceERC20Base.clone();
-        GovernanceERC20(token).initialize(_managingDao, _tokenConfig.name, _tokenConfig.symbol);
+        token = createProxy(address(_managingDao), governanceERC20Base, bytes(""));
+        GovernanceERC20(token).initialize(_tokenConfig.name, _tokenConfig.symbol);
 
-        // Clone and initialize a `MerkleMinter`
-        address merkleMinter = merkleMinterBase.clone();
+        // // Clone and initialize a `MerkleMinter`
+        address merkleMinter = createProxy(address(_managingDao), merkleMinterBase, bytes(""));
         MerkleMinter(merkleMinter).initialize(
-            _managingDao,
             _managingDao.getTrustedForwarder(),
             IERC20MintableUpgradeable(token),
             distributorBase
@@ -110,7 +109,7 @@ contract TokenFactory {
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
 
-        // Grant the permission to mint to the token factory (`address(this)`).
+        // // Grant the permission to mint to the token factory (`address(this)`).
         _managingDao.grant(token, address(this), tokenMintPermission);
 
         for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
@@ -121,13 +120,13 @@ contract TokenFactory {
             IERC20MintableUpgradeable(token).mint(receiver, _mintConfig.amounts[i]);
         }
 
-        // Revoke the mint permission from the token factory (`address(this)`).
+        // // Revoke the mint permission from the token factory (`address(this)`).
         _managingDao.revoke(token, address(this), tokenMintPermission);
 
-        // Grant the managing DAO permission to directly mint tokens to an receiving address.
+        // // Grant the managing DAO permission to directly mint tokens to an receiving address.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 
-        // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.
+        // // Grant the managing DAO permission to mint tokens via the `MerkleMinter` that are claimable on a merkle tree.
         _managingDao.grant(token, merkleMinter, tokenMintPermission);
         _managingDao.grant(merkleMinter, address(_managingDao), merkleMintPermission);
 

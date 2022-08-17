@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
@@ -17,7 +18,14 @@ import "./IDAO.sol";
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
+contract DAO is
+    IDAO,
+    Initializable,
+    UUPSUpgradeable,
+    PermissionManager,
+    ERC1271,
+    ERC165Upgradeable
+{
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -74,12 +82,19 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         address _initialOwner,
         address _trustedForwarder
     ) external initializer {
-        _registerStandard(DAO_INTERFACE_ID);
-        _registerStandard(type(ERC1271).interfaceId);
-
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
         __PermissionManager_init(_initialOwner);
+    }
+
+    /// @notice adds a IERC165 to check whether contract supports DAO interface or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or DAO interface
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == DAO_INTERFACE_ID ||
+            interfaceId == type(ERC1271).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
@@ -215,10 +230,11 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         emit NativeTokenDeposited(msg.sender, msg.value);
     }
 
-    /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
-    fallback() external {
-        _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
-    }
+    // TODO: GIORGI do we actually need this or adaptiveerc165 ?
+    // /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
+    // fallback() external {
+    //     _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
+    // }
 
     /// @notice Emits the MetadataSet event if new metadata is set.
     /// @param _metadata Hash of the IPFS metadata object.

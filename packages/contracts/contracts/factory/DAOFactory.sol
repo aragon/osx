@@ -8,13 +8,13 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "../voting/allowlist/AllowlistVoting.sol";
 import "../voting/erc20/ERC20Voting.sol";
-import "../tokens/GovernanceERC20.sol";
-import "../tokens/GovernanceWrappedERC20.sol";
 import "../registry/DAORegistry.sol";
 import "../core/DAO.sol";
 import "../utils/Proxy.sol";
-import "../tokens/MerkleMinter.sol";
-import "./TokenFactory.sol";
+import { GovernanceERC20 } from "../tokens/GovernanceERC20.sol";
+import { GovernanceWrappedERC20} from "../tokens/GovernanceWrappedERC20.sol";
+import { TokenFactory } from "./TokenFactory.sol";
+import { MerkleMinter} from "../tokens/MerkleMinter.sol";
 
 /// @title DAOFactory
 /// @author Aragon Association - 2022
@@ -131,8 +131,8 @@ contract DAOFactory {
         internal
         returns (DAO dao)
     {
-        // create dao
-        dao = DAO(createProxy(daoBase, bytes("")));
+        // create dao TODO:GIORGI
+        dao = DAO(createProxy(address(0), daoBase, bytes("")));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory
         dao.initialize(_daoConfig.metadata, address(this), _trustedForwarder);
@@ -203,6 +203,7 @@ contract DAOFactory {
     ) internal returns (ERC20Voting erc20Voting) {
         erc20Voting = ERC20Voting(
             createProxy(
+                address(_dao),
                 erc20VotingBase,
                 abi.encodeWithSelector(
                     ERC20Voting.initialize.selector,
@@ -248,6 +249,7 @@ contract DAOFactory {
     ) internal returns (AllowlistVoting allowlistVoting) {
         allowlistVoting = AllowlistVoting(
             createProxy(
+                address(_dao), 
                 allowlistVotingBase,
                 abi.encodeWithSelector(
                     AllowlistVoting.initialize.selector,
