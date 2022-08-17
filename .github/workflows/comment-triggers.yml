@@ -11,7 +11,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     outputs:
       run: ${{ steps.check.outputs.triggered }}
-      mode: ${{ steps.mode.outputs.moode }}
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
@@ -32,7 +32,7 @@ jobs:
     uses: './.github/workflows/mythx-changed.yml'
     with:
       pr_number: ${{ github.event.issue.number }}
-      mode: $ {{ needs.mythx_partial.outputs.mode }}
+      mode: ${{ needs.mythx_partial.outputs.mode }}
     secrets: inherit
 
   mythx_full:
@@ -40,7 +40,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     outputs:
       run: ${{ steps.check.outputs.triggered }}
-      mode: ${{ steps.mode.outputs.moode }}
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
@@ -60,7 +60,7 @@ jobs:
     if: needs.mythx_full.outputs.run == 'true'
     uses: './.github/workflows/mythx-full.yml'
     with:
-      mode: $ {{ needs.mythx_full.outputs.mode }}
+      mode: ${{ needs.mythx_full.outputs.mode }}
     secrets: inherit
 
 

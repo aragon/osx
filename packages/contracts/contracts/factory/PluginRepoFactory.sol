@@ -44,20 +44,20 @@ contract PluginRepoFactory {
     /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the address `_maintainer`.
     /// @param _name The plugin repository name.
     /// @param _initialSemanticVersion The semantic version for the new plugin repository version.
-    /// @param _pluginFactory The plugin factory contract associated with the plugin version.
+    /// @param _pluginManager The plugin factory contract associated with the plugin version.
     /// @param _contentURI The external URI for fetching the new version's content.
     /// @param _maintainer The plugin maintainer address.
     function createPluginRepoWithVersion(
         string calldata _name,
         uint16[3] memory _initialSemanticVersion,
-        address _pluginFactory,
+        address _pluginManager,
         bytes memory _contentURI,
         address _maintainer
     ) external returns (PluginRepo pluginRepo) {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_name, address(this));
 
-        pluginRepo.createVersion(_initialSemanticVersion, _pluginFactory, _contentURI);
+        pluginRepo.createVersion(_initialSemanticVersion, _pluginManager, _contentURI);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         setPluginRepoPermissions(pluginRepo, _maintainer);
