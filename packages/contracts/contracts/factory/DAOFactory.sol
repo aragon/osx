@@ -63,13 +63,13 @@ contract DAOFactory {
     /// @param _daoConfig The name and metadata hash of the DAO.
     /// @param _voteConfig The configuration used to set up the the majority voting.
     /// @param _tokenConfig The configuration used to create a new token.
-    /// @param _mintConfig The configuration used to mint the newly created tokens.
+    /// @param _mintSetting The configuration used to mint the newly created tokens.
     /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     function createERC20VotingDAO(
         DAOConfig calldata _daoConfig,
         VoteConfig calldata _voteConfig,
         TokenFactory.TokenConfig calldata _tokenConfig,
-        GovernanceERC20.MintConfig calldata _mintConfig,
+        GovernanceERC20.MintSetting calldata _mintSetting,
         address _trustedForwarder
     )
         external
@@ -80,17 +80,17 @@ contract DAOFactory {
             MerkleMinter minter
         )
     {
-        if (_mintConfig.receivers.length != _mintConfig.amounts.length)
+        if (_mintSetting.receivers.length != _mintSetting.amounts.length)
             revert MintArrayLengthMismatch({
-                receiversArrayLength: _mintConfig.receivers.length,
-                amountsArrayLength: _mintConfig.amounts.length
+                receiversArrayLength: _mintSetting.receivers.length,
+                amountsArrayLength: _mintSetting.amounts.length
             });
 
         dao = createDAO(_daoConfig, _trustedForwarder);
 
         // Create token and merkle minter
         dao.grant(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
-        (token, minter) = tokenFactory.createToken(dao, _tokenConfig, _mintConfig);
+        (token, minter) = tokenFactory.createToken(dao, _tokenConfig, _mintSetting);
         dao.revoke(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
 
         daoRegistry.register(_daoConfig.name, dao, msg.sender);

@@ -6,12 +6,12 @@ import "../../core/IDAO.sol";
 import "../../plugin/PluginManager.sol";
 import "./AllowlistVoting.sol";
 
-contract AllowlistManager is PluginManager {
+contract AddressListVotingManager is PluginManager {
     /// @notice The logic contract of the `AllowlistVoting`.
-    AllowlistVoting private allowlistVotingBase;
+    AllowlistVoting private addresslistVotingBase;
 
     constructor() {
-        allowlistVotingBase = new AllowlistVoting();
+        addresslistVotingBase = new AllowlistVoting();
     }
 
     /// @inheritdoc PluginManager
@@ -72,7 +72,7 @@ contract AllowlistManager is PluginManager {
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
             NO_ORACLE,
-            allowlistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
+            addresslistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
         );
 
         // Allows DAO to call plugin with SET_CONFIGURATION_PERMISSION
@@ -81,7 +81,7 @@ contract AllowlistManager is PluginManager {
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
             NO_ORACLE,
-            allowlistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            addresslistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
         );
 
         // Allows DAO to call plugin with UPGRADE_PERMISSION
@@ -90,7 +90,7 @@ contract AllowlistManager is PluginManager {
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
             NO_ORACLE,
-            allowlistVotingBase.UPGRADE_PERMISSION_ID()
+            addresslistVotingBase.UPGRADE_PERMISSION_ID()
         );
 
         // Allows DAO to call plugin with SET_TRUSTED_FORWARDER_PERMISSION
@@ -99,13 +99,13 @@ contract AllowlistManager is PluginManager {
             PLUGIN_PLACEHOLDER,
             DAO_PLACEHOLDER,
             NO_ORACLE,
-            allowlistVotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+            addresslistVotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
     }
 
     /// @inheritdoc PluginManager
     function getImplementationAddress() public view virtual override returns (address) {
-        return address(allowlistVotingBase);
+        return address(addresslistVotingBase);
     }
 
     /// @inheritdoc PluginManager

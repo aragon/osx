@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `AllowlistManager` & `Erc20VotingManager`.
+- Added `AddressListVotingManager` & `Erc20VotingManager`.
 - Added `AragonPlugin` and `AragonUpgradablePlugin` for the devs to inherit from for their concrete plugin implementations.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
 - Added Abstract `PluginManager` for the devs to inherit from for their concrete plugin manager implementation.

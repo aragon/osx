@@ -19,7 +19,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 
-    struct MintConfig {
+    struct MintSetting {
         address[] receivers;
         uint256[] amounts;
     }
@@ -51,17 +51,17 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
         IDAO _dao,
         string calldata _name,
         string calldata _symbol,
-        MintConfig calldata _initialMintConfig
+        MintSetting calldata _initialMintSetting
     ) external initializer {
         __GovernanceERC20_init(_dao, _name, _symbol);
 
-        if (_initialMintConfig.receivers.length > 0) {
-            for (uint256 i = 0; i < _initialMintConfig.receivers.length; i++) {
+        if (_initialMintSetting.receivers.length > 0) {
+            for (uint256 i = 0; i < _initialMintSetting.receivers.length; i++) {
                 // allow minting to treasury
-                address receiver = _initialMintConfig.receivers[i] == address(0)
+                address receiver = _initialMintSetting.receivers[i] == address(0)
                     ? address(_dao)
-                    : _initialMintConfig.receivers[i];
-                _mint(receiver, _initialMintConfig.amounts[i]);
+                    : _initialMintSetting.receivers[i];
+                _mint(receiver, _initialMintSetting.amounts[i]);
             }
         }
     }

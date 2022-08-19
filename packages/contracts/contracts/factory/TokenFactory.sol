@@ -52,13 +52,13 @@ contract TokenFactory {
     /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token depending on the address used in the `TokenConfig` provided.
     /// @param _managingDao The address of the DAO managing the token.
     /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be create, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an [ERC-20](https://eips.ethereum.org/EIPS/eip-20)-compatible contract, a wrapped governance token is created.
-    /// @param _mintConfig The token mint configuration struct containing the `receivers` and `amounts`.
+    /// @param _mintSetting The token mint configuration struct containing the `receivers` and `amounts`.
     /// @return ERC20VotesUpgradeable The address of the created token.
     /// @return MerkleMinter The `MerkleMinter` contract address being used to mint token address(zero address in case passed token addr was not zero)
     function createToken(
         DAO _managingDao,
         TokenConfig calldata _tokenConfig,
-        GovernanceERC20.MintConfig calldata _mintConfig
+        GovernanceERC20.MintSetting calldata _mintSetting
     ) external returns (ERC20VotesUpgradeable, MerkleMinter) {
         address token = _tokenConfig.addr;
 
@@ -88,7 +88,7 @@ contract TokenFactory {
             _managingDao,
             _tokenConfig.name,
             _tokenConfig.symbol,
-            _mintConfig
+            _mintSetting
         );
 
         // Clone and initialize a `MerkleMinter`

@@ -27,16 +27,16 @@ contract Erc20VotingManager is PluginManager {
     /// @notice The logic contract of the `GovernanceWrappedERC20`.
     address public governanceWrappedERC20Base;
 
-    struct TokenConfig {
+    struct TokenSetting {
         address addr;
         string name;
         string symbol;
-        GovernanceERC20.MintConfig mintConfig;
+        GovernanceERC20.MintSetting mintSetting;
     }
 
-    struct VoteConfig {
-        uint64 participationRequiredPct;
-        uint64 supportRequiredPct;
+    struct VoteSetting {
+        uint64 minTurnout;
+        uint64 minSupport;
         uint64 minDuration;
     }
 
@@ -55,32 +55,32 @@ contract Erc20VotingManager is PluginManager {
     {
         IDAO _dao = IDAO(payable(dao));
 
-        (VoteConfig memory _voteConfig, TokenConfig memory _tokenConfig) = abi.decode(
+        (VoteSetting memory _voteSetting, TokenSetting memory _tokenSetting) = abi.decode(
             data,
-            (VoteConfig, TokenConfig)
+            (VoteSetting, TokenSetting)
         );
 
         (bool isGovernanceErc20, bool isGovernanceErc20Wrapped) = isGovernanceToken(
-            _tokenConfig.addr
+            _tokenSetting.addr
         );
 
-        relatedContracts = new address[](_tokenConfig.addr == address(0) ? 1 : 0);
+        relatedContracts = new address[](_tokenSetting.addr == address(0) ? 1 : 0);
 
-        if (_tokenConfig.addr == address(0)) {
+        if (_tokenSetting.addr == address(0)) {
             // Create `GovernanceERC20`
-            _tokenConfig.addr = createProxy(
+            _tokenSetting.addr = createProxy(
                 address(_dao),
                 governanceERC20Base,
                 abi.encodeWithSelector(
                     GovernanceERC20.initialize.selector,
                     address(_dao),
-                    _tokenConfig.name,
-                    _tokenConfig.symbol,
-                    _tokenConfig.mintConfig
+                    _tokenSetting.name,
+                    _tokenSetting.symbol,
+                    _tokenSetting.mintSetting
                 )
             );
 
-            relatedContracts[0] = _tokenConfig.addr;
+            relatedContracts[0] = _tokenSetting.addr;
         } else if (!isGovernanceErc20 && !isGovernanceErc20Wrapped) {
             // user already has a token. we need to wrap it in
             // GovernanceWrappedERC20 in order to make the token
@@ -88,18 +88,18 @@ contract Erc20VotingManager is PluginManager {
 
             // Validate if token is ERC20
             // Not Enough Checks, but better than nothing.
-            _tokenConfig.addr.functionCall(
+            _tokenSetting.addr.functionCall(
                 abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
             );
 
-            _tokenConfig.addr = createProxy(
+            _tokenSetting.addr = createProxy(
                 address(_dao),
                 governanceWrappedERC20Base,
                 abi.encodeWithSelector(
                     GovernanceWrappedERC20.initialize.selector,
-                    IERC20Upgradeable(_tokenConfig.addr),
-                    _tokenConfig.name,
-                    _tokenConfig.symbol
+                    IERC20Upgradeable(_tokenSetting.addr),
+                    _tokenSetting.name,
+                    _tokenSetting.symbol
                 )
             );
         }
@@ -108,10 +108,10 @@ contract Erc20VotingManager is PluginManager {
             ERC20Voting.initialize.selector,
             _dao,
             _dao.getTrustedForwarder(),
-            _voteConfig.participationRequiredPct,
-            _voteConfig.supportRequiredPct,
-            _voteConfig.minDuration,
-            GovernanceERC20(_tokenConfig.addr)
+            _voteSetting.minTurnout,
+            _voteSetting.minSupport,
+            _voteSetting.minDuration,
+            GovernanceERC20(_tokenSetting.addr)
         );
 
         plugin = createProxy(dao, getImplementationAddress(), init);
@@ -125,10 +125,10 @@ contract Erc20VotingManager is PluginManager {
         override
         returns (RequestedPermission[] memory permissions, string[] memory helperNames)
     {
-        (, TokenConfig memory _tokenConfig) = abi.decode(data, (VoteConfig, TokenConfig));
+        (, TokenSetting memory _tokenSetting) = abi.decode(data, (VoteSetting, TokenSetting));
 
-        permissions = new RequestedPermission[](_tokenConfig.addr == address(0) ? 5 : 4);
-        helperNames = new string[](_tokenConfig.addr == address(0) ? 1 : 0);
+        permissions = new RequestedPermission[](_tokenSetting.addr == address(0) ? 5 : 4);
+        helperNames = new string[](_tokenSetting.addr == address(0) ? 1 : 0);
 
         address NO_ORACLE = address(0);
 
@@ -170,7 +170,7 @@ contract Erc20VotingManager is PluginManager {
 
         uint256 GOVERNANCE_ERC20_HELPER_IDX = 0;
 
-        if (_tokenConfig.addr == address(0)) {
+        if (_tokenSetting.addr == address(0)) {
             // Allows DAO to call relatedContracts (token) with MINT_PERMISSION.
             permissions[4] = buildPermission(
                 BulkPermissionsLib.Operation.Grant,
@@ -192,7 +192,7 @@ contract Erc20VotingManager is PluginManager {
     /// @inheritdoc PluginManager
     function deployABI() external view virtual override returns (string memory) {
         return
-            "((tuple(uint64,uint64,uint64) voteConfig),(tuple(address addr,string name,string symbol, (tuple(address[],uint256[]) mintConfig)) tokenConfig))";
+            "((tuple(uint64,uint64,uint64) voteSetting),(tuple(address addr,string name,string symbol, (tuple(address[],uint256[]) mintSetting)) tokenSetting))";
     }
 
     /// @notice Check if a contract address supports `ERC165Upgradeable` interface.
