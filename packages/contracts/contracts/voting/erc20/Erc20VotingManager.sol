@@ -132,7 +132,7 @@ contract Erc20VotingManager is PluginManager {
 
         address NO_ORACLE = address(0);
 
-        // Allows plugin to call DAO with EXEC_PERMISSION
+        // Grant the `EXECUTE_PERMISSION_ID` permission on the installing DAO to the plugin.
         permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
@@ -141,7 +141,7 @@ contract Erc20VotingManager is PluginManager {
             keccak256("EXECUTE_PERMISSION")
         );
 
-        // Allows DAO to call plugin with SET_CONFIGURATION_PERMISSION
+        // Grant the `SET_CONFIGURATION_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
@@ -150,7 +150,7 @@ contract Erc20VotingManager is PluginManager {
             erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
         );
 
-        // Allows DAO to call plugin with UPGRADE_PERMISSION
+        // Grant the `UPGRADE_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[2] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
@@ -159,7 +159,7 @@ contract Erc20VotingManager is PluginManager {
             erc20VotingBase.UPGRADE_PERMISSION_ID()
         );
 
-        // Allows DAO to call plugin with SET_TRUSTED_FORWARDER_PERMISSION
+        // Grant the `SET_TRUSTED_FORWARDER_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[3] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
@@ -171,13 +171,13 @@ contract Erc20VotingManager is PluginManager {
         uint256 GOVERNANCE_ERC20_HELPER_IDX = 0;
 
         if (_tokenSetting.addr == address(0)) {
-            // Allows DAO to call relatedContracts (token) with MINT_PERMISSION.
+            // Grant the `MINT_PERMISSION_ID` permission on the`GovernanceErc20` helper contract with index `GOVERNANCE_ERC20_HELPER_IDX` to the installing DAO.
             permissions[4] = buildPermission(
                 BulkPermissionsLib.Operation.Grant,
                 GOVERNANCE_ERC20_HELPER_IDX,
                 DAO_PLACEHOLDER,
                 NO_ORACLE,
-                keccak256("MINT_PERMISSION")
+                GovernanceERC20(governanceERC20Base).MINT_PERMISSION_ID()
             );
 
             helperNames[GOVERNANCE_ERC20_HELPER_IDX] = "GovernanceERC20";

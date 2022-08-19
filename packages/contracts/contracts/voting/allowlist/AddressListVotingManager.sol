@@ -7,7 +7,7 @@ import "../../plugin/PluginManager.sol";
 import "./AllowlistVoting.sol";
 
 contract AddressListVotingManager is PluginManager {
-    /// @notice The logic contract of the `AllowlistVoting`.
+    /// @notice The logic contract of the `AddressListVoting`.
     AllowlistVoting private addresslistVotingBase;
 
     constructor() {
@@ -57,7 +57,7 @@ contract AddressListVotingManager is PluginManager {
 
         address NO_ORACLE = address(0);
 
-        // Allows plugin to call DAO with EXEC_PERMISSION
+        // Grant the `EXECUTE_PERMISSION_ID` permission on the installing DAO to the plugin.
         permissions[0] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             DAO_PLACEHOLDER,
@@ -66,7 +66,7 @@ contract AddressListVotingManager is PluginManager {
             keccak256("EXECUTE_PERMISSION")
         );
 
-        // Allows DAO to call plugin with MODIFY_ALLOWLIST_PERMISSION
+        // Grant the `MODIFY_ALLOWLIST_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[1] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
@@ -75,7 +75,7 @@ contract AddressListVotingManager is PluginManager {
             addresslistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
         );
 
-        // Allows DAO to call plugin with SET_CONFIGURATION_PERMISSION
+        // Grant the `SET_CONFIGURATION_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[2] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
@@ -84,7 +84,7 @@ contract AddressListVotingManager is PluginManager {
             addresslistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
         );
 
-        // Allows DAO to call plugin with UPGRADE_PERMISSION
+        // Grant the `UPGRADE_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[3] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
@@ -93,7 +93,7 @@ contract AddressListVotingManager is PluginManager {
             addresslistVotingBase.UPGRADE_PERMISSION_ID()
         );
 
-        // Allows DAO to call plugin with SET_TRUSTED_FORWARDER_PERMISSION
+        // Grant the `SET_TRUSTED_FORWARDER_PERMISSION_ID` permission on the plugin to the installing DAO.
         permissions[4] = buildPermission(
             BulkPermissionsLib.Operation.Grant,
             PLUGIN_PLACEHOLDER,
