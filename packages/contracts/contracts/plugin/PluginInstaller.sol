@@ -2,15 +2,14 @@
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import "./PluginManager.sol";
-import "./PluginConstants.sol";
-import "../core/DAO.sol";
-import "../utils/PluginERC1967Proxy.sol";
-import {AragonUpgradablePlugin} from "../core/plugin/AragonUpgradablePlugin.sol";
-import {AragonPlugin} from "../core/plugin/AragonPlugin.sol";
+import { Permission, PluginManager } from "./PluginManager.sol";
+import { PluginERC1967Proxy } from "../utils/PluginERC1967Proxy.sol";
+import { AragonUpgradablePlugin } from "../core/plugin/AragonUpgradablePlugin.sol";
+import { AragonPlugin } from "../core/plugin/AragonPlugin.sol";
+import { DAO } from "../core/DAO.sol";
 
 /// @notice Plugin Installer that has root permissions to install plugin on the dao and apply permissions.
-contract PluginInstaller is PluginConstants {
+contract PluginInstaller {
     using ERC165Checker for address payable;
 
     struct InstallPlugin {
@@ -53,27 +52,12 @@ contract PluginInstaller is PluginConstants {
             revert InstallNotAllowed();
         }
 
-        (address pluginAddress, address[] memory relatedContracts) = plugin.manager.deploy(
+        (address pluginAddress, Permission.ItemMultiTarget[] memory permissions) = plugin.manager.deploy(
             dao,
             plugin.data
         );
 
-        (
-            PluginManager.RequestedPermission[] memory permissions,
-            string[] memory helperNames
-        ) = plugin.manager.getInstallPermissions(plugin.data);
-
-        // Extra check to ensure consistency is protected
-        if (relatedContracts.length != helperNames.length) {
-            revert LengthMismatch({
-                relatedContractsLength: relatedContracts.length,
-                helperNamesLength: helperNames.length
-            });
-        }
-
-        DAO(payable(dao)).bulkOnMultiTarget(
-            createFinalPermissions(dao, pluginAddress, permissions, relatedContracts)
-        );
+        DAO(payable(dao)).bulkOnMultiTarget(permissions);
 
         emit PluginInstalled(dao, pluginAddress);
     }
@@ -113,87 +97,15 @@ contract PluginInstaller is PluginConstants {
             }
         }
 
-        address[] memory relatedContracts = plugin.manager.update(
+        Permission.ItemMultiTarget[] memory permissions = plugin.manager.update(
+            dao,
             proxy,
             plugin.oldVersion,
             plugin.data
         );
 
-        (
-            PluginManager.RequestedPermission[] memory permissions,
-            string[] memory helperNames
-        ) = plugin.manager.getUpdatePermissions(plugin.oldVersion, plugin.data);
-
-        // Extra check to ensure consistency is protected
-        if (relatedContracts.length != helperNames.length) {
-            revert LengthMismatch({
-                relatedContractsLength: relatedContracts.length,
-                helperNamesLength: helperNames.length
-            });
-        }
-
-        DAO(payable(dao)).bulkOnMultiTarget(
-            createFinalPermissions(dao, proxy, permissions, relatedContracts)
-        );
+        DAO(payable(dao)).bulkOnMultiTarget(permissions);
 
         emit PluginUpdated(dao, proxy, plugin.oldVersion, plugin.data);
-    }
-
-    /// @notice Builds the final permission struct to pass the dao to bulk.
-    /// @param dao the dao address
-    /// @param plugin the plugin struct that contains manager address, encoded data and old version.
-    /// @param permissions the permissions array received from plugin manager.
-    /// @param relatedContracts related contracts that were deployed alongside the plugin.
-    /// @return bulkPermissions the final permission array for the dao to bulk.
-    function createFinalPermissions(
-        address dao,
-        address plugin,
-        PluginManager.RequestedPermission[] memory permissions,
-        address[] memory relatedContracts
-    ) private pure returns (BulkPermissionsLib.ItemMultiTarget[] memory bulkPermissions) {
-        bulkPermissions = new BulkPermissionsLib.ItemMultiTarget[](permissions.length);
-
-        for (uint256 j = 0; j < permissions.length; j++) {
-            address grantee;
-            address granter;
-
-            uint256 where = permissions[j].where;
-            bool isWhereAddress = permissions[j].isWhereAddress;
-
-            uint256 who = permissions[j].who;
-            bool isWhoAddress = permissions[j].isWhoAddress;
-
-            address oracle = permissions[j].oracle;
-            bytes32 permissionId = permissions[j].permissionId;
-
-            if (where == DAO_PLACEHOLDER && who != PLUGIN_PLACEHOLDER) {
-                revert("RESTRICTION: Helper can't have permission on dao through installation");
-            }
-
-            // Figure out grantee..
-            if (where == DAO_PLACEHOLDER) grantee = dao;
-            else if (where == PLUGIN_PLACEHOLDER) grantee = plugin;
-            else if (isWhereAddress) grantee = address(uint160(where));
-            else if (where < relatedContracts.length) grantee = relatedContracts[where];
-
-            // Figure out granter..
-            if (who == DAO_PLACEHOLDER) granter = dao;
-            else if (who == PLUGIN_PLACEHOLDER) granter = plugin;
-            else if (isWhoAddress) granter = address(uint160(who));
-            else if (who < relatedContracts.length) granter = relatedContracts[who];
-
-            if (grantee == address(0) && granter == address(0)) {
-                revert("BUG IN PLUGIN FACTORY");
-            }
-
-            // create final permission
-            bulkPermissions[j] = BulkPermissionsLib.ItemMultiTarget(
-                permissions[j].op,
-                grantee,
-                granter,
-                oracle,
-                permissionId
-            );
-        }
     }
 }

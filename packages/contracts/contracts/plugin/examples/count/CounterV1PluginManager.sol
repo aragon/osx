@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import "../../PluginManager.sol";
-import "./MultiplyHelper.sol";
-import "./CounterV1.sol";
+import { Permission, PluginManager } from "../../PluginManager.sol";
+import { MultiplyHelper } from "./MultiplyHelper.sol";
+import { CounterV1 } from "./CounterV1.sol";
 
 contract CounterV1PluginManager is PluginManager {
     
@@ -22,14 +22,13 @@ contract CounterV1PluginManager is PluginManager {
         external
         virtual
         override
-        returns (address plugin, address[] memory relatedContracts)
+        returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
 
-        // Allocate space for one address for the helper contracts for which we
-        // also want to define permissions
-        relatedContracts = new address[](1);
+        // Allocate space for requested permission that will be applied on this plugin installation.
+        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 2 : 3);
 
         if (_multiplyHelper == address(0)) {
             // Deploy some internal helper contract for the Plugin
@@ -42,63 +41,42 @@ contract CounterV1PluginManager is PluginManager {
             _multiplyHelper,
             _num
         );
-
-        // Address of the helper so that PluginInstaller can grant the requested permissions on it
-        relatedContracts[0] = _multiplyHelper;
-
+        
         // Deploy the Plugin itself, make it point to the implementation and
         // pass it the initialization params
         plugin = createProxy(dao, getImplementationAddress(), initData);
-    }
-
-    // TODO: WOULD THIS NEED dao as well to be passed
-    function getInstallPermissions(bytes memory data)
-        external
-        view
-        virtual
-        override
-        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
-    {
-        address _multiplyHelper = abi.decode(data, (address));
-
-        permissions = new RequestedPermission[](_multiplyHelper == address(0) ? 2 : 3);
-        helperNames = new string[](1);
-
+        
         // Allows plugin Count to call execute on DAO
-        permissions[0] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            DAO_PLACEHOLDER,
-            PLUGIN_PLACEHOLDER,
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            dao,
+            plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
         // Allows DAO to call Multiply on plugin Count
-        permissions[1] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        permissions[1] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
-
-        uint MULTIPLY_HELPER_IDX = 0;
 
         // MultiplyHelper could be something that dev already has it from outside
         // which mightn't be a aragon plugin. It's dev's responsibility to do checks
         // and risk whether or not to still set the permission.
         if (_multiplyHelper == address(0)) {
             // Allows Count plugin to call MultiplyHelper's multiply function.
-            permissions[2] = buildPermission(
-                BulkPermissionsLib.Operation.Grant,
-                MULTIPLY_HELPER_IDX, // Index from relatedContracts (multiplyHelper)
-                PLUGIN_PLACEHOLDER,
+            permissions[2] = Permission.ItemMultiTarget(
+                Permission.Operation.Grant,
+                _multiplyHelper,
+                plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
-
-        helperNames[MULTIPLY_HELPER_IDX] = "MultiplyHelper";
     }
 
     function getImplementationAddress() public view virtual override returns (address) {

@@ -3,7 +3,8 @@
 pragma solidity 0.8.10;
 
 import { AragonUpgradablePlugin } from "../../../core/plugin/AragonUpgradablePlugin.sol";
-import "./MultiplyHelper.sol";
+import { MultiplyHelper } from "./MultiplyHelper.sol";
+import { IDAO } from '../../../core/IDAO.sol';
 
 /// @notice The first version of example plugin - CounterV1.
 contract CounterV1 is AragonUpgradablePlugin {
