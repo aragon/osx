@@ -27,17 +27,19 @@ contract CounterV1PluginManager is PluginManager {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
 
+        address multiplyHelper;
+
         // Allocate space for requested permission that will be applied on this plugin installation.
-        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 2 : 3);
+        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
 
         if (_multiplyHelper == address(0)) {
             // Deploy some internal helper contract for the Plugin
-            _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
+            multiplyHelper = createProxy(dao, address(multiplyHelperBase), bytes(""));
         }
 
         // Encode the parameters that will be passed to initialize() on the Plugin
         bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("function initialize(address,uint256))")),
+            bytes4(keccak256("initialize(address,uint256)")),
             _multiplyHelper,
             _num
         );
@@ -71,7 +73,7 @@ contract CounterV1PluginManager is PluginManager {
             // Allows Count plugin to call MultiplyHelper's multiply function.
             permissions[2] = Permission.ItemMultiTarget(
                 Permission.Operation.Grant,
-                _multiplyHelper,
+                multiplyHelper,
                 plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
