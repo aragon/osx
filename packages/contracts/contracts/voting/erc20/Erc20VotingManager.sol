@@ -55,15 +55,20 @@ contract Erc20VotingManager is PluginManager {
     {
         IDAO _dao = IDAO(payable(dao));
 
+        // Decode the passed parameters.
         (VoteSetting memory _voteSetting, TokenSetting memory _tokenSetting) = abi.decode(
             data,
             (VoteSetting, TokenSetting)
         );
 
+        // check if the token address is already a `GovernanceERC20` or `GovernanceWrappedERC20` or not.
         (bool isGovernanceErc20, bool isGovernanceErc20Wrapped) = isGovernanceToken(
             _tokenSetting.addr
         );
 
+        // Allocate space for the helper contracts for which we
+        // also want to define permissions
+        // depending on if token address is passed or not.
         relatedContracts = new address[](_tokenSetting.addr == address(0) ? 1 : 0);
 
         if (_tokenSetting.addr == address(0)) {
@@ -104,7 +109,8 @@ contract Erc20VotingManager is PluginManager {
             );
         }
 
-        bytes memory init = abi.encodeWithSelector(
+        // Encode the parameters that will be passed to `initialize()` on the Plugin
+        bytes memory initData = abi.encodeWithSelector(
             ERC20Voting.initialize.selector,
             _dao,
             _dao.getTrustedForwarder(),
@@ -114,7 +120,9 @@ contract Erc20VotingManager is PluginManager {
             GovernanceERC20(_tokenSetting.addr)
         );
 
-        plugin = createProxy(dao, getImplementationAddress(), init);
+        // Deploy the Plugin itself as a proxy, make it point to the implementation logic
+        // and pass the initialization parameteres.
+        plugin = createProxy(dao, getImplementationAddress(), initData);
     }
 
     /// @inheritdoc PluginManager
@@ -192,7 +200,7 @@ contract Erc20VotingManager is PluginManager {
     /// @inheritdoc PluginManager
     function deployABI() external view virtual override returns (string memory) {
         return
-            "((tuple(uint64,uint64,uint64) voteSetting),(tuple(address addr,string name,string symbol, (tuple(address[],uint256[]) mintSetting)) tokenSetting))";
+            "((tuple(uint64 minTurnout, uint64 minSupport, uint64 minDuration) voteSetting),(tuple(address addr,string name,string symbol, (tuple(address[] receivers,uint256[] amounts) mintSetting)) tokenSetting))";
     }
 
     /// @notice Check if a contract address supports `ERC165Upgradeable` interface.

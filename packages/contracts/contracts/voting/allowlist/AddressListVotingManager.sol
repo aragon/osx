@@ -23,25 +23,31 @@ contract AddressListVotingManager is PluginManager {
     {
         IDAO _dao = IDAO(payable(dao));
 
+        // Decode the passed parameters.
         (
-            uint256 participationRequiredPct,
-            uint256 supportRequiredPct,
+            uint256 minTurnout,
+            uint256 minSupport,
             uint256 minDuration,
             address[] memory allowlistVoters
         ) = abi.decode(data, (uint256, uint256, uint256, address[]));
 
-        bytes memory init = abi.encodeWithSelector(
+        // Encode the parameters that will be passed to `initialize()` on the Plugin
+        bytes memory initData = abi.encodeWithSelector(
             AllowlistVoting.initialize.selector,
             _dao,
             _dao.getTrustedForwarder(),
-            participationRequiredPct,
-            supportRequiredPct,
+            minTurnout,
+            minSupport,
             minDuration,
             allowlistVoters
         );
 
+        // Since this plugin do not deply any related contract, we set `relatedContracts` to an empty array.
         relatedContracts = new address[](0);
-        plugin = createProxy(dao, getImplementationAddress(), init);
+
+        // Deploy the Plugin itself as a proxy, make it point to the implementation logic
+        // and pass the initialization parameteres.
+        plugin = createProxy(dao, getImplementationAddress(), initData);
     }
 
     /// @inheritdoc PluginManager
