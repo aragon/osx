@@ -2,13 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import { Permission, PluginManager } from "../../PluginManager.sol";
+import {Permission, PluginManager} from "../../PluginManager.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./MultiplyHelper.sol";
 import "./CounterV2.sol";
 
 contract CounterV2PluginManager is PluginManager {
-    
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
@@ -33,9 +32,9 @@ contract CounterV2PluginManager is PluginManager {
             (address, uint256, uint256)
         );
 
-       // Allocate space for requested permission that will be applied on this plugin installation.
+        // Allocate space for requested permission that will be applied on this plugin installation.
         permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 2 : 3);
-        
+
         if (_multiplyHelper == address(0)) {
             _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
         }
@@ -98,7 +97,7 @@ contract CounterV2PluginManager is PluginManager {
         // Just a way of reinforcing...
         UUPSUpgradeable(proxy).upgradeTo(getImplementationAddress());
 
-        // Only 
+        // Only
         if (oldVersion[0] == 1 && oldVersion[1] == 0) {
             (_newVariable) = abi.decode(data, (uint256));
             CounterV2(proxy).setNewVariable(_newVariable);
@@ -130,13 +129,10 @@ contract CounterV2PluginManager is PluginManager {
 }
 
 contract TestCounterV2Manager is CounterV2PluginManager {
-
     event PluginDeployed(address plugin, Permission.ItemMultiTarget[] permissions);
     event PluginUpdated(address plugin, address dao, Permission.ItemMultiTarget[] permissions);
 
-    constructor(MultiplyHelper _multiplyHelper) CounterV2PluginManager(_multiplyHelper) {
-
-    }
+    constructor(MultiplyHelper _multiplyHelper) CounterV2PluginManager(_multiplyHelper) {}
 
     function deploy(address dao, bytes memory data)
         public
@@ -148,7 +144,7 @@ contract TestCounterV2Manager is CounterV2PluginManager {
         emit PluginDeployed(plugin, permissions);
     }
 
-     function update(
+    function update(
         address dao,
         address plugin,
         uint16[3] calldata oldVersion,

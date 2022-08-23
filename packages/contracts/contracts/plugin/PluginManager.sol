@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.10;
 
-import { PluginERC1967Proxy } from "../utils/PluginERC1967Proxy.sol";
-import { BulkPermissionsLib as Permission } from "../core/permission/BulkPermissionsLib.sol";
+import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
+import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
 
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
-    
+
     /// @notice helper function to deploy Custom ERC1967Proxy that includes dao slot on it.
     /// @param dao dao address
     /// @param logic the base contract address proxy has to delegate calls to.

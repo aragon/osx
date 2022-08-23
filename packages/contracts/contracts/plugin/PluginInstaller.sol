@@ -29,7 +29,7 @@ contract PluginInstaller {
     error InstallNotAllowed();
     error UpdateNotAllowed();
     error AlreadyThisVersion();
-    
+
     /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
     /// @param dao The dao address that plugin belongs to.
     /// @param plugin the plugin address.

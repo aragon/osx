@@ -2,12 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import { Permission, PluginManager } from "../../PluginManager.sol";
-import { MultiplyHelper } from "./MultiplyHelper.sol";
-import { CounterV1 } from "./CounterV1.sol";
+import {Permission, PluginManager} from "../../PluginManager.sol";
+import {MultiplyHelper} from "./MultiplyHelper.sol";
+import {CounterV1} from "./CounterV1.sol";
 
 contract CounterV1PluginManager is PluginManager {
-    
     MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
 
@@ -43,11 +42,11 @@ contract CounterV1PluginManager is PluginManager {
             multiplyHelper,
             _num
         );
-        
+
         // Deploy the Plugin itself, make it point to the implementation and
         // pass it the initialization params
         plugin = createProxy(dao, getImplementationAddress(), initData);
-        
+
         // Allows plugin Count to call execute on DAO
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
@@ -90,9 +89,7 @@ contract CounterV1PluginManager is PluginManager {
     }
 }
 
-
 contract TestCounterV1Manager is CounterV1PluginManager {
-
     event PluginDeployed(address plugin, Permission.ItemMultiTarget[] permissions);
 
     function deploy(address dao, bytes memory data)
@@ -104,5 +101,4 @@ contract TestCounterV1Manager is CounterV1PluginManager {
 
         emit PluginDeployed(plugin, permissions);
     }
-
 }

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import { Permission, PluginManager } from "../plugin/PluginManager.sol";
+import {Permission, PluginManager} from "../plugin/PluginManager.sol";
 import "./MajorityVotingMock.sol";
 import "../utils/Proxy.sol";
 
