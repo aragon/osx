@@ -16,7 +16,7 @@ contract PluginManagerMock is PluginManager {
     }
 
     function deploy(address dao, bytes calldata params)
-        external
+        public
         override
         returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
     {

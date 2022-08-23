@@ -41,7 +41,7 @@ abstract contract PluginManager {
     /// @return plugin the plugin address
     /// @return permissions array of permissions that will be applied through plugin installations.
     function deploy(address dao, bytes memory data)
-        external
+        public
         virtual
         returns (address plugin, Permission.ItemMultiTarget[] memory permissions);
 
@@ -56,7 +56,7 @@ abstract contract PluginManager {
         address proxy,
         uint16[3] calldata oldVersion,
         bytes memory data
-    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
+    ) public virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
 
     /// @notice the plugin's base implementation address proxies need to delegate calls.
     /// @return address of the base contract address.

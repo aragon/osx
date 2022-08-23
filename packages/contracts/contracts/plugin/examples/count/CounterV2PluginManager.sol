@@ -3,13 +3,14 @@
 pragma solidity 0.8.10;
 
 import { Permission, PluginManager } from "../../PluginManager.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./MultiplyHelper.sol";
 import "./CounterV2.sol";
 
 contract CounterV2PluginManager is PluginManager {
     
-    MultiplyHelper private multiplyHelperBase;
-    CounterV2 private counterBase;
+    MultiplyHelper public multiplyHelperBase;
+    CounterV2 public counterBase;
 
     address private constant NO_ORACLE = address(0);
 
@@ -20,7 +21,7 @@ contract CounterV2PluginManager is PluginManager {
     }
 
     function deploy(address dao, bytes memory data)
-        external
+        public
         virtual
         override
         returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
@@ -90,20 +91,29 @@ contract CounterV2PluginManager is PluginManager {
         address proxy,
         uint16[3] calldata oldVersion,
         bytes memory data
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+    ) public virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
         uint256 _newVariable;
-
-        // TODO: improve the example to handle more complicated scenario...
-        if (oldVersion[0] == 1) {
-            (_newVariable) = abi.decode(data, (uint256));
-        }
 
         // TODO: Shall we leave it here or make devs call `upgrade` from our abstract factory
         // Just a way of reinforcing...
-        // TODO1: proxy needs casting to UUPSSUpgradable
-        // TODO2: 2nd line needs casting to CounterV2
-        // proxy.upgradeTo(getImplementationAddress());
-        CounterV2(proxy).setNewVariable(_newVariable);
+        UUPSUpgradeable(proxy).upgradeTo(getImplementationAddress());
+
+        // Only 
+        if (oldVersion[0] == 1 && oldVersion[1] == 0) {
+            (_newVariable) = abi.decode(data, (uint256));
+            CounterV2(proxy).setNewVariable(_newVariable);
+        }
+
+        permissions = new Permission.ItemMultiTarget[](1);
+
+        // Just for the case of example...
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Revoke,
+            dao,
+            proxy,
+            NO_ORACLE,
+            multiplyHelperBase.MULTIPLY_PERMISSION_ID()
+        );
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
@@ -115,6 +125,37 @@ contract CounterV2PluginManager is PluginManager {
     }
 
     function updateABI() external view virtual override returns (string memory) {
-        return "(address whoCanMultiply, uint _newVariable)";
+        return "(uint _newVariable)";
+    }
+}
+
+contract TestCounterV2Manager is CounterV2PluginManager {
+
+    event PluginDeployed(address plugin, Permission.ItemMultiTarget[] permissions);
+    event PluginUpdated(address plugin, address dao, Permission.ItemMultiTarget[] permissions);
+
+    constructor(MultiplyHelper _multiplyHelper) CounterV2PluginManager(_multiplyHelper) {
+
+    }
+
+    function deploy(address dao, bytes memory data)
+        public
+        override
+        returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
+    {
+        (plugin, permissions) = super.deploy(dao, data);
+
+        emit PluginDeployed(plugin, permissions);
+    }
+
+     function update(
+        address dao,
+        address plugin,
+        uint16[3] calldata oldVersion,
+        bytes memory data
+    ) public virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+        permissions = super.update(dao, plugin, oldVersion, data);
+
+        emit PluginUpdated(plugin, dao, permissions);
     }
 }
