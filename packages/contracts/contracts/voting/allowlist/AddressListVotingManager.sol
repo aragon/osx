@@ -16,10 +16,10 @@ contract AddressListVotingManager is PluginManager {
 
     /// @inheritdoc PluginManager
     function deploy(address dao, bytes memory data)
-        external
+        public
         virtual
         override
-        returns (address plugin, address[] memory relatedContracts)
+        returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
     {
         IDAO _dao = IDAO(payable(dao));
 
@@ -42,68 +42,55 @@ contract AddressListVotingManager is PluginManager {
             allowlistVoters
         );
 
-        // Since this plugin do not deply any related contract, we set `relatedContracts` to an empty array.
-        relatedContracts = new address[](0);
-
         // Deploy the Plugin itself as a proxy, make it point to the implementation logic
         // and pass the initialization parameteres.
         plugin = createProxy(dao, getImplementationAddress(), initData);
-    }
 
-    /// @inheritdoc PluginManager
-    function getInstallPermissions(bytes memory)
-        external
-        view
-        virtual
-        override
-        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
-    {
-        permissions = new RequestedPermission[](5);
-        helperNames = new string[](0);
+        permissions = new Permission.ItemMultiTarget[](5);
 
         address NO_ORACLE = address(0);
 
-        // Grant the `EXECUTE_PERMISSION_ID` permission on the installing DAO to the plugin.
-        permissions[0] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            DAO_PLACEHOLDER,
-            PLUGIN_PLACEHOLDER,
+        // Grant the `EXECUTE_PERMISSION_ID` permission of the installing DAO to the plugin.
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            dao,
+            plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        // Grant the `MODIFY_ALLOWLIST_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[1] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `MODIFY_ALLOWLIST_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[1] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             addresslistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
         );
 
-        // Grant the `SET_CONFIGURATION_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[2] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `SET_CONFIGURATION_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[2] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             addresslistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
         );
 
-        // Grant the `UPGRADE_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[3] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `UPGRADE_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[3] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             addresslistVotingBase.UPGRADE_PERMISSION_ID()
         );
 
-        // Grant the `SET_TRUSTED_FORWARDER_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[4] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `SET_TRUSTED_FORWARDER_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[4] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             addresslistVotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );

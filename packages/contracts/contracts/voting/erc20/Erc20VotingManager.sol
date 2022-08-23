@@ -18,6 +18,8 @@ contract Erc20VotingManager is PluginManager {
     using Address for address;
     using ERC165Checker for address;
 
+    address private constant NO_ORACLE = address(0);
+
     /// @notice The logic contract of the `ERC20Voting`.
     ERC20Voting private erc20VotingBase;
 
@@ -48,10 +50,10 @@ contract Erc20VotingManager is PluginManager {
 
     /// @inheritdoc PluginManager
     function deploy(address dao, bytes memory data)
-        external
+        public
         virtual
         override
-        returns (address plugin, address[] memory relatedContracts)
+        returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
     {
         IDAO _dao = IDAO(payable(dao));
 
@@ -66,10 +68,7 @@ contract Erc20VotingManager is PluginManager {
             _tokenSetting.addr
         );
 
-        // Allocate space for the helper contracts for which we
-        // also want to define permissions
-        // depending on if token address is passed or not.
-        relatedContracts = new address[](_tokenSetting.addr == address(0) ? 1 : 0);
+        permissions = new Permission.ItemMultiTarget[](_tokenSetting.addr == address(0) ? 5 : 4);
 
         if (_tokenSetting.addr == address(0)) {
             // Create `GovernanceERC20`
@@ -84,8 +83,6 @@ contract Erc20VotingManager is PluginManager {
                     _tokenSetting.mintSetting
                 )
             );
-
-            relatedContracts[0] = _tokenSetting.addr;
         } else if (!isGovernanceErc20 && !isGovernanceErc20Wrapped) {
             // user already has a token. we need to wrap it in
             // GovernanceWrappedERC20 in order to make the token
@@ -123,72 +120,56 @@ contract Erc20VotingManager is PluginManager {
         // Deploy the Plugin itself as a proxy, make it point to the implementation logic
         // and pass the initialization parameteres.
         plugin = createProxy(dao, getImplementationAddress(), initData);
-    }
 
-    /// @inheritdoc PluginManager
-    function getInstallPermissions(bytes memory data)
-        external
-        view
-        virtual
-        override
-        returns (RequestedPermission[] memory permissions, string[] memory helperNames)
-    {
-        (, TokenSetting memory _tokenSetting) = abi.decode(data, (VoteSetting, TokenSetting));
+        // permission preperations
+        //
+        bytes32 tokenMintPermission = GovernanceERC20(governanceERC20Base).MINT_PERMISSION_ID();
 
-        permissions = new RequestedPermission[](_tokenSetting.addr == address(0) ? 5 : 4);
-        helperNames = new string[](_tokenSetting.addr == address(0) ? 1 : 0);
-
-        address NO_ORACLE = address(0);
-
-        // Grant the `EXECUTE_PERMISSION_ID` permission on the installing DAO to the plugin.
-        permissions[0] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            DAO_PLACEHOLDER,
-            PLUGIN_PLACEHOLDER,
+        // Grant the `EXECUTE_PERMISSION_ID` permission of the installing DAO to the plugin.
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            dao,
+            plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        // Grant the `SET_CONFIGURATION_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[1] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `SET_CONFIGURATION_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[1] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
         );
 
-        // Grant the `UPGRADE_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[2] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `UPGRADE_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[2] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             erc20VotingBase.UPGRADE_PERMISSION_ID()
         );
 
-        // Grant the `SET_TRUSTED_FORWARDER_PERMISSION_ID` permission on the plugin to the installing DAO.
-        permissions[3] = buildPermission(
-            BulkPermissionsLib.Operation.Grant,
-            PLUGIN_PLACEHOLDER,
-            DAO_PLACEHOLDER,
+        // Grant the `SET_TRUSTED_FORWARDER_PERMISSION_ID` permission of the plugin to the installing DAO.
+        permissions[3] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
             NO_ORACLE,
             erc20VotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
 
-        uint256 GOVERNANCE_ERC20_HELPER_IDX = 0;
-
         if (_tokenSetting.addr == address(0)) {
-            // Grant the `MINT_PERMISSION_ID` permission on the`GovernanceErc20` helper contract with index `GOVERNANCE_ERC20_HELPER_IDX` to the installing DAO.
-            permissions[4] = buildPermission(
-                BulkPermissionsLib.Operation.Grant,
-                GOVERNANCE_ERC20_HELPER_IDX,
-                DAO_PLACEHOLDER,
+            // Grant the `MINT_PERMISSION_ID` permission of the`GovernanceErc20` helper contract to the installing DAO.
+            permissions[4] = Permission.ItemMultiTarget(
+                Permission.Operation.Grant,
+                _tokenSetting.addr,
+                dao,
                 NO_ORACLE,
-                GovernanceERC20(governanceERC20Base).MINT_PERMISSION_ID()
+                tokenMintPermission
             );
-
-            helperNames[GOVERNANCE_ERC20_HELPER_IDX] = "GovernanceERC20";
         }
     }
 
