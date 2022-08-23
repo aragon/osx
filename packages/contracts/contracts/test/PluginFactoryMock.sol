@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "../plugin/PluginManager.sol";
+import {Permission, PluginManager} from "../plugin/PluginManager.sol";
 import "./MajorityVotingMock.sol";
 import "../utils/Proxy.sol";
 
@@ -16,9 +16,9 @@ contract PluginManagerMock is PluginManager {
     }
 
     function deploy(address dao, bytes calldata params)
-        external
+        public
         override
-        returns (address plugin, address[] memory relatedContracts)
+        returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
     {
         plugin = basePluginAddress;
 
@@ -32,12 +32,4 @@ contract PluginManagerMock is PluginManager {
     function deployABI() external view virtual override returns (string memory) {
         return "";
     }
-
-    function getInstallPermissions(bytes memory data)
-        external
-        view
-        virtual
-        override
-        returns (RequestedPermission[] memory, string[] memory)
-    {}
 }
