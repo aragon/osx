@@ -4,8 +4,10 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import {Permission, PluginManager} from "./PluginManager.sol";
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
-import {AragonUpgradablePlugin} from "../core/plugin/AragonUpgradablePlugin.sol";
-import {AragonPlugin} from "../core/plugin/AragonPlugin.sol";
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "../core/component/DaoAuthorizableUpgradeable.sol";
+
 import {DAO} from "../core/DAO.sol";
 
 /// @notice Plugin Installer that has root permissions to install plugin on the dao and apply permissions.
@@ -77,47 +79,47 @@ contract PluginInstaller {
         address pluginAddress,
         UpdatePlugin calldata plugin
     ) public {
-        bool supportsAragonPlugin = payable(pluginAddress).supportsInterface(
-            type(AragonPlugin).interfaceId
-        );
+        // bool supportsUUPS = payable(pluginAddress).supportsInterface(
+        //     type(PluginUUPSUpgradable).interfaceId
+        // );
+        // bool supportsTransprent = payable(pluginAddress).supportsInterface(
+        //     type(PluginTransparentUpgradeable).interfaceId
+        // );
 
-        // If it supports aragon plugin, means it's not upgradable...
-        if (supportsAragonPlugin) revert UpdateNotAllowed();
+        // // Don't allow update if its interface doesn't allow it..
+        // if (!supportsUUPS && !supportsTransprent) {
+        //     revert UpdateNotAllowed();
+        // }
 
-        bool supportsAragonUpgradablePlugin = payable(pluginAddress).supportsInterface(
-            type(AragonUpgradablePlugin).interfaceId
-        );
+        // address newBaseAddress = plugin.manager.getImplementationAddress();
+        // if (AragonUpgradablePlugin(pluginAddress).getImplementationAddress() == newBaseAddress) {
+        //     revert AlreadyThisVersion();
+        // }
 
-        // TODO: shall we revert in the first phase of release for safety ?
-        if (!supportsAragonUpgradablePlugin) {
-            revert UpdateNotAllowed();
-        }
+        // address daoOnProxy = address(DaoAuthorizableUpgradeable(payable(pluginAddress)).getDAO());
+        // if (
+        //     ((daoOnProxy != msg.sender || daoOnProxy != dao) &&
+        //         !DAO(payable(dao)).hasPermission(
+        //             address(this),
+        //             msg.sender,
+        //             UPDATE_PERMISSION_ID,
+        //             bytes("")
+        //         ))
+        // ) {
+        //     revert UpdateNotAllowed();
+        // }
+
+        Permission.ItemMultiTarget[] memory permissions = plugin
+            .manager
+            .update(dao, pluginAddress, plugin.oldVersion, plugin.data);
 
         address newBaseAddress = plugin.manager.getImplementationAddress();
-        if (AragonUpgradablePlugin(pluginAddress).getImplementationAddress() == newBaseAddress) {
-            revert AlreadyThisVersion();
-        }
 
-        address daoOnProxy = address(PluginERC1967Proxy(payable(pluginAddress)).dao());
-        if (
-            ((daoOnProxy != msg.sender || daoOnProxy != dao) &&
-                !DAO(payable(dao)).hasPermission(
-                    address(this),
-                    msg.sender,
-                    INSTALL_PERMISSION_ID,
-                    bytes("")
-                ))
-        ) {
-            revert UpdateNotAllowed();
-        }
-
-        Permission.ItemMultiTarget[] memory permissions = plugin.manager.update(
-            dao,
-            pluginAddress,
-            plugin.oldVersion,
-            plugin.data
-        );
-
+        // if (newBaseAddress.supportsInterface(type(PluginUUPSUpgradable).interfaceId)) {
+        //     if (init.length > 0) PluginUUPSUpgradable(proxy).upgradeToAndCall(newBaseAddress, init);
+        //     else PluginUUPSUpgradable(proxy).upgradeTo(newBaseAddress);
+        // }
+        
         DAO(payable(dao)).bulkOnMultiTarget(permissions);
 
         emit PluginUpdated(dao, pluginAddress, plugin.oldVersion, plugin.data);

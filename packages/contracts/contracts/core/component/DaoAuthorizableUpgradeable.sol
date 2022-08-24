@@ -2,19 +2,19 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-import { PermissionManager } from "../permission/PermissionManager.sol";
-import { IDAO } from "./../IDAO.sol";
+import "../permission/PermissionManager.sol";
+import "./../IDAO.sol";
 
-/// @title DaoAuthorizable
+/// @title DaoAuthorizableUpgradable
 /// @author Aragon Association - 2022
 /// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
 /// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
 /// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
 ///      This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
-abstract contract DaoAuthorizable is Initializable, Context {
+abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
@@ -56,4 +56,9 @@ abstract contract DaoAuthorizable is Initializable, Context {
 
         _;
     }
+
+    /// @dev This empty reserved space is put in place to allow future versions to add new
+    /// variables without shifting down storage in the inheritance chain.
+    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    uint256[49] private __gap;
 }

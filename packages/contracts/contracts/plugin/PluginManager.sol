@@ -35,6 +35,7 @@ abstract contract PluginManager {
         // TODO: shall we implement this ?
     }
 
+
     /// @notice the function dev has to override/implement for the plugin deployment.
     /// @param dao dao address where plugin will be installed to in the end.
     /// @param data the ABI encoded data that deploy needs for its work.

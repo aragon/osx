@@ -24,7 +24,7 @@ const AddressZero = ethers.constants.AddressZero
 
 // TODO 1. add type GRANT/REVOKE check in permissions
 // TODO 2. in order to detect encode abi for deploy/update, use deployABI/updateABI
-describe.only('CounterPluginManager(Example)', function () {
+describe('CounterPluginManager(Example)', function () {
     let ownerAddress: string;
     let signers: any;
     let counterV1Manager: TestCounterV1Manager;

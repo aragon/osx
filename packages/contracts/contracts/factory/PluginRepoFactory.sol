@@ -6,7 +6,8 @@ pragma solidity 0.8.10;
 
 import "../utils/Proxy.sol";
 import "../registry/AragonPluginRegistry.sol";
-import "../plugin/PluginRepo.sol";
+import { PluginRepo } from  "../plugin/PluginRepo.sol";
+import { BulkPermissionsLib } from '../core/permission/BulkPermissionsLib.sol';
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022

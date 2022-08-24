@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IPermissionOracle } from '../core/permission/IPermissionOracle.sol';
 
 import "../core/component/Component.sol";
 

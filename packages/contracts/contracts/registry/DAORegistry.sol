@@ -3,7 +3,7 @@
 pragma solidity 0.8.10;
 
 import "../core/IDAO.sol";
-import "./InterfaceBasedRegistry.sol";
+import { InterfaceBasedRegistry } from "./InterfaceBasedRegistry.sol";
 
 /// @title Register your unique DAO name
 /// @author Aragon Association - 2022

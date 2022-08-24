@@ -2,12 +2,16 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginManager} from "../../PluginManager.sol";
+import '@openzeppelin/contracts/proxy/Clones.sol';
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+import {Permission, PluginManager} from "../../PluginManager.sol";
 import "./MultiplyHelper.sol";
 import "./CounterV2.sol";
 
 contract CounterV2PluginManager is PluginManager {
+    using Clones for address;
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
@@ -32,24 +36,27 @@ contract CounterV2PluginManager is PluginManager {
             (address, uint256, uint256)
         );
 
+        address multiplyHelper = _multiplyHelper;
+
         // Allocate space for requested permission that will be applied on this plugin installation.
         permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 2 : 3);
 
         if (_multiplyHelper == address(0)) {
-            _multiplyHelper = createProxy(dao, address(multiplyHelperBase), "0x");
+            multiplyHelper = address(multiplyHelperBase).clone();
+            MultiplyHelper(multiplyHelper).initialize(dao);
         }
 
         // Encode the parameters that will be passed to initialize() on the Plugin
         bytes memory initData = abi.encodeWithSelector(
             bytes4(keccak256("initialize(address,uint256)")),
-            _multiplyHelper,
+            multiplyHelper,
             _num,
             _newVariable
         );
 
         // Deploy the Plugin itself, make it point to the implementation and
         // pass it the initialization params
-        plugin = createProxy(dao, getImplementationAddress(), initData);
+        plugin = address(new ERC1967Proxy(getImplementationAddress(), initData));
 
         // Allows plugin Count to call execute on DAO
         permissions[0] = Permission.ItemMultiTarget(
@@ -76,7 +83,7 @@ contract CounterV2PluginManager is PluginManager {
             // Allows Count plugin to call MultiplyHelper's multiply function.
             permissions[2] = Permission.ItemMultiTarget(
                 Permission.Operation.Grant,
-                _multiplyHelper,
+                multiplyHelper,
                 plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()

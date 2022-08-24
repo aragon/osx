@@ -2,11 +2,16 @@
 
 pragma solidity 0.8.10;
 
+import '@openzeppelin/contracts/proxy/Clones.sol';
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
 import {Permission, PluginManager} from "../../PluginManager.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
 contract CounterV1PluginManager is PluginManager {
+    using Clones for address;
+
     MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
 
@@ -33,20 +38,22 @@ contract CounterV1PluginManager is PluginManager {
 
         if (_multiplyHelper == address(0)) {
             // Deploy some internal helper contract for the Plugin
-            multiplyHelper = createProxy(dao, address(multiplyHelperBase), bytes(""));
+            multiplyHelper = address(multiplyHelperBase).clone();
+            MultiplyHelper(multiplyHelper).initialize(dao);
         }
 
         // Encode the parameters that will be passed to initialize() on the Plugin
         bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("initialize(address,uint256)")),
+            bytes4(keccak256("initialize(address,address,uint256)")),
+            dao,
             multiplyHelper,
             _num
         );
 
         // Deploy the Plugin itself, make it point to the implementation and
         // pass it the initialization params
-        plugin = createProxy(dao, getImplementationAddress(), initData);
-
+        plugin = address(new ERC1967Proxy(getImplementationAddress(), initData));
+        
         // Allows plugin Count to call execute on DAO
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
