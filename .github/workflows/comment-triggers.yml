@@ -24,8 +24,10 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment.body }}" | sed "s|/mythx partial ||" | sed "s/ //")
+          mode=$(echo $BODY | sed "s|/mythx partial ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
+        env:
+          BODY: ${{ github.event.comment.body }}
   mythx_partial_run:
     needs: ['mythx_partial']
     if: needs.mythx_partial.outputs.run == 'true'
@@ -53,8 +55,10 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment.body }}" | sed "s|/mythx full ||" | sed "s/ //")
+          mode=$(echo $BODY | sed "s|/mythx full ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
+        env:
+          BODY: ${{ github.event.comment.body }}
   mythx_full_run:
     needs: ['mythx_full']
     if: needs.mythx_full.outputs.run == 'true'
@@ -80,8 +84,10 @@ jobs:
       - name: Get type
         id: type
         run: |
-          type=$(echo "${{ github.event.comment.body }}" | sed "s|/release ||" | sed "s/ //")
+          type=$(echo $BODY | sed "s|/release ||" | sed "s/ //")
           echo "::set-output name=type::$type"
+        env:
+          BODY: ${{ github.event.comment.body }}
       - name: add label
         if: steps.check.outputs.triggered == 'true'
         uses: actions-ecosystem/action-add-labels@v1
@@ -103,8 +109,10 @@ jobs:
       - name: Get type
         id: type
         run: |
-          type=$(echo "${{ github.event.comment.body }}" | sed "s|/subgraph ||" | sed "s/ //")
+          type=$(echo $BODY | sed "s|/subgraph ||" | sed "s/ //")
           echo "::set-output name=type::$type"
+        env:
+          BODY: ${{ github.event.comment.body }}
       - name: add label
         if: steps.check.outputs.triggered == 'true'
         uses: actions-ecosystem/action-add-labels@v1
