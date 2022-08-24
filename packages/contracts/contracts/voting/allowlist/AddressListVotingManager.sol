@@ -28,7 +28,7 @@ contract AddressListVotingManager is PluginManager {
             uint256 minTurnout,
             uint256 minSupport,
             uint256 minDuration,
-            address[] memory allowlistVoters
+            address[] memory addressList
         ) = abi.decode(data, (uint256, uint256, uint256, address[]));
 
         // Encode the parameters that will be passed to `initialize()` on the Plugin
@@ -39,7 +39,7 @@ contract AddressListVotingManager is PluginManager {
             minTurnout,
             minSupport,
             minDuration,
-            allowlistVoters
+            addressList
         );
 
         // Deploy the Plugin itself as a proxy, make it point to the implementation logic
@@ -104,6 +104,6 @@ contract AddressListVotingManager is PluginManager {
     /// @inheritdoc PluginManager
     function deployABI() external view virtual override returns (string memory) {
         return
-            "(uint256 participationRequiredPct, uint256 supportRequiredPct, uint256 minDuration, address[] allowlistVoters)";
+            "(uint256 participationRequiredPct, uint256 supportRequiredPct, uint256 minDuration, address[] addressList)";
     }
 }

@@ -29,14 +29,14 @@ contract Erc20VotingManager is PluginManager {
     /// @notice The logic contract of the `GovernanceWrappedERC20`.
     address public governanceWrappedERC20Base;
 
-    struct TokenSetting {
+    struct TokenSettings {
         address addr;
         string name;
         string symbol;
-        GovernanceERC20.MintSetting mintSetting;
+        GovernanceERC20.MintSettings mintSetting;
     }
 
-    struct VoteSetting {
+    struct VoteSettings {
         uint64 minTurnout;
         uint64 minSupport;
         uint64 minDuration;
@@ -58,9 +58,9 @@ contract Erc20VotingManager is PluginManager {
         IDAO _dao = IDAO(payable(dao));
 
         // Decode the passed parameters.
-        (VoteSetting memory _voteSetting, TokenSetting memory _tokenSetting) = abi.decode(
+        (VoteSettings memory _voteSetting, TokenSettings memory _tokenSetting) = abi.decode(
             data,
-            (VoteSetting, TokenSetting)
+            (VoteSettings, TokenSettings)
         );
 
         // check if the token address is already a `GovernanceERC20` or `GovernanceWrappedERC20` or not.

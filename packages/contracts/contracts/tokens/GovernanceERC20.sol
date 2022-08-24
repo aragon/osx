@@ -19,7 +19,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 
-    struct MintSetting {
+    struct MintSettings {
         address[] receivers;
         uint256[] amounts;
     }
@@ -51,7 +51,7 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
         IDAO _dao,
         string calldata _name,
         string calldata _symbol,
-        MintSetting calldata _initialMintSetting
+        MintSettings calldata _initialMintSetting
     ) external initializer {
         __GovernanceERC20_init(_dao, _name, _symbol);
 
