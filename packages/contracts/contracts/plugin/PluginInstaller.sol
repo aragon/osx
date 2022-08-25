@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import {Permission, PluginManager} from "./PluginManager.sol";
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
@@ -79,48 +80,59 @@ contract PluginInstaller {
         address pluginAddress,
         UpdatePlugin calldata plugin
     ) public {
-        // bool supportsUUPS = payable(pluginAddress).supportsInterface(
-        //     type(PluginUUPSUpgradable).interfaceId
-        // );
-        // bool supportsTransprent = payable(pluginAddress).supportsInterface(
-        //     type(PluginTransparentUpgradeable).interfaceId
-        // );
-
-        // // Don't allow update if its interface doesn't allow it..
-        // if (!supportsUUPS && !supportsTransprent) {
-        //     revert UpdateNotAllowed();
-        // }
-
-        // address newBaseAddress = plugin.manager.getImplementationAddress();
-        // if (AragonUpgradablePlugin(pluginAddress).getImplementationAddress() == newBaseAddress) {
-        //     revert AlreadyThisVersion();
-        // }
+        address payable _pluginAddr = payable(pluginAddress);
+        address payable _dao = payable(dao);
+        Permission.ItemMultiTarget[] memory permissions;
 
         // address daoOnProxy = address(DaoAuthorizableUpgradeable(payable(pluginAddress)).getDAO());
-        // if (
-        //     ((daoOnProxy != msg.sender || daoOnProxy != dao) &&
-        //         !DAO(payable(dao)).hasPermission(
-        //             address(this),
-        //             msg.sender,
-        //             UPDATE_PERMISSION_ID,
-        //             bytes("")
-        //         ))
-        // ) {
-        //     revert UpdateNotAllowed();
-        // }
+        // TODO 1: Checking daoOnProxy == dao shouldn't be necessary
 
-        Permission.ItemMultiTarget[] memory permissions = plugin
-            .manager
-            .update(dao, pluginAddress, plugin.oldVersion, plugin.data);
+        if (
+            (dao != msg.sender &&
+                !DAO(_dao).hasPermission(
+                    address(this),
+                    msg.sender,
+                    UPDATE_PERMISSION_ID,
+                    bytes("")
+                ))
+        ) {
+            revert UpdateNotAllowed();
+        }
 
-        address newBaseAddress = plugin.manager.getImplementationAddress();
+        bool isUUPS = _pluginAddr.supportsInterface(type(PluginUUPSUpgradeable).interfaceId);
 
-        // if (newBaseAddress.supportsInterface(type(PluginUUPSUpgradable).interfaceId)) {
-        //     if (init.length > 0) PluginUUPSUpgradable(proxy).upgradeToAndCall(newBaseAddress, init);
-        //     else PluginUUPSUpgradable(proxy).upgradeTo(newBaseAddress);
-        // }
-        
-        DAO(payable(dao)).bulkOnMultiTarget(permissions);
+        if (isUUPS) {
+            DAO(_dao).grant(
+                pluginAddress,
+                address(plugin.manager),
+                keccak256("UPGRADE_PERMISSION")
+            );
+            permissions = plugin.manager.update(dao, pluginAddress, plugin.oldVersion, plugin.data);
+            DAO(_dao).revoke(
+                pluginAddress,
+                address(plugin.manager),
+                keccak256("UPGRADE_PERMISSION")
+            );
+        } else {
+            // TODO 2: How can we check if the proxy is `Transparent` to do things accordingly ?
+            // a. If admin is pluginInstaller, supportsInterface will return false, even when it's true, So below
+            //    3 line code is wrong.
+            // b. So this should call `admin` function and returned result must be equal to plugin installer
+            //    This mightn't be enough as what if `pluginAddr` actually contains `admin` function, but
+            //    is not Transparent Proxy type ?
+            // bool isTransparent = _pluginAddr.supportsInterface(
+            //     type(PluginTransparentUpgradeable).interfaceId
+            // );
+            // TODO 3:
+            // Admin would be `PluginInstaller`. Now, since update logic resides inside
+            // plugin manager, plugin manager should have the permission on the proxy to upgrade it.
+            // PluginInstaller can call `changeAdmin` on TransparentUpgradeableProxy by which
+            // PluginManager becomes the admin, does the upgrade, but PROBLEM is that
+            // PluginInstaller after `update` call of plugin manager, can't change it back so it becomes admin again.
+            // Only plugin manager can change it back to plugin installer which just complicates everything...
+        }
+
+        DAO(_dao).bulkOnMultiTarget(permissions);
 
         emit PluginUpdated(dao, pluginAddress, plugin.oldVersion, plugin.data);
     }
