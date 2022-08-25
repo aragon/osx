@@ -51,7 +51,9 @@ jobs:
       - name: Install deps
         run: yarn
       - name: Run mythx
-        run: mythx --output id --format json --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --async --mode ${{ inputs.mode }} packages/contracts/contracts
+        run: mythx --output id --format json --yes --api-key ${{ secrets.MYTHX_API_KEY }} analyze --async --mode "$MODE" packages/contracts/contracts
+        env:
+          MODE: ${{ inputs.mode }}
       - name: Comment Prepare
         id: comment_prepare
         run: |
