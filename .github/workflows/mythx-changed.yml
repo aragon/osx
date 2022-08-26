@@ -33,7 +33,10 @@ on:
 
 jobs:
   mythx:
+    permissions: read-all
     runs-on: ubuntu-latest
+    outputs:
+      group_id: ${{ steps.comment_prepare.outputs.group_id }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -65,12 +68,21 @@ jobs:
           id=$(cat id | head -1)
           group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq -r .group_id)
           echo "::set-output name=group_id::$group_id"
+
+  comment:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    needs: [mythx]
+    steps:
       - name: Comment a pull_request
+        if: ${{ inputs.pr_number != '' }}
         uses: thollander/actions-comment-pull-request@v1
         with:
           pr_number: ${{ inputs.pr_number }}
-          message: 'Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }})'
+          message: 'Scan started in group [https://dashboard.mythx.io/#/console/analyses/groups/${{ needs.mythx.outputs.group_id }}](https://dashboard.mythx.io/#/console/analyses/groups/${{ needs.mythx.outputs.group_id }})'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: SEE HERE FOR DASHBOARD LINK
         run: |
-          echo 'Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/${{ steps.comment_prepare.outputs.group_id }}'
+          echo 'Scan started in group https://dashboard.mythx.io/#/console/analyses/groups/${{ needs.mythx.outputs.group_id }}'
