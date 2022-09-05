@@ -13,6 +13,7 @@ contract CounterV1PluginManager is PluginManager {
     using Clones for address;
     using PluginManagerLib for PluginManagerLib.Data;
 
+    // For testing purposes, the below are public...
     MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
 
@@ -47,6 +48,8 @@ contract CounterV1PluginManager is PluginManager {
             _num
         );
 
+        installation.plugins = new PluginManagerLib.Deployment[](2);
+        
         address pluginAddr = installation.addPlugin(address(counterBase), initData);
 
         installation.addPermission(
@@ -85,17 +88,3 @@ contract CounterV1PluginManager is PluginManager {
         return "(address multiplyHelper, uint num)";
     }
 }
-
-// contract TestCounterV1Manager is CounterV1PluginManager {
-//     event PluginDeployed(address plugin, Permission.ItemMultiTarget[] permissions);
-
-//     function deploy(address dao, bytes memory data)
-//         public
-//         override
-//         returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
-//     {
-//         (plugin, permissions) = super.deploy(dao, data);
-
-//         emit PluginDeployed(plugin, permissions);
-//     }
-// }

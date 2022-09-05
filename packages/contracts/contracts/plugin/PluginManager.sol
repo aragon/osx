@@ -26,7 +26,7 @@ library PluginManagerLib {
     struct Data {
         address dao;
         address installer;
-        bytes32 nonce;
+        bytes32 salt;
         bytes params;
         Deployment[] plugins;
         Deployment[] helpers;
@@ -36,12 +36,12 @@ library PluginManagerLib {
     function init(
         address dao,
         address installer,
-        bytes32 nonce,
+        bytes32 salt,
         bytes memory params
     ) internal pure returns (Data memory data) {
         data.dao = dao;
         data.installer = installer;
-        data.nonce = nonce;
+        data.salt = salt;
         data.params = params;
     }
 
@@ -52,7 +52,7 @@ library PluginManagerLib {
     ) internal view returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(implementation, DeployType.None, initData);
         (self.plugins, deploymentAddress) = _addDeploy(
-            self.nonce,
+            self.salt,
             implementation,
             self.installer,
             self.plugins,
@@ -68,7 +68,7 @@ library PluginManagerLib {
     ) internal view returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(implementation, deployType, initData);
         (self.plugins, deploymentAddress) = _addDeploy(
-            self.nonce,
+            self.salt,
             implementation,
             self.installer,
             self.plugins,
@@ -83,7 +83,7 @@ library PluginManagerLib {
     ) internal view returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(implementation, DeployType.None, initData);
         (self.helpers, deploymentAddress) = _addDeploy(
-            self.nonce,
+            self.salt,
             implementation,
             self.installer,
             self.helpers,
@@ -99,7 +99,7 @@ library PluginManagerLib {
     ) internal view returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(implementation, deployType, initData);
         (self.helpers, deploymentAddress) = _addDeploy(
-            self.nonce,
+            self.salt,
             implementation,
             self.installer,
             self.helpers,
@@ -108,7 +108,7 @@ library PluginManagerLib {
     }
 
     function _addDeploy(
-        bytes32 nonce,
+        bytes32 salt,
         address implementation,
         address installer,
         Deployment[] memory currentDeployments,
@@ -120,10 +120,13 @@ library PluginManagerLib {
         for (uint256 i = 0; i < currentDeployments.length; i++) {
             newDeployments[i] = currentDeployments[i];
         }
-        newDeployments[currentDeployments.length] = newDeployment;
+
+        if (currentDeployments.length > 0)
+            newDeployments[currentDeployments.length - 1] = newDeployment;
+        else newDeployments[0] = newDeployment;
 
         deploymentAddress = Create2.computeAddress(
-            nonce,
+            salt,
             keccak256(bytecodeAt(implementation)),
             installer
         );
@@ -152,7 +155,11 @@ library PluginManagerLib {
         for (uint256 i = 0; i < self.permissions.length; i++) {
             newPermissions[i] = self.permissions[i];
         }
-        newPermissions[newPermissions.length] = newPermission;
+
+        if (self.permissions.length > 0)
+            newPermissions[newPermissions.length - 1] = newPermission;
+        else newPermissions[0] = newPermission;
+
         self.permissions = newPermissions;
     }
 }
@@ -162,14 +169,18 @@ library PluginManagerLib {
 abstract contract PluginManager {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
 
+    // TODO: Think about if it's a better choice to hardcode plugin installer address
+    // which means `deployer` doesn't need to be passed anymore...
+    
     function getInstallInstruction(
         address dao,
         bytes32 salt,
+        address deployer,
         bytes memory params
     ) public view returns (PluginManagerLib.Data memory) {
         PluginManagerLib.Data memory installation = PluginManagerLib.init(
             dao,
-            msg.sender, // TODO: can we always assume this will be the installer a.k.a deployer ?
+            deployer,
             salt,
             params
         );
@@ -187,11 +198,12 @@ abstract contract PluginManager {
         address dao,
         address proxy,
         bytes32 salt,
+        address deployer,
         bytes memory params
     ) public view returns (PluginManagerLib.Data memory, bytes memory) {
         PluginManagerLib.Data memory update = PluginManagerLib.init(
             dao,
-            msg.sender, // TODO: can we always assume this will be the installer a.k.a deployer ?
+            deployer,
             salt,
             params
         );

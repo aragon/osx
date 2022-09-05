@@ -83,7 +83,7 @@ contract PluginInstaller {
 
         PluginManagerLib.Data memory installationInstructions = plugin
             .manager
-            .getInstallInstruction(dao, newSalt, plugin.data);
+            .getInstallInstruction(dao, newSalt, address(this), plugin.data);
 
         // Deploy the helpers
         for (uint256 i = 0; i < installationInstructions.helpers.length; i++) {
@@ -135,7 +135,7 @@ contract PluginInstaller {
 
         (PluginManagerLib.Data memory updateInstructions, bytes memory initData) = plugin
             .manager
-            .getUpdateInstruction(plugin.oldVersion, dao, plugin.proxy, salt, plugin.data);
+            .getUpdateInstruction(plugin.oldVersion, dao, plugin.proxy, salt, address(this), plugin.data);
 
         if (updateInstructions.helpers.length > 0) {
             newSalt = keccak256(
@@ -185,7 +185,7 @@ contract PluginInstaller {
             deployedAddr = create2(0, salt, abi.encodePacked(bytecodeAt(implementation)));
 
             deployedAddr.functionCall(initData);
-            
+
             // IMPORTANT to call this after the initData. 
             // See {PluginClones-clonesInit}. 
             PluginClones(deployedAddr).clonesInit(dao);

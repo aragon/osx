@@ -1,35 +1,37 @@
-// // SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: GPL-3.0
 
-// pragma solidity 0.8.10;
+pragma solidity 0.8.10;
 
-// import {Permission, PluginManager} from "../plugin/PluginManager.sol";
-// import "./MajorityVotingMock.sol";
-// import "../utils/Proxy.sol";
-// // TODO:GIORGI
-// contract PluginManagerMock is PluginManager {
-//     event NewPluginDeployed(address dao, bytes params);
+import {Permission, PluginManager, PluginManagerLib } from "../plugin/PluginManager.sol";
+import "./MajorityVotingMock.sol";
+import "../utils/Proxy.sol";
+// TODO:GIORGI
+contract PluginManagerMock is PluginManager {
+    using PluginManagerLib for PluginManagerLib.Data;
 
-//     address public basePluginAddress;
+    event NewPluginDeployed(address dao, bytes params);
 
-//     constructor() {
-//         basePluginAddress = address(new MajorityVotingMock());
-//     }
+    address public basePluginAddress;
 
-//     function deploy(address dao, bytes calldata params)
-//         public
-//         override
-//         returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
-//     {
-//         plugin = basePluginAddress;
+    constructor() {
+        basePluginAddress = address(new MajorityVotingMock());
+    }
 
-//         emit NewPluginDeployed(dao, params);
-//     }
+    function _getInstallInstruction(PluginManagerLib.Data memory installation)
+        internal
+        view
+        override
+        returns (PluginManagerLib.Data memory)
+    {
 
-//     function getImplementationAddress() public view virtual override returns (address) {
-//         return basePluginAddress;
-//     }
+        installation.addPlugin(basePluginAddress, bytes(""));
+    }
 
-//     function deployABI() external view virtual override returns (string memory) {
-//         return "";
-//     }
-// }
+    function getImplementationAddress() public view virtual override returns (address) {
+        return basePluginAddress;
+    }
+
+    function deployABI() external view virtual override returns (string memory) {
+        return "";
+    }
+}

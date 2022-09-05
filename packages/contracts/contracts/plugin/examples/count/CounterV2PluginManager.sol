@@ -14,6 +14,7 @@ contract CounterV2PluginManager is PluginManager {
     using Clones for address;
     using PluginManagerLib for PluginManagerLib.Data;
     
+    // For testing purposes, the below are public...
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
@@ -116,31 +117,3 @@ contract CounterV2PluginManager is PluginManager {
         return "(uint _newVariable)";
     }
 }
-
-// contract TestCounterV2Manager is CounterV2PluginManager {
-//     event PluginDeployed(address plugin, Permission.ItemMultiTarget[] permissions);
-//     event PluginUpdated(address plugin, address dao, Permission.ItemMultiTarget[] permissions);
-
-//     constructor(MultiplyHelper _multiplyHelper) CounterV2PluginManager(_multiplyHelper) {}
-
-//     function deploy(address dao, bytes memory data)
-//         public
-//         override
-//         returns (address plugin, Permission.ItemMultiTarget[] memory permissions)
-//     {
-//         (plugin, permissions) = super.deploy(dao, data);
-
-//         emit PluginDeployed(plugin, permissions);
-//     }
-
-//     function update(
-//         address dao,
-//         address plugin,
-//         uint16[3] calldata oldVersion,
-//         bytes memory data
-//     ) public virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-//         permissions = super.update(dao, plugin, oldVersion, data);
-
-//         emit PluginUpdated(plugin, dao, permissions);
-//     }
-// }

@@ -3,8 +3,8 @@ import { ethers } from 'hardhat';
 
 import {
     DAOMock,
-    TestCounterV1Manager,
-    TestCounterV2Manager
+    CounterV1PluginManager,
+    CounterV2PluginManager
 } from '../../typechain';
 
 const EVENTS = {
@@ -27,10 +27,11 @@ const AddressZero = ethers.constants.AddressZero
 describe('CounterPluginManager(Example)', function () {
     let ownerAddress: string;
     let signers: any;
-    let counterV1Manager: TestCounterV1Manager;
-    let counterV2Manager: TestCounterV2Manager;
+    let counterV1Manager: CounterV1PluginManager;
+    let counterV2Manager: CounterV2PluginManager;
     let implementationAddress: string;
     let daoMock: DAOMock;
+    let multiplyPermissionId: string;
 
     async function decodeEvent(tx: any, eventName: string) {
         const { events } = await tx.wait()
@@ -48,135 +49,88 @@ describe('CounterPluginManager(Example)', function () {
         const DAOMock = await ethers.getContractFactory('DAOMock');
         daoMock = await DAOMock.deploy(ownerAddress);
 
-        const CounterV1Manager = await ethers.getContractFactory('TestCounterV1Manager');
+        const CounterV1Manager = await ethers.getContractFactory('CounterV1PluginManager');
         counterV1Manager = await CounterV1Manager.deploy()
+        
+        const COUNTER_V1 = await ethers.getContractFactory('CounterV1')
+        const counterV1 = COUNTER_V1.attach(await counterV1Manager.multiplyHelperBase())
+        multiplyPermissionId = await counterV1.MULTIPLY_PERMISSION_ID()
 
         implementationAddress = await counterV1Manager.getImplementationAddress()
     });
 
-    describe("staticCall:deploy", async () => {
-        it("should deploy helper and return permissions correctly", async () => {
+    describe("getInstallInstruction", async () => {
+        it("correctly returns permissions/helpers/plugin when helper is passed", async () => {
             const num = 10;
+    
+            const params = abiCoder.encode(
+                ["address", "uint256"],
+                [ownerAddress, num]
+            )
+            
+            const salt = ethers.utils.formatBytes32String("hello world");
+            const data = await counterV1Manager.getInstallInstruction(daoMock.address, salt, ownerAddress, params)
 
-            const encoded = abiCoder.encode(
+            expect(data.permissions.length).to.be.equal(2);
+            expect(data.helpers.length).to.be.equal(0);
+            expect(data.plugins.length).to.be.equal(1);
+
+            // compute the address of the plugin in advance
+            const pluginInitCode = await ethers.provider.getCode(await counterV1Manager.getImplementationAddress());
+            const predictedPluginAddr = ethers.utils.getCreate2Address(
+                ownerAddress,
+                salt,
+                ethers.utils.keccak256(pluginInitCode)
+            )
+            
+            // Inside permissions, there should be the same address as predictedPluginAddr
+            expect(data.permissions).to.deep.equal([
+                [Op.Grant, daoMock.address, predictedPluginAddr, AddressZero, ethers.utils.id('EXEC_PERMISSION')],
+                [Op.Grant, predictedPluginAddr, daoMock.address, AddressZero, multiplyPermissionId],
+            ])
+        })
+
+        it("correcly returns permissions/helpers/plugin when helper is NOT passed", async () => {
+            const num = 10;
+    
+            const params = abiCoder.encode(
                 ["address", "uint256"],
                 [AddressZero, num]
             )
+            
+            const salt = ethers.utils.formatBytes32String("hello world");
+            const data = await counterV1Manager.getInstallInstruction(daoMock.address, salt, ownerAddress, params)
 
-            const data = await counterV1Manager.callStatic.deploy(daoMock.address, encoded);
-            const permissions = data['permissions']
-            const plugin = data['plugin']
-            expect(permissions.length).to.be.equal(3);
-            expect(plugin).to.not.eq(AddressZero)
-        })
+            expect(data.permissions.length).to.be.equal(3);
+            expect(data.helpers.length).to.be.equal(1);
+            expect(data.plugins.length).to.be.equal(1);
 
-        it("should not deploy multiplyHelper and return permissions correctly", async () => {
-            const num = 10;
-
-            const encoded = abiCoder.encode(
-                ["address", "uint256"],
-                [ownerAddress, num]
+            // compute the address of the plugin in advance
+            const pluginInitCode = await ethers.provider.getCode(await counterV1Manager.getImplementationAddress());
+            const helperInitCode = await ethers.provider.getCode(await counterV1Manager.multiplyHelperBase());
+            const predictedPluginAddr = ethers.utils.getCreate2Address(
+                ownerAddress,
+                salt,
+                ethers.utils.keccak256(pluginInitCode)
             )
-            // deploy with static call 
-            const data = await counterV1Manager.callStatic.deploy(daoMock.address, encoded);
-            const permissions = data['permissions']
-            const pluginAddress = data['plugin']
-            expect(permissions.length).to.be.equal(2);
-            expect(pluginAddress).to.not.eq(AddressZero)
-        })
-    })
-
-    describe("deploy", async () => {
-        it("should not deploy helper and not apply permissions on it", async () => {
-            const num = 10;
-    
-            const encoded = abiCoder.encode(
-                ["address", "uint256"],
-                [ownerAddress, num]
+            const predictedHelperAddr = ethers.utils.getCreate2Address(
+                ownerAddress,
+                salt,
+                ethers.utils.keccak256(helperInitCode)
             )
-    
-            const tx = await counterV1Manager.deploy(daoMock.address, encoded)
-            const { plugin, permissions } = await decodeEvent(tx, EVENTS.PLUGIN_DEPLOYED);
-    
-            const CounterV1 = await ethers.getContractFactory('CounterV1')
-            const counter = CounterV1.attach(plugin)
-    
-            expect(await counter.count()).to.be.equal(10);
-            expect(await counter.multiplyHelper()).to.be.equal(ownerAddress);
-            expect(permissions.length).to.be.equal(2);
-    
-            expect(permissions).to.deep.equal([
-                [Op.Grant, daoMock.address, plugin, AddressZero, ethers.utils.id('EXEC_PERMISSION')],
-                [Op.Grant, plugin, daoMock.address, AddressZero, await counter.MULTIPLY_PERMISSION_ID()],
-            ])
-        })
-    
-        it("should deploy helper and apply permissions correctly", async () => {
-            const num = 10;
-    
-            const encoded = abiCoder.encode(
-                ["address", "uint256"],
-                [AddressZero, num]
-            )
-    
-            const tx = await counterV1Manager.deploy(daoMock.address, encoded);
-            const { plugin, permissions } = await decodeEvent(tx, EVENTS.PLUGIN_DEPLOYED);
-    
-            const CounterV1 = await ethers.getContractFactory('CounterV1')
-            const counter = CounterV1.attach(plugin)
-    
-            const multiplyHelper = permissions[2]['where']
-            expect(await counter.count()).to.be.equal(num);
-            expect(await counter.multiplyHelper()).to.be.equal(multiplyHelper);
-            expect(permissions.length).to.be.equal(3);
-    
-            expect(permissions).to.deep.equal([
-                [Op.Grant, daoMock.address, plugin, AddressZero, ethers.utils.id('EXEC_PERMISSION')],
-                [Op.Grant, plugin, daoMock.address, AddressZero, await counter.MULTIPLY_PERMISSION_ID()],
-                [Op.Grant, multiplyHelper, plugin, AddressZero, await counter.MULTIPLY_PERMISSION_ID()]
+            
+            // Inside permissions, there should be the same address as predictedPluginAddr
+            expect(data.permissions).to.deep.equal([
+                [Op.Grant, daoMock.address, predictedPluginAddr, AddressZero, ethers.utils.id('EXEC_PERMISSION')],
+                [Op.Grant, predictedPluginAddr, daoMock.address, AddressZero, multiplyPermissionId],
+                [Op.Grant, predictedHelperAddr, predictedPluginAddr, AddressZero, multiplyPermissionId],
             ])
         })
     })
 
-    describe("update", async () => {
-        let plugin: string, permissions;
+    // TODO: include more interesting example in CounterV2PluginManager + add tests below.
+    describe("getUpdateInstruction", async () => {
 
-        before(async () => {
-            const oldMultiplyHelper = await counterV1Manager.multiplyHelperBase()
-            const CounterV2Manager = await ethers.getContractFactory('TestCounterV2Manager');
-            counterV2Manager = await CounterV2Manager.deploy(oldMultiplyHelper)
-        })
-
-        beforeEach(async () => {
-            const num = 10;
-
-            const encoded = abiCoder.encode(
-                ["address", "uint256"],
-                [ownerAddress, num]
-            )
-
-            const tx = await counterV1Manager.deploy(daoMock.address, encoded);
-            const data = await decodeEvent(tx, EVENTS.PLUGIN_DEPLOYED);
-            plugin = data.plugin;
-            permissions = data.permissions;
-        })
-
-        it("updates the proxy with the new implementation and initializes new data", async () => {
-            const newVariable = 15;
-            const encoded = abiCoder.encode(["uint256"], [newVariable])
-            const tx = await counterV2Manager.update(daoMock.address, plugin, [1, 0, 0], encoded)
-
-            const CounterV2 = await ethers.getContractFactory('CounterV2')
-            const counter = CounterV2.attach(plugin)
-
-            expect(await counter.newVariable()).to.be.equal(newVariable)
-
-            const data = await decodeEvent(tx, EVENTS.PLUGIN_UPDATED);
-            const updatePermissions = data.permissions;
-
-            expect(updatePermissions).to.deep.equal([
-                [Op.Revoke, daoMock.address, plugin, AddressZero, await counter.MULTIPLY_PERMISSION_ID()]
-            ])
-        })
     })
-});
+  
+})
