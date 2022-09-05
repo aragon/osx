@@ -50,7 +50,7 @@ library PluginManagerLib {
         address implementation,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, DeployType.None, initData);
+        Deployment memory newDeployment = Deployment(implementation, bytes(""), DeployType.None, initData);
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
             implementation,
@@ -66,7 +66,7 @@ library PluginManagerLib {
         bytes memory initData,
         DeployType deployType
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, deployType, initData);
+        Deployment memory newDeployment = Deployment(implementation, bytes(""), deployType, initData);
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
             implementation,
@@ -81,7 +81,7 @@ library PluginManagerLib {
         address implementation,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, DeployType.None, initData);
+        Deployment memory newDeployment = Deployment(implementation, bytes(""), DeployType.None, initData);
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
             implementation,
@@ -97,7 +97,7 @@ library PluginManagerLib {
         bytes memory initData,
         DeployType deployType
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, deployType, initData);
+        Deployment memory newDeployment = Deployment(implementation, bytes(""), deployType, initData);
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
             implementation,
@@ -171,7 +171,7 @@ abstract contract PluginManager {
 
     // TODO: Think about if it's a better choice to hardcode plugin installer address
     // which means `deployer` doesn't need to be passed anymore...
-    
+
     function getInstallInstruction(
         address dao,
         bytes32 salt,

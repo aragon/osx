@@ -48,8 +48,13 @@ contract CounterV1PluginManager is PluginManager {
             _num
         );
 
-        installation.plugins = new PluginManagerLib.Deployment[](2);
-        
+        // TODO 1: If dev wants his plugin to be deployed with `new`, with the current solution,
+        // he is still obliged to deploy things as bases inside plugin manager constructor eve though
+        // it's not required. + hence more gas costs
+
+        // TODO 2: installation.addPlugin is the way to use everything correctly. Though, dev can
+        // stil write installation.plugins = new PluginManagerLib.Deployment[](3) and then 
+        // directly put some other addresses instead of plugin which mean create2 will produce a different addresses
         address pluginAddr = installation.addPlugin(address(counterBase), initData);
 
         installation.addPermission(
