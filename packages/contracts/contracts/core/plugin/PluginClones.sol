@@ -18,8 +18,12 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 abstract contract PluginClones is Initializable, ERC165, Context, AppStorage {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginClones).interfaceId;
 
-    // TODO: initializer problem
-    function __Plugin_init(address _dao) public virtual initializer {
+    /// @notice used by the deployer of the plugin to call.
+    /// @dev plugin's own initialize function can't have the initializer with the same version(1)
+    /// @param _dao the dao address to set in a slot.
+    /// IMPORTANT: Must be called after the plugin's own initialize is called ONLY 
+    // if it also uses OZ's initializable
+    function clonesInit(address _dao) external reinitializer(2) {
         setDAO(_dao);
     }
 

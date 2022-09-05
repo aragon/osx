@@ -81,11 +81,9 @@ contract PluginInstaller {
             abi.encodePacked(salt, dao, address(this), plugin.manager, keccak256(plugin.data))
         );
 
-        PluginManagerLib.Data memory installationInstructions = plugin.manager.getInstallInstruction(
-            dao,
-            newSalt,
-            plugin.data
-        );
+        PluginManagerLib.Data memory installationInstructions = plugin
+            .manager
+            .getInstallInstruction(dao, newSalt, plugin.data);
 
         // Deploy the helpers
         for (uint256 i = 0; i < installationInstructions.helpers.length; i++) {
@@ -93,13 +91,13 @@ contract PluginInstaller {
             bytes memory init = installationInstructions.helpers[i].initData;
             PluginManagerLib.DeployType deployType = installationInstructions.helpers[i].deployType;
 
-            deploy(dao, newSalt, base, init, deployType);
+            deployWithCreate2(dao, newSalt, base, init, deployType);
         }
 
         // Deploy the plugin
         // in PluginInstaller V1, restrict Plugin Size to be 1 always
         if (installationInstructions.plugins.length != 1) revert("Length Mismatch");
-        address pluginAddr = deploy(
+        address pluginAddr = deployWithCreate2(
             dao,
             newSalt,
             installationInstructions.plugins[0].implementation,
@@ -138,8 +136,8 @@ contract PluginInstaller {
         (PluginManagerLib.Data memory updateInstructions, bytes memory initData) = plugin
             .manager
             .getUpdateInstruction(plugin.oldVersion, dao, plugin.proxy, salt, plugin.data);
-        
-        if(updateInstructions.helpers.length > 0) {
+
+        if (updateInstructions.helpers.length > 0) {
             newSalt = keccak256(
                 abi.encodePacked(salt, dao, address(this), plugin.manager, keccak256(plugin.data))
             );
@@ -149,7 +147,7 @@ contract PluginInstaller {
             bytes memory init = updateInstructions.helpers[i].initData;
             PluginManagerLib.DeployType deployType = updateInstructions.helpers[i].deployType;
 
-            deploy(dao, salt, base, init, deployType);
+            deployWithCreate2(dao, newSalt, base, init, deployType);
         }
 
         // NOTE: the same exact functions are present for both UUPS/Transparent.
@@ -157,7 +155,7 @@ contract PluginInstaller {
         // If the proxy doesn't support upgradeToAndCall, it will fail.
         address implementationAddr = plugin.manager.getImplementationAddress();
         PluginUUPSUpgradeable(plugin.proxy).upgradeToAndCall(implementationAddr, initData);
-            
+
         // TODO: Since we allow users to decide not to use our pluginuupsupgradable/PluginTransparentUpgradeable since
         // they don't want to use our ACL and features we will bring inside them, we deploy such contracts with OZ's contracts
         // directly. In that case, we need to support upgrading them as well.
@@ -167,7 +165,7 @@ contract PluginInstaller {
         emit PluginUpdated(dao, plugin.proxy, plugin.oldVersion, plugin.data);
     }
 
-    function deploy(
+    function deployWithCreate2(
         address dao,
         bytes32 salt,
         address implementation,
@@ -186,9 +184,11 @@ contract PluginInstaller {
         } else if (implementation.supportsInterface(type(PluginClones).interfaceId)) {
             deployedAddr = create2(0, salt, abi.encodePacked(bytecodeAt(implementation)));
 
-            PluginClones(deployedAddr).__Plugin_init(dao);
-
             deployedAddr.functionCall(initData);
+            
+            // IMPORTANT to call this after the initData. 
+            // See {PluginClones-clonesInit}. 
+            PluginClones(deployedAddr).clonesInit(dao);
         } else if (implementation.supportsInterface(type(Plugin).interfaceId)) {
             deployedAddr = create2(0, salt, abi.encodePacked(bytecodeAt(implementation), initData));
         } else if (

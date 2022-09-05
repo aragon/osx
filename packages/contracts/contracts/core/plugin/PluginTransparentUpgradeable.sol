@@ -12,7 +12,6 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
 import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeable.sol";
 
-
 /// @title PluginTranparentUpgradable
 /// @notice An abstract contract to inherit from when creating a proxy contract.
 /// This should be used to deploy logic contracts where proxy itself
