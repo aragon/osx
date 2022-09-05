@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 
@@ -17,21 +18,35 @@ import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeabl
 abstract contract PluginUUPSUpgradeable is
     Initializable,
     ERC165Upgradeable,
+    ContextUpgradeable,
     UUPSUpgradeable,
-    DaoAuthorizableUpgradeable
+    AppStorage
 {
-    bytes4  public constant PLUGIN_UUPS_INTERFACE_ID = type(PluginUUPSUpgradeable).interfaceId;
+    bytes4  public constant PLUGIN_INTERFACE_ID = type(PluginUUPSUpgradeable).interfaceId;
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
-    function __Plugin_init(address _dao) internal virtual onlyInitializing {
-        __DaoAuthorizable_init(IDAO(_dao));
+    // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
+
+    /// @dev Auth modifier used in all components of a DAO to check the permissions.
+    /// @param _permissionId The hash of the permission identifier
+    modifier auth(bytes32 _permissionId)  {
+        IDAO dao = dao(); 
+        if(!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
+            revert PermissionManager.Unauthorized({
+                here: address(this), 
+                where: address(this), 
+                who: _msgSender(), 
+                permissionId: _permissionId
+            });
+        }
+        _;
     }
 
     /// @notice adds a IERC165 to check whether contract supports PluginUUPSUpgradeable interface or not.
     /// @dev See {ERC165Upgradeable-supportsInterface}.
     /// @return bool whether it supports the IERC165 or PluginUUPSUpgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == PLUGIN_UUPS_INTERFACE_ID || super.supportsInterface(interfaceId);
+        return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @notice used to check the current base logic contract proxy delegates to.

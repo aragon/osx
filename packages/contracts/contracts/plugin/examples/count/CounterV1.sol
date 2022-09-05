@@ -13,11 +13,9 @@ contract CounterV1 is PluginUUPSUpgradeable {
     uint256 public count;
     MultiplyHelper public multiplyHelper;
 
-    function initialize(address _dao, MultiplyHelper _multiplyHelper, uint256 _num) external initializer {
+    function initialize(MultiplyHelper _multiplyHelper, uint256 _num) external initializer {
         count = _num;
         multiplyHelper = _multiplyHelper;
-
-        __Plugin_init(_dao);
     }
 
     function multiply(uint256 a) public auth(MULTIPLY_PERMISSION_ID) returns (uint256) {

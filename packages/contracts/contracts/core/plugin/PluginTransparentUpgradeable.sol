@@ -22,7 +22,7 @@ abstract contract PluginTransparentUpgradeable is
     ERC165Upgradeable,
     DaoAuthorizableUpgradeable
 {
-    bytes4 public constant PLUGIN_TRANSPARENT_INTERFACE_ID = type(PluginTransparentUpgradeable).interfaceId;
+    bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginTransparentUpgradeable).interfaceId;
 
     function __Plugin_init(address _dao) internal virtual onlyInitializing {
         __DaoAuthorizable_init(IDAO(_dao));
@@ -33,7 +33,7 @@ abstract contract PluginTransparentUpgradeable is
     /// @return bool whether it supports the IERC165 or PluginTranparentUpgradable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == PLUGIN_TRANSPARENT_INTERFACE_ID || super.supportsInterface(interfaceId);
+            interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

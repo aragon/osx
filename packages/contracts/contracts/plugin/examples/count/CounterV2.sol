@@ -19,7 +19,6 @@ contract CounterV2 is PluginUUPSUpgradeable {
     // This only gets called for daos that install it for the first time.
     // initializer modifier protects it from being called 2nd time for old proxies.
     function initialize(
-        address _dao,
         MultiplyHelper _multiplyHelper,
         uint256 _num,
         uint256 _newVariable
@@ -31,8 +30,6 @@ contract CounterV2 is PluginUUPSUpgradeable {
         newVariable = _newVariable;
 
         multiplyHelper = _multiplyHelper;
-
-        __Plugin_init(_dao);
     }
 
     // This gets called when dao already has some previous version installed(in our case, CountV1)
