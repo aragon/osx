@@ -562,8 +562,8 @@ describe('Core: PermissionManager', function () {
         }
       ];
 
-      await expect(pm.bulkOnMultiTarget(bulkItems)).to.be.revertedWith(
-        customError('Unauthorized', pm.address, signers[1].address, signers[0].address, ADMIN_PERMISSION_ID)
+      await expect(pm.connect(signers[2]).bulkOnMultiTarget(bulkItems)).to.be.revertedWith(
+        customError('Unauthorized', pm.address, signers[1].address, signers[2].address, ROOT_PERMISSION_ID)
       )
     });
   })
