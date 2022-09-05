@@ -3,12 +3,21 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Create2.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
 import {bytecodeAt} from "../utils/Contract.sol";
+import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
+import {TransparentProxy} from "../utils/TransparentProxy.sol";
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {PluginClones} from "../core/plugin/PluginClones.sol";
+import {Plugin} from "../core/plugin/Plugin.sol";
+import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgradeable.sol";
 
 library PluginManagerLib {
+    using ERC165Checker for address;
+
     enum DeployType {
         None,
         Clones,
@@ -18,9 +27,12 @@ library PluginManagerLib {
     }
 
     struct Deployment {
-        address implementation;
-        DeployType deployType;
+        // gets returned by the dev and describes what function should be called after deployment.
         bytes initData;
+        // Aragon's custom init data which describes what function should be called after initData is called.
+        bytes additionalInitData;
+        // (bytecode + constructor arguments)
+        bytes initCode;
     }
 
     struct Data {
@@ -45,15 +57,25 @@ library PluginManagerLib {
         data.params = params;
     }
 
+    // aragon proxy uups - implementation + initData (function selector + arguments)
+    // aragon transparent - implementation + initData (function selector + arguments)
+    // aragon clones - implementation + initData(function selector + arguments)
+    // aragon new - implementation(zero address) + initData (bytecode + constuctor arguments)
+
     function addPlugin(
         Data memory self,
         address implementation,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, bytes(""), DeployType.None, initData);
+        (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
+            self,
+            implementation,
+            initData
+        );
+
+        Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
-            implementation,
             self.installer,
             self.plugins,
             newDeployment
@@ -66,10 +88,15 @@ library PluginManagerLib {
         bytes memory initData,
         DeployType deployType
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, bytes(""), deployType, initData);
+        (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
+            self,
+            implementation,
+            initData
+        );
+
+        Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
-            implementation,
             self.installer,
             self.plugins,
             newDeployment
@@ -81,10 +108,15 @@ library PluginManagerLib {
         address implementation,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, bytes(""), DeployType.None, initData);
+        (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
+            self,
+            implementation,
+            initData
+        );
+
+        Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
-            implementation,
             self.installer,
             self.helpers,
             newDeployment
@@ -97,10 +129,15 @@ library PluginManagerLib {
         bytes memory initData,
         DeployType deployType
     ) internal view returns (address deploymentAddress) {
-        Deployment memory newDeployment = Deployment(implementation, bytes(""), deployType, initData);
+        (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
+            self,
+            implementation,
+            initData
+        );
+
+        Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
-            implementation,
             self.installer,
             self.helpers,
             newDeployment
@@ -109,7 +146,6 @@ library PluginManagerLib {
 
     function _addDeploy(
         bytes32 salt,
-        address implementation,
         address installer,
         Deployment[] memory currentDeployments,
         Deployment memory newDeployment
@@ -127,9 +163,41 @@ library PluginManagerLib {
 
         deploymentAddress = Create2.computeAddress(
             salt,
-            keccak256(bytecodeAt(implementation)),
+            keccak256(newDeployment.initCode),
             installer
         );
+    }
+
+    function calculateInitCode(
+        Data memory self,
+        address implementation,
+        bytes memory initData
+    ) internal view returns (bytes memory initCode, bytes memory additionalInitData) {
+        if (implementation.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
+            bytes memory bytecodeWithArgs = abi.encodePacked(
+                type(PluginERC1967Proxy).creationCode,
+                abi.encode(self.dao, implementation, initData)
+            );
+
+            initCode = bytecodeWithArgs;
+        } else if (implementation.supportsInterface(type(PluginClones).interfaceId)) {
+            initCode = bytecodeAt(implementation);
+
+            additionalInitData = abi.encodeWithSelector(
+                bytes4(keccak256("clonesInit(address)")),
+                self.dao
+            );
+        } else if (implementation.supportsInterface(type(Plugin).interfaceId)) {
+            initCode = initData;
+        } else if (
+            implementation.supportsInterface(type(PluginTransparentUpgradeable).interfaceId)
+        ) {
+            bytes memory bytecodeWithArgs = abi.encodePacked(
+                type(TransparentProxy).creationCode,
+                abi.encode(self.dao, implementation, self.installer, initData)
+            );
+            initCode = bytecodeWithArgs;
+        }
     }
 
     function addPermission(
@@ -156,8 +224,7 @@ library PluginManagerLib {
             newPermissions[i] = self.permissions[i];
         }
 
-        if (self.permissions.length > 0)
-            newPermissions[newPermissions.length - 1] = newPermission;
+        if (self.permissions.length > 0) newPermissions[newPermissions.length - 1] = newPermission;
         else newPermissions[0] = newPermission;
 
         self.permissions = newPermissions;
@@ -201,12 +268,7 @@ abstract contract PluginManager {
         address deployer,
         bytes memory params
     ) public view returns (PluginManagerLib.Data memory, bytes memory) {
-        PluginManagerLib.Data memory update = PluginManagerLib.init(
-            dao,
-            deployer,
-            salt,
-            params
-        );
+        PluginManagerLib.Data memory update = PluginManagerLib.init(dao, deployer, salt, params);
         return _getUpdateInstruction(proxy, oldVersion, update);
     }
 

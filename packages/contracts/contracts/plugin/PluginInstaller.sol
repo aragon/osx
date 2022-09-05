@@ -87,22 +87,15 @@ contract PluginInstaller {
 
         // Deploy the helpers
         for (uint256 i = 0; i < installationInstructions.helpers.length; i++) {
-            address base = installationInstructions.helpers[i].implementation;
-            bytes memory init = installationInstructions.helpers[i].initData;
-            PluginManagerLib.DeployType deployType = installationInstructions.helpers[i].deployType;
-
-            deployWithCreate2(dao, newSalt, base, init, deployType);
+            deployWithCreate2(newSalt, installationInstructions.helpers[i]);
         }
 
         // Deploy the plugin
         // in PluginInstaller V1, restrict Plugin Size to be 1 always
         if (installationInstructions.plugins.length != 1) revert("Length Mismatch");
         address pluginAddr = deployWithCreate2(
-            dao,
             newSalt,
-            installationInstructions.plugins[0].implementation,
-            installationInstructions.plugins[0].initData,
-            installationInstructions.plugins[0].deployType
+            installationInstructions.plugins[0]
         );
 
         DAO(payable(dao)).bulkOnMultiTarget(installationInstructions.permissions);
@@ -135,7 +128,14 @@ contract PluginInstaller {
 
         (PluginManagerLib.Data memory updateInstructions, bytes memory initData) = plugin
             .manager
-            .getUpdateInstruction(plugin.oldVersion, dao, plugin.proxy, salt, address(this), plugin.data);
+            .getUpdateInstruction(
+                plugin.oldVersion,
+                dao,
+                plugin.proxy,
+                salt,
+                address(this),
+                plugin.data
+            );
 
         if (updateInstructions.helpers.length > 0) {
             newSalt = keccak256(
@@ -143,11 +143,7 @@ contract PluginInstaller {
             );
         }
         for (uint256 i = 0; i < updateInstructions.helpers.length; i++) {
-            address base = updateInstructions.helpers[i].implementation;
-            bytes memory init = updateInstructions.helpers[i].initData;
-            PluginManagerLib.DeployType deployType = updateInstructions.helpers[i].deployType;
-
-            deployWithCreate2(dao, newSalt, base, init, deployType);
+            deployWithCreate2(newSalt, updateInstructions.helpers[i]);
         }
 
         // NOTE: the same exact functions are present for both UUPS/Transparent.
@@ -166,50 +162,17 @@ contract PluginInstaller {
     }
 
     function deployWithCreate2(
-        address dao,
         bytes32 salt,
-        address implementation,
-        bytes memory initData,
-        PluginManagerLib.DeployType deployType
-    ) private returns (address deployedAddr) {
-        // TODO: The extra checks cost more gas. What if implementation doesn't support
-        // Any of the below interfaces and is a custom one, in that case, user pays for all
-        // supportsInterface call each time(+3.5k per call)
-        if (implementation.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            bytes memory bytecodeWithArgs = abi.encodePacked(
-                type(PluginERC1967Proxy).creationCode,
-                abi.encode(dao, implementation, initData)
-            );
-            deployedAddr = create2(0, salt, bytecodeWithArgs);
-        } else if (implementation.supportsInterface(type(PluginClones).interfaceId)) {
-            deployedAddr = create2(0, salt, abi.encodePacked(bytecodeAt(implementation)));
-
-            deployedAddr.functionCall(initData);
-
-            // IMPORTANT to call this after the initData. 
-            // See {PluginClones-clonesInit}. 
-            PluginClones(deployedAddr).clonesInit(dao);
-        } else if (implementation.supportsInterface(type(Plugin).interfaceId)) {
-            deployedAddr = create2(0, salt, abi.encodePacked(bytecodeAt(implementation), initData));
-        } else if (
-            implementation.supportsInterface(type(PluginTransparentUpgradeable).interfaceId)
-        ) {
-            bytes memory bytecodeWithArgs = abi.encodePacked(
-                type(TransparentProxy).creationCode,
-                abi.encode(dao, implementation, address(this), initData)
-            );
-            deployedAddr = create2(0, salt, bytecodeWithArgs);
-        } else {
-            // TODO: use deployType to check and decide !!!
-            revert("Plugin Interface doesn't match any of the Aragon's interfaces...");
+        PluginManagerLib.Deployment memory deployment
+    ) private returns (address deployedAddr) {                
+        deployedAddr = Create2.deploy(0, salt, deployment.initCode);
+        
+        if(deployment.initData.length > 0) {
+            deployedAddr.functionCall(deployment.initData);
         }
-    }
 
-    function create2(
-        uint256 amount,
-        bytes32 nonce,
-        bytes memory bytecodeWithArgs
-    ) private returns (address) {
-        return Create2.deploy(amount, nonce, bytecodeWithArgs);
+        if(deployment.additionalInitData.length > 0) {
+            deployedAddr.functionCall(deployment.additionalInitData);
+        }
     }
 }
