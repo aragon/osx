@@ -48,7 +48,7 @@ contract PluginInstaller {
     /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
     /// @param dao The dao address that plugin belongs to.
     /// @param plugin the plugin address.
-    event PluginInstalled(address dao, address plugin);
+    event PluginInstalled(address dao, address plugin, address[] helpers);
 
     /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
     /// @param dao The dao address that plugin belongs to.
@@ -85,22 +85,20 @@ contract PluginInstaller {
             .manager
             .getInstallInstruction(dao, newSalt, address(this), plugin.data);
 
+        address[] memory helpersAddresses = new address[](installationInstructions.helpers.length);
         // Deploy the helpers
         for (uint256 i = 0; i < installationInstructions.helpers.length; i++) {
-            deployWithCreate2(newSalt, installationInstructions.helpers[i]);
+            helpersAddresses[i] = deployWithCreate2(newSalt, installationInstructions.helpers[i]);
         }
 
         // Deploy the plugin
         // in PluginInstaller V1, restrict Plugin Size to be 1 always
         if (installationInstructions.plugins.length != 1) revert("Length Mismatch");
-        address pluginAddr = deployWithCreate2(
-            newSalt,
-            installationInstructions.plugins[0]
-        );
+        address pluginAddr = deployWithCreate2(newSalt, installationInstructions.plugins[0]);
 
         DAO(payable(dao)).bulkOnMultiTarget(installationInstructions.permissions);
 
-        emit PluginInstalled(dao, pluginAddr);
+        emit PluginInstalled(dao, pluginAddr, helpersAddresses);
     }
 
     /// @notice Updates plugin on the dao by emitting the event and sets up permissions.
@@ -161,17 +159,17 @@ contract PluginInstaller {
         emit PluginUpdated(dao, plugin.proxy, plugin.oldVersion, plugin.data);
     }
 
-    function deployWithCreate2(
-        bytes32 salt,
-        PluginManagerLib.Deployment memory deployment
-    ) private returns (address deployedAddr) {                
+    function deployWithCreate2(bytes32 salt, PluginManagerLib.Deployment memory deployment)
+        private
+        returns (address deployedAddr)
+    {
         deployedAddr = Create2.deploy(0, salt, deployment.initCode);
-        
-        if(deployment.initData.length > 0) {
+
+        if (deployment.initData.length > 0) {
             deployedAddr.functionCall(deployment.initData);
         }
 
-        if(deployment.additionalInitData.length > 0) {
+        if (deployment.additionalInitData.length > 0) {
             deployedAddr.functionCall(deployment.additionalInitData);
         }
     }
