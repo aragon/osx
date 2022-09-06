@@ -18,7 +18,7 @@ abstract contract Plugin is Initializable, ERC165, DaoAuthorizable {
     constructor(address _dao) {
         __DaoAuthorizable_init(IDAO(_dao));
     }
-
+    
     /// @notice adds a IERC165 to check whether contract supports Plugin interface or not.
     /// @dev See {ERC165Upgradeable-supportsInterface}.
     /// @return bool whether it supports the IERC165 or Plugin

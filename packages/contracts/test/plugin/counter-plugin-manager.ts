@@ -24,7 +24,7 @@ const AddressZero = ethers.constants.AddressZero
 
 // TODO 1. add type GRANT/REVOKE check in permissions
 // TODO 2. in order to detect encode abi for deploy/update, use deployABI/updateABI
-describe('CounterPluginManager(Example)', function () {
+describe.only('CounterPluginManager(Example)', function () {
     let ownerAddress: string;
     let signers: any;
     let counterV1Manager: CounterV1PluginManager;
@@ -76,11 +76,10 @@ describe('CounterPluginManager(Example)', function () {
             expect(data.plugins.length).to.be.equal(1);
 
             // compute the address of the plugin in advance
-            const pluginInitCode = await ethers.provider.getCode(await counterV1Manager.getImplementationAddress());
             const predictedPluginAddr = ethers.utils.getCreate2Address(
                 ownerAddress,
                 salt,
-                ethers.utils.keccak256(pluginInitCode)
+                ethers.utils.keccak256(data.plugins[0].initCode)
             )
             
             // Inside permissions, there should be the same address as predictedPluginAddr
@@ -111,12 +110,12 @@ describe('CounterPluginManager(Example)', function () {
             const predictedPluginAddr = ethers.utils.getCreate2Address(
                 ownerAddress,
                 salt,
-                ethers.utils.keccak256(pluginInitCode)
+                ethers.utils.keccak256(data.plugins[0].initCode)
             )
             const predictedHelperAddr = ethers.utils.getCreate2Address(
                 ownerAddress,
                 salt,
-                ethers.utils.keccak256(helperInitCode)
+                ethers.utils.keccak256(data.helpers[0].initCode)
             )
             
             // Inside permissions, there should be the same address as predictedPluginAddr

@@ -124,7 +124,9 @@ contract PluginInstaller {
             revert UpdateNotAllowed();
         }
 
-        bytes32 newSalt;
+        bytes32 newSalt = keccak256(
+            abi.encodePacked(salt, dao, address(this), plugin.manager, keccak256(plugin.data))
+        );
 
         (PluginManagerLib.Data memory updateInstructions, bytes memory initData) = plugin
             .manager
@@ -132,16 +134,11 @@ contract PluginInstaller {
                 plugin.oldVersion,
                 dao,
                 plugin.proxy,
-                salt,
+                newSalt,
                 address(this),
                 plugin.data
             );
 
-        if (updateInstructions.helpers.length > 0) {
-            newSalt = keccak256(
-                abi.encodePacked(salt, dao, address(this), plugin.manager, keccak256(plugin.data))
-            );
-        }
         for (uint256 i = 0; i < updateInstructions.helpers.length; i++) {
             deployWithCreate2(newSalt, updateInstructions.helpers[i]);
         }
@@ -155,7 +152,6 @@ contract PluginInstaller {
         // TODO: Since we allow users to decide not to use our pluginuupsupgradable/PluginTransparentUpgradeable since
         // they don't want to use our ACL and features we will bring inside them, we deploy such contracts with OZ's contracts
         // directly. In that case, we need to support upgrading them as well.
-
         DAO(payable(dao)).bulkOnMultiTarget(updateInstructions.permissions);
 
         emit PluginUpdated(dao, plugin.proxy, plugin.oldVersion, plugin.data);

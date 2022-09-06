@@ -57,16 +57,39 @@ library PluginManagerLib {
         data.params = params;
     }
 
-    // aragon proxy uups - implementation + initData (function selector + arguments)
-    // aragon transparent - implementation + initData (function selector + arguments)
-    // aragon clones - implementation + initData(function selector + arguments)
-    // aragon new - implementation(zero address) + initData (bytecode + constuctor arguments)
+    /// Used as an advanced way - if developer wants the plugin to be out of our interfaces.
+    function addPlugin(
+        Data memory self,
+        bytes memory initCode,
+        bytes memory initData
+    ) internal view returns (address deploymentAddress) {
+        Deployment memory newDeployment = Deployment(initData, bytes(""), initCode);
+        (self.plugins, deploymentAddress) = _addDeploy(
+            self.salt,
+            self.installer,
+            self.plugins,
+            newDeployment
+        );
+    }
 
+    /// Normal/Recommended way - if developer wants the plugin to be one of our interface.
+    /// In case dev wants to deploy his plugin with `new` keyword:
+    ///     * implementation must be zero
+    ///     * initData should contain bytecode + constructor arguments as encoded.
+    ///     * dev can directly opt in to use advanced `addPlugin` above for this case as well. Though,
+    ///     if so, and dev also wants to call some initialization function right away, it won't be possible.
+    /// In case dev wants to deploy with our uups, transparent, clone that also use aragon's permissions
+    ///     * implementation must be a base address
+    ///     * initData should contain function selector + encoded arguments.
     function addPlugin(
         Data memory self,
         address implementation,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
+        if (implementation == address(0)) {
+            revert("TODO: ADD MESSAGE");
+        }
+
         (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
             self,
             implementation,
@@ -82,39 +105,13 @@ library PluginManagerLib {
         );
     }
 
-    function addPlugin(
-        Data memory self,
-        address implementation,
-        bytes memory initData,
-        DeployType deployType
-    ) internal view returns (address deploymentAddress) {
-        (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
-            self,
-            implementation,
-            initData
-        );
-
-        Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
-        (self.plugins, deploymentAddress) = _addDeploy(
-            self.salt,
-            self.installer,
-            self.plugins,
-            newDeployment
-        );
-    }
-
+    /// Used as an advanced way - if developer wants the plugin to be out of our interfaces.
     function addHelper(
         Data memory self,
-        address implementation,
+        bytes memory initCode,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
-        (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
-            self,
-            implementation,
-            initData
-        );
-
-        Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
+        Deployment memory newDeployment = Deployment(initData, bytes(""), initCode);
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
             self.installer,
@@ -123,12 +120,15 @@ library PluginManagerLib {
         );
     }
 
+    /// Normal/Recommended way - if developer wants the helper to be one of our interface.
     function addHelper(
         Data memory self,
         address implementation,
-        bytes memory initData,
-        DeployType deployType
+        bytes memory initData
     ) internal view returns (address deploymentAddress) {
+        if (implementation == address(0)) {
+            revert("TODO: ADD MESSAGE");
+        }
         (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
             self,
             implementation,
@@ -149,7 +149,7 @@ library PluginManagerLib {
         address installer,
         Deployment[] memory currentDeployments,
         Deployment memory newDeployment
-    ) internal view returns (Deployment[] memory newDeployments, address deploymentAddress) {
+    ) internal pure returns (Deployment[] memory newDeployments, address deploymentAddress) {
         newDeployments = new Deployment[](currentDeployments.length + 1);
 
         // TODO: more efficient copy
@@ -187,8 +187,6 @@ library PluginManagerLib {
                 bytes4(keccak256("clonesInit(address)")),
                 self.dao
             );
-        } else if (implementation.supportsInterface(type(Plugin).interfaceId)) {
-            initCode = initData;
         } else if (
             implementation.supportsInterface(type(PluginTransparentUpgradeable).interfaceId)
         ) {
@@ -235,10 +233,7 @@ library PluginManagerLib {
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
-
-    // TODO: Think about if it's a better choice to hardcode plugin installer address
-    // which means `deployer` doesn't need to be passed anymore...
-
+    
     function getInstallInstruction(
         address dao,
         bytes32 salt,
