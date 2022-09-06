@@ -61,7 +61,15 @@ contract PluginManagerMock is PluginManager {
             update.dao,
             proxy,
             NO_ORACLE,
-            keccak256("NEW_PERMISSION")
+            keccak256("EXEC_PERMISSION")
+        );
+
+        update.addPermission(
+            Permission.Operation.Grant,
+            helperAddr,
+            proxy,
+            NO_ORACLE,
+            keccak256("GRANT_PERMISSION")
         );
 
         return (update, initData);

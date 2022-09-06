@@ -42,6 +42,7 @@ contract PluginInstaller {
     }
 
     error InstallNotAllowed();
+    error PluginCountTooBig();
     error UpdateNotAllowed();
     error AlreadyThisVersion();
 
@@ -91,9 +92,10 @@ contract PluginInstaller {
             helpersAddresses[i] = deployWithCreate2(newSalt, installationInstructions.helpers[i]);
         }
 
-        // Deploy the plugin
         // in PluginInstaller V1, restrict Plugin Size to be 1 always
-        if (installationInstructions.plugins.length != 1) revert("Length Mismatch");
+        if (installationInstructions.plugins.length != 1) revert PluginCountTooBig();
+
+        // Deploy the plugin
         address pluginAddr = deployWithCreate2(newSalt, installationInstructions.plugins[0]);
 
         DAO(payable(dao)).bulkOnMultiTarget(installationInstructions.permissions);
@@ -137,6 +139,8 @@ contract PluginInstaller {
                 plugin.data
             );
 
+        if (updateInstructions.plugins.length != 0) revert PluginCountTooBig();
+
         for (uint256 i = 0; i < updateInstructions.helpers.length; i++) {
             deployWithCreate2(newSalt, updateInstructions.helpers[i]);
         }
@@ -145,7 +149,11 @@ contract PluginInstaller {
         // Beacon NOT Supported for now..
         // If the proxy doesn't support upgradeToAndCall, it will fail.
         address implementationAddr = plugin.manager.getImplementationAddress();
-        PluginUUPSUpgradeable(plugin.proxy).upgradeToAndCall(implementationAddr, initData);
+        if (initData.length > 0) {
+            PluginUUPSUpgradeable(plugin.proxy).upgradeToAndCall(implementationAddr, initData);
+        } else {
+            PluginUUPSUpgradeable(plugin.proxy).upgradeTo(implementationAddr);
+        }
 
         // TODO: Since we allow users to decide not to use our pluginuupsupgradable/PluginTransparentUpgradeable since
         // they don't want to use our ACL and features we will bring inside them, we deploy such contracts with OZ's contracts
