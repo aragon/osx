@@ -55,67 +55,98 @@ describe('Plugin Installer', function () {
     );
   });
 
-  it('Install a plugin on DAO', async function () {
-    // Prepare plugin to install on `targetDao`.
-    const pluginParams = '0x';
+  describe('Install Plugin', function () {
+    it('Install a plugin on a DAO', async function () {
+      // Prepare plugin to install on `targetDao`.
+      const pluginParams = '0x';
 
-    const plugin = {
-      manager: pluginManagerMock.address,
-      data: pluginParams,
-    };
+      const plugin = {
+        manager: pluginManagerMock.address,
+        data: pluginParams,
+      };
 
-    // Any salt that passed by a consumer such as the UI.
-    const uiSalt = ethers.utils.id('salt');
+      // Any salt that passed by a consumer such as the UI.
+      const uiSalt = ethers.utils.id('salt');
 
-    // Prepare the `newSalt` that `PluginInstaller` passes to `PluginManager`.
-    // Pack the same params similar to the `PluginInstaller`.
-    const packedSalt = ethers.utils.solidityPack(
-      ['bytes32', 'address', 'address', 'address', 'bytes32'],
-      [
-        uiSalt,
+      // Prepare the `newSalt` that `PluginInstaller` passes to `PluginManager`.
+      // Pack the same params similar to the `PluginInstaller`.
+      const packedSalt = ethers.utils.solidityPack(
+        ['bytes32', 'address', 'address', 'address', 'bytes32'],
+        [
+          uiSalt,
+          targetDao.address,
+          pluginInstaller.address,
+          plugin.manager,
+          ethers.utils.keccak256(plugin.data),
+        ]
+      );
+
+      // Hash the packed salt.
+      const pISalt = ethers.utils.keccak256(packedSalt);
+
+      // Get install instruction using `PluginInstaller`'s salt.
+      const instruction = await pluginManagerMock.getInstallInstruction(
         targetDao.address,
+        pISalt,
         pluginInstaller.address,
-        plugin.manager,
-        ethers.utils.keccak256(plugin.data),
-      ]
-    );
+        pluginParams
+      );
 
-    // Hash the packed salt.
-    const pISalt = ethers.utils.keccak256(packedSalt);
-
-    // Get install instruction using `PluginInstaller`'s salt.
-    const instruction = await pluginManagerMock.getInstallInstruction(
-      targetDao.address,
-      pISalt,
-      pluginInstaller.address,
-      pluginParams
-    );
-
-    // Predict Plugin's address.
-    const predictedPluginAddress = ethers.utils.getCreate2Address(
-      pluginInstaller.address,
-      pISalt,
-      ethers.utils.keccak256(instruction.plugins[0].initCode)
-    );
-
-    // Predict Helpers' address.
-    const predictedHelpersAddresses = instruction.helpers.map(helper =>
-      ethers.utils.getCreate2Address(
+      // Predict Plugin's address.
+      const predictedPluginAddress = ethers.utils.getCreate2Address(
         pluginInstaller.address,
         pISalt,
-        ethers.utils.keccak256(helper.initCode)
-      )
-    );
-
-    // Check that the predicted addresses are the same as the ones installed by the `PluginInstaller`.
-    expect(
-      await pluginInstaller.installPlugin(targetDao.address, plugin, uiSalt)
-    )
-      .to.emit(pluginInstaller, EVENTS.PluginInstalled)
-      .withArgs(
-        targetDao.address,
-        predictedPluginAddress,
-        predictedHelpersAddresses
+        ethers.utils.keccak256(instruction.plugins[0].initCode)
       );
+
+      // Predict Helpers' address.
+      const predictedHelpersAddresses = instruction.helpers.map(helper =>
+        ethers.utils.getCreate2Address(
+          pluginInstaller.address,
+          pISalt,
+          ethers.utils.keccak256(helper.initCode)
+        )
+      );
+
+      // Check that the predicted addresses are the same as the ones installed by the `PluginInstaller`.
+      expect(
+        await pluginInstaller.installPlugin(targetDao.address, plugin, uiSalt)
+      )
+        .to.emit(pluginInstaller, EVENTS.PluginInstalled)
+        .withArgs(
+          targetDao.address,
+          predictedPluginAddress,
+          predictedHelpersAddresses
+        );
+    });
+  });
+
+  describe('Plugin Update', function () {
+    beforeEach(async function () {
+      // Grant the `INSTALL_PERMISSION_ID` permission to `ownerAddress`
+      await targetDao.grant(
+        pluginInstaller.address,
+        ownerAddress,
+        UPDATE_PERMISSION_ID
+      );
+    });
+
+    it('Update a plugin of a DAO', async function () {
+      // Prepare plugin v1 to install on `targetDao`.
+      const pluginParams = '0x';
+
+      const pluginV1 = {
+        manager: pluginManagerMock.address,
+        data: pluginParams,
+      };
+
+      // Any salt that passed by a consumer such as the UI.
+      const uiSalt = ethers.utils.id('salt');
+
+      // Install plugin v1
+      await pluginInstaller.installPlugin(targetDao.address, pluginV1, uiSalt);
+
+      // Prepare plugin v2 .... TODO: finish this test
+    });
   });
 });

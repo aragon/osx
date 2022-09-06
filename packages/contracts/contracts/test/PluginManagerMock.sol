@@ -47,6 +47,26 @@ contract PluginManagerMock is PluginManager {
         return installation;
     }
 
+    function _getUpdateInstruction(
+        address proxy,
+        uint16[3] calldata oldVersion,
+        PluginManagerLib.Data memory update
+    ) internal view override returns (PluginManagerLib.Data memory, bytes memory initData) {
+        initData = bytes("");
+
+        address helperAddr = update.addHelper(address(helperBase), bytes(""));
+
+        update.addPermission(
+            Permission.Operation.Revoke,
+            update.dao,
+            proxy,
+            NO_ORACLE,
+            keccak256("NEW_PERMISSION")
+        );
+
+        return (update, initData);
+    }
+
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
     }
