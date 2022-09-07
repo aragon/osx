@@ -93,7 +93,7 @@ contract DAOFactory {
         (token, minter) = tokenFactory.createToken(dao, _tokenConfig, _mintConfig);
         dao.revoke(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
 
-        daoRegistry.register(_daoConfig.name, dao, msg.sender);
+        daoRegistry.register(dao, msg.sender, _daoConfig.name);
 
         voting = createERC20Voting(dao, token, _voteConfig);
 
@@ -115,7 +115,7 @@ contract DAOFactory {
     ) external returns (DAO dao, AllowlistVoting voting) {
         dao = createDAO(_daoConfig, _trustedForwarder);
 
-        daoRegistry.register(_daoConfig.name, dao, msg.sender);
+        daoRegistry.register(dao, msg.sender, _daoConfig.name);
 
         voting = createAllowlistVoting(dao, _allowlistVoters, _voteConfig);
 
@@ -143,7 +143,8 @@ contract DAOFactory {
     /// @param _voting The voting contract address (`AllowlistVoting` or `ERC20Voting`).
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set permissionIds on the dao itself.
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
 
         // Grant DAO all the permissions required
         items[0] = BulkPermissionsLib.ItemSingleTarget(
@@ -217,7 +218,8 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for ERC20Voting
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
@@ -262,7 +264,8 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for AllowlistVoting
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),

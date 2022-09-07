@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added helper function `test/test-utils/ens.ts` deploying the `ENSSubdomainRegistrar` and `ENS`-related contracts.
 - Added `AragonPlugin` and `AragonUpgradablePlugin` for the devs to inherit from for their concrete plugin implementations.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
 - Added Abstract `PluginManager` for the devs to inherit from for their concrete plugin manager implementation.
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `DAORegistry` to use the `ENSSubdomainRegistrar` so that a DAO name can only be registered once.
 - Updated deploy script to correctly use `ERC1967Proxy`.
 - Renamed `hasPermission` to `isGranted` in both `PermissionManager` and `IPermissionOracle`.
 - Renamed several contracts, methods, variables, and constants as well as associated folder names.
