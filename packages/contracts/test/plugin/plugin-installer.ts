@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { zeroAddress } from 'ethereumjs-util';
 import { BytesLike } from 'ethers';
 import { ethers } from 'hardhat';
-import { PluginInstaller, PluginManagerMock } from '../../typechain';
+import { PluginInstaller, PluginManagerMock, PluginManagerV2Mock} from '../../typechain';
 import { customError } from '../test-utils/custom-error-helper';
 
 import { deployNewDAO } from '../test-utils/dao';
@@ -24,34 +24,50 @@ const INSTALL_PERMISSION_ID = ethers.utils.id('INSTALL_PERMISSION');
 const UPDATE_PERMISSION_ID = ethers.utils.id('UPDATE_PERMISSION');
 const PLUGIN_UPGRADE_PERMISSION_ID = ethers.utils.id("UPGRADE_PERMISSION")
 
+// Util Helper Functions
+async function decodeEvent(tx: any, eventName: string) {
+  const { events } = await tx.wait()
+  const event = events.find(
+      ({ event }: { event: any }) => event === eventName
+  ).args;
+
+  const { plugin } = event
+  return plugin
+}
+
+function predictCreate2(deployer: string, salt: string, initCode: string) {
+  return ethers.utils.getCreate2Address(
+    deployer,
+    salt,
+    ethers.utils.keccak256(initCode)
+  );
+}
+
 describe('Plugin Installer', function () {
   let pi: PluginInstaller;
-  let pluginManagerMock: PluginManagerMock;
+  let pluginManagerV1Mock: PluginManagerMock;
+  let pluginManagerV2Mock: PluginManagerV2Mock;
   let ownerAddress: string;
   let targetDao: any;
-
-  async function decodeEvent(tx: any, eventName: string) {
-    const { events } = await tx.wait()
-    const event = events.find(
-        ({ event }: { event: any }) => event === eventName
-    ).args;
-
-    const { plugin } = event
-    return plugin
-  }
-
-  function predictCreate2(deployer: string, salt: string, initCode: string) {
-    return ethers.utils.getCreate2Address(
-      deployer,
-      salt,
-      ethers.utils.keccak256(initCode)
-    );
-  }
 
   before(async () => {
     const signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
   });
+
+  before(async () => {
+    // DAO PluginInstaller
+    const PluginManagerV1Mock = await ethers.getContractFactory(
+      'PluginManagerMock'
+    );
+    pluginManagerV1Mock = await PluginManagerV1Mock.deploy();
+
+    // DAO PluginInstaller
+    const PluginManagerV2Mock = await ethers.getContractFactory(
+      'PluginManagerV2Mock'
+    );
+    pluginManagerV2Mock = await PluginManagerV2Mock.deploy();
+  })
 
   beforeEach(async function () {
     // Target DAO to be used as an example DAO
@@ -60,12 +76,6 @@ describe('Plugin Installer', function () {
     // DAO PluginInstaller
     const PluginInstaller = await ethers.getContractFactory('PluginInstaller');
     pi = await PluginInstaller.deploy();
-
-    // DAO PluginInstaller
-    const PluginManagerMock = await ethers.getContractFactory(
-      'PluginManagerMock'
-    );
-    pluginManagerMock = await PluginManagerMock.deploy();
   });
 
   describe('Install Plugin', function () {
@@ -96,7 +106,7 @@ describe('Plugin Installer', function () {
       await targetDao.revoke(targetDao.address, pi.address, ROOT_PERMISSION_ID);
 
       const plugin = {
-        manager: pluginManagerMock.address,
+        manager: pluginManagerV1Mock.address,
         data: '0x'
       }
 
@@ -117,7 +127,7 @@ describe('Plugin Installer', function () {
       const pluginParams = '0x';
 
       const plugin = {
-        manager: pluginManagerMock.address,
+        manager: pluginManagerV1Mock.address,
         data: pluginParams,
       };
 
@@ -141,7 +151,7 @@ describe('Plugin Installer', function () {
       const pISalt = ethers.utils.keccak256(packedSalt);
 
       // Get install instruction using `PluginInstaller`'s salt.
-      const instruction = await pluginManagerMock.getInstallInstruction(
+      const instruction = await pluginManagerV1Mock.getInstallInstruction(
         targetDao.address,
         pISalt,
         pi.address,
@@ -193,6 +203,12 @@ describe('Plugin Installer', function () {
           ADDRESS_TWO
         )
       
+      // Plugin is installed, check if it was initialized correctly.
+      const pluginEthersContract = await ethers.getContractFactory('PluginUUPSUpgradableV1Mock')
+      const pluginContract = pluginEthersContract.attach(predictedPluginAddress)
+      const initNum = await pluginManagerV1Mock.PLUGIN_INIT_NUMBER()
+      expect(await pluginContract.num()).to.eq(initNum)
+      
       // if used the same salt + same parameters, create2 deploy should fail
       await expect(
         pi.installPlugin(targetDao.address, plugin, uiSalt)
@@ -232,7 +248,7 @@ describe('Plugin Installer', function () {
     `, async () => {
 
       const installPlugin = {
-        manager: pluginManagerMock.address,
+        manager: pluginManagerV1Mock.address,
         data: '0x'
       }
 
@@ -241,7 +257,7 @@ describe('Plugin Installer', function () {
       const pluginAddr = await decodeEvent(tx, EVENTS.PluginInstalled)
 
       const updatePlugin = {
-        manager: pluginManagerMock.address,
+        manager: pluginManagerV2Mock.address,
         data: '0x',
         proxy: pluginAddr,
         oldVersion: [1,1,1]
@@ -264,11 +280,11 @@ describe('Plugin Installer', function () {
       // Grant plugin upgrde permission to installer to move to next step
       targetDao.grant(pluginAddr, pi.address, PLUGIN_UPGRADE_PERMISSION_ID);
       
-      // Revoe ROOT permission id on dao for plugin installer to check
+      // Revoke ROOT permission id on dao for plugin installer to check
       // it correctly reverts on setting up permissions
       await targetDao.revoke(targetDao.address, pi.address, ROOT_PERMISSION_ID);
 
-      // Reverts as doesn't have root permission on the dao
+      // Reverts as installer doesn't have root permission on the dao
       await expect(
         // @ts-ignore
         pi.updatePlugin(targetDao.address, ethers.utils.id('updateSalt'), updatePlugin)
@@ -286,7 +302,7 @@ describe('Plugin Installer', function () {
       // Prepare plugin v1 to install on `targetDao`.
 
       const pluginV1 = {
-        manager: pluginManagerMock.address,
+        manager: pluginManagerV1Mock.address,
         data: '0x',
       };
 
@@ -297,8 +313,10 @@ describe('Plugin Installer', function () {
       // Install plugin v1
       const tx = await pi.installPlugin(targetDao.address, pluginV1, installSalt);
       const pluginAddr = await decodeEvent(tx, EVENTS.PluginInstalled)
+
       const updatePlugin = {
-        manager: pluginManagerMock.address,
+        // V2 plugin manager that holds updated pluginbase
+        manager: pluginManagerV2Mock.address,
         data: '0x',
         proxy: pluginAddr,
         oldVersion: [1,1,1]
@@ -321,7 +339,7 @@ describe('Plugin Installer', function () {
       const pISalt = ethers.utils.keccak256(packedSalt);
 
       // Get update instruction using `PluginInstaller`'s salt.
-      const [instruction, initData] = await pluginManagerMock.getUpdateInstruction(
+      const [instruction, initData] = await pluginManagerV2Mock.getUpdateInstruction(
         // @ts-ignore
         updatePlugin.oldVersion,
         targetDao.address,
@@ -370,6 +388,11 @@ describe('Plugin Installer', function () {
         predictedHelpersAddresses[0],  
         ADDRESS_TWO
       )
+
+      // Plugin is supposed to be updated now..
+      const pluginContract = await ethers.getContractFactory('PluginUUPSUpgradableV2Mock')
+      const plugin = pluginContract.attach(pluginAddr)
+      expect(await plugin.str()).to.eq("stringExample")
     });
   });
 });

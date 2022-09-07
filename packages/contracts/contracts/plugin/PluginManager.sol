@@ -62,7 +62,7 @@ library PluginManagerLib {
         Data memory self,
         bytes memory initCode,
         bytes memory initData
-    ) internal view returns (address deploymentAddress) {
+    ) internal pure returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(initData, bytes(""), initCode);
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
@@ -110,7 +110,7 @@ library PluginManagerLib {
         Data memory self,
         bytes memory initCode,
         bytes memory initData
-    ) internal view returns (address deploymentAddress) {
+    ) internal pure returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(initData, bytes(""), initCode);
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
@@ -171,12 +171,14 @@ library PluginManagerLib {
     function calculateInitCode(
         Data memory self,
         address implementation,
-        bytes memory initData
+        bytes memory /* initData */
     ) internal view returns (bytes memory initCode, bytes memory additionalInitData) {
         if (implementation.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
             bytes memory bytecodeWithArgs = abi.encodePacked(
                 type(PluginERC1967Proxy).creationCode,
-                abi.encode(self.dao, implementation, initData)
+                // Optimization: it might be better to pass initData below
+                // instead of bytes("") so that pluginInstaller doesn't need to call initData call.
+                abi.encode(self.dao, implementation, bytes(""))
             );
 
             initCode = bytecodeWithArgs;
@@ -192,7 +194,9 @@ library PluginManagerLib {
         ) {
             bytes memory bytecodeWithArgs = abi.encodePacked(
                 type(TransparentProxy).creationCode,
-                abi.encode(self.dao, implementation, self.installer, initData)
+                // Optimization: it might be better to pass initData below
+                // instead of bytes("") so that pluginInstaller doesn't need to call initData call.
+                abi.encode(self.dao, implementation, self.installer, bytes(""))
             );
             initCode = bytecodeWithArgs;
         }
