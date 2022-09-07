@@ -8,9 +8,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperU
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 
-import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
 /// @title GovernanceWrappedERC20
@@ -23,7 +23,7 @@ import "../core/IDAO.sol";
 /// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token contract.
 contract GovernanceWrappedERC20 is
     Initializable,
-    AdaptiveERC165,
+    ERC165Upgradeable,
     ERC20VotesUpgradeable,
     ERC20WrapperUpgradeable,
     BaseRelayRecipient
@@ -47,10 +47,6 @@ contract GovernanceWrappedERC20 is
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
-
-        _registerStandard(type(IERC20Upgradeable).interfaceId);
-        _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
-        _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
 
     /// @notice Initializes the component.
@@ -63,6 +59,17 @@ contract GovernanceWrappedERC20 is
         string calldata _symbol
     ) external initializer {
         __GovernanceWrappedERC20_init(_token, _name, _symbol);
+    }
+
+    /// @notice adds a IERC165 to check whether contract supports GovernanceERC20 interface or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or Plugin
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC20Upgradeable).interfaceId ||
+            interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
+            interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @inheritdoc ERC20WrapperUpgradeable

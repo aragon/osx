@@ -64,6 +64,7 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizable, UUPSUpgradeable {
 
         if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
 
+        // TODO: if we keep using this contract, instead of AdaptiveERC165, use ERC165Checker from OZ.
         try AdaptiveERC165(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
             if (!result) revert ContractInterfaceInvalid(_registrant);
         } catch {

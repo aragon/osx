@@ -88,9 +88,9 @@ describe('PluginRepo', function () {
     const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
     let adaptiveERC165 = await AdaptiveERC165.deploy();
     
-    // TODO: GIORGI fix after the repo is fixed...
+    // TODO: fix after the repo is fixed...
     await expect(
-      pluginRepo.createVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
+      pluginRepo.createVersion([1, 0, 0], pluginRepo.address, emptyBytes)
     ).to.be.revertedWith(
       customError('InvalidPluginManagerInterface', adaptiveERC165.address)
     );

@@ -6,9 +6,10 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/permission/PermissionManager.sol";
-import "../core/erc165/AdaptiveERC165.sol";
+
 import "../utils/UncheckedMath.sol";
 import "./PluginManager.sol";
 import "./IPluginRepo.sol";
@@ -21,7 +22,7 @@ contract PluginRepo is
     Initializable,
     UUPSUpgradeable,
     PermissionManager,
-    AdaptiveERC165
+    ERC165Upgradeable
 {
     struct Version {
         uint16[3] semanticVersion;
@@ -80,7 +81,6 @@ contract PluginRepo is
     /// - giving the `CREATE_VERSION_PERMISSION_ID` permission to the initial owner.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     function initialize(address initialOwner) external initializer {
-        _registerStandard(type(IPluginRepo).interfaceId);
         __PermissionManager_init(initialOwner);
 
         nextVersionIndex = 1;
@@ -99,7 +99,7 @@ contract PluginRepo is
         if (!Address.isContract(_pluginManager)) {
             revert InvalidContractAddress({invalidContract: _pluginManager});
         }
-        
+
         // TODO: uncommment
         // try
         //     PluginManager(_pluginManager).supportsInterface(
@@ -254,4 +254,11 @@ contract PluginRepo is
         override
         auth(address(this), UPGRADE_PERMISSION_ID)
     {}
+
+    /// @notice adds a IERC165 to check whether contract supports GovernanceERC20 interface or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or Plugin
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IPluginRepo).interfaceId || super.supportsInterface(interfaceId);
+    }
 }
