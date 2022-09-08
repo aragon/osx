@@ -1,0 +1,45 @@
+name: Documentation Update
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - develop
+
+jobs:
+  update_docs:
+    permissions: read-all
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Generate Docs
+        run: yarn run docgen
+        working-directory: packages/contracts/
+      - name: Checkout builders-portal
+        uses: actions/checkout@v3
+        with:
+          repository: aragon/builders-portal
+          ref: staging
+          path: builders-portal
+          token: ${{ secrets.ARABOT_PAT }}
+      - name: Copy docs
+        run: cp -R packages/contracts/docs/generated/* $GITHUB_WORKSPACE/builders-portal/docs/smart-contracts/
+      - name: Get short commit hash
+        id: hash
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.ARABOT_PAT }}
+          path: builders-portal
+          commit-message: "Update smart-contract docs by commit ${{ steps.hash.outputs.sha_short }}"
+          committer: "Arabot <arabot-1@users.noreply.github.com>"
+          branch: patch/smart-contracts-docs
+          delete-branch: true
+          title: Updates docs for smart contracts
+          body: "Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))"
+          reviewers: ${{ github.actor }}
