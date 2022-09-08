@@ -45,3 +45,4 @@ jobs:
           title: Updates docs for smart contracts
           body: "Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))"
           reviewers: ${{ github.actor }}
+          team-reviewers: devrel
