@@ -45,6 +45,7 @@ contract PluginInstaller {
     error PluginCountTooBig();
     error UpdateNotAllowed();
     error AlreadyThisVersion();
+    error UpgradeNotExistOnProxy();
 
     /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
     /// @param dao The dao address that plugin belongs to.
@@ -149,15 +150,12 @@ contract PluginInstaller {
         // Beacon NOT Supported for now..
         // If the proxy doesn't support upgradeToAndCall, it will fail.
         address implementationAddr = plugin.manager.getImplementationAddress();
-        if (initData.length > 0) {
-            PluginUUPSUpgradeable(plugin.proxy).upgradeToAndCall(implementationAddr, initData);
-        } else {
-            PluginUUPSUpgradeable(plugin.proxy).upgradeTo(implementationAddr);
-        }
+        upgradeProxy(plugin.proxy, implementationAddr, initData);
 
         // TODO: Since we allow users to decide not to use our pluginuupsupgradable/PluginTransparentUpgradeable since
-        // they don't want to use our ACL and features we will bring inside them, we deploy such contracts with OZ's contracts
-        // directly. In that case, we need to support upgrading them as well.
+        // they don't want to use our ACL and features we will bring inside them, 
+        // we deploy such contracts with OZ's contracts directly. 
+        // In that case, we need to support upgrading them as well.
         DAO(payable(dao)).bulkOnMultiTarget(updateInstructions.permissions);
 
         emit PluginUpdated(dao, plugin.proxy, plugin.oldVersion, plugin.data);
@@ -175,6 +173,34 @@ contract PluginInstaller {
 
         if (deployment.additionalInitData.length > 0) {
             deployedAddr.functionCall(deployment.additionalInitData);
+        }
+    }
+
+    function upgradeProxy(
+        address proxy,
+        address implementation,
+        bytes memory initData
+    ) private {
+        if (initData.length > 0) {
+            try
+                PluginUUPSUpgradeable(proxy).upgradeToAndCall(implementation, initData)
+            {} catch Error(string memory reason) {
+                revert(reason);
+            } catch (
+                bytes memory /*lowLevelData*/
+            ) {
+                revert UpgradeNotExistOnProxy();
+            }
+        } else {
+            try PluginUUPSUpgradeable(proxy).upgradeTo(implementation) {} catch Error(
+                string memory reason
+            ) {
+                revert(reason);
+            } catch (
+                bytes memory /*lowLevelData*/
+            ) {
+                revert UpgradeNotExistOnProxy();
+            }
         }
     }
 }

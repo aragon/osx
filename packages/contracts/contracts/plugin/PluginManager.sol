@@ -17,15 +17,7 @@ import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgr
 
 library PluginManagerLib {
     using ERC165Checker for address;
-
-    enum DeployType {
-        None,
-        Clones,
-        UUPS,
-        Transparent,
-        withNew
-    }
-
+    
     struct Deployment {
         // gets returned by the dev and describes what function should be called after deployment.
         bytes initData;

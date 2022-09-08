@@ -12,6 +12,10 @@ contract AppStorage {
     /// @dev bytes32 internal constant DAO_POSITION = keccak256("core.storage.dao");
     bytes32 internal constant DAO_POSITION = 0xd69e81f6042b963e91c7595979ec7bb19d41b99e5a44a91c85e5cd5861e49998;
     
+    /// @notice The position in storage in which the boolean which detects if it's initialized or not.
+    // @dev bytes32 internal constant INITIALIZED_POSITION keccak256("core.Initializable.Initialization");
+    bytes32 internal constant INITIALIZED_POSITION = 0x9c3082e39a59296f5efc7411b06d50b551d4000fd56a910bf8c29127005317f0;
+    
     /// @notice Gets the`IDAO` contract being stored in the `DAO_POSITION` storage slot.
     /// @return The `IDAO` contract.
     function dao() public view returns (IDAO) {
@@ -24,4 +28,13 @@ contract AppStorage {
         StorageSlot.getAddressSlot(DAO_POSITION).value = _dao;
     }
 
+    /// @notice Sets the initialized boolean to true..
+    function initialized() internal {
+        StorageSlot.getBooleanSlot(INITIALIZED_POSITION).value = true;
+    }
+    
+    /// @return bool whether it's initialized or not.
+    function isInitialized() internal view returns(bool) {
+        return StorageSlot.getBooleanSlot(DAO_POSITION).value;
+    }
 }
