@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "./ERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 /// @title AdaptiveERC165
 /// @author Aragon Association - 2022
