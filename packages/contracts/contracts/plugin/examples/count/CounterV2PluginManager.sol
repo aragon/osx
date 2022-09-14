@@ -85,7 +85,10 @@ contract CounterV2PluginManager is PluginManager {
         address proxy,
         uint16[3] calldata oldVersion,
         PluginManagerLib.Data memory update
-    ) internal view override returns (PluginManagerLib.Data memory, bytes memory initData) {
+    ) internal view override returns (
+        PluginManagerLib.Data memory, 
+        bytes memory initData
+    ) {
         uint256 _newVariable;
 
         if (oldVersion[0] == 1 && oldVersion[1] == 0) {

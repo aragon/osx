@@ -72,7 +72,7 @@ contract CounterV1PluginManager is PluginManager {
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
-
+        
         if (_multiplyHelper == address(0)) {
             installation.addPermission(
                 Permission.Operation.Grant,
@@ -82,11 +82,25 @@ contract CounterV1PluginManager is PluginManager {
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
+
+        installation.addPermission(
+            Permission.Operation.Grant,
+            
+        )
         return installation;
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
         return address(counterBase);
+    }
+
+    
+    function deploymentOptions()
+        public
+        view
+        virtual
+        returns (PluginManagerLib.DeploymentOptions[] memory options) {
+        return [options.UUPSUpgradable, options.NOProxy];
     }
 
     function deployABI() external view virtual override returns (string memory) {

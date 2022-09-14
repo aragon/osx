@@ -3,7 +3,10 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Create2.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
+
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
@@ -17,7 +20,13 @@ import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgr
 
 library PluginManagerLib {
     using ERC165Checker for address;
-    
+    using Clones for address;
+
+    enum DeploymentType {
+        UUPSUpgradable,
+        NOProxy
+    }
+
     struct Deployment {
         // gets returned by the dev and describes what function should be called after deployment.
         bytes initData;
@@ -32,6 +41,7 @@ library PluginManagerLib {
         address installer;
         bytes32 salt;
         bytes params;
+        DeploymentType deploymentType;
         Deployment[] plugins;
         Deployment[] helpers;
         Permission.ItemMultiTarget[] permissions;
@@ -41,21 +51,51 @@ library PluginManagerLib {
         address dao,
         address installer,
         bytes32 salt,
-        bytes memory params
+        bytes memory params,
+        DeploymentType deploymentType
     ) internal pure returns (Data memory data) {
         data.dao = dao;
         data.installer = installer;
         data.salt = salt;
         data.params = params;
+        data.deploymentType = deploymentType;
     }
 
-    /// Used as an advanced way - if developer wants the plugin to be out of our interfaces.
+    /**
+     *
+     * Requirements:
+     *  - initCode must be the bytecode + constructor arguments encoded together.
+     *      i.  can be used if you want to deploy contract with `new`..
+     *      ii. can be used if you want to deploy custom proxy with custom plugin interface
+     *      that looks at the implementation. Note that the same thing can't be achieved
+     *      with another `addPlugin` because another `addPlugin` only expects implementation
+     *      and doesn't know/have any idea what the proxy contract looks like to deploy it.
+     *  - initData must be empty or function selector encoded with arguments.
+     *
+     * Rules:
+     *  - if implementation doesn't inherit from PluginClones or PluginUUPSUpgradable, it reverts.
+     *  - if deploymentType is UPGRADABLE, it will revert due to the ambiguity that we don't know
+     * whether your provided initCode actually follows UUPS interface..
+     *
+     * Result:
+     *  - This can be used to deploy any plugin that is non-upgradable.
+     *
+     */
     function addPlugin(
         Data memory self,
-        bytes memory initCode,
+        bytes memory initCode, 
         bytes memory initData
     ) internal pure returns (address deploymentAddress) {
         Deployment memory newDeployment = Deployment(initData, bytes(""), initCode);
+
+        if (self.deploymentType == DeploymentType.UUPSUpgradable) {
+            revert("use another addPlugin function");
+        }
+
+        if (initCode.length == 0) {
+            revert("bytecode can't be empty..");
+        }
+
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
             self.installer,
@@ -64,22 +104,32 @@ library PluginManagerLib {
         );
     }
 
-    /// Normal/Recommended way - if developer wants the plugin to be one of our interface.
-    /// In case dev wants to deploy his plugin with `new` keyword:
-    ///     * implementation must be zero
-    ///     * initData should contain bytecode + constructor arguments as encoded.
-    ///     * dev can directly opt in to use advanced `addPlugin` above for this case as well. Though,
-    ///     if so, and dev also wants to call some initialization function right away, it won't be possible.
-    /// In case dev wants to deploy with our uups, transparent, clone that also use aragon's permissions
-    ///     * implementation must be a base address
-    ///     * initData should contain function selector + encoded arguments.
+    /**
+     *
+     * Requirements:
+     *  - implementation can't be zero
+     *  - implementation must be inheritting from aragon's interface(plugin clone or plugin upps upgradable)
+     *  - initData must be empty or function selector encoded with arguments
+     *
+     * Rules:
+     *  - if implementation doesn't inherit from PluginClones or PluginUUPSUpgradable, it reverts.
+     *  - if deploymentType is UPGRADABLE, implementation MUST inherit from PluginUUPSUpgradable, or it reverts.
+     *
+     * Result:
+     *  - This will return either Minimal Proxy or PluginUUPSUpgradable bytecode
+     *
+     *
+     * Thoughts:
+     *  - In case you want to deploy the plugin that doesn't inherit from PluginClones or PluginUUPSUpgradable,
+     * you must use advanced addPlugin which is a shadowed one and expects slightly different arguments.
+     */
     function addPlugin(
         Data memory self,
         address implementation,
         bytes memory initData
     ) internal view returns (address deploymentAddress) {
         if (implementation == address(0)) {
-            revert("TODO: ADD MESSAGE");
+            revert("BLBLA");
         }
 
         (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
@@ -88,7 +138,12 @@ library PluginManagerLib {
             initData
         );
 
+        if (initCode.length == 0) {
+            revert("Wrong");
+        }
+
         Deployment memory newDeployment = Deployment(initData, additionalInitData, initCode);
+
         (self.plugins, deploymentAddress) = _addDeploy(
             self.salt,
             self.installer,
@@ -97,19 +152,27 @@ library PluginManagerLib {
         );
     }
 
+    
     /// Used as an advanced way - if developer wants the plugin to be out of our interfaces.
     function addHelper(
         Data memory self,
         bytes memory initCode,
         bytes memory initData
     ) internal pure returns (address deploymentAddress) {
+        if (initCode.length == 0) {
+            revert("bytecode can't be empty..");
+        }
+
+        // if initCode is provided, how do we restrict that it only deploys with new ? 
         Deployment memory newDeployment = Deployment(initData, bytes(""), initCode);
+
         (self.helpers, deploymentAddress) = _addDeploy(
             self.salt,
             self.installer,
             self.helpers,
             newDeployment
         );
+
     }
 
     /// Normal/Recommended way - if developer wants the helper to be one of our interface.
@@ -121,6 +184,7 @@ library PluginManagerLib {
         if (implementation == address(0)) {
             revert("TODO: ADD MESSAGE");
         }
+        
         (bytes memory initCode, bytes memory additionalInitData) = calculateInitCode(
             self,
             implementation,
@@ -160,37 +224,62 @@ library PluginManagerLib {
         );
     }
 
+    // 1. helper can be our interface or just something else
+    // 2. plugin can be our interface or just something else
+    //    i.  if deploymentType is Upgradable and pluginbase is our pluginuups, deploy it with our custom PluginERC1967 proxy.
+    //.   ii. if deploymentType is Upgradable and pluginbase is something else, revert as it should be inheriting from our own.
+    //.   iii. if deploymentType is non upgradable, it might be desireable to deploy it with clones or new
+    //.       check if it inherits from plugin clones, if yes, deploy, if not,
+    //. if it's something else
+
+    // 3. we add a feature that user now can pass deploymentType which says whether
+    // he wants the plugin to be upgradable or not(only works if dev specified that it supports upgradability in his/her manager)
+    // 4. if end user wants his plugin to be upgradaable, does it mean helpers should always be upgradable as well or dev
+    // can decide what to do with helpers ?
     function calculateInitCode(
         Data memory self,
         address implementation,
         bytes memory /* initData */
-    ) internal view returns (bytes memory initCode, bytes memory additionalInitData) {
-        if (implementation.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            bytes memory bytecodeWithArgs = abi.encodePacked(
-                type(PluginERC1967Proxy).creationCode,
-                // Optimization: it might be better to pass initData below
-                // instead of bytes("") so that pluginInstaller doesn't need to call initData call.
-                abi.encode(self.dao, implementation, bytes(""))
+    ) internal view returns (bytes memory, bytes memory) {
+        bytes memory initCode;
+        bytes memory additionalInitData;
+
+        // if plugin must be upgradable, decide whether
+        // to deploy it with our custom proxy or OZ.
+        if (self.deploymentType == DeploymentType.UUPSUpgradable) {
+            // extra check...
+            bool isPluginUUPS = implementation.supportsInterface(
+                type(PluginUUPSUpgradeable).interfaceId
             );
 
-            initCode = bytecodeWithArgs;
-        } else if (implementation.supportsInterface(type(PluginClones).interfaceId)) {
-            initCode = bytecodeAt(implementation);
+            if (!isPluginUUPS) {
+                revert("non-compliant interface");
+            }
 
+            // TODO: If isPluginUUPS is false, we can still go ahead
+            // and deploy with OZ's original ERC1967Proxy, but we have no way of
+            // knowing if implementation actually inherits from OZ's UUPSUpgradable and upgradeToAndCall
+            // might not exist... Thoughts ?
+            bytes memory creationCode = type(PluginERC1967Proxy).creationCode;
+            bytes memory constructorArgs = abi.encode(self.dao, implementation, bytes(""));
+            initCode = abi.encodePacked(creationCode, constructorArgs);
+    
+            return (initCode, additionalInitData);
+        }
+
+        // Plugin is non-upgradable.
+
+        // If it's our PluginClones
+        bool isPluginClone = implementation.supportsInterface(type(PluginClones).interfaceId);
+
+        if (isPluginClone) {
+            initCode = getClonesBytecode(implementation);
             additionalInitData = abi.encodeWithSelector(
                 bytes4(keccak256("clonesInit(address)")),
                 self.dao
             );
-        } else if (
-            implementation.supportsInterface(type(PluginTransparentUpgradeable).interfaceId)
-        ) {
-            bytes memory bytecodeWithArgs = abi.encodePacked(
-                type(TransparentProxy).creationCode,
-                // Optimization: it might be better to pass initData below
-                // instead of bytes("") so that pluginInstaller doesn't need to call initData call.
-                abi.encode(self.dao, implementation, self.installer, bytes(""))
-            );
-            initCode = bytecodeWithArgs;
+
+            return (initCode, additionalInitData);
         }
     }
 
@@ -223,24 +312,38 @@ library PluginManagerLib {
 
         self.permissions = newPermissions;
     }
+
+    function getClonesBytecode(address impl) internal view returns (bytes memory b) {
+        assembly {
+            b := mload(0x40)
+            mstore(0x40, add(b, 0x80))
+            mstore(b, 0x37)
+
+            mstore(add(b, 0x20), 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+            mstore(add(b, 0x34), shl(0x60, impl))
+            mstore(add(b, 0x48), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+        }
+    }
 }
 
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
 abstract contract PluginManager {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
-    
+
     function getInstallInstruction(
         address dao,
         bytes32 salt,
         address deployer,
-        bytes memory params
+        bytes memory params,
+        PluginManagerLib.DeploymentType DeploymentType
     ) public view returns (PluginManagerLib.Data memory) {
         PluginManagerLib.Data memory installation = PluginManagerLib.init(
             dao,
             deployer,
             salt,
-            params
+            params,
+            DeploymentType
         );
         return _getInstallInstruction(installation);
     }
@@ -268,6 +371,12 @@ abstract contract PluginManager {
         uint16[3] calldata oldVersion,
         PluginManagerLib.Data memory installation
     ) internal view virtual returns (PluginManagerLib.Data memory, bytes memory) {}
+
+    function DeploymentTypes()
+        public
+        view
+        virtual
+        returns (PluginManagerLib.DeploymentTypes[] memory);
 
     /// @notice the plugin's base implementation address proxies need to delegate calls.
     /// @return address of the base contract address.
