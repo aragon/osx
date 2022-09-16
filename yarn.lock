@@ -1228,13 +1228,6 @@
     which "2.0.2"
     yaml "1.9.2"
 
-"@graphprotocol/graph-ts@^0.24.1":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.24.1.tgz#50961b52b5383f9c5cf5e6e23fa039f24e729ddf"
-  integrity sha512-2vU4m5ZPQIqMlMce/z5vmOtGHRlRmcRhMfemS3NIwxCSxSBGVnX2zb7QBTzzdQKGwsAZdbz6V0okkOtvohELfQ==
-  dependencies:
-    assemblyscript "0.19.10"
-
 "@graphprotocol/graph-ts@^0.27.0":
   version "0.27.0"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.27.0.tgz#948fe1716f6082964a01a63a19bcbf9ac44e06ff"
@@ -9212,12 +9205,12 @@ match-all@^1.2.6:
   resolved "https://registry.yarnpkg.com/match-all/-/match-all-1.2.6.tgz#66d276ad6b49655551e63d3a6ee53e8be0566f8d"
   integrity sha512-0EESkXiTkWzrQQntBu2uzKvLu6vVkUGz40nGPbSZuegcfE5UuSzNjLaIu76zJWuaT/2I3Z/8M06OlUOZLGwLlQ==
 
-matchstick-as@^0.4.0:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.4.1.tgz#005a220fda442eacfceef2655b106eed6c2fbc68"
-  integrity sha512-AylFWX+hLRThWY8BMxN0x9bv/ro1ea1qysQ12NvD65g0iKYa8c/TRR0HFtddNEy9Ev5ixzWMzxcl8KVx7YKOVQ==
+matchstick-as@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.5.0.tgz#cdafc1ef49d670b9cbe98e933bc2a5cb7c450aeb"
+  integrity sha512-4K619YDH+so129qt4RB4JCNxaFwJJYLXPc7drpG+/mIj86Cfzg6FKs/bA91cnajmS1CLHdhHl9vt6Kd6Oqvfkg==
   dependencies:
-    "@graphprotocol/graph-ts" "^0.24.1"
+    "@graphprotocol/graph-ts" "^0.27.0"
     assemblyscript "^0.19.20"
     wabt "1.0.24"
 
