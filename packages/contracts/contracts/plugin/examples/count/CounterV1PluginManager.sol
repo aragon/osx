@@ -24,7 +24,7 @@ contract CounterV1PluginManager is PluginManager {
         counterBase = new CounterV1();
     }
 
-    function _getInstallInstruction(PluginManagerLib.Data memory installation)
+    function _getInstallInstruction(address dao, bytes memory data)
         internal
         view
         override
@@ -32,14 +32,15 @@ contract CounterV1PluginManager is PluginManager {
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(
-            installation.params,
+            params,
             (address, uint256)
         );
 
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            multiplyHelper = installation.addHelper(address(multiplyHelperBase), bytes(""));
+            // deploy helper without our proxy..
+            multiplyHelper = new ERC1967Proxy(multiplyHelperBase, bytes(""));            
         }
 
         bytes memory initData = abi.encodeWithSelector(
@@ -48,26 +49,19 @@ contract CounterV1PluginManager is PluginManager {
             _num
         );
 
-        // TODO 1: If dev wants his plugin to be deployed with `new`, with the current solution,
-        // he is still obliged to deploy things as bases inside plugin manager constructor eve though
-        // it's not required. + hence more gas costs
-
-        // TODO 2: installation.addPlugin is the way to use everything correctly. Though, dev can
-        // stil write installation.plugins = new PluginManagerLib.Deployment[](3) and then 
-        // directly put some other addresses instead of plugin which mean create2 will produce a different addresses
-        address pluginAddr = installation.addPlugin(address(counterBase), initData);
+        plugin = createProxy(dao, counterBase, initData);
 
         installation.addPermission(
             Permission.Operation.Grant,
             installation.dao,
-            pluginAddr,
+            plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
         installation.addPermission(
             Permission.Operation.Grant,
-            pluginAddr,
+            plugin,
             installation.dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
@@ -77,17 +71,13 @@ contract CounterV1PluginManager is PluginManager {
             installation.addPermission(
                 Permission.Operation.Grant,
                 multiplyHelper,
-                pluginAddr,
+                plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
 
-        installation.addPermission(
-            Permission.Operation.Grant,
-            
-        )
-        return installation;
+        return (plugin, permissions);
     }
 
     function getImplementationAddress() public view virtual override returns (address) {

@@ -33,7 +33,10 @@ contract PluginInstaller {
         PluginManager manager;
         bytes data;
     }
+    // Way 1
+    // require(dao.isValidSignature(plugin, signature));
 
+    //
     struct UpdatePlugin {
         PluginManager manager;
         bytes data;
@@ -58,51 +61,113 @@ contract PluginInstaller {
     /// @param oldVersion the old version plugin is upgrading from.
     event PluginUpdated(address dao, address plugin, uint16[3] oldVersion, bytes data);
 
-    /// @notice Installs plugin on the dao by emitting the event and sets up permissions.
-    /// @dev It's dev's responsibility to deploy the plugin inside the plugin manager.
-    /// @param dao the dao address where the plugin should be installed.
-    /// @param plugin the plugin struct that contains manager address and encoded data.
+    mapping(bytes32 => bytes32) private permissionHashesV2;
+
+    // Calling this should be possible without proposal, but directly..
+    // problem is, i can call it for another dao with my own params
+    function deployInstall(
+        address dao,
+        address pluginManager,
+        bytes memory data // encoded per pluginManager's deploy ABI
+    ) public {
+        (
+            address plugin, 
+            address[] helpers, // not required, but just in case
+            PermissionManagerLib.ItemMultiTarget[] memory permissions
+        ) = pluginManager.deploy(dao, data);
+
+        permissionHashesV2[
+            keccak256(abi.encode(dao, pluginManager, keccak256(data)))
+        ] = getHash(permissions);
+
+        // Gets stored in a subgraph.
+        emit PluginInstallDeployed(
+            msg.sender, 
+            dao, 
+            plugin, 
+            helpers,
+            pluginManager, 
+            data, 
+            permissions
+        );
+        
+
+        // with weiroll, that's how it would work.
+        return permissions;
+    }
+
     function installPlugin(
         address dao,
-        InstallPlugin calldata plugin,
-        bytes32 salt
+        bytes memory _hash,
+        PermissionManagerLib.ItemMultiTarget calldata permissions
     ) public {
-        if (
-            msg.sender != dao &&
-            !DAO(payable(dao)).hasPermission(
-                address(this),
-                msg.sender,
-                INSTALL_PERMISSION_ID,
-                bytes("")
-            )
-        ) {
-            revert InstallNotAllowed();
-        }
+        // make sure only dao calls it...
+        require(msg.sender == dao);
 
-        bytes32 newSalt = keccak256(
-            abi.encodePacked(salt, dao, address(this), plugin.manager, keccak256(plugin.data))
+        require(permissionHashesV2[_hash] == getHash(permissions));
+
+        DAO(payable(dao)).bulkOnMultiTarget(permissions);
+
+        emit PluginInstalled(dao, _plugin, _helpers);
+
+        // TODO: Might be even good to do: lazy to think now.
+        delete permissionHashesV2[_hash];
+    }
+
+    function deployUpdate(
+        address dao,
+        address pluginManager, // plugin manager v2
+        bytes memory data, // encoded per pluginManager's update ABI,
+        uint[3] memory oldVersion
+    ) public {
+        (
+            address[] helpers, // not required, but just in case (newHelpers deployed if needed)
+            PermissionManagerLib.ItemMultiTarget[] memory permissions
+        ) = pluginManager.update(dao, data);
+
+        // TODO: we might need separate/different mapping
+        permissionHashesV2[
+            keccak256(abi.encode(dao, pluginManager, keccak256(data)))
+        ] = getHash(permissions);
+
+        emit PluginUpdateDeployed(
+            dao,
+            helpers,
+            permissions
         );
 
-        PluginManagerLib.Data memory installationInstructions = plugin
-            .manager
-            .getInstallInstruction(dao, newSalt, address(this), plugin.data);
+        return permissions;
+    }
+    
+    function updatePlugin(
+        address dao,
+        address plugin,
+        bytes memory _hash,
+        bytes memory initData,
+        PermissionManagerLib.ItemMultiTarget calldata permissions
+    ) public {
+        // make sure only dao calls it...
+        require(msg.sender == dao);
 
-        address[] memory helpersAddresses = new address[](installationInstructions.helpers.length);
-        // Deploy the helpers
-        for (uint256 i = 0; i < installationInstructions.helpers.length; i++) {
-            helpersAddresses[i] = deployWithCreate2(newSalt, installationInstructions.helpers[i]);
+        require(plugin.supportsInterface(type(PluginUUPSUpgradable).interfaceId));
+
+        plugin.upgradeToAndCall(plugin.getImplementationAddress(), initData);
+
+        DAO(payable(dao)).bulkOnMultiTarget(permissions);
+    }
+
+    function getHash(
+        PermissionManagerLib.ItemMultiTarget[] memory permissions
+    ) private returns (bytes32) {
+        bytes memory encoded;
+        for (uint256 i = 0; i < permissions.length; i++) {
+            PermissionManagerLib.ItemMultiTarget memory p = permissions[i];
+            encoded = abi.encodePacked(hash, p.Op, p.where, p.who, p.oracle, p.permissionId);
         }
 
-        // in PluginInstaller V1, restrict Plugin Size to be 1 always
-        if (installationInstructions.plugins.length != 1) revert PluginCountTooBig();
-
-        // Deploy the plugin
-        address pluginAddr = deployWithCreate2(newSalt, installationInstructions.plugins[0]);
-
-        DAO(payable(dao)).bulkOnMultiTarget(installationInstructions.permissions);
-
-        emit PluginInstalled(dao, pluginAddr, helpersAddresses);
+        return keccak256(encoded);
     }
+
 
     /// @notice Updates plugin on the dao by emitting the event and sets up permissions.
     /// @dev It's dev's responsibility to update the plugin inside the plugin manager.
@@ -153,8 +218,8 @@ contract PluginInstaller {
         upgradeProxy(plugin.proxy, implementationAddr, initData);
 
         // TODO: Since we allow users to decide not to use our pluginuupsupgradable/PluginTransparentUpgradeable since
-        // they don't want to use our ACL and features we will bring inside them, 
-        // we deploy such contracts with OZ's contracts directly. 
+        // they don't want to use our ACL and features we will bring inside them,
+        // we deploy such contracts with OZ's contracts directly.
         // In that case, we need to support upgrading them as well.
         DAO(payable(dao)).bulkOnMultiTarget(updateInstructions.permissions);
 
