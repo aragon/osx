@@ -65,9 +65,9 @@ test('Run dao (handleDeposited) for native token mappings with mock event', () =
   handleNativeTokenDeposited(newEvent);
 
   // checks
-  assert.fieldEquals('VaultDeposit', entityID, 'id', entityID);
-  assert.fieldEquals('VaultDeposit', entityID, 'sender', ADDRESS_ONE);
-  assert.fieldEquals('VaultDeposit', entityID, 'amount', ONE_ETH);
+  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
+  assert.fieldEquals('VaultTransfer', entityID, 'sender', ADDRESS_ONE);
+  assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
 
   clearStore();
 });
@@ -149,22 +149,22 @@ test('Run dao (handleDeposited) for Token mappings with mock event', () => {
     HALF_ETH
   );
   // checks Deposit
-  assert.fieldEquals('VaultDeposit', entityID, 'id', entityID);
+  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
   assert.fieldEquals(
-    'VaultDeposit',
+    'VaultTransfer',
     entityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
-  assert.fieldEquals('VaultDeposit', entityID, 'sender', ADDRESS_ONE);
+  assert.fieldEquals('VaultTransfer', entityID, 'sender', ADDRESS_ONE);
   assert.fieldEquals(
-    'VaultDeposit',
+    'VaultTransfer',
     entityID,
     'token',
     Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
   );
-  assert.fieldEquals('VaultDeposit', entityID, 'amount', ONE_ETH);
-  assert.fieldEquals('VaultDeposit', entityID, 'reference', STRING_DATA);
+  assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
+  assert.fieldEquals('VaultTransfer', entityID, 'reference', STRING_DATA);
 
   clearStore();
 });
@@ -207,41 +207,41 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
     event.transactionLogIndex.toHexString() +
     '_' +
     '0';
-  assert.fieldEquals('VaultWithdraw', entityID, 'id', entityID);
+  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'dao',
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'token',
     Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'to',
     Address.fromHexString(ADDRESS_ONE).toHexString()
   );
-  assert.fieldEquals('VaultWithdraw', entityID, 'amount', '1');
+  assert.fieldEquals('VaultTransfer', entityID, 'amount', '1');
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'reference',
     Bytes.fromUTF8(STRING_DATA).toString()
   );
-  assert.fieldEquals('VaultWithdraw', entityID, 'proposal', proposalId);
+  assert.fieldEquals('VaultTransfer', entityID, 'proposal', proposalId);
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'transaction',
     event.transaction.hash.toHexString()
   );
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'createdAt',
     event.block.timestamp.toString()
