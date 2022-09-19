@@ -180,77 +180,7 @@ contract PluginInstaller {
         return keccak256(encoded);
     }
 
-    /// @notice Updates plugin on the dao by emitting the event and sets up permissions.
-    /// @dev It's dev's responsibility to update the plugin inside the plugin manager.
-    /// @param dao the dao address where the plugin should be updated.
-    /// @param plugin the plugin struct that contains manager address, encoded data and old version.
-    function updatePlugin(
-        address dao,
-        bytes32 salt,
-        UpdatePlugin calldata plugin
-    ) public {
-        if (
-            (dao != msg.sender &&
-                !DAO(payable(dao)).hasPermission(
-                    address(this),
-                    msg.sender,
-                    UPDATE_PERMISSION_ID,
-                    bytes("")
-                ))
-        ) {
-            revert UpdateNotAllowed();
-        }
 
-        bytes32 newSalt = keccak256(
-            abi.encodePacked(salt, dao, address(this), plugin.manager, keccak256(plugin.data))
-        );
-
-        (PluginManagerLib.Data memory updateInstructions, bytes memory initData) = plugin
-            .manager
-            .getUpdateInstruction(
-                plugin.oldVersion,
-                dao,
-                plugin.proxy,
-                newSalt,
-                address(this),
-                plugin.data
-            );
-
-        if (updateInstructions.plugins.length != 0) revert PluginCountTooBig();
-
-        for (uint256 i = 0; i < updateInstructions.helpers.length; i++) {
-            deployWithCreate2(newSalt, updateInstructions.helpers[i]);
-        }
-
-        // NOTE: the same exact functions are present for both UUPS/Transparent.
-        // Beacon NOT Supported for now..
-        // If the proxy doesn't support upgradeToAndCall, it will fail.
-        address implementationAddr = plugin.manager.getImplementationAddress();
-        upgradeProxy(plugin.proxy, implementationAddr, initData);
-
-        // TODO: Since we allow users to decide not to use our pluginuupsupgradable/PluginTransparentUpgradeable since
-        // they don't want to use our ACL and features we will bring inside them,
-        // we deploy such contracts with OZ's contracts directly.
-        // In that case, we need to support upgrading them as well.
-        DAO(payable(dao)).bulkOnMultiTarget(updateInstructions.permissions);
-
-        emit PluginUpdated(dao, plugin.proxy, plugin.oldVersion, plugin.data);
-    }
-
-    function deployWithCreate2(bytes32 salt, PluginManagerLib.Deployment memory deployment)
-        private
-        returns (address deployedAddr)
-    {
-        deployedAddr = Create2.deploy(0, salt, deployment.initCode);
-
-        if (deployment.initData.length > 0) {
-            deployedAddr.functionCall(deployment.initData);
-        }
-
-        if (deployment.additionalInitData.length > 0) {
-            deployedAddr.functionCall(deployment.additionalInitData);
-        }
-    }
 
     function upgradeProxy(
         address proxy,
