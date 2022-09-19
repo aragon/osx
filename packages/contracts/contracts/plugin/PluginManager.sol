@@ -55,18 +55,6 @@ library PluginManagerLib {
 
         self.permissions = newPermissions;
     }
-
-    function getClonesBytecode(address impl) internal view returns (bytes memory b) {
-        assembly {
-            b := mload(0x40)
-            mstore(0x40, add(b, 0x80))
-            mstore(b, 0x37)
-
-            mstore(add(b, 0x20), 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-            mstore(add(b, 0x34), shl(0x60, impl))
-            mstore(add(b, 0x48), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-        }
-    }
 }
 
 /// NOTE: This is an untested code and should NOT be used in production.
