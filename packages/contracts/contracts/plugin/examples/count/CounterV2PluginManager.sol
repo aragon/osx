@@ -2,18 +2,18 @@
 
 pragma solidity 0.8.10;
 
-import '@openzeppelin/contracts/proxy/Clones.sol';
+import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Permission, PluginManager, PluginManagerLib} from "../../PluginManager.sol";
-import {MultiplyHelper} from  "./MultiplyHelper.sol";
+import {MultiplyHelper} from "./MultiplyHelper.sol";
 import "./CounterV2.sol";
 
 contract CounterV2PluginManager is PluginManager {
     using Clones for address;
     using PluginManagerLib for PluginManagerLib.Data;
-    
+
     // For testing purposes, the below are public...
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
@@ -26,22 +26,24 @@ contract CounterV2PluginManager is PluginManager {
         counterBase = new CounterV2();
     }
 
-    function _getInstallInstruction(PluginManagerLib.Data memory installation)
-        internal
-        view
+    function deploy(address dao, bytes memory data)
+        public
+        virtual
         override
-        returns (PluginManagerLib.Data memory)
+        returns (
+            address plugin,
+            address[] memory helpers,
+            Permission.ItemMultiTarget[] memory permissions
+        )
     {
         // Decode the parameters from the UI
-        (address _multiplyHelper, uint256 _num) = abi.decode(
-            installation.params,
-            (address, uint256)
-        );
+        (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
 
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            multiplyHelper = installation.addHelper(address(multiplyHelperBase), bytes(""));
+            // deploy helper without our proxy..
+            multiplyHelper = address(new ERC1967Proxy(address(multiplyHelperBase), bytes("")));
         }
 
         bytes memory initData = abi.encodeWithSelector(
@@ -50,62 +52,82 @@ contract CounterV2PluginManager is PluginManager {
             _num
         );
 
-        address pluginAddr = installation.addPlugin(address(counterBase), initData);
+        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
+        helpers = new address[](1);
 
-        installation.addPermission(
+        // deploy
+        plugin = createProxy(dao, address(counterBase), initData);
+
+        // set permissions
+        permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            installation.dao,
-            pluginAddr,
+            dao,
+            plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        installation.addPermission(
+        permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            pluginAddr,
-            installation.dao,
+            plugin,
+            dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
         if (_multiplyHelper == address(0)) {
-            installation.addPermission(
+            permissions[2] = Permission.ItemMultiTarget(
                 Permission.Operation.Grant,
                 multiplyHelper,
-                pluginAddr,
+                plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
 
-        return installation;
+        // add helpers
+        helpers[0] = multiplyHelper;
+
+        return (plugin, helpers, permissions);
     }
 
-    function _getUpdateInstruction(
-        address proxy,
-        uint16[3] calldata oldVersion,
-        PluginManagerLib.Data memory update
-    ) internal view override returns (
-        PluginManagerLib.Data memory, 
-        bytes memory initData
-    ) {
+    function update(
+        address dao,
+        address plugin, // proxy
+        address[] memory helpers,
+        bytes memory data,
+        uint16[3] calldata oldVersion
+    )
+        public
+        override
+        returns (
+            address[] memory activeHelpers,
+            bytes memory initData,
+            Permission.ItemMultiTarget[] memory permissions
+        )
+    {
         uint256 _newVariable;
 
         if (oldVersion[0] == 1 && oldVersion[1] == 0) {
-            (_newVariable) = abi.decode(update.params, (uint256));
+            (_newVariable) = abi.decode(data, (uint256));
             initData = abi.encodeWithSelector(
                 bytes4(keccak256("setNewVariable(uint256)")),
                 _newVariable
             );
         }
 
-        update.addPermission(
+        permissions = new Permission.ItemMultiTarget[](1);
+        permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
-            update.dao,
-            proxy,
+            dao,
+            plugin,
             NO_ORACLE,
             multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
+
+        // if another helper is deployed, put it inside activeHelpers + put old ones as well.
+        activeHelpers = new address[](1);
+        activeHelpers[0] = helpers[0];
     }
 
     function getImplementationAddress() public view virtual override returns (address) {

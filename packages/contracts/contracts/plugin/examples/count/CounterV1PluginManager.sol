@@ -24,23 +24,24 @@ contract CounterV1PluginManager is PluginManager {
         counterBase = new CounterV1();
     }
 
-    function _getInstallInstruction(address dao, bytes memory data)
-        internal
-        view
+    function deploy(address dao, bytes memory data)
+        public
+        virtual
         override
-        returns (PluginManagerLib.Data memory)
+        returns (
+            address plugin,
+            address[] memory helpers,
+            Permission.ItemMultiTarget[] memory permissions
+        )
     {
         // Decode the parameters from the UI
-        (address _multiplyHelper, uint256 _num) = abi.decode(
-            params,
-            (address, uint256)
-        );
+        (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
 
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
             // deploy helper without our proxy..
-            multiplyHelper = new ERC1967Proxy(multiplyHelperBase, bytes(""));            
+            multiplyHelper = address(new ERC1967Proxy(address(multiplyHelperBase), bytes("")));
         }
 
         bytes memory initData = abi.encodeWithSelector(
@@ -49,26 +50,31 @@ contract CounterV1PluginManager is PluginManager {
             _num
         );
 
-        plugin = createProxy(dao, counterBase, initData);
+        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
+        helpers = new address[](1);
 
-        installation.addPermission(
+        // deploy
+        plugin = createProxy(dao, address(counterBase), initData);
+
+        // set permissions
+        permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            installation.dao,
+            dao,
             plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        installation.addPermission(
+        permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             plugin,
-            installation.dao,
+            dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
-        
+
         if (_multiplyHelper == address(0)) {
-            installation.addPermission(
+            permissions[2] = Permission.ItemMultiTarget(
                 Permission.Operation.Grant,
                 multiplyHelper,
                 plugin,
@@ -77,20 +83,14 @@ contract CounterV1PluginManager is PluginManager {
             );
         }
 
-        return (plugin, permissions);
+        // add helpers
+        helpers[0] = multiplyHelper;
+
+        return (plugin, helpers, permissions);
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
         return address(counterBase);
-    }
-
-    
-    function deploymentOptions()
-        public
-        view
-        virtual
-        returns (PluginManagerLib.DeploymentOptions[] memory options) {
-        return [options.UUPSUpgradable, options.NOProxy];
     }
 
     function deployABI() external view virtual override returns (string memory) {

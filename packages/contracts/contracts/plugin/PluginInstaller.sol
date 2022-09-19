@@ -61,104 +61,116 @@ contract PluginInstaller {
     /// @param oldVersion the old version plugin is upgrading from.
     event PluginUpdated(address dao, address plugin, uint16[3] oldVersion, bytes data);
 
-    mapping(bytes32 => bytes32) private permissionHashesV2;
+    mapping(bytes32 => bytes32) private permissionHashes;
+    mapping(bytes32 => bytes32) private helperHashes;
 
-    // Calling this should be possible without proposal, but directly..
-    // problem is, i can call it for another dao with my own params
     function deployInstall(
         address dao,
         address pluginManager,
         bytes memory data // encoded per pluginManager's deploy ABI
     ) public {
         (
-            address plugin, 
-            address[] helpers, // not required, but just in case
+            address plugin,
+            address[] helpers,
             PermissionManagerLib.ItemMultiTarget[] memory permissions
         ) = pluginManager.deploy(dao, data);
 
-        permissionHashesV2[
+        permissionHashes[
             keccak256(abi.encode(dao, pluginManager, keccak256(data)))
-        ] = getHash(permissions);
+        ] = getPermissionsHash(permissions);
+
+        helperHashes[keccak256(abi.encode(dao, pluginManager, helpers))] = keccak256(
+            abi.encode(helpers)
+        );
 
         // Gets stored in a subgraph.
         emit PluginInstallDeployed(
-            msg.sender, 
-            dao, 
-            plugin, 
+            msg.sender,
+            dao,
+            plugin,
             helpers,
-            pluginManager, 
-            data, 
+            pluginManager,
+            data,
             permissions
         );
-        
 
-        // with weiroll, that's how it would work.
         return permissions;
     }
 
     function installPlugin(
         address dao,
         bytes memory _hash,
-        PermissionManagerLib.ItemMultiTarget calldata permissions
+        Permission.ItemMultiTarget calldata permissions
     ) public {
         // make sure only dao calls it...
         require(msg.sender == dao);
 
-        require(permissionHashesV2[_hash] == getHash(permissions));
+        require(permissionHashes[_hash] == getPermissionsHash(permissions));
 
         DAO(payable(dao)).bulkOnMultiTarget(permissions);
 
         emit PluginInstalled(dao, _plugin, _helpers);
 
         // TODO: Might be even good to do: lazy to think now.
-        delete permissionHashesV2[_hash];
+        delete permissionHashes[_hash];
     }
 
     function deployUpdate(
         address dao,
-        address pluginManager, // plugin manager v2
-        bytes memory data, // encoded per pluginManager's update ABI,
-        uint[3] memory oldVersion
+        address oldPluginManager,
+        address pluginManager, // plugin manager v2.
+        address[] helpers, // helpers that were deployed when installing the plugin.
+        bytes memory data // encoded per pluginManager's update ABI,
     ) public {
         (
-            address[] helpers, // not required, but just in case (newHelpers deployed if needed)
+            address[] activeHelpers, // not required, but just in case (newHelpers deployed if needed)
             PermissionManagerLib.ItemMultiTarget[] memory permissions
-        ) = pluginManager.update(dao, data);
+        ) = pluginManager.update(dao, data, helpers);
 
-        // TODO: we might need separate/different mapping
-        permissionHashesV2[
-            keccak256(abi.encode(dao, pluginManager, keccak256(data)))
-        ] = getHash(permissions);
-
-        emit PluginUpdateDeployed(
-            dao,
-            helpers,
-            permissions
+        require(
+            helperHashes[keccak256(abi.encode(dao, oldPluginManager, helpers))] ==
+                abi.encode(helpers)
         );
+
+        helperHashes[keccak256(abi.encode(dao, newPluginManager, helpers))] = abi.encode(
+            activeHelpers
+        );
+
+        delete helperHashes[keccak256(abi.encode(dao, oldPluginManager, helpers))];
+
+        permissionHashes[
+            keccak256(abi.encode(dao, pluginManager, keccak256(data)))
+        ] = getPermissionsHash(permissions);
+
+        emit PluginUpdateDeployed(dao, _newHelpers, permissions);
 
         return permissions;
     }
-    
+
     function updatePlugin(
         address dao,
-        address plugin,
+        address plugin, // proxy contract
+        address pluginManager, // new plugin manager upgrade happens to.
         bytes memory _hash,
         bytes memory initData,
-        PermissionManagerLib.ItemMultiTarget calldata permissions
+        Permission.ItemMultiTarget calldata permissions
     ) public {
         // make sure only dao calls it...
         require(msg.sender == dao);
 
+        require(permissionHashes[_hash] == getPermissionsHash(permissions));
+
         require(plugin.supportsInterface(type(PluginUUPSUpgradable).interfaceId));
 
-        plugin.upgradeToAndCall(plugin.getImplementationAddress(), initData);
+        upgradeProxy(plugin, pluginManager.getImplementationAddress(), initData);
 
         DAO(payable(dao)).bulkOnMultiTarget(permissions);
     }
 
-    function getHash(
-        PermissionManagerLib.ItemMultiTarget[] memory permissions
-    ) private returns (bytes32) {
+    function getPermissionsHash(Permission.ItemMultiTarget[] memory permissions)
+        private
+        returns (bytes32)
+    {
         bytes memory encoded;
         for (uint256 i = 0; i < permissions.length; i++) {
             PermissionManagerLib.ItemMultiTarget memory p = permissions[i];
@@ -167,7 +179,6 @@ contract PluginInstaller {
 
         return keccak256(encoded);
     }
-
 
     /// @notice Updates plugin on the dao by emitting the event and sets up permissions.
     /// @dev It's dev's responsibility to update the plugin inside the plugin manager.
@@ -246,6 +257,7 @@ contract PluginInstaller {
         address implementation,
         bytes memory initData
     ) private {
+        // TODO: check if proxy is a contract
         if (initData.length > 0) {
             try
                 PluginUUPSUpgradeable(proxy).upgradeToAndCall(implementation, initData)
