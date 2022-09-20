@@ -7,7 +7,6 @@ import {
   handleExecuted,
   _handleMetadataSet
 } from '../../src/dao/dao';
-import {Dao, ERC20VotingProposal} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -23,17 +22,17 @@ import {
   createNewNativeTokenDepositedEvent,
   createNewDepositedEvent,
   getBalanceOf,
-  createNewExecutedEvent
+  createNewExecutedEvent,
+  createDaoEntityState
 } from './utils';
+import {createERC20VotingProposalEntityState} from '../erc20-voting/utils';
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // create state
-  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
-  daoEntity.save();
+  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
   let metadata = 'new-metadata';
-
-  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
 
   // handle event
   _handleMetadataSet(entityID, metadata);
@@ -171,13 +170,18 @@ test('Run dao (handleDeposited) for Token mappings with mock event', () => {
 
 test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   // create state
-  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
-  daoEntity.save();
+  let daoEntity = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(daoEntity, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
   let proposalId =
     Address.fromHexString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let proposalEntity = new ERC20VotingProposal(proposalId);
-  proposalEntity.save();
+
+  createERC20VotingProposalEntityState(
+    proposalId,
+    DAO_ADDRESS,
+    VOTING_ADDRESS,
+    ADDRESS_ONE
+  );
 
   // create token calls
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');

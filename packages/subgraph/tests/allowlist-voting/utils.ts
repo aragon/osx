@@ -1,5 +1,6 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
+import {AllowlistProposal} from '../../generated/schema';
 
 import {
   VoteCreated,
@@ -208,4 +209,32 @@ export function getVotesLengthCall(
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
+}
+
+// state
+
+export function createAllowlistProposalEntityState(
+  entityID: string,
+  dao: string,
+  voting: string,
+  creator: string
+): AllowlistProposal {
+  let allowlistProposal = new AllowlistProposal(entityID);
+  allowlistProposal.dao = Address.fromString(dao).toHexString();
+  allowlistProposal.pkg = Address.fromString(voting).toHexString();
+  allowlistProposal.voteId = BigInt.zero();
+  allowlistProposal.creator = Address.fromString(creator);
+
+  allowlistProposal.startDate = BigInt.zero();
+  allowlistProposal.endDate = BigInt.zero();
+  allowlistProposal.snapshotBlock = BigInt.zero();
+  allowlistProposal.supportRequiredPct = BigInt.zero();
+  allowlistProposal.participationRequired = BigInt.zero();
+  allowlistProposal.votingPower = BigInt.zero();
+  allowlistProposal.open = true;
+  allowlistProposal.executed = false;
+  allowlistProposal.createdAt = BigInt.zero();
+  allowlistProposal.save();
+
+  return allowlistProposal;
 }
