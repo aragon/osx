@@ -84,7 +84,14 @@ abstract contract PluginManager {
             address[] memory activeHelpers,
             bytes memory initData,
             Permission.ItemMultiTarget[] memory permissions
-        ) {}
+        )
+    {}
+
+    function uninstall(
+        address dao,
+        address plugin,
+        address[] calldata activeHelpers
+    ) public virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
 
     function createERC1967Proxy(
         address _dao,
