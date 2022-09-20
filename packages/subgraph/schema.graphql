@@ -73,7 +73,6 @@ type VaultTransfer @entity {
   type: TransferType!
 }
 
-
 # Dao
 
 type Dao @entity {
@@ -84,7 +83,7 @@ type Dao @entity {
   createdAt: BigInt!
   token: ERC20Token!
   actions: [Action!]! @derivedFrom(field: "dao")
-  transfers: [VaultTransfers]! @derivedFrom(field: "dao")
+  transfers: [VaultTransfer!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
