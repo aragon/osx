@@ -54,27 +54,23 @@ type Action @entity {
 
 # Treasury
 
-type VaultWithdraw @entity {
+enum TransferType {
+  Withdraw
+  Deposit
+}
+
+type VaultTransfer @entity {
   id: ID!
   dao: Dao!
   token: ERC20Token
-  to: Bytes!
+  sender: Bytes
+  to: Bytes
   amount: BigInt!
   reference: String!
   transaction: String!
-  proposal: Proposal!
+  proposal: Proposal
   createdAt: BigInt!
-}
-
-type VaultDeposit @entity {
-  id: ID!
-  dao: Dao!
-  token: ERC20Token!
-  sender: Bytes!
-  amount: BigInt!
-  reference: String!
-  transaction: String!
-  createdAt: BigInt!
+  type: TransferType!
 }
 
 # Dao
@@ -87,8 +83,7 @@ type Dao @entity {
   createdAt: BigInt!
   token: ERC20Token
   actions: [Action!]! @derivedFrom(field: "dao")
-  deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
-  withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
+  transfers: [VaultTransfer!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
