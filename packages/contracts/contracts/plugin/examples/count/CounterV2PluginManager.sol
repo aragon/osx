@@ -56,7 +56,7 @@ contract CounterV2PluginManager is PluginManager {
         helpers = new address[](1);
 
         // deploy
-        plugin = createProxy(dao, address(counterBase), initData);
+        plugin = createERC1967Proxy(dao, address(counterBase), initData);
 
         // set permissions
         permissions[0] = Permission.ItemMultiTarget(

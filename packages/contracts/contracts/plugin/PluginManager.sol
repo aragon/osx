@@ -84,9 +84,9 @@ abstract contract PluginManager {
             address[] memory activeHelpers,
             bytes memory initData,
             Permission.ItemMultiTarget[] memory permissions
-        );
+        ) {}
 
-    function createProxy(
+    function createERC1967Proxy(
         address _dao,
         address _logic,
         bytes memory _data

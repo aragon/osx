@@ -12,7 +12,7 @@ contract PluginManagerMock is PluginManager {
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV1Mock public pluginBase;
 
-    uint public constant PLUGIN_INIT_NUMBER = 15;
+    uint256 public constant PLUGIN_INIT_NUMBER = 15;
 
     address private constant NO_ORACLE = address(0);
 
@@ -21,36 +21,43 @@ contract PluginManagerMock is PluginManager {
         pluginBase = new PluginUUPSUpgradableV1Mock();
     }
 
-    function _getInstallInstruction(PluginManagerLib.Data memory installation)
-        internal
-        view
+    function deploy(address dao, bytes memory data)
+        public
+        virtual
         override
-        returns (PluginManagerLib.Data memory)
+        returns (
+            address plugin,
+            address[] memory helpers,
+            Permission.ItemMultiTarget[] memory permissions
+        )
     {
-        address helperAddr = installation.addHelper(address(helperBase), bytes(""));
+        address helperAddr = createERC1967Proxy(dao, address(helperBase), bytes(""));
 
-        address pluginAddr = installation.addPlugin(
+        plugin = createERC1967Proxy(
+            dao,
             address(pluginBase),
             abi.encodeWithSelector(bytes4(keccak256("initialize(uint256)")), PLUGIN_INIT_NUMBER)
         );
 
-        installation.addPermission(
+        permissions = new Permission.ItemMultiTarget[](2);
+        helpers = new address[](1);
+
+        helpers[0] = helperAddr;
+        permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            installation.dao,
-            pluginAddr,
+            dao,
+            plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        installation.addPermission(
+        permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            pluginAddr,
+            plugin,
             helperAddr,
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
         );
-
-        return installation;
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
@@ -69,6 +76,7 @@ contract PluginManagerV2Mock is PluginManager {
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV2Mock public pluginBase;
 
+    uint256 public constant PLUGIN_INIT_NUMBER = 15;
     address private constant NO_ORACLE = address(0);
 
     constructor() {
@@ -77,33 +85,92 @@ contract PluginManagerV2Mock is PluginManager {
         pluginBase = new PluginUUPSUpgradableV2Mock();
     }
 
-    function _getInstallInstruction(PluginManagerLib.Data memory installation)
-        internal
-        view
+    function deploy(address dao, bytes memory data)
+        public
+        virtual
         override
-        returns (PluginManagerLib.Data memory)
+        returns (
+            address plugin,
+            address[] memory helpers,
+            Permission.ItemMultiTarget[] memory permissions
+        )
     {
-        address helperAddr = installation.addHelper(address(helperBase), bytes(""));
+        address helperAddr = createERC1967Proxy(dao, address(helperBase), bytes(""));
 
-        address pluginAddr = installation.addPlugin(address(pluginBase), bytes(""));
+        plugin = createERC1967Proxy(
+            dao,
+            address(pluginBase),
+            abi.encodeWithSelector(bytes4(keccak256("initialize(uint256)")), PLUGIN_INIT_NUMBER)
+        );
 
-        installation.addPermission(
+        permissions = new Permission.ItemMultiTarget[](2);
+        helpers = new address[](1);
+
+        helpers[0] = helperAddr;
+        permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            installation.dao,
-            pluginAddr,
+            dao,
+            plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        installation.addPermission(
+        permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            pluginAddr,
+            plugin,
             helperAddr,
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
         );
+    }
 
-        return installation;
+    function update(
+        address dao,
+        address plugin, // proxy
+        address[] memory helpers,
+        bytes memory data,
+        uint16[3] calldata oldVersion
+    )
+        public
+        virtual
+        override
+        returns (
+            address[] memory activeHelpers,
+            bytes memory initData,
+            Permission.ItemMultiTarget[] memory permissions
+        )
+    {
+        initData = abi.encodeWithSelector(
+            bytes4(keccak256("initializeV2(string)")),
+            "stringExample"
+        );
+
+        address helperAddr = createERC1967Proxy(dao, address(helperBase), bytes(""));
+
+        permissions = new Permission.ItemMultiTarget[](2);
+        activeHelpers = new address[](helpers.length + 1);
+
+        for (uint256 i = 0; i < helpers.length; i++) {
+            activeHelpers[i] = helpers[i];
+        }
+
+        activeHelpers[helpers.length] = helperAddr;
+
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Revoke,
+            dao,
+            plugin,
+            NO_ORACLE,
+            keccak256("EXEC_PERMISSION")
+        );
+
+        permissions[1] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            helperAddr,
+            plugin,
+            NO_ORACLE,
+            keccak256("GRANT_PERMISSION")
+        );
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
@@ -112,36 +179,5 @@ contract PluginManagerV2Mock is PluginManager {
 
     function deployABI() external view virtual override returns (string memory) {
         return "";
-    }
-
-    function _getUpdateInstruction(
-        address proxy,
-        uint16[3] calldata oldVersion,
-        PluginManagerLib.Data memory update
-    ) internal view override returns (PluginManagerLib.Data memory, bytes memory initData) {
-        initData = abi.encodeWithSelector(
-            bytes4(keccak256("initializeV2(string)")),
-            "stringExample"
-        );
-
-        address helperAddr = update.addHelper(address(helperBase), bytes(""));
-
-        update.addPermission(
-            Permission.Operation.Revoke,
-            update.dao,
-            proxy,
-            NO_ORACLE,
-            keccak256("EXEC_PERMISSION")
-        );
-
-        update.addPermission(
-            Permission.Operation.Grant,
-            helperAddr,
-            proxy,
-            NO_ORACLE,
-            keccak256("GRANT_PERMISSION")
-        );
-
-        return (update, initData);
     }
 }
