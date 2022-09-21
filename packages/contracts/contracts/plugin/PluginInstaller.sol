@@ -25,8 +25,6 @@ import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
 /// @notice Plugin Installer that has root permissions to install plugin on the dao and apply permissions.
 contract PluginInstaller is DaoAuthorizable {
     using ERC165Checker for address;
-    // using Create2 for address payable;
-    // using Address for address;
 
     bytes32 public constant INSTALL_PERMISSION_ID = keccak256("INSTALL_PERMISSION");
     bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
@@ -43,6 +41,20 @@ contract PluginInstaller is DaoAuthorizable {
         address proxy;
         uint16[3] oldVersion;
     }
+
+    struct PluginUpdateDeployInfo {
+        address plugin;
+        PluginRepo pluginManagerRepo; // where plugin manager versions are handled.
+        address oldPluginManager;
+        address newPluginManager;
+    }
+
+    mapping(bytes32 => bytes32) private installPermissionHashes;
+    mapping(bytes32 => bool) private pluginInstalledChecker;
+    mapping(bytes32 => bytes32) private updatePermissionHashes;
+    mapping(bytes32 => bytes32) private helperHashes;
+
+    AragonPluginRegistry public repoRegistry;
 
     error InstallNotAllowed();
     error PluginCountTooBig();
@@ -63,47 +75,23 @@ contract PluginInstaller is DaoAuthorizable {
     event PluginInstalled(address dao, address plugin);
 
     event Deployed(
-        address sender,
-        address dao,
-        address plugin,
-        address[] helpers,
+        address indexed sender,
+        address indexed dao,
+        address indexed plugin,
         address pluginManager,
-        bytes data,
-        Permission.ItemMultiTarget[] permissions
+        address[] helpers,
+        Permission.ItemMultiTarget[] permissions,
+        bytes data
     );
 
-    event Updated(address dao, address[] helpers, Permission.ItemMultiTarget[] permissions);
-    event PluginUpdated(address dao, address plugin);
-    event PluginUninstalled(address dao, address plugin);
-
-    struct PluginUpdateDeployInfo {
-        address plugin;
-        PluginRepo pluginManagerRepo; // where plugin manager versions are handled.
-        address oldPluginManager;
-        address newPluginManager;
-    }
-
-    mapping(bytes32 => bytes32) private installPermissionHashes;
-    mapping(bytes32 => bool) private pluginInstalledChecker;
-    mapping(bytes32 => bytes32) private updatePermissionHashes;
-    mapping(bytes32 => bytes32) private helperHashes;
-
-    AragonPluginRegistry public repoRegistry;
+    event Updated(address indexed dao, address[] helpers, Permission.ItemMultiTarget[] permissions);
+    event PluginUpdated(address indexed dao, address indexed plugin);
+    event PluginUninstalled(address indexed dao, address indexed plugin);
 
     /// @dev Modifier used to check if caller is the DAO, or has given permission by the DAO.
     /// @param _dao The address of the DAO.
     modifier daoAuthorized(address _dao) {
-        if (
-            msg.sender != _dao &&
-            !DAO(payable(_dao)).hasPermission(
-                address(this),
-                msg.sender,
-                INSTALL_PERMISSION_ID,
-                bytes("")
-            )
-        ) {
-            revert InstallNotAllowed();
-        }
+        _isCallAllowed(_dao);
         _;
     }
 
@@ -121,8 +109,8 @@ contract PluginInstaller is DaoAuthorizable {
 
     function deployInstall(
         address dao,
-        PluginRepo pluginManagerRepo,
         address pluginManager,
+        PluginRepo pluginManagerRepo,
         bytes memory data // encoded per pluginManager's deploy ABI
     ) public returns (Permission.ItemMultiTarget[] memory) {
         // ensure repo for plugin manager exists
@@ -149,7 +137,7 @@ contract PluginInstaller is DaoAuthorizable {
 
         helperHashes[hash] = keccak256(abi.encode(helpers));
 
-        emit Deployed(msg.sender, dao, plugin, helpers, pluginManager, data, permissions);
+        emit Deployed(msg.sender, dao, plugin, pluginManager, helpers, permissions, data);
 
         return permissions;
     }
@@ -274,9 +262,9 @@ contract PluginInstaller is DaoAuthorizable {
     function uninstallPlugin(
         address dao,
         address plugin,
-        address[] calldata activeHelpers,
+        address pluginManager,
         PluginRepo pluginManagerRepo,
-        address pluginManager
+        address[] calldata activeHelpers
     ) public daoAuthorized(dao) {
         // Implicitly confirms plugin manager is valid valid.
         // ensure repo for plugin manager exists
@@ -353,6 +341,20 @@ contract PluginInstaller is DaoAuthorizable {
             ) {
                 revert UpgradeNotExistOnProxy();
             }
+        }
+    }
+
+    function _isCallAllowed(address _dao) internal view {
+        if (
+            msg.sender != _dao &&
+            !DAO(payable(_dao)).hasPermission(
+                address(this),
+                msg.sender,
+                INSTALL_PERMISSION_ID,
+                bytes("")
+            )
+        ) {
+            revert InstallNotAllowed();
         }
     }
 }

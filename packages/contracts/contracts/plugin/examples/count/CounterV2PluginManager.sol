@@ -129,6 +129,41 @@ contract CounterV2PluginManager is PluginManager {
         activeHelpers[0] = helpers[0];
     }
 
+    function uninstall(
+        address dao,
+        address plugin,
+        address[] calldata activeHelpers
+    ) public virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+        permissions = new Permission.ItemMultiTarget[](activeHelpers.length != 0 ? 3 : 2);
+
+        // set permissions
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            dao,
+            plugin,
+            NO_ORACLE,
+            keccak256("EXEC_PERMISSION")
+        );
+
+        permissions[1] = Permission.ItemMultiTarget(
+            Permission.Operation.Grant,
+            plugin,
+            dao,
+            NO_ORACLE,
+            counterBase.MULTIPLY_PERMISSION_ID()
+        );
+
+        if (activeHelpers.length != 0) {
+            permissions[2] = Permission.ItemMultiTarget(
+                Permission.Operation.Grant,
+                activeHelpers[0],
+                plugin,
+                NO_ORACLE,
+                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
+            );
+        }
+    }
+
     function getImplementationAddress() public view virtual override returns (address) {
         return address(counterBase);
     }
