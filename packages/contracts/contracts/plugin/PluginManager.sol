@@ -18,47 +18,8 @@ import {PluginClones} from "../core/plugin/PluginClones.sol";
 import {Plugin} from "../core/plugin/Plugin.sol";
 import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgradeable.sol";
 
-library PluginManagerLib {
-    using ERC165Checker for address;
-    using Clones for address;
-
-    struct Data {
-        Permission.ItemMultiTarget[] permissions;
-    }
-
-    function addPermission(
-        Data memory self,
-        Permission.Operation op,
-        address where,
-        address who,
-        address oracle,
-        bytes32 permissionId
-    ) internal view {
-        Permission.ItemMultiTarget memory newPermission = Permission.ItemMultiTarget(
-            op,
-            where,
-            who,
-            oracle,
-            permissionId
-        );
-        Permission.ItemMultiTarget[] memory newPermissions = new Permission.ItemMultiTarget[](
-            self.permissions.length + 1
-        );
-
-        // TODO: more efficient copy
-        for (uint256 i = 0; i < self.permissions.length; i++) {
-            newPermissions[i] = self.permissions[i];
-        }
-
-        if (self.permissions.length > 0) newPermissions[newPermissions.length - 1] = newPermission;
-        else newPermissions[0] = newPermission;
-
-        self.permissions = newPermissions;
-    }
-}
-
 /// NOTE: This is an untested code and should NOT be used in production.
-/// @notice Abstract Plugin Factory that dev's have to inherit from for their factories.
+/// @notice Abstract Plugin Manager that dev's have to inherit from for their managers.
 abstract contract PluginManager {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
 

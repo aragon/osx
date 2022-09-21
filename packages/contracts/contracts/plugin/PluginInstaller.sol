@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {Permission, PluginManager, PluginManagerLib} from "./PluginManager.sol";
+import {Permission, PluginManager} from "./PluginManager.sol";
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {TransparentProxy} from "../utils/TransparentProxy.sol";
 import {bytecodeAt} from "../utils/Contract.sol";
@@ -16,29 +16,27 @@ import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {PluginClones} from "../core/plugin/PluginClones.sol";
 import {Plugin} from "../core/plugin/Plugin.sol";
 import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgradeable.sol";
-import {DaoAuthorizableUpgradeable} from "../core/component/DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
 
-import {DAO} from "../core/DAO.sol";
+import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
 
 /// @notice Plugin Installer that has root permissions to install plugin on the dao and apply permissions.
-contract PluginInstaller {
+contract PluginInstaller is DaoAuthorizable {
     using ERC165Checker for address;
-    using Create2 for address payable;
-    using Address for address;
+    // using Create2 for address payable;
+    // using Address for address;
 
     bytes32 public constant INSTALL_PERMISSION_ID = keccak256("INSTALL_PERMISSION");
-    bytes32 public constant UPDATE_PERMISSION_ID = keccak256("UPDATE_PERMISSION");
+    bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
+        keccak256("SET_REPO_REGISTRY_PERMISSION");
 
     struct InstallPlugin {
         PluginManager manager;
         bytes data;
     }
-    // Way 1
-    // require(dao.isValidSignature(plugin, signature));
 
-    //
     struct UpdatePlugin {
         PluginManager manager;
         bytes data;
@@ -75,7 +73,6 @@ contract PluginInstaller {
     );
 
     event Updated(address dao, address[] helpers, Permission.ItemMultiTarget[] permissions);
-
     event PluginUpdated(address dao, address plugin);
     event PluginUninstalled(address dao, address plugin);
 
@@ -88,20 +85,37 @@ contract PluginInstaller {
 
     mapping(bytes32 => bytes32) private installPermissionHashes;
     mapping(bytes32 => bool) private pluginInstalledChecker;
-
     mapping(bytes32 => bytes32) private updatePermissionHashes;
-
     mapping(bytes32 => bytes32) private helperHashes;
 
     AragonPluginRegistry public repoRegistry;
 
-    constructor(AragonPluginRegistry _repoRegistry) {
+    /// @dev Modifier used to check if caller is the DAO, or has given permission by the DAO.
+    /// @param _dao The address of the DAO.
+    modifier daoAuthorized(address _dao) {
+        if (
+            msg.sender != _dao &&
+            !DAO(payable(_dao)).hasPermission(
+                address(this),
+                msg.sender,
+                INSTALL_PERMISSION_ID,
+                bytes("")
+            )
+        ) {
+            revert InstallNotAllowed();
+        }
+        _;
+    }
+
+    constructor(AragonPluginRegistry _repoRegistry, address _dao) {
+        __DaoAuthorizable_init(IDAO(_dao));
         repoRegistry = _repoRegistry;
     }
 
-    // TODO: protect it only to be called by us(aragon)
-    // and move it below..
-    function setRepoRegistry(AragonPluginRegistry _repoRegistry) external {
+    function setRepoRegistry(AragonPluginRegistry _repoRegistry)
+        external
+        auth(SET_REPO_REGISTRY_PERMISSION_ID)
+    {
         repoRegistry = _repoRegistry;
     }
 
@@ -145,12 +159,7 @@ contract PluginInstaller {
         address pluginManager,
         address plugin,
         Permission.ItemMultiTarget[] calldata permissions
-    ) public {
-        // make sure only dao calls it...
-        if (msg.sender != dao) {
-            revert InstallNotAllowed();
-        }
-
+    ) public daoAuthorized(dao) {
         bytes32 hash = keccak256(abi.encode(dao, pluginManager, plugin));
 
         if (pluginInstalledChecker[hash]) {
@@ -250,10 +259,7 @@ contract PluginInstaller {
         address pluginManager, // new plugin manager upgrade happens to.
         bytes memory initData,
         Permission.ItemMultiTarget[] calldata permissions
-    ) public {
-        // make sure only dao calls it...
-        require(msg.sender == dao);
-
+    ) public daoAuthorized(dao) {
         bytes32 hash = keccak256(abi.encode(dao, pluginManager, plugin));
 
         require(updatePermissionHashes[hash] == getPermissionsHash(permissions));
@@ -271,10 +277,7 @@ contract PluginInstaller {
         address[] calldata activeHelpers,
         PluginRepo pluginManagerRepo,
         address pluginManager
-    ) public {
-        // make sure only dao calls it...
-        require(msg.sender == dao);
-
+    ) public daoAuthorized(dao) {
         // Implicitly confirms plugin manager is valid valid.
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(pluginManagerRepo))) {

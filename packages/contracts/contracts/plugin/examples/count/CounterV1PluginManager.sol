@@ -5,13 +5,12 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {Permission, PluginManager, PluginManagerLib} from "../../PluginManager.sol";
+import {Permission, PluginManager} from "../../PluginManager.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
 contract CounterV1PluginManager is PluginManager {
     using Clones for address;
-    using PluginManagerLib for PluginManagerLib.Data;
 
     // For testing purposes, the below are public...
     MultiplyHelper public multiplyHelperBase;

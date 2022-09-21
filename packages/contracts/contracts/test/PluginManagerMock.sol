@@ -2,13 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginManager, PluginManagerLib} from "../plugin/PluginManager.sol";
+import {Permission, PluginManager} from "../plugin/PluginManager.sol";
 import {PluginUUPSUpgradableV1Mock, PluginUUPSUpgradableV2Mock} from "../test/PluginUUPSUpgradableMock.sol";
 
 // The first version of plugin manager.
 contract PluginManagerMock is PluginManager {
-    using PluginManagerLib for PluginManagerLib.Data;
-
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV1Mock public pluginBase;
 
@@ -71,8 +69,6 @@ contract PluginManagerMock is PluginManager {
 
 // The second version of plugin manager.
 contract PluginManagerV2Mock is PluginManager {
-    using PluginManagerLib for PluginManagerLib.Data;
-
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV2Mock public pluginBase;
 

@@ -5,9 +5,9 @@ pragma solidity 0.8.10;
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 
 contract PluginUUPSUpgradableV1Mock is PluginUUPSUpgradeable {
-    uint public num;
+    uint256 public num;
 
-    function initialize(uint _num) external initializer {
+    function initialize(uint256 _num) external initializer {
         num = _num;
     }
 
@@ -15,12 +15,12 @@ contract PluginUUPSUpgradableV1Mock is PluginUUPSUpgradeable {
 }
 
 contract PluginUUPSUpgradableV2Mock is PluginUUPSUpgradeable {
-    uint public num;
+    uint256 public num;
 
     // add new variable for update
     string public str;
 
-    function initialize(uint _num, string memory _str) external initializer {
+    function initialize(uint256 _num, string memory _str) external initializer {
         num = _num;
         str = _str;
     }
