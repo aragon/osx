@@ -5,11 +5,11 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {Permission, PluginManager} from "../../PluginManager.sol";
+import {Permission, PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
-contract CounterV1PluginManager is PluginManager {
+contract CounterV1PluginSetup is PluginSetup {
     using Clones for address;
 
     // For testing purposes, the below are public...
@@ -23,8 +23,8 @@ contract CounterV1PluginManager is PluginManager {
         counterBase = new CounterV1();
     }
 
-    function deploy(address dao, bytes memory data)
-        public
+    function prepareInstallation(address dao, bytes memory data)
+        external
         virtual
         override
         returns (
@@ -88,16 +88,16 @@ contract CounterV1PluginManager is PluginManager {
         return (plugin, helpers, permissions);
     }
 
-    function uninstall(
+    function prepareUninstallation(
         address dao,
         address plugin,
         address[] calldata activeHelpers
-    ) public virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
         permissions = new Permission.ItemMultiTarget[](activeHelpers.length != 0 ? 3 : 2);
 
         // set permissions
         permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+            Permission.Operation.Revoke,
             dao,
             plugin,
             NO_ORACLE,
@@ -105,7 +105,7 @@ contract CounterV1PluginManager is PluginManager {
         );
 
         permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+            Permission.Operation.Revoke,
             plugin,
             dao,
             NO_ORACLE,
@@ -114,7 +114,7 @@ contract CounterV1PluginManager is PluginManager {
 
         if (activeHelpers.length != 0) {
             permissions[2] = Permission.ItemMultiTarget(
-                Permission.Operation.Grant,
+                Permission.Operation.Revoke,
                 activeHelpers[0],
                 plugin,
                 NO_ORACLE,
@@ -123,11 +123,11 @@ contract CounterV1PluginManager is PluginManager {
         }
     }
 
-    function getImplementationAddress() public view virtual override returns (address) {
+    function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
     }
 
-    function deployABI() external view virtual override returns (string memory) {
+    function prepareInstallABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num)";
     }
 }

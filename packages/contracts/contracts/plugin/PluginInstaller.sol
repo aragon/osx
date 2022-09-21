@@ -1,97 +1,80 @@
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {Permission, PluginManager} from "./PluginManager.sol";
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
-import {TransparentProxy} from "../utils/TransparentProxy.sol";
-import {bytecodeAt} from "../utils/Contract.sol";
-
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {PluginClones} from "../core/plugin/PluginClones.sol";
-import {Plugin} from "../core/plugin/Plugin.sol";
-import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgradeable.sol";
 import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
-
 import {DAO, IDAO} from "../core/DAO.sol";
-import {PluginRepo} from "./PluginRepo.sol";
+
+import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
 
-/// @notice Plugin Installer that has root permissions to install plugin on the dao and apply permissions.
-contract PluginInstaller is DaoAuthorizable {
+import {Permission, PluginSetup} from "./PluginSetup.sol";
+import {PluginRepo} from "./PluginRepo.sol";
+
+/// @notice Plugin setup processor that has root permissions to setup plugin on the dao and apply permissions.
+contract PluginSetupProcessor is DaoAuthorizable {
     using ERC165Checker for address;
 
-    bytes32 public constant INSTALL_PERMISSION_ID = keccak256("INSTALL_PERMISSION");
+    bytes32 public constant PROCESS_SETUP_PERMISSION_ID = keccak256("PROCESS_SETUP_PERMISSION");
     bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
         keccak256("SET_REPO_REGISTRY_PERMISSION");
 
-    struct InstallPlugin {
-        PluginManager manager;
-        bytes data;
-    }
-
-    struct UpdatePlugin {
-        PluginManager manager;
-        bytes data;
-        address proxy;
-        uint16[3] oldVersion;
-    }
-
-    struct PluginUpdateDeployInfo {
+    struct UpdateSettings {
         address plugin;
-        PluginRepo pluginManagerRepo; // where plugin manager versions are handled.
-        address oldPluginManager;
-        address newPluginManager;
+        PluginRepo pluginSetupRepo; // where plugin manager versions are handled.
+        address oldPluginSetup;
+        address newPluginSetup;
     }
 
+    // TODO: do we need all these mappings?
+    mapping(bytes32 => bool) private isInstallationPrepared;
     mapping(bytes32 => bytes32) private installPermissionHashes;
-    mapping(bytes32 => bool) private pluginInstalledChecker;
     mapping(bytes32 => bytes32) private updatePermissionHashes;
-    mapping(bytes32 => bytes32) private helperHashes;
+    mapping(bytes32 => bytes32) private helpersHashes;
 
     AragonPluginRegistry public repoRegistry;
 
-    error InstallNotAllowed();
-    error PluginCountTooBig();
-    error UpdateNotAllowed();
-    error AlreadyThisVersion();
-    error UpgradeNotExistOnProxy();
-    error NotSupportsUpgradable();
+    error SetupNotAllowed();
+    error PluginNonupgradeable(address plugin);
+    error PermissionsInvalid(bytes32 expected, bytes32 actual);
+    error PluginNotPrepared();
+    error HelpersMismatch();
+    error PluginRepoNonexistant();
+    error PluginWithTheSameAddressExists(); // in case the PluginSetup is malicios and always/sometime returns the same address
 
-    error PermissionsWrong();
-    error PluginNotDeployed();
-    error HelpersWrong();
-    error PluginRepoNotExists();
-    error PluginWithTheSameAddressExists();
-
-    /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
-    /// @param dao The dao address that plugin belongs to.
-    /// @param plugin the plugin address.
-    event PluginInstalled(address dao, address plugin);
-
-    event Deployed(
+    event InstallationPrepared(
         address indexed sender,
         address indexed dao,
         address indexed plugin,
-        address pluginManager,
+        address pluginSetup,
         address[] helpers,
         Permission.ItemMultiTarget[] permissions,
         bytes data
     );
 
-    event Updated(address indexed dao, address[] helpers, Permission.ItemMultiTarget[] permissions);
-    event PluginUpdated(address indexed dao, address indexed plugin);
+    /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
+    /// @param dao The dao address that plugin belongs to.
+    /// @param plugin the plugin address.
+    event InstallationProcessed(address dao, address plugin);
+
+    event UpdatePrepared(
+        address indexed dao,
+        address[] helpers,
+        Permission.ItemMultiTarget[] permissions
+    );
+    event UpdateProcessed(address indexed dao, address indexed plugin);
+
     event PluginUninstalled(address indexed dao, address indexed plugin);
 
-    /// @dev Modifier used to check if caller is the DAO, or has given permission by the DAO.
+    /// @dev Modifier used to check if the setup can be processed by the caller.
     /// @param _dao The address of the DAO.
-    modifier daoAuthorized(address _dao) {
-        _isCallAllowed(_dao);
+    modifier canProcessSetup(address _dao) {
+        _canProcessSetup(_dao);
         _;
     }
 
@@ -107,191 +90,204 @@ contract PluginInstaller is DaoAuthorizable {
         repoRegistry = _repoRegistry;
     }
 
-    function deployInstall(
-        address dao,
-        address pluginManager,
-        PluginRepo pluginManagerRepo,
-        bytes memory data // encoded per pluginManager's deploy ABI
-    ) public returns (Permission.ItemMultiTarget[] memory) {
+    function PrepareInstallation(
+        address _dao,
+        address _pluginSetup,
+        PluginRepo _pluginSetupRepo,
+        bytes memory _data // encoded per pluginSetup's prepareInstallation ABI
+    ) external returns (Permission.ItemMultiTarget[] memory) {
         // ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(pluginManagerRepo))) {
-            revert PluginRepoNotExists();
+        if (!repoRegistry.entries(address(_pluginSetupRepo))) {
+            revert PluginRepoNonexistant();
         }
 
-        // Reverts if pluginManager doesn't exist on the repo...
-        pluginManagerRepo.getVersionByPluginManager(pluginManager);
+        // Reverts if pluginSetup doesn't exist on the repo...
+        _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
-        // deploy
+        // prepareInstallation
         (
             address plugin,
             address[] memory helpers,
             Permission.ItemMultiTarget[] memory permissions
-        ) = PluginManager(pluginManager).deploy(dao, data);
+        ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // important safety measure to include dao + plugin manager in the encoding.
-        bytes32 hash = keccak256(abi.encode(dao, pluginManager, plugin));
+        bytes32 installationId = keccak256(abi.encode(_dao, _pluginSetup, plugin));
 
-        pluginInstalledChecker[hash] = true;
+        isInstallationPrepared[installationId] = true;
 
-        installPermissionHashes[hash] = getPermissionsHash(permissions);
+        installPermissionHashes[installationId] = getPermissionsHash(permissions);
 
-        helperHashes[hash] = keccak256(abi.encode(helpers));
+        helpersHashes[installationId] = keccak256(abi.encode(helpers));
 
-        emit Deployed(msg.sender, dao, plugin, pluginManager, helpers, permissions, data);
+        emit InstallationPrepared(
+            msg.sender,
+            _dao,
+            plugin,
+            _pluginSetup,
+            helpers,
+            permissions,
+            _data
+        );
 
         return permissions;
     }
 
-    function installPlugin(
-        address dao,
-        address pluginManager,
-        address plugin,
-        Permission.ItemMultiTarget[] calldata permissions
-    ) public daoAuthorized(dao) {
-        bytes32 hash = keccak256(abi.encode(dao, pluginManager, plugin));
+    function processInstallation(
+        address _dao,
+        address _pluginSetup,
+        address _plugin,
+        Permission.ItemMultiTarget[] calldata _permissions
+    ) external canProcessSetup(_dao) {
+        bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
 
-        if (pluginInstalledChecker[hash]) {
+        // TODO: is this the correct place for this check?
+        // this should be in the prepare installtion function
+        // before : isInstallationPrepared[installationId] = true;
+        if (isInstallationPrepared[setupId]) {
             revert PluginWithTheSameAddressExists();
         }
 
-        bytes32 permissionHash = installPermissionHashes[hash];
+        bytes32 storedPermissionHash = installPermissionHashes[setupId];
 
         // check if plugin was actually deployed..
-        if (permissionHash == bytes32(0)) {
-            revert PluginNotDeployed();
+        if (storedPermissionHash == bytes32(0)) {
+            revert PluginNotPrepared();
         }
 
+        bytes32 passedPermissionHash = getPermissionsHash(_permissions);
+
         // check that permissions weren't tempered.
-        if (permissionHash != getPermissionsHash(permissions)) {
-            revert PermissionsWrong();
+        if (storedPermissionHash != passedPermissionHash) {
+            revert PermissionsInvalid({
+                expected: storedPermissionHash,
+                actual: passedPermissionHash
+            });
         }
 
         // apply permissions on a dao..
-        DAO(payable(dao)).bulkOnMultiTarget(permissions);
+        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
 
         // emit the event to connect plugin to the dao.
-        emit PluginInstalled(dao, plugin);
+        emit InstallationProcessed(_dao, _plugin);
 
-        delete installPermissionHashes[hash];
+        delete installPermissionHashes[setupId];
     }
 
-    // TODO: might we need to check when `deployUpdate` gets called, if plugin actually was installed ?
+    // TODO: might we need to check when `prepareUpdate` gets called, if plugin actually was installed ?
     // Though problematic, since this check only happens when plugin updates from 1.0 to 1.x
     // and checking it always would cost more... shall we still check it and how ?
-    function deployUpdate(
-        address dao,
-        PluginUpdateDeployInfo calldata updateInfo,
-        address[] calldata helpers, // helpers that were deployed when installing/updating the plugin.
-        bytes memory data // encoded per pluginManager's update ABI,
-    ) public returns (Permission.ItemMultiTarget[] memory, bytes memory) {
+    function prepareUpdate(
+        address _dao,
+        UpdateSettings calldata _updateSettings,
+        address[] calldata _helpers, // helpers that were deployed when installing/updating the plugin.
+        bytes memory _data // encoded per pluginSetup's update ABI,
+    ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
-        if (updateInfo.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            revert NotSupportsUpgradable();
+        if (_updateSettings.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
+            revert PluginNonupgradeable({plugin: _updateSettings.plugin});
         }
 
         // Implicitly confirms plugin managers are valid.
         // ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(updateInfo.pluginManagerRepo))) {
-            revert PluginRepoNotExists();
+        if (!repoRegistry.entries(address(_updateSettings.pluginSetupRepo))) {
+            revert PluginRepoNonexistant();
         }
 
-        (uint16[3] memory oldVersion, , ) = updateInfo.pluginManagerRepo.getVersionByPluginManager(
-            updateInfo.oldPluginManager
+        (uint16[3] memory oldVersion, , ) = _updateSettings.pluginSetupRepo.getVersionByPluginSetup(
+            _updateSettings.oldPluginSetup
         );
 
-        // Reverts if newPluginManager doesn't exist on the repo...
-        updateInfo.pluginManagerRepo.getVersionByPluginManager(updateInfo.newPluginManager);
+        // Reverts if newPluginSetup doesn't exist on the repo...
+        _updateSettings.pluginSetupRepo.getVersionByPluginSetup(_updateSettings.newPluginSetup);
 
         // Check if helpers are correct...
         // Implicitly checks if plugin was installed in the first place.
-        bytes32 oldHash = keccak256(
-            abi.encode(dao, updateInfo.oldPluginManager, updateInfo.plugin)
+        bytes32 oldSetupId = keccak256(
+            abi.encode(_dao, _updateSettings.oldPluginSetup, _updateSettings.plugin)
         );
 
-        if (helperHashes[oldHash] != keccak256(abi.encode(helpers))) {
-            revert HelpersWrong();
+        if (helpersHashes[oldSetupId] != keccak256(abi.encode(_helpers))) {
+            revert HelpersMismatch();
         }
 
-        delete helperHashes[oldHash];
+        delete helpersHashes[oldSetupId];
 
-        // update deploy..
+        // prepare update
         (
             address[] memory activeHelpers,
             bytes memory initData,
             Permission.ItemMultiTarget[] memory permissions
-        ) = PluginManager(updateInfo.newPluginManager).update(
-                dao,
-                updateInfo.plugin,
-                helpers,
-                data,
+        ) = PluginSetup(_updateSettings.newPluginSetup).prepareUpdate(
+                _dao,
+                _updateSettings.plugin,
+                _helpers,
+                _data,
                 oldVersion
             );
 
         // add new helpers for the future update checks
-        bytes32 newHash = keccak256(
-            abi.encode(dao, updateInfo.newPluginManager, updateInfo.plugin)
+        bytes32 newSetupId = keccak256(
+            abi.encode(_dao, _updateSettings.newPluginSetup, _updateSettings.plugin)
         );
-        helperHashes[newHash] = keccak256(abi.encode(activeHelpers));
+        helpersHashes[newSetupId] = keccak256(abi.encode(activeHelpers));
 
         // check if permissions are corret.
-        updatePermissionHashes[newHash] = getPermissionsHash(permissions);
+        updatePermissionHashes[newSetupId] = getPermissionsHash(permissions);
 
-        emit Updated(dao, activeHelpers, permissions);
+        emit UpdatePrepared(_dao, activeHelpers, permissions);
 
         return (permissions, initData);
     }
 
-    function updatePlugin(
-        address dao,
-        address plugin, // proxy contract
-        address pluginManager, // new plugin manager upgrade happens to.
-        bytes memory initData,
-        Permission.ItemMultiTarget[] calldata permissions
-    ) public daoAuthorized(dao) {
-        bytes32 hash = keccak256(abi.encode(dao, pluginManager, plugin));
+    function processUpdate(
+        address _dao,
+        address _plugin, // proxy contract
+        address _pluginSetup, // new plugin manager upgrade happens to.
+        bytes memory _initData,
+        Permission.ItemMultiTarget[] calldata _permissions
+    ) external canProcessSetup(_dao) {
+        bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
 
-        require(updatePermissionHashes[hash] == getPermissionsHash(permissions));
+        require(updatePermissionHashes[setupId] == getPermissionsHash(_permissions));
 
-        upgradeProxy(plugin, PluginManager(pluginManager).getImplementationAddress(), initData);
+        upgradeProxy(_plugin, PluginSetup(_pluginSetup).getImplementationAddress(), _initData);
 
-        DAO(payable(dao)).bulkOnMultiTarget(permissions);
+        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
 
-        emit PluginUpdated(dao, plugin); // TODO: some other parts might be needed..
+        emit UpdateProcessed(_dao, _plugin); // TODO: some other parts might be needed..
     }
 
-    function uninstallPlugin(
-        address dao,
-        address plugin,
-        address pluginManager,
-        PluginRepo pluginManagerRepo,
-        address[] calldata activeHelpers
-    ) public daoAuthorized(dao) {
+    function processUninstallation(
+        address _dao,
+        address _plugin,
+        address _pluginSetup,
+        PluginRepo _pluginSetupRepo,
+        address[] calldata _activeHelpers
+    ) external canProcessSetup(_dao) {
         // Implicitly confirms plugin manager is valid valid.
         // ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(pluginManagerRepo))) {
-            revert PluginRepoNotExists();
+        if (!repoRegistry.entries(address(_pluginSetupRepo))) {
+            revert PluginRepoNonexistant();
         }
 
-        // Reverts if pluginManager doesn't exist on the repo...
-        pluginManagerRepo.getVersionByPluginManager(pluginManager);
+        // Reverts if pluginSetup doesn't exist on the repo...
+        _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
-        bytes32 hash = keccak256(abi.encode(dao, pluginManager, plugin));
+        bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
 
-        if (helperHashes[hash] != keccak256(abi.encode(activeHelpers))) {
-            revert HelpersWrong();
+        if (helpersHashes[setupId] != keccak256(abi.encode(_activeHelpers))) {
+            revert HelpersMismatch();
         }
 
-        delete helperHashes[hash];
+        delete helpersHashes[setupId];
 
-        Permission.ItemMultiTarget[] memory permissions = PluginManager(pluginManager).uninstall(
-            dao,
-            plugin,
-            activeHelpers
-        );
+        Permission.ItemMultiTarget[] memory permissions = PluginSetup(_pluginSetup)
+            .prepareUninstallation(_dao, _plugin, _activeHelpers);
 
-        DAO(payable(dao)).bulkOnMultiTarget(permissions);
+        DAO(payable(_dao)).bulkOnMultiTarget(permissions);
 
-        emit PluginUninstalled(dao, plugin);
+        emit PluginUninstalled(_dao, _plugin);
     }
 
     function getPermissionsHash(Permission.ItemMultiTarget[] memory permissions)
@@ -329,7 +325,7 @@ contract PluginInstaller is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert UpgradeNotExistOnProxy();
+                revert PluginNonupgradeable({plugin: proxy});
             }
         } else {
             try PluginUUPSUpgradeable(proxy).upgradeTo(implementation) {} catch Error(
@@ -339,22 +335,22 @@ contract PluginInstaller is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert UpgradeNotExistOnProxy();
+                revert PluginNonupgradeable({plugin: proxy});
             }
         }
     }
 
-    function _isCallAllowed(address _dao) internal view {
+    function _canProcessSetup(address _dao) private view {
         if (
             msg.sender != _dao &&
             !DAO(payable(_dao)).hasPermission(
                 address(this),
                 msg.sender,
-                INSTALL_PERMISSION_ID,
+                PROCESS_SETUP_PERMISSION_ID,
                 bytes("")
             )
         ) {
-            revert InstallNotAllowed();
+            revert SetupNotAllowed();
         }
     }
 }

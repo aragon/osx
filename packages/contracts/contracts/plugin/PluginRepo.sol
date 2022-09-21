@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../utils/UncheckedMath.sol";
-import "./PluginManager.sol";
+import "./PluginSetup.sol";
 import "./IPluginRepo.sol";
 
 /// @title PluginRepo
@@ -25,7 +25,7 @@ contract PluginRepo is
 {
     struct Version {
         uint16[3] semanticVersion;
-        address pluginManager;
+        address pluginSetup;
         bytes contentURI;
     }
 
@@ -44,8 +44,8 @@ contract PluginRepo is
     /// @notice A mapping between the semantic version number hash and the version index.
     mapping(bytes32 => uint256) internal versionIndexForSemantic;
 
-    /// @notice A mapping between the `PluginManager` contract addresses and the version index.
-    mapping(address => uint256) internal versionIndexForPluginManager;
+    /// @notice A mapping between the `PluginSetup` contract addresses and the version index.
+    mapping(address => uint256) internal versionIndexForPluginSetup;
 
     /// @notice Thrown if a semantic version number bump is invalid.
     /// @param currentVersion The current semantic version number.
@@ -56,13 +56,13 @@ contract PluginRepo is
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);
 
-    /// @notice Thrown if a contract does not inherit from `PluginManager`.
-    /// @param invalidPluginManager The address of the contract missing the `PluginManager` interface.
-    error InvalidPluginManagerInterface(address invalidPluginManager);
+    /// @notice Thrown if a contract does not inherit from `PluginSetup`.
+    /// @param invalidPluginSetup The address of the contract missing the `PluginSetup` interface.
+    error InvalidPluginSetupInterface(address invalidPluginSetup);
 
-    /// @notice Thrown if a contract is not a `PluginManager` contract.
-    /// @param invalidPluginManager The address of the contract not being a plugin factory.
-    error InvalidPluginManagerContract(address invalidPluginManager);
+    /// @notice Thrown if a contract is not a `PluginSetup` contract.
+    /// @param invalidPluginSetup The address of the contract not being a plugin factory.
+    error InvalidPluginSetupContract(address invalidPluginSetup);
 
     /// @notice Thrown if address is not a contract.
     /// @param invalidContract The address not being a contract.
@@ -92,25 +92,25 @@ contract PluginRepo is
     /// @inheritdoc IPluginRepo
     function createVersion(
         uint16[3] memory _newSemanticVersion,
-        address _pluginManager,
+        address _pluginSetup,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
-        // Check if `_pluginManager` is a `PluginManager` contract
-        if (!Address.isContract(_pluginManager)) {
-            revert InvalidContractAddress({invalidContract: _pluginManager});
+        // Check if `_pluginSetup` is a `PluginSetup` contract
+        if (!Address.isContract(_pluginSetup)) {
+            revert InvalidContractAddress({invalidContract: _pluginSetup});
         }
-        
+
         // TODO: uncommment
         // try
-        //     PluginManager(_pluginManager).supportsInterface(
-        //         PluginManager.PLUGIN_FACTORY_INTERFACE_ID
+        //     PluginSetup(_pluginSetup).supportsInterface(
+        //         PluginSetup.PLUGIN_FACTORY_INTERFACE_ID
         //     )
         // returns (bool result) {
         //     if (!result) {
-        //         revert InvalidPluginManagerInterface({invalidPluginManager: _pluginManager});
+        //         revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         //     }
         // } catch {
-        //     revert InvalidPluginManagerContract({invalidPluginManager: _pluginManager});
+        //     revert InvalidPluginSetupContract({invalidPluginSetup: _pluginSetup});
         // }
 
         uint256 currentVersionIndex = nextVersionIndex - 1;
@@ -131,23 +131,23 @@ contract PluginRepo is
 
         uint256 versionIndex = nextVersionIndex;
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
-        versions[versionIndex] = Version(_newSemanticVersion, _pluginManager, _contentURI);
+        versions[versionIndex] = Version(_newSemanticVersion, _pluginSetup, _contentURI);
         versionIndexForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIndex;
-        versionIndexForPluginManager[_pluginManager] = versionIndex;
+        versionIndexForPluginSetup[_pluginSetup] = versionIndex;
 
         emit VersionCreated(versionIndex, _newSemanticVersion);
     }
 
     /// @notice Gets the version information of the latest version.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
     function getLatestVersion()
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
@@ -156,30 +156,30 @@ contract PluginRepo is
 
     /// @notice Gets the version information associated with a plugin factory address.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionByPluginManager(address _pluginManager)
+    function getVersionByPluginSetup(address _pluginSetup)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
-        return getVersionById(versionIndexForPluginManager[_pluginManager]);
+        return getVersionById(versionIndexForPluginSetup[_pluginSetup]);
     }
 
     /// @notice Gets the version information associated with a semantic version number.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
     function getVersionBySemanticVersion(uint16[3] memory _semanticVersion)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
@@ -188,21 +188,21 @@ contract PluginRepo is
 
     /// @notice Gets the version information associated with a version index.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
     function getVersionById(uint256 _versionIndex)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
         if (_versionIndex <= 0 || _versionIndex >= nextVersionIndex)
             revert VersionIndexDoesNotExist({versionIndex: _versionIndex});
         Version storage version = versions[_versionIndex];
-        return (version.semanticVersion, version.pluginManager, version.contentURI);
+        return (version.semanticVersion, version.pluginSetup, version.contentURI);
     }
 
     /// @notice Gets the total number of published versions.

@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginManager} from "../plugin/PluginManager.sol";
+import {Permission, PluginSetup} from "../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradableV1Mock, PluginUUPSUpgradableV2Mock} from "../test/PluginUUPSUpgradableMock.sol";
 
 // The first version of plugin manager.
-contract PluginManagerMock is PluginManager {
+contract PluginSetupMock is PluginSetup {
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV1Mock public pluginBase;
 
@@ -19,7 +19,7 @@ contract PluginManagerMock is PluginManager {
         pluginBase = new PluginUUPSUpgradableV1Mock();
     }
 
-    function deploy(address dao, bytes memory data)
+    function prepareInstallation(address dao, bytes memory data)
         public
         virtual
         override
@@ -62,13 +62,13 @@ contract PluginManagerMock is PluginManager {
         return address(pluginBase);
     }
 
-    function deployABI() external view virtual override returns (string memory) {
+    function prepareInstallABI() external view virtual override returns (string memory) {
         return "";
     }
 }
 
 // The second version of plugin manager.
-contract PluginManagerV2Mock is PluginManager {
+contract PluginSetupV2Mock is PluginSetup {
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV2Mock public pluginBase;
 
@@ -81,7 +81,7 @@ contract PluginManagerV2Mock is PluginManager {
         pluginBase = new PluginUUPSUpgradableV2Mock();
     }
 
-    function deploy(address dao, bytes memory data)
+    function prepareInstallation(address dao, bytes memory)
         public
         virtual
         override
@@ -120,12 +120,12 @@ contract PluginManagerV2Mock is PluginManager {
         );
     }
 
-    function update(
+    function prepareUpdate(
         address dao,
         address plugin, // proxy
         address[] memory helpers,
-        bytes memory data,
-        uint16[3] calldata oldVersion
+        bytes memory,
+        uint16[3] calldata
     )
         public
         virtual
@@ -173,7 +173,7 @@ contract PluginManagerV2Mock is PluginManager {
         return address(pluginBase);
     }
 
-    function deployABI() external view virtual override returns (string memory) {
+    function prepareInstallABI() external view virtual override returns (string memory) {
         return "";
     }
 }

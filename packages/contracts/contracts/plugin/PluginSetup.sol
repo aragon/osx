@@ -4,42 +4,35 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
-import {bytecodeAt} from "../utils/Contract.sol";
+
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
-import {TransparentProxy} from "../utils/TransparentProxy.sol";
-import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {PluginClones} from "../core/plugin/PluginClones.sol";
-import {Plugin} from "../core/plugin/Plugin.sol";
-import {PluginTransparentUpgradeable} from "../core/plugin/PluginTransparentUpgradeable.sol";
 
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their managers.
-abstract contract PluginManager {
-    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginManager).interfaceId;
+abstract contract PluginSetup {
+    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginSetup).interfaceId;
 
-    function deploy(address dao, bytes memory data)
-        public
+    function prepareInstallation(address dao, bytes memory data)
+        external
         virtual
         returns (
             address plugin,
-            address[] memory helpers,
+            address[] memory helpers, // TODO: perhaps relatedAddresses could be a better naming
             Permission.ItemMultiTarget[] memory permissions
         );
 
-    function update(
+    function prepareUpdate(
         address dao,
         address plugin, // proxy
         address[] memory helpers,
         bytes memory data,
-        uint16[3] calldata oldVersion
+        uint16[3] calldata oldVersion // TODO: check if it can be done with oldPluginSetup
     )
-        public
+        external
         virtual
         returns (
             address[] memory activeHelpers,
@@ -48,11 +41,12 @@ abstract contract PluginManager {
         )
     {}
 
-    function uninstall(
+    // TODO: should we have  `_data` param? in case dev need to do somthing else depending on the data?
+    function prepareUninstallation(
         address dao,
         address plugin,
         address[] calldata activeHelpers
-    ) public virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
+    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
 
     function createERC1967Proxy(
         address _dao,
@@ -64,14 +58,18 @@ abstract contract PluginManager {
 
     /// @notice the plugin's base implementation address proxies need to delegate calls.
     /// @return address of the base contract address.
-    function getImplementationAddress() public view virtual returns (address);
+    function getImplementationAddress() external view virtual returns (address);
 
-    /// @notice the ABI in string format that deploy function needs to use.
+    // TODO: perhaps find a better name for "*ABI" naming, or "*Abi"
+
+    /// @notice the ABI in string format that prepareInstallation function needs to use.
     /// @return ABI in string format.
-    function deployABI() external view virtual returns (string memory);
+    function prepareInstallABI() external view virtual returns (string memory);
 
     /// @notice The ABI in string format that update function needs to use.
     /// @dev Not required to be overriden as there might be no update at all by dev.
     /// @return ABI in string format.
-    function updateABI() external view virtual returns (string memory) {}
+    function prepapreUpdateABI() external view virtual returns (string memory) {}
+
+    // TODO: if uninstall have data ? should we also have: prepareUninstallABI() ?
 }

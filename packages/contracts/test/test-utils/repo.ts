@@ -1,14 +1,12 @@
 import {ethers} from 'hardhat';
 
-import {PluginManagerMock} from '../../typechain';
+import {PluginSetupMock} from '../../typechain';
 
-export async function deployMockPluginManager(): Promise<PluginManagerMock> {
-  const PluginManagerMock = await ethers.getContractFactory(
-    'PluginManagerMock'
-  );
-  const pluginManagerMockContract = await PluginManagerMock.deploy();
+export async function deployMockPluginSetup(): Promise<PluginSetupMock> {
+  const PluginSetupMock = await ethers.getContractFactory('PluginSetupMock');
+  const pluginSetupMockContract = await PluginSetupMock.deploy();
 
-  return pluginManagerMockContract;
+  return pluginSetupMockContract;
 }
 
 export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {

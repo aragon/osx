@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `AragonPlugin` and `AragonUpgradablePlugin` for the devs to inherit from for their concrete plugin implementations.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
-- Added Abstract `PluginManager` for the devs to inherit from for their concrete plugin manager implementation.
+- Added Abstract `PluginSetup` for the devs to inherit from for their concrete plugin manager implementation.
 - Added the `solidity-docgen` hardhat plugin by OpenZepplin to automatically generate documentation via `yarn docgen`.
 - Added deployment script for `ENSSubdomainRegistrar`.
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.

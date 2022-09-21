@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {Permission, PluginManager} from "../../PluginManager.sol";
+import {Permission, PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import "./CounterV2.sol";
 
-contract CounterV2PluginManager is PluginManager {
+contract CounterV2PluginSetup is PluginSetup {
     using Clones for address;
 
     // For testing purposes, the below are public...
@@ -25,8 +25,8 @@ contract CounterV2PluginManager is PluginManager {
         counterBase = new CounterV2();
     }
 
-    function deploy(address dao, bytes memory data)
-        public
+    function prepareInstallation(address dao, bytes memory data)
+        external
         virtual
         override
         returns (
@@ -90,14 +90,14 @@ contract CounterV2PluginManager is PluginManager {
         return (plugin, helpers, permissions);
     }
 
-    function update(
+    function prepareUpdate(
         address dao,
         address plugin, // proxy
         address[] memory helpers,
         bytes memory data,
         uint16[3] calldata oldVersion
     )
-        public
+        external
         override
         returns (
             address[] memory activeHelpers,
@@ -129,11 +129,11 @@ contract CounterV2PluginManager is PluginManager {
         activeHelpers[0] = helpers[0];
     }
 
-    function uninstall(
+    function prepareUninstallation(
         address dao,
         address plugin,
         address[] calldata activeHelpers
-    ) public virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
         permissions = new Permission.ItemMultiTarget[](activeHelpers.length != 0 ? 3 : 2);
 
         // set permissions
@@ -164,15 +164,15 @@ contract CounterV2PluginManager is PluginManager {
         }
     }
 
-    function getImplementationAddress() public view virtual override returns (address) {
+    function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
     }
 
-    function deployABI() external view virtual override returns (string memory) {
+    function prepareInstallABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num, uint newVariable)";
     }
 
-    function updateABI() external view virtual override returns (string memory) {
+    function prepapreUpdateABI() external view virtual override returns (string memory) {
         return "(uint _newVariable)";
     }
 }

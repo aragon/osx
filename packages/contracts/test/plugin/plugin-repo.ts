@@ -4,8 +4,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {PluginRepo, PluginManagerMock} from '../../typechain';
-import {deployMockPluginManager} from '../test-utils/repo';
+import {PluginRepo, PluginSetupMock} from '../../typechain';
+import {deployMockPluginSetup} from '../test-utils/repo';
 import {customError} from '../test-utils/custom-error-helper';
 
 const emptyBytes = '0x00';
@@ -14,17 +14,17 @@ describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: any;
-  let pluginManagerMock: PluginManagerMock;
+  let pluginSetupMock: PluginSetupMock;
 
   function assertVersion(
     actualVersionData: any,
     expectedSemanticVersion: any,
-    expectedPluginManager: any,
+    expectedPluginSetup: any,
     expectedContentUri: any
   ) {
     const {
       semanticVersion: [maj, min, pat],
-      pluginManager,
+      pluginSetup,
       contentURI,
     } = actualVersionData;
 
@@ -32,7 +32,7 @@ describe('PluginRepo', function () {
     expect(min).to.equal(expectedSemanticVersion[1]); // minor should match
     expect(pat).to.equal(expectedSemanticVersion[2]); // patch should match
 
-    expect(pluginManager).to.equal(expectedPluginManager); // code should match
+    expect(pluginSetup).to.equal(expectedPluginSetup); // code should match
     expect(contentURI).to.equal(expectedContentUri); // content should match
   }
 
@@ -48,7 +48,7 @@ describe('PluginRepo', function () {
     await pluginRepo.initialize(ownerAddress);
 
     // deploy pluging factory mock
-    pluginManagerMock = await deployMockPluginManager();
+    pluginSetupMock = await deployMockPluginSetup();
   });
 
   it('computes correct valid bumps', async function () {
@@ -80,19 +80,19 @@ describe('PluginRepo', function () {
   // valid version as being a correct bump from 0.0.0
   it('cannot create invalid first version', async function () {
     await expect(
-      pluginRepo.createVersion([1, 1, 0], pluginManagerMock.address, emptyBytes)
+      pluginRepo.createVersion([1, 1, 0], pluginSetupMock.address, emptyBytes)
     ).to.be.revertedWith('InvalidBump([0, 0, 0], [1, 1, 0])');
   });
 
   it.skip('cannot create version with unsupported interface contract', async function () {
     const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
     let adaptiveERC165 = await AdaptiveERC165.deploy();
-    
+
     // TODO: GIORGI fix after the repo is fixed...
     await expect(
       pluginRepo.createVersion([1, 0, 0], adaptiveERC165.address, emptyBytes)
     ).to.be.revertedWith(
-      customError('InvalidPluginManagerInterface', adaptiveERC165.address)
+      customError('InvalidPluginSetupInterface', adaptiveERC165.address)
     );
   });
 
@@ -105,18 +105,18 @@ describe('PluginRepo', function () {
   });
 
   context('creating initial version', async function () {
-    let initialPluginManager: any;
+    let initialPluginSetup: any;
     const initialContent = '0x12';
 
     before(async function () {
-      const pluginManagerMock = await deployMockPluginManager();
-      initialPluginManager = pluginManagerMock.address;
+      const pluginSetupMock = await deployMockPluginSetup();
+      initialPluginSetup = pluginSetupMock.address;
     });
 
     beforeEach(async function () {
       await pluginRepo.createVersion(
         [1, 0, 0],
-        initialPluginManager,
+        initialPluginSetup,
         initialContent
       );
     });
@@ -125,7 +125,7 @@ describe('PluginRepo', function () {
       assertVersion(
         await pluginRepo.getLatestVersion(),
         [1, 0, 0],
-        initialPluginManager,
+        initialPluginSetup,
         initialContent
       );
     });
@@ -134,16 +134,16 @@ describe('PluginRepo', function () {
       assertVersion(
         await pluginRepo.getVersionBySemanticVersion([1, 0, 0]),
         [1, 0, 0],
-        initialPluginManager,
+        initialPluginSetup,
         initialContent
       );
     });
 
     it('version is fetchable by plugin factory address', async () => {
       assertVersion(
-        await pluginRepo.getVersionByPluginManager(initialPluginManager),
+        await pluginRepo.getVersionByPluginSetup(initialPluginSetup),
         [1, 0, 0],
-        initialPluginManager,
+        initialPluginSetup,
         initialContent
       );
     });
@@ -152,18 +152,14 @@ describe('PluginRepo', function () {
       assertVersion(
         await pluginRepo.getVersionById(1),
         [1, 0, 0],
-        initialPluginManager,
+        initialPluginSetup,
         initialContent
       );
     });
 
     it('fails when version bump is invalid', async () => {
       await expect(
-        pluginRepo.createVersion(
-          [1, 2, 0],
-          initialPluginManager,
-          initialContent
-        )
+        pluginRepo.createVersion([1, 2, 0], initialPluginSetup, initialContent)
       ).to.be.revertedWith('InvalidBump([1, 0, 0], [1, 2, 0])');
     });
 
@@ -175,23 +171,23 @@ describe('PluginRepo', function () {
     });
 
     context('adding new version', () => {
-      let newPluginManager: string;
+      let newPluginSetup: string;
       const newContent = '0x13';
 
       before(async function () {
-        const pluginManagerMock = await deployMockPluginManager();
-        newPluginManager = pluginManagerMock.address;
+        const pluginSetupMock = await deployMockPluginSetup();
+        newPluginSetup = pluginSetupMock.address;
       });
 
       beforeEach(async function () {
-        await pluginRepo.createVersion([2, 0, 0], newPluginManager, newContent);
+        await pluginRepo.createVersion([2, 0, 0], newPluginSetup, newContent);
       });
 
       it('new version is fetchable as latest', async () => {
         assertVersion(
           await pluginRepo.getLatestVersion(),
           [2, 0, 0],
-          newPluginManager,
+          newPluginSetup,
           newContent
         );
       });
@@ -200,16 +196,16 @@ describe('PluginRepo', function () {
         assertVersion(
           await pluginRepo.getVersionBySemanticVersion([2, 0, 0]),
           [2, 0, 0],
-          newPluginManager,
+          newPluginSetup,
           newContent
         );
       });
 
       it('new version is fetchable by contract address', async () => {
         assertVersion(
-          await pluginRepo.getVersionByPluginManager(newPluginManager),
+          await pluginRepo.getVersionByPluginSetup(newPluginSetup),
           [2, 0, 0],
-          newPluginManager,
+          newPluginSetup,
           newContent
         );
       });
@@ -218,7 +214,7 @@ describe('PluginRepo', function () {
         assertVersion(
           await pluginRepo.getVersionById(2),
           [2, 0, 0],
-          newPluginManager,
+          newPluginSetup,
           newContent
         );
       });
@@ -227,16 +223,16 @@ describe('PluginRepo', function () {
         assertVersion(
           await pluginRepo.getVersionBySemanticVersion([1, 0, 0]),
           [1, 0, 0],
-          initialPluginManager,
+          initialPluginSetup,
           initialContent
         );
       });
 
       it('old version is fetchable by contract address', async () => {
         assertVersion(
-          await pluginRepo.getVersionByPluginManager(initialPluginManager),
+          await pluginRepo.getVersionByPluginSetup(initialPluginSetup),
           [1, 0, 0],
-          initialPluginManager,
+          initialPluginSetup,
           initialContent
         );
       });
@@ -245,7 +241,7 @@ describe('PluginRepo', function () {
         assertVersion(
           await pluginRepo.getVersionById(1),
           [1, 0, 0],
-          initialPluginManager,
+          initialPluginSetup,
           initialContent
         );
       });
