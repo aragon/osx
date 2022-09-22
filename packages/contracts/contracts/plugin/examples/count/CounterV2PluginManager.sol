@@ -138,7 +138,7 @@ contract CounterV2PluginSetup is PluginSetup {
 
         // set permissions
         permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+            Permission.Operation.Revoke,
             dao,
             plugin,
             NO_ORACLE,
@@ -146,7 +146,7 @@ contract CounterV2PluginSetup is PluginSetup {
         );
 
         permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+            Permission.Operation.Revoke,
             plugin,
             dao,
             NO_ORACLE,
@@ -155,7 +155,7 @@ contract CounterV2PluginSetup is PluginSetup {
 
         if (activeHelpers.length != 0) {
             permissions[2] = Permission.ItemMultiTarget(
-                Permission.Operation.Grant,
+                Permission.Operation.Revoke,
                 activeHelpers[0],
                 plugin,
                 NO_ORACLE,
