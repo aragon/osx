@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored event names.
 - Refacotred `deposits` and `withdraws` into one field `transfers`
 - Refactored `VaultWithdraw` and `VaultDeposit` into one type `VaultTransfer`
+- Removes not null enforcing `Proposal.metadata`
 
 ## v0.2.0-alpha
 
