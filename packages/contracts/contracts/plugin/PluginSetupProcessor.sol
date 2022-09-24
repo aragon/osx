@@ -78,7 +78,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _;
     }
 
-    constructor(AragonPluginRegistry _repoRegistry, address _dao) {
+    // TODO: make sure if `DaoAuthorizable` should have constructor or `initialize()`
+    // constructor(AragonPluginRegistry _repoRegistry) {
+    //     repoRegistry = _repoRegistry;
+    // }
+
+    function initialize(AragonPluginRegistry _repoRegistry, address _dao) external initializer {
         __DaoAuthorizable_init(IDAO(_dao));
         repoRegistry = _repoRegistry;
     }
@@ -114,6 +119,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // important safety measure to include dao + plugin manager in the encoding.
         bytes32 installationId = keccak256(abi.encode(_dao, _pluginSetup, plugin));
 
+        if (isInstallationPrepared[installationId]) {
+            revert PluginWithTheSameAddressExists();
+        }
+
         isInstallationPrepared[installationId] = true;
 
         installPermissionHashes[installationId] = getPermissionsHash(permissions);
@@ -144,9 +153,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // TODO: is this the correct place for this check?
         // this should be in the prepare installtion function
         // before : isInstallationPrepared[installationId] = true;
-        if (isInstallationPrepared[setupId]) {
-            revert PluginWithTheSameAddressExists();
-        }
+        // if (isInstallationPrepared[setupId]) {
+        //     revert PluginWithTheSameAddressExists();
+        // }
 
         bytes32 storedPermissionHash = installPermissionHashes[setupId];
 

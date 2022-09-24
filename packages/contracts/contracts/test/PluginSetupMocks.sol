@@ -6,7 +6,7 @@ import {Permission, PluginSetup} from "../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradableV1Mock, PluginUUPSUpgradableV2Mock} from "../test/PluginUUPSUpgradableMock.sol";
 
 // The first version of plugin manager.
-contract PluginSetupMock is PluginSetup {
+contract PluginSetupV1Mock is PluginSetup {
     PluginUUPSUpgradableV1Mock public helperBase;
     PluginUUPSUpgradableV1Mock public pluginBase;
 
@@ -19,7 +19,7 @@ contract PluginSetupMock is PluginSetup {
         pluginBase = new PluginUUPSUpgradableV1Mock();
     }
 
-    function prepareInstallation(address dao, bytes memory data)
+    function prepareInstallation(address dao, bytes memory)
         public
         virtual
         override
@@ -53,6 +53,29 @@ contract PluginSetupMock is PluginSetup {
             Permission.Operation.Grant,
             plugin,
             helperAddr,
+            NO_ORACLE,
+            keccak256("SETTINGS_PERMISSION")
+        );
+    }
+
+    function prepareUninstallation(
+        address dao,
+        address plugin,
+        address[] calldata activeHelpers
+    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+        permissions = new Permission.ItemMultiTarget[](2);
+        permissions[0] = Permission.ItemMultiTarget(
+            Permission.Operation.Revoke,
+            dao,
+            plugin,
+            NO_ORACLE,
+            keccak256("EXEC_PERMISSION")
+        );
+
+        permissions[1] = Permission.ItemMultiTarget(
+            Permission.Operation.Revoke,
+            plugin,
+            activeHelpers[0],
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
         );
