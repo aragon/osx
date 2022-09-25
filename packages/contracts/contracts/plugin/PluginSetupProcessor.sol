@@ -20,7 +20,10 @@ import {PluginRepo} from "./PluginRepo.sol";
 contract PluginSetupProcessor is DaoAuthorizable {
     using ERC165Checker for address;
 
-    bytes32 public constant PROCESS_SETUP_PERMISSION_ID = keccak256("PROCESS_SETUP_PERMISSION");
+    bytes32 public constant PROCESS_INSTALL_PERMISSION_ID = keccak256("PROCESS_INSTALL_PERMISSION");
+    bytes32 public constant PROCESS_UPDATE_PERMISSION_ID = keccak256("PROCESS_UPDATE_PERMISSION");
+    bytes32 public constant PROCESS_UNINSTALL_PERMISSION_ID =
+        keccak256("PROCESS_UNINSTALL_PERMISSION");
     bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
         keccak256("SET_REPO_REGISTRY_PERMISSION");
 
@@ -39,13 +42,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     AragonPluginRegistry public repoRegistry;
 
-    error SetupNotAllowed();
+    error SetupNotAllowed(address caller, bytes32 permissionId);
     error PluginNonupgradeable(address plugin);
-    error PermissionsInvalid(bytes32 expected, bytes32 actual);
+    error PermissionsInvalid(bytes32 stored, bytes32 passed);
     error PluginNotPrepared();
     error HelpersMismatch();
     error PluginRepoNonexistant();
     error PluginWithTheSameAddressExists(); // in case the PluginSetup is malicios and always/sometime returns the same address
+    error UpdatePermissionsMismatch();
 
     event InstallationPrepared(
         address indexed sender,
@@ -65,7 +69,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     event UpdatePrepared(
         address indexed dao,
         address[] helpers,
-        Permission.ItemMultiTarget[] permissions
+        Permission.ItemMultiTarget[] permissions,
+        bytes initData
     );
     event UpdateProcessed(address indexed dao, address indexed plugin);
 
@@ -73,8 +78,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @dev Modifier used to check if the setup can be processed by the caller.
     /// @param _dao The address of the DAO.
-    modifier canProcessSetup(address _dao) {
-        _canProcessSetup(_dao);
+    modifier canProcessSetup(address _dao, bytes32 _permissionId) {
+        _canProcessSetup(_dao, _permissionId);
         _;
     }
 
@@ -147,7 +152,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         address _plugin,
         Permission.ItemMultiTarget[] calldata _permissions
-    ) external canProcessSetup(_dao) {
+    ) external canProcessSetup(_dao, PROCESS_INSTALL_PERMISSION_ID) {
         bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
 
         // TODO: is this the correct place for this check?
@@ -168,10 +173,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check that permissions weren't tempered.
         if (storedPermissionHash != passedPermissionHash) {
-            revert PermissionsInvalid({
-                expected: storedPermissionHash,
-                actual: passedPermissionHash
-            });
+            revert PermissionsInvalid({stored: storedPermissionHash, passed: passedPermissionHash});
         }
 
         // apply permissions on a dao..
@@ -193,7 +195,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes memory _data // encoded per pluginSetup's update ABI,
     ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
-        if (_updateSettings.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
+        if (!_updateSettings.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
             revert PluginNonupgradeable({plugin: _updateSettings.plugin});
         }
 
@@ -202,6 +204,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
         if (!repoRegistry.entries(address(_updateSettings.pluginSetupRepo))) {
             revert PluginRepoNonexistant();
         }
+
+        // TODO: check if plugin is actually installed on the DAO
 
         (uint16[3] memory oldVersion, , ) = _updateSettings.pluginSetupRepo.getVersionByPluginSetup(
             _updateSettings.oldPluginSetup
@@ -244,7 +248,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // check if permissions are corret.
         updatePermissionHashes[newSetupId] = getPermissionsHash(permissions);
 
-        emit UpdatePrepared(_dao, activeHelpers, permissions);
+        emit UpdatePrepared(_dao, activeHelpers, permissions, initData);
 
         return (permissions, initData);
     }
@@ -255,10 +259,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup, // new plugin manager upgrade happens to.
         bytes memory _initData,
         Permission.ItemMultiTarget[] calldata _permissions
-    ) external canProcessSetup(_dao) {
+    ) external canProcessSetup(_dao, PROCESS_UPDATE_PERMISSION_ID) {
         bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
 
-        require(updatePermissionHashes[setupId] == getPermissionsHash(_permissions));
+        if (updatePermissionHashes[setupId] != getPermissionsHash(_permissions)) {
+            revert UpdatePermissionsMismatch();
+        }
 
         upgradeProxy(_plugin, PluginSetup(_pluginSetup).getImplementationAddress(), _initData);
 
@@ -273,7 +279,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         address[] calldata _activeHelpers
-    ) external canProcessSetup(_dao) {
+    ) external canProcessSetup(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
         // Implicitly confirms plugin manager is valid valid.
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
@@ -349,17 +355,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    function _canProcessSetup(address _dao) private view {
+    function _canProcessSetup(address _dao, bytes32 _permissionId) private view {
         if (
             msg.sender != _dao &&
-            !DAO(payable(_dao)).hasPermission(
-                address(this),
-                msg.sender,
-                PROCESS_SETUP_PERMISSION_ID,
-                bytes("")
-            )
+            !DAO(payable(_dao)).hasPermission(address(this), msg.sender, _permissionId, bytes(""))
         ) {
-            revert SetupNotAllowed();
+            revert SetupNotAllowed({caller: msg.sender, permissionId: _permissionId});
         }
     }
 }

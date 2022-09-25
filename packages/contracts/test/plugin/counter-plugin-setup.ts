@@ -82,15 +82,12 @@ describe('CounterPluginSetup(Example)', function () {
     it('correctly returns permissions/helpers/plugin when helper is passed', async () => {
       const num = 10;
 
-      const params = abiCoder.encode(
-        ['address', 'uint256'],
-        [ownerAddress, num]
-      );
+      const data = abiCoder.encode(['address', 'uint256'], [ownerAddress, num]);
 
       const {plugin, helpers, permissions} =
         await counterV1Setup.callStatic.prepareInstallation(
           daoMock.address,
-          params
+          data
         );
 
       expect(permissions.length).to.be.equal(2);
@@ -112,15 +109,12 @@ describe('CounterPluginSetup(Example)', function () {
     it('correcly returns permissions/helpers/plugin when helper is NOT passed', async () => {
       const num = 10;
 
-      const params = abiCoder.encode(
-        ['address', 'uint256'],
-        [AddressZero, num]
-      );
+      const data = abiCoder.encode(['address', 'uint256'], [AddressZero, num]);
 
       const {plugin, helpers, permissions} =
         await counterV1Setup.callStatic.prepareInstallation(
           daoMock.address,
-          params
+          data
         );
 
       expect(permissions.length).to.be.equal(3);
@@ -144,7 +138,7 @@ describe('CounterPluginSetup(Example)', function () {
   describe('prepareUpdate', async () => {
     it('correcly returns activeHelpers/initData/permissions', async () => {
       const num = 10;
-      const params = abiCoder.encode(['uint256'], [num]);
+      const data = abiCoder.encode(['uint256'], [num]);
       const oldVersion: [BigNumberish, BigNumberish, BigNumberish] = [1, 0, 0];
       const plugin = address1;
       const helper = address2;
@@ -159,7 +153,7 @@ describe('CounterPluginSetup(Example)', function () {
           daoMock.address,
           plugin,
           [helper],
-          params,
+          data,
           oldVersion
         );
 
