@@ -146,8 +146,10 @@ describe('Plugin Setup Processor', function () {
     const PluginSetupProcessor = await ethers.getContractFactory(
       'PluginSetupProcessor'
     );
-    psp = await PluginSetupProcessor.deploy();
-    await psp.initialize(aragonPluginRegistry.address, managingDao.address);
+    psp = await PluginSetupProcessor.deploy(
+      managingDao.address,
+      aragonPluginRegistry.address
+    );
   });
 
   beforeEach(async function () {

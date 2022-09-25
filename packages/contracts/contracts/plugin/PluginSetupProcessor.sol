@@ -83,15 +83,15 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _;
     }
 
-    // TODO: make sure if `DaoAuthorizable` should have constructor or `initialize()`
-    // constructor(AragonPluginRegistry _repoRegistry) {
-    //     repoRegistry = _repoRegistry;
-    // }
-
-    function initialize(AragonPluginRegistry _repoRegistry, address _dao) external initializer {
+    constructor(address _dao, AragonPluginRegistry _repoRegistry) initializer {
         __DaoAuthorizable_init(IDAO(_dao));
         repoRegistry = _repoRegistry;
     }
+
+    // function initialize(AragonPluginRegistry _repoRegistry, address _dao) external initializer {
+    //     __DaoAuthorizable_init(IDAO(_dao));
+    //     repoRegistry = _repoRegistry;
+    // }
 
     function setRepoRegistry(AragonPluginRegistry _repoRegistry)
         external
