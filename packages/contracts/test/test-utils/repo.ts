@@ -1,9 +1,9 @@
 import {ethers} from 'hardhat';
 
-import {PluginSetupMock} from '../../typechain';
+import {PluginSetupV1Mock} from '../../typechain';
 
-export async function deployMockPluginSetup(): Promise<PluginSetupMock> {
-  const PluginSetupMock = await ethers.getContractFactory('PluginSetupMock');
+export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
+  const PluginSetupMock = await ethers.getContractFactory('PluginSetupV1Mock');
   const pluginSetupMockContract = await PluginSetupMock.deploy();
 
   return pluginSetupMockContract;

@@ -12,6 +12,10 @@ const EVENTS = {
 
 const zeroAddress = ethers.constants.AddressZero;
 
+const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
+  'PLUGIN_REGISTER_PERMISSION'
+);
+
 async function getAragonPluginRegistryEvents(tx: any) {
   const data = await tx.wait();
   const {events} = data;
@@ -93,15 +97,15 @@ describe('PluginRepoFactory: ', function () {
     managingDao.grant(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_PERMISSION')
+      PLUGIN_REGISTER_PERMISSION_ID
     );
   });
 
-  it('fail to create new pluginRepo with no REGISTER_PERMISSION', async () => {
+  it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
     managingDao.revoke(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_PERMISSION')
+      PLUGIN_REGISTER_PERMISSION_ID
     );
 
     const pluginRepoName = 'my-pluginRepo';
@@ -115,7 +119,7 @@ describe('PluginRepoFactory: ', function () {
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,
-        ethers.utils.id('REGISTER_PERMISSION')
+        PLUGIN_REGISTER_PERMISSION_ID
       )
     );
   });

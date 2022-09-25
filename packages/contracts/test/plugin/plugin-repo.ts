@@ -4,7 +4,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {PluginRepo, PluginSetupMock} from '../../typechain';
+import {PluginRepo, PluginSetupV1Mock} from '../../typechain';
 import {deployMockPluginSetup} from '../test-utils/repo';
 import {customError} from '../test-utils/custom-error-helper';
 
@@ -14,7 +14,7 @@ describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: any;
-  let pluginSetupMock: PluginSetupMock;
+  let pluginSetupMock: PluginSetupV1Mock;
 
   function assertVersion(
     actualVersionData: any,
