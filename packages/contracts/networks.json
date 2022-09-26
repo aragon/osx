@@ -1,6 +1,6 @@
 {
   "goerli": {
-    "url": "https://goerli.infura.io/v3/579ebd226d934b2fac48c7ffb0c1907c",
+    "url": "https://goerli.infura.io/v3/92aa62d2bb5449cfafe04b83ca8636f1",
     "isTestnet": true,
     "chainId": 5
   },

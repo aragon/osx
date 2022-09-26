@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added deployment script for `managing-dao`, `plugin-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
+- Added goerli configuration to deploy to goerli.
 
 ### Changed
 
