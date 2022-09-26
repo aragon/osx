@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/Create2.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
@@ -34,7 +30,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address newPluginSetup;
     }
 
-    // TODO: do we need all these mappings?
     mapping(bytes32 => bool) private isInstallationPrepared;
     mapping(bytes32 => bytes32) private installPermissionHashes;
     mapping(bytes32 => bytes32) private updatePermissionHashes;
@@ -87,11 +82,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         __DaoAuthorizable_init(IDAO(_dao));
         repoRegistry = _repoRegistry;
     }
-
-    // function initialize(AragonPluginRegistry _repoRegistry, address _dao) external initializer {
-    //     __DaoAuthorizable_init(IDAO(_dao));
-    //     repoRegistry = _repoRegistry;
-    // }
 
     function setRepoRegistry(AragonPluginRegistry _repoRegistry)
         external
