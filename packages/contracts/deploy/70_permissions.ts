@@ -18,7 +18,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
     console.log('Granting permissions')
-    // Grant REGISTER_PERMISSION_ID to pluginRepo factory
     const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
     const aragonPluginRegistryAddress = await getContractAddress('AragonPluginRegistry', hre);
     const pluginRepoFactoryAddress = await getContractAddress('PluginRepoFactory', hre);
