@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../utils/UncheckedMath.sol";
-import "./PluginSetup.sol";
+import {PluginSetup} from "./PluginSetup.sol";
 import "./IPluginRepo.sol";
 
 /// @title PluginRepo

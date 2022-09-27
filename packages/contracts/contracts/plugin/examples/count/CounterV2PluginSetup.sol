@@ -25,7 +25,7 @@ contract CounterV2PluginSetup is PluginSetup {
         counterBase = new CounterV2();
     }
 
-    function prepareInstallation(address dao, bytes memory data)
+    function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
         override
@@ -36,7 +36,7 @@ contract CounterV2PluginSetup is PluginSetup {
         )
     {
         // Decode the parameters from the UI
-        (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
+        (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
 
         address multiplyHelper = _multiplyHelper;
 
@@ -46,7 +46,8 @@ contract CounterV2PluginSetup is PluginSetup {
         }
 
         bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("initialize(address,uint256)")),
+            bytes4(keccak256("initialize(address,address,uint256)")),
+            _dao,
             multiplyHelper,
             _num
         );
@@ -55,12 +56,12 @@ contract CounterV2PluginSetup is PluginSetup {
         helpers = new address[](1);
 
         // deploy
-        plugin = createERC1967Proxy(dao, address(counterBase), initData);
+        plugin = createERC1967Proxy(address(counterBase), initData);
 
         // set permissions
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            dao,
+            _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
@@ -69,7 +70,7 @@ contract CounterV2PluginSetup is PluginSetup {
         permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             plugin,
-            dao,
+            _dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );

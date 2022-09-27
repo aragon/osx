@@ -4,12 +4,11 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Create2.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
-
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
@@ -26,7 +25,7 @@ abstract contract PluginSetup {
         );
 
     function prepareUpdate(
-        address dao,
+        address dao, // TODO Needed? Can't we access it via plugin.getDAO()?
         address plugin, // proxy
         address[] memory helpers,
         bytes memory data,
@@ -43,17 +42,16 @@ abstract contract PluginSetup {
 
     // TODO: should we have  `_data` param? in case dev need to do somthing else depending on the data?
     function prepareUninstallation(
-        address dao,
+        address dao, // TODO Needed? Can't we access it via plugin.getDAO()?
         address plugin,
         address[] calldata activeHelpers
     ) external virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
 
-    function createERC1967Proxy(
-        address _dao,
-        address _logic,
-        bytes memory _data
-    ) internal returns (address payable addr) {
-        return payable(address(new PluginERC1967Proxy(_dao, _logic, _data)));
+    function createERC1967Proxy(address _logic, bytes memory _data)
+        internal
+        returns (address payable)
+    {
+        return payable(address(new ERC1967Proxy(_logic, _data)));
     }
 
     /// @notice the plugin's base implementation address proxies need to delegate calls.

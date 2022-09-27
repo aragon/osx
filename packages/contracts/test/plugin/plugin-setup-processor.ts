@@ -626,8 +626,8 @@ describe('Plugin Setup Processor', function () {
     });
 
     // TODO: Find a way to test upgradeProxy
-    // also chack this function's errors as they might be missleading
-    // it also get threw if UPGRADE_PERMISSION is not granted
+    // also check this function's errors as they might be misleading
+    // it is also thrown if UPGRADE_PERMISSION is not granted
     // it('processUpdate: reverts if PluginNonupgradeable.', async () => {});
 
     it('processUpdate: Correctly process an update.', async () => {

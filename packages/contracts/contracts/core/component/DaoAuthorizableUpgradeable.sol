@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../permission/PermissionManager.sol";
-import "./../IDAO.sol";
+import {PermissionManager} from "../permission/PermissionManager.sol";
+import "../IDAO.sol";
 
 /// @title DaoAuthorizableUpgradable
 /// @author Aragon Association - 2022
@@ -38,7 +38,7 @@ abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeabl
         dao = _dao;
     }
 
-    function getDAO() public view returns(IDAO) {
+    function getDAO() public view returns (IDAO) {
         return dao;
     }
 

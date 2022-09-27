@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
-import {IDAO} from "./../IDAO.sol";
+import {IDAO} from "../IDAO.sol";
 
 /// @title DaoAuthorizable
 /// @author Aragon Association - 2022

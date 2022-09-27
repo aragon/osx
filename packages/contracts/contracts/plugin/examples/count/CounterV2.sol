@@ -19,10 +19,13 @@ contract CounterV2 is PluginUUPSUpgradeable {
     // This only gets called for daos that install it for the first time.
     // initializer modifier protects it from being called 2nd time for old proxies.
     function initialize(
+        IDAO _dao,
         MultiplyHelper _multiplyHelper,
         uint256 _num,
         uint256 _newVariable
     ) external initializer {
+        __PluginUpgradeable_init(_dao);
+
         count = _num;
 
         // Since this is V2 version, and some daos might want to install this right away
@@ -39,14 +42,13 @@ contract CounterV2 is PluginUUPSUpgradeable {
         newVariable = _newVariable;
     }
 
-    function multiply(uint256 a) public auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
-        count = multiplyHelper.multiply(count, a);
+    function multiply(uint256 _a) public auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
+        count = multiplyHelper.multiply(count, _a);
         return count;
     }
 
     function execute() public {
         // IDAO dao = dao();
-
         // In order to do this, Count needs permission on the dao (EXEC_ROLE)
         //dao.execute(...)
     }

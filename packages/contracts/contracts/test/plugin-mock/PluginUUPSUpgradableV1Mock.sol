@@ -3,12 +3,18 @@
 pragma solidity 0.8.10;
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../core/IDAO.sol";
 
 contract PluginUUPSUpgradableV1Mock is PluginUUPSUpgradeable {
     uint256 public num;
     address public helper;
 
-    function initialize(uint256 _num, address _helper) external initializer {
+    function initialize(
+        IDAO _dao,
+        uint256 _num,
+        address _helper
+    ) external initializer {
+        __PluginUpgradeable_init(_dao);
         num = _num;
         helper = _helper;
     }
