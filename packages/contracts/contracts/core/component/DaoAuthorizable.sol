@@ -12,7 +12,7 @@ import {IDAO} from "./../IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
 /// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
-/// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
+/// @dev Make sure to call `constructor` during the contract creation of the inheriting contract.
 ///      This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
 abstract contract DaoAuthorizable is Initializable, Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
@@ -32,19 +32,27 @@ abstract contract DaoAuthorizable is Initializable, Context {
         bytes32 permissionId
     );
 
-    /// @notice Initializes the contract by setting the associated DAO.
+    /// @notice Constructing the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
-    function __DaoAuthorizable_init(IDAO _dao) internal virtual onlyInitializing {
+    constructor(IDAO _dao) {
         dao = _dao;
     }
 
-    function getDAO() public view returns (IDAO) {
+    /// @notice Get the DAO that was set at the moment of creation or initialization.
+    function getDAO() external view returns (IDAO) {
         return dao;
     }
 
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
+        _auth(_permissionId);
+        _;
+    }
+
+    /// @notice A private function to be used by the auth modifier to check permissions on a target contract via the associated DAO.
+    /// @param _permissionId The permission identifier.
+    function _auth(bytes32 _permissionId) internal view {
         if (!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData()))
             revert DaoUnauthorized({
                 dao: address(dao),
@@ -53,7 +61,5 @@ abstract contract DaoAuthorizable is Initializable, Context {
                 who: _msgSender(),
                 permissionId: _permissionId
             });
-
-        _;
     }
 }

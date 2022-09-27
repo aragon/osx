@@ -15,10 +15,8 @@ import {DaoAuthorizable} from "../component/DaoAuthorizable.sol";
 abstract contract Plugin is Initializable, ERC165, DaoAuthorizable {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;
 
-    constructor(address _dao) {
-        __DaoAuthorizable_init(IDAO(_dao));
-    }
-    
+    constructor(IDAO _dao) DaoAuthorizable(_dao) {}
+
     /// @notice adds a IERC165 to check whether contract supports Plugin interface or not.
     /// @dev See {ERC165-supportsInterface}.
     /// @return bool whether it supports the IERC165 or Plugin
