@@ -45,6 +45,11 @@ abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeabl
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
+        _auth(_permissionId);
+        _;
+    }
+
+    function _auth(bytes32 _permissionId) internal view {
         if (!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData()))
             revert DaoUnauthorized({
                 dao: address(dao),
@@ -53,8 +58,6 @@ abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeabl
                 who: _msgSender(),
                 permissionId: _permissionId
             });
-
-        _;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
