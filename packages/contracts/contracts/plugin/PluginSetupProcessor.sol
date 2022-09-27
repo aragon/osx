@@ -56,7 +56,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes data
     );
 
-    /// @notice Thrown after the plugin installation to detect plugin was installed on a dao.
+    // @notice Emitted after the plugin installation to track that a plugin was installed on a DAO.
     /// @param dao The dao address that plugin belongs to.
     /// @param plugin the plugin address.
     event InstallationProcessed(address dao, address plugin);
