@@ -15,14 +15,14 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 /// @title PluginClones
 /// @notice An abstract contract to inherit from when creating a proxy contract.
 /// This should be used to deploy EIP-1167 clones.
-abstract contract PluginClones is Initializable, ERC165, Context, AppStorage {
-    bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginClones).interfaceId;
+abstract contract PluginCloneable is Initializable, ERC165, Context, AppStorage {
+    bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginCloneable).interfaceId;
 
     error ClonesInitAlreadyInitialized();
 
-    /// @notice used by the aragon to call by default for PluginClones interfaces.
+    /// @notice used by the aragon to call by default for PluginCloneable interfaces.
     /// @param _dao the dao address to set in a slot.
-    function clonesInit(address _dao) external {
+    function __PluginCloneable_init(address _dao) external {
         if (isInitialized()) {
             revert ClonesInitAlreadyInitialized();
         }
