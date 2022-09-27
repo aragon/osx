@@ -25,7 +25,7 @@ contract CounterV2PluginSetup is PluginSetup {
         counterBase = new CounterV2();
     }
 
-    function prepareInstallation(address dao, bytes memory data)
+    function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
         override
@@ -36,7 +36,7 @@ contract CounterV2PluginSetup is PluginSetup {
         )
     {
         // Decode the parameters from the UI
-        (address _multiplyHelper, uint256 _num) = abi.decode(data, (address, uint256));
+        (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
 
         address multiplyHelper = _multiplyHelper;
 
@@ -55,12 +55,12 @@ contract CounterV2PluginSetup is PluginSetup {
         helpers = new address[](1);
 
         // deploy
-        plugin = createERC1967Proxy(dao, address(counterBase), initData);
+        plugin = createERC1967Proxy(_dao, address(counterBase), initData);
 
         // set permissions
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            dao,
+            _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
@@ -69,7 +69,7 @@ contract CounterV2PluginSetup is PluginSetup {
         permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             plugin,
-            dao,
+            _dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
@@ -91,11 +91,11 @@ contract CounterV2PluginSetup is PluginSetup {
     }
 
     function prepareUpdate(
-        address dao,
-        address plugin, // proxy
-        address[] memory helpers,
-        bytes memory data,
-        uint16[3] calldata oldVersion
+        address _dao,
+        address _plugin, // proxy
+        address[] memory _helpers,
+        bytes memory _data,
+        uint16[3] calldata _oldVersion
     )
         external
         override
@@ -107,8 +107,8 @@ contract CounterV2PluginSetup is PluginSetup {
     {
         uint256 _newVariable;
 
-        if (oldVersion[0] == 1 && oldVersion[1] == 0) {
-            (_newVariable) = abi.decode(data, (uint256));
+        if (_oldVersion[0] == 1 && _oldVersion[1] == 0) {
+            (_newVariable) = abi.decode(_data, (uint256));
             initData = abi.encodeWithSelector(
                 bytes4(keccak256("setNewVariable(uint256)")),
                 _newVariable
@@ -118,15 +118,15 @@ contract CounterV2PluginSetup is PluginSetup {
         permissions = new Permission.ItemMultiTarget[](1);
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
-            dao,
-            plugin,
+            _dao,
+            _plugin,
             NO_ORACLE,
             multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
 
         // if another helper is deployed, put it inside activeHelpers + put old ones as well.
         activeHelpers = new address[](1);
-        activeHelpers[0] = helpers[0];
+        activeHelpers[0] = _helpers[0];
     }
 
     function prepareUninstallation(

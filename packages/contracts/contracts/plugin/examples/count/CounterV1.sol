@@ -18,14 +18,13 @@ contract CounterV1 is PluginUUPSUpgradeable {
         multiplyHelper = _multiplyHelper;
     }
 
-    function multiply(uint256 a) public auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
-        count = multiplyHelper.multiply(count, a);
+    function multiply(uint256 _a) public auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
+        count = multiplyHelper.multiply(count, _a);
         return count;
     }
 
     function execute() public {
         // IDAO dao = dao();
-
         // In order to do this, Count needs permission on the dao (EXEC_ROLE)
         //dao.execute(...)
     }
