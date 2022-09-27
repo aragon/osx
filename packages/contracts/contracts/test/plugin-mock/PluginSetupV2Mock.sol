@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../plugin/PluginSetup.sol";
+import {BulkPermissionsLib} from "../../core/permission/BulkPermissionsLib.sol";
+import {PluginSetup} from "../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradableV2Mock} from "./PluginUUPSUpgradableV2Mock.sol";
 
 // The second version of plugin manager.
@@ -27,7 +28,7 @@ contract PluginSetupV2Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {
         address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
@@ -44,20 +45,20 @@ contract PluginSetupV2Mock is PluginSetup {
             )
         );
 
-        permissions = new Permission.ItemMultiTarget[](2);
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
         helpers = new address[](1);
 
         helpers[0] = helperAddr;
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             plugin,
             helperAddr,
             NO_ORACLE,
@@ -78,7 +79,7 @@ contract PluginSetupV2Mock is PluginSetup {
         returns (
             address[] memory activeHelpers,
             bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {
         initData = abi.encodeWithSelector(
@@ -88,7 +89,7 @@ contract PluginSetupV2Mock is PluginSetup {
 
         address helperAddr = createERC1967Proxy(address(helperBase), bytes("")); // TODO Why does this receive no initialization data?
 
-        permissions = new Permission.ItemMultiTarget[](2);
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
         activeHelpers = new address[](_helpers.length + 1);
 
         for (uint256 i = 0; i < _helpers.length; i++) {
@@ -97,16 +98,16 @@ contract PluginSetupV2Mock is PluginSetup {
 
         activeHelpers[_helpers.length] = helperAddr;
 
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             helperAddr,
             _plugin,
             NO_ORACLE,
             keccak256("NEW_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Revoke,
             _plugin,
             activeHelpers[0],
             NO_ORACLE,

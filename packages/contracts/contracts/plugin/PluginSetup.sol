@@ -8,12 +8,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
+import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
 abstract contract PluginSetup {
-    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginSetup).interfaceId;
+    bytes4 public constant PLUGIN_SETUP_INTERFACE_ID = type(PluginSetup).interfaceId; // TODO Needed? If yes, make PluginSetup ERC165.
 
     function prepareInstallation(address dao, bytes memory data)
         external
@@ -21,7 +21,7 @@ abstract contract PluginSetup {
         returns (
             address plugin,
             address[] memory helpers, // TODO: perhaps relatedAddresses could be a better naming
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         );
 
     function prepareUpdate(
@@ -36,7 +36,7 @@ abstract contract PluginSetup {
         returns (
             address[] memory activeHelpers,
             bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {}
 
@@ -45,7 +45,7 @@ abstract contract PluginSetup {
         address dao, // TODO Needed? Can't we access it via plugin.getDAO()?
         address plugin,
         address[] calldata activeHelpers
-    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
+    ) external virtual returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions) {}
 
     function createERC1967Proxy(address _logic, bytes memory _data)
         internal
