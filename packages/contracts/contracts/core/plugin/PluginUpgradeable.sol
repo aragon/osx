@@ -15,7 +15,7 @@ abstract contract PluginUpgradeable is ERC165Upgradeable, DaoAuthorizableUpgrade
     bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginUpgradeable).interfaceId;
 
     function __PluginUpgradeable_init(IDAO _dao) internal virtual onlyInitializing {
-        __DaoAuthorizable_init(_dao);
+        __DaoAuthorizableUpgradeable_init(_dao);
     }
 
     /// @notice adds a IERC165 to check whether contract supports PluginTranparentUpgradable interface or not.

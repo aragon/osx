@@ -3,7 +3,6 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 import {PermissionManager} from "../permission/PermissionManager.sol";
 import {IDAO} from "../IDAO.sol";
@@ -14,7 +13,7 @@ import {IDAO} from "../IDAO.sol";
 /// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
 /// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
 ///      This contract is compatible with meta transactions through OZ's `ContextUpgradable`.
-abstract contract DaoAuthorizable is Initializable, Context {
+abstract contract DaoAuthorizable is Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
@@ -34,7 +33,7 @@ abstract contract DaoAuthorizable is Initializable, Context {
 
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
-    function __DaoAuthorizable_init(IDAO _dao) internal virtual onlyInitializing {
+    constructor(IDAO _dao) {
         dao = _dao;
     }
 

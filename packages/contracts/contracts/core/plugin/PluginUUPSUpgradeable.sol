@@ -11,7 +11,7 @@ import {PluginUpgradeable} from "./PluginUpgradeable.sol";
 /// @title PluginUUPSUpgradeable
 /// @notice An abstract contract to inherit from when creating a UUPS Upgradable contract.
 abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
-    bytes4 public constant PLUGIN_UPGRADEABLE_INTERFACE_ID =
+    bytes4 public constant PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID =
         type(PluginUUPSUpgradeable).interfaceId;
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
@@ -25,7 +25,7 @@ abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
     /// @return bool whether it supports the IERC165 or PluginUUPSUpgradeable
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            _interfaceId == PLUGIN_UPGRADEABLE_INTERFACE_ID ||
+            _interfaceId == PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID ||
             super.supportsInterface(_interfaceId);
     }
 

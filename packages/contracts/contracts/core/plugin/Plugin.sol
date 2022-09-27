@@ -12,17 +12,10 @@ import {IDAO} from "../IDAO.sol";
 abstract contract Plugin is ERC165, DaoAuthorizable {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;
 
-    function __Plugin_init(IDAO _dao) internal virtual onlyInitializing {
-        __DaoAuthorizable_init(_dao);
-    }
-
-    // Michael: Not do it like this because the three other plugin types we support use an initializer. Devs favor consistency according to Juliette. The pure `Plugin` contract can also be assumed to be used the least and is anyway very gas inefficient because of the `new` keyword costs
-    /* constructor(IDAO _dao) {
-        __DaoAuthorizable_init(_dao);
-    } */
+    constructor(IDAO _dao) DaoAuthorizable(_dao) {}
 
     /// @notice adds a IERC165 to check whether contract supports Plugin interface or not.
-    /// @dev See {ERC165-supportsInterface}.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
     /// @return bool whether it supports the IERC165 or Plugin
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);

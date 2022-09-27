@@ -77,8 +77,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _;
     }
 
-    constructor(address _dao, AragonPluginRegistry _repoRegistry) initializer {
-        __DaoAuthorizable_init(IDAO(_dao));
+    constructor(address _dao, AragonPluginRegistry _repoRegistry) DaoAuthorizable(IDAO(_dao)) {
         repoRegistry = _repoRegistry;
     }
 
