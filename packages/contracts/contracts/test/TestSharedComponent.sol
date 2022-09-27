@@ -3,7 +3,7 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IPermissionOracle } from '../core/permission/IPermissionOracle.sol';
+import {IPermissionOracle} from "../core/permission/IPermissionOracle.sol";
 
 import "../core/component/Component.sol";
 
@@ -17,6 +17,14 @@ contract TestSharedComponent is Component {
     uint256 internal _counter;
 
     error ObjectIdNotAssigned(uint256 _id);
+
+    error DaoUnauthorized(
+        address dao,
+        address here,
+        address where,
+        address who,
+        bytes32 permissionId
+    );
 
     modifier sharedAuth(uint256 _id, bytes32 _permissionId) {
         if (address(ownedIds[_id]) == address(0)) {

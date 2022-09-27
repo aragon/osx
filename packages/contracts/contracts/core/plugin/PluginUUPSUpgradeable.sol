@@ -7,11 +7,11 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeabl
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-import {PermissionManager} from "../permission/PermissionManager.sol";
-
+import {_auth} from "../../utils/auth.sol";
 import {AppStorage} from "../../utils/AppStorage.sol";
-import {IDAO} from "../IDAO.sol";
+
 import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../IDAO.sol";
 
 /// @title PluginUUPSUpgradeable
 /// @notice An abstract contract to inherit from when creating a UUPS Upgradable contract.
@@ -22,23 +22,16 @@ abstract contract PluginUUPSUpgradeable is
     UUPSUpgradeable,
     AppStorage
 {
-    bytes4  public constant PLUGIN_INTERFACE_ID = type(PluginUUPSUpgradeable).interfaceId;
+    bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginUUPSUpgradeable).interfaceId;
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _permissionId The hash of the permission identifier
-    modifier auth(bytes32 _permissionId)  {
-        IDAO dao = dao(); 
-        if(!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
-            revert PermissionManager.Unauthorized({
-                here: address(this), 
-                where: address(this), 
-                who: _msgSender(), 
-                permissionId: _permissionId
-            });
-        }
+    modifier auth(bytes32 _permissionId) {
+        IDAO dao = dao();
+        _auth(dao, address(this), _msgSender(), _permissionId, _msgData());
         _;
     }
 
