@@ -46,7 +46,7 @@ abstract contract PluginClones is Initializable, ERC165, Context, AppStorage {
     }
 
     /// @notice adds a IERC165 to check whether contract supports PluginClones interface or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @dev See {ERC165-supportsInterface}.
     /// @return bool whether it supports the IERC165 or PluginClones
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
