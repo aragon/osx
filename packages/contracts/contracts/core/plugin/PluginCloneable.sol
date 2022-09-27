@@ -8,10 +8,8 @@ import {DaoAuthorizableCloneable} from "../component/DaoAuthorizableCloneable.so
 import {IDAO} from "../IDAO.sol";
 import {Plugin} from "./Plugin.sol";
 
-/// TODO, do we need this class as it doesn't differ from Plugin?
 /// @title PluginCloneable
-/// @notice An abstract contract to inherit from when creating a proxy contract.
-/// This should be used to deploy EIP-1167 clones.
+/// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
 abstract contract PluginCloneable is ERC165, DaoAuthorizableCloneable {
     bytes4 public constant PLUGIN_CLONES_INTERFACE_ID = type(PluginCloneable).interfaceId;
 

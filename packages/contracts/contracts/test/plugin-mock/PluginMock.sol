@@ -18,5 +18,5 @@ contract PluginMock is Plugin {
         helper = _helper;
     }
 
-    function execute() public {}
+    function execute() external {}
 }

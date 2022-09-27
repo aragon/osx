@@ -9,7 +9,7 @@ import {IDAO} from "../IDAO.sol";
 import {PluginUpgradeable} from "./PluginUpgradeable.sol";
 
 /// @title PluginUUPSUpgradeable
-/// @notice An abstract contract to inherit from when creating a UUPS Upgradable contract.
+/// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
     bytes4 public constant PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID =
         type(PluginUUPSUpgradeable).interfaceId;

@@ -19,5 +19,5 @@ contract PluginClonesV1Mock is PluginCloneable {
         helper = _helper;
     }
 
-    function execute() public {}
+    function execute() external {}
 }

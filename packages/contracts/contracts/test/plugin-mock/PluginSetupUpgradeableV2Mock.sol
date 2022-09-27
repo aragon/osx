@@ -4,22 +4,21 @@ pragma solidity 0.8.10;
 
 import {BulkPermissionsLib} from "../../core/permission/BulkPermissionsLib.sol";
 import {PluginSetup} from "../../plugin/PluginSetup.sol";
-import {PluginUUPSUpgradableV1Mock} from "./PluginUUPSUpgradableV1Mock.sol";
+import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
-// The first version of plugin setup.
-contract PluginSetupV1Mock is PluginSetup {
-    PluginUUPSUpgradableV1Mock public helperBase;
-    PluginUUPSUpgradableV1Mock public pluginBase;
+// The second version of plugin manager.
+contract PluginSetupV2Mock is PluginSetup {
+    PluginUUPSUpgradeableV2Mock public helperBase;
+    PluginUUPSUpgradeableV2Mock public pluginBase;
 
     uint256 public constant PLUGIN_INIT_NUMBER = 15;
-
     address private constant NO_ORACLE = address(0);
 
     constructor() {
         // User the plugin as helper for testing puposes.
-        helperBase = new PluginUUPSUpgradableV1Mock();
-        // V1 version.
-        pluginBase = new PluginUUPSUpgradableV1Mock();
+        helperBase = new PluginUUPSUpgradeableV2Mock();
+        // V2 version
+        pluginBase = new PluginUUPSUpgradeableV2Mock();
     }
 
     function prepareInstallation(address _dao, bytes memory)
@@ -32,26 +31,24 @@ contract PluginSetupV1Mock is PluginSetup {
             BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {
-        // Deploy a helper.
-        address helperAddr = createERC1967Proxy(address(helperBase), bytes("")); // TODO Why does this receive no initialization data?
+        address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
-        // Deploy and set the plugn.
         plugin = createERC1967Proxy(
+            //_dao,
             address(pluginBase),
             abi.encodeWithSelector(
-                bytes4(keccak256("initialize(address,uint256,address)")),
+                bytes4(keccak256("initialize(address,uint256,address,string)")),
                 _dao,
                 PLUGIN_INIT_NUMBER,
-                helperAddr
+                helperAddr,
+                "stringExample"
             )
         );
 
-        // Set helper.
-        helpers = new address[](1);
-        helpers[0] = helperAddr;
-
-        // Set permissions.
         permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
+        helpers = new address[](1);
+
+        helpers[0] = helperAddr;
         permissions[0] = BulkPermissionsLib.ItemMultiTarget(
             BulkPermissionsLib.Operation.Grant,
             _dao,
@@ -69,24 +66,50 @@ contract PluginSetupV1Mock is PluginSetup {
         );
     }
 
-    function prepareUninstallation(
+    function prepareUpdate(
         address _dao,
-        address _plugin,
-        address[] calldata _activeHelpers
-    ) external virtual override returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions) {
+        address _plugin, // proxy
+        address[] memory _helpers,
+        bytes memory,
+        uint16[3] calldata
+    )
+        public
+        virtual
+        override
+        returns (
+            address[] memory activeHelpers,
+            bytes memory initData,
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
+        )
+    {
+        initData = abi.encodeWithSelector(
+            bytes4(keccak256("initializeV2(string)")),
+            "stringExample"
+        );
+
+        address helperAddr = createERC1967Proxy(address(helperBase), bytes("")); // TODO Why does this receive no initialization data?
+
         permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
+        activeHelpers = new address[](_helpers.length + 1);
+
+        for (uint256 i = 0; i < _helpers.length; i++) {
+            activeHelpers[i] = _helpers[i];
+        }
+
+        activeHelpers[_helpers.length] = helperAddr;
+
         permissions[0] = BulkPermissionsLib.ItemMultiTarget(
-            BulkPermissionsLib.Operation.Revoke,
-            _dao,
+            BulkPermissionsLib.Operation.Grant,
+            helperAddr,
             _plugin,
             NO_ORACLE,
-            keccak256("EXEC_PERMISSION")
+            keccak256("NEW_PERMISSION")
         );
 
         permissions[1] = BulkPermissionsLib.ItemMultiTarget(
             BulkPermissionsLib.Operation.Revoke,
             _plugin,
-            _activeHelpers[0],
+            activeHelpers[0],
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
         );
