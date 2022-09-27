@@ -38,7 +38,7 @@ abstract contract DaoAuthorizable is Initializable, Context {
         dao = _dao;
     }
 
-    function getDAO() public view returns (IDAO) {
+    function getDAO() external view returns (IDAO) {
         return dao;
     }
 
