@@ -6,6 +6,7 @@ import {
   PluginSetupV2Mock,
   PluginRepoFactory,
   AragonPluginRegistry,
+  PluginRepo,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 
@@ -86,6 +87,7 @@ async function getPluginRepoFactoryMergedABI() {
 describe('Plugin Setup Processor', function () {
   let signers: any;
   let psp: PluginSetupProcessor;
+  let pluginRepo: PluginRepo;
   let pluginSetupV1Mock: PluginSetupV1Mock;
   let pluginSetupMockRepoAddress: any;
   let pluginSetupV2Mock: PluginSetupV2Mock;
@@ -171,7 +173,7 @@ describe('Plugin Setup Processor', function () {
 
     // Add PluginSetupV2Mock to the PluginRepo.
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
-    const pluginRepo = PluginRepo.attach(pluginSetupMockRepoAddress);
+    pluginRepo = PluginRepo.attach(pluginSetupMockRepoAddress);
     await pluginRepo.createVersion(
       [2, 0, 0],
       pluginSetupV2Mock.address,
@@ -193,8 +195,6 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    // TODO: create a test testing `PluginWithTheSameAddressExists` error.
-
     it('PrepareInstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`.', async () => {
       const data = '0x';
       const pluginSetupRepoAddr = ADDRESS_TWO;
@@ -207,6 +207,47 @@ describe('Plugin Setup Processor', function () {
           data
         )
       ).to.be.revertedWith(customError('PluginRepoNonexistant'));
+    });
+
+    it('PrepareInstallation: reverts if plugin setup return the same address.', async () => {
+      const PluginSetupV1MockBad = await ethers.getContractFactory(
+        'PluginSetupV1MockBad'
+      );
+      const pluginSetupV1MockBad = await PluginSetupV1MockBad.deploy();
+
+      // register the bad plugin setup on `AragonPluginRegistry`.
+      await pluginRepo.createVersion(
+        [3, 0, 0],
+        pluginSetupV1MockBad.address,
+        '0x00'
+      );
+
+      // user1 normally prepares a plugin installation.
+      const dataUser1 = ethers.utils.defaultAbiCoder.encode(
+        ['address'],
+        [AddressZero]
+      );
+      const {plugin} = await prepareInstallation(
+        psp,
+        targetDao.address,
+        pluginSetupV1MockBad.address,
+        pluginSetupMockRepoAddress,
+        dataUser1
+      );
+
+      // user2 tries to prepare pad installation with the same plugin address.
+      const dataUser2 = ethers.utils.defaultAbiCoder.encode(
+        ['address'],
+        [plugin]
+      );
+      await expect(
+        psp.PrepareInstallation(
+          targetDao.address,
+          pluginSetupV1MockBad.address,
+          pluginSetupMockRepoAddress,
+          dataUser2
+        )
+      ).to.be.revertedWith(customError('PluginWithTheSameAddressExists'));
     });
 
     it('PrepareInstallation: retrun correctly the permissions', async () => {
