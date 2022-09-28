@@ -11,7 +11,7 @@ import {_auth} from "../../utils/auth.sol";
 import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
 
-/// @title PluginTranparentUpgradable
+/// @title PluginTranparentUpgradeable
 /// @notice An abstract contract to inherit from when creating a proxy contract.
 /// This should be used to deploy logic contracts where proxy itself
 /// is deployed through transparent or beacon...
@@ -31,9 +31,9 @@ abstract contract PluginTransparentUpgradeable is
         _;
     }
 
-    /// @notice adds a IERC165 to check whether contract supports PluginTranparentUpgradable interface or not.
+    /// @notice adds a IERC165 to check whether contract supports PluginTranparentUpgradeable interface or not.
     /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginTranparentUpgradable
+    /// @return bool whether it supports the IERC165 or PluginTranparentUpgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
     }

@@ -11,7 +11,7 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
 
 /// @title Plugin
-/// @notice NON-Upgradable Plugin Interface that should be directly deployed with `new`.
+/// @notice NON-Upgradeable Plugin Interface that should be directly deployed with `new`.
 abstract contract Plugin is ERC165, Context, AppStorage {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;
 

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `AragonPlugin` and `AragonUpgradablePlugin` for the devs to inherit from for their concrete plugin implementations.
+- Added `AragonPlugin` and `AragonUpgradeablePlugin` for the devs to inherit from for their concrete plugin implementations.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
 - Added Abstract `PluginSetup` for the devs to inherit from for their concrete plugin manager implementation.
 - Added the `solidity-docgen` hardhat plugin by OpenZepplin to automatically generate documentation via `yarn docgen`.
@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the event `SetMetadata` to `MetadataSet`.
 - Completed the `IDAO` interface and changed `DAO` accordingly.
 - Decoupled `Permissions` from `BaseRelayRecipient`.
-- Fixed OZ contracts-upgradable `Initializable`.
+- Fixed OZ contracts-upgradeable `Initializable`.
 
 ### Removed
 

@@ -3,21 +3,21 @@
 pragma solidity 0.8.10;
 
 import {Permission, PluginSetup} from "../../plugin/PluginSetup.sol";
-import {PluginUUPSUpgradableV2Mock} from "./PluginUUPSUpgradableV2Mock.sol";
+import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
 // The second version of plugin manager.
 contract PluginSetupV2Mock is PluginSetup {
-    PluginUUPSUpgradableV2Mock public helperBase;
-    PluginUUPSUpgradableV2Mock public pluginBase;
+    PluginUUPSUpgradeableV2Mock public helperBase;
+    PluginUUPSUpgradeableV2Mock public pluginBase;
 
     uint256 public constant PLUGIN_INIT_NUMBER = 15;
     address private constant NO_ORACLE = address(0);
 
     constructor() {
         // User the plugin as helper for testing puposes.
-        helperBase = new PluginUUPSUpgradableV2Mock();
+        helperBase = new PluginUUPSUpgradeableV2Mock();
         // V2 version
-        pluginBase = new PluginUUPSUpgradableV2Mock();
+        pluginBase = new PluginUUPSUpgradeableV2Mock();
     }
 
     function prepareInstallation(address _dao, bytes memory)

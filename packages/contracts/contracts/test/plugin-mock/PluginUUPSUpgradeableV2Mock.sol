@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
-contract PluginUUPSUpgradableV2Mock is PluginUUPSUpgradeable {
+contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeable {
     uint256 public num;
     address public helper;
 
