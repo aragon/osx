@@ -21,7 +21,7 @@ abstract contract PluginSetup {
         virtual
         returns (
             address plugin,
-            address[] memory helpers, // TODO: perhaps relatedAddresses could be a better naming
+            address[] memory helpers,
             Permission.ItemMultiTarget[] memory permissions
         );
 
@@ -30,7 +30,7 @@ abstract contract PluginSetup {
         address plugin, // proxy
         address[] memory helpers,
         bytes memory data,
-        uint16[3] calldata oldVersion // TODO: check if it can be done with oldPluginSetup
+        uint16[3] calldata oldVersion
     )
         external
         virtual

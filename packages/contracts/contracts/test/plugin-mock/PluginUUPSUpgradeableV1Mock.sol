@@ -13,5 +13,5 @@ contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
         helper = _helper;
     }
 
-    function execute() public {}
+    function execute() external {}
 }

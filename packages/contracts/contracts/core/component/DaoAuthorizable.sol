@@ -25,7 +25,8 @@ abstract contract DaoAuthorizable is Initializable, Context {
         dao = _dao;
     }
 
-    /// @notice Get the DAO that was set at the moment of creation or initialization.
+    /// @notice Returns the DAO contract.
+    /// @return IDAO The DAO contract.
     function getDAO() external view returns (IDAO) {
         return dao;
     }

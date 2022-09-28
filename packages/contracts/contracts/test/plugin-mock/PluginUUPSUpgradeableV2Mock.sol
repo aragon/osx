@@ -25,5 +25,5 @@ contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeable {
         str = _str;
     }
 
-    function execute() public {}
+    function execute() external {}
 }

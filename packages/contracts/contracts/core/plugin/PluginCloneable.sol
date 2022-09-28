@@ -12,8 +12,8 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
 
 /// @title PluginClones
-/// @notice An abstract contract to inherit from when creating a proxy contract.
-/// This should be used to deploy EIP-1167 clones.
+/// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin
+/// being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
 abstract contract PluginCloneable is Initializable, ERC165, Context, AppStorage {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginCloneable).interfaceId;
 
