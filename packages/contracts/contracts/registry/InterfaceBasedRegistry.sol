@@ -56,20 +56,20 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgr
 
     /// @notice Register an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract address.
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar.
-    /// @param registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract.
-    function _register(address registrant) internal {
-        if (!Address.isContract(registrant)) {
-            revert ContractAddressInvalid({registrant: registrant});
+    /// @param _registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract.
+    function _register(address _registrant) internal {
+        if (!Address.isContract(_registrant)) {
+            revert ContractAddressInvalid({registrant: _registrant});
         }
 
-        if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
+        if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
 
-        try AdaptiveERC165(registrant).supportsInterface(targetInterfaceId) returns (bool result) {
-            if (!result) revert ContractInterfaceInvalid(registrant);
+        try AdaptiveERC165(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
+            if (!result) revert ContractInterfaceInvalid(_registrant);
         } catch {
-            revert ContractERC165SupportInvalid({registrant: registrant});
+            revert ContractERC165SupportInvalid({registrant: _registrant});
         }
 
-        entries[registrant] = true;
+        entries[_registrant] = true;
     }
 }

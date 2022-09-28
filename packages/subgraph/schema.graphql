@@ -37,7 +37,7 @@ type Permission @entity {
   contractPermissionId: ContractPermissionId!
   who: Bytes!
   actor: Bytes!
-  oracle: Bytes!
+  oracle: Bytes
 }
 
 # Executions
@@ -54,41 +54,36 @@ type Action @entity {
 
 # Treasury
 
-type VaultWithdraw @entity {
+enum TransferType {
+  Withdraw
+  Deposit
+}
+
+type VaultTransfer @entity {
   id: ID!
   dao: Dao!
   token: ERC20Token
-  to: Bytes!
+  sender: Bytes
+  to: Bytes
   amount: BigInt!
   reference: String!
   transaction: String!
-  proposal: Proposal!
+  proposal: Proposal
   createdAt: BigInt!
-}
-
-type VaultDeposit @entity {
-  id: ID!
-  dao: Dao!
-  token: ERC20Token!
-  sender: Bytes!
-  amount: BigInt!
-  reference: String!
-  transaction: String!
-  createdAt: BigInt!
+  type: TransferType!
 }
 
 # Dao
 
 type Dao @entity {
   id: ID! # use address as id
-  name: String!
+  name: String
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
-  token: ERC20Token!
+  token: ERC20Token
   actions: [Action!]! @derivedFrom(field: "dao")
-  deposits: [VaultDeposit!]! @derivedFrom(field: "dao")
-  withdraws: [VaultWithdraw!]! @derivedFrom(field: "dao")
+  transfers: [VaultTransfer!]! @derivedFrom(field: "dao")
   balances: [Balance!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
@@ -115,7 +110,7 @@ interface Proposal {
   id: ID! # package + voteId
   dao: Dao!
   creator: Bytes!
-  metadata: String!
+  metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   executed: Boolean!
   createdAt: BigInt!
@@ -135,7 +130,7 @@ enum VoteOption {
 type ERC20VotingPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  trustedForwarder: Bytes!
+  trustedForwarder: Bytes
   proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
   supportRequiredPct: BigInt
   participationRequiredPct: BigInt
@@ -170,7 +165,7 @@ type ERC20VotingProposal implements Proposal @entity {
   pkg: ERC20VotingPackage!
   voteId: BigInt!
   creator: Bytes!
-  metadata: String!
+  metadata: String
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
@@ -192,7 +187,7 @@ type ERC20VotingProposal implements Proposal @entity {
 type AllowlistPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  trustedForwarder: Bytes!
+  trustedForwarder: Bytes
   proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
   supportRequiredPct: BigInt
   participationRequiredPct: BigInt
@@ -225,7 +220,7 @@ type AllowlistProposal implements Proposal @entity {
   pkg: AllowlistPackage!
   voteId: BigInt!
   creator: Bytes!
-  metadata: String!
+  metadata: String
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!

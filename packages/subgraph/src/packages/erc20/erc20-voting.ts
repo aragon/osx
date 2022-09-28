@@ -1,4 +1,4 @@
-import {BigInt, dataSource} from '@graphprotocol/graph-ts';
+import {dataSource} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,

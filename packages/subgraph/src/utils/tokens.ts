@@ -62,6 +62,7 @@ export function updateBalance(
   if (!entity) {
     entity = new Balance(balanceId);
     entity.token = token.toHexString();
+    entity.balance = BigInt.zero();
     entity.dao = daoId;
   }
 

@@ -8,6 +8,7 @@ import {
   ConfigUpdated,
   TrustedForwarderSet
 } from '../../generated/templates/ERC20Voting/ERC20Voting';
+import {ERC20VotingProposal} from '../../generated/schema';
 
 // events
 
@@ -168,4 +169,32 @@ export function getVotesLengthCall(
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
+}
+
+// state
+
+export function createERC20VotingProposalEntityState(
+  entityID: string,
+  dao: string,
+  voting: string,
+  creator: string
+): ERC20VotingProposal {
+  let erc20VotingProposal = new ERC20VotingProposal(entityID);
+  erc20VotingProposal.dao = Address.fromString(dao).toHexString();
+  erc20VotingProposal.pkg = Address.fromString(voting).toHexString();
+  erc20VotingProposal.voteId = BigInt.zero();
+  erc20VotingProposal.creator = Address.fromString(creator);
+
+  erc20VotingProposal.startDate = BigInt.zero();
+  erc20VotingProposal.endDate = BigInt.zero();
+  erc20VotingProposal.snapshotBlock = BigInt.zero();
+  erc20VotingProposal.supportRequiredPct = BigInt.zero();
+  erc20VotingProposal.participationRequiredPct = BigInt.zero();
+  erc20VotingProposal.votingPower = BigInt.zero();
+  erc20VotingProposal.open = true;
+  erc20VotingProposal.executed = false;
+  erc20VotingProposal.createdAt = BigInt.zero();
+  erc20VotingProposal.save();
+
+  return erc20VotingProposal;
 }
