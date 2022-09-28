@@ -6,11 +6,10 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import {PermissionManager} from "../permission/PermissionManager.sol";
+import {_auth} from "../../utils/auth.sol";
+import {AppStorage} from "../../utils/AppStorage.sol";
 
 import {IDAO} from "../IDAO.sol";
-import {DaoAuthorizable} from "../component/DaoAuthorizable.sol";
-import {AppStorage} from "../../utils/AppStorage.sol";
 
 /// @title PluginClones
 /// @notice An abstract contract to inherit from when creating a proxy contract.
@@ -34,14 +33,7 @@ abstract contract PluginCloneable is Initializable, ERC165, Context, AppStorage 
     /// @param _permissionId The hash of the permission identifier
     modifier auth(bytes32 _permissionId) {
         IDAO dao = dao();
-        if (!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData())) {
-            revert PermissionManager.Unauthorized({
-                here: address(this),
-                where: address(this),
-                who: _msgSender(),
-                permissionId: _permissionId
-            });
-        }
+        _auth(dao, address(this), _msgSender(), _permissionId, _msgData());
         _;
     }
 

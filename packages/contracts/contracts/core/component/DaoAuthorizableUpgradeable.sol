@@ -5,8 +5,9 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-import "../permission/PermissionManager.sol";
-import "./../IDAO.sol";
+import {_auth} from "../../utils/auth.sol";
+
+import {IDAO} from "./../IDAO.sol";
 
 /// @title DaoAuthorizableUpgradable
 /// @author Aragon Association - 2022
@@ -17,20 +18,6 @@ import "./../IDAO.sol";
 abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
-
-    /// @notice Thrown if a call is unauthorized in the associated DAO.
-    /// @param dao The associated DAO.
-    /// @param here The context in which the authorization reverted.
-    /// @param where The contract requiring the permission.
-    /// @param who The address (EOA or contract) missing the permission.
-    /// @param permissionId The permission identifier.
-    error DaoUnauthorized(
-        address dao,
-        address here,
-        address where,
-        address who,
-        bytes32 permissionId
-    );
 
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
@@ -46,21 +33,8 @@ abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeabl
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
-        _auth(_permissionId);
+        _auth(dao, address(this), _msgSender(), _permissionId, _msgData());
         _;
-    }
-
-    /// @notice A private function to be used by the auth modifier to check permissions on a target contract via the associated DAO.
-    /// @param _permissionId The permission identifier.
-    function _auth(bytes32 _permissionId) internal view {
-        if (!dao.hasPermission(address(this), _msgSender(), _permissionId, _msgData()))
-            revert DaoUnauthorized({
-                dao: address(dao),
-                here: address(this),
-                where: address(this),
-                who: _msgSender(),
-                permissionId: _permissionId
-            });
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
