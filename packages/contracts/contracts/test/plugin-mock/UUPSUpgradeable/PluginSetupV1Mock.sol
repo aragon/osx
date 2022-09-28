@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../plugin/PluginSetup.sol";
+import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
