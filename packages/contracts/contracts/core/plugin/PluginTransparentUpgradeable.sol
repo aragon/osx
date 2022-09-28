@@ -5,12 +5,11 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-import {PermissionManager} from "../permission/PermissionManager.sol";
-
+import {_auth} from "../../utils/auth.sol";
 import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
-import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeable.sol";
 
 /// @title PluginTranparentUpgradable
 /// @notice An abstract contract to inherit from when creating a proxy contract.
@@ -19,12 +18,17 @@ import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeabl
 abstract contract PluginTransparentUpgradeable is
     Initializable,
     ERC165Upgradeable,
-    DaoAuthorizableUpgradeable
+    ContextUpgradeable,
+    AppStorage
 {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginTransparentUpgradeable).interfaceId;
 
-    function __PluginTransparentUpgradeable_init(address _dao) internal virtual onlyInitializing {
-        __DaoAuthorizable_init(IDAO(_dao));
+    /// @dev Auth modifier used in all components of a DAO to check the permissions.
+    /// @param _permissionId The hash of the permission identifier
+    modifier auth(bytes32 _permissionId) {
+        IDAO dao = dao();
+        _auth(dao, address(this), _msgSender(), _permissionId, _msgData());
+        _;
     }
 
     /// @notice adds a IERC165 to check whether contract supports PluginTranparentUpgradable interface or not.
