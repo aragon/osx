@@ -1,4 +1,4 @@
-import {dataSource} from '@graphprotocol/graph-ts';
+import {BigInt, dataSource} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
@@ -124,12 +124,37 @@ export function handleVoteCast(event: VoteCast): void {
     let contract = ERC20Voting.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
+      let voteCount = vote.value.value8.plus(
+        vote.value.value9.plus(vote.value.value10)
+      );
       proposalEntity.yes = vote.value.value8;
       proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
-      proposalEntity.voteCount = vote.value.value8.plus(
-        vote.value.value9.plus(vote.value.value10)
-      );
+      proposalEntity.voteCount = voteCount
+      let packageEntity = ERC20VotingPackage.load(proposalEntity.pkg);
+      if (
+        packageEntity && 
+        packageEntity.participationRequiredPct &&
+        packageEntity.supportRequiredPct
+      ) {
+        // check if the current vote results meet the conditions for
+        // for the proposal to pass:
+        // - Minimum participation => => (totalVotes / votingPower) >= minParticipation
+        // - Minimum suport => (yes / totalVotes) >= minSupport
+        if (
+          (voteCount.times(BigInt.fromI32(100))).div(proposalEntity.votingPower)
+            .ge(
+              packageEntity.participationRequiredPct,
+            ) &&
+          (proposalEntity.yes.times(BigInt.fromI32(100))).div(voteCount).ge(
+            packageEntity.supportRequiredPct,
+          )
+        ) {
+          proposalEntity.expectedPass = true
+        } else {
+          proposalEntity.expectedPass = false
+        }
+      }
       proposalEntity.save();
     }
   }
