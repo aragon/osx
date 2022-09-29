@@ -125,8 +125,8 @@ export function handleVoteCast(event: VoteCast): void {
         packageEntity.participationRequiredPct &&
         packageEntity.supportRequiredPct
       ) {
-        // check if the current vote results meet the conditions for
-        // for the proposal to pass:
+        // check if the current vote results meet
+        // the conditions for the proposal to pass:
         // - Minimum participation => => (totalVotes / votingPower) >= minParticipation
         // - Minimum suport => (yes / totalVotes) >= minSupport
         if (
