@@ -238,12 +238,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         emit TrustedForwarderSet(_trustedForwarder);
     }
 
-    /// @dev See {AdaptiveERC165-registerStandardAndCallback}.
+    /// @inheritdoc IDAO
     function registerStandardAndCallback(
         bytes4 _interfaceId,
         bytes4 _callbackSig,
         bytes4 _magicNumber
-    ) external auth(address(this), REGISTER_STANDARD_ROLE_PERMISSION) {
+    ) external override auth(address(this), REGISTER_STANDARD_ROLE_PERMISSION) {
         _registerStandardAndCallback(_interfaceId, _callbackSig, _magicNumber);
     }
 }
