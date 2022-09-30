@@ -119,30 +119,21 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
       proposalEntity.voteCount = voteCount
-      let packageEntity = AllowlistPackage.load(proposalEntity.pkg);
-      if (
-        packageEntity && 
-        packageEntity.participationRequiredPct &&
-        packageEntity.supportRequiredPct
-      ) {
-        // check if the current vote results meet
-        // the conditions for the proposal to pass:
-        // - Minimum participation => => (totalVotes / votingPower) >= minParticipation
-        // - Minimum suport => (yes / totalVotes) >= minSupport
-        if (
-          (voteCount.times(BigInt.fromI32(100))).div(proposalEntity.votingPower)
-            .ge(
-              packageEntity.participationRequiredPct,
-            ) &&
-          (proposalEntity.yes.times(BigInt.fromI32(100))).div(voteCount).ge(
-            packageEntity.supportRequiredPct,
-          )
-        ) {
-          proposalEntity.expectedPass = true
-        } else {
-          proposalEntity.expectedPass = false
-        }
-      }
+      
+      // check if the current vote results meet
+      // the conditions for the proposal to pass:
+      // - Minimum participation => => (totalVotes / votingPower) >= minParticipation
+      // - Minimum suport => (yes / totalVotes) >= minSupport
+
+      let currentParticipation = voteCount.times(BigInt.fromI32(100)).div(
+        proposalEntity.votingPower,
+      );
+      let currentSupport = proposalEntity.yes!.times(BigInt.fromI32(100)).div(
+        voteCount,
+      );
+      proposalEntity.executable =
+        currentParticipation.ge(proposalEntity.participationRequired) &&
+        currentSupport.ge(proposalEntity.supportRequiredPct);
       proposalEntity.save();
     }
   }

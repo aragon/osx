@@ -192,6 +192,7 @@ export function createERC20VotingProposalEntityState(
   erc20VotingProposal.participationRequiredPct = BigInt.zero();
   erc20VotingProposal.votingPower = BigInt.zero();
   erc20VotingProposal.open = true;
+  erc20VotingProposal.executable = false;
   erc20VotingProposal.executed = false;
   erc20VotingProposal.createdAt = BigInt.zero();
   erc20VotingProposal.save();

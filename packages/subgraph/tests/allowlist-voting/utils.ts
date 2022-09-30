@@ -233,6 +233,7 @@ export function createAllowlistProposalEntityState(
   allowlistProposal.votingPower = BigInt.zero();
   allowlistProposal.open = true;
   allowlistProposal.executed = false;
+  allowlistProposal.executable = false;
   allowlistProposal.createdAt = BigInt.zero();
   allowlistProposal.save();
 
