@@ -191,7 +191,7 @@ describe('CounterPluginSetup(Example)', function () {
       ]);
     });
 
-    it('correcly returns permissionswhen helper is passed', async () => {
+    it('correcly returns permissions when helper is passed.', async () => {
       const plugin = address1;
       const helper = address2;
 

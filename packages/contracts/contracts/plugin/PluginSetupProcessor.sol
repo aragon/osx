@@ -23,14 +23,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
         keccak256("SET_REPO_REGISTRY_PERMISSION");
 
-    struct UpdateSettings {
+    struct PluginUpdateParams {
         address plugin;
         PluginRepo pluginSetupRepo; // where plugin manager versions are handled.
         address oldPluginSetup;
         address newPluginSetup;
     }
 
-    mapping(bytes32 => bool) private isInstallationPrepared;
+    mapping(bytes32 => bool) private isInstallationProcessed;
     mapping(bytes32 => bytes32) private installPermissionHashes;
     mapping(bytes32 => bytes32) private updatePermissionHashes;
     mapping(bytes32 => bytes32) private helpersHashes;
@@ -113,12 +113,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // important safety measure to include dao + plugin manager in the encoding.
         bytes32 installationId = keccak256(abi.encode(_dao, _pluginSetup, plugin));
 
-        if (isInstallationPrepared[installationId]) {
-            revert PluginWithTheSameAddressExists();
-        }
-
-        isInstallationPrepared[installationId] = true;
-
         installPermissionHashes[installationId] = getPermissionsHash(permissions);
 
         helpersHashes[installationId] = keccak256(abi.encode(helpers));
@@ -142,16 +136,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _plugin,
         Permission.ItemMultiTarget[] calldata _permissions
     ) external canProcessSetup(_dao, PROCESS_INSTALL_PERMISSION_ID) {
-        bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
+        bytes32 installedId = keccak256(abi.encode(_dao, _plugin));
 
-        // TODO: is this the correct place for this check?
-        // this should be in the prepare installtion function
-        // before : isInstallationPrepared[installationId] = true;
-        // if (isInstallationPrepared[setupId]) {
-        //     revert PluginWithTheSameAddressExists();
-        // }
+        if (isInstallationProcessed[installedId]) {
+            revert PluginWithTheSameAddressExists();
+        }
 
-        bytes32 storedPermissionHash = installPermissionHashes[setupId];
+        isInstallationProcessed[installedId] = true;
+
+        bytes32 installationId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
+
+        bytes32 storedPermissionHash = installPermissionHashes[installationId];
 
         // check if plugin was actually deployed..
         if (storedPermissionHash == bytes32(0)) {
@@ -171,7 +166,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // emit the event to connect plugin to the dao.
         emit InstallationProcessed(_dao, _plugin);
 
-        delete installPermissionHashes[setupId];
+        delete installPermissionHashes[installationId];
     }
 
     // TODO: might we need to check when `prepareUpdate` gets called, if plugin actually was installed ?
@@ -179,7 +174,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     // and checking it always would cost more... shall we still check it and how ?
     function prepareUpdate(
         address _dao,
-        UpdateSettings calldata _updateSettings,
+        PluginUpdateParams calldata _updateSettings,
         address[] calldata _helpers, // helpers that were deployed when installing/updating the plugin.
         bytes memory _data // encoded per pluginSetup's update ABI,
     ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
