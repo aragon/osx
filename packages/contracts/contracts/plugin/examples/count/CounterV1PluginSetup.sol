@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {Permission, PluginSetup} from "../../PluginSetup.sol";
+import {Permission, PluginSetup, PluginSetupProcessor} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
@@ -24,14 +24,10 @@ contract CounterV1PluginSetup is PluginSetup {
     }
 
     function prepareInstallation(address _dao, bytes memory _data)
-        external
+        public
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
-        )
+        returns (PluginSetupProcessor.PluginInstallParams memory params)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -49,54 +45,55 @@ contract CounterV1PluginSetup is PluginSetup {
             _num
         );
 
-        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
-        helpers = new address[](1);
+        params.permissions = new Permission.ItemMultiTarget[](
+            _multiplyHelper == address(0) ? 3 : 2
+        );
+        params.helpers = new address[](1);
 
         // deploy
-        plugin = createERC1967Proxy(_dao, address(counterBase), initData);
+        params.plugin = createERC1967Proxy(_dao, address(counterBase), initData);
 
         // set permissions
-        permissions[0] = Permission.ItemMultiTarget(
+        params.permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             _dao,
-            plugin,
+            params.plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
+        params.permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            plugin,
+            params.plugin,
             _dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
         if (_multiplyHelper == address(0)) {
-            permissions[2] = Permission.ItemMultiTarget(
+            params.permissions[2] = Permission.ItemMultiTarget(
                 Permission.Operation.Grant,
                 multiplyHelper,
-                plugin,
+                params.plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
 
         // add helpers
-        helpers[0] = multiplyHelper;
-
-        return (plugin, helpers, permissions);
+        params.helpers[0] = multiplyHelper;
     }
 
     function prepareUninstallation(
         address _dao,
         address _plugin,
-        address[] calldata _activeHelpers
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-        permissions = new Permission.ItemMultiTarget[](_activeHelpers.length != 0 ? 3 : 2);
+        address[] calldata _activeHelpers,
+        bytes calldata
+    ) external virtual override returns (PluginSetupProcessor.PluginUninstallParams memory params) {
+        params.permissions = new Permission.ItemMultiTarget[](_activeHelpers.length != 0 ? 3 : 2);
 
         // set permissions
-        permissions[0] = Permission.ItemMultiTarget(
+        params.permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
             _dao,
             _plugin,
@@ -104,7 +101,7 @@ contract CounterV1PluginSetup is PluginSetup {
             keccak256("EXEC_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
+        params.permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
             _plugin,
             _dao,
@@ -113,7 +110,7 @@ contract CounterV1PluginSetup is PluginSetup {
         );
 
         if (_activeHelpers.length != 0) {
-            permissions[2] = Permission.ItemMultiTarget(
+            params.permissions[2] = Permission.ItemMultiTarget(
                 Permission.Operation.Revoke,
                 _activeHelpers[0],
                 _plugin,
@@ -127,7 +124,11 @@ contract CounterV1PluginSetup is PluginSetup {
         return address(counterBase);
     }
 
-    function prepareInstallABI() external view virtual override returns (string memory) {
+    function prepareInstallDataABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num)";
+    }
+
+    function prepapreUninstallDataABI() external view virtual override returns (string memory) {
+        return "";
     }
 }

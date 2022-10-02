@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {Permission, PluginSetup, PluginSetupProcessor} from "../../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
@@ -25,11 +25,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         public
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
-        )
+        returns (PluginSetupProcessor.PluginInstallParams memory params)
     {
         // Deploy a helper.
         address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
@@ -38,10 +34,10 @@ contract PluginSetupV1MockBad is PluginSetup {
 
         // For testing purposes: this setup returns the same adress that was passed as a plugin.
         if (_samePluginAddress != address(0)) {
-            plugin = _samePluginAddress;
+            params.plugin = _samePluginAddress;
         } else {
             // Deploy and set the plugn.
-            plugin = createERC1967Proxy(
+            params.plugin = createERC1967Proxy(
                 _dao,
                 address(pluginBase),
                 abi.encodeWithSelector(
@@ -53,22 +49,22 @@ contract PluginSetupV1MockBad is PluginSetup {
         }
 
         // Set helper.
-        helpers = new address[](1);
-        helpers[0] = helperAddr;
+        params.helpers = new address[](1);
+        params.helpers[0] = helperAddr;
 
         // Set permissions.
-        permissions = new Permission.ItemMultiTarget[](2);
-        permissions[0] = Permission.ItemMultiTarget(
+        params.permissions = new Permission.ItemMultiTarget[](2);
+        params.permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             _dao,
-            plugin,
+            params.plugin,
             NO_ORACLE,
             keccak256("EXEC_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
+        params.permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            plugin,
+            params.plugin,
             helperAddr,
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
@@ -78,10 +74,11 @@ contract PluginSetupV1MockBad is PluginSetup {
     function prepareUninstallation(
         address _dao,
         address _plugin,
-        address[] calldata _activeHelpers
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-        permissions = new Permission.ItemMultiTarget[](2);
-        permissions[0] = Permission.ItemMultiTarget(
+        address[] calldata _activeHelpers,
+        bytes calldata
+    ) external virtual override returns (PluginSetupProcessor.PluginUninstallParams memory params) {
+        params.permissions = new Permission.ItemMultiTarget[](2);
+        params.permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
             _dao,
             _plugin,
@@ -89,7 +86,7 @@ contract PluginSetupV1MockBad is PluginSetup {
             keccak256("EXEC_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
+        params.permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
             _plugin,
             _activeHelpers[0],
@@ -102,7 +99,11 @@ contract PluginSetupV1MockBad is PluginSetup {
         return address(pluginBase);
     }
 
-    function prepareInstallABI() external view virtual override returns (string memory) {
+    function prepareInstallDataABI() external view virtual override returns (string memory) {
         return "(address samePluginAddress)";
+    }
+
+    function prepapreUninstallDataABI() external view virtual override returns (string memory) {
+        return "";
     }
 }

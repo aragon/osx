@@ -11,42 +11,46 @@ import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissio
 
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 
+import {PluginSetupProcessor} from "./PluginSetupProcessor.sol";
+
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
 abstract contract PluginSetup {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginSetup).interfaceId;
 
-    function prepareInstallation(address dao, bytes memory data)
+    /// @notice the ABI in string format that `prepareInstallation` function needs to use `_data`.
+    /// @return ABI in string format.
+    function prepareInstallDataABI() external view virtual returns (string memory);
+
+    function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
-        returns (
-            address plugin,
-            address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
-        );
+        returns (PluginSetupProcessor.PluginInstallParams memory);
+
+    /// @notice The ABI in string format that `prepareUpdate` function needs to use as `_data`.
+    /// @dev Not required to be overriden as there might be no update at all by dev.
+    /// @return ABI in string format.
+    function prepapreUpdateDataABI() external view virtual returns (string memory) {}
 
     function prepareUpdate(
-        address dao,
-        address plugin, // proxy
-        address[] memory helpers,
-        bytes memory data,
-        uint16[3] calldata oldVersion
-    )
-        external
-        virtual
-        returns (
-            address[] memory activeHelpers,
-            bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
-        )
-    {}
+        address _dao,
+        address _plugin, // proxy
+        address[] memory _helpers,
+        uint16[3] calldata _oldVersion,
+        bytes memory _data
+    ) external virtual returns (PluginSetupProcessor.PluginUpdateParams memory) {}
+
+    /// @notice the ABI in string format that prepareUninstallation function needs to use as `_data`.
+    /// @return ABI in string format.
+    function prepapreUninstallDataABI() external view virtual returns (string memory);
 
     // TODO: should we have  `_data` param? in case dev need to do somthing else depending on the data?
     function prepareUninstallation(
-        address dao,
-        address plugin,
-        address[] calldata activeHelpers
-    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
+        address _dao,
+        address _plugin,
+        address[] calldata _activeHelpers,
+        bytes calldata _data
+    ) external virtual returns (PluginSetupProcessor.PluginUninstallParams memory);
 
     function createERC1967Proxy(
         address _dao,
@@ -61,15 +65,6 @@ abstract contract PluginSetup {
     function getImplementationAddress() external view virtual returns (address);
 
     // TODO: perhaps find a better name for "*ABI" naming, or "*Abi"
-
-    /// @notice the ABI in string format that prepareInstallation function needs to use.
-    /// @return ABI in string format.
-    function prepareInstallABI() external view virtual returns (string memory);
-
-    /// @notice The ABI in string format that update function needs to use.
-    /// @dev Not required to be overriden as there might be no update at all by dev.
-    /// @return ABI in string format.
-    function prepapreUpdateABI() external view virtual returns (string memory) {}
 
     // TODO: if uninstall have data ? should we also have: prepareUninstallABI() ?
 }
