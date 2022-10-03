@@ -227,7 +227,7 @@ describe('Plugin Setup Processor', function () {
           targetDao.address,
           plugin,
           AddressZero,
-          ethers.utils.id('EXEC_PERMISSION'),
+          ethers.utils.id('EXECUTE_PERMISSION'),
         ],
         [
           Op.Grant,
