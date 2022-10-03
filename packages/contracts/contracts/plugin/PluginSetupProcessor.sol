@@ -89,7 +89,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         repoRegistry = _repoRegistry;
     }
 
-    function PrepareInstallation(
+    function prepareInstallation(
         address _dao,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,

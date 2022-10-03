@@ -195,12 +195,12 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('PrepareInstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+    it('prepareInstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
       const data = '0x';
       const pluginSetupRepoAddr = ADDRESS_TWO;
 
       await expect(
-        psp.PrepareInstallation(
+        psp.prepareInstallation(
           targetDao.address,
           pluginSetupV1Mock.address,
           pluginSetupRepoAddr,
@@ -209,7 +209,7 @@ describe('Plugin Setup Processor', function () {
       ).to.be.revertedWith(customError('EmptyPluginRepo'));
     });
 
-    it('PrepareInstallation: retrun correctly the permissions', async () => {
+    it('prepareInstallation: retrun correctly the permissions', async () => {
       const {plugin, helpers, prepareInstallpermissions} =
         await prepareInstallation(
           psp,
