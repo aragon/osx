@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.2.1-alpha
+On 2022-10-03 10:38:36
+
 ### Added
 
 - Added `members` to `ERC20VotingPackage`.
