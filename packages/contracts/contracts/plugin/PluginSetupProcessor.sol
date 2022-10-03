@@ -39,11 +39,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     error SetupNotAllowed(address caller, bytes32 permissionId);
     error PluginNonupgradeable(address plugin);
-    error PermissionsInvalid(bytes32 stored, bytes32 passed);
+    error BadPermissions(bytes32 stored, bytes32 passed);
     error PluginNotPrepared();
     error HelpersMismatch();
-    error PluginRepoNonexistant();
-    error PluginWithTheSameAddressExists(); // in case the PluginSetup is malicios and always/sometime returns the same address
+    error EmptyPluginRepo();
+    error PluginAlreadyApplied(); // in case the PluginSetup is malicios and always/sometime returns the same address
     error UpdatePermissionsMismatch();
 
     event InstallationPrepared(
@@ -59,7 +59,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     // @notice Emitted after the plugin installation to track that a plugin was installed on a DAO.
     /// @param dao The dao address that plugin belongs to.
     /// @param plugin the plugin address.
-    event InstallationProcessed(address dao, address plugin);
+    event InstallationApplied(address dao, address plugin);
 
     event UpdatePrepared(
         address indexed dao,
@@ -67,14 +67,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
         Permission.ItemMultiTarget[] permissions,
         bytes initData
     );
-    event UpdateProcessed(address indexed dao, address indexed plugin);
+    event UpdateApplied(address indexed dao, address indexed plugin);
 
-    event PluginUninstalled(address indexed dao, address indexed plugin);
+    event UninstallationApplied(address indexed dao, address indexed plugin);
 
     /// @dev Modifier used to check if the setup can be processed by the caller.
     /// @param _dao The address of the DAO.
-    modifier canProcessSetup(address _dao, bytes32 _permissionId) {
-        _canProcessSetup(_dao, _permissionId);
+    modifier canApply(address _dao, bytes32 _setupId) {
+        _canApply(_dao, _setupId);
         _;
     }
 
@@ -97,7 +97,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     ) external returns (Permission.ItemMultiTarget[] memory) {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
-            revert PluginRepoNonexistant();
+            revert EmptyPluginRepo();
         }
 
         // Reverts if pluginSetup doesn't exist on the repo...
@@ -130,16 +130,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return permissions;
     }
 
-    function processInstallation(
+    function applyInstallation(
         address _dao,
         address _pluginSetup,
         address _plugin,
         Permission.ItemMultiTarget[] calldata _permissions
-    ) external canProcessSetup(_dao, PROCESS_INSTALL_PERMISSION_ID) {
+    ) external canApply(_dao, PROCESS_INSTALL_PERMISSION_ID) {
         bytes32 installedId = keccak256(abi.encode(_dao, _plugin));
 
         if (isInstallationProcessed[installedId]) {
-            revert PluginWithTheSameAddressExists();
+            revert PluginAlreadyApplied();
         }
 
         isInstallationProcessed[installedId] = true;
@@ -157,14 +157,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check that permissions weren't tempered.
         if (storedPermissionHash != passedPermissionHash) {
-            revert PermissionsInvalid({stored: storedPermissionHash, passed: passedPermissionHash});
+            revert BadPermissions({stored: storedPermissionHash, passed: passedPermissionHash});
         }
 
         // apply permissions on a dao..
         DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
 
         // emit the event to connect plugin to the dao.
-        emit InstallationProcessed(_dao, _plugin);
+        emit InstallationApplied(_dao, _plugin);
 
         delete installPermissionHashes[installationId];
     }
@@ -186,7 +186,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Implicitly confirms plugin managers are valid.
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_updateSettings.pluginSetupRepo))) {
-            revert PluginRepoNonexistant();
+            revert EmptyPluginRepo();
         }
 
         // TODO: check if plugin is actually installed on the DAO
@@ -237,13 +237,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return (permissions, initData);
     }
 
-    function processUpdate(
+    function applyUpdate(
         address _dao,
         address _plugin, // proxy contract
         address _pluginSetup, // new plugin manager upgrade happens to.
         bytes memory _initData,
         Permission.ItemMultiTarget[] calldata _permissions
-    ) external canProcessSetup(_dao, PROCESS_UPDATE_PERMISSION_ID) {
+    ) external canApply(_dao, PROCESS_UPDATE_PERMISSION_ID) {
         bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
 
         if (updatePermissionHashes[setupId] != getPermissionsHash(_permissions)) {
@@ -254,21 +254,21 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
 
-        emit UpdateProcessed(_dao, _plugin); // TODO: some other parts might be needed..
+        emit UpdateApplied(_dao, _plugin); // TODO: some other parts might be needed..
     }
 
-    function processUninstallation(
+    function applyUninstallation(
         address _dao,
         address _plugin,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external canProcessSetup(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
+    ) external canApply(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
         // Implicitly confirms plugin manager is valid valid.
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
-            revert PluginRepoNonexistant();
+            revert EmptyPluginRepo();
         }
 
         // Reverts if pluginSetup doesn't exist on the repo...
@@ -287,7 +287,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         DAO(payable(_dao)).bulkOnMultiTarget(permissions);
 
-        emit PluginUninstalled(_dao, _plugin);
+        emit UninstallationApplied(_dao, _plugin);
     }
 
     function getPermissionsHash(Permission.ItemMultiTarget[] memory permissions)
@@ -340,7 +340,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    function _canProcessSetup(address _dao, bytes32 _permissionId) private view {
+    function _canApply(address _dao, bytes32 _permissionId) private view {
         if (
             msg.sender != _dao &&
             !DAO(payable(_dao)).hasPermission(address(this), msg.sender, _permissionId, bytes(""))
