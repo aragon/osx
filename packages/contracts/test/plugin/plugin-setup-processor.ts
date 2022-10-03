@@ -423,7 +423,8 @@ describe('Plugin Setup Processor', function () {
           AddressZero,
           AddressZero,
           AddressZero,
-          []
+          [],
+          EMPTY_DATA
         )
       ).to.be.revertedWith(
         customError(
@@ -461,7 +462,8 @@ describe('Plugin Setup Processor', function () {
           plugin,
           pluginSetup,
           pluginSetupRepoAddr,
-          helpers
+          helpers,
+          EMPTY_DATA
         )
       ).to.be.revertedWith(customError('PluginRepoNonexistant'));
     });
@@ -491,7 +493,8 @@ describe('Plugin Setup Processor', function () {
           plugin,
           pluginSetup,
           pluginSetupMockRepoAddress,
-          helpers
+          helpers,
+          EMPTY_DATA
         )
       )
         .to.emit(psp, EVENTS.PluginUninstalled)

@@ -23,6 +23,10 @@ contract CounterV1PluginSetup is PluginSetup {
         counterBase = new CounterV1();
     }
 
+    function prepareInstallDataABI() external view virtual override returns (string memory) {
+        return "(address multiplyHelper, uint num)";
+    }
+
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
@@ -88,10 +92,15 @@ contract CounterV1PluginSetup is PluginSetup {
         return (plugin, helpers, permissions);
     }
 
+    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
     function prepareUninstallation(
         address _dao,
         address _plugin,
-        address[] calldata _activeHelpers
+        address[] calldata _activeHelpers,
+        bytes calldata
     ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
         permissions = new Permission.ItemMultiTarget[](_activeHelpers.length != 0 ? 3 : 2);
 
@@ -125,9 +134,5 @@ contract CounterV1PluginSetup is PluginSetup {
 
     function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
-    }
-
-    function prepareInstallABI() external view virtual override returns (string memory) {
-        return "(address multiplyHelper, uint num)";
     }
 }

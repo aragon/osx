@@ -21,6 +21,10 @@ contract PluginSetupV1Mock is PluginSetup {
         pluginBase = new PluginUUPSUpgradeableV1Mock();
     }
 
+    function prepareInstallDataABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
     function prepareInstallation(address _dao, bytes memory)
         public
         virtual
@@ -68,10 +72,15 @@ contract PluginSetupV1Mock is PluginSetup {
         );
     }
 
+    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
     function prepareUninstallation(
         address _dao,
         address _plugin,
-        address[] calldata _activeHelpers
+        address[] calldata _activeHelpers,
+        bytes calldata
     ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
         permissions = new Permission.ItemMultiTarget[](2);
         permissions[0] = Permission.ItemMultiTarget(
@@ -93,9 +102,5 @@ contract PluginSetupV1Mock is PluginSetup {
 
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
-    }
-
-    function prepareInstallABI() external view virtual override returns (string memory) {
-        return "";
     }
 }

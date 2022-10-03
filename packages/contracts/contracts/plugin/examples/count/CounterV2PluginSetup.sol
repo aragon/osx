@@ -25,6 +25,10 @@ contract CounterV2PluginSetup is PluginSetup {
         counterBase = new CounterV2();
     }
 
+    function prepareInstallDataABI() external view virtual override returns (string memory) {
+        return "(address multiplyHelper, uint num, uint newVariable)";
+    }
+
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
@@ -90,12 +94,16 @@ contract CounterV2PluginSetup is PluginSetup {
         return (plugin, helpers, permissions);
     }
 
+    function prepapreUpdateDataABI() external view virtual override returns (string memory) {
+        return "(uint _newVariable)";
+    }
+
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
         address[] memory _helpers,
-        bytes memory _data,
-        uint16[3] calldata _oldVersion
+        uint16[3] calldata _oldVersion,
+        bytes memory _data
     )
         external
         override
@@ -129,10 +137,15 @@ contract CounterV2PluginSetup is PluginSetup {
         activeHelpers[0] = _helpers[0];
     }
 
+    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
     function prepareUninstallation(
         address dao,
         address plugin,
-        address[] calldata activeHelpers
+        address[] calldata activeHelpers,
+        bytes calldata
     ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
         permissions = new Permission.ItemMultiTarget[](activeHelpers.length != 0 ? 3 : 2);
 
@@ -166,13 +179,5 @@ contract CounterV2PluginSetup is PluginSetup {
 
     function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
-    }
-
-    function prepareInstallABI() external view virtual override returns (string memory) {
-        return "(address multiplyHelper, uint num, uint newVariable)";
-    }
-
-    function prepapreUpdateABI() external view virtual override returns (string memory) {
-        return "(uint _newVariable)";
     }
 }

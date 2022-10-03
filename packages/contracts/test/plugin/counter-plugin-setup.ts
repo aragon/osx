@@ -24,6 +24,8 @@ enum Op {
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 
+const EMPTY_DATA = '0x';
+
 // TODO 1. add type GRANT/REVOKE check in permissions
 // TODO 2. in order to detect encode abi for deploy/update, use deployABI/updateABI
 describe('CounterPluginSetup(Example)', function () {
@@ -153,8 +155,8 @@ describe('CounterPluginSetup(Example)', function () {
           daoMock.address,
           plugin,
           [helper],
-          data,
-          oldVersion
+          oldVersion,
+          data
         );
 
       expect(activeHelpers.length).to.be.equal(1);
@@ -170,7 +172,8 @@ describe('CounterPluginSetup(Example)', function () {
       const permissions = await counterV1Setup.callStatic.prepareUninstallation(
         daoMock.address,
         address1,
-        []
+        [],
+        EMPTY_DATA
       );
 
       expect(permissions).to.deep.equal([
@@ -198,7 +201,8 @@ describe('CounterPluginSetup(Example)', function () {
       const permissions = await counterV1Setup.callStatic.prepareUninstallation(
         daoMock.address,
         plugin,
-        [helper]
+        [helper],
+        EMPTY_DATA
       );
 
       expect(permissions).to.deep.equal([

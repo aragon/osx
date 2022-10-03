@@ -219,8 +219,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 _dao,
                 _updateSettings.plugin,
                 _helpers,
-                _data,
-                oldVersion
+                oldVersion,
+                _data
             );
 
         // add new helpers for the future update checks
@@ -262,7 +262,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _plugin,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
-        address[] calldata _activeHelpers
+        address[] calldata _activeHelpers,
+        bytes calldata _data
     ) external canProcessSetup(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
         // Implicitly confirms plugin manager is valid valid.
         // ensure repo for plugin manager exists
@@ -282,7 +283,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         delete helpersHashes[setupId];
 
         Permission.ItemMultiTarget[] memory permissions = PluginSetup(_pluginSetup)
-            .prepareUninstallation(_dao, _plugin, _activeHelpers);
+            .prepareUninstallation(_dao, _plugin, _activeHelpers, _data);
 
         DAO(payable(_dao)).bulkOnMultiTarget(permissions);
 

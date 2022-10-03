@@ -20,6 +20,10 @@ contract PluginSetupV2Mock is PluginSetup {
         pluginBase = new PluginUUPSUpgradeableV2Mock();
     }
 
+    function prepareInstallDataABI() external view virtual override returns (string memory) {
+        return "(address samePluginAddress)";
+    }
+
     function prepareInstallation(address _dao, bytes memory)
         public
         virtual
@@ -64,12 +68,16 @@ contract PluginSetupV2Mock is PluginSetup {
         );
     }
 
+    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
         address[] memory _helpers,
-        bytes memory,
-        uint16[3] calldata
+        uint16[3] calldata,
+        bytes memory
     )
         public
         virtual
@@ -115,9 +123,5 @@ contract PluginSetupV2Mock is PluginSetup {
 
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
-    }
-
-    function prepareInstallABI() external view virtual override returns (string memory) {
-        return "";
     }
 }
