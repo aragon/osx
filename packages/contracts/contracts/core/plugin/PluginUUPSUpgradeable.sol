@@ -30,7 +30,7 @@ abstract contract PluginUUPSUpgradeable is
     /// @dev Auth modifier used in all components of a DAO to check the permissions.
     /// @param _permissionId The hash of the permission identifier
     modifier auth(bytes32 _permissionId) {
-        IDAO dao = dao();
+        IDAO dao = getDao();
         _auth(dao, address(this), _msgSender(), _permissionId, _msgData());
         _;
     }

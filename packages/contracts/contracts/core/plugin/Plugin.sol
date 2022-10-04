@@ -25,7 +25,7 @@ abstract contract Plugin is ERC165, Context, AppStorage {
     /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     modifier auth(bytes32 _permissionId) {
-        _auth(dao(), address(this), _msgSender(), _permissionId, _msgData());
+        _auth(getDao(), address(this), _msgSender(), _permissionId, _msgData());
         _;
     }
 

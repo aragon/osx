@@ -24,7 +24,7 @@ contract CounterV1 is PluginUUPSUpgradeable {
     }
 
     function execute() public {
-        // IDAO dao = dao();
+        // IDAO dao = getDao();
         // In order to do this, Count needs permission on the dao (EXEC_ROLE)
         //dao.execute(...)
     }

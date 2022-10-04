@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import console from 'console';
 import {ethers} from 'hardhat';
 import {
   PluginSetupProcessor,
@@ -26,6 +27,7 @@ const EVENTS = {
   InstallationApplied: 'InstallationApplied',
   UpdatePrepared: 'UpdatePrepared',
   UpdateApplied: 'UpdateApplied',
+  UninstallationPrepared: 'UninstallationPrepared',
   UninstallationApplied: 'UninstallationApplied',
   PluginRepoRegistered: 'PluginRepoRegistered',
   Granted: 'Granted',
