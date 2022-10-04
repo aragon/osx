@@ -5,6 +5,7 @@ import {
   PluginSetupProcessor,
   PluginSetupV1Mock,
   PluginSetupV2Mock,
+  PluginSetupV1MockBad,
   PluginRepoFactory,
   AragonPluginRegistry,
   PluginRepo,
@@ -95,6 +96,7 @@ describe('Plugin Setup Processor', function () {
   let pluginSetupV1Mock: PluginSetupV1Mock;
   let pluginSetupMockRepoAddress: any;
   let pluginSetupV2Mock: PluginSetupV2Mock;
+  let pluginSetupV1MockBad: PluginSetupV1MockBad;
   let ownerAddress: string;
   let targetDao: any;
   let managingDao: any;
@@ -184,6 +186,18 @@ describe('Plugin Setup Processor', function () {
       '0x00'
     );
 
+    const PluginSetupV1MockBad = await ethers.getContractFactory(
+      'PluginSetupV1MockBad'
+    );
+    pluginSetupV1MockBad = await PluginSetupV1MockBad.deploy();
+
+    // register the bad plugin setup on `AragonPluginRegistry`.
+    await pluginRepo.createVersion(
+      [3, 0, 0],
+      pluginSetupV1MockBad.address,
+      '0x00'
+    );
+
     // Grant
     await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);
   });
@@ -211,6 +225,33 @@ describe('Plugin Setup Processor', function () {
           data
         )
       ).to.be.revertedWith(customError('EmptyPluginRepo'));
+    });
+
+    it('PrepareInstallation: reverts if installation already prepared', async () => {
+      const pluginSetupBad = pluginSetupV1MockBad.address;
+
+      const data1 = ethers.utils.defaultAbiCoder.encode(
+        ['address'],
+        [AddressZero]
+      );
+      const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        psp,
+        targetDao.address,
+        pluginSetupBad,
+        pluginSetupMockRepoAddress,
+        data1
+      );
+
+      const data2 = ethers.utils.defaultAbiCoder.encode(['address'], [plugin]);
+
+      await expect(
+        psp.prepareInstallation(
+          targetDao.address,
+          pluginSetupBad,
+          pluginSetupMockRepoAddress,
+          data2
+        )
+      ).to.be.revertedWith(customError('InstallationAlreadyPrepared'));
     });
 
     it('PrepareInstallation: retrun correctly the permissions', async () => {
@@ -316,17 +357,8 @@ describe('Plugin Setup Processor', function () {
     });
 
     it('ApplyInstallation: reverts if plugin setup return the same address', async () => {
-      const PluginSetupV1MockBad = await ethers.getContractFactory(
-        'PluginSetupV1MockBad'
-      );
-      const pluginSetupV1MockBad = await PluginSetupV1MockBad.deploy();
-
       const pluginSetupBad = pluginSetupV1MockBad.address;
 
-      // register the bad plugin setup on `AragonPluginRegistry`.
-      await pluginRepo.createVersion([3, 0, 0], pluginSetupBad, '0x00');
-
-      // user1 normally prepares a plugin installation.
       const dataUser1 = ethers.utils.defaultAbiCoder.encode(
         ['address'],
         [AddressZero]

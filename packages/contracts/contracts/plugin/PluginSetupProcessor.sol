@@ -48,6 +48,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error UpdatePermissionsMismatch();
     error PluginNotApplied();
 
+    error InstallationAlreadyPrepared();
+
     event InstallationPrepared(
         address indexed sender,
         address indexed dao,
@@ -121,8 +123,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
             Permission.ItemMultiTarget[] memory permissions
         ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
-        // important safety measure to include dao + plugin manager in the encoding.
+        // Important safety measure to include dao + plugin manager in the encoding.
         bytes32 setupId = getSetupId(_dao, _pluginSetup, plugin);
+
+        // Check if this plugin is not already prepared
+        if (installPermissionHashes[setupId] != bytes32(0)) {
+            revert InstallationAlreadyPrepared();
+        }
 
         installPermissionHashes[setupId] = getPermissionsHash(permissions);
 

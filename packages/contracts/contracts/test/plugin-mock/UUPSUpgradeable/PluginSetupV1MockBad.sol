@@ -61,7 +61,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         helpers[0] = helperAddr;
 
         // Set permissions.
-        permissions = new Permission.ItemMultiTarget[](2);
+        permissions = new Permission.ItemMultiTarget[](_samePluginAddress != address(0) ? 2 : 1);
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             _dao,
@@ -70,13 +70,15 @@ contract PluginSetupV1MockBad is PluginSetup {
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
-            plugin,
-            helperAddr,
-            NO_ORACLE,
-            keccak256("SETTINGS_PERMISSION")
-        );
+        if (_samePluginAddress != address(0)) {
+            permissions[1] = Permission.ItemMultiTarget(
+                Permission.Operation.Grant,
+                _dao,
+                plugin,
+                NO_ORACLE,
+                keccak256("BAD_PERMISSION")
+            );
+        }
     }
 
     function prepareUninstallDataABI() external view virtual override returns (string memory) {
