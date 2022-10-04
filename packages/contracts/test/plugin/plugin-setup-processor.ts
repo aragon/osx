@@ -213,216 +213,223 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('PrepareInstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
-      const data = '0x';
-      const pluginSetupRepoAddr = ADDRESS_TWO;
+    describe('PrepareInstallation', function () {
+      it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+        const data = '0x';
+        const pluginSetupRepoAddr = ADDRESS_TWO;
 
-      await expect(
-        psp.prepareInstallation(
-          targetDao.address,
-          pluginSetupV1Mock.address,
-          pluginSetupRepoAddr,
-          data
-        )
-      ).to.be.revertedWith(customError('EmptyPluginRepo'));
-    });
+        await expect(
+          psp.prepareInstallation(
+            targetDao.address,
+            pluginSetupV1Mock.address,
+            pluginSetupRepoAddr,
+            data
+          )
+        ).to.be.revertedWith(customError('EmptyPluginRepo'));
+      });
 
-    it('PrepareInstallation: reverts if installation already prepared', async () => {
-      const pluginSetupBad = pluginSetupV1MockBad.address;
+      it('Reverts if installation already prepared', async () => {
+        const pluginSetupBad = pluginSetupV1MockBad.address;
 
-      const data1 = ethers.utils.defaultAbiCoder.encode(
-        ['address'],
-        [AddressZero]
-      );
-      const {plugin, prepareInstallpermissions} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetupBad,
-        pluginSetupMockRepoAddress,
-        data1
-      );
-
-      const data2 = ethers.utils.defaultAbiCoder.encode(['address'], [plugin]);
-
-      await expect(
-        psp.prepareInstallation(
+        const data1 = ethers.utils.defaultAbiCoder.encode(
+          ['address'],
+          [AddressZero]
+        );
+        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+          psp,
           targetDao.address,
           pluginSetupBad,
           pluginSetupMockRepoAddress,
-          data2
-        )
-      ).to.be.revertedWith(customError('InstallationAlreadyPrepared'));
+          data1
+        );
+
+        const data2 = ethers.utils.defaultAbiCoder.encode(
+          ['address'],
+          [plugin]
+        );
+
+        await expect(
+          psp.prepareInstallation(
+            targetDao.address,
+            pluginSetupBad,
+            pluginSetupMockRepoAddress,
+            data2
+          )
+        ).to.be.revertedWith(customError('InstallationAlreadyPrepared'));
+      });
+
+      it('Retrun correctly the permissions', async () => {
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            targetDao.address,
+            pluginSetupV1Mock.address,
+            pluginSetupMockRepoAddress,
+            EMPTY_DATA
+          );
+
+        expect(plugin).not.to.be.equal(AddressZero);
+        expect(helpers.length).to.be.equal(1);
+        expect(prepareInstallpermissions).to.deep.equal([
+          [
+            Op.Grant,
+            targetDao.address,
+            plugin,
+            AddressZero,
+            ethers.utils.id('EXECUTE_PERMISSION'),
+          ],
+          [
+            Op.Grant,
+            plugin,
+            helpers[0],
+            AddressZero,
+            ethers.utils.id('SETTINGS_PERMISSION'),
+          ],
+        ]);
+      });
     });
 
-    it('PrepareInstallation: retrun correctly the permissions', async () => {
-      const {plugin, helpers, prepareInstallpermissions} =
-        await prepareInstallation(
+    describe('ApplyInstallation', function () {
+      it('Reverts if caller does not have `PROCESS_INSTALL_PERMISSION`', async () => {
+        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+        // to see that it can't set permissions without it.
+        await targetDao.revoke(
+          psp.address,
+          ownerAddress,
+          PROCESS_INSTALL_PERMISSION_ID
+        );
+
+        const pluginSetup = pluginSetupV1Mock.address;
+
+        const {plugin, prepareInstallpermissions} = await prepareInstallation(
           psp,
           targetDao.address,
-          pluginSetupV1Mock.address,
+          pluginSetup,
           pluginSetupMockRepoAddress,
           EMPTY_DATA
         );
 
-      expect(plugin).not.to.be.equal(AddressZero);
-      expect(helpers.length).to.be.equal(1);
-      expect(prepareInstallpermissions).to.deep.equal([
-        [
-          Op.Grant,
-          targetDao.address,
-          plugin,
-          AddressZero,
-          ethers.utils.id('EXECUTE_PERMISSION'),
-        ],
-        [
-          Op.Grant,
-          plugin,
-          helpers[0],
-          AddressZero,
-          ethers.utils.id('SETTINGS_PERMISSION'),
-        ],
-      ]);
-    });
+        await expect(
+          psp.applyInstallation(
+            targetDao.address,
+            pluginSetup,
+            plugin,
+            prepareInstallpermissions
+          )
+        ).to.be.revertedWith(
+          customError(
+            'SetupNotAllowed',
+            ownerAddress,
+            PROCESS_INSTALL_PERMISSION_ID
+          )
+        );
+      });
 
-    it('ApplyInstallation: reverts if caller does not have `PROCESS_INSTALL_PERMISSION`', async () => {
-      // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
-      // to see that it can't set permissions without it.
-      await targetDao.revoke(
-        psp.address,
-        ownerAddress,
-        PROCESS_INSTALL_PERMISSION_ID
-      );
-
-      const pluginSetup = pluginSetupV1Mock.address;
-
-      const {plugin, prepareInstallpermissions} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      await expect(
-        psp.applyInstallation(
-          targetDao.address,
-          pluginSetup,
-          plugin,
-          prepareInstallpermissions
-        )
-      ).to.be.revertedWith(
-        customError(
-          'SetupNotAllowed',
-          ownerAddress,
-          PROCESS_INSTALL_PERMISSION_ID
-        )
-      );
-    });
-
-    it("ApplyInstallation: reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
-      // revoke root permission on dao for plugin installer
-      // to see that it can't set permissions without it.
-      await targetDao.revoke(
-        targetDao.address,
-        psp.address,
-        ROOT_PERMISSION_ID
-      );
-
-      const pluginSetup = pluginSetupV1Mock.address;
-
-      const {plugin, prepareInstallpermissions} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      await expect(
-        psp.applyInstallation(
-          targetDao.address,
-          pluginSetup,
-          plugin,
-          prepareInstallpermissions
-        )
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
-          targetDao.address,
+      it("Reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+        // revoke root permission on dao for plugin installer
+        // to see that it can't set permissions without it.
+        await targetDao.revoke(
           targetDao.address,
           psp.address,
           ROOT_PERMISSION_ID
-        )
-      );
-    });
+        );
 
-    it('ApplyInstallation: reverts if plugin setup return the same address', async () => {
-      const pluginSetupBad = pluginSetupV1MockBad.address;
+        const pluginSetup = pluginSetupV1Mock.address;
 
-      const dataUser1 = ethers.utils.defaultAbiCoder.encode(
-        ['address'],
-        [AddressZero]
-      );
-      const {plugin, prepareInstallpermissions} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetupBad,
-        pluginSetupMockRepoAddress,
-        dataUser1
-      );
-
-      await psp.applyInstallation(
-        targetDao.address,
-        pluginSetupBad,
-        plugin,
-        prepareInstallpermissions
-      );
-
-      // user2 tries to prepare bad installation with the same plugin address.
-      const dataUser2 = ethers.utils.defaultAbiCoder.encode(
-        ['address'],
-        [plugin]
-      );
-
-      const secondPreparation = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetupBad,
-        pluginSetupMockRepoAddress,
-        dataUser2
-      );
-
-      await expect(
-        psp.applyInstallation(
-          targetDao.address,
-          pluginSetupBad,
-          secondPreparation.plugin,
-          secondPreparation.prepareInstallpermissions
-        )
-      ).to.be.revertedWith(customError('PluginAlreadyApplied'));
-    });
-
-    it('ApplyInstallation: correctly complete an instaltion process', async () => {
-      const pluginSetup = pluginSetupV1Mock.address;
-
-      const {plugin, prepareInstallpermissions} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      await expect(
-        psp.applyInstallation(
+        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+          psp,
           targetDao.address,
           pluginSetup,
+          pluginSetupMockRepoAddress,
+          EMPTY_DATA
+        );
+
+        await expect(
+          psp.applyInstallation(
+            targetDao.address,
+            pluginSetup,
+            plugin,
+            prepareInstallpermissions
+          )
+        ).to.be.revertedWith(
+          customError(
+            'Unauthorized',
+            targetDao.address,
+            targetDao.address,
+            psp.address,
+            ROOT_PERMISSION_ID
+          )
+        );
+      });
+
+      it('Reverts if plugin setup return the same address', async () => {
+        const pluginSetupBad = pluginSetupV1MockBad.address;
+
+        const dataUser1 = ethers.utils.defaultAbiCoder.encode(
+          ['address'],
+          [AddressZero]
+        );
+        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+          psp,
+          targetDao.address,
+          pluginSetupBad,
+          pluginSetupMockRepoAddress,
+          dataUser1
+        );
+
+        await psp.applyInstallation(
+          targetDao.address,
+          pluginSetupBad,
           plugin,
           prepareInstallpermissions
+        );
+
+        // user2 tries to prepare bad installation with the same plugin address.
+        const dataUser2 = ethers.utils.defaultAbiCoder.encode(
+          ['address'],
+          [plugin]
+        );
+
+        const secondPreparation = await prepareInstallation(
+          psp,
+          targetDao.address,
+          pluginSetupBad,
+          pluginSetupMockRepoAddress,
+          dataUser2
+        );
+
+        await expect(
+          psp.applyInstallation(
+            targetDao.address,
+            pluginSetupBad,
+            secondPreparation.plugin,
+            secondPreparation.prepareInstallpermissions
+          )
+        ).to.be.revertedWith(customError('PluginAlreadyApplied'));
+      });
+
+      it('Correctly complete an instaltion process', async () => {
+        const pluginSetup = pluginSetupV1Mock.address;
+
+        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+          psp,
+          targetDao.address,
+          pluginSetup,
+          pluginSetupMockRepoAddress,
+          EMPTY_DATA
+        );
+
+        await expect(
+          psp.applyInstallation(
+            targetDao.address,
+            pluginSetup,
+            plugin,
+            prepareInstallpermissions
+          )
         )
-      )
-        .to.emit(psp, EVENTS.InstallationApplied)
-        .withArgs(targetDao.address, plugin);
+          .to.emit(psp, EVENTS.InstallationApplied)
+          .withArgs(targetDao.address, plugin);
+      });
     });
   });
 
@@ -442,140 +449,126 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('PrepareUninstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
-      await expect(
-        psp.prepareUninstallation(
-          targetDao.address,
-          AddressZero,
-          AddressZero,
-          AddressZero,
-          [AddressZero],
-          EMPTY_DATA
-        )
-      ).to.be.revertedWith(customError('EmptyPluginRepo'));
-    });
+    describe('PrepareUninstallation', function () {
+      it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+        await expect(
+          psp.prepareUninstallation(
+            targetDao.address,
+            AddressZero,
+            AddressZero,
+            AddressZero,
+            [AddressZero],
+            EMPTY_DATA
+          )
+        ).to.be.revertedWith(customError('EmptyPluginRepo'));
+      });
 
-    it('PrepareUninstallation: reverts if plugin is not applied yet', async () => {
-      const pluginSetup = pluginSetupV1Mock.address;
+      it('Reverts if plugin is not applied yet', async () => {
+        const pluginSetup = pluginSetupV1Mock.address;
 
-      const {plugin, helpers} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      await expect(
-        psp.prepareUninstallation(
-          targetDao.address,
-          plugin,
-          pluginSetup,
-          pluginSetupMockRepoAddress,
-          helpers,
-          EMPTY_DATA
-        )
-      ).to.be.revertedWith(customError('PluginNotApplied'));
-    });
-
-    it('PrepareUninstallation: reverts if plugin uninstallation is already prepared', async () => {
-      const pluginSetupBad = pluginSetupV1MockBad.address;
-
-      const installData = ethers.utils.defaultAbiCoder.encode(
-        ['address'],
-        [AddressZero]
-      );
-      const {plugin, helpers, prepareInstallpermissions} =
-        await prepareInstallation(
+        const {plugin, helpers} = await prepareInstallation(
           psp,
           targetDao.address,
-          pluginSetupBad,
+          pluginSetup,
           pluginSetupMockRepoAddress,
-          installData
+          EMPTY_DATA
         );
 
-      await psp.applyInstallation(
-        targetDao.address,
-        pluginSetupBad,
-        plugin,
-        prepareInstallpermissions
-      );
+        await expect(
+          psp.prepareUninstallation(
+            targetDao.address,
+            plugin,
+            pluginSetup,
+            pluginSetupMockRepoAddress,
+            helpers,
+            EMPTY_DATA
+          )
+        ).to.be.revertedWith(customError('PluginNotApplied'));
+      });
 
-      // prepare first uninstallation
-      const uninstallData = ethers.utils.defaultAbiCoder.encode(
-        ['bool'],
-        [false]
-      );
+      it('Reverts if plugin uninstallation is already prepared', async () => {
+        const pluginSetupBad = pluginSetupV1MockBad.address;
 
-      await psp.prepareUninstallation(
-        targetDao.address,
-        plugin,
-        pluginSetupBad,
-        pluginSetupMockRepoAddress,
-        helpers,
-        uninstallData
-      );
+        const installData = ethers.utils.defaultAbiCoder.encode(
+          ['address'],
+          [AddressZero]
+        );
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            targetDao.address,
+            pluginSetupBad,
+            pluginSetupMockRepoAddress,
+            installData
+          );
 
-      // prepare second uninstallation
-      await expect(
-        psp.prepareUninstallation(
+        await psp.applyInstallation(
+          targetDao.address,
+          pluginSetupBad,
+          plugin,
+          prepareInstallpermissions
+        );
+
+        // prepare first uninstallation
+        const uninstallData = ethers.utils.defaultAbiCoder.encode(
+          ['bool'],
+          [false]
+        );
+
+        await psp.prepareUninstallation(
           targetDao.address,
           plugin,
           pluginSetupBad,
           pluginSetupMockRepoAddress,
           helpers,
-          ethers.utils.defaultAbiCoder.encode(['bool'], [true])
-        )
-      ).to.be.revertedWith(customError('UninstallationAlreadyPrepared'));
+          uninstallData
+        );
+
+        // prepare second uninstallation
+        await expect(
+          psp.prepareUninstallation(
+            targetDao.address,
+            plugin,
+            pluginSetupBad,
+            pluginSetupMockRepoAddress,
+            helpers,
+            ethers.utils.defaultAbiCoder.encode(['bool'], [true])
+          )
+        ).to.be.revertedWith(customError('UninstallationAlreadyPrepared'));
+      });
     });
 
-    it('ProcessUninstallation: reverts if caller does not have `PROCESS_UNINSTALL_PERMISSION`', async () => {
-      // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
-      // to see that it can't set permissions without it.
-      await targetDao.revoke(
-        psp.address,
-        ownerAddress,
-        PROCESS_UNINSTALL_PERMISSION_ID
-      );
-
-      await expect(
-        psp.applyUninstallation(
-          targetDao.address,
-          AddressZero,
-          AddressZero,
-          [],
-          []
-        )
-      ).to.be.revertedWith(
-        customError(
-          'SetupNotAllowed',
+    describe('ApplyUninstallation', function () {
+      it('Reverts if caller does not have `PROCESS_UNINSTALL_PERMISSION`', async () => {
+        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+        // to see that it can't set permissions without it.
+        await targetDao.revoke(
+          psp.address,
           ownerAddress,
           PROCESS_UNINSTALL_PERMISSION_ID
-        )
-      );
-    });
+        );
 
-    it('ProcessUninstallation: revert if helpers do not match', async () => {
-      const pluginSetup = pluginSetupV1Mock.address;
+        await expect(
+          psp.applyUninstallation(
+            targetDao.address,
+            AddressZero,
+            AddressZero,
+            [],
+            []
+          )
+        ).to.be.revertedWith(
+          customError(
+            'SetupNotAllowed',
+            ownerAddress,
+            PROCESS_UNINSTALL_PERMISSION_ID
+          )
+        );
+      });
 
-      const {plugin} = await prepareInstallation(
-        psp,
-        targetDao.address,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
+      it('Revert if helpers do not match', async () => {
+        const pluginSetup = pluginSetupV1Mock.address;
 
-      await expect(
-        psp.applyUninstallation(targetDao.address, plugin, pluginSetup, [], [])
-      ).to.be.revertedWith(customError('HelpersMismatch'));
-    });
-
-    it('ProcessUninstallation: revert bad permissions is passed', async () => {
-      const pluginSetup = pluginSetupV1Mock.address;
-
-      const {plugin, helpers, prepareInstallpermissions} =
-        await prepareInstallation(
+        const {plugin} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
@@ -583,81 +576,105 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         );
 
-      await psp.applyInstallation(
-        targetDao.address,
-        pluginSetup,
-        plugin,
-        prepareInstallpermissions
-      );
+        await expect(
+          psp.applyUninstallation(
+            targetDao.address,
+            plugin,
+            pluginSetup,
+            [],
+            []
+          )
+        ).to.be.revertedWith(customError('HelpersMismatch'));
+      });
 
-      await psp.callStatic.prepareUninstallation(
-        targetDao.address,
-        plugin,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        helpers,
-        EMPTY_DATA
-      );
+      it('Revert bad permissions is passed', async () => {
+        const pluginSetup = pluginSetupV1Mock.address;
 
-      await expect(
-        psp.applyUninstallation(
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            targetDao.address,
+            pluginSetup,
+            pluginSetupMockRepoAddress,
+            EMPTY_DATA
+          );
+
+        await psp.applyInstallation(
+          targetDao.address,
+          pluginSetup,
+          plugin,
+          prepareInstallpermissions
+        );
+
+        await psp.callStatic.prepareUninstallation(
           targetDao.address,
           plugin,
           pluginSetup,
-          helpers,
-          []
-        )
-      ).to.be.revertedWith(
-        customError(
-          'BadPermissions',
-          EMPTY_ID,
-          '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470' // TODO: create function to calculate permissions hashes
-        )
-      );
-    });
-
-    it('ProcessUninstallation: correctly complete an uninstallation process', async () => {
-      const pluginSetup = pluginSetupV1Mock.address;
-
-      const {plugin, helpers, prepareInstallpermissions} =
-        await prepareInstallation(
-          psp,
-          targetDao.address,
-          pluginSetup,
           pluginSetupMockRepoAddress,
+          helpers,
           EMPTY_DATA
         );
 
-      await psp.applyInstallation(
-        targetDao.address,
-        pluginSetup,
-        plugin,
-        prepareInstallpermissions
-      );
+        await expect(
+          psp.applyUninstallation(
+            targetDao.address,
+            plugin,
+            pluginSetup,
+            helpers,
+            []
+          )
+        ).to.be.revertedWith(
+          customError(
+            'BadPermissions',
+            EMPTY_ID,
+            '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470' // TODO: create function to calculate permissions hashes
+          )
+        );
+      });
 
-      const tx = await psp.prepareUninstallation(
-        targetDao.address,
-        plugin,
-        pluginSetup,
-        pluginSetupMockRepoAddress,
-        helpers,
-        EMPTY_DATA
-      );
+      it('Correctly complete an uninstallation process', async () => {
+        const pluginSetup = pluginSetupV1Mock.address;
 
-      const event = await decodeEvent(tx, 'UninstallationPrepared');
-      const {permissions} = event.args;
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            targetDao.address,
+            pluginSetup,
+            pluginSetupMockRepoAddress,
+            EMPTY_DATA
+          );
 
-      await expect(
-        psp.applyUninstallation(
+        await psp.applyInstallation(
+          targetDao.address,
+          pluginSetup,
+          plugin,
+          prepareInstallpermissions
+        );
+
+        const tx = await psp.prepareUninstallation(
           targetDao.address,
           plugin,
           pluginSetup,
+          pluginSetupMockRepoAddress,
           helpers,
-          permissions
+          EMPTY_DATA
+        );
+
+        const event = await decodeEvent(tx, 'UninstallationPrepared');
+        const {permissions} = event.args;
+
+        await expect(
+          psp.applyUninstallation(
+            targetDao.address,
+            plugin,
+            pluginSetup,
+            helpers,
+            permissions
+          )
         )
-      )
-        .to.emit(psp, EVENTS.UninstallationApplied)
-        .withArgs(targetDao.address, plugin, helpers);
+          .to.emit(psp, EVENTS.UninstallationApplied)
+          .withArgs(targetDao.address, plugin, helpers);
+      });
     });
   });
 
@@ -675,184 +692,33 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('PrepareUpdate: reverts if plugin does not support `PluginUUPSUpgradeable` interface', async () => {
-      const pluginSetupRepoAddr = ADDRESS_TWO;
-      const plugin = AddressZero;
-      const pluginUpdateParams = {
-        plugin: plugin,
-        pluginSetupRepo: pluginSetupRepoAddr,
-        oldPluginSetup: AddressZero,
-        newPluginSetup: AddressZero,
-      };
-      const helpers = [AddressZero];
+    describe('PrepareUpdate', function () {
+      it('Reverts if plugin does not support `PluginUUPSUpgradeable` interface', async () => {
+        const pluginSetupRepoAddr = ADDRESS_TWO;
+        const plugin = AddressZero;
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupRepoAddr,
+          oldPluginSetup: AddressZero,
+          newPluginSetup: AddressZero,
+        };
+        const helpers = [AddressZero];
 
-      await expect(
-        psp.prepareUpdate(
-          targetDao.address,
-          pluginUpdateParams,
-          helpers,
-          EMPTY_DATA
-        )
-      ).to.be.revertedWith(customError('PluginNonupgradeable', plugin));
-    });
+        await expect(
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            helpers,
+            EMPTY_DATA
+          )
+        ).to.be.revertedWith(customError('PluginNonupgradeable', plugin));
+      });
 
-    it('PrepareUpdate: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
-      const daoAddress = targetDao.address;
-      const pluginSetupV1 = pluginSetupV1Mock.address;
+      it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
 
-      const {plugin, helpers} = await prepareInstallation(
-        psp,
-        daoAddress,
-        pluginSetupV1,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      const pluginSetupRepoAddr = ADDRESS_TWO;
-      const pluginUpdateParams = {
-        plugin: plugin,
-        pluginSetupRepo: pluginSetupRepoAddr,
-        oldPluginSetup: pluginSetupV1,
-        newPluginSetup: pluginSetupV2Mock.address,
-      };
-
-      await expect(
-        psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
-      ).to.be.revertedWith(customError('EmptyPluginRepo'));
-    });
-
-    it('PrepareUpdate: correctly retrun permissions and initData', async () => {
-      const daoAddress = targetDao.address;
-      const pluginSetupV1 = pluginSetupV1Mock.address;
-
-      const {plugin, helpers} = await prepareInstallation(
-        psp,
-        daoAddress,
-        pluginSetupV1,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      const pluginUpdateParams = {
-        plugin: plugin,
-        pluginSetupRepo: pluginSetupMockRepoAddress,
-        oldPluginSetup: pluginSetupV1,
-        newPluginSetup: pluginSetupV2Mock.address,
-      };
-
-      const result = await psp.callStatic.prepareUpdate(
-        daoAddress,
-        pluginUpdateParams,
-        helpers,
-        EMPTY_DATA
-      );
-
-      const permissions = result[0];
-      const initData = result[1];
-
-      expect(permissions.length).to.be.equal(2);
-      expect(initData).not.to.be.equal('');
-    });
-
-    it('PrepareUpdate: revert if helpers passed are missmatched', async () => {
-      const daoAddress = targetDao.address;
-      const pluginSetupV1 = pluginSetupV1Mock.address;
-
-      const {plugin} = await prepareInstallation(
-        psp,
-        daoAddress,
-        pluginSetupV1,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      const pluginUpdateParams = {
-        plugin: plugin,
-        pluginSetupRepo: pluginSetupMockRepoAddress,
-        oldPluginSetup: pluginSetupV1,
-        newPluginSetup: pluginSetupV2Mock.address,
-      };
-
-      await expect(
-        psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
-      ).to.be.revertedWith(customError('HelpersMismatch'));
-    });
-
-    it('PrepareUpdate: correctly prepare an update', async () => {
-      const daoAddress = targetDao.address;
-      const pluginSetupV1 = pluginSetupV1Mock.address;
-
-      const {plugin, helpers} = await prepareInstallation(
-        psp,
-        daoAddress,
-        pluginSetupV1,
-        pluginSetupMockRepoAddress,
-        EMPTY_DATA
-      );
-
-      const pluginUpdateParams = {
-        plugin: plugin,
-        pluginSetupRepo: pluginSetupMockRepoAddress,
-        oldPluginSetup: pluginSetupV1,
-        newPluginSetup: pluginSetupV2Mock.address,
-      };
-
-      await expect(
-        psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
-      ).to.emit(psp, EVENTS.UpdatePrepared);
-    });
-
-    it('ApplyUpdate: reverts if caller does not have `PROCESS_UPDATE_PERMISSION`', async () => {
-      // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
-      // to see that it can't set permissions without it.
-      await targetDao.revoke(
-        psp.address,
-        ownerAddress,
-        PROCESS_UPDATE_PERMISSION_ID
-      );
-
-      await expect(
-        psp.applyUpdate(
-          targetDao.address,
-          AddressZero,
-          AddressZero,
-          EMPTY_DATA,
-          []
-        )
-      ).to.be.revertedWith(
-        customError(
-          'SetupNotAllowed',
-          ownerAddress,
-          PROCESS_UPDATE_PERMISSION_ID
-        )
-      );
-    });
-
-    it('ApplyUpdate: revert if permissions are mismatched', async () => {
-      const permissions: any[] = [];
-
-      await expect(
-        psp.applyUpdate(
-          targetDao.address,
-          AddressZero,
-          AddressZero,
-          EMPTY_DATA,
-          permissions
-        )
-      ).to.be.revertedWith(customError('UpdatePermissionsMismatch'));
-    });
-
-    // TODO: Find a way to test upgradeProxy
-    // also chack this function's errors as they might be missleading
-    // it also get threw if UPGRADE_PERMISSION is not granted
-    // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
-
-    it('ApplyUpdate: Correctly process an update', async () => {
-      const daoAddress = targetDao.address;
-      const pluginSetupV1 = pluginSetupV1Mock.address;
-
-      const {plugin, helpers, prepareInstallpermissions} =
-        await prepareInstallation(
+        const {plugin, helpers} = await prepareInstallation(
           psp,
           daoAddress,
           pluginSetupV1,
@@ -860,42 +726,197 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         );
 
-      await psp.applyInstallation(
-        targetDao.address,
-        pluginSetupV1,
-        plugin,
-        prepareInstallpermissions
-      );
+        const pluginSetupRepoAddr = ADDRESS_TWO;
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupRepoAddr,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
 
-      const pluginUpdateParams = {
-        plugin: plugin,
-        pluginSetupRepo: pluginSetupMockRepoAddress,
-        oldPluginSetup: pluginSetupV1,
-        newPluginSetup: pluginSetupV2Mock.address,
-      };
-      const prepareUpdateTx = await psp.prepareUpdate(
-        targetDao.address,
-        pluginUpdateParams,
-        helpers,
-        EMPTY_DATA
-      );
-      const prepareUpdateEvent = await decodeEvent(
-        prepareUpdateTx,
-        EVENTS.UpdatePrepared
-      );
-      const {permissions, initData} = prepareUpdateEvent.args;
+        await expect(
+          psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
+        ).to.be.revertedWith(customError('EmptyPluginRepo'));
+      });
 
-      await targetDao.grant(plugin, psp.address, UPGRADE_PERMISSION_ID);
+      it('Correctly retrun permissions and initData', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
 
-      await expect(
-        psp.applyUpdate(
+        const {plugin, helpers} = await prepareInstallation(
+          psp,
+          daoAddress,
+          pluginSetupV1,
+          pluginSetupMockRepoAddress,
+          EMPTY_DATA
+        );
+
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupMockRepoAddress,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
+
+        const result = await psp.callStatic.prepareUpdate(
+          daoAddress,
+          pluginUpdateParams,
+          helpers,
+          EMPTY_DATA
+        );
+
+        const permissions = result[0];
+        const initData = result[1];
+
+        expect(permissions.length).to.be.equal(2);
+        expect(initData).not.to.be.equal('');
+      });
+
+      it('Revert if helpers passed are missmatched', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
+
+        const {plugin} = await prepareInstallation(
+          psp,
+          daoAddress,
+          pluginSetupV1,
+          pluginSetupMockRepoAddress,
+          EMPTY_DATA
+        );
+
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupMockRepoAddress,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
+
+        await expect(
+          psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
+        ).to.be.revertedWith(customError('HelpersMismatch'));
+      });
+
+      it('Correctly prepare an update', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
+
+        const {plugin, helpers} = await prepareInstallation(
+          psp,
+          daoAddress,
+          pluginSetupV1,
+          pluginSetupMockRepoAddress,
+          EMPTY_DATA
+        );
+
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupMockRepoAddress,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
+
+        await expect(
+          psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
+        ).to.emit(psp, EVENTS.UpdatePrepared);
+      });
+    });
+
+    describe('ApplyUpdate', function () {
+      it('Reverts if caller does not have `PROCESS_UPDATE_PERMISSION`', async () => {
+        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+        // to see that it can't set permissions without it.
+        await targetDao.revoke(
+          psp.address,
+          ownerAddress,
+          PROCESS_UPDATE_PERMISSION_ID
+        );
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            AddressZero,
+            AddressZero,
+            EMPTY_DATA,
+            []
+          )
+        ).to.be.revertedWith(
+          customError(
+            'SetupNotAllowed',
+            ownerAddress,
+            PROCESS_UPDATE_PERMISSION_ID
+          )
+        );
+      });
+
+      it('Revert if permissions are mismatched', async () => {
+        const permissions: any[] = [];
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            AddressZero,
+            AddressZero,
+            EMPTY_DATA,
+            permissions
+          )
+        ).to.be.revertedWith(customError('UpdatePermissionsMismatch'));
+      });
+
+      // TODO: Find a way to test upgradeProxy
+      // also chack this function's errors as they might be missleading
+      // it also get threw if UPGRADE_PERMISSION is not granted
+      // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
+
+      it('Correctly process an update', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
+
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            daoAddress,
+            pluginSetupV1,
+            pluginSetupMockRepoAddress,
+            EMPTY_DATA
+          );
+
+        await psp.applyInstallation(
           targetDao.address,
+          pluginSetupV1,
           plugin,
-          pluginSetupV2Mock.address,
-          initData,
-          permissions
-        )
-      ).to.emit(psp, EVENTS.UpdateApplied);
+          prepareInstallpermissions
+        );
+
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupMockRepoAddress,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
+        const prepareUpdateTx = await psp.prepareUpdate(
+          targetDao.address,
+          pluginUpdateParams,
+          helpers,
+          EMPTY_DATA
+        );
+        const prepareUpdateEvent = await decodeEvent(
+          prepareUpdateTx,
+          EVENTS.UpdatePrepared
+        );
+        const {permissions, initData} = prepareUpdateEvent.args;
+
+        await targetDao.grant(plugin, psp.address, UPGRADE_PERMISSION_ID);
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            plugin,
+            pluginSetupV2Mock.address,
+            initData,
+            permissions
+          )
+        ).to.emit(psp, EVENTS.UpdateApplied);
+      });
     });
   });
 });
