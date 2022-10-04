@@ -49,6 +49,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error PluginNotApplied();
 
     error InstallationAlreadyPrepared();
+    error UninstallationAlreadyPrepared();
+    error UpdateAlreadyPrepared();
 
     event InstallationPrepared(
         address indexed sender,
@@ -126,7 +128,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Important safety measure to include dao + plugin manager in the encoding.
         bytes32 setupId = getSetupId(_dao, _pluginSetup, plugin);
 
-        // Check if this plugin is not already prepared
+        // Check if this plugin installation is already prepared
         if (installPermissionHashes[setupId] != bytes32(0)) {
             revert InstallationAlreadyPrepared();
         }
@@ -154,7 +156,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _plugin,
         Permission.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, PROCESS_INSTALL_PERMISSION_ID) {
-        bytes32 appliedId = keccak256(abi.encode(_dao, _plugin));
+        bytes32 appliedId = getAppliedId(_dao, _plugin);
 
         if (isInstallationApplied[appliedId]) {
             revert PluginAlreadyApplied();
@@ -252,6 +254,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
         helpersHashes[newSetupId] = keccak256(abi.encode(activeHelpers));
 
+        // Check if this plugin update is already prepared
+        if (updatePermissionHashes[newSetupId] != bytes32(0)) {
+            revert UpdateAlreadyPrepared();
+        }
+
         // check if permissions are corret.
         updatePermissionHashes[newSetupId] = getPermissionsHash(permissions);
 
@@ -297,7 +304,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
         // check if plugin is applied.
-        bytes32 appliedId = keccak256(abi.encode(_dao, _plugin));
+        bytes32 appliedId = getAppliedId(_dao, _plugin);
 
         if (!isInstallationApplied[appliedId]) {
             revert PluginNotApplied();
@@ -311,6 +318,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
+
+        // Check if this plugin uninstallation is already prepared
+        if (uninstallPermissionHashes[setupId] != bytes32(0)) {
+            revert UninstallationAlreadyPrepared();
+        }
 
         // set permission hashes.
         uninstallPermissionHashes[setupId] = getPermissionsHash(permissions);
@@ -353,6 +365,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         delete uninstallPermissionHashes[setupId];
 
         emit UninstallationApplied(_dao, _plugin, _activeHelpers);
+    }
+
+    function getAppliedId(address _dao, address _plugin) internal pure returns (bytes32 appliedId) {
+        appliedId = keccak256(abi.encode(_dao, _plugin));
     }
 
     function getSetupId(

@@ -478,6 +478,57 @@ describe('Plugin Setup Processor', function () {
       ).to.be.revertedWith(customError('PluginNotApplied'));
     });
 
+    it('PrepareUninstallation: reverts if plugin uninstallation is already prepared', async () => {
+      const pluginSetupBad = pluginSetupV1MockBad.address;
+
+      const installData = ethers.utils.defaultAbiCoder.encode(
+        ['address'],
+        [AddressZero]
+      );
+      const {plugin, helpers, prepareInstallpermissions} =
+        await prepareInstallation(
+          psp,
+          targetDao.address,
+          pluginSetupBad,
+          pluginSetupMockRepoAddress,
+          installData
+        );
+
+      await psp.applyInstallation(
+        targetDao.address,
+        pluginSetupBad,
+        plugin,
+        prepareInstallpermissions
+      );
+
+      // prepare first uninstallation
+      const uninstallData = ethers.utils.defaultAbiCoder.encode(
+        ['bool'],
+        [false]
+      );
+
+      await psp.prepareUninstallation(
+        targetDao.address,
+        plugin,
+        pluginSetupBad,
+        pluginSetupMockRepoAddress,
+        helpers,
+        uninstallData
+      );
+
+      // prepare second uninstallation
+      await expect(
+        psp.prepareUninstallation(
+          targetDao.address,
+          plugin,
+          pluginSetupBad,
+          pluginSetupMockRepoAddress,
+          helpers,
+          ethers.utils.defaultAbiCoder.encode(['bool'], [true])
+        )
+      ).to.be.revertedWith(customError('UninstallationAlreadyPrepared'));
+    });
+
     it('ProcessUninstallation: reverts if caller does not have `PROCESS_UNINSTALL_PERMISSION`', async () => {
       // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
       // to see that it can't set permissions without it.

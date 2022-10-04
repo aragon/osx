@@ -82,16 +82,18 @@ contract PluginSetupV1MockBad is PluginSetup {
     }
 
     function prepareUninstallDataABI() external view virtual override returns (string memory) {
-        return "";
+        return "(bool beBad)";
     }
 
     function prepareUninstallation(
         address _dao,
         address _plugin,
         address[] calldata _activeHelpers,
-        bytes calldata
+        bytes calldata _data
     ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-        permissions = new Permission.ItemMultiTarget[](2);
+        bool beBad = abi.decode(_data, (bool));
+
+        permissions = new Permission.ItemMultiTarget[](beBad ? 2 : 1);
         permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
             _dao,
@@ -100,13 +102,15 @@ contract PluginSetupV1MockBad is PluginSetup {
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
-            _plugin,
-            _activeHelpers[0],
-            NO_ORACLE,
-            keccak256("SETTINGS_PERMISSION")
-        );
+        if (beBad) {
+            permissions[1] = Permission.ItemMultiTarget(
+                Permission.Operation.Grant,
+                _plugin,
+                _activeHelpers[0],
+                NO_ORACLE,
+                keccak256("BAD_PERMISSION")
+            );
+        }
     }
 
     function getImplementationAddress() public view virtual override returns (address) {
