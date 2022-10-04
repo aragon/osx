@@ -99,6 +99,8 @@ contract PluginSetupV2Mock is PluginSetup {
             Permission.ItemMultiTarget[] memory permissions
         )
     {
+        (_dao); // silence compiler warning
+
         initData = abi.encodeWithSelector(
             bytes4(keccak256("initializeV2(string)")),
             "stringExample"
