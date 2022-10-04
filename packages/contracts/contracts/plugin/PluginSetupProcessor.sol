@@ -47,10 +47,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error PluginAlreadyApplied(); // in case the PluginSetup is malicios and always/sometime returns the same address
     error UpdatePermissionsMismatch();
     error PluginNotApplied();
-
     error InstallationAlreadyPrepared();
     error UninstallationAlreadyPrepared();
-    error UpdateAlreadyPrepared();
 
     event InstallationPrepared(
         address indexed sender,
@@ -195,37 +193,33 @@ contract PluginSetupProcessor is DaoAuthorizable {
     // and checking it always would cost more... shall we still check it and how ?
     function prepareUpdate(
         address _dao,
-        PluginUpdateParams calldata _updateSettings,
+        PluginUpdateParams calldata _updateParams,
         address[] calldata _helpers, // helpers that were deployed when installing/updating the plugin.
         bytes memory _data // encoded per pluginSetup's update ABI,
     ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
-        if (!_updateSettings.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            revert PluginNonupgradeable({plugin: _updateSettings.plugin});
+        if (!_updateParams.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
+            revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 
         // Implicitly confirms plugin managers are valid.
         // ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(_updateSettings.pluginSetupRepo))) {
+        if (!repoRegistry.entries(address(_updateParams.pluginSetupRepo))) {
             revert EmptyPluginRepo();
         }
 
         // TODO: check if plugin is actually installed on the DAO
 
-        (uint16[3] memory oldVersion, , ) = _updateSettings.pluginSetupRepo.getVersionByPluginSetup(
-            _updateSettings.oldPluginSetup
+        (uint16[3] memory oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+            _updateParams.oldPluginSetup
         );
 
         // Reverts if newPluginSetup doesn't exist on the repo...
-        _updateSettings.pluginSetupRepo.getVersionByPluginSetup(_updateSettings.newPluginSetup);
+        _updateParams.pluginSetupRepo.getVersionByPluginSetup(_updateParams.newPluginSetup);
 
         // Check if helpers are correct...
         // Implicitly checks if plugin was installed in the first place.
-        bytes32 oldSetupId = getSetupId(
-            _dao,
-            _updateSettings.oldPluginSetup,
-            _updateSettings.plugin
-        );
+        bytes32 oldSetupId = getSetupId(_dao, _updateParams.oldPluginSetup, _updateParams.plugin);
 
         if (helpersHashes[oldSetupId] != keccak256(abi.encode(_helpers))) {
             revert HelpersMismatch();
@@ -238,26 +232,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
             address[] memory activeHelpers,
             bytes memory initData,
             Permission.ItemMultiTarget[] memory permissions
-        ) = PluginSetup(_updateSettings.newPluginSetup).prepareUpdate(
+        ) = PluginSetup(_updateParams.newPluginSetup).prepareUpdate(
                 _dao,
-                _updateSettings.plugin,
+                _updateParams.plugin,
                 _helpers,
                 oldVersion,
                 _data
             );
 
         // add new helpers for the future update checks
-        bytes32 newSetupId = getSetupId(
-            _dao,
-            _updateSettings.newPluginSetup,
-            _updateSettings.plugin
-        );
+        bytes32 newSetupId = getSetupId(_dao, _updateParams.newPluginSetup, _updateParams.plugin);
         helpersHashes[newSetupId] = keccak256(abi.encode(activeHelpers));
-
-        // Check if this plugin update is already prepared
-        if (updatePermissionHashes[newSetupId] != bytes32(0)) {
-            revert UpdateAlreadyPrepared();
-        }
 
         // check if permissions are corret.
         updatePermissionHashes[newSetupId] = getPermissionsHash(permissions);

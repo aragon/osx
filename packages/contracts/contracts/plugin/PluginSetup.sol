@@ -29,10 +29,10 @@ abstract contract PluginSetup {
             Permission.ItemMultiTarget[] memory permissions
         );
 
-    /// @notice The ABI in string format that `prepapreUpdateDataABI()`'s `_data` needs to use.
+    /// @notice The ABI in string format that `prepareUpdateDataABI()`'s `_data` needs to use.
     /// @dev Not required to be overriden as there might be no update at all by dev.
     /// @return ABI in string format.
-    function prepapreUpdateDataABI() external view virtual returns (string memory) {}
+    function prepareUpdateDataABI() external view virtual returns (string memory) {}
 
     function prepareUpdate(
         address _dao,
@@ -59,7 +59,7 @@ abstract contract PluginSetup {
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions) {}
+    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions);
 
     function createERC1967Proxy(
         address _dao,

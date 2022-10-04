@@ -94,7 +94,7 @@ contract CounterV2PluginSetup is PluginSetup {
         return (plugin, helpers, permissions);
     }
 
-    function prepapreUpdateDataABI() external view virtual override returns (string memory) {
+    function prepareUpdateDataABI() external view virtual override returns (string memory) {
         return "(uint _newVariable)";
     }
 

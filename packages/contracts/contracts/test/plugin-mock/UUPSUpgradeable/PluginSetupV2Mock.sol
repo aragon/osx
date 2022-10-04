@@ -72,6 +72,17 @@ contract PluginSetupV2Mock is PluginSetup {
         return "";
     }
 
+    function prepareUninstallation(
+        address _dao,
+        address _plugin,
+        address[] calldata _activeHelpers,
+        bytes calldata _data
+    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {}
+
+    function prepareUpdateDataABI() external view virtual override returns (string memory) {
+        return "";
+    }
+
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
