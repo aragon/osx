@@ -30,9 +30,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address newPluginSetup;
     }
 
-    mapping(bytes32 => bool) private isInstallationProcessed;
+    mapping(bytes32 => bool) private isInstallationApplied;
     mapping(bytes32 => bytes32) private installPermissionHashes;
     mapping(bytes32 => bytes32) private updatePermissionHashes;
+    mapping(bytes32 => bytes32) private uninstallPermissionHashes;
     mapping(bytes32 => bytes32) private helpersHashes;
 
     AragonPluginRegistry public repoRegistry;
@@ -45,6 +46,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error EmptyPluginRepo();
     error PluginAlreadyApplied(); // in case the PluginSetup is malicios and always/sometime returns the same address
     error UpdatePermissionsMismatch();
+    error PluginNotApplied();
 
     event InstallationPrepared(
         address indexed sender,
@@ -69,7 +71,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
     );
     event UpdateApplied(address indexed dao, address indexed plugin);
 
-    event UninstallationApplied(address indexed dao, address indexed plugin);
+    event UninstallationPrepared(
+        address indexed dao,
+        address indexed plugin,
+        address indexed pluginSetup,
+        address[] activeHelpers,
+        bytes data,
+        Permission.ItemMultiTarget[] permissions
+    );
+
+    event UninstallationApplied(address indexed dao, address indexed plugin, address[] helpers);
 
     /// @dev Modifier used to check if the setup can be processed by the caller.
     /// @param _dao The address of the DAO.
@@ -111,11 +122,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // important safety measure to include dao + plugin manager in the encoding.
-        bytes32 installationId = keccak256(abi.encode(_dao, _pluginSetup, plugin));
+        bytes32 setupId = getSetupId(_dao, _pluginSetup, plugin);
 
-        installPermissionHashes[installationId] = getPermissionsHash(permissions);
+        installPermissionHashes[setupId] = getPermissionsHash(permissions);
 
-        helpersHashes[installationId] = keccak256(abi.encode(helpers));
+        helpersHashes[setupId] = keccak256(abi.encode(helpers));
 
         emit InstallationPrepared(
             msg.sender,
@@ -136,17 +147,15 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _plugin,
         Permission.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, PROCESS_INSTALL_PERMISSION_ID) {
-        bytes32 installedId = keccak256(abi.encode(_dao, _plugin));
+        bytes32 appliedId = keccak256(abi.encode(_dao, _plugin));
 
-        if (isInstallationProcessed[installedId]) {
+        if (isInstallationApplied[appliedId]) {
             revert PluginAlreadyApplied();
         }
 
-        isInstallationProcessed[installedId] = true;
+        bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
-        bytes32 installationId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
-
-        bytes32 storedPermissionHash = installPermissionHashes[installationId];
+        bytes32 storedPermissionHash = installPermissionHashes[setupId];
 
         // check if plugin was actually deployed..
         if (storedPermissionHash == bytes32(0)) {
@@ -163,10 +172,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // apply permissions on a dao..
         DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
 
+        // set is installation processed
+        isInstallationApplied[appliedId] = true;
+
         // emit the event to connect plugin to the dao.
         emit InstallationApplied(_dao, _plugin);
 
-        delete installPermissionHashes[installationId];
+        delete installPermissionHashes[setupId];
     }
 
     // TODO: might we need to check when `prepareUpdate` gets called, if plugin actually was installed ?
@@ -200,8 +212,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Check if helpers are correct...
         // Implicitly checks if plugin was installed in the first place.
-        bytes32 oldSetupId = keccak256(
-            abi.encode(_dao, _updateSettings.oldPluginSetup, _updateSettings.plugin)
+        bytes32 oldSetupId = getSetupId(
+            _dao,
+            _updateSettings.oldPluginSetup,
+            _updateSettings.plugin
         );
 
         if (helpersHashes[oldSetupId] != keccak256(abi.encode(_helpers))) {
@@ -224,8 +238,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
             );
 
         // add new helpers for the future update checks
-        bytes32 newSetupId = keccak256(
-            abi.encode(_dao, _updateSettings.newPluginSetup, _updateSettings.plugin)
+        bytes32 newSetupId = getSetupId(
+            _dao,
+            _updateSettings.newPluginSetup,
+            _updateSettings.plugin
         );
         helpersHashes[newSetupId] = keccak256(abi.encode(activeHelpers));
 
@@ -244,7 +260,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes memory _initData,
         Permission.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, PROCESS_UPDATE_PERMISSION_ID) {
-        bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
+        bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
         if (updatePermissionHashes[setupId] != getPermissionsHash(_permissions)) {
             revert UpdatePermissionsMismatch();
@@ -257,15 +273,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
         emit UpdateApplied(_dao, _plugin); // TODO: some other parts might be needed..
     }
 
-    function applyUninstallation(
+    function prepareUninstallation(
         address _dao,
         address _plugin,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external canApply(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
-        // Implicitly confirms plugin manager is valid valid.
+    ) external returns (Permission.ItemMultiTarget[] memory permissions) {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -274,20 +289,71 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Reverts if pluginSetup doesn't exist on the repo...
         _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
-        bytes32 setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
+        // check if plugin is applied.
+        bytes32 appliedId = keccak256(abi.encode(_dao, _plugin));
+
+        if (!isInstallationApplied[appliedId]) {
+            revert PluginNotApplied();
+        }
+
+        permissions = PluginSetup(_pluginSetup).prepareUninstallation(
+            _dao,
+            _plugin,
+            _activeHelpers,
+            _data
+        );
+
+        bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
+
+        // set permission hashes.
+        uninstallPermissionHashes[setupId] = getPermissionsHash(permissions);
+
+        emit UninstallationPrepared(
+            _dao,
+            _plugin,
+            _pluginSetup,
+            _activeHelpers,
+            _data,
+            permissions
+        );
+    }
+
+    function applyUninstallation(
+        address _dao,
+        address _plugin,
+        address _pluginSetup,
+        address[] calldata _activeHelpers,
+        Permission.ItemMultiTarget[] calldata permissions
+    ) external canApply(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
+        bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
         if (helpersHashes[setupId] != keccak256(abi.encode(_activeHelpers))) {
             revert HelpersMismatch();
         }
 
-        delete helpersHashes[setupId];
+        bytes32 storedPermissionHash = uninstallPermissionHashes[setupId];
+        bytes32 passedPermissionHash = getPermissionsHash(permissions);
 
-        Permission.ItemMultiTarget[] memory permissions = PluginSetup(_pluginSetup)
-            .prepareUninstallation(_dao, _plugin, _activeHelpers, _data);
+        // check that permissions weren't tempered.
+        if (storedPermissionHash != passedPermissionHash) {
+            revert BadPermissions({stored: storedPermissionHash, passed: passedPermissionHash});
+        }
 
         DAO(payable(_dao)).bulkOnMultiTarget(permissions);
 
-        emit UninstallationApplied(_dao, _plugin);
+        delete helpersHashes[setupId];
+
+        delete uninstallPermissionHashes[setupId];
+
+        emit UninstallationApplied(_dao, _plugin, _activeHelpers);
+    }
+
+    function getSetupId(
+        address _dao,
+        address _pluginSetup,
+        address _plugin
+    ) internal pure returns (bytes32 setupId) {
+        setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
     }
 
     function getPermissionsHash(Permission.ItemMultiTarget[] memory permissions)

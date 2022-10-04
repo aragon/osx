@@ -38,6 +38,8 @@ const AddressZero = ethers.constants.AddressZero;
 // default oracle address emitted from permission manager
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
+const EMPTY_ID = `0x${'00'.repeat(32)}`;
+
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const PROCESS_INSTALL_PERMISSION_ID = ethers.utils.id(
   'PROCESS_INSTALL_PERMISSION'
@@ -406,6 +408,42 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
+    it('prepareUninstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+      await expect(
+        psp.prepareUninstallation(
+          targetDao.address,
+          AddressZero,
+          AddressZero,
+          AddressZero,
+          [AddressZero],
+          EMPTY_DATA
+        )
+      ).to.be.revertedWith(customError('EmptyPluginRepo'));
+    });
+
+    it('prepareUninstallation: reverts if plugin is not applied yet', async () => {
+      const pluginSetup = pluginSetupV1Mock.address;
+
+      const {plugin, helpers} = await prepareInstallation(
+        psp,
+        targetDao.address,
+        pluginSetup,
+        pluginSetupMockRepoAddress,
+        EMPTY_DATA
+      );
+
+      await expect(
+        psp.prepareUninstallation(
+          targetDao.address,
+          plugin,
+          pluginSetup,
+          pluginSetupMockRepoAddress,
+          helpers,
+          EMPTY_DATA
+        )
+      ).to.be.revertedWith(customError('PluginNotApplied'));
+    });
+
     it('ProcessUninstallation: reverts if caller does not have `PROCESS_UNINSTALL_PERMISSION`', async () => {
       // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
       // to see that it can't set permissions without it.
@@ -415,16 +453,13 @@ describe('Plugin Setup Processor', function () {
         PROCESS_UNINSTALL_PERMISSION_ID
       );
 
-      const data = '0x';
-
       await expect(
         psp.applyUninstallation(
           targetDao.address,
           AddressZero,
           AddressZero,
-          AddressZero,
           [],
-          EMPTY_DATA
+          []
         )
       ).to.be.revertedWith(
         customError(
@@ -435,7 +470,23 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('ProcessUninstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+    it('ProcessUninstallation: revert if helpers do not match', async () => {
+      const pluginSetup = pluginSetupV1Mock.address;
+
+      const {plugin} = await prepareInstallation(
+        psp,
+        targetDao.address,
+        pluginSetup,
+        pluginSetupMockRepoAddress,
+        EMPTY_DATA
+      );
+
+      await expect(
+        psp.applyUninstallation(targetDao.address, plugin, pluginSetup, [], [])
+      ).to.be.revertedWith(customError('HelpersMismatch'));
+    });
+
+    it('ProcessUninstallation: revert bad permissions is passed', async () => {
       const pluginSetup = pluginSetupV1Mock.address;
 
       const {plugin, helpers, prepareInstallpermissions} =
@@ -454,18 +505,30 @@ describe('Plugin Setup Processor', function () {
         prepareInstallpermissions
       );
 
-      const pluginSetupRepoAddr = ADDRESS_TWO;
+      await psp.callStatic.prepareUninstallation(
+        targetDao.address,
+        plugin,
+        pluginSetup,
+        pluginSetupMockRepoAddress,
+        helpers,
+        EMPTY_DATA
+      );
 
       await expect(
         psp.applyUninstallation(
           targetDao.address,
           plugin,
           pluginSetup,
-          pluginSetupRepoAddr,
           helpers,
-          EMPTY_DATA
+          []
         )
-      ).to.be.revertedWith(customError('EmptyPluginRepo'));
+      ).to.be.revertedWith(
+        customError(
+          'BadPermissions',
+          EMPTY_ID,
+          '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470' // TODO: create function to calculate permissions hashes
+        )
+      );
     });
 
     it('ProcessUninstallation: correctly complete an uninstallation process', async () => {
@@ -487,18 +550,29 @@ describe('Plugin Setup Processor', function () {
         prepareInstallpermissions
       );
 
+      const tx = await psp.prepareUninstallation(
+        targetDao.address,
+        plugin,
+        pluginSetup,
+        pluginSetupMockRepoAddress,
+        helpers,
+        EMPTY_DATA
+      );
+
+      const event = await decodeEvent(tx, 'UninstallationPrepared');
+      const {permissions} = event.args;
+
       await expect(
         psp.applyUninstallation(
           targetDao.address,
           plugin,
           pluginSetup,
-          pluginSetupMockRepoAddress,
           helpers,
-          EMPTY_DATA
+          permissions
         )
       )
         .to.emit(psp, EVENTS.UninstallationApplied)
-        .withArgs(targetDao.address, plugin);
+        .withArgs(targetDao.address, plugin, helpers);
     });
   });
 
