@@ -7,7 +7,7 @@ export async function prepareInstallation(
   pluginRepo: any,
   data: any
 ) {
-  const tx = await pluginSetupProcessorContract.PrepareInstallation(
+  const tx = await pluginSetupProcessorContract.prepareInstallation(
     daoAddress,
     pluginSetup,
     pluginRepo,

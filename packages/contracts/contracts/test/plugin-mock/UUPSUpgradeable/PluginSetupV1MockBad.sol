@@ -67,7 +67,7 @@ contract PluginSetupV1MockBad is PluginSetup {
             _dao,
             plugin,
             NO_ORACLE,
-            keccak256("EXEC_PERMISSION")
+            keccak256("EXECUTE_PERMISSION")
         );
 
         permissions[1] = Permission.ItemMultiTarget(
@@ -95,7 +95,7 @@ contract PluginSetupV1MockBad is PluginSetup {
             _dao,
             _plugin,
             NO_ORACLE,
-            keccak256("EXEC_PERMISSION")
+            keccak256("EXECUTE_PERMISSION")
         );
 
         permissions[1] = Permission.ItemMultiTarget(

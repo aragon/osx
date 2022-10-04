@@ -204,7 +204,7 @@ describe('Plugin Setup Processor', function () {
       const pluginSetupRepoAddr = ADDRESS_TWO;
 
       await expect(
-        psp.PrepareInstallation(
+        psp.prepareInstallation(
           targetDao.address,
           pluginSetupV1Mock.address,
           pluginSetupRepoAddr,
@@ -231,7 +231,7 @@ describe('Plugin Setup Processor', function () {
           targetDao.address,
           plugin,
           AddressZero,
-          ethers.utils.id('EXEC_PERMISSION'),
+          ethers.utils.id('EXECUTE_PERMISSION'),
         ],
         [
           Op.Grant,
@@ -243,7 +243,7 @@ describe('Plugin Setup Processor', function () {
       ]);
     });
 
-    it('applyInstallation: reverts if caller does not have `PROCESS_INSTALL_PERMISSION`', async () => {
+    it('ApplyInstallation: reverts if caller does not have `PROCESS_INSTALL_PERMISSION`', async () => {
       // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
       // to see that it can't set permissions without it.
       await targetDao.revoke(
@@ -278,7 +278,7 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it("applyInstallation: reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+    it("ApplyInstallation: reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
       // revoke root permission on dao for plugin installer
       // to see that it can't set permissions without it.
       await targetDao.revoke(
@@ -315,7 +315,7 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('applyInstallation: reverts if plugin setup return the same address', async () => {
+    it('ApplyInstallation: reverts if plugin setup return the same address', async () => {
       const PluginSetupV1MockBad = await ethers.getContractFactory(
         'PluginSetupV1MockBad'
       );
@@ -370,7 +370,7 @@ describe('Plugin Setup Processor', function () {
       ).to.be.revertedWith(customError('PluginAlreadyApplied'));
     });
 
-    it('applyInstallation: correctly complete an instaltion process', async () => {
+    it('ApplyInstallation: correctly complete an instaltion process', async () => {
       const pluginSetup = pluginSetupV1Mock.address;
 
       const {plugin, prepareInstallpermissions} = await prepareInstallation(
@@ -410,7 +410,7 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('prepareUninstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+    it('PrepareUninstallation: reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
       await expect(
         psp.prepareUninstallation(
           targetDao.address,
@@ -423,7 +423,7 @@ describe('Plugin Setup Processor', function () {
       ).to.be.revertedWith(customError('EmptyPluginRepo'));
     });
 
-    it('prepareUninstallation: reverts if plugin is not applied yet', async () => {
+    it('PrepareUninstallation: reverts if plugin is not applied yet', async () => {
       const pluginSetup = pluginSetupV1Mock.address;
 
       const {plugin, helpers} = await prepareInstallation(
@@ -719,7 +719,7 @@ describe('Plugin Setup Processor', function () {
       ).to.emit(psp, EVENTS.UpdatePrepared);
     });
 
-    it('applyUpdate: reverts if caller does not have `PROCESS_UPDATE_PERMISSION`', async () => {
+    it('ApplyUpdate: reverts if caller does not have `PROCESS_UPDATE_PERMISSION`', async () => {
       // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
       // to see that it can't set permissions without it.
       await targetDao.revoke(
@@ -745,7 +745,7 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
-    it('applyUpdate: revert if permissions are mismatched', async () => {
+    it('ApplyUpdate: revert if permissions are mismatched', async () => {
       const permissions: any[] = [];
 
       await expect(
@@ -764,7 +764,7 @@ describe('Plugin Setup Processor', function () {
     // it also get threw if UPGRADE_PERMISSION is not granted
     // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
 
-    it('applyUpdate: Correctly process an update', async () => {
+    it('ApplyUpdate: Correctly process an update', async () => {
       const daoAddress = targetDao.address;
       const pluginSetupV1 = pluginSetupV1Mock.address;
 
