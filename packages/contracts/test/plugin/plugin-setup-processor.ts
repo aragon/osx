@@ -711,7 +711,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginNonupgradeable', plugin));
+        ).to.be.revertedWith(customError('PluginNonUpgradeable', plugin));
       });
 
       it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
@@ -912,7 +912,7 @@ describe('Plugin Setup Processor', function () {
       // TODO: Find a way to test upgradeProxy
       // also chack this function's errors as they might be missleading
       // it also get threw if UPGRADE_PERMISSION is not granted
-      // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
+      // it('applyUpdate: reverts if PluginNonUpgradeable', async () => {});
 
       it('Correctly process an update', async () => {
         const daoAddress = targetDao.address;

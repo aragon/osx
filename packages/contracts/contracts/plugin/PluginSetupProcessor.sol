@@ -310,6 +310,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
+        // check helpers
+        if (helpersHashes[setupId] != getHelpersHash(_activeHelpers)) {
+            revert HelpersMismatch();
+        }
+
         // Check if this plugin uninstallation is already prepared
         if (uninstallPermissionHashes[setupId] != bytes32(0)) {
             revert UninstallationAlreadyPrepared();
