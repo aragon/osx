@@ -30,7 +30,7 @@ contract AragonPluginRegistry is InterfaceBasedRegistry {
     /// @notice Registers a plugin repository with a name and address.
     /// @param name The name of the PluginRepo.
     /// @param registrant The address of the PluginRepo contract.
-    function register(string calldata name, address registrant)
+    function registerPlugin(string calldata name, address registrant)
         external
         auth(PLUGIN_REGISTER_PERMISSION_ID)
     {

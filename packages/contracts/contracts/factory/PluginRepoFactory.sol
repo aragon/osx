@@ -6,8 +6,8 @@ pragma solidity 0.8.10;
 
 import "../utils/Proxy.sol";
 import "../registry/AragonPluginRegistry.sol";
-import { PluginRepo } from  "../plugin/PluginRepo.sol";
-import { BulkPermissionsLib } from '../core/permission/BulkPermissionsLib.sol';
+import {PluginRepo} from "../plugin/PluginRepo.sol";
+import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022
@@ -70,7 +70,8 @@ contract PluginRepoFactory {
     /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](5);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](5);
 
         // Grant the plugin maintainer all the permissions required
         items[0] = BulkPermissionsLib.ItemSingleTarget(
@@ -122,6 +123,6 @@ contract PluginRepoFactory {
             )
         );
 
-        aragonPluginRegistry.register(_name, address(pluginRepo));
+        aragonPluginRegistry.registerPlugin(_name, address(pluginRepo));
     }
 }

@@ -50,7 +50,10 @@ describe('Aragon-Plugin-Registry', function () {
 
   it('Should register a new pluginRepo successfully', async function () {
     await expect(
-      await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
+      await aragonPluginRegistry.registerPlugin(
+        pluginRepoName,
+        pluginRepo.address
+      )
     )
       .to.emit(aragonPluginRegistry, EVENTS.PluginRepoRegistered)
       .withArgs(pluginRepoName, pluginRepo.address);
@@ -62,7 +65,10 @@ describe('Aragon-Plugin-Registry', function () {
 
   it('fail to register if the sender lacks the required role', async () => {
     // Register a plugin successfully
-    await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address);
+    await aragonPluginRegistry.registerPlugin(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
     // Revoke the permission
     await managingDAO.revoke(
@@ -75,7 +81,7 @@ describe('Aragon-Plugin-Registry', function () {
     const newPluginRepo = await deployNewPluginRepo(ownerAddress);
 
     await expect(
-      aragonPluginRegistry.register(pluginRepoName, newPluginRepo.address)
+      aragonPluginRegistry.registerPlugin(pluginRepoName, newPluginRepo.address)
     ).to.be.revertedWith(
       customError(
         'DaoUnauthorized',
@@ -89,10 +95,13 @@ describe('Aragon-Plugin-Registry', function () {
   });
 
   it('fail to register if pluginRepo already exists', async function () {
-    await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address);
+    await aragonPluginRegistry.registerPlugin(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
     await expect(
-      aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
+      aragonPluginRegistry.registerPlugin(pluginRepoName, pluginRepo.address)
     ).to.be.revertedWith(
       customError('ContractAlreadyRegistered', pluginRepo.address)
     );
