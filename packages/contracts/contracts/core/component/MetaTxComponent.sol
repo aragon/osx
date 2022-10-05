@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+
 import "./Component.sol";
 
 /// @title MetaTxComponent

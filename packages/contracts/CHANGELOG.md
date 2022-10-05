@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `AragonPlugin` and `AragonUpgradeablePlugin` for the devs to inherit from for their concrete plugin implementations.
+- Added `AragonPlugin` and `AragonUpgradeablePlugin` for developers to inherit from for their concrete plugin implementations.
 - Added helper function `test/test-utils/ens.ts` deploying the `ENSSubdomainRegistrar` and `ENS`-related contracts.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
 - Added Abstract `PluginSetup` for the devs to inherit from for their concrete plugin manager implementation.
