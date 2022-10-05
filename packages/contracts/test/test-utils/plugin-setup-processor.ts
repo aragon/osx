@@ -1,11 +1,12 @@
+import {PluginSetupProcessor} from '../../typechain';
 import {decodeEvent} from './event';
 
 export async function prepareInstallation(
-  pluginSetupProcessorContract: any,
-  daoAddress: any,
-  pluginSetup: any,
-  pluginRepo: any,
-  data: any
+  pluginSetupProcessorContract: PluginSetupProcessor,
+  daoAddress: string,
+  pluginSetup: string,
+  pluginRepo: string,
+  data: string
 ) {
   const tx = await pluginSetupProcessorContract.prepareInstallation(
     daoAddress,
