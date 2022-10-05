@@ -8,14 +8,14 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/component/DaoAuthorizable.sol";
+import { DaoAuthorizableUpgradeable } from "../core/component/DaoAuthorizableUpgradeable.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../core/IDAO.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
 /// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
-contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizable {
+contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 

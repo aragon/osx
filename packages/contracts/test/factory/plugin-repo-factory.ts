@@ -4,13 +4,17 @@ import {ethers} from 'hardhat';
 import {AragonPluginRegistry, DAO} from '../../typechain';
 
 import {customError} from '../test-utils/custom-error-helper';
-import {deployMockPluginManager} from '../test-utils/repo';
+import {deployMockPluginSetup} from '../test-utils/repo';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
 };
 
 const zeroAddress = ethers.constants.AddressZero;
+
+const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
+  'PLUGIN_REGISTER_PERMISSION'
+);
 
 async function getAragonPluginRegistryEvents(tx: any) {
   const data = await tx.wait();
@@ -93,15 +97,15 @@ describe('PluginRepoFactory: ', function () {
     managingDao.grant(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_PERMISSION')
+      PLUGIN_REGISTER_PERMISSION_ID
     );
   });
 
-  it('fail to create new pluginRepo with no REGISTER_PERMISSION', async () => {
+  it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
     managingDao.revoke(
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
-      ethers.utils.id('REGISTER_PERMISSION')
+      PLUGIN_REGISTER_PERMISSION_ID
     );
 
     const pluginRepoName = 'my-pluginRepo';
@@ -115,7 +119,7 @@ describe('PluginRepoFactory: ', function () {
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         pluginRepoFactory.address,
-        ethers.utils.id('REGISTER_PERMISSION')
+        PLUGIN_REGISTER_PERMISSION_ID
       )
     );
   });
@@ -143,18 +147,18 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('fail creating new pluginRepo with wrong major version', async () => {
-    const pluginManagerMock = await deployMockPluginManager();
+    const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [0, 0, 0];
-    const pluginManagerAddress = pluginManagerMock.address;
+    const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
     await expect(
       pluginRepoFactory.createPluginRepoWithVersion(
         pluginRepoName,
         initialSemanticVersion,
-        pluginManagerAddress,
+        pluginSetupAddress,
         contentURI,
         ownerAddress
       )
@@ -162,17 +166,17 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('create new pluginRepo with version', async () => {
-    const pluginManagerMock = await deployMockPluginManager();
+    const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
     const initialSemanticVersion = [1, 0, 0];
-    const pluginManagerAddress = pluginManagerMock.address;
+    const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
     let tx = await pluginRepoFactory.createPluginRepoWithVersion(
       pluginRepoName,
       initialSemanticVersion,
-      pluginManagerAddress,
+      pluginSetupAddress,
       contentURI,
       ownerAddress
     );
