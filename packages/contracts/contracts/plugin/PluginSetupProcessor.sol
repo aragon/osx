@@ -400,7 +400,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address implementation,
         bytes memory initData
     ) private {
-        // TODO: check if proxy is a contract
         if (initData.length > 0) {
             try
                 PluginUUPSUpgradeable(proxy).upgradeToAndCall(implementation, initData)
