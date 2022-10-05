@@ -7,7 +7,6 @@ import {
   handleExecuted,
   _handleMetadataSet
 } from '../../src/dao/dao';
-import {Dao, ERC20VotingProposal} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
@@ -23,17 +22,17 @@ import {
   createNewNativeTokenDepositedEvent,
   createNewDepositedEvent,
   getBalanceOf,
-  createNewExecutedEvent
+  createNewExecutedEvent,
+  createDaoEntityState
 } from './utils';
+import {createERC20VotingProposalEntityState} from '../erc20-voting/utils';
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // create state
-  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
-  daoEntity.save();
+  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
   let metadata = 'new-metadata';
-
-  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
 
   // handle event
   _handleMetadataSet(entityID, metadata);
@@ -65,9 +64,9 @@ test('Run dao (handleDeposited) for native token mappings with mock event', () =
   handleNativeTokenDeposited(newEvent);
 
   // checks
-  assert.fieldEquals('VaultDeposit', entityID, 'id', entityID);
-  assert.fieldEquals('VaultDeposit', entityID, 'sender', ADDRESS_ONE);
-  assert.fieldEquals('VaultDeposit', entityID, 'amount', ONE_ETH);
+  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
+  assert.fieldEquals('VaultTransfer', entityID, 'sender', ADDRESS_ONE);
+  assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
 
   clearStore();
 });
@@ -149,35 +148,40 @@ test('Run dao (handleDeposited) for Token mappings with mock event', () => {
     HALF_ETH
   );
   // checks Deposit
-  assert.fieldEquals('VaultDeposit', entityID, 'id', entityID);
+  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
   assert.fieldEquals(
-    'VaultDeposit',
+    'VaultTransfer',
     entityID,
     'dao',
     Address.fromString(DAO_ADDRESS).toHexString()
   );
-  assert.fieldEquals('VaultDeposit', entityID, 'sender', ADDRESS_ONE);
+  assert.fieldEquals('VaultTransfer', entityID, 'sender', ADDRESS_ONE);
   assert.fieldEquals(
-    'VaultDeposit',
+    'VaultTransfer',
     entityID,
     'token',
     Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
   );
-  assert.fieldEquals('VaultDeposit', entityID, 'amount', ONE_ETH);
-  assert.fieldEquals('VaultDeposit', entityID, 'reference', STRING_DATA);
+  assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
+  assert.fieldEquals('VaultTransfer', entityID, 'reference', STRING_DATA);
 
   clearStore();
 });
 
 test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   // create state
-  let daoEntity = new Dao(Address.fromHexString(DAO_ADDRESS).toHexString());
-  daoEntity.save();
+  let daoEntity = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(daoEntity, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
   let proposalId =
     Address.fromHexString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let proposalEntity = new ERC20VotingProposal(proposalId);
-  proposalEntity.save();
+
+  createERC20VotingProposalEntityState(
+    proposalId,
+    DAO_ADDRESS,
+    VOTING_ADDRESS,
+    ADDRESS_ONE
+  );
 
   // create token calls
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
@@ -207,41 +211,41 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
     event.transactionLogIndex.toHexString() +
     '_' +
     '0';
-  assert.fieldEquals('VaultWithdraw', entityID, 'id', entityID);
+  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'dao',
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'token',
     Address.fromHexString(DAO_TOKEN_ADDRESS).toHexString()
   );
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'to',
     Address.fromHexString(ADDRESS_ONE).toHexString()
   );
-  assert.fieldEquals('VaultWithdraw', entityID, 'amount', '1');
+  assert.fieldEquals('VaultTransfer', entityID, 'amount', '1');
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'reference',
     Bytes.fromUTF8(STRING_DATA).toString()
   );
-  assert.fieldEquals('VaultWithdraw', entityID, 'proposal', proposalId);
+  assert.fieldEquals('VaultTransfer', entityID, 'proposal', proposalId);
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'transaction',
     event.transaction.hash.toHexString()
   );
   assert.fieldEquals(
-    'VaultWithdraw',
+    'VaultTransfer',
     entityID,
     'createdAt',
     event.block.timestamp.toString()

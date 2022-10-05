@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added mocks and tests for the `Plugin` and `PluginSetup` classes.
+- Added `PluginSetupProcessor` to be the main class processing `PluginSetup` contracts and applying permissions in the installing DAO.
+- Added `DaoAuthorizableUpgradeable` and a free `_auth` function to provide an `auth` modifier to the different plugin types and prevent code duplication.
+- Added `PluginCloneable`, `PluginTransparentUpgradeable`.
+- Added goerli configuration to deploy to goerli.
+- Added `AragonPlugin` and `AragonUpgradeablePlugin` for developers to inherit from for their concrete plugin implementations.
 - Added helper function `test/test-utils/ens.ts` deploying the `ENSSubdomainRegistrar` and `ENS`-related contracts.
-- Added `AragonPlugin` and `AragonUpgradablePlugin` for the devs to inherit from for their concrete plugin implementations.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
-- Added Abstract `PluginManager` for the devs to inherit from for their concrete plugin manager implementation.
+- Added Abstract `PluginSetup` for the devs to inherit from for their concrete plugin manager implementation.
 - Added the `solidity-docgen` hardhat plugin by OpenZepplin to automatically generate documentation via `yarn docgen`.
 - Added deployment script for `ENSSubdomainRegistrar`.
 - Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
@@ -28,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Adapted `Component` to use `DaoAuthorizableUpgradeable` until it is fully refactored to become `Plugin`.
+- Refactored `DaoAuthorizable` to use the newly introduced, free `_auth` function to prevent code duplication.
+- Improved `Counter` examples and added respective `PluginSetup` example contracts.
+- Renamed `PluginManager` to `PluginSetup` and refactored it to be a two-transaction process consisting of a `prepare` and an `apply` step.
+- Replaced `AragonPlugin` and `AragonUpgradeablePlugin` by `Plugin` and `PluginUUPSUpgradeable`, respectively.
 - Changed `DAORegistry` to use the `ENSSubdomainRegistrar` so that a DAO name can only be registered once.
 - Updated deploy script to correctly use `ERC1967Proxy`.
 - Renamed `hasPermission` to `isGranted` in both `PermissionManager` and `IPermissionOracle`.
@@ -39,11 +49,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored import statements.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.
 - Changed order of deployment scripts.
-- Changed folder struction of tests.
+- Changed folder structure of tests.
 - Refactored event names and NatSpec comments.
 
 ### Removed
 
+- Removed `PluginConstants` that were related to the previous, indexd plugin setup solution.
 - Removed restrictions regarding plugin's address in `PluginRepo`.
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
 - Removed `ERC165Registry`.
@@ -75,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the event `SetMetadata` to `MetadataSet`.
 - Completed the `IDAO` interface and changed `DAO` accordingly.
 - Decoupled `Permissions` from `BaseRelayRecipient`.
-- Fixed OZ contracts-upgradable `Initializable`.
+- Fixed OZ contracts-upgradeable `Initializable`.
 
 ### Removed
 
