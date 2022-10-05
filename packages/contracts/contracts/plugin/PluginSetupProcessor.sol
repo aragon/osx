@@ -25,7 +25,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     struct PluginUpdateParams {
         address plugin;
-        PluginRepo pluginSetupRepo; // where plugin manager versions are handled.
+        PluginRepo pluginSetupRepo; // where pluginsetup versions are handled.
         address oldPluginSetup;
         address newPluginSetup;
     }
@@ -39,7 +39,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     AragonPluginRegistry public repoRegistry;
 
     error SetupNotAllowed(address caller, bytes32 permissionId);
-    error PluginNonupgradeable(address plugin);
+    error PluginNonUpgradeable(address plugin);
     error BadPermissions(bytes32 stored, bytes32 passed);
     error PluginNotPrepared();
     error HelpersMismatch();
@@ -199,7 +199,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
         if (!_updateParams.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            revert PluginNonupgradeable({plugin: _updateParams.plugin});
+            revert PluginNonUpgradeable({plugin: _updateParams.plugin});
         }
 
         // Implicitly confirms plugin managers are valid.
@@ -399,7 +399,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonupgradeable({plugin: proxy});
+                revert PluginNonUpgradeable({plugin: proxy});
             }
         } else {
             try PluginUUPSUpgradeable(proxy).upgradeTo(implementation) {} catch Error(
@@ -409,7 +409,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonupgradeable({plugin: proxy});
+                revert PluginNonUpgradeable({plugin: proxy});
             }
         }
     }
