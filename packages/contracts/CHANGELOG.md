@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored import statements.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.
 - Changed order of deployment scripts.
-- Changed folder struction of tests.
+- Changed folder structure of tests.
 - Refactored event names and NatSpec comments.
 
 ### Removed
