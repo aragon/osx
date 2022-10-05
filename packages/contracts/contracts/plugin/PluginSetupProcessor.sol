@@ -208,7 +208,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert EmptyPluginRepo();
         }
 
-        // TODO: check if plugin is actually installed on the DAO
+        // Check if plugin is applied
+        bytes32 appliedId = getAppliedId(_dao, _updateParams.plugin);
+        if (!isInstallationApplied[appliedId]) {
+            revert PluginNotApplied();
+        }
 
         (uint16[3] memory oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.oldPluginSetup

@@ -739,7 +739,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('EmptyPluginRepo'));
       });
 
-      it('Correctly retrun permissions and initData', async () => {
+      it('Revert if plugin is not applied', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
@@ -749,6 +749,69 @@ describe('Plugin Setup Processor', function () {
           pluginSetupV1,
           pluginSetupMockRepoAddress,
           EMPTY_DATA
+        );
+
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupMockRepoAddress,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
+
+        await expect(
+          psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
+        ).to.be.revertedWith(customError('PluginNotApplied'));
+      });
+
+      it('Revert if helpers passed are missmatched', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
+
+        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+          psp,
+          daoAddress,
+          pluginSetupV1,
+          pluginSetupMockRepoAddress,
+          EMPTY_DATA
+        );
+
+        await psp.applyInstallation(
+          targetDao.address,
+          pluginSetupV1,
+          plugin,
+          prepareInstallpermissions
+        );
+
+        const pluginUpdateParams = {
+          plugin: plugin,
+          pluginSetupRepo: pluginSetupMockRepoAddress,
+          oldPluginSetup: pluginSetupV1,
+          newPluginSetup: pluginSetupV2Mock.address,
+        };
+
+        await expect(
+          psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
+        ).to.be.revertedWith(customError('HelpersMismatch'));
+      });
+
+      it('Correctly retrun permissions and initData', async () => {
+        const daoAddress = targetDao.address;
+        const pluginSetupV1 = pluginSetupV1Mock.address;
+
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            daoAddress,
+            pluginSetupV1,
+            pluginSetupMockRepoAddress,
+            EMPTY_DATA
+          );
+
+        await psp.applyInstallation(
+          targetDao.address,
+          pluginSetupV1,
+          plugin,
+          prepareInstallpermissions
         );
 
         const pluginUpdateParams = {
@@ -772,40 +835,24 @@ describe('Plugin Setup Processor', function () {
         expect(initData).not.to.be.equal('');
       });
 
-      it('Revert if helpers passed are missmatched', async () => {
-        const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
-
-        const {plugin} = await prepareInstallation(
-          psp,
-          daoAddress,
-          pluginSetupV1,
-          pluginSetupMockRepoAddress,
-          EMPTY_DATA
-        );
-
-        const pluginUpdateParams = {
-          plugin: plugin,
-          pluginSetupRepo: pluginSetupMockRepoAddress,
-          oldPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
-        };
-
-        await expect(
-          psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
-        ).to.be.revertedWith(customError('HelpersMismatch'));
-      });
-
       it('Correctly prepare an update', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
-        const {plugin, helpers} = await prepareInstallation(
-          psp,
-          daoAddress,
+        const {plugin, helpers, prepareInstallpermissions} =
+          await prepareInstallation(
+            psp,
+            daoAddress,
+            pluginSetupV1,
+            pluginSetupMockRepoAddress,
+            EMPTY_DATA
+          );
+
+        await psp.applyInstallation(
+          targetDao.address,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
-          EMPTY_DATA
+          plugin,
+          prepareInstallpermissions
         );
 
         const pluginUpdateParams = {
