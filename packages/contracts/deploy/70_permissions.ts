@@ -20,7 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('Granting permissions');
   const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
   const aragonPluginRegistryAddress = await getContractAddress(
-    'AragonPluginRegistry',
+    'PluginRepoRegistry',
     hre
   );
   const pluginRepoFactoryAddress = await getContractAddress(

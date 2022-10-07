@@ -5,16 +5,16 @@
 pragma solidity 0.8.10;
 
 import "../utils/Proxy.sol";
-import "../registry/AragonPluginRegistry.sol";
+import "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022
-/// @notice This contract creates `PluginRepo` proxies and registers them on an `AragonPluginRegistry` contract.
+/// @notice This contract creates `PluginRepo` proxies and registers them on an `PluginRepoRegistry` contract.
 contract PluginRepoFactory {
     /// @notice The Aragon plugin registry contract.
-    AragonPluginRegistry public aragonPluginRegistry;
+    PluginRepoRegistry public aragonPluginRegistry;
 
     /// @notice The address of the `PluginRepo` base contract.
     address public pluginRepoBase;
@@ -24,7 +24,7 @@ contract PluginRepoFactory {
 
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
     /// @param _aragonPluginRegistry The aragon plugin registry address.
-    constructor(AragonPluginRegistry _aragonPluginRegistry) {
+    constructor(PluginRepoRegistry _aragonPluginRegistry) {
         aragonPluginRegistry = _aragonPluginRegistry;
 
         pluginRepoBase = address(new PluginRepo());

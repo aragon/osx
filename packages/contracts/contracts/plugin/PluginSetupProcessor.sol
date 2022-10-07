@@ -7,7 +7,7 @@ import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
-import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
+import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 
 import {Permission, PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
@@ -44,7 +44,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     mapping(bytes32 => bytes32) private uninstallPermissionHashes;
     mapping(bytes32 => bytes32) private helpersHashes;
 
-    AragonPluginRegistry public repoRegistry;
+    PluginRepoRegistry public repoRegistry;
 
     error SetupNotAllowed(address caller, bytes32 permissionId);
     error PluginNonUpgradeable(address plugin);
@@ -99,11 +99,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _;
     }
 
-    constructor(IDAO _dao, AragonPluginRegistry _repoRegistry) DaoAuthorizable(_dao) {
+    constructor(IDAO _dao, PluginRepoRegistry _repoRegistry) DaoAuthorizable(_dao) {
         repoRegistry = _repoRegistry;
     }
 
-    function setRepoRegistry(AragonPluginRegistry _repoRegistry)
+    function setRepoRegistry(PluginRepoRegistry _repoRegistry)
         external
         auth(SET_REPO_REGISTRY_PERMISSION_ID)
     {

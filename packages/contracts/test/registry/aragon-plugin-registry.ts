@@ -30,11 +30,11 @@ describe('Aragon-Plugin-Registry', function () {
     // DAO
     managingDAO = await deployNewDAO(ownerAddress);
 
-    // deploy and initialize AragonPluginRegistry
-    const AragonPluginRegistry = await ethers.getContractFactory(
-      'AragonPluginRegistry'
+    // deploy and initialize PluginRepoRegistry
+    const PluginRepoRegistry = await ethers.getContractFactory(
+      'PluginRepoRegistry'
     );
-    aragonPluginRegistry = await AragonPluginRegistry.deploy();
+    aragonPluginRegistry = await PluginRepoRegistry.deploy();
     await aragonPluginRegistry.initialize(managingDAO.address);
 
     // deploy a pluginRepo and initialize

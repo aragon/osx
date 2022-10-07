@@ -7,7 +7,7 @@ import {
   PluginSetupV2Mock,
   PluginSetupV1MockBad,
   PluginRepoFactory,
-  AragonPluginRegistry,
+  PluginRepoRegistry,
   PluginRepo,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
@@ -62,8 +62,8 @@ const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
 // Util Helper Functions
 async function getPluginRepoFactoryMergedABI() {
   // @ts-ignore
-  const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
-    'AragonPluginRegistry'
+  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
+    'PluginRepoRegistry'
   );
   // @ts-ignore
   const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
@@ -72,7 +72,7 @@ async function getPluginRepoFactoryMergedABI() {
 
   const _merged = [
     ...PluginRepoFactoryArtifact.abi,
-    ...AragonPluginRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
+    ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
   ];
 
   // remove duplicated events
@@ -99,7 +99,7 @@ describe('Plugin Setup Processor', function () {
   let targetDao: any;
   let managingDao: any;
   let pluginRepoFactory: any;
-  let aragonPluginRegistry: AragonPluginRegistry;
+  let aragonPluginRegistry: PluginRepoRegistry;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -122,11 +122,11 @@ describe('Plugin Setup Processor', function () {
     // Managing DAO that have permission to manage PluginSetupProcessor
     managingDao = await deployNewDAO(ownerAddress);
 
-    // AragonPluginRegistry
-    const AragonPluginRegistry = await ethers.getContractFactory(
-      'AragonPluginRegistry'
+    // PluginRepoRegistry
+    const PluginRepoRegistry = await ethers.getContractFactory(
+      'PluginRepoRegistry'
     );
-    aragonPluginRegistry = await AragonPluginRegistry.deploy();
+    aragonPluginRegistry = await PluginRepoRegistry.deploy();
     await aragonPluginRegistry.initialize(managingDao.address);
 
     // PluginRepoFactory
@@ -162,7 +162,7 @@ describe('Plugin Setup Processor', function () {
     // Target DAO to be used as an example DAO
     targetDao = await deployNewDAO(ownerAddress);
 
-    // Create and register a plugin on the AragonPluginRegistry
+    // Create and register a plugin on the PluginRepoRegistry
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
       'PluginSetupV1Mock',
       [1, 0, 0],
@@ -189,7 +189,7 @@ describe('Plugin Setup Processor', function () {
     );
     pluginSetupV1MockBad = await PluginSetupV1MockBad.deploy();
 
-    // register the bad plugin setup on `AragonPluginRegistry`.
+    // register the bad plugin setup on `PluginRepoRegistry`.
     await pluginRepo.createVersion(
       [3, 0, 0],
       pluginSetupV1MockBad.address,
@@ -212,7 +212,7 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('PrepareInstallation', function () {
-      it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+      it('Reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         const data = '0x';
         const pluginSetupRepoAddr = ADDRESS_TWO;
 
@@ -448,7 +448,7 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('PrepareUninstallation', function () {
-      it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+      it('Reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         await expect(
           psp.prepareUninstallation(
             targetDao.address,
@@ -712,7 +712,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('PluginNonUpgradeable', plugin));
       });
 
-      it('Reverts if `PluginSetupRepo` do not exist on `AragonPluginRegistry`', async () => {
+      it('Reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
