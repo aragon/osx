@@ -12,6 +12,8 @@ import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {Permission, PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 
+/// @title PluginSetupProcessor
+/// @author Aragon Association - 2022
 /// @notice Plugin setup processor that has root permissions to setup plugin on the dao and apply permissions.
 contract PluginSetupProcessor is DaoAuthorizable {
     using ERC165Checker for address;

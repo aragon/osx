@@ -13,7 +13,7 @@ import "./erc165/AdaptiveERC165.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
 
-/// @title The public interface of the Aragon DAO framework.
+/// @title DAO
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.

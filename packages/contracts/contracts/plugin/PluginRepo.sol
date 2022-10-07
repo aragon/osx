@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+
 import "../core/permission/PermissionManager.sol";
 import "../core/erc165/AdaptiveERC165.sol";
 import "../utils/UncheckedMath.sol";
@@ -13,7 +14,7 @@ import "./IPluginRepo.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
-/// @notice The repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
+/// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
 contract PluginRepo is
     IPluginRepo,
     Initializable,

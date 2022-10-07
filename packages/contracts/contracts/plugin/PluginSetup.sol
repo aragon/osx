@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
-
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 
-/// NOTE: This is an untested code and should NOT be used in production.
-/// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
+/// @title PluginSetup
+/// @author Aragon Association - 2022
+/// @notice Abstract Plugin Setup that developers have to inherit from for their plugin setup contracts.
 abstract contract PluginSetup {
     bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginSetup).interfaceId;
 

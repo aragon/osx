@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.10;
 
-// import "../../../core/plugin/PluginClones.sol";
 import "../../../core/plugin/PluginUUPSUpgradeable.sol";
 
 // NON-Upgradeable
