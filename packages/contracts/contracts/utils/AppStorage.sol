@@ -34,7 +34,7 @@ contract AppStorage {
         StorageSlot.getBooleanSlot(INITIALIZED_POSITION).value = true;
     }
 
-    /// @return bool whether it's initialized or not.
+    /// @return bool Returns true if the storage slot is initialized.
     function isInitialized() internal view returns (bool) {
         return StorageSlot.getBooleanSlot(DAO_POSITION).value;
     }

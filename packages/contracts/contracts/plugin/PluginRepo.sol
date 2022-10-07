@@ -213,7 +213,7 @@ contract PluginRepo is
     /// @notice Checks if a version bump is valid.
     /// @param _oldVersion The old semantic version number.
     /// @param _newVersion The new semantic version number.
-    /// @return bool True if the bump is valid.
+    /// @return bool Returns true if the bump is valid.
     function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
         public
         pure
