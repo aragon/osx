@@ -15,7 +15,7 @@ import {IDAO} from "../IDAO.sol";
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin
 /// being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
 abstract contract PluginCloneable is Initializable, ERC165, Context, AppStorage {
-    bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginCloneable).interfaceId;
+    bytes4 public constant PLUGIN_CLONABLE_INTERFACE_ID = type(PluginCloneable).interfaceId;
 
     error ClonesInitAlreadyInitialized();
 
@@ -37,10 +37,11 @@ abstract contract PluginCloneable is Initializable, ERC165, Context, AppStorage 
         _;
     }
 
-    /// @notice adds a IERC165 to check whether contract supports PluginClones interface or not.
-    /// @dev See {ERC165-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginClones
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return
+            _interfaceId == PLUGIN_CLONABLE_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 }

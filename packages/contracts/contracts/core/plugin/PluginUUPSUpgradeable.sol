@@ -22,7 +22,8 @@ abstract contract PluginUUPSUpgradeable is
     UUPSUpgradeable,
     AppStorage
 {
-    bytes4 public constant PLUGIN_INTERFACE_ID = type(PluginUUPSUpgradeable).interfaceId;
+    bytes4 public constant PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID =
+        type(PluginUUPSUpgradeable).interfaceId;
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
@@ -35,11 +36,13 @@ abstract contract PluginUUPSUpgradeable is
         _;
     }
 
-    /// @notice adds a IERC165 to check whether contract supports PluginUUPSUpgradeable interface or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginUUPSUpgradeable
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
+    /// @notice Checks if an interface is supported by this or the parent contract.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return
+            _interfaceId == PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @notice used to check the current base logic contract proxy delegates to.
