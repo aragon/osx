@@ -45,7 +45,12 @@ async function proposal() {
       {label: 'link02', url: 'https://link.02'},
     ],
   };
-  const client = IPFS.create('https://ipfs.infura.io:5001/api/v0');
+  const client = IPFS.create({
+    url: 'https://ipfs-0.aragon.network/api/v0',
+    headers: {
+      'X-API-KEY': 'yRERPRwFAb5ZiV94XvJdgvDKoGEeFerfFsAQ65',
+    },
+  });
   const cid = await client.add(JSON.stringify(metadataObj));
 
   console.log('ipfs cid', cid.path);
@@ -101,7 +106,7 @@ async function proposal() {
     actions,
     0,
     0,
-    false,
+    true,
     2,
     overrides
   ); // vote Yea and execute

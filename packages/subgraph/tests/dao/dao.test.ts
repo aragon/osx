@@ -176,12 +176,7 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   let proposalId =
     Address.fromHexString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
 
-  createERC20VotingProposalEntityState(
-    proposalId,
-    DAO_ADDRESS,
-    VOTING_ADDRESS,
-    ADDRESS_ONE
-  );
+  createERC20VotingProposalEntityState();
 
   // create token calls
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
