@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -12,8 +13,8 @@ import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
-abstract contract PluginSetup {
-    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginSetup).interfaceId;
+abstract contract PluginSetup is ERC165 {
+    bytes4 public constant PLUGIN_SETUP_INTERFACE_ID = type(PluginSetup).interfaceId;
 
     /// @notice the ABI in string format that `prepareInstallation()`'s `_data` param needs to use.
     /// @return ABI in string format.
@@ -71,4 +72,12 @@ abstract contract PluginSetup {
     /// @notice the plugin's base implementation address proxies need to delegate calls.
     /// @return address of the base contract address.
     function getImplementationAddress() external view virtual returns (address);
+
+    /// @notice adds a IERC165 to check whether contract supports PluginSetup interface or not.
+    /// @dev See {ERC165-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or PluginSetup
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == PLUGIN_SETUP_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }
+
 }
