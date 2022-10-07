@@ -16,10 +16,18 @@ import {PluginRepo} from "./PluginRepo.sol";
 contract PluginSetupProcessor is DaoAuthorizable {
     using ERC165Checker for address;
 
-    bytes32 public constant PROCESS_INSTALL_PERMISSION_ID = keccak256("PROCESS_INSTALL_PERMISSION");
-    bytes32 public constant PROCESS_UPDATE_PERMISSION_ID = keccak256("PROCESS_UPDATE_PERMISSION");
-    bytes32 public constant PROCESS_UNINSTALL_PERMISSION_ID =
-        keccak256("PROCESS_UNINSTALL_PERMISSION");
+    /// @notice The ID of the permission required to call the `applyInstallation` function.
+    bytes32 public constant APPLY_INSTALLATION_PERMISSION_ID =
+        keccak256("APPLY_INSTALLATION_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `applyUpdate` function.
+    bytes32 public constant APPLY_UPDATE_PERMISSION_ID = keccak256("APPLY_UPDATE_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `applyUninstallation` function.
+    bytes32 public constant APPLY_UNINSTALLATION_PERMISSION_ID =
+        keccak256("APPLY_UNINSTALLATION_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `setRepoRegistry` function.
     bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
         keccak256("SET_REPO_REGISTRY_PERMISSION");
 
@@ -153,7 +161,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         address _plugin,
         Permission.ItemMultiTarget[] calldata _permissions
-    ) external canApply(_dao, PROCESS_INSTALL_PERMISSION_ID) {
+    ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
         bytes32 appliedId = getAppliedId(_dao, _plugin);
 
         if (isInstallationApplied[appliedId]) {
@@ -262,7 +270,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup, // new plugin manager upgrade happens to.
         bytes memory _initData,
         Permission.ItemMultiTarget[] calldata _permissions
-    ) external canApply(_dao, PROCESS_UPDATE_PERMISSION_ID) {
+    ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
         if (updatePermissionHashes[setupId] != getPermissionsHash(_permissions)) {
@@ -339,7 +347,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         address[] calldata _activeHelpers,
         Permission.ItemMultiTarget[] calldata permissions
-    ) external canApply(_dao, PROCESS_UNINSTALL_PERMISSION_ID) {
+    ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
         if (helpersHashes[setupId] != getHelpersHash(_activeHelpers)) {

@@ -44,14 +44,12 @@ const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 const EMPTY_ID = `0x${'00'.repeat(32)}`;
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
-const PROCESS_INSTALL_PERMISSION_ID = ethers.utils.id(
-  'PROCESS_INSTALL_PERMISSION'
+const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
+  'APPLY_INSTALLATION_PERMISSION'
 );
-const PROCESS_UPDATE_PERMISSION_ID = ethers.utils.id(
-  'PROCESS_UPDATE_PERMISSION'
-);
-const PROCESS_UNINSTALL_PERMISSION_ID = ethers.utils.id(
-  'PROCESS_UNINSTALL_PERMISSION'
+const APPLY_UPDATE_PERMISSION_ID = ethers.utils.id('APPLY_UPDATE_PERMISSION');
+const APPLY_UNINSTALLATION_PERMISSION_ID = ethers.utils.id(
+  'APPLY_UNINSTALLATION_PERMISSION'
 );
 const SET_REPO_REGISTRY_PERMISSION_ID = ethers.utils.id(
   'SET_REPO_REGISTRY_PERMISSION'
@@ -209,7 +207,7 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        PROCESS_INSTALL_PERMISSION_ID
+        APPLY_INSTALLATION_PERMISSION_ID
       );
     });
 
@@ -290,13 +288,13 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('ApplyInstallation', function () {
-      it('Reverts if caller does not have `PROCESS_INSTALL_PERMISSION`', async () => {
-        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+      it('Reverts if caller does not have `APPLY_INSTALLATION_PERMISSION`', async () => {
+        // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
           psp.address,
           ownerAddress,
-          PROCESS_INSTALL_PERMISSION_ID
+          APPLY_INSTALLATION_PERMISSION_ID
         );
 
         const pluginSetup = pluginSetupV1Mock.address;
@@ -320,7 +318,7 @@ describe('Plugin Setup Processor', function () {
           customError(
             'SetupNotAllowed',
             ownerAddress,
-            PROCESS_INSTALL_PERMISSION_ID
+            APPLY_INSTALLATION_PERMISSION_ID
           )
         );
       });
@@ -440,12 +438,12 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        PROCESS_INSTALL_PERMISSION_ID
+        APPLY_INSTALLATION_PERMISSION_ID
       );
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        PROCESS_UNINSTALL_PERMISSION_ID
+        APPLY_UNINSTALLATION_PERMISSION_ID
       );
     });
 
@@ -539,13 +537,13 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('ApplyUninstallation', function () {
-      it('Reverts if caller does not have `PROCESS_UNINSTALL_PERMISSION`', async () => {
-        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+      it('Reverts if caller does not have `APPLY_UNINSTALLATION_PERMISSION`', async () => {
+        // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
           psp.address,
           ownerAddress,
-          PROCESS_UNINSTALL_PERMISSION_ID
+          APPLY_UNINSTALLATION_PERMISSION_ID
         );
 
         await expect(
@@ -560,7 +558,7 @@ describe('Plugin Setup Processor', function () {
           customError(
             'SetupNotAllowed',
             ownerAddress,
-            PROCESS_UNINSTALL_PERMISSION_ID
+            APPLY_UNINSTALLATION_PERMISSION_ID
           )
         );
       });
@@ -683,12 +681,12 @@ describe('Plugin Setup Processor', function () {
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        PROCESS_INSTALL_PERMISSION_ID
+        APPLY_INSTALLATION_PERMISSION_ID
       );
       await targetDao.grant(
         psp.address,
         ownerAddress,
-        PROCESS_UPDATE_PERMISSION_ID
+        APPLY_UPDATE_PERMISSION_ID
       );
     });
 
@@ -869,13 +867,13 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('ApplyUpdate', function () {
-      it('Reverts if caller does not have `PROCESS_UPDATE_PERMISSION`', async () => {
-        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+      it('Reverts if caller does not have `APPLY_UPDATE_PERMISSION`', async () => {
+        // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
           psp.address,
           ownerAddress,
-          PROCESS_UPDATE_PERMISSION_ID
+          APPLY_UPDATE_PERMISSION_ID
         );
 
         await expect(
@@ -890,7 +888,7 @@ describe('Plugin Setup Processor', function () {
           customError(
             'SetupNotAllowed',
             ownerAddress,
-            PROCESS_UPDATE_PERMISSION_ID
+            APPLY_UPDATE_PERMISSION_ID
           )
         );
       });
