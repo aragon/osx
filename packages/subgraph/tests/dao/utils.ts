@@ -1,5 +1,6 @@
 import {ethereum, Bytes, Address, BigInt} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as/assembly/index';
+import {Dao} from '../../generated/schema';
 
 import {
   MetadataSet,
@@ -383,4 +384,20 @@ export function getSupportsInterface(
       ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
+}
+
+// state
+
+export function createDaoEntityState(
+  entityID: string,
+  creator: string,
+  token: string
+): Dao {
+  let daoEntity = new Dao(entityID);
+  daoEntity.creator = Address.fromString(creator);
+  daoEntity.createdAt = BigInt.zero();
+  daoEntity.token = Address.fromString(token).toHexString();
+  daoEntity.save();
+
+  return daoEntity;
 }

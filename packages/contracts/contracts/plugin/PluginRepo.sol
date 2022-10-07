@@ -4,15 +4,15 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "../core/permission/PermissionManager.sol";
-
-import "../utils/UncheckedMath.sol";
-import "./PluginManager.sol";
-import "./IPluginRepo.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {PermissionManager} from "../core/permission/PermissionManager.sol";
+import {AdaptiveERC165} from "../core/erc165/AdaptiveERC165.sol";
+import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
+import {PluginSetup} from "./PluginSetup.sol";
+import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -24,9 +24,11 @@ contract PluginRepo is
     PermissionManager,
     ERC165Upgradeable
 {
+    using Address for address;
+
     struct Version {
         uint16[3] semanticVersion;
-        address pluginManager;
+        address pluginSetup;
         bytes contentURI;
     }
 
@@ -45,8 +47,8 @@ contract PluginRepo is
     /// @notice A mapping between the semantic version number hash and the version index.
     mapping(bytes32 => uint256) internal versionIndexForSemantic;
 
-    /// @notice A mapping between the `PluginManager` contract addresses and the version index.
-    mapping(address => uint256) internal versionIndexForPluginManager;
+    /// @notice A mapping between the `PluginSetup` contract addresses and the version index.
+    mapping(address => uint256) internal versionIndexForPluginSetup;
 
     /// @notice Thrown if a semantic version number bump is invalid.
     /// @param currentVersion The current semantic version number.
@@ -57,13 +59,13 @@ contract PluginRepo is
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);
 
-    /// @notice Thrown if a contract does not inherit from `PluginManager`.
-    /// @param invalidPluginManager The address of the contract missing the `PluginManager` interface.
-    error InvalidPluginManagerInterface(address invalidPluginManager);
+    /// @notice Thrown if a contract does not inherit from `PluginSetup`.
+    /// @param invalidPluginSetup The address of the contract missing the `PluginSetup` interface.
+    error InvalidPluginSetupInterface(address invalidPluginSetup);
 
-    /// @notice Thrown if a contract is not a `PluginManager` contract.
-    /// @param invalidPluginManager The address of the contract not being a plugin factory.
-    error InvalidPluginManagerContract(address invalidPluginManager);
+    /// @notice Thrown if a contract is not a `PluginSetup` contract.
+    /// @param invalidPluginSetup The address of the contract not being a plugin factory.
+    error InvalidPluginSetupContract(address invalidPluginSetup);
 
     /// @notice Thrown if address is not a contract.
     /// @param invalidContract The address not being a contract.
@@ -92,26 +94,22 @@ contract PluginRepo is
     /// @inheritdoc IPluginRepo
     function createVersion(
         uint16[3] memory _newSemanticVersion,
-        address _pluginManager,
+        address _pluginSetup,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
-        // Check if `_pluginManager` is a `PluginManager` contract
-        if (!Address.isContract(_pluginManager)) {
-            revert InvalidContractAddress({invalidContract: _pluginManager});
-        }
+        // In a case where _pluginSetup doesn't contain supportsInterface,
+        // but contains fallback, that doesn't return anything(most cases)
+        // the below approach aims to still return custom error which not possible with try/catch..
+        // NOTE: also checks if _pluginSetup is a contract and reverts if not.
+        bytes memory data = _pluginSetup.functionCall(
+            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(PluginSetup).interfaceId)
+        );
 
-        // TODO: uncommment
-        // try
-        //     PluginManager(_pluginManager).supportsInterface(
-        //         PluginManager.PLUGIN_FACTORY_INTERFACE_ID
-        //     )
-        // returns (bool result) {
-        //     if (!result) {
-        //         revert InvalidPluginManagerInterface({invalidPluginManager: _pluginManager});
-        //     }
-        // } catch {
-        //     revert InvalidPluginManagerContract({invalidPluginManager: _pluginManager});
-        // }
+        // NOTE: if data contains 32 bytes that can't be decoded with uint256
+        // it reverts with solidity's ambigious error.
+        if (data.length != 32 || abi.decode(data, (uint256)) != 1) {
+            revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
+        }
 
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
@@ -131,23 +129,23 @@ contract PluginRepo is
 
         uint256 versionIndex = nextVersionIndex;
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
-        versions[versionIndex] = Version(_newSemanticVersion, _pluginManager, _contentURI);
+        versions[versionIndex] = Version(_newSemanticVersion, _pluginSetup, _contentURI);
         versionIndexForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIndex;
-        versionIndexForPluginManager[_pluginManager] = versionIndex;
+        versionIndexForPluginSetup[_pluginSetup] = versionIndex;
 
         emit VersionCreated(versionIndex, _newSemanticVersion);
     }
 
     /// @notice Gets the version information of the latest version.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
     function getLatestVersion()
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
@@ -156,30 +154,30 @@ contract PluginRepo is
 
     /// @notice Gets the version information associated with a plugin factory address.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionByPluginManager(address _pluginManager)
+    function getVersionByPluginSetup(address _pluginSetup)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
-        return getVersionById(versionIndexForPluginManager[_pluginManager]);
+        return getVersionById(versionIndexForPluginSetup[_pluginSetup]);
     }
 
     /// @notice Gets the version information associated with a semantic version number.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
     function getVersionBySemanticVersion(uint16[3] memory _semanticVersion)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
@@ -188,21 +186,21 @@ contract PluginRepo is
 
     /// @notice Gets the version information associated with a version index.
     /// @return semanticVersion The semantic version number.
-    /// @return pluginManager The address of the plugin factory associated with the version.
+    /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
     function getVersionById(uint256 _versionIndex)
         public
         view
         returns (
             uint16[3] memory semanticVersion,
-            address pluginManager,
+            address pluginSetup,
             bytes memory contentURI
         )
     {
         if (_versionIndex <= 0 || _versionIndex >= nextVersionIndex)
             revert VersionIndexDoesNotExist({versionIndex: _versionIndex});
         Version storage version = versions[_versionIndex];
-        return (version.semanticVersion, version.pluginManager, version.contentURI);
+        return (version.semanticVersion, version.pluginSetup, version.contentURI);
     }
 
     /// @notice Gets the total number of published versions.

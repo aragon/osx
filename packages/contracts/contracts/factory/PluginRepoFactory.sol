@@ -6,7 +6,8 @@ pragma solidity 0.8.10;
 
 import "../utils/Proxy.sol";
 import "../registry/AragonPluginRegistry.sol";
-import "../plugin/PluginRepo.sol";
+import {PluginRepo} from "../plugin/PluginRepo.sol";
+import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022
@@ -44,20 +45,20 @@ contract PluginRepoFactory {
     /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the address `_maintainer`.
     /// @param _name The plugin repository name.
     /// @param _initialSemanticVersion The semantic version for the new plugin repository version.
-    /// @param _pluginManager The plugin factory contract associated with the plugin version.
+    /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _contentURI The external URI for fetching the new version's content.
     /// @param _maintainer The plugin maintainer address.
     function createPluginRepoWithVersion(
         string calldata _name,
         uint16[3] memory _initialSemanticVersion,
-        address _pluginManager,
+        address _pluginSetup,
         bytes memory _contentURI,
         address _maintainer
     ) external returns (PluginRepo pluginRepo) {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_name, address(this));
 
-        pluginRepo.createVersion(_initialSemanticVersion, _pluginManager, _contentURI);
+        pluginRepo.createVersion(_initialSemanticVersion, _pluginSetup, _contentURI);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         setPluginRepoPermissions(pluginRepo, _maintainer);
@@ -69,7 +70,8 @@ contract PluginRepoFactory {
     /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
-        BulkPermissionsLib.ItemSingleTarget[] memory items = new BulkPermissionsLib.ItemSingleTarget[](5);
+        BulkPermissionsLib.ItemSingleTarget[]
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](5);
 
         // Grant the plugin maintainer all the permissions required
         items[0] = BulkPermissionsLib.ItemSingleTarget(
@@ -121,6 +123,6 @@ contract PluginRepoFactory {
             )
         );
 
-        aragonPluginRegistry.register(_name, address(pluginRepo));
+        aragonPluginRegistry.registerPlugin(_name, address(pluginRepo));
     }
 }

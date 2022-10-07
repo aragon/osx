@@ -17,7 +17,7 @@ import {
   AllowlistVoter,
   AllowlistVote
 } from '../../../generated/schema';
-import {VOTER_STATE} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
 
 export function handleVoteCreated(event: VoteCreated): void {
   let context = dataSource.context();
@@ -112,13 +112,40 @@ export function handleVoteCast(event: VoteCast): void {
     let contract = AllowlistVoting.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
-      proposalEntity.yes = vote.value.value8;
-      proposalEntity.no = vote.value.value9;
-      proposalEntity.abstain = vote.value.value10;
-      proposalEntity.voteCount = vote.value.value8.plus(
+      let voteCount = vote.value.value8.plus(
         vote.value.value9.plus(vote.value.value10)
       );
+      let yes = vote.value.value8;
+      proposalEntity.yes = yes;
+      proposalEntity.no = vote.value.value9;
+      proposalEntity.abstain = vote.value.value10;
+      proposalEntity.voteCount = voteCount;
 
+      // check if the current vote results meet
+      // the conditions for the proposal to pass:
+      // - Minimum participation => => (totalVotes / votingPower) >= minParticipation
+      // - Minimum suport => (yes / totalVotes) >= minSupport
+
+      // expect a number between 0 and 100
+      // where 0.35 => 35
+      let currentParticipation = voteCount
+        .times(BigInt.fromI32(100))
+        .div(proposalEntity.votingPower);
+      // expect a number between 0 and 100
+      // where 0.35 => 35
+      let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+      // set the executable param
+      proposalEntity.executable =
+        currentParticipation.ge(
+          proposalEntity.participationRequired.div(
+            BigInt.fromString(TEN_POWER_16)
+          )
+        ) &&
+        currentSupport.ge(
+          proposalEntity.supportRequiredPct.div(
+            BigInt.fromString(TEN_POWER_16)
+          )
+        );
       proposalEntity.save();
     }
   }

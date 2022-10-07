@@ -27,9 +27,10 @@ jobs:
       - name: Prepare
         id: prepare
         run: node .github/helpers/subgraph/buildMatrix.js '${{ github.ref }}'
+
   changelog:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged && github.actor != 'arabot-1' && contains(github.event.pull_request.labels.*.name, 'subgraph:') 
+    if: github.event.pull_request.merged && github.actor != 'arabot-1' && contains(toJson(github.event.pull_request.labels.*.name), 'subgraph:') 
     steps:
       - uses: actions/checkout@v2
         with:
@@ -81,7 +82,7 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
-    if: needs.prepare.outputs.environment != '' && contains(github.event.pull_request.labels.*.name, 'subgraph:')
+    if: needs.prepare.outputs.environment != '' && contains(toJson(github.event.pull_request.labels.*.name), 'subgraph:')
     environment: ${{ needs.prepare.outputs.environment }}
     strategy:
       fail-fast: false
