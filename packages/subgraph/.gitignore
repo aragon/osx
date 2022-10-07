@@ -8,3 +8,4 @@ artifacts
 # generated
 deploy-output.txt
 dev-data
+tests/.latest.json

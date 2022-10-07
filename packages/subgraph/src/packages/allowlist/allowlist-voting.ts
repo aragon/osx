@@ -17,7 +17,7 @@ import {
   AllowlistVoter,
   AllowlistVote
 } from '../../../generated/schema';
-import {VOTER_STATE} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
 
 export function handleVoteCreated(event: VoteCreated): void {
   let context = dataSource.context();
@@ -138,12 +138,12 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.executable =
         currentParticipation.ge(
           proposalEntity.participationRequired.div(
-            BigInt.fromString('10000000000000000')
+            BigInt.fromString(TEN_POWER_16)
           )
         ) &&
         currentSupport.ge(
           proposalEntity.supportRequiredPct.div(
-            BigInt.fromString('10000000000000000')
+            BigInt.fromString(TEN_POWER_16)
           )
         );
       proposalEntity.save();
