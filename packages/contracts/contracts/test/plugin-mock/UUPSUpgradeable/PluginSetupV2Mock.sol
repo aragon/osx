@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {Permission, PluginSetup, PluginSetupProcessor} from "../../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
 // The second version of plugin manager.
@@ -28,15 +28,11 @@ contract PluginSetupV2Mock is PluginSetup {
         public
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
-        )
+        returns (PluginSetupProcessor.PluginInstallParams memory params)
     {
         address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
 
-        plugin = createERC1967Proxy(
+        params.plugin = createERC1967Proxy(
             _dao,
             address(pluginBase),
             abi.encodeWithSelector(
@@ -47,21 +43,21 @@ contract PluginSetupV2Mock is PluginSetup {
             )
         );
 
-        permissions = new Permission.ItemMultiTarget[](2);
-        helpers = new address[](1);
+        params.permissions = new Permission.ItemMultiTarget[](2);
+        params.helpers = new address[](1);
 
-        helpers[0] = helperAddr;
-        permissions[0] = Permission.ItemMultiTarget(
+        params.helpers[0] = helperAddr;
+        params.permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             _dao,
-            plugin,
+            params.plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
+        params.permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
-            plugin,
+            params.plugin,
             helperAddr,
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
@@ -77,7 +73,12 @@ contract PluginSetupV2Mock is PluginSetup {
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {}
+    )
+        external
+        virtual
+        override
+        returns (PluginSetupProcessor.PluginUninstallParams memory params)
+    {}
 
     function prepareUpdateDataABI() external view virtual override returns (string memory) {
         return "";
@@ -89,33 +90,25 @@ contract PluginSetupV2Mock is PluginSetup {
         address[] memory _helpers,
         uint16[3] calldata,
         bytes memory
-    )
-        public
-        virtual
-        override
-        returns (
-            address[] memory activeHelpers,
-            bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
-        )
-    {
-        initData = abi.encodeWithSelector(
+    ) public virtual override returns (PluginSetupProcessor.PluginUpdateParams memory params) {
+        params.initData = abi.encodeWithSelector(
             bytes4(keccak256("initializeV2(string)")),
             "stringExample"
         );
 
         address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
 
-        permissions = new Permission.ItemMultiTarget[](2);
-        activeHelpers = new address[](_helpers.length + 1);
+        params.permissions = new Permission.ItemMultiTarget[](2);
+        params.oldHelpers = _helpers;
+        params.newHelpers = new address[](_helpers.length + 1);
 
         for (uint256 i = 0; i < _helpers.length; i++) {
-            activeHelpers[i] = _helpers[i];
+            params.newHelpers[i] = _helpers[i];
         }
 
-        activeHelpers[_helpers.length] = helperAddr;
+        params.newHelpers[_helpers.length] = helperAddr;
 
-        permissions[0] = Permission.ItemMultiTarget(
+        params.permissions[0] = Permission.ItemMultiTarget(
             Permission.Operation.Grant,
             helperAddr,
             _plugin,
@@ -123,10 +116,10 @@ contract PluginSetupV2Mock is PluginSetup {
             keccak256("NEW_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
+        params.permissions[1] = Permission.ItemMultiTarget(
             Permission.Operation.Revoke,
             _plugin,
-            activeHelpers[0],
+            params.newHelpers[0],
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
         );

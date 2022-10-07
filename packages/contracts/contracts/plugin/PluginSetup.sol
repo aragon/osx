@@ -10,6 +10,8 @@ import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissio
 
 import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 
+import {PluginSetupProcessor} from "./PluginSetupProcessor.sol";
+
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
 abstract contract PluginSetup {
@@ -22,11 +24,7 @@ abstract contract PluginSetup {
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
-        returns (
-            address plugin,
-            address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
-        );
+        returns (PluginSetupProcessor.PluginInstallParams memory);
 
     /// @notice The ABI in string format that `prepareUpdateDataABI()`'s `_data` needs to use.
     /// @dev Not required to be overriden as there might be no update at all by dev.
@@ -39,15 +37,7 @@ abstract contract PluginSetup {
         address[] memory _helpers,
         uint16[3] calldata _oldVersion,
         bytes memory _data
-    )
-        external
-        virtual
-        returns (
-            address[] memory activeHelpers,
-            bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
-        )
-    {}
+    ) external virtual returns (PluginSetupProcessor.PluginUpdateParams memory) {}
 
     /// @notice The ABI in string format that `prepareUninstallation()`'s `_data` needs to use.
     /// @return ABI in string format.
@@ -58,7 +48,7 @@ abstract contract PluginSetup {
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions);
+    ) external virtual returns (PluginSetupProcessor.PluginUninstallParams memory);
 
     function createERC1967Proxy(
         address _dao,
