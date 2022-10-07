@@ -45,7 +45,7 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgr
         virtual
         onlyInitializing
     {
-        __DaoAuthorizable_init(_managingDao);
+        __DaoAuthorizableUpgradeable_init(_managingDao);
 
         targetInterfaceId = _targetInterfaceId;
     }

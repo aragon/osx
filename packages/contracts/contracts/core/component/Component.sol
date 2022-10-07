@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../erc165/AdaptiveERC165.sol";
 import "../IDAO.sol";
-import { DaoAuthorizableUpgradeable } from "./DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "./DaoAuthorizableUpgradeable.sol";
 
 /// @title Component
 /// @author Aragon Association - 2021, 2022
@@ -20,7 +20,7 @@ abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DaoAuthorizableU
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The associated DAO address.
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
-        __DaoAuthorizable_init(_dao);
+        __DaoAuthorizableUpgradeable_init(_dao);
 
         _registerStandard(type(Component).interfaceId);
     }

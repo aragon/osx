@@ -34,13 +34,13 @@ contract PluginSetupV2Mock is PluginSetup {
             Permission.ItemMultiTarget[] memory permissions
         )
     {
-        address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
+        address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
         plugin = createERC1967Proxy(
-            _dao,
             address(pluginBase),
             abi.encodeWithSelector(
-                bytes4(keccak256("initialize(uint256,address,string)")),
+                bytes4(keccak256("initialize(address,uint256,address,string)")),
+                _dao,
                 PLUGIN_INIT_NUMBER,
                 helperAddr,
                 "stringExample"
@@ -104,7 +104,7 @@ contract PluginSetupV2Mock is PluginSetup {
             "stringExample"
         );
 
-        address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
+        address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
         permissions = new Permission.ItemMultiTarget[](2);
         activeHelpers = new address[](_helpers.length + 1);

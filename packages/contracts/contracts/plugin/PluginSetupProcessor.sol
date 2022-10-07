@@ -6,7 +6,6 @@ import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
 
 import {Permission, PluginSetup} from "./PluginSetup.sol";
