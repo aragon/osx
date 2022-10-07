@@ -540,7 +540,7 @@ describe('Plugin Setup Processor', function () {
 
     describe('ApplyUninstallation', function () {
       it('Reverts if caller does not have `PROCESS_UNINSTALL_PERMISSION`', async () => {
-        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+        // revoke `PROCESS_UNINSTALL_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
           psp.address,
@@ -870,7 +870,7 @@ describe('Plugin Setup Processor', function () {
 
     describe('ApplyUpdate', function () {
       it('Reverts if caller does not have `PROCESS_UPDATE_PERMISSION`', async () => {
-        // revoke `PROCESS_INSTALL_PERMISSION_ID` on dao for plugin installer
+        // revoke `PROCESS_UPDATE_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
           psp.address,
