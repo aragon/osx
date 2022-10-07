@@ -3,9 +3,9 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 import "../core/component/DaoAuthorizableUpgradeable.sol";
-import "../core/erc165/AdaptiveERC165.sol";
 
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022
@@ -64,8 +64,7 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgr
 
         if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
 
-        // TODO: if we keep using this contract, instead of AdaptiveERC165, use ERC165Checker from OZ.
-        try AdaptiveERC165(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
+        try ERC165(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
             if (!result) revert ContractInterfaceInvalid(_registrant);
         } catch {
             revert ContractERC165SupportInvalid({registrant: _registrant});

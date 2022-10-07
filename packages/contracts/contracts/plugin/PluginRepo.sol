@@ -9,7 +9,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
-import {AdaptiveERC165} from "../core/erc165/AdaptiveERC165.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+
 import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
