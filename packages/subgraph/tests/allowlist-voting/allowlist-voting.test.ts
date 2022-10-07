@@ -10,11 +10,7 @@ import {
   handleConfigUpdated,
   _handleVoteCreated
 } from '../../src/packages/allowlist/allowlist-voting';
-import {
-  AllowlistPackage,
-  AllowlistProposal,
-  AllowlistVoter
-} from '../../generated/schema';
+import {AllowlistPackage, AllowlistVoter} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -33,7 +29,8 @@ import {
   createNewVoteCreatedEvent,
   createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
-  getVotesLengthCall
+  getVotesLengthCall,
+  createAllowlistProposalEntityState
 } from './utils';
 
 let voteId = '0';
@@ -126,8 +123,12 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   // create state
   let proposalId =
     Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let erc20VotingProposal = new AllowlistProposal(proposalId);
-  erc20VotingProposal.save();
+  createAllowlistProposalEntityState(
+    proposalId,
+    DAO_ADDRESS,
+    VOTING_ADDRESS,
+    ADDRESS_ONE
+  );
 
   // create calls
   createGetVoteCall(
@@ -203,8 +204,12 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
 test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let erc20VotingProposal = new AllowlistProposal(entityID);
-  erc20VotingProposal.save();
+  createAllowlistProposalEntityState(
+    entityID,
+    DAO_ADDRESS,
+    VOTING_ADDRESS,
+    ADDRESS_ONE
+  );
 
   // create event
   let event = createNewVoteExecutedEvent('0', VOTING_ADDRESS);
@@ -290,6 +295,7 @@ test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
   for (let index = 0; index < userArray.length; index++) {
     const user = userArray[index];
     let userEntity = new AllowlistVoter(user.toHexString());
+    userEntity.pkg = Address.fromString(VOTING_ADDRESS).toHexString();
     userEntity.save();
   }
 

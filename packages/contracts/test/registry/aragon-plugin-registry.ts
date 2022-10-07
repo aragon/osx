@@ -16,7 +16,9 @@ describe('Aragon-Plugin-Registry', function () {
   let managingDAO: DAO;
   let pluginRepo: PluginRepo;
 
-  const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
+  const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
+    'PLUGIN_REGISTER_PERMISSION'
+  );
   const pluginRepoName = 'my-pluginRepo';
 
   before(async () => {
@@ -42,13 +44,16 @@ describe('Aragon-Plugin-Registry', function () {
     managingDAO.grant(
       aragonPluginRegistry.address,
       ownerAddress,
-      REGISTER_PERMISSION_ID
+      PLUGIN_REGISTER_PERMISSION_ID
     );
   });
 
   it('Should register a new pluginRepo successfully', async function () {
     await expect(
-      await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
+      await aragonPluginRegistry.registerPlugin(
+        pluginRepoName,
+        pluginRepo.address
+      )
     )
       .to.emit(aragonPluginRegistry, EVENTS.PluginRepoRegistered)
       .withArgs(pluginRepoName, pluginRepo.address);
@@ -60,20 +65,23 @@ describe('Aragon-Plugin-Registry', function () {
 
   it('fail to register if the sender lacks the required role', async () => {
     // Register a plugin successfully
-    await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address);
+    await aragonPluginRegistry.registerPlugin(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
     // Revoke the permission
     await managingDAO.revoke(
       aragonPluginRegistry.address,
       ownerAddress,
-      REGISTER_PERMISSION_ID
+      PLUGIN_REGISTER_PERMISSION_ID
     );
 
     // deploy a pluginRepo
     const newPluginRepo = await deployNewPluginRepo(ownerAddress);
 
     await expect(
-      aragonPluginRegistry.register(pluginRepoName, newPluginRepo.address)
+      aragonPluginRegistry.registerPlugin(pluginRepoName, newPluginRepo.address)
     ).to.be.revertedWith(
       customError(
         'DaoUnauthorized',
@@ -81,16 +89,19 @@ describe('Aragon-Plugin-Registry', function () {
         aragonPluginRegistry.address,
         aragonPluginRegistry.address,
         ownerAddress,
-        REGISTER_PERMISSION_ID
+        PLUGIN_REGISTER_PERMISSION_ID
       )
     );
   });
 
   it('fail to register if pluginRepo already exists', async function () {
-    await aragonPluginRegistry.register(pluginRepoName, pluginRepo.address);
+    await aragonPluginRegistry.registerPlugin(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
     await expect(
-      aragonPluginRegistry.register(pluginRepoName, pluginRepo.address)
+      aragonPluginRegistry.registerPlugin(pluginRepoName, pluginRepo.address)
     ).to.be.revertedWith(
       customError('ContractAlreadyRegistered', pluginRepo.address)
     );

@@ -4,10 +4,12 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
+// Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 export const ENS_ADDRESSES: {[key: string]: string} = {
   mainnet: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
   ropsten: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+  rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // dao.eth
+  goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
 
 export async function getContractAddress(
