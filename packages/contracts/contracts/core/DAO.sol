@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-import "./erc1271/ERC1271.sol";
 import "./erc165/AdaptiveERC165.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
@@ -17,7 +16,7 @@ import "./IDAO.sol";
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
+contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, AdaptiveERC165 {
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -42,7 +41,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
-    ERC1271 signatureValidator;
+    IERC1271 signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
@@ -75,7 +74,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         address _trustedForwarder
     ) external initializer {
         _registerStandard(DAO_INTERFACE_ID);
-        _registerStandard(type(ERC1271).interfaceId);
+        _registerStandard(type(IERC1271).interfaceId);
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
@@ -194,14 +193,14 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         override
         auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID)
     {
-        signatureValidator = ERC1271(_signatureValidator);
+        signatureValidator = IERC1271(_signatureValidator);
     }
 
-    /// @inheritdoc IDAO
+    /// @inheritdoc IERC1271
     function isValidSignature(bytes32 _hash, bytes memory _signature)
         external
         view
-        override(IDAO, ERC1271)
+        override
         returns (bytes4)
     {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number

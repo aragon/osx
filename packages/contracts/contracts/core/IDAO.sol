@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 
+import "@openzeppelin/contracts/interfaces/IERC1271.sol";
+
 pragma solidity 0.8.10;
 
 /// @title IDAO
 /// @author Aragon Association - 2022
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
-abstract contract IDAO {
+abstract contract IDAO is IERC1271 {
     /// @notice The `IDAO` interface ID.
     bytes4 internal constant DAO_INTERFACE_ID = type(IDAO).interfaceId;
 
@@ -117,13 +119,4 @@ abstract contract IDAO {
     /// @notice Setter for the ERC1271 signature validator contract.
     /// @param _signatureValidator ERC1271 SignatureValidator.
     function setSignatureValidator(address _signatureValidator) external virtual;
-
-    /// @notice Checks whether a signature is valid for the provided data.
-    /// @param _hash The keccak256 hash of arbitrary length data signed on the behalf of `address(this)`.
-    /// @param _signature Signature byte array associated with _data.
-    /// @return magicValue Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
-    function isValidSignature(bytes32 _hash, bytes memory _signature)
-        external
-        virtual
-        returns (bytes4);
 }
