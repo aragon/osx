@@ -8,8 +8,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "../core/permission/PermissionManager.sol";
 
+import "../core/permission/PermissionManager.sol";
 import "../utils/UncheckedMath.sol";
 import "./PluginSetup.sol";
 import "./IPluginRepo.sol";
