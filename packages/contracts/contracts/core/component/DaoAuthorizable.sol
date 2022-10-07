@@ -9,13 +9,12 @@ import {IDAO} from "../IDAO.sol";
 
 /// @title DaoAuthorizable
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
-/// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
+/// @notice An abstract contract providing a meta-transaction compatible modifier for contracts being generated with `new` to authorize function calls through an associated DAO.
 abstract contract DaoAuthorizable is Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
-    /// @notice Initializes the contract by setting the associated DAO.
+    /// @notice Constructs the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
     constructor(IDAO _dao) {
         dao = _dao;
