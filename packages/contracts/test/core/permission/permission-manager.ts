@@ -1,9 +1,9 @@
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-import {PermissionManagerTest, PermissionOracleMock} from '../../../typechain';
-import {customError} from '../../test-utils/custom-error-helper';
+import { PermissionManagerTest, PermissionOracleMock } from '../../../typechain';
+import { customError } from '../../test-utils/custom-error-helper';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');

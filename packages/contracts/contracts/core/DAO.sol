@@ -42,8 +42,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
 
     /// @notice The ID of the permission required to call the `registerStandardAndCallback` function.
-    bytes32 public constant REGISTER_STANDARD_ROLE_PERMISSION =
-        keccak256("REGISTER_STANDARD_ROLE_PERMISSION");
+    bytes32 public constant REGISTER_STANDARD_PERMISSION_ID =
+        keccak256("REGISTER_STANDARD_PERMISSION");
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     ERC1271 signatureValidator;
@@ -238,12 +238,12 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         emit TrustedForwarderSet(_trustedForwarder);
     }
 
-    /// @dev See {AdaptiveERC165-registerStandardAndCallback}.
+    /// @inheritdoc IDAO
     function registerStandardAndCallback(
         bytes4 _interfaceId,
         bytes4 _callbackSig,
         bytes4 _magicNumber
-    ) external auth(address(this), REGISTER_STANDARD_ROLE_PERMISSION) {
+    ) external override auth(address(this), REGISTER_STANDARD_PERMISSION_ID) {
         _registerStandardAndCallback(_interfaceId, _callbackSig, _magicNumber);
     }
 }
