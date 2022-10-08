@@ -17,8 +17,8 @@ import {IDAO} from "../IDAO.sol";
 /// @notice An abstract contract to inherit from when creating a UUPS Upgradeable contract.
 abstract contract PluginUUPSUpgradeable is
     Initializable,
-    ERC165Upgradeable,
     ContextUpgradeable,
+    ERC165Upgradeable,
     UUPSUpgradeable,
     AppStorage
 {

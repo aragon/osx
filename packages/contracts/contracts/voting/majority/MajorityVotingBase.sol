@@ -2,15 +2,25 @@
 
 pragma solidity 0.8.10;
 
-import "../../core/component/MetaTxComponent.sol";
-import "../../utils/TimeHelpers.sol";
-import "./IMajorityVoting.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+import {TimeHelpers} from "../../utils/TimeHelpers.sol";
+import {IMajorityVoting} from "./IMajorityVoting.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components.
 /// @dev This component implements the `IMajorityVoting` interface.
-abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHelpers {
+abstract contract MajorityVotingBase is
+    Initializable,
+    ERC165Upgradeable,
+    IMajorityVoting,
+    TimeHelpers,
+    PluginUUPSUpgradeable
+{
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
@@ -71,12 +81,22 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal onlyInitializing {
-        _registerStandard(MAJORITY_VOTING_INTERFACE_ID);
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        __MetaTxComponent_init(_dao, _trustedForwarder);
-
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
+    }
+
+    /// @notice adds a IERC165 to check whether contract supports MAJORITY_VOTING_INTERFACE_ID or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or MAJORITY_VOTING_INTERFACE_ID
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165Upgradeable, PluginUUPSUpgradeable)
+        returns (bool)
+    {
+        return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -181,6 +201,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     /// @notice Internal function to execute a vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
+        IDAO dao = getDao();
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         votes[_voteId].executed = true;
@@ -284,4 +305,9 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         supportRequiredPct = _supportRequiredPct;
         minDuration = _minDuration;
     }
+
+    /// @dev This empty reserved space is put in place to allow future versions to add new
+    /// variables without shifting down storage in the inheritance chain.
+    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    uint256[47] private __gap;
 }

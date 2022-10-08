@@ -5,9 +5,6 @@ pragma solidity 0.8.10;
 import "../voting/majority/MajorityVotingBase.sol";
 
 contract MajorityVotingMock is MajorityVotingBase {
-    function versionRecipient() external pure override returns (string memory) {
-        return "MajorityVotingMock";
-    }
 
     function initializeMock(
         IDAO _dao,

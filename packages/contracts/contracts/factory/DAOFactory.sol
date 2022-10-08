@@ -219,7 +219,7 @@ contract DAOFactory {
 
         // Grant dao the necessary permissions for ERC20Voting
         BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](2);
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
@@ -229,11 +229,6 @@ contract DAOFactory {
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
             erc20Voting.SET_CONFIGURATION_PERMISSION_ID()
-        );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            erc20Voting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
 
         _dao.bulkOnSingleTarget(address(erc20Voting), items);
@@ -265,7 +260,7 @@ contract DAOFactory {
 
         // Grant dao the necessary permissions for AllowlistVoting
         BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
@@ -280,11 +275,6 @@ contract DAOFactory {
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
             allowlistVoting.UPGRADE_PERMISSION_ID()
-        );
-        items[3] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            allowlistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
 
         _dao.bulkOnSingleTarget(address(allowlistVoting), items);
