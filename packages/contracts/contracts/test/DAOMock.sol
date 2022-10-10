@@ -70,9 +70,9 @@ contract DAOMock is IDAO, PermissionManager {
         return 0x0;
     }
 
-    function registerStandardAndCallback(
+    function registerStandardCallback(
         bytes4 _interfaceId,
-        bytes4 _callbackSig,
+        bytes4 _callbackSelector,
         bytes4 _magicNumber
     ) external override {}
 }

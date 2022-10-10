@@ -2,48 +2,30 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-
 /// @title CallbackHandler
 /// @author Aragon Association - 2022
-contract CallbackHandler is ERC165 {
-    /// @notice ERC165 interface ID -> whether it is supported
-    mapping(bytes4 => bool) internal standardSupported;
-
-    /// @notice Callback function signature -> magic number to return
+/// @notice This contract handles callbacks by registering a magic number together with the callback function's selector. It provides the `_handleCallback` function that inherting have to call inside their `fallback()` function  (`_handleCallback(msg.callbackSelector, msg.data)`).  This allows to adaptively register ERC standards (e.g., [ERC-721](https://eips.ethereum.org/EIPS/eip-721), [ERC-1115](https://eips.ethereum.org/EIPS/eip-1155), or future versions of [ERC-165](https://eips.ethereum.org/EIPS/eip-165)) and returning the required magic numbers for the associated callback functions for the inheriting contract so that it doesn't need to be upgraded.
+/// @dev This callback handling functionality is intented to be used by executor contracts (i.e., `DAO.sol`).
+contract CallbackHandler {
+    /// @notice A mapping between function callbackSelectornatures and magic return numbers.
     mapping(bytes4 => bytes32) internal callbackMagicNumbers;
 
+    /// @notice The magic number refering to unregistered callbacks.
     bytes32 internal constant UNREGISTERED_CALLBACK = bytes32(0);
 
-    // Errors
-    error AdapERC165UnkownCallback(bytes32 magicNumber);
+    /// @notice Thrown if the callback function is not registered.
+    /// @param callbackSelector The selector of the callback function.
+    /// @param magicNumber The magic number to be registered for the callback function selector.
+    error UnkownCallback(bytes4 callbackSelector, bytes32 magicNumber);
 
-    // Events
-
-    /// @notice Emmitted when a new standard is registred and assigned to `interfaceId`
-    event StandardRegistered(bytes4 interfaceId);
-
-    /// @notice Emmitted when a callback is registered
-    event CallbackRegistered(bytes4 sig, bytes4 magicNumber);
-
-    /// @notice Emmitted when a callback is received
-    event CallbackReceived(bytes4 indexed sig, bytes data);
-
-    /// @notice Checks if the contract supports a specific interface or not
-    /// @param _interfaceId The identifier of the interface to check for
-    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return standardSupported[_interfaceId] || super.supportsInterface(_interfaceId);
-    }
-
-    /// @notice Handles callbacks to support future versions of the ERC165 or similar without upgrading the contracts.
-    /// @param _sig The function signature of the called method (msg.sig)
-    /// @param _data The data resp. arguments passed to the method
-    function _handleCallback(bytes4 _sig, bytes memory _data) internal {
-        bytes32 magicNumber = callbackMagicNumbers[_sig];
+    /// @notice Handles callbacks to adaptively support ERC standards
+    /// @param _callbackSelector The selector of the callback function.
+    /// @param _data The `bytes` data passed to the function.
+    /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
+    function _handleCallback(bytes4 _callbackSelector, bytes memory _data) internal {
+        bytes32 magicNumber = callbackMagicNumbers[_callbackSelector];
         if (magicNumber == UNREGISTERED_CALLBACK)
-            revert AdapERC165UnkownCallback({magicNumber: magicNumber});
-
-        emit CallbackReceived(_sig, _data);
+            revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
 
         // low-level return magic number
         assembly {
@@ -52,31 +34,13 @@ contract CallbackHandler is ERC165 {
         }
     }
 
-    /// @notice Registers a standard and also callback
-    /// @param _interfaceId The identifier of the interface to check for
-    /// @param _callbackSig The function signature of the called method (msg.sig)
-    /// @param _magicNumber The magic number to be registered for the function signature
-    function _registerStandardAndCallback(
-        bytes4 _interfaceId,
-        bytes4 _callbackSig,
-        bytes4 _magicNumber
-    ) internal {
-        _registerStandard(_interfaceId);
-        _registerCallback(_callbackSig, _magicNumber);
+    /// @notice Registers a magic number for a callback function callbackSelectornature.
+    /// @param _callbackSelector The selector of the callback function.
+    /// @param _magicNumber The magic number to be registered for the function callbackSelectornature.
+    function _registerCallback(bytes4 _callbackSelector, bytes4 _magicNumber) internal {
+        callbackMagicNumbers[_callbackSelector] = _magicNumber;
     }
 
-    /// @notice Registers a standard resp. interface type
-    /// @param _interfaceId The identifier of the interface to check for
-    function _registerStandard(bytes4 _interfaceId) internal {
-        standardSupported[_interfaceId] = true;
-        emit StandardRegistered(_interfaceId);
-    }
-
-    /// @notice Registers a callback
-    /// @param _callbackSig The function signature of the called method (msg.sig)
-    /// @param _magicNumber The magic number to be registered for the function signature
-    function _registerCallback(bytes4 _callbackSig, bytes4 _magicNumber) internal {
-        callbackMagicNumbers[_callbackSig] = _magicNumber;
-        emit CallbackRegistered(_callbackSig, _magicNumber);
-    }
+    /// @dev This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain. See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    uint256[49] private __gap;
 }

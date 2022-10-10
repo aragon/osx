@@ -4,7 +4,11 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {PluginRepo, PluginSetupV1Mock} from '../../typechain';
+import {
+  PluginRepo,
+  PluginSetupV1Mock,
+  PermissionManager,
+} from '../../typechain';
 import {deployMockPluginSetup} from '../test-utils/repo';
 import {customError} from '../test-utils/custom-error-helper';
 
@@ -85,12 +89,22 @@ describe('PluginRepo', function () {
   });
 
   it('cannot create version with unsupported interface contract', async function () {
-    const CallbackHandler = await ethers.getContractFactory('CallbackHandler');
-    let adaptiveERC165 = await CallbackHandler.deploy();
+    // Use the `InterfaceHandler` contract for testing purposes here, because the interface differs from `PluginSetup`.
+    const InterfaceHandler = await ethers.getContractFactory(
+      'InterfaceHandler'
+    );
+    let contractNotBeingAPluginSetup = await InterfaceHandler.deploy();
     await expect(
-      pluginRepo.createVersion([1, 0, 0], pluginRepo.address, emptyBytes)
+      pluginRepo.createVersion(
+        [1, 0, 0],
+        contractNotBeingAPluginSetup.address,
+        emptyBytes
+      )
     ).to.be.revertedWith(
-      customError('InvalidPluginSetupInterface', adaptiveERC165.address)
+      customError(
+        'InvalidPluginSetupInterface',
+        contractNotBeingAPluginSetup.address
+      )
     );
   });
 

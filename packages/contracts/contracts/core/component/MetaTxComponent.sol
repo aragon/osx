@@ -30,7 +30,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     {
         __Component_init(_dao);
 
-        _registerStandard(type(MetaTxComponent).interfaceId);
+        _registerInterface(type(MetaTxComponent).interfaceId);
 
         _setTrustedForwarder(_trustedForwarder);
         emit TrustedForwarderSet(_trustedForwarder);

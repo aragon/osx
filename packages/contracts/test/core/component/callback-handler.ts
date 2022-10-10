@@ -1,106 +1,87 @@
 import {expect} from 'chai';
-import {Signer} from 'ethers';
-import {hexDataSlice, id} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {hexDataSlice, id} from 'ethers/lib/utils';
 
 import {
   CallbackHandlerMock,
   CallbackHandlerMockHelper,
-  CallbackHandlerMock__factory,
-  CallbackHandlerMockHelper__factory,
 } from '../../../typechain';
 import {customError} from '../../test-utils/custom-error-helper';
 
 const EVENTS = {
-  REGISTERED_CALLBACK: 'CallbackRegistered',
-  REGISTERED_STANDARD: 'StandardRegistered',
-  RECEIVED_CALLBACK: 'CallbackReceived',
+  CALLBACK_REGISTERED: 'CallbackRegistered',
+  CALLBACK_RECEIVED: 'CallbackReceived',
 };
 
-const beefInterfaceId = '0xbeefbeef';
-const callbackSig = hexDataSlice(id('callbackFunc()'), 0, 4); // 0x1eb2075a
+const callbackSelector = hexDataSlice(id('callbackFunc()'), 0, 4); // 0x1eb2075a
 const magicNumber = '0x10000000';
 const magicNumberReturn = magicNumber + '0'.repeat(56);
 const unregisteredNumberReturn = '0x' + '0'.repeat(64);
 
-describe('AdaptiveErc165', function () {
-  let adaptive: CallbackHandlerMock, signers: Signer[];
-  let adaptiveHelper: CallbackHandlerMockHelper;
+describe('CallbackHandler', function () {
+  let signers: SignerWithAddress[];
+  let callbackHandlerMock: CallbackHandlerMock;
+  let callbackHandlerMockHelper: CallbackHandlerMockHelper;
 
   before(async () => {
     signers = await ethers.getSigners();
-    const Adaptive = (await ethers.getContractFactory(
+    const CallbackHandlerMock = await ethers.getContractFactory(
       'CallbackHandlerMock'
-    )) as CallbackHandlerMock__factory;
-    const AdaptiveHelper = (await ethers.getContractFactory(
+    );
+    const CallbackHandlerHelper = await ethers.getContractFactory(
       'CallbackHandlerMockHelper'
-    )) as CallbackHandlerMockHelper__factory;
+    );
 
-    adaptive = await Adaptive.deploy();
-    adaptiveHelper = await AdaptiveHelper.deploy(adaptive.address);
+    callbackHandlerMock = await CallbackHandlerMock.deploy();
+    callbackHandlerMockHelper = await CallbackHandlerHelper.deploy(
+      callbackHandlerMock.address
+    );
   });
 
-  context('registerStandardAndCallback', () => {
-    it('ensures the right events were fired', async () => {
+  context('registerStandardCallback', () => {
+    it('emits the `CallbackRegistered` event', async () => {
       await expect(
-        adaptive.registerStandardAndCallback(
-          beefInterfaceId,
-          callbackSig,
+        callbackHandlerMock.registerStandardCallback(
+          callbackSelector,
           magicNumber
         )
       )
-        .to.emit(adaptive, EVENTS.REGISTERED_STANDARD)
-        .withArgs(beefInterfaceId)
-        .to.emit(adaptive, EVENTS.REGISTERED_CALLBACK)
-        .withArgs(callbackSig, magicNumber);
+        .to.emit(callbackHandlerMock, EVENTS.CALLBACK_REGISTERED)
+        .withArgs(callbackSelector, magicNumber);
     });
 
-    it('ensures support the right interfaceID', async () => {
-      await expect(await adaptive.supportsInterface(beefInterfaceId)).to.equal(
-        true
-      );
-    });
-
-    it('ensures the right callback was called with the right memory value', async () => {
+    it('emits the `CallbackReceived` event with the correct magic number', async () => {
       await expect(
         signers[0].sendTransaction({
-          to: adaptive.address,
-          data: callbackSig,
+          to: callbackHandlerMock.address,
+          data: callbackSelector,
         })
       )
-        .to.emit(adaptive, EVENTS.RECEIVED_CALLBACK)
-        .withArgs(callbackSig, callbackSig);
+        .to.emit(callbackHandlerMock, EVENTS.CALLBACK_RECEIVED)
+        .withArgs(callbackSelector, callbackSelector);
     });
 
-    it('reverts with unknown callback', async () => {
+    it('reverts for an unknown callback function signature', async () => {
+      const functionSelector = hexDataSlice(id('unknown()'), 0, 4);
       await expect(
         signers[0].sendTransaction({
-          to: adaptive.address,
-          data: hexDataSlice(id('unknown()'), 0, 4),
+          to: callbackHandlerMock.address,
+          data: functionSelector,
         })
       ).to.be.revertedWith(
-        customError('AdapERC165UnkownCallback', unregisteredNumberReturn)
+        customError(
+          'UnkownCallback',
+          functionSelector,
+          unregisteredNumberReturn
+        )
       );
     });
 
-    it('returns the correct value from handleCallback assembly', async () => {
-      await expect(adaptiveHelper.handleCallback(callbackSig))
-        .to.emit(adaptiveHelper, EVENTS.RECEIVED_CALLBACK)
+    it('returns the correct value from the `_handleCallback` assembly code', async () => {
+      await expect(callbackHandlerMockHelper.handleCallback(callbackSelector))
+        .to.emit(callbackHandlerMockHelper, EVENTS.CALLBACK_RECEIVED)
         .withArgs(magicNumberReturn);
-    });
-  });
-
-  context('ERC-165', () => {
-    const ERC165_INTERFACE_ID = '0x01ffc9a7';
-
-    it('supports ERC-165', async () => {
-      expect(await adaptive.supportsInterface(ERC165_INTERFACE_ID)).to.equal(
-        true
-      );
-    });
-
-    it("doesn't support random interfaceID", async () => {
-      expect(await adaptive.supportsInterface('0xabababab')).to.equal(false);
     });
   });
 });
