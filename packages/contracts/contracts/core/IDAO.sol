@@ -55,11 +55,6 @@ abstract contract IDAO {
     /// @param execResults Array with the results of the executed actions.
     event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
 
-    /// @notice Emitted when a callback is received via the `fallback()` function.
-    /// @param callbackSelector The selector of the callback function.
-    /// @param data The `bytes` data passed to the function.
-    event CallbackReceived(bytes4 indexed callbackSelector, bytes data);
-
     /// @notice Emitted when a standard callback is registered.
     /// @param interfaceId The ID of the interface.
     /// @param callbackSelector The selector of the callback function.

@@ -230,7 +230,6 @@ contract DAO is
 
     /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
     fallback() external {
-        emit CallbackReceived(msg.sig, msg.data);
         _handleCallback(msg.sig); // WARN: does a low-level return, any code below would be unreacheable
     }
 

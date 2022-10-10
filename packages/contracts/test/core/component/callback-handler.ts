@@ -54,32 +54,15 @@ describe('CallbackHandler', function () {
       .withArgs(beefInterfaceId, callbackSelector, magicNumber);
   });
 
-  it('emits the `CallbackReceived` event with correct data', async () => {
-    await dao.registerStandardCallback(
-      beefInterfaceId,
-      callbackSelector,
-      magicNumber
-    );
-
+  it('reverts for an unknown callback function signature', async () => {
+    // we don't register `callbackSelector` here
     await expect(
       signers[0].sendTransaction({
         to: dao.address,
         data: callbackSelector,
       })
-    )
-      .to.emit(dao, EVENTS.CALLBACK_RECEIVED)
-      .withArgs(callbackSelector, callbackSelector);
-  });
-
-  it('reverts for an unknown callback function signature', async () => {
-    const functionSelector = hexDataSlice(id('unknown()'), 0, 4);
-    await expect(
-      signers[0].sendTransaction({
-        to: dao.address,
-        data: functionSelector,
-      })
     ).to.be.revertedWith(
-      customError('UnkownCallback', functionSelector, unregisteredNumberReturn)
+      customError('UnkownCallback', callbackSelector, unregisteredNumberReturn)
     );
   });
 
