@@ -56,11 +56,9 @@ describe('InterfaceBasedRegistry', function () {
     });
 
     it('fail to register if the interface is not supported', async () => {
-      // Use the `InterfaceHandler` contract for testing purposes here, because the interface differs from the `DAO` interface
-      const InterfaceHandler = await ethers.getContractFactory(
-        'InterfaceHandler'
-      );
-      let contractNotBeingADao = await InterfaceHandler.deploy();
+      // Use the `PluginRepo` contract for testing purposes here, because the interface differs from the `DAO` interface
+      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      let contractNotBeingADao = await PluginRepo.deploy();
 
       await expect(
         interfaceBasedRegistryMock.register(contractNotBeingADao.address)

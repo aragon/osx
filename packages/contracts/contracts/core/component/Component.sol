@@ -37,6 +37,6 @@ abstract contract Component is
 
     /// @dev Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
     fallback() external {
-        _handleCallback(msg.sig, _msgData()); // WARN: does a low-level return, any code below would be unreacheable
+        _handleCallback(msg.sig); // WARN: does a low-level return, any code below would be unreacheable
     }
 }
