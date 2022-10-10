@@ -127,7 +127,7 @@ abstract contract IDAO {
         virtual
         returns (bytes4);
 
-    /// @dev See {AdaptiveERC165-registerStandardAndCallback}.
+    /// @dev See {CallbackHandler-registerStandardAndCallback}.
     function registerStandardAndCallback(
         bytes4 _interfaceId,
         bytes4 _callbackSig,

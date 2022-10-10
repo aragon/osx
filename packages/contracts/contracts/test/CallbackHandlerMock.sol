@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import "../core/erc165/AdaptiveERC165.sol";
+import "../core/component/CallbackHandler.sol";
 
-contract AdaptiveERC165Mock is AdaptiveERC165 {
+contract CallbackHandlerMock is CallbackHandler {
     fallback() external {
         _handleCallback(msg.sig, msg.data);
     }
@@ -18,7 +18,7 @@ contract AdaptiveERC165Mock is AdaptiveERC165 {
     }
 }
 
-contract AdaptiveERC165MockHelper {
+contract CallbackHandlerMockHelper {
     address addr;
 
     event CallbackReceived(bytes32 b);
@@ -28,7 +28,7 @@ contract AdaptiveERC165MockHelper {
     }
 
     /**
-     * @notice Executes fallback function on the AdaptiveERC165Mock and emits the returned value.
+     * @notice Executes fallback function on the CallbackHandlerMock and emits the returned value.
      * @param selector any kind of selector in order to call fallback
      */
     function handleCallback(bytes4 selector) external {

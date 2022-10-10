@@ -4,9 +4,9 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-/// @title AdaptiveERC165
+/// @title CallbackHandler
 /// @author Aragon Association - 2022
-contract AdaptiveERC165 is ERC165 {
+contract CallbackHandler is ERC165 {
     /// @notice ERC165 interface ID -> whether it is supported
     mapping(bytes4 => bool) internal standardSupported;
 

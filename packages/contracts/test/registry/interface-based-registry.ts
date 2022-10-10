@@ -55,8 +55,10 @@ describe('InterfaceBasedRegistry', function () {
     });
 
     it('fail to register if interfaceId is not supported', async () => {
-      const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
-      let adaptiveERC165 = await AdaptiveERC165.deploy();
+      const CallbackHandler = await ethers.getContractFactory(
+        'CallbackHandler'
+      );
+      let adaptiveERC165 = await CallbackHandler.deploy();
 
       await expect(
         interfaceBasedRegistryMock.register(adaptiveERC165.address)

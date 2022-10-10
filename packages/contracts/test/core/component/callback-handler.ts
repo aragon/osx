@@ -4,12 +4,12 @@ import {hexDataSlice, id} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
 import {
-  AdaptiveERC165Mock,
-  AdaptiveERC165MockHelper,
-  AdaptiveERC165Mock__factory,
-  AdaptiveERC165MockHelper__factory,
-} from '../typechain';
-import {customError} from './test-utils/custom-error-helper';
+  CallbackHandlerMock,
+  CallbackHandlerMockHelper,
+  CallbackHandlerMock__factory,
+  CallbackHandlerMockHelper__factory,
+} from '../../../typechain';
+import {customError} from '../../test-utils/custom-error-helper';
 
 const EVENTS = {
   REGISTERED_CALLBACK: 'CallbackRegistered',
@@ -24,17 +24,17 @@ const magicNumberReturn = magicNumber + '0'.repeat(56);
 const unregisteredNumberReturn = '0x' + '0'.repeat(64);
 
 describe('AdaptiveErc165', function () {
-  let adaptive: AdaptiveERC165Mock, signers: Signer[];
-  let adaptiveHelper: AdaptiveERC165MockHelper;
+  let adaptive: CallbackHandlerMock, signers: Signer[];
+  let adaptiveHelper: CallbackHandlerMockHelper;
 
   before(async () => {
     signers = await ethers.getSigners();
     const Adaptive = (await ethers.getContractFactory(
-      'AdaptiveERC165Mock'
-    )) as AdaptiveERC165Mock__factory;
+      'CallbackHandlerMock'
+    )) as CallbackHandlerMock__factory;
     const AdaptiveHelper = (await ethers.getContractFactory(
-      'AdaptiveERC165MockHelper'
-    )) as AdaptiveERC165MockHelper__factory;
+      'CallbackHandlerMockHelper'
+    )) as CallbackHandlerMockHelper__factory;
 
     adaptive = await Adaptive.deploy();
     adaptiveHelper = await AdaptiveHelper.deploy(adaptive.address);

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 import "./erc1271/ERC1271.sol";
-import "./erc165/AdaptiveERC165.sol";
+import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
 
@@ -17,7 +17,7 @@ import "./IDAO.sol";
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
+contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, CallbackHandler {
     using SafeERC20 for ERC20;
     using Address for address;
 

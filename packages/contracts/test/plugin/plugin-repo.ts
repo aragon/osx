@@ -85,8 +85,8 @@ describe('PluginRepo', function () {
   });
 
   it('cannot create version with unsupported interface contract', async function () {
-    const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
-    let adaptiveERC165 = await AdaptiveERC165.deploy();
+    const CallbackHandler = await ethers.getContractFactory('CallbackHandler');
+    let adaptiveERC165 = await CallbackHandler.deploy();
     await expect(
       pluginRepo.createVersion([1, 0, 0], pluginRepo.address, emptyBytes)
     ).to.be.revertedWith(
@@ -99,7 +99,7 @@ describe('PluginRepo', function () {
 
     await expect(
       pluginRepo.createVersion([1, 0, 0], randomAddress, emptyBytes)
-    ).to.be.revertedWith("Address: call to non-contract")
+    ).to.be.revertedWith('Address: call to non-contract');
   });
 
   context('creating initial version', async function () {

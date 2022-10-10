@@ -5,14 +5,14 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "../erc165/AdaptiveERC165.sol";
+import "./CallbackHandler.sol";
 import "../IDAO.sol";
-import { DaoAuthorizableUpgradeable } from "./DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "./DaoAuthorizableUpgradeable.sol";
 
 /// @title Component
 /// @author Aragon Association - 2021, 2022
 /// @notice The base component in the Aragon App DAO framework.
-abstract contract Component is UUPSUpgradeable, AdaptiveERC165, DaoAuthorizableUpgradeable {
+abstract contract Component is UUPSUpgradeable, CallbackHandler, DaoAuthorizableUpgradeable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
