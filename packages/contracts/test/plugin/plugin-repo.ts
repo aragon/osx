@@ -85,12 +85,20 @@ describe('PluginRepo', function () {
   });
 
   it('cannot create version with unsupported interface contract', async function () {
-    const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
-    let adaptiveERC165 = await AdaptiveERC165.deploy();
+    // Use the `DAO` contract for testing purposes here, because the interface differs from `PluginSetup`.
+    const DAO = await ethers.getContractFactory('DAO');
+    let contractNotBeingAPluginSetup = await DAO.deploy();
     await expect(
-      pluginRepo.createVersion([1, 0, 0], pluginRepo.address, emptyBytes)
+      pluginRepo.createVersion(
+        [1, 0, 0],
+        contractNotBeingAPluginSetup.address,
+        emptyBytes
+      )
     ).to.be.revertedWith(
-      customError('InvalidPluginSetupInterface', adaptiveERC165.address)
+      customError(
+        'InvalidPluginSetupInterface',
+        contractNotBeingAPluginSetup.address
+      )
     );
   });
 
@@ -99,7 +107,7 @@ describe('PluginRepo', function () {
 
     await expect(
       pluginRepo.createVersion([1, 0, 0], randomAddress, emptyBytes)
-    ).to.be.revertedWith("Address: call to non-contract")
+    ).to.be.revertedWith('Address: call to non-contract');
   });
 
   context('creating initial version', async function () {
