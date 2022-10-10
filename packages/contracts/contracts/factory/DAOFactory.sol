@@ -16,6 +16,9 @@ import "../utils/Proxy.sol";
 import "../tokens/MerkleMinter.sol";
 import "./TokenFactory.sol";
 
+import {PluginRepo} from "../plugin/PluginRepo.sol";
+import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
+
 /// @title DAOFactory
 /// @author Aragon Association - 2022
 /// @notice This contract is used to create a DAO.
@@ -25,23 +28,25 @@ contract DAOFactory {
 
     error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
 
-    address public erc20VotingBase;
-    address public allowlistVotingBase;
+    // address public erc20VotingBase;
+    // address public allowlistVotingBase;
     address public daoBase;
 
     DAORegistry public daoRegistry;
-    TokenFactory public tokenFactory;
+    // TokenFactory public tokenFactory;
+    PluginSetupProcessor public pluginSetupProcessor;
 
     struct DAOConfig {
         string name;
+        address trustedForwarder;
         bytes metadata;
     }
 
-    struct VoteConfig {
-        uint64 participationRequiredPct;
-        uint64 supportRequiredPct;
-        uint64 minDuration;
-    }
+    // struct VoteConfig {
+    //     uint64 participationRequiredPct;
+    //     uint64 supportRequiredPct;
+    //     uint64 minDuration;
+    // }
 
     /// @notice Emitted when a new DAO is created.
     /// @param name The DAO name.
@@ -51,12 +56,18 @@ contract DAOFactory {
 
     /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
     /// @param _registry The DAO registry to register the DAO by its name.
-    /// @param _tokenFactory The token factory for optional governance token creation.
-    constructor(DAORegistry _registry, TokenFactory _tokenFactory) {
+    /// @param _pluginSetupProcessor The addres of PluginSetupProcessor.
+    constructor(
+        DAORegistry _registry,
+        // TokenFactory _tokenFactory,
+        PluginSetupProcessor _pluginSetupProcessor
+    ) {
         daoRegistry = _registry;
-        tokenFactory = _tokenFactory;
+        // tokenFactory = _tokenFactory;
+        pluginSetupProcessor = _pluginSetupProcessor;
 
-        setupBases();
+        daoBase = address(new DAO());
+        // setupBases();
     }
 
     /// @notice Creates a new DAO with the `ERC20Voting` component installed and deploys a new [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token if the corresponding configuration is passed.
@@ -65,83 +76,130 @@ contract DAOFactory {
     /// @param _tokenConfig The configuration used to create a new token.
     /// @param _mintConfig The configuration used to mint the newly created tokens.
     /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
-    function createERC20VotingDAO(
-        DAOConfig calldata _daoConfig,
-        VoteConfig calldata _voteConfig,
-        TokenFactory.TokenConfig calldata _tokenConfig,
-        TokenFactory.MintConfig calldata _mintConfig,
-        address _trustedForwarder
-    )
-        external
-        returns (
-            DAO dao,
-            ERC20Voting voting,
-            ERC20VotesUpgradeable token,
-            MerkleMinter minter
-        )
-    {
-        if (_mintConfig.receivers.length != _mintConfig.amounts.length)
-            revert MintArrayLengthMismatch({
-                receiversArrayLength: _mintConfig.receivers.length,
-                amountsArrayLength: _mintConfig.amounts.length
-            });
+    // function createERC20VotingDAO(
+    //     DAOConfig calldata _daoConfig,
+    //     VoteConfig calldata _voteConfig,
+    //     TokenFactory.TokenConfig calldata _tokenConfig,
+    //     TokenFactory.MintConfig calldata _mintConfig,
+    //     address _trustedForwarder
+    // )
+    //     external
+    //     returns (
+    //         DAO dao,
+    //         ERC20Voting voting,
+    //         ERC20VotesUpgradeable token,
+    //         MerkleMinter minter
+    //     )
+    // {
+    //     if (_mintConfig.receivers.length != _mintConfig.amounts.length)
+    //         revert MintArrayLengthMismatch({
+    //             receiversArrayLength: _mintConfig.receivers.length,
+    //             amountsArrayLength: _mintConfig.amounts.length
+    //         });
 
-        dao = createDAO(_daoConfig, _trustedForwarder);
+    //     dao = createDAO(_daoConfig, _trustedForwarder);
 
-        // Create token and merkle minter
-        dao.grant(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
-        (token, minter) = tokenFactory.createToken(dao, _tokenConfig, _mintConfig);
-        dao.revoke(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
+    //     // Create token and merkle minter
+    //     dao.grant(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
+    //     (token, minter) = tokenFactory.createToken(dao, _tokenConfig, _mintConfig);
+    //     dao.revoke(address(dao), address(tokenFactory), dao.ROOT_PERMISSION_ID());
 
-        daoRegistry.register(dao, msg.sender, _daoConfig.name);
+    //     daoRegistry.register(dao, msg.sender, _daoConfig.name);
 
-        voting = createERC20Voting(dao, token, _voteConfig);
+    //     voting = createERC20Voting(dao, token, _voteConfig);
 
-        setDAOPermissions(dao, address(voting));
+    //     setDAOPermissions(dao, address(voting));
 
-        emit DAOCreated(_daoConfig.name, address(token), address(voting));
-    }
+    //     emit DAOCreated(_daoConfig.name, address(token), address(voting));
+    // }
 
     /// @notice Creates a new DAO with the `AllowlistVoting` component installed.
     /// @param _daoConfig The name and metadata hash of the DAO.
     /// @param _voteConfig The configuration used to set up the the majority voting.
     /// @param _allowlistVoters An array of addresses that are allowed to vote.
     /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
-    function createAllowlistVotingDAO(
-        DAOConfig calldata _daoConfig,
-        VoteConfig calldata _voteConfig,
-        address[] calldata _allowlistVoters,
-        address _trustedForwarder
-    ) external returns (DAO dao, AllowlistVoting voting) {
-        dao = createDAO(_daoConfig, _trustedForwarder);
+    // function createAllowlistVotingDAO(
+    //     DAOConfig calldata _daoConfig,
+    //     VoteConfig calldata _voteConfig,
+    //     address[] calldata _allowlistVoters,
+    //     address _trustedForwarder
+    // ) external returns (DAO dao, AllowlistVoting voting) {
+    //     dao = createDAO(_daoConfig, _trustedForwarder);
 
-        daoRegistry.register(dao, msg.sender, _daoConfig.name);
+    //     daoRegistry.register(dao, msg.sender, _daoConfig.name);
 
-        voting = createAllowlistVoting(dao, _allowlistVoters, _voteConfig);
+    //     voting = createAllowlistVoting(dao, _allowlistVoters, _voteConfig);
 
-        setDAOPermissions(dao, address(voting));
+    //     setDAOPermissions(dao, address(voting));
 
-        emit DAOCreated(_daoConfig.name, address(0), address(voting));
+    //     emit DAOCreated(_daoConfig.name, address(0), address(voting));
+    // }
+
+    struct PluginSettings {
+        address pluginSetup;
+        PluginRepo pluginSetupRepo;
+        bytes data;
+    }
+
+    function createDao(DAOConfig calldata _daoConfig, PluginSettings[] calldata pluginSettings)
+        external
+    {
+        // Create DAO
+        DAO dao = _createDAO(_daoConfig);
+
+        // Grant `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
+        dao.grant(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
+
+        // Prepare and apply plugins to the dao
+        DAORegistry.PluginPackage[] memory plugins = new DAORegistry.PluginPackage[](
+            pluginSettings.length
+        );
+
+        for (uint256 i = 0; i < pluginSettings.length; i++) {
+            (
+                address plugin,
+                address[] memory helpers,
+                BulkPermissionsLib.ItemMultiTarget[] memory permissions
+            ) = pluginSetupProcessor.prepareInstallation(
+                    address(dao),
+                    pluginSettings[i].pluginSetup,
+                    pluginSettings[i].pluginSetupRepo,
+                    pluginSettings[i].data
+                );
+
+            plugins[i] = DAORegistry.PluginPackage(plugin, helpers, permissions);
+
+            pluginSetupProcessor.applyInstallation(
+                address(dao),
+                pluginSettings[i].pluginSetup,
+                plugins[i].plugin,
+                plugins[i].permissions
+            );
+        }
+
+        // Revoke `ROOT_PERMISSION_ID` from `pluginSetupProcessor`.
+        dao.revoke(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
+
+        // set the rest of DAO's permissions
+        _setDAOPermissions(dao);
+
+        // Register DAO
+        daoRegistry.register(dao, msg.sender, _daoConfig.name, plugins);
     }
 
     /// @notice Creates a new DAO.
     /// @param _daoConfig The name and metadata hash of the DAO it creates.
-    /// @param _trustedForwarder The forwarder address for the OpenGSN meta tx solution.
-    function createDAO(DAOConfig calldata _daoConfig, address _trustedForwarder)
-        internal
-        returns (DAO dao)
-    {
+    function _createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _trustedForwarder);
+        dao.initialize(_daoConfig.metadata, address(this), _daoConfig.trustedForwarder);
     }
 
     /// @notice Sets the required permissions for the new DAO.
     /// @param _dao The DAO instance just created.
-    /// @param _voting The voting contract address (`AllowlistVoting` or `ERC20Voting`).
-    function setDAOPermissions(DAO _dao, address _voting) internal {
+    function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
         BulkPermissionsLib.ItemSingleTarget[]
             memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
@@ -177,14 +235,14 @@ contract DAOFactory {
             address(_dao),
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
-        items[6] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            _voting,
-            _dao.EXECUTE_PERMISSION_ID()
-        );
+        // items[6] = BulkPermissionsLib.ItemSingleTarget(
+        //     BulkPermissionsLib.Operation.Grant,
+        //     _voting,
+        //     _dao.EXECUTE_PERMISSION_ID()
+        // );
 
         // Revoke permissions from factory
-        items[7] = BulkPermissionsLib.ItemSingleTarget(
+        items[6] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Revoke,
             address(this),
             _dao.ROOT_PERMISSION_ID()
@@ -197,103 +255,103 @@ contract DAOFactory {
     /// @param _dao The associated DAO.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token address.
     /// @param _voteConfig The vote configuration.
-    function createERC20Voting(
-        DAO _dao,
-        ERC20VotesUpgradeable _token,
-        VoteConfig calldata _voteConfig
-    ) internal returns (ERC20Voting erc20Voting) {
-        erc20Voting = ERC20Voting(
-            createProxy(
-                erc20VotingBase,
-                abi.encodeWithSelector(
-                    ERC20Voting.initialize.selector,
-                    _dao,
-                    _dao.getTrustedForwarder(),
-                    _voteConfig.participationRequiredPct,
-                    _voteConfig.supportRequiredPct,
-                    _voteConfig.minDuration,
-                    _token
-                )
-            )
-        );
+    // function createERC20Voting(
+    //     DAO _dao,
+    //     ERC20VotesUpgradeable _token,
+    //     VoteConfig calldata _voteConfig
+    // ) internal returns (ERC20Voting erc20Voting) {
+    //     erc20Voting = ERC20Voting(
+    //         createProxy(
+    //             erc20VotingBase,
+    //             abi.encodeWithSelector(
+    //                 ERC20Voting.initialize.selector,
+    //                 _dao,
+    //                 _dao.getTrustedForwarder(),
+    //                 _voteConfig.participationRequiredPct,
+    //                 _voteConfig.supportRequiredPct,
+    //                 _voteConfig.minDuration,
+    //                 _token
+    //             )
+    //         )
+    //     );
 
-        // Grant dao the necessary permissions for ERC20Voting
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            erc20Voting.UPGRADE_PERMISSION_ID()
-        );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            erc20Voting.SET_CONFIGURATION_PERMISSION_ID()
-        );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            erc20Voting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
+    //     // Grant dao the necessary permissions for ERC20Voting
+    //     BulkPermissionsLib.ItemSingleTarget[]
+    //         memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
+    //     items[0] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         erc20Voting.UPGRADE_PERMISSION_ID()
+    //     );
+    //     items[1] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         erc20Voting.SET_CONFIGURATION_PERMISSION_ID()
+    //     );
+    //     items[2] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         erc20Voting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+    //     );
 
-        _dao.bulkOnSingleTarget(address(erc20Voting), items);
-    }
+    //     _dao.bulkOnSingleTarget(address(erc20Voting), items);
+    // }
 
     /// @notice Internal helper method to create and setup an `AllowlistVoting` contract for a DAO.
     /// @param _dao The associated DAO.
     /// @param _allowlistVoters The array of the allowed voting addresses.
     /// @param _voteConfig The vote configuration.
-    function createAllowlistVoting(
-        DAO _dao,
-        address[] calldata _allowlistVoters,
-        VoteConfig calldata _voteConfig
-    ) internal returns (AllowlistVoting allowlistVoting) {
-        allowlistVoting = AllowlistVoting(
-            createProxy(
-                allowlistVotingBase,
-                abi.encodeWithSelector(
-                    AllowlistVoting.initialize.selector,
-                    _dao,
-                    _dao.getTrustedForwarder(),
-                    _voteConfig.participationRequiredPct,
-                    _voteConfig.supportRequiredPct,
-                    _voteConfig.minDuration,
-                    _allowlistVoters
-                )
-            )
-        );
+    // function createAllowlistVoting(
+    //     DAO _dao,
+    //     address[] calldata _allowlistVoters,
+    //     VoteConfig calldata _voteConfig
+    // ) internal returns (AllowlistVoting allowlistVoting) {
+    //     allowlistVoting = AllowlistVoting(
+    //         createProxy(
+    //             allowlistVotingBase,
+    //             abi.encodeWithSelector(
+    //                 AllowlistVoting.initialize.selector,
+    //                 _dao,
+    //                 _dao.getTrustedForwarder(),
+    //                 _voteConfig.participationRequiredPct,
+    //                 _voteConfig.supportRequiredPct,
+    //                 _voteConfig.minDuration,
+    //                 _allowlistVoters
+    //             )
+    //         )
+    //     );
 
-        // Grant dao the necessary permissions for AllowlistVoting
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            allowlistVoting.MODIFY_ALLOWLIST_PERMISSION_ID()
-        );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            allowlistVoting.SET_CONFIGURATION_PERMISSION_ID()
-        );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            allowlistVoting.UPGRADE_PERMISSION_ID()
-        );
-        items[3] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
-            address(_dao),
-            allowlistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
+    //     // Grant dao the necessary permissions for AllowlistVoting
+    //     BulkPermissionsLib.ItemSingleTarget[]
+    //         memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
+    //     items[0] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         allowlistVoting.MODIFY_ALLOWLIST_PERMISSION_ID()
+    //     );
+    //     items[1] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         allowlistVoting.SET_CONFIGURATION_PERMISSION_ID()
+    //     );
+    //     items[2] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         allowlistVoting.UPGRADE_PERMISSION_ID()
+    //     );
+    //     items[3] = BulkPermissionsLib.ItemSingleTarget(
+    //         BulkPermissionsLib.Operation.Grant,
+    //         address(_dao),
+    //         allowlistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+    //     );
 
-        _dao.bulkOnSingleTarget(address(allowlistVoting), items);
-    }
+    //     _dao.bulkOnSingleTarget(address(allowlistVoting), items);
+    // }
 
     /// @notice Internal helper method to set up the required base contracts on `DAOFactory` deployment.
-    function setupBases() private {
-        erc20VotingBase = address(new ERC20Voting());
-        allowlistVotingBase = address(new AllowlistVoting());
-        daoBase = address(new DAO());
-    }
+    // function setupBases() private {
+    //     erc20VotingBase = address(new ERC20Voting());
+    //     allowlistVotingBase = address(new AllowlistVoting());
+    //     daoBase = address(new DAO());
+    // }
 }

@@ -107,7 +107,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         bytes memory _data // encoded per pluginSetup's prepareInstallation ABI
-    ) external returns (Permission.ItemMultiTarget[] memory) {
+    )
+        external
+        returns (
+            address plugin,
+            address[] memory helpers,
+            Permission.ItemMultiTarget[] memory permissions
+        )
+    {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -117,11 +124,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
         // prepareInstallation
-        (
-            address plugin,
-            address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
-        ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
+        (plugin, helpers, permissions) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // Important safety measure to include dao + plugin manager in the encoding.
         bytes32 setupId = getSetupId(_dao, _pluginSetup, plugin);
@@ -144,8 +147,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             permissions,
             _data
         );
-
-        return permissions;
     }
 
     function applyInstallation(
