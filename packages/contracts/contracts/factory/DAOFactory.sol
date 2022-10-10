@@ -70,15 +70,10 @@ contract DAOFactory {
         // Grant `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
         dao.grant(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
 
-        // Prepare and apply plugins to the dao
-        DAORegistry.PluginPackage[] memory plugins = new DAORegistry.PluginPackage[](
-            pluginSettings.length
-        );
-
         for (uint256 i = 0; i < pluginSettings.length; i++) {
             (
                 address plugin,
-                address[] memory helpers,
+                ,
                 BulkPermissionsLib.ItemMultiTarget[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(dao),
@@ -87,13 +82,11 @@ contract DAOFactory {
                     pluginSettings[i].data
                 );
 
-            plugins[i] = DAORegistry.PluginPackage(plugin, helpers, permissions);
-
             pluginSetupProcessor.applyInstallation(
                 address(dao),
                 pluginSettings[i].pluginSetup,
-                plugins[i].plugin,
-                plugins[i].permissions
+                plugin,
+                permissions
             );
         }
 
@@ -104,7 +97,7 @@ contract DAOFactory {
         _setDAOPermissions(dao);
 
         // Register DAO
-        daoRegistry.register(dao, msg.sender, _daoConfig.name, plugins);
+        daoRegistry.register(dao, msg.sender, _daoConfig.name);
     }
 
     /// @notice Creates a new DAO.
