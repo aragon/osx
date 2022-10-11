@@ -6,6 +6,11 @@ import {ensDomainHash} from '../../utils/ensHelpers';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {VoteOption} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
+import {AragonPluginRegistry, PluginSetupProcessor} from '../../typechain';
+import {
+  deployAragonPluginRegistry,
+  deployPluginSetupProcessor,
+} from '../test-utils/plugin-setup-processor';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -73,6 +78,9 @@ describe('DAOFactory: ', function () {
   let daoFactory: any;
   let managingDao: any;
 
+  let psp: PluginSetupProcessor;
+  let aragonPluginRegistry: AragonPluginRegistry;
+
   let actionExecuteContract: any; // contract
 
   let signers: SignerWithAddress[];
@@ -83,27 +91,20 @@ describe('DAOFactory: ', function () {
 
   async function getMergedABI() {
     // @ts-ignore
-    const RegistryArtifact = await hre.artifacts.readArtifact('DAORegistry');
-    // @ts-ignore
-    const TokenFactoryArtifact = await hre.artifacts.readArtifact(
-      'TokenFactory'
-    );
-    // @ts-ignore
     const DAOFactoryArtifact = await hre.artifacts.readArtifact('DAOFactory');
     // @ts-ignore
-    const ERC20Voting = await hre.artifacts.readArtifact('ERC20Voting');
+    const RegistryArtifact = await hre.artifacts.readArtifact('DAORegistry');
     // @ts-ignore
-    const AllowlistVoting = await hre.artifacts.readArtifact('AllowlistVoting');
-    // @ts-ignore
-    const Token = await hre.artifacts.readArtifact('GovernanceERC20');
+    const PluginSetupProcessorArtifact = await hre.artifacts.readArtifact(
+      'PluginSetupProcessor'
+    );
 
     const _merged = [
       ...DAOFactoryArtifact.abi,
-      ...TokenFactoryArtifact.abi.filter((f: any) => f.type === 'event'),
       ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...ERC20Voting.abi.filter((f: any) => f.type === 'event'),
-      ...AllowlistVoting.abi.filter((f: any) => f.type === 'event'),
-      ...Token.abi.filter((f: any) => f.type === 'event'),
+      ...PluginSetupProcessorArtifact.abi.filter(
+        (f: any) => f.type === 'event'
+      ),
     ];
 
     // remove duplicated events
@@ -153,9 +154,8 @@ describe('DAOFactory: ', function () {
       ensSubdomainRegistrar.address
     );
 
-    // Token Facotry
-    const TokenFactory = await ethers.getContractFactory('TokenFactory');
-    const tokenFactory = await TokenFactory.deploy();
+    aragonPluginRegistry = await deployAragonPluginRegistry(managingDao);
+    psp = await deployPluginSetupProcessor(managingDao, aragonPluginRegistry);
 
     // DAO Factory
     const DAOFactory = new ethers.ContractFactory(
@@ -164,10 +164,7 @@ describe('DAOFactory: ', function () {
       signers[0]
     );
 
-    daoFactory = await DAOFactory.deploy(
-      daoRegistry.address,
-      tokenFactory.address
-    );
+    daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
 
     const ActionExecuteContract = await ethers.getContractFactory(
       'ActionExecute'
@@ -189,303 +186,303 @@ describe('DAOFactory: ', function () {
     );
   });
 
-  it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
-    const mintAmount = 100;
+  // it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
+  //   const mintAmount = 100;
 
-    let tx = await daoFactory.createERC20VotingDAO(
-      {
-        name: daoDummyName,
-        metadata: daoDummyMetadata,
-      },
-      dummyVoteSettings,
-      {
-        addr: zeroAddress,
-        name: 'TokenName',
-        symbol: 'TokenSymbol',
-      },
-      {
-        receivers: [ownerAddress],
-        amounts: [mintAmount],
-      },
-      zeroAddress
-    );
+  //   let tx = await daoFactory.createERC20VotingDAO(
+  //     {
+  //       name: daoDummyName,
+  //       metadata: daoDummyMetadata,
+  //     },
+  //     dummyVoteSettings,
+  //     {
+  //       addr: zeroAddress,
+  //       name: 'TokenName',
+  //       symbol: 'TokenSymbol',
+  //     },
+  //     {
+  //       receivers: [ownerAddress],
+  //       amounts: [mintAmount],
+  //     },
+  //     zeroAddress
+  //   );
 
-    // get block that tx was mined
-    const blockNum = await ethers.provider.getBlockNumber();
+  //   // get block that tx was mined
+  //   const blockNum = await ethers.provider.getBlockNumber();
 
-    const {
-      dao: createdDao,
-      token,
-      voting,
-      creator,
-      name,
-    } = await getDeployments(tx, true);
+  //   const {
+  //     dao: createdDao,
+  //     token,
+  //     voting,
+  //     creator,
+  //     name,
+  //   } = await getDeployments(tx, true);
 
-    expect(name).to.equal(daoDummyName);
+  //   expect(name).to.equal(daoDummyName);
 
-    expect(creator).to.equal(ownerAddress);
+  //   expect(creator).to.equal(ownerAddress);
 
-    await ethers.provider.send('evm_mine', []);
+  //   await ethers.provider.send('evm_mine', []);
 
-    expect(await token.getPastVotes(ownerAddress, blockNum)).to.equal(
-      mintAmount
-    );
+  //   expect(await token.getPastVotes(ownerAddress, blockNum)).to.equal(
+  //     mintAmount
+  //   );
 
-    const EXECUTE_PERMISSION_ID = await createdDao.EXECUTE_PERMISSION_ID();
+  //   const EXECUTE_PERMISSION_ID = await createdDao.EXECUTE_PERMISSION_ID();
 
-    const DAOPermissions = await Promise.all([
-      createdDao.SET_METADATA_PERMISSION_ID(),
-      createdDao.ROOT_PERMISSION_ID(),
-      createdDao.WITHDRAW_PERMISSION_ID(),
-      createdDao.UPGRADE_PERMISSION_ID(),
-      createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
-    ]);
+  //   const DAOPermissions = await Promise.all([
+  //     createdDao.SET_METADATA_PERMISSION_ID(),
+  //     createdDao.ROOT_PERMISSION_ID(),
+  //     createdDao.WITHDRAW_PERMISSION_ID(),
+  //     createdDao.UPGRADE_PERMISSION_ID(),
+  //     createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
+  //   ]);
 
-    // ======== Test Permission events that were emitted successfully ==========
+  //   // ======== Test Permission events that were emitted successfully ==========
 
-    tx = expect(tx);
+  //   tx = expect(tx);
 
-    // Check if correct PermissionManager events are thrown.
-    tx = tx.to
-      .emit(createdDao, EVENTS.MetadataSet)
-      .withArgs(daoDummyMetadata)
-      .to.emit(voting, EVENTS.ConfigUpdated)
-      .withArgs(
-        dummyVoteSettings.participationRequiredPct,
-        dummyVoteSettings.supportRequiredPct,
-        dummyVoteSettings.minDuration
-      );
+  //   // Check if correct PermissionManager events are thrown.
+  //   tx = tx.to
+  //     .emit(createdDao, EVENTS.MetadataSet)
+  //     .withArgs(daoDummyMetadata)
+  //     .to.emit(voting, EVENTS.ConfigUpdated)
+  //     .withArgs(
+  //       dummyVoteSettings.participationRequiredPct,
+  //       dummyVoteSettings.supportRequiredPct,
+  //       dummyVoteSettings.minDuration
+  //     );
 
-    // @ts-ignore
-    DAOPermissions.map(item => {
-      tx = tx.to
-        .emit(createdDao, EVENTS.Granted)
-        .withArgs(
-          item,
-          daoFactory.address,
-          createdDao.address,
-          createdDao.address,
-          PermissionManagerAllowFlagAddress
-        );
-    });
+  //   // @ts-ignore
+  //   DAOPermissions.map(item => {
+  //     tx = tx.to
+  //       .emit(createdDao, EVENTS.Granted)
+  //       .withArgs(
+  //         item,
+  //         daoFactory.address,
+  //         createdDao.address,
+  //         createdDao.address,
+  //         PermissionManagerAllowFlagAddress
+  //       );
+  //   });
 
-    tx = tx.to
-      .emit(createdDao, EVENTS.Granted)
-      .withArgs(
-        SET_CONFIGURATION_PERMISSION_ID,
-        daoFactory.address,
-        createdDao.address,
-        voting.address,
-        PermissionManagerAllowFlagAddress
-      )
-      .to.emit(createdDao, EVENTS.Revoked)
-      .withArgs(
-        DAOPermissions[1],
-        daoFactory.address,
-        daoFactory.address,
-        createdDao.address
-      )
-      .to.emit(createdDao, EVENTS.Granted)
-      .withArgs(
-        EXECUTE_PERMISSION_ID,
-        daoFactory.address,
-        voting.address,
-        createdDao.address,
-        PermissionManagerAllowFlagAddress
-      );
+  //   tx = tx.to
+  //     .emit(createdDao, EVENTS.Granted)
+  //     .withArgs(
+  //       SET_CONFIGURATION_PERMISSION_ID,
+  //       daoFactory.address,
+  //       createdDao.address,
+  //       voting.address,
+  //       PermissionManagerAllowFlagAddress
+  //     )
+  //     .to.emit(createdDao, EVENTS.Revoked)
+  //     .withArgs(
+  //       DAOPermissions[1],
+  //       daoFactory.address,
+  //       daoFactory.address,
+  //       createdDao.address
+  //     )
+  //     .to.emit(createdDao, EVENTS.Granted)
+  //     .withArgs(
+  //       EXECUTE_PERMISSION_ID,
+  //       daoFactory.address,
+  //       voting.address,
+  //       createdDao.address,
+  //       PermissionManagerAllowFlagAddress
+  //     );
 
-    // ===== Test if user can create a vote and execute it ======
+  //   // ===== Test if user can create a vote and execute it ======
 
-    // should be only callable by ERC20Voting
-    await expect(createdDao.execute(0, [])).to.be.revertedWith(
-      customError(
-        'Unauthorized',
-        createdDao.address,
-        createdDao.address,
-        ownerAddress,
-        EXECUTE_PERMISSION_ID
-      )
-    );
+  //   // should be only callable by ERC20Voting
+  //   await expect(createdDao.execute(0, [])).to.be.revertedWith(
+  //     customError(
+  //       'Unauthorized',
+  //       createdDao.address,
+  //       createdDao.address,
+  //       ownerAddress,
+  //       EXECUTE_PERMISSION_ID
+  //     )
+  //   );
 
-    await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
-      customError(
-        'DaoUnauthorized',
-        createdDao.address,
-        voting.address,
-        voting.address,
-        ownerAddress,
-        SET_CONFIGURATION_PERMISSION_ID
-      )
-    );
+  //   await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
+  //     customError(
+  //       'DaoUnauthorized',
+  //       createdDao.address,
+  //       voting.address,
+  //       voting.address,
+  //       ownerAddress,
+  //       SET_CONFIGURATION_PERMISSION_ID
+  //     )
+  //   );
 
-    const actions = [
-      {
-        to: actionExecuteContract.address,
-        value: 0,
-        data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
-      },
-      {
-        to: voting.address,
-        value: 0,
-        data: voting.interface.encodeFunctionData(
-          'setConfiguration',
-          [3, 4, 5]
-        ),
-      },
-    ];
+  //   const actions = [
+  //     {
+  //       to: actionExecuteContract.address,
+  //       value: 0,
+  //       data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
+  //     },
+  //     {
+  //       to: voting.address,
+  //       value: 0,
+  //       data: voting.interface.encodeFunctionData(
+  //         'setConfiguration',
+  //         [3, 4, 5]
+  //       ),
+  //     },
+  //   ];
 
-    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
+  //   await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
-    expect(await voting.vote(0, VoteOption.Yes, true))
-      .to.emit(createdDao, EVENTS.Executed)
-      .withArgs(voting.address, 0, [], [])
-      .to.emit(voting, EVENTS.ConfigUpdated)
-      .withArgs(3, 4, 5);
+  //   expect(await voting.vote(0, VoteOption.Yes, true))
+  //     .to.emit(createdDao, EVENTS.Executed)
+  //     .withArgs(voting.address, 0, [], [])
+  //     .to.emit(voting, EVENTS.ConfigUpdated)
+  //     .withArgs(3, 4, 5);
 
-    expect(await actionExecuteContract.test()).to.equal(true);
-  });
+  //   expect(await actionExecuteContract.test()).to.equal(true);
+  // });
 
-  it('creates AllowlistVoting DAO', async () => {
-    let tx = await daoFactory.createAllowlistVotingDAO(
-      {
-        name: daoDummyName,
-        metadata: daoDummyMetadata,
-      },
-      dummyVoteSettings,
-      [ownerAddress],
-      zeroAddress
-    );
+  // it('creates AllowlistVoting DAO', async () => {
+  //   let tx = await daoFactory.createAllowlistVotingDAO(
+  //     {
+  //       name: daoDummyName,
+  //       metadata: daoDummyMetadata,
+  //     },
+  //     dummyVoteSettings,
+  //     [ownerAddress],
+  //     zeroAddress
+  //   );
 
-    const {
-      dao: createdDao,
-      voting,
-      creator,
-      name,
-    } = await getDeployments(tx, false);
+  //   const {
+  //     dao: createdDao,
+  //     voting,
+  //     creator,
+  //     name,
+  //   } = await getDeployments(tx, false);
 
-    expect(name).to.equal(daoDummyName);
+  //   expect(name).to.equal(daoDummyName);
 
-    expect(creator).to.equal(ownerAddress);
+  //   expect(creator).to.equal(ownerAddress);
 
-    await ethers.provider.send('evm_mine', []);
+  //   await ethers.provider.send('evm_mine', []);
 
-    const DAOPermissions = await Promise.all([
-      createdDao.SET_METADATA_PERMISSION_ID(),
-      createdDao.ROOT_PERMISSION_ID(),
-      createdDao.WITHDRAW_PERMISSION_ID(),
-      createdDao.UPGRADE_PERMISSION_ID(),
-      createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
-    ]);
+  //   const DAOPermissions = await Promise.all([
+  //     createdDao.SET_METADATA_PERMISSION_ID(),
+  //     createdDao.ROOT_PERMISSION_ID(),
+  //     createdDao.WITHDRAW_PERMISSION_ID(),
+  //     createdDao.UPGRADE_PERMISSION_ID(),
+  //     createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
+  //   ]);
 
-    // ======== Test Permission events that were emitted successfully ==========
+  //   // ======== Test Permission events that were emitted successfully ==========
 
-    tx = expect(tx);
+  //   tx = expect(tx);
 
-    // Check if correct PermissionManager events are thrown.
-    tx = tx.to
-      .emit(createdDao, EVENTS.MetadataSet)
-      .withArgs(daoDummyMetadata)
-      .to.emit(voting, EVENTS.ConfigUpdated)
-      .withArgs(
-        dummyVoteSettings.participationRequiredPct,
-        dummyVoteSettings.supportRequiredPct,
-        dummyVoteSettings.minDuration
-      );
+  //   // Check if correct PermissionManager events are thrown.
+  //   tx = tx.to
+  //     .emit(createdDao, EVENTS.MetadataSet)
+  //     .withArgs(daoDummyMetadata)
+  //     .to.emit(voting, EVENTS.ConfigUpdated)
+  //     .withArgs(
+  //       dummyVoteSettings.participationRequiredPct,
+  //       dummyVoteSettings.supportRequiredPct,
+  //       dummyVoteSettings.minDuration
+  //     );
 
-    // @ts-ignore
-    DAOPermissions.map(item => {
-      tx = tx.to
-        .emit(createdDao, EVENTS.Granted)
-        .withArgs(
-          item,
-          daoFactory.address,
-          createdDao.address,
-          createdDao.address,
-          PermissionManagerAllowFlagAddress
-        );
-    });
+  //   // @ts-ignore
+  //   DAOPermissions.map(item => {
+  //     tx = tx.to
+  //       .emit(createdDao, EVENTS.Granted)
+  //       .withArgs(
+  //         item,
+  //         daoFactory.address,
+  //         createdDao.address,
+  //         createdDao.address,
+  //         PermissionManagerAllowFlagAddress
+  //       );
+  //   });
 
-    tx = tx.to
-      .emit(createdDao, EVENTS.Granted)
-      .withArgs(
-        SET_CONFIGURATION_PERMISSION_ID,
-        daoFactory.address,
-        createdDao.address,
-        voting.address,
-        PermissionManagerAllowFlagAddress
-      )
-      .to.emit(createdDao, EVENTS.Granted)
-      .withArgs(
-        MODIFY_ALLOWLIST_PERMISSION_ID,
-        daoFactory.address,
-        createdDao.address,
-        voting.address,
-        PermissionManagerAllowFlagAddress
-      )
-      .to.emit(createdDao, EVENTS.Revoked)
-      .withArgs(
-        DAOPermissions[1],
-        daoFactory.address,
-        daoFactory.address,
-        createdDao.address
-      )
-      .to.emit(createdDao, EVENTS.Granted)
-      .withArgs(
-        EXECUTE_PERMISSION_ID,
-        daoFactory.address,
-        voting.address,
-        createdDao.address,
-        PermissionManagerAllowFlagAddress
-      );
+  //   tx = tx.to
+  //     .emit(createdDao, EVENTS.Granted)
+  //     .withArgs(
+  //       SET_CONFIGURATION_PERMISSION_ID,
+  //       daoFactory.address,
+  //       createdDao.address,
+  //       voting.address,
+  //       PermissionManagerAllowFlagAddress
+  //     )
+  //     .to.emit(createdDao, EVENTS.Granted)
+  //     .withArgs(
+  //       MODIFY_ALLOWLIST_PERMISSION_ID,
+  //       daoFactory.address,
+  //       createdDao.address,
+  //       voting.address,
+  //       PermissionManagerAllowFlagAddress
+  //     )
+  //     .to.emit(createdDao, EVENTS.Revoked)
+  //     .withArgs(
+  //       DAOPermissions[1],
+  //       daoFactory.address,
+  //       daoFactory.address,
+  //       createdDao.address
+  //     )
+  //     .to.emit(createdDao, EVENTS.Granted)
+  //     .withArgs(
+  //       EXECUTE_PERMISSION_ID,
+  //       daoFactory.address,
+  //       voting.address,
+  //       createdDao.address,
+  //       PermissionManagerAllowFlagAddress
+  //     );
 
-    // ===== Test if user can create a vote and execute it ======
+  //   // ===== Test if user can create a vote and execute it ======
 
-    // should be only callable by AllowlistVoting
-    await expect(createdDao.execute(0, [])).to.be.revertedWith(
-      customError(
-        'Unauthorized',
-        createdDao.address,
-        createdDao.address,
-        ownerAddress,
-        EXECUTE_PERMISSION_ID
-      )
-    );
+  //   // should be only callable by AllowlistVoting
+  //   await expect(createdDao.execute(0, [])).to.be.revertedWith(
+  //     customError(
+  //       'Unauthorized',
+  //       createdDao.address,
+  //       createdDao.address,
+  //       ownerAddress,
+  //       EXECUTE_PERMISSION_ID
+  //     )
+  //   );
 
-    await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
-      customError(
-        'DaoUnauthorized',
-        createdDao.address,
-        voting.address,
-        voting.address,
-        ownerAddress,
-        SET_CONFIGURATION_PERMISSION_ID
-      )
-    );
+  //   await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
+  //     customError(
+  //       'DaoUnauthorized',
+  //       createdDao.address,
+  //       voting.address,
+  //       voting.address,
+  //       ownerAddress,
+  //       SET_CONFIGURATION_PERMISSION_ID
+  //     )
+  //   );
 
-    const actions = [
-      {
-        to: actionExecuteContract.address,
-        value: 0,
-        data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
-      },
-      {
-        to: voting.address,
-        value: 0,
-        data: voting.interface.encodeFunctionData(
-          'setConfiguration',
-          [3, 4, 5]
-        ),
-      },
-    ];
+  //   const actions = [
+  //     {
+  //       to: actionExecuteContract.address,
+  //       value: 0,
+  //       data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
+  //     },
+  //     {
+  //       to: voting.address,
+  //       value: 0,
+  //       data: voting.interface.encodeFunctionData(
+  //         'setConfiguration',
+  //         [3, 4, 5]
+  //       ),
+  //     },
+  //   ];
 
-    await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
+  //   await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
-    expect(await voting.vote(0, VoteOption.Yes, true))
-      .to.emit(createdDao, EVENTS.Executed)
-      .withArgs(voting.address, 0, [], [])
-      .to.emit(voting, EVENTS.ConfigUpdated)
-      .withArgs(3, 4, 5);
+  //   expect(await voting.vote(0, VoteOption.Yes, true))
+  //     .to.emit(createdDao, EVENTS.Executed)
+  //     .withArgs(voting.address, 0, [], [])
+  //     .to.emit(voting, EVENTS.ConfigUpdated)
+  //     .withArgs(3, 4, 5);
 
-    expect(await actionExecuteContract.test()).to.equal(true);
-  });
+  //   expect(await actionExecuteContract.test()).to.equal(true);
+  // });
 });

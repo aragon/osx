@@ -1,5 +1,38 @@
-import {PluginSetupProcessor} from '../../typechain';
+import {ethers} from 'hardhat';
 import {decodeEvent} from './event';
+import {AragonPluginRegistry, PluginSetupProcessor} from '../../typechain';
+
+export async function deployPluginSetupProcessor(
+  managingDao: any,
+  aragonPluginRegistry: AragonPluginRegistry
+): Promise<PluginSetupProcessor> {
+  let psp: PluginSetupProcessor;
+
+  // PluginSetupProcessor
+  const PluginSetupProcessor = await ethers.getContractFactory(
+    'PluginSetupProcessor'
+  );
+  psp = await PluginSetupProcessor.deploy(
+    managingDao.address,
+    aragonPluginRegistry.address
+  );
+
+  return psp;
+}
+
+export async function deployAragonPluginRegistry(
+  managingDao: any
+): Promise<AragonPluginRegistry> {
+  let aragonPluginRegistry: AragonPluginRegistry;
+
+  const AragonPluginRegistry = await ethers.getContractFactory(
+    'AragonPluginRegistry'
+  );
+  aragonPluginRegistry = await AragonPluginRegistry.deploy();
+  await aragonPluginRegistry.initialize(managingDao.address);
+
+  return aragonPluginRegistry;
+}
 
 export async function prepareInstallation(
   pluginSetupProcessorContract: PluginSetupProcessor,

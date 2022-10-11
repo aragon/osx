@@ -2,20 +2,10 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-
-import "../voting/allowlist/AllowlistVoting.sol";
-import "../voting/erc20/ERC20Voting.sol";
-import "../tokens/GovernanceERC20.sol";
-import "../tokens/GovernanceWrappedERC20.sol";
-import "../registry/DAORegistry.sol";
-import "../core/DAO.sol";
-import "../utils/Proxy.sol";
-import "../tokens/MerkleMinter.sol";
-import "./TokenFactory.sol";
-
+import {DAORegistry} from "../registry/DAORegistry.sol";
+import {DAO} from "../core/DAO.sol";
+import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
+import {createProxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 
@@ -23,27 +13,25 @@ import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
-    using Address for address;
-    using Clones for address;
-
-    error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
-
     address public daoBase;
 
     DAORegistry public daoRegistry;
     PluginSetupProcessor public pluginSetupProcessor;
 
-    struct DAOConfig {
+    struct DAOSettings {
         string name;
         address trustedForwarder;
         bytes metadata;
     }
 
-    /// @notice Emitted when a new DAO is created.
-    /// @param name The DAO name.
-    /// @param token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance token address or `address(0)` if no token was created.
-    /// @param voting The address of the voting component of the new DAO.
-    event DAOCreated(string name, address indexed token, address indexed voting);
+    struct PluginSettings {
+        address pluginSetup;
+        PluginRepo pluginSetupRepo;
+        bytes data;
+    }
+
+    /// @notice Thrown if `PluginSettings` array is empty.
+    error NoPluginProvided();
 
     /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
     /// @param _registry The DAO registry to register the DAO by its name.
@@ -55,22 +43,25 @@ contract DAOFactory {
         daoBase = address(new DAO());
     }
 
-    struct PluginSettings {
-        address pluginSetup;
-        PluginRepo pluginSetupRepo;
-        bytes data;
-    }
-
-    function createDao(DAOConfig calldata _daoConfig, PluginSettings[] calldata pluginSettings)
+    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata pluginSettings)
         external
     {
+        // Check if plugin is provided
+        if (pluginSettings.length == 0) {
+            revert NoPluginProvided();
+        }
+
         // Create DAO
-        DAO dao = _createDAO(_daoConfig);
+        DAO dao = _createDAO(_daoSettings);
+
+        // Register DAO
+        daoRegistry.register(dao, msg.sender, _daoSettings.name);
 
         // Grant `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
         dao.grant(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
 
         for (uint256 i = 0; i < pluginSettings.length; i++) {
+            // Prepare plugin.
             (
                 address plugin,
                 ,
@@ -82,6 +73,7 @@ contract DAOFactory {
                     pluginSettings[i].data
                 );
 
+            // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(dao),
                 pluginSettings[i].pluginSetup,
@@ -90,24 +82,18 @@ contract DAOFactory {
             );
         }
 
-        // Revoke `ROOT_PERMISSION_ID` from `pluginSetupProcessor`.
-        dao.revoke(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
-
         // set the rest of DAO's permissions
         _setDAOPermissions(dao);
-
-        // Register DAO
-        daoRegistry.register(dao, msg.sender, _daoConfig.name);
     }
 
     /// @notice Creates a new DAO.
-    /// @param _daoConfig The name and metadata hash of the DAO it creates.
-    function _createDAO(DAOConfig calldata _daoConfig) internal returns (DAO dao) {
+    /// @param _daoSettings The name and metadata hash of the DAO it creates.
+    function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory
-        dao.initialize(_daoConfig.metadata, address(this), _daoConfig.trustedForwarder);
+        dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder);
     }
 
     /// @notice Sets the required permissions for the new DAO.
@@ -149,8 +135,15 @@ contract DAOFactory {
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
 
-        // Revoke permissions from factory
+        // Revoke permissions from `pluginSetupProcessor`
         items[6] = BulkPermissionsLib.ItemSingleTarget(
+            BulkPermissionsLib.Operation.Revoke,
+            address(pluginSetupProcessor),
+            _dao.ROOT_PERMISSION_ID()
+        );
+
+        // Revoke permissions from this factory
+        items[7] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Revoke,
             address(this),
             _dao.ROOT_PERMISSION_ID()

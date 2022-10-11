@@ -14,7 +14,11 @@ import {customError} from '../test-utils/custom-error-helper';
 
 import {deployNewDAO} from '../test-utils/dao';
 import {decodeEvent} from '../test-utils/event';
-import {prepareInstallation} from '../test-utils/plugin-setup-processor';
+import {
+  deployAragonPluginRegistry,
+  deployPluginSetupProcessor,
+  prepareInstallation,
+} from '../test-utils/plugin-setup-processor';
 
 enum Op {
   Grant,
@@ -124,12 +128,8 @@ describe('Plugin Setup Processor', function () {
     // Managing DAO that have permission to manage PluginSetupProcessor
     managingDao = await deployNewDAO(ownerAddress);
 
-    // AragonPluginRegistry
-    const AragonPluginRegistry = await ethers.getContractFactory(
-      'AragonPluginRegistry'
-    );
-    aragonPluginRegistry = await AragonPluginRegistry.deploy();
-    await aragonPluginRegistry.initialize(managingDao.address);
+    aragonPluginRegistry = await deployAragonPluginRegistry(managingDao);
+    psp = await deployPluginSetupProcessor(managingDao, aragonPluginRegistry);
 
     // PluginRepoFactory
     const {abi, bytecode} = await getPluginRepoFactoryMergedABI();
@@ -148,15 +148,6 @@ describe('Plugin Setup Processor', function () {
       aragonPluginRegistry.address,
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
-    );
-
-    // PluginSetupProcessor
-    const PluginSetupProcessor = await ethers.getContractFactory(
-      'PluginSetupProcessor'
-    );
-    psp = await PluginSetupProcessor.deploy(
-      managingDao.address,
-      aragonPluginRegistry.address
     );
   });
 
