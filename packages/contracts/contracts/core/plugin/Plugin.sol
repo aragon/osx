@@ -11,6 +11,7 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
 
 /// @title Plugin
+/// @author Aragon Association - 2022
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the `new` keyword.
 abstract contract Plugin is ERC165, Context, AppStorage {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;

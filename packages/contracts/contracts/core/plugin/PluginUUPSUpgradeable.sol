@@ -14,7 +14,8 @@ import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeabl
 import {IDAO} from "../IDAO.sol";
 
 /// @title PluginUUPSUpgradeable
-/// @notice An abstract contract to inherit from when creating a UUPS Upgradeable contract.
+/// @author Aragon Association - 2022
+/// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract PluginUUPSUpgradeable is
     Initializable,
     ERC165Upgradeable,

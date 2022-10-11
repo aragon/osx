@@ -25,7 +25,7 @@ contract CounterV2PluginSetup is PluginSetup {
         counterBase = new CounterV2();
     }
 
-    function prepareInstallDataABI() external view virtual override returns (string memory) {
+    function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num, uint newVariable)";
     }
 
@@ -137,7 +137,7 @@ contract CounterV2PluginSetup is PluginSetup {
         activeHelpers[0] = _helpers[0];
     }
 
-    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 

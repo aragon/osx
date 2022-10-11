@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored NatSpec comments and names for the contracts related to the `Plugin` and `PluginSetup`.
 - Adapted `Component` to use `DaoAuthorizableUpgradeable` until it is fully refactored to become `Plugin`.
 - Refactored `DaoAuthorizable` to use the newly introduced, free `_auth` function to prevent code duplication.
 - Improved `Counter` examples and added respective `PluginSetup` example contracts.

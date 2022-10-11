@@ -11,10 +11,7 @@ import {IDAO} from "./../IDAO.sol";
 
 /// @title DaoAuthorizableUpgradeable
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
-/// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
-/// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
-///      This contract is compatible with meta transactions through OZ's `ContextUpgradeable`.
+/// @notice An abstract contract providing a meta-transaction compatible modifier to authorize function calls through an associated DAO.
 abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
@@ -25,7 +22,8 @@ abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeabl
         dao = _dao;
     }
 
-    /// @notice Get the DAO that was set at the moment of creation or initialization.
+    /// @notice Returns the DAO that was set at the moment of creation or initialization.
+    /// @return The DAO contract.
     function getDAO() external view returns (IDAO) {
         return dao;
     }

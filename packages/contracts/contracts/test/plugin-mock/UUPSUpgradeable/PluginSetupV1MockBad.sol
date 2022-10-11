@@ -21,7 +21,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         pluginBase = new PluginUUPSUpgradeableV1Mock();
     }
 
-    function prepareInstallDataABI() external view virtual override returns (string memory) {
+    function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address samePluginAddress)";
     }
 
@@ -81,7 +81,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         }
     }
 
-    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "(bool beBad)";
     }
 

@@ -12,9 +12,8 @@ import {AppStorage} from "../../utils/AppStorage.sol";
 import {IDAO} from "../IDAO.sol";
 
 /// @title PluginTranparentUpgradeable
-/// @notice An abstract contract to inherit from when creating a proxy contract.
-/// This should be used to deploy logic contracts where proxy itself
-/// is deployed through transparent or beacon...
+/// @author Aragon Association - 2022
+/// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the transparent proxy pattern (see [OZ's article](https://blog.openzeppelin.com/the-transparent-proxy-pattern/)).
 abstract contract PluginTransparentUpgradeable is
     Initializable,
     ERC165Upgradeable,
