@@ -12,14 +12,14 @@ import {CounterV1} from "./CounterV1.sol";
 contract CounterV1PluginSetup is PluginSetup {
     using Clones for address;
 
-    bytes32 public constant MULTIPLY_PERMISSION_ID =
-        0x293ab483515bb2dc32ac9b2dfb9c39ee4ea5571530c34de9864c3e5fa9ce787d;
-    
+    // For testing purposes, the below are public...
+    MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
-    
+
     address private constant NO_ORACLE = address(0);
 
     constructor() {
+        multiplyHelperBase = new MultiplyHelper();
         counterBase = new CounterV1();
     }
 
@@ -43,7 +43,8 @@ contract CounterV1PluginSetup is PluginSetup {
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            multiplyHelper = address(new MultiplyHelper(_dao)); 
+            // deploy helper without our proxy..
+            multiplyHelper = address(new ERC1967Proxy(address(multiplyHelperBase), bytes("")));
         }
 
         bytes memory initData = abi.encodeWithSelector(
@@ -82,7 +83,7 @@ contract CounterV1PluginSetup is PluginSetup {
                 multiplyHelper,
                 plugin,
                 NO_ORACLE,
-                MULTIPLY_PERMISSION_ID
+                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
 
@@ -127,7 +128,7 @@ contract CounterV1PluginSetup is PluginSetup {
                 _activeHelpers[0],
                 _plugin,
                 NO_ORACLE,
-                MULTIPLY_PERMISSION_ID
+                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
     }

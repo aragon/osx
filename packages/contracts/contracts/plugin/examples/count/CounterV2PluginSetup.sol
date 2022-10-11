@@ -13,15 +13,15 @@ import "./CounterV2.sol";
 contract CounterV2PluginSetup is PluginSetup {
     using Clones for address;
 
-    bytes32 public constant MULTIPLY_PERMISSION_ID =
-        0x293ab483515bb2dc32ac9b2dfb9c39ee4ea5571530c34de9864c3e5fa9ce787d;
-    
+    // For testing purposes, the below are public...
+    MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
     address private constant NO_ORACLE = address(0);
 
     // MultiplyHelper doesn't change. so dev decides to pass the old one.
-    constructor() {
+    constructor(MultiplyHelper _helper) {
+        multiplyHelperBase = _helper;
         counterBase = new CounterV2();
     }
 
@@ -45,7 +45,8 @@ contract CounterV2PluginSetup is PluginSetup {
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            multiplyHelper = address(new MultiplyHelper(_dao)); 
+            // deploy helper without our proxy..
+            multiplyHelper = address(new ERC1967Proxy(address(multiplyHelperBase), bytes("")));
         }
 
         bytes memory initData = abi.encodeWithSelector(
@@ -84,7 +85,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 multiplyHelper,
                 plugin,
                 NO_ORACLE,
-                MultiplyHelper(multiplyHelper).MULTIPLY_PERMISSION_ID()
+                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
 
@@ -129,11 +130,10 @@ contract CounterV2PluginSetup is PluginSetup {
             _dao,
             _plugin,
             NO_ORACLE,
-            MULTIPLY_PERMISSION_ID
+            multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
 
         // if another helper is deployed, put it inside activeHelpers + put old ones as well.
-        // The sequence you provide will be the same passed to the second version's update.
         activeHelpers = new address[](1);
         activeHelpers[0] = _helpers[0];
     }
@@ -173,7 +173,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 activeHelpers[0],
                 plugin,
                 NO_ORACLE,
-                MULTIPLY_PERMISSION_ID
+                multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
     }
