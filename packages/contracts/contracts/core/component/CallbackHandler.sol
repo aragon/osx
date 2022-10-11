@@ -23,9 +23,9 @@ contract CallbackHandler {
     /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
     function _handleCallback(bytes4 _callbackSelector) internal view {
         bytes32 magicNumber = callbackMagicNumbers[_callbackSelector];
-        if (magicNumber == UNREGISTERED_CALLBACK)
+        if (magicNumber == UNREGISTERED_CALLBACK) {
             revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
-
+        }
         // low-level return magic number
         assembly {
             mstore(0x00, magicNumber)
