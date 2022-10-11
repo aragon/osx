@@ -21,10 +21,10 @@ import "./IDAO.sol";
 contract DAO is
     IDAO,
     Initializable,
-    UUPSUpgradeable,
-    PermissionManager,
     ERC1271,
     ERC165StorageUpgradeable,
+    UUPSUpgradeable,
+    PermissionManager,
     CallbackHandler
 {
     using SafeERC20 for ERC20;

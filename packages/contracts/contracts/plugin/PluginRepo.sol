@@ -21,9 +21,9 @@ import {IPluginRepo} from "./IPluginRepo.sol";
 contract PluginRepo is
     IPluginRepo,
     Initializable,
+    ERC165Upgradeable,
     UUPSUpgradeable,
-    PermissionManager,
-    ERC165Upgradeable
+    PermissionManager
 {
     using Address for address;
 
