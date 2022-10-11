@@ -6,21 +6,25 @@ import {ensDomainHash} from '../../utils/ensHelpers';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {VoteOption} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
-import {AragonPluginRegistry, PluginSetupProcessor} from '../../typechain';
+import {
+  AragonPluginRegistry,
+  DAORegistry,
+  PluginRepoFactory,
+  PluginSetupProcessor,
+  PluginSetupV1Mock,
+} from '../../typechain';
 import {
   deployAragonPluginRegistry,
   deployPluginSetupProcessor,
 } from '../test-utils/plugin-setup-processor';
+import {deployPluginRepoFactory} from '../test-utils/repo';
+import {decodeEvent} from '../test-utils/event';
 
 const EVENTS = {
+  PluginRepoRegistered: 'PluginRepoRegistered',
   DAORegistered: 'DAORegistered',
-  MetadataSet: 'MetadataSet',
-  ConfigUpdated: 'ConfigUpdated',
-  DAOCreated: 'DAOCreated',
-  Granted: 'Granted',
-  Revoked: 'Revoked',
-  Executed: 'Executed',
-  TokenCreated: 'TokenCreated',
+  InstallationPrepared: 'InstallationPrepared',
+  InstallationApplied: 'InstallationApplied',
 };
 
 const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
@@ -39,40 +43,36 @@ const PermissionManagerAllowFlagAddress =
 const daoDummyName = 'dao1';
 const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
-const dummyVoteSettings = {
-  participationRequiredPct: 1,
-  supportRequiredPct: 2,
-  minDuration: 3,
-};
+const EMPTY_DATA = '0x';
+const AddressZero = ethers.constants.AddressZero;
 
-async function getDeployments(tx: any, tokenVoting: boolean) {
+async function extractInfoFromCreateDaoTx(tx: any): Promise<{
+  dao: any;
+  creator: any;
+  name: any;
+  plugin: any;
+  helpers: any;
+  permissions: any;
+}> {
   const data = await tx.wait();
   const {events} = data;
   const {dao, creator, name} = events.find(
     ({event}: {event: any}) => event === EVENTS.DAORegistered
   ).args;
 
-  const token = tokenVoting
-    ? events.find(({event}: {event: any}) => event === EVENTS.TokenCreated).args
-        .token
-    : zeroAddress;
-
-  const {voting} = events.find(
-    ({event}: {event: any}) => event === EVENTS.DAOCreated
+  const {plugin, helpers, permissions} = events.find(
+    ({event}: {event: any}) => event === EVENTS.InstallationPrepared
   ).args;
 
   return {
-    dao: await ethers.getContractAt('DAO', dao),
-    token: await ethers.getContractAt('GovernanceERC20', token),
-    voting: tokenVoting
-      ? await ethers.getContractAt('ERC20Voting', voting)
-      : await ethers.getContractAt('AllowlistVoting', voting),
-    creator,
-    name,
+    dao: dao,
+    creator: creator,
+    name: name,
+    plugin: plugin,
+    helpers: helpers,
+    permissions: permissions,
   };
 }
-
-// This is more like e2e test that tests the whole flow.
 
 describe('DAOFactory: ', function () {
   let daoFactory: any;
@@ -80,6 +80,10 @@ describe('DAOFactory: ', function () {
 
   let psp: PluginSetupProcessor;
   let aragonPluginRegistry: AragonPluginRegistry;
+  let pluginSetupV1Mock: PluginSetupV1Mock;
+  let pluginRepoFactory: any;
+  let pluginSetupMockRepoAddress: any;
+  let daoRegistry: DAORegistry;
 
   let actionExecuteContract: any; // contract
 
@@ -148,7 +152,7 @@ describe('DAOFactory: ', function () {
 
     // DAO Registry
     const DAORegistry = await ethers.getContractFactory('DAORegistry');
-    const daoRegistry = await DAORegistry.deploy();
+    daoRegistry = await DAORegistry.deploy();
     await daoRegistry.initialize(
       managingDao.address,
       ensSubdomainRegistrar.address
@@ -156,8 +160,30 @@ describe('DAOFactory: ', function () {
 
     aragonPluginRegistry = await deployAragonPluginRegistry(managingDao);
     psp = await deployPluginSetupProcessor(managingDao, aragonPluginRegistry);
+    pluginRepoFactory = await deployPluginRepoFactory(
+      signers,
+      managingDao,
+      aragonPluginRegistry
+    );
 
-    // DAO Factory
+    // Create and register a plugin on the AragonPluginRegistry
+    // PluginSetupV1
+    const PluginSetupV1Mock = await ethers.getContractFactory(
+      'PluginSetupV1Mock'
+    );
+    pluginSetupV1Mock = await PluginSetupV1Mock.deploy();
+
+    const tx = await pluginRepoFactory.createPluginRepoWithVersion(
+      'PluginSetupV1Mock',
+      [1, 0, 0],
+      pluginSetupV1Mock.address,
+      '0x00',
+      ownerAddress
+    );
+    const event = await decodeEvent(tx, EVENTS.PluginRepoRegistered);
+    pluginSetupMockRepoAddress = event.args.pluginRepo;
+
+    // Deploy DAO Factory
     const DAOFactory = new ethers.ContractFactory(
       mergedABI,
       daoFactoryBytecode,
@@ -184,6 +210,43 @@ describe('DAOFactory: ', function () {
       daoRegistry.address,
       ethers.utils.id('REGISTER_ENS_SUBDOMAIN_PERMISSION')
     );
+  });
+
+  it('Revert if no plugin is provided', async () => {
+    const daoSettings = {
+      name: daoDummyName,
+      trustedForwarder: AddressZero,
+      metadata: daoDummyMetadata,
+    };
+
+    await expect(daoFactory.createDao(daoSettings, [])).to.be.revertedWith(
+      customError('NoPluginProvided')
+    );
+  });
+
+  it('Correclty create a DAO with one plugin', async () => {
+    const daoSettings = {
+      name: daoDummyName,
+      trustedForwarder: AddressZero,
+      metadata: daoDummyMetadata,
+    };
+
+    const pluginSettings = {
+      pluginSetup: pluginSetupV1Mock.address,
+      pluginSetupRepo: pluginSetupMockRepoAddress,
+      data: EMPTY_DATA,
+    };
+
+    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const {dao, plugin} = await extractInfoFromCreateDaoTx(tx);
+
+    await expect(tx)
+      .to.emit(daoRegistry, EVENTS.DAORegistered)
+      .withArgs(dao, ownerAddress, daoSettings.name);
+
+    await expect(tx)
+      .to.emit(psp, EVENTS.InstallationApplied)
+      .withArgs(dao, plugin);
   });
 
   // it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {

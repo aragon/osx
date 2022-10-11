@@ -30,7 +30,7 @@ contract DAOFactory {
         bytes data;
     }
 
-    /// @notice Thrown if `PluginSettings` array is empty.
+    /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
     error NoPluginProvided();
 
     /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
@@ -60,6 +60,13 @@ contract DAOFactory {
         // Grant `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
         dao.grant(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
 
+        // Grant `PROCESS_INSTALL_PERMISSION_ID` to `DAOFactory` on `pluginSetupProcessor`.
+        dao.grant(
+            address(pluginSetupProcessor),
+            address(this),
+            pluginSetupProcessor.PROCESS_INSTALL_PERMISSION_ID()
+        );
+
         for (uint256 i = 0; i < pluginSettings.length; i++) {
             // Prepare plugin.
             (
@@ -81,6 +88,13 @@ contract DAOFactory {
                 permissions
             );
         }
+
+        // Revoke `PROCESS_INSTALL_PERMISSION_ID` from `DAOFactory` on `pluginSetupProcessor`.
+        dao.revoke(
+            address(pluginSetupProcessor),
+            address(this),
+            pluginSetupProcessor.PROCESS_INSTALL_PERMISSION_ID()
+        );
 
         // set the rest of DAO's permissions
         _setDAOPermissions(dao);

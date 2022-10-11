@@ -19,6 +19,7 @@ import {
   deployPluginSetupProcessor,
   prepareInstallation,
 } from '../test-utils/plugin-setup-processor';
+import {deployPluginRepoFactory} from '../test-utils/repo';
 
 enum Op {
   Grant,
@@ -65,34 +66,6 @@ const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
 
-// Util Helper Functions
-async function getPluginRepoFactoryMergedABI() {
-  // @ts-ignore
-  const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
-    'AragonPluginRegistry'
-  );
-  // @ts-ignore
-  const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoFactory'
-  );
-
-  const _merged = [
-    ...PluginRepoFactoryArtifact.abi,
-    ...AragonPluginRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-  ];
-
-  // remove duplicated events
-  const merged = _merged.filter(
-    (value, index, self) =>
-      index === self.findIndex(event => event.name === value.name)
-  );
-
-  return {
-    abi: merged,
-    bytecode: PluginRepoFactoryArtifact.bytecode,
-  };
-}
-
 describe('Plugin Setup Processor', function () {
   let signers: any;
   let psp: PluginSetupProcessor;
@@ -130,24 +103,10 @@ describe('Plugin Setup Processor', function () {
 
     aragonPluginRegistry = await deployAragonPluginRegistry(managingDao);
     psp = await deployPluginSetupProcessor(managingDao, aragonPluginRegistry);
-
-    // PluginRepoFactory
-    const {abi, bytecode} = await getPluginRepoFactoryMergedABI();
-    const PluginRepoFactory = new ethers.ContractFactory(
-      abi,
-      bytecode,
-      signers[0]
-    );
-
-    pluginRepoFactory = await PluginRepoFactory.deploy(
-      aragonPluginRegistry.address
-    );
-
-    // Grant `PLUGIN_REGISTER_PERMISSION` to `PluginRepoFactory`.
-    await managingDao.grant(
-      aragonPluginRegistry.address,
-      pluginRepoFactory.address,
-      PLUGIN_REGISTER_PERMISSION_ID
+    pluginRepoFactory = await deployPluginRepoFactory(
+      signers,
+      managingDao,
+      aragonPluginRegistry
     );
   });
 
