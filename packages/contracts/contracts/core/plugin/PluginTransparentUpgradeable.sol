@@ -31,9 +31,7 @@ abstract contract PluginTransparentUpgradeable is
         _;
     }
 
-    /// @notice adds a IERC165 to check whether contract supports PluginTranparentUpgradeable interface or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginTranparentUpgradeable
+    /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
     }

@@ -61,9 +61,7 @@ contract GovernanceWrappedERC20 is
         __GovernanceWrappedERC20_init(_token, _name, _symbol);
     }
 
-    /// @notice adds a IERC165 to check whether contract supports GovernanceERC20 interface or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or Plugin
+    /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC20Upgradeable).interfaceId ||

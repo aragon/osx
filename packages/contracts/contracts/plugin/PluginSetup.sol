@@ -73,11 +73,8 @@ abstract contract PluginSetup is ERC165 {
     /// @return address of the base contract address.
     function getImplementationAddress() external view virtual returns (address);
 
-    /// @notice adds a IERC165 to check whether contract supports PluginSetup interface or not.
-    /// @dev See {ERC165-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginSetup
+    /// @inheritdoc ERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_SETUP_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
-
 }
