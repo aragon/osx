@@ -5,8 +5,6 @@ pragma solidity 0.8.10;
 contract CallbackHandlerMockHelper {
     address callbackHandlerMockAddr;
 
-    event CallbackReceived(bytes32 b);
-
     constructor(address _callbackHandlerMockAddr) {
         callbackHandlerMockAddr = _callbackHandlerMockAddr;
     }
