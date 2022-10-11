@@ -282,11 +282,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return (permissions, initData);
     }
 
-    /// @notice Applies the permissions of a prepared update.
+    /// @notice Applies the permissions of a prepared update of an upgradeable contract. //TODO revisit
     /// @param _dao The address of the updating DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _plugin The address of the `Plugin` contract.
-    /// @param _initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
+    /// @param _initData The initialization data to be passed to the upgradeable plugin contract.
     /// @param _permissions The list of multi-targeted permission operations to apply to the updating DAO.
     function applyUpdate(
         address _dao,
@@ -421,18 +421,23 @@ contract PluginSetupProcessor is DaoAuthorizable {
         setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
     }
 
+    /// @notice Returns a hash of an address array of helpers (contracts or EOAs).
+    /// @param _helpers The address array of helpers (contracts or EOAs) associated to be hashed.
     function getHelpersHash(address[] memory _helpers) private pure returns (bytes32 helpersHash) {
         helpersHash = keccak256(abi.encode(_helpers));
     }
 
-    function getPermissionsHash(Permission.ItemMultiTarget[] memory permissions)
+    /// @notice Returns a hash of an array of multi-targeted permission operations.
+    /// @param _permissions The array of of multi-targeted permission operations.
+    /// @return bytes The hash of the array of permission operations.
+    function getPermissionsHash(Permission.ItemMultiTarget[] memory _permissions)
         private
         pure
         returns (bytes32)
     {
         bytes memory encoded;
-        for (uint256 i = 0; i < permissions.length; i++) {
-            Permission.ItemMultiTarget memory p = permissions[i];
+        for (uint256 i = 0; i < _permissions.length; i++) {
+            Permission.ItemMultiTarget memory p = _permissions[i];
             encoded = abi.encodePacked(
                 encoded,
                 p.operation,
@@ -446,30 +451,33 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return keccak256(encoded);
     }
 
+    /// @notice Upgrades an UUPSUpgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @param _proxy The address of the UUPSUpgradeable proxy.
+    /// @param _initData The initialization data to be passed to the upgradeable plugin contract. //TODO
     function upgradeProxy(
-        address proxy,
-        address implementation,
-        bytes memory initData
+        address _proxy,
+        address _implementation,
+        bytes memory _initData
     ) private {
-        if (initData.length > 0) {
+        if (_initData.length > 0) {
             try
-                PluginUUPSUpgradeable(proxy).upgradeToAndCall(implementation, initData)
+                PluginUUPSUpgradeable(_proxy).upgradeToAndCall(_implementation, _initData)
             {} catch Error(string memory reason) {
                 revert(reason);
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonUpgradeable({plugin: proxy});
+                revert PluginNonUpgradeable({plugin: _proxy});
             }
         } else {
-            try PluginUUPSUpgradeable(proxy).upgradeTo(implementation) {} catch Error(
+            try PluginUUPSUpgradeable(_proxy).upgradeTo(_implementation) {} catch Error(
                 string memory reason
             ) {
                 revert(reason);
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonUpgradeable({plugin: proxy});
+                revert PluginNonUpgradeable({plugin: _proxy});
             }
         }
     }

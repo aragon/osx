@@ -24,7 +24,7 @@ abstract contract PluginSetup {
     /// @param _data The `bytes` encoded data containing the input parameters specified in `prepareInstallationDataABI()`.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
     /// @return installedHelpers The address array of all helpers (contracts or EOAs) associated with the plugin to be installed.
-    /// @return permissions The list of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
+    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
@@ -43,12 +43,12 @@ abstract contract PluginSetup {
     /// @param _dao The address of the installing DAO.
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
+    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     /// @param _oldVersion The semantic version of the plugin to update from.
     /// @param _data The `bytes` encoded data containing the input parameters specified in `prepareUpdateDataABI()`.
     /// @return updatedHelpers The address array of helpers (contracts or EOAs) associated with the plugin after the update.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
-    /// @return permissions The list of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the updating DAO.
+    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the updating DAO.
     function prepareUpdate(
         address _dao,
         address _plugin,
@@ -73,9 +73,9 @@ abstract contract PluginSetup {
     /// @param _dao The address of the installing DAO.
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
+    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     /// @param _data The `bytes` encoded data containing the input parameters specified in `prepareUninstallationDataABI()`.
-    /// @return permissions The list of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
+    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     function prepareUninstallation(
         address _dao,
         address _plugin,
