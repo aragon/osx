@@ -697,7 +697,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupRepoAddr,
-          oldPluginSetup: AddressZero,
+          currentPluginSetup: AddressZero,
           newPluginSetup: AddressZero,
         };
         const helpers = [AddressZero];
@@ -728,7 +728,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupRepoAddr,
-          oldPluginSetup: pluginSetupV1,
+          currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
 
@@ -752,7 +752,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupMockRepoAddress,
-          oldPluginSetup: pluginSetupV1,
+          currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
 
@@ -783,7 +783,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupMockRepoAddress,
-          oldPluginSetup: pluginSetupV1,
+          currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
 
@@ -815,7 +815,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupMockRepoAddress,
-          oldPluginSetup: pluginSetupV1,
+          currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
 
@@ -856,7 +856,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupMockRepoAddress,
-          oldPluginSetup: pluginSetupV1,
+          currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
 
@@ -935,7 +935,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupMockRepoAddress,
-          oldPluginSetup: pluginSetupV1,
+          currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
         const prepareUpdateTx = await psp.prepareUpdate(
