@@ -43,16 +43,16 @@ templates:
       entities:
         - Dao
       abis:
-        - name: DAO
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: ERC165
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
         - name: AllowlistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
-        - name: ERC165
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/erc165/ERC165.sol/ERC165.json
+        - name: DAO
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet

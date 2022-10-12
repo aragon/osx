@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Renamed `PluginTransparentUpgradeable` to `PluginUpgradeable`.
+- Refactored `AdaptiveERC165` into an independent `CallbackHandler` contract and separated `ERC165` from it.
 - Adapted `Component` to use `DaoAuthorizableUpgradeable` until it is fully refactored to become `Plugin`.
 - Refactored `DaoAuthorizable` to use the newly introduced, free `_auth` function to prevent code duplication.
 - Improved `Counter` examples and added respective `PluginSetup` example contracts.

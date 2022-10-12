@@ -37,7 +37,7 @@ contract ERC20Voting is MajorityVotingBase {
         uint64 _minDuration,
         ERC20VotesUpgradeable _token
     ) public initializer {
-        _registerStandard(ERC20_VOTING_INTERFACE_ID);
+        _registerInterface(ERC20_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
             _dao,
             _trustedForwarder,

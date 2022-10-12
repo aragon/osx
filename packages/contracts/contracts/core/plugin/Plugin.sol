@@ -17,9 +17,7 @@ abstract contract Plugin is ERC165, DaoAuthorizable {
     /// @param _dao The associated DAO address.
     constructor(IDAO _dao) DaoAuthorizable(_dao) {}
 
-    /// @notice adds a IERC165 to check whether contract supports Plugin interface or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or Plugin
+    /// @inheritdoc ERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
     }

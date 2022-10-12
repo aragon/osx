@@ -20,13 +20,11 @@ abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
-    /// @notice adds a IERC165 to check whether contract supports PluginUUPSUpgradeable interface or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginUUPSUpgradeable
-    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+    /// @inheritdoc PluginUpgradeable
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
-            _interfaceId == PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID ||
-            super.supportsInterface(_interfaceId);
+            interfaceId == PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice used to check the current base logic contract proxy delegates to.

@@ -180,6 +180,7 @@ type ERC20VotingProposal implements Proposal @entity {
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  executable: Boolean
 }
 
 # AllowlistVoting
@@ -235,4 +236,5 @@ type AllowlistProposal implements Proposal @entity {
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  executable: Boolean
 }

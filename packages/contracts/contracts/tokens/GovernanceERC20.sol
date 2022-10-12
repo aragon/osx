@@ -7,15 +7,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20Metadat
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import {DaoAuthorizableUpgradeable} from "../core/component/DaoAuthorizableUpgradeable.sol";
-import "../core/erc165/AdaptiveERC165.sol";
-import "../core/IDAO.sol";
+import {IDAO} from "../core/IDAO.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
 /// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
-contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizableUpgradeable {
+contract GovernanceERC20 is ERC165Upgradeable, ERC20VotesUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
 
@@ -31,10 +31,6 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
-
-        _registerStandard(type(IERC20Upgradeable).interfaceId);
-        _registerStandard(type(IERC20PermitUpgradeable).interfaceId);
-        _registerStandard(type(IERC20MetadataUpgradeable).interfaceId);
     }
 
     /// @notice Initializes the component.
@@ -47,6 +43,15 @@ contract GovernanceERC20 is AdaptiveERC165, ERC20VotesUpgradeable, DaoAuthorizab
         string calldata _symbol
     ) external initializer {
         __GovernanceERC20_init(_dao, _name, _symbol);
+    }
+
+    /// @inheritdoc ERC165Upgradeable
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC20Upgradeable).interfaceId ||
+            interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
+            interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice Mints tokens to an address.

@@ -17,9 +17,7 @@ abstract contract PluginCloneable is ERC165, DaoAuthorizableCloneable {
         __DaoAuthorizableCloneable_init(_dao);
     }
 
-    /// @notice adds a IERC165 to check whether contract supports PluginCloneable interface or not.
-    /// @dev See {ERC165-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or PluginCloneable
+    /// @inheritdoc ERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == PLUGIN_CLONES_INTERFACE_ID || super.supportsInterface(interfaceId);
     }

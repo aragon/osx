@@ -69,4 +69,10 @@ contract DAOMock is IDAO, PermissionManager {
     ) external pure override returns (bytes4) {
         return 0x0;
     }
+
+    function registerStandardCallback(
+        bytes4 _interfaceId,
+        bytes4 _callbackSelector,
+        bytes4 _magicNumber
+    ) external override {}
 }

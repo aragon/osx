@@ -15,7 +15,14 @@ import {
   VOTING_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
-  ADDRESS_ZERO
+  ADDRESS_ZERO,
+  VOTE_ID,
+  END_DATE,
+  MIN_SUPPORT,
+  MIN_TURNOUT,
+  SNAPSHOT_BLOCK,
+  START_DATE,
+  VOTING_POWER
 } from '../constants';
 import {createDummyAcctions, createGetVoteCall} from '../utils';
 import {
@@ -132,29 +139,20 @@ test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
 });
 
 test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
-  // create state
-  let proposalId =
-    Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-
-  createERC20VotingProposalEntityState(
-    proposalId,
-    DAO_ADDRESS,
-    VOTING_ADDRESS,
-    ADDRESS_ONE
-  );
+  let proposal = createERC20VotingProposalEntityState();
 
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    VOTE_ID,
     true,
     false,
-    startDate,
-    endDate,
-    snapshotBlock,
-    supportRequiredPct,
-    participationRequiredPct,
-    votingPower,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+    MIN_SUPPORT,
+    MIN_TURNOUT,
+    VOTING_POWER,
     '1',
     '0',
     '0',
@@ -163,17 +161,17 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event = createNewVoteCastEvent(
-    voteId,
+    VOTE_ID,
     ADDRESS_ONE,
     '2', // Yes
-    votingPower,
+    '1',
     VOTING_ADDRESS
   );
 
   handleVoteCast(event);
 
   // checks
-  let entityID = ADDRESS_ONE + '_' + proposalId;
+  let entityID = ADDRESS_ONE + '_' + proposal.id;
   assert.fieldEquals('ERC20Vote', entityID, 'id', entityID);
 
   // check voter
@@ -193,22 +191,29 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   );
 
   // check proposal
-  assert.fieldEquals('ERC20VotingProposal', proposalId, 'yes', '1');
+  assert.fieldEquals('ERC20VotingProposal', proposal.id, 'yes', '1');
 
+  // check executable
+  // the total voting power is 3, currently total votes = 1
+  // the min participation is 0.5; 0.33 <= 0.5 => false
+  // currently yes = 1
+  // the min support is 0.5; 1 >= 0.5 => true
+  // is not executable 
+  assert.fieldEquals('ERC20VotingProposal', proposal.id, 'executable', 'false');
   // check vote count
-  assert.fieldEquals('ERC20VotingProposal', proposalId, 'voteCount', '1');
+  assert.fieldEquals('ERC20VotingProposal', proposal.id, 'voteCount', '1');
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    VOTE_ID,
     true,
     false,
-    startDate,
-    endDate,
-    snapshotBlock,
-    supportRequiredPct,
-    participationRequiredPct,
-    votingPower,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+    MIN_SUPPORT,
+    MIN_TURNOUT,
+    VOTING_POWER,
     '1',
     '0',
     '1',
@@ -216,16 +221,24 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   );
   // create event
   let event2 = createNewVoteCastEvent(
-    voteId,
+    VOTE_ID,
     ADDRESS_ONE,
     '1', // abstain
-    votingPower,
+    '1',
     VOTING_ADDRESS
   );
 
   handleVoteCast(event2);
 
-  assert.fieldEquals('ERC20VotingProposal', proposalId, 'voteCount', '2');
+  // check executable
+  // the total voting power is 3, currently total votes = 2
+  // the min participation is 0.5; 0.66 >= 0.5 => true
+  // currently yes = 1, abstain = 1
+  // the min support is 0.5; 0.5 >= 0.5 => true
+  // is executable 
+  assert.fieldEquals('ERC20VotingProposal', proposal.id, 'executable', 'true');
+
+  assert.fieldEquals('ERC20VotingProposal', proposal.id, 'voteCount', '2');
 
   clearStore();
 });
