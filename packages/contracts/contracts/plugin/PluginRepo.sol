@@ -4,14 +4,16 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "../core/permission/PermissionManager.sol";
-import "../core/erc165/AdaptiveERC165.sol";
-import "../utils/UncheckedMath.sol";
-import "./PluginSetup.sol";
-import "./IPluginRepo.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {PermissionManager} from "../core/permission/PermissionManager.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+
+import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
+import {PluginSetup} from "./PluginSetup.sol";
+import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -19,10 +21,12 @@ import "./IPluginRepo.sol";
 contract PluginRepo is
     IPluginRepo,
     Initializable,
+    ERC165Upgradeable,
     UUPSUpgradeable,
-    PermissionManager,
-    AdaptiveERC165
+    PermissionManager
 {
+    using Address for address;
+
     struct Version {
         uint16[3] semanticVersion;
         address pluginSetup;
@@ -80,7 +84,6 @@ contract PluginRepo is
     /// - giving the `CREATE_VERSION_PERMISSION_ID` permission to the initial owner.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     function initialize(address initialOwner) external initializer {
-        _registerStandard(type(IPluginRepo).interfaceId);
         __PermissionManager_init(initialOwner);
 
         nextVersionIndex = 1;
@@ -95,23 +98,19 @@ contract PluginRepo is
         address _pluginSetup,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
-        // Check if `_pluginSetup` is a `PluginSetup` contract
-        if (!Address.isContract(_pluginSetup)) {
-            revert InvalidContractAddress({invalidContract: _pluginSetup});
-        }
+        // In a case where _pluginSetup doesn't contain supportsInterface,
+        // but contains fallback, that doesn't return anything(most cases)
+        // the below approach aims to still return custom error which not possible with try/catch..
+        // NOTE: also checks if _pluginSetup is a contract and reverts if not.
+        bytes memory data = _pluginSetup.functionCall(
+            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(PluginSetup).interfaceId)
+        );
 
-        // TODO: uncommment
-        // try
-        //     PluginSetup(_pluginSetup).supportsInterface(
-        //         PluginSetup.PLUGIN_FACTORY_INTERFACE_ID
-        //     )
-        // returns (bool result) {
-        //     if (!result) {
-        //         revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
-        //     }
-        // } catch {
-        //     revert InvalidPluginSetupContract({invalidPluginSetup: _pluginSetup});
-        // }
+        // NOTE: if data contains 32 bytes that can't be decoded with uint256
+        // it reverts with solidity's ambigious error.
+        if (data.length != 32 || abi.decode(data, (uint256)) != 1) {
+            revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
+        }
 
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
@@ -254,4 +253,9 @@ contract PluginRepo is
         override
         auth(address(this), UPGRADE_PERMISSION_ID)
     {}
+
+    /// @inheritdoc ERC165Upgradeable
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IPluginRepo).interfaceId || super.supportsInterface(interfaceId);
+    }
 }

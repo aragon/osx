@@ -60,7 +60,7 @@ contract AllowlistVoting is MajorityVotingBase {
         uint64 _minDuration,
         address[] calldata _allowed
     ) public initializer {
-        _registerStandard(ALLOWLIST_VOTING_INTERFACE_ID);
+        _registerInterface(ALLOWLIST_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
             _dao,
             _trustedForwarder,

@@ -33,6 +33,7 @@ describe('InterfaceBasedRegistry', function () {
     );
     interfaceBasedRegistryMock = await InterfaceBasedRegistryMock.deploy();
 
+    // Let the interface registry register `DAO` contracts for testing purposes
     await interfaceBasedRegistryMock.initialize(dao.address);
 
     // grant REGISTER_PERMISSION_ID to registrer
@@ -54,14 +55,34 @@ describe('InterfaceBasedRegistry', function () {
       );
     });
 
-    it('fail to register if interfaceId is not supported', async () => {
-      const AdaptiveERC165 = await ethers.getContractFactory('AdaptiveERC165');
-      let adaptiveERC165 = await AdaptiveERC165.deploy();
+    it('fail to register if the interface is not supported', async () => {
+      // Use the `PluginRepo` contract for testing purposes here, because the interface differs from the `DAO` interface
+      const PluginRepo = await ethers.getContractFactory('PluginRepo');
+      let contractNotBeingADao = await PluginRepo.deploy();
 
       await expect(
-        interfaceBasedRegistryMock.register(adaptiveERC165.address)
+        interfaceBasedRegistryMock.register(contractNotBeingADao.address)
       ).to.be.revertedWith(
-        customError('ContractInterfaceInvalid', adaptiveERC165.address)
+        customError('ContractInterfaceInvalid', contractNotBeingADao.address)
+      );
+    });
+
+    it('fail to register if the contract does not support ERC165', async () => {
+      // Use the `CallbackHandler` contract for testing purposes here, because the interface doesn't support ERC-165.
+      const CallbackHandler = await ethers.getContractFactory(
+        'CallbackHandler'
+      );
+      let contractThatDoesNotSupportERC165 = await CallbackHandler.deploy();
+
+      await expect(
+        interfaceBasedRegistryMock.register(
+          contractThatDoesNotSupportERC165.address
+        )
+      ).to.be.revertedWith(
+        customError(
+          'ContractERC165SupportInvalid',
+          contractThatDoesNotSupportERC165.address
+        )
       );
     });
 
