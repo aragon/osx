@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.4.0-alpha
+On 2022-10-07 15:20:00
+### Added
+- `executable` property to `ERC20VotingProposal` and `AllowlistProposal`.
+
 ## 0.2.1-alpha
 On 2022-10-03 10:38:36
 

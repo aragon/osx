@@ -36,7 +36,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         )
     {
         // Deploy a helper.
-        address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
+        address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
         address _samePluginAddress = abi.decode(_data, (address));
 
@@ -46,10 +46,10 @@ contract PluginSetupV1MockBad is PluginSetup {
         } else {
             // Deploy and set the plugn.
             plugin = createERC1967Proxy(
-                _dao,
                 address(pluginBase),
                 abi.encodeWithSelector(
-                    bytes4(keccak256("initialize(uint256,address)")),
+                    bytes4(keccak256("initialize(address,uint256,address)")),
+                    _dao,
                     PLUGIN_INIT_NUMBER,
                     helperAddr
                 )

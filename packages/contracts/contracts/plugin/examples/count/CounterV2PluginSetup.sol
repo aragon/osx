@@ -50,7 +50,8 @@ contract CounterV2PluginSetup is PluginSetup {
         }
 
         bytes memory initData = abi.encodeWithSelector(
-            bytes4(keccak256("initialize(address,uint256)")),
+            bytes4(keccak256("initialize(address,address,uint256)")),
+            _dao,
             multiplyHelper,
             _num
         );
@@ -59,7 +60,7 @@ contract CounterV2PluginSetup is PluginSetup {
         helpers = new address[](1);
 
         // deploy
-        plugin = createERC1967Proxy(_dao, address(counterBase), initData);
+        plugin = createERC1967Proxy(address(counterBase), initData);
 
         // set permissions
         permissions[0] = Permission.ItemMultiTarget(
@@ -106,6 +107,7 @@ contract CounterV2PluginSetup is PluginSetup {
         bytes memory _data
     )
         external
+        view
         override
         returns (
             address[] memory activeHelpers,

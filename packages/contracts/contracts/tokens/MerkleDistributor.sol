@@ -57,7 +57,7 @@ contract MerkleDistributor is MetaTxComponent {
         IERC20Upgradeable _token,
         bytes32 _merkleRoot
     ) external initializer {
-        _registerStandard(MERKLE_DISTRIBUTOR_INTERFACE_ID);
+        _registerInterface(MERKLE_DISTRIBUTOR_INTERFACE_ID);
         __MetaTxComponent_init(_dao, _trustedForwarder);
 
         token = _token;

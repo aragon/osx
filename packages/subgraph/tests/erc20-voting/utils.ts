@@ -2,13 +2,27 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  VoteCreated,
-  VoteCast,
-  VoteExecuted,
   ConfigUpdated,
-  TrustedForwarderSet
+  TrustedForwarderSet,
+  VoteCast,
+  VoteCreated,
+  VoteExecuted
 } from '../../generated/templates/ERC20Voting/ERC20Voting';
 import {ERC20VotingProposal} from '../../generated/schema';
+import {
+  ADDRESS_ONE,
+  DAO_ADDRESS,
+  PROPOSAL_ID,
+  VOTE_ID,
+  VOTING_ADDRESS,
+  CREATED_AT,
+  END_DATE,
+  MIN_SUPPORT,
+  MIN_TURNOUT,
+  SNAPSHOT_BLOCK,
+  START_DATE,
+  VOTING_POWER
+} from '../constants';
 
 // events
 
@@ -174,26 +188,42 @@ export function getVotesLengthCall(
 // state
 
 export function createERC20VotingProposalEntityState(
-  entityID: string,
-  dao: string,
-  voting: string,
-  creator: string
+  entityID: string = PROPOSAL_ID,
+  dao: string = DAO_ADDRESS,
+  pkg: string = VOTING_ADDRESS,
+  creator: string = ADDRESS_ONE,
+  voteId: string = VOTE_ID,
+  startDate: string = START_DATE,
+  endDate: string = END_DATE,
+  snapshotBlock: string = SNAPSHOT_BLOCK,
+  supportRequiredPct: string = MIN_SUPPORT,
+  participationRequiredPct: string = MIN_TURNOUT,
+  votingPower: string = VOTING_POWER,
+  createdAt: string = CREATED_AT,
+  open: boolean = true,
+  executable: boolean = false,
+  executed: boolean = false
 ): ERC20VotingProposal {
   let erc20VotingProposal = new ERC20VotingProposal(entityID);
   erc20VotingProposal.dao = Address.fromString(dao).toHexString();
-  erc20VotingProposal.pkg = Address.fromString(voting).toHexString();
-  erc20VotingProposal.voteId = BigInt.zero();
+  erc20VotingProposal.pkg = Address.fromString(pkg).toHexString();
+  erc20VotingProposal.voteId = BigInt.fromString(voteId);
   erc20VotingProposal.creator = Address.fromString(creator);
 
-  erc20VotingProposal.startDate = BigInt.zero();
-  erc20VotingProposal.endDate = BigInt.zero();
-  erc20VotingProposal.snapshotBlock = BigInt.zero();
-  erc20VotingProposal.supportRequiredPct = BigInt.zero();
-  erc20VotingProposal.participationRequiredPct = BigInt.zero();
-  erc20VotingProposal.votingPower = BigInt.zero();
-  erc20VotingProposal.open = true;
-  erc20VotingProposal.executed = false;
-  erc20VotingProposal.createdAt = BigInt.zero();
+  erc20VotingProposal.startDate = BigInt.fromString(startDate);
+  erc20VotingProposal.endDate = BigInt.fromString(endDate);
+  erc20VotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  erc20VotingProposal.supportRequiredPct = BigInt.fromString(
+    supportRequiredPct
+  );
+  erc20VotingProposal.participationRequiredPct = BigInt.fromString(
+    participationRequiredPct
+  );
+  erc20VotingProposal.votingPower = BigInt.fromString(votingPower);
+  erc20VotingProposal.open = open;
+  erc20VotingProposal.executable = executable;
+  erc20VotingProposal.executed = executed;
+  erc20VotingProposal.createdAt = BigInt.fromString(createdAt);
   erc20VotingProposal.save();
 
   return erc20VotingProposal;

@@ -2,28 +2,28 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {_auth} from "../../utils/auth.sol";
-
-import {IDAO} from "./../IDAO.sol";
+import "../IDAO.sol";
 
 /// @title DaoAuthorizableUpgradeable
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta-transaction compatible modifier to authorize function calls through an associated DAO.
+/// @notice An abstract contract providing a meta-transaction compatible modifier for upgradeable contracts to authorize function calls through an associated DAO.
+/// @dev Make sure to call `__DaoAuthorizableUpgradeable_init` during initialization of the inheriting contract.
 abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
 
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
-    function __DaoAuthorizable_init(IDAO _dao) internal virtual onlyInitializing {
+    function __DaoAuthorizableUpgradeable_init(IDAO _dao) internal onlyInitializing {
         dao = _dao;
     }
 
-    /// @notice Returns the DAO that was set at the moment of creation or initialization.
-    /// @return The DAO contract.
+    /// @notice Returns the DAO contract.
+    /// @return IDAO The DAO contract.
     function getDAO() external view returns (IDAO) {
         return dao;
     }

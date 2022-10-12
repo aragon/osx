@@ -71,7 +71,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal onlyInitializing {
-        _registerStandard(MAJORITY_VOTING_INTERFACE_ID);
+        _registerInterface(MAJORITY_VOTING_INTERFACE_ID);
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         __MetaTxComponent_init(_dao, _trustedForwarder);

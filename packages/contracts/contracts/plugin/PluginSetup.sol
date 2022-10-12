@@ -2,18 +2,18 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 
 /// @title PluginSetup
 /// @author Aragon Association - 2022
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
-abstract contract PluginSetup {
-    bytes4 public constant PLUGIN_MANAGER_INTERFACE_ID = type(PluginSetup).interfaceId;
+abstract contract PluginSetup is ERC165 {
+    bytes4 public constant PLUGIN_SETUP_INTERFACE_ID = type(PluginSetup).interfaceId;
 
     /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.
     /// @return The ABI in string format.
@@ -84,19 +84,23 @@ abstract contract PluginSetup {
     ) external virtual returns (Permission.ItemMultiTarget[] memory permissions);
 
     /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.
-    /// @param _dao The address of the installing DAO that is automatically placed in the storage of the plugin.
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
-    /// @return proxy The address of the created proxy contracts.
-    function createERC1967Proxy(
-        address _dao,
-        address _implementation,
-        bytes memory _data
-    ) internal returns (address payable proxy) {
-        proxy = payable(address(new PluginERC1967Proxy(_dao, _implementation, _data)));
+    /// @param _data The data to initialize the storage of the proxy contract.
+    /// @return proxy The address of the created proxy contract.
+    function createERC1967Proxy(address _implementation, bytes memory _data)
+        internal
+        returns (address payable proxy)
+    {
+        proxy = payable(address(new ERC1967Proxy(_implementation, _data)));
     }
 
     /// @notice Returns the plugin's base implementation.
     /// @return address The address of the plugin implementation contract.
     /// @dev The implementation can be instantiated via the `new` keyword, cloned via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)), or proxied via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     function getImplementationAddress() external view virtual returns (address);
+
+    /// @inheritdoc ERC165
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == PLUGIN_SETUP_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }
 }

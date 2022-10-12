@@ -11,6 +11,20 @@ import {
   UsersRemoved,
   TrustedForwarderSet
 } from '../../generated/templates/AllowlistVoting/AllowlistVoting';
+import {
+  ADDRESS_ONE,
+  CREATED_AT,
+  DAO_ADDRESS,
+  END_DATE,
+  MIN_SUPPORT,
+  MIN_TURNOUT,
+  PROPOSAL_ID,
+  SNAPSHOT_BLOCK,
+  START_DATE,
+  VOTE_ID,
+  VOTING_ADDRESS,
+  VOTING_POWER
+} from '../constants';
 
 // events
 
@@ -214,26 +228,40 @@ export function getVotesLengthCall(
 // state
 
 export function createAllowlistProposalEntityState(
-  entityID: string,
-  dao: string,
-  voting: string,
-  creator: string
+  entityID: string = PROPOSAL_ID,
+  dao: string = DAO_ADDRESS,
+  pkg: string = VOTING_ADDRESS,
+  creator: string = ADDRESS_ONE,
+  voteId: string = VOTE_ID,
+  startDate: string = START_DATE,
+  endDate: string = END_DATE,
+  snapshotBlock: string = SNAPSHOT_BLOCK,
+  supportRequiredPct: string = MIN_SUPPORT,
+  participationRequiredPct: string = MIN_TURNOUT,
+  votingPower: string = VOTING_POWER,
+  createdAt: string = CREATED_AT,
+  open: boolean = true,
+  executable: boolean = false,
+  executed: boolean = false
 ): AllowlistProposal {
   let allowlistProposal = new AllowlistProposal(entityID);
   allowlistProposal.dao = Address.fromString(dao).toHexString();
-  allowlistProposal.pkg = Address.fromString(voting).toHexString();
-  allowlistProposal.voteId = BigInt.zero();
+  allowlistProposal.pkg = Address.fromString(pkg).toHexString();
+  allowlistProposal.voteId = BigInt.fromString(voteId);
   allowlistProposal.creator = Address.fromString(creator);
 
-  allowlistProposal.startDate = BigInt.zero();
-  allowlistProposal.endDate = BigInt.zero();
-  allowlistProposal.snapshotBlock = BigInt.zero();
-  allowlistProposal.supportRequiredPct = BigInt.zero();
-  allowlistProposal.participationRequired = BigInt.zero();
-  allowlistProposal.votingPower = BigInt.zero();
-  allowlistProposal.open = true;
-  allowlistProposal.executed = false;
-  allowlistProposal.createdAt = BigInt.zero();
+  allowlistProposal.startDate = BigInt.fromString(startDate);
+  allowlistProposal.endDate = BigInt.fromString(endDate);
+  allowlistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  allowlistProposal.supportRequiredPct = BigInt.fromString(supportRequiredPct);
+  allowlistProposal.participationRequired = BigInt.fromString(
+    participationRequiredPct
+  );
+  allowlistProposal.votingPower = BigInt.fromString(votingPower);
+  allowlistProposal.open = open;
+  allowlistProposal.executable = executable;
+  allowlistProposal.executed = executed;
+  allowlistProposal.createdAt = BigInt.fromString(createdAt);
   allowlistProposal.save();
 
   return allowlistProposal;
