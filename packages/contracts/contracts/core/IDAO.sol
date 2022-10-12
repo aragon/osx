@@ -50,7 +50,7 @@ abstract contract IDAO {
     /// @param actor The address of the caller.
     /// @param callId The id of the call.
     /// @dev The value of callId is defined by the component/contract calling the execute function.
-    ///      A Component implementation can use it, for example, as a nonce.
+    ///      A `Plugin` implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed.
     /// @param execResults Array with the results of the executed actions.
     event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
