@@ -107,6 +107,7 @@ contract CounterV2PluginSetup is PluginSetup {
         bytes memory _data
     )
         external
+        view
         override
         returns (
             address[] memory activeHelpers,
