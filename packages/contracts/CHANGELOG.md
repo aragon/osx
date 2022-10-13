@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added test util functions such as `deployAragonPluginRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory` and `filterEvents`.
+- Added `PluginSetupV1MockNonGovernance` mock and testing `DAOFactory` with non-governance plugins.
 - Added mocks and tests for the `Plugin` and `PluginSetup` classes.
 - Added `PluginSetupProcessor` to be the main class processing `PluginSetup` contracts and applying permissions in the installing DAO.
 - Added `DaoAuthorizableUpgradeable` and a free `_auth` function to provide an `auth` modifier to the different plugin types and prevent code duplication.
@@ -33,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored 'DAOFactory`to use`PluginSetupProcessor`.
 - Adapted `Component` to use `DaoAuthorizableUpgradeable` until it is fully refactored to become `Plugin`.
 - Refactored `DaoAuthorizable` to use the newly introduced, free `_auth` function to prevent code duplication.
 - Improved `Counter` examples and added respective `PluginSetup` example contracts.
