@@ -13,7 +13,7 @@ import {
 import {customError} from '../test-utils/custom-error-helper';
 
 import {deployNewDAO} from '../test-utils/dao';
-import {decodeEvent} from '../test-utils/event';
+import {findEvent} from '../test-utils/event';
 import {
   deployAragonPluginRegistry,
   deployPluginSetupProcessor,
@@ -43,7 +43,6 @@ const EVENTS = {
 const EMPTY_DATA = '0x';
 
 const AddressZero = ethers.constants.AddressZero;
-// default oracle address emitted from permission manager
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
 const EMPTY_ID = `0x${'00'.repeat(32)}`;
@@ -123,7 +122,7 @@ describe('Plugin Setup Processor', function () {
       ownerAddress
     );
 
-    const event = await decodeEvent(tx, EVENTS.PluginRepoRegistered);
+    const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
 
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
@@ -610,7 +609,7 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         );
 
-        const event = await decodeEvent(tx, 'UninstallationPrepared');
+        const event = await findEvent(tx, 'UninstallationPrepared');
         const {permissions} = event.args;
 
         await expect(
@@ -896,7 +895,7 @@ describe('Plugin Setup Processor', function () {
           helpers,
           EMPTY_DATA
         );
-        const prepareUpdateEvent = await decodeEvent(
+        const prepareUpdateEvent = await findEvent(
           prepareUpdateTx,
           EVENTS.UpdatePrepared
         );

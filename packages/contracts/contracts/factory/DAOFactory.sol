@@ -19,8 +19,8 @@ contract DAOFactory {
     PluginSetupProcessor public pluginSetupProcessor;
 
     struct DAOSettings {
-        string name;
         address trustedForwarder;
+        string name;
         bytes metadata;
     }
 
@@ -32,6 +32,9 @@ contract DAOFactory {
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
     error NoPluginProvided();
+
+    /// @notice Thrown if none of the provided `PluginSettings` is a governance plugin.
+    error NoGovernancePluginProvided();
 
     /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
     /// @param _registry The DAO registry to register the DAO by its name.
@@ -45,27 +48,32 @@ contract DAOFactory {
 
     function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata pluginSettings)
         external
+        returns (DAO dao)
     {
-        // Check if plugin is provided
+        // Check if no plugin is provided.
         if (pluginSettings.length == 0) {
             revert NoPluginProvided();
         }
 
-        // Create DAO
-        DAO dao = _createDAO(_daoSettings);
+        // Create DAO.
+        dao = _createDAO(_daoSettings);
 
-        // Register DAO
+        // Register DAO.
         daoRegistry.register(dao, msg.sender, _daoSettings.name);
 
-        // Grant `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
+        // Grant the temporary permissions.
+        // Grant Temporarly `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
         dao.grant(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
 
-        // Grant `PROCESS_INSTALL_PERMISSION_ID` to `DAOFactory` on `pluginSetupProcessor`.
+        // Grant Temporarly `PROCESS_INSTALL_PERMISSION_ID` on `pluginSetupProcessor` to this `DAOFactory`.
         dao.grant(
             address(pluginSetupProcessor),
             address(this),
             pluginSetupProcessor.PROCESS_INSTALL_PERMISSION_ID()
         );
+
+        // Install plugins on the newly created DAO.
+        bool hasGovernancePlugin;
 
         for (uint256 i = 0; i < pluginSettings.length; i++) {
             // Prepare plugin.
@@ -80,6 +88,11 @@ contract DAOFactory {
                     pluginSettings[i].data
                 );
 
+            // Check if plugin is a governance plugin.
+            if (!hasGovernancePlugin) {
+                hasGovernancePlugin = hasExecutePermission(permissions);
+            }
+
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(dao),
@@ -89,15 +102,28 @@ contract DAOFactory {
             );
         }
 
-        // Revoke `PROCESS_INSTALL_PERMISSION_ID` from `DAOFactory` on `pluginSetupProcessor`.
+        // Check one of the plugin was governance plugin.
+        if (!hasGovernancePlugin) {
+            revert NoGovernancePluginProvided();
+        }
+
+        // Set the rest of DAO's permissions TODO: only set, so it is extendable.
+        _setDAOPermissions(dao);
+
+        // Revoke the temporarly granted permissions.
+        // Revoke Temporarly `ROOT_PERMISSION` from `pluginSetupProcessor`.
+        dao.revoke(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
+
+        // Revoke `PROCESS_INSTALL_PERMISSION_ID` on `pluginSetupProcessor` from this `DAOFactory` .
         dao.revoke(
             address(pluginSetupProcessor),
             address(this),
             pluginSetupProcessor.PROCESS_INSTALL_PERMISSION_ID()
         );
 
-        // set the rest of DAO's permissions
-        _setDAOPermissions(dao);
+        // Revoke Temporarly `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implecitly granted to this `DaoFactory`
+        // at the create dao step `address(this)` being the initial owner of the new created DAO.
+        dao.revoke(address(dao), address(this), dao.ROOT_PERMISSION_ID());
     }
 
     /// @notice Creates a new DAO.
@@ -106,7 +132,7 @@ contract DAOFactory {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
 
-        // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory
+        // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
         dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder);
     }
 
@@ -115,13 +141,13 @@ contract DAOFactory {
     function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
         BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
+            memory items = new BulkPermissionsLib.ItemSingleTarget[](6);
 
-        // Grant DAO all the permissions required
+        // Grant DAO all the permissions required.
         items[0] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
-            _dao.SET_METADATA_PERMISSION_ID()
+            _dao.ROOT_PERMISSION_ID()
         );
         items[1] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
@@ -136,33 +162,38 @@ contract DAOFactory {
         items[3] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
-            _dao.ROOT_PERMISSION_ID()
+            _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
         );
         items[4] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
-            _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
+            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
         items[5] = BulkPermissionsLib.ItemSingleTarget(
             BulkPermissionsLib.Operation.Grant,
             address(_dao),
-            _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
-
-        // Revoke permissions from `pluginSetupProcessor`
-        items[6] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Revoke,
-            address(pluginSetupProcessor),
-            _dao.ROOT_PERMISSION_ID()
-        );
-
-        // Revoke permissions from this factory
-        items[7] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Revoke,
-            address(this),
-            _dao.ROOT_PERMISSION_ID()
+            _dao.SET_METADATA_PERMISSION_ID()
         );
 
         _dao.bulkOnSingleTarget(address(_dao), items);
+    }
+
+    /// @notice Check if one of the permissions is granting `EXECUTE_PERMISSION_ID`.
+    /// @param permissions List of permissions to be checked.
+    function hasExecutePermission(BulkPermissionsLib.ItemMultiTarget[] memory permissions)
+        internal
+        view
+        returns (bool)
+    {
+        for (uint256 i = 0; i < permissions.length; i++) {
+            if (
+                permissions[i].operation == BulkPermissionsLib.Operation.Grant &&
+                permissions[i].permissionId == DAO(payable(daoBase)).EXECUTE_PERMISSION_ID()
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

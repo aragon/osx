@@ -2,9 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ensDomainHash} from '../../utils/ensHelpers';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {VoteOption} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 import {
   AragonPluginRegistry,
@@ -18,26 +16,31 @@ import {
   deployPluginSetupProcessor,
 } from '../test-utils/plugin-setup-processor';
 import {deployPluginRepoFactory} from '../test-utils/repo';
-import {decodeEvent} from '../test-utils/event';
+import {findEvent} from '../test-utils/event';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
   DAORegistered: 'DAORegistered',
   InstallationPrepared: 'InstallationPrepared',
   InstallationApplied: 'InstallationApplied',
+  Revoked: 'Revoked',
+  Granted: 'Granted',
 };
 
-const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
-  'SET_CONFIGURATION_PERMISSION'
+const PROCESS_INSTALL_PERMISSION_ID = ethers.utils.id(
+  'PROCESS_INSTALL_PERMISSION'
 );
-const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
-  'MODIFY_ALLOWLIST_PERMISSION'
+const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
+const WITHDRAW_PERMISSION_ID = ethers.utils.id('WITHDRAW_PERMISSION');
+const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
+const SET_SIGNATURE_VALIDATOR_PERMISSION_ID = ethers.utils.id(
+  'SET_SIGNATURE_VALIDATOR_PERMISSION'
 );
-const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
+const SET_TRUSTED_FORWARDER_PERMISSION_ID = ethers.utils.id(
+  'SET_TRUSTED_FORWARDER_PERMISSION'
+);
+const SET_METADATA_PERMISSION_ID = ethers.utils.id('SET_METADATA_PERMISSION');
 
-const zeroAddress = ethers.constants.AddressZero;
-const PermissionManagerAnyAddress =
-  '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 const PermissionManagerAllowFlagAddress =
   '0x0000000000000000000000000000000000000002';
 const daoDummyName = 'dao1';
@@ -84,8 +87,8 @@ describe('DAOFactory: ', function () {
   let pluginRepoFactory: any;
   let pluginSetupMockRepoAddress: any;
   let daoRegistry: DAORegistry;
-
-  let actionExecuteContract: any; // contract
+  let daoSettings: any;
+  let pluginSettings: any;
 
   let signers: SignerWithAddress[];
   let ownerAddress: string;
@@ -102,10 +105,13 @@ describe('DAOFactory: ', function () {
     const PluginSetupProcessorArtifact = await hre.artifacts.readArtifact(
       'PluginSetupProcessor'
     );
+    // @ts-ignore
+    const DaoArtifact = await hre.artifacts.readArtifact('DAO');
 
     const _merged = [
       ...DAOFactoryArtifact.abi,
       ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
+      ...DaoArtifact.abi.filter((f: any) => f.type === 'event'),
       ...PluginSetupProcessorArtifact.abi.filter(
         (f: any) => f.type === 'event'
       ),
@@ -180,7 +186,7 @@ describe('DAOFactory: ', function () {
       '0x00',
       ownerAddress
     );
-    const event = await decodeEvent(tx, EVENTS.PluginRepoRegistered);
+    const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
     // Deploy DAO Factory
@@ -191,11 +197,6 @@ describe('DAOFactory: ', function () {
     );
 
     daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
-
-    const ActionExecuteContract = await ethers.getContractFactory(
-      'ActionExecute'
-    );
-    actionExecuteContract = await ActionExecuteContract.deploy();
 
     // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
     await managingDao.grant(
@@ -210,342 +211,170 @@ describe('DAOFactory: ', function () {
       daoRegistry.address,
       ethers.utils.id('REGISTER_ENS_SUBDOMAIN_PERMISSION')
     );
-  });
 
-  it('Revert if no plugin is provided', async () => {
-    const daoSettings = {
-      name: daoDummyName,
+    daoSettings = {
       trustedForwarder: AddressZero,
+      name: daoDummyName,
       metadata: daoDummyMetadata,
     };
 
+    pluginSettings = {
+      pluginSetup: pluginSetupV1Mock.address,
+      pluginSetupRepo: pluginSetupMockRepoAddress,
+      data: EMPTY_DATA,
+    };
+  });
+
+  it('Revert if no plugin is provided', async () => {
     await expect(daoFactory.createDao(daoSettings, [])).to.be.revertedWith(
       customError('NoPluginProvided')
     );
   });
 
-  it('Correclty create a DAO with one plugin', async () => {
-    const daoSettings = {
-      name: daoDummyName,
-      trustedForwarder: AddressZero,
-      metadata: daoDummyMetadata,
-    };
+  it('Revert if no governance plugin is provided', async () => {
+    const PluginSetupV1MockNonGovernance = await ethers.getContractFactory(
+      'PluginSetupV1MockNonGovernance'
+    );
+    const pluginSetupV1MockNonGovernance =
+      await PluginSetupV1MockNonGovernance.deploy();
 
-    const pluginSettings = {
-      pluginSetup: pluginSetupV1Mock.address,
-      pluginSetupRepo: pluginSetupMockRepoAddress,
+    const tx = await pluginRepoFactory.createPluginRepoWithVersion(
+      'PluginSetupV1NonGovernance',
+      [1, 0, 0],
+      pluginSetupV1MockNonGovernance.address,
+      '0x00',
+      ownerAddress
+    );
+    const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
+    const pluginSetupV1MockNonGovernanceRepoAddress = event.args.pluginRepo;
+
+    const nonGovernancepluginSettings = {
+      pluginSetup: pluginSetupV1MockNonGovernance.address,
+      pluginSetupRepo: pluginSetupV1MockNonGovernanceRepoAddress,
       data: EMPTY_DATA,
     };
 
+    await expect(
+      daoFactory.createDao(daoSettings, [nonGovernancepluginSettings])
+    ).to.be.revertedWith(customError('NoGovernancePluginProvided'));
+  });
+
+  it('Correclty create a DAO with one plugin', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
-    const {dao, plugin} = await extractInfoFromCreateDaoTx(tx);
+    const {dao, plugin, helpers, permissions} =
+      await extractInfoFromCreateDaoTx(tx);
 
     await expect(tx)
       .to.emit(daoRegistry, EVENTS.DAORegistered)
       .withArgs(dao, ownerAddress, daoSettings.name);
+
+    const event = await findEvent(tx, EVENTS.InstallationPrepared);
+
+    expect(event.args.sender).to.equal(daoFactory.address);
+    expect(event.args.dao).to.equal(dao);
+    expect(event.args.plugin).to.equal(plugin);
+    expect(event.args.pluginSetup).to.equal(pluginSetupV1Mock.address);
+    expect(event.args.helpers).to.deep.equal(helpers);
+    expect(event.args.permissions).to.deep.equal(permissions);
+    expect(event.args.data).to.equal(EMPTY_DATA);
 
     await expect(tx)
       .to.emit(psp, EVENTS.InstallationApplied)
       .withArgs(dao, plugin);
   });
 
-  // it('creates GovernanceWrappedERC20 clone when token is NON-zero', async () => {
-  //   const mintAmount = 100;
+  it('Make sure all temporarly granted permissions are revoked', async () => {
+    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-  //   let tx = await daoFactory.createERC20VotingDAO(
-  //     {
-  //       name: daoDummyName,
-  //       metadata: daoDummyMetadata,
-  //     },
-  //     dummyVoteSettings,
-  //     {
-  //       addr: zeroAddress,
-  //       name: 'TokenName',
-  //       symbol: 'TokenSymbol',
-  //     },
-  //     {
-  //       receivers: [ownerAddress],
-  //       amounts: [mintAmount],
-  //     },
-  //     zeroAddress
-  //   );
+    const factory = await ethers.getContractFactory('DAO');
+    const daoContract = factory.attach(dao);
 
-  //   // get block that tx was mined
-  //   const blockNum = await ethers.provider.getBlockNumber();
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Revoked)
+      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, psp.address, dao);
 
-  //   const {
-  //     dao: createdDao,
-  //     token,
-  //     voting,
-  //     creator,
-  //     name,
-  //   } = await getDeployments(tx, true);
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Revoked)
+      .withArgs(
+        PROCESS_INSTALL_PERMISSION_ID,
+        daoFactory.address,
+        daoFactory.address,
+        psp.address
+      );
 
-  //   expect(name).to.equal(daoDummyName);
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Revoked)
+      .withArgs(
+        ROOT_PERMISSION_ID,
+        daoFactory.address,
+        daoFactory.address,
+        dao
+      );
+  });
 
-  //   expect(creator).to.equal(ownerAddress);
+  it('Make sure all DAO permissions are correctly granted', async () => {
+    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const {dao} = await extractInfoFromCreateDaoTx(tx);
 
-  //   await ethers.provider.send('evm_mine', []);
+    const factory = await ethers.getContractFactory('DAO');
+    const daoContract = factory.attach(dao);
 
-  //   expect(await token.getPastVotes(ownerAddress, blockNum)).to.equal(
-  //     mintAmount
-  //   );
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        ROOT_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        PermissionManagerAllowFlagAddress
+      );
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        WITHDRAW_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        PermissionManagerAllowFlagAddress
+      );
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        UPGRADE_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        PermissionManagerAllowFlagAddress
+      );
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        SET_SIGNATURE_VALIDATOR_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        PermissionManagerAllowFlagAddress
+      );
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        SET_TRUSTED_FORWARDER_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        PermissionManagerAllowFlagAddress
+      );
+    await expect(tx)
+      .to.emit(daoContract, EVENTS.Granted)
+      .withArgs(
+        SET_METADATA_PERMISSION_ID,
+        daoFactory.address,
+        dao,
+        dao,
+        PermissionManagerAllowFlagAddress
+      );
+  });
 
-  //   const EXECUTE_PERMISSION_ID = await createdDao.EXECUTE_PERMISSION_ID();
-
-  //   const DAOPermissions = await Promise.all([
-  //     createdDao.SET_METADATA_PERMISSION_ID(),
-  //     createdDao.ROOT_PERMISSION_ID(),
-  //     createdDao.WITHDRAW_PERMISSION_ID(),
-  //     createdDao.UPGRADE_PERMISSION_ID(),
-  //     createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
-  //   ]);
-
-  //   // ======== Test Permission events that were emitted successfully ==========
-
-  //   tx = expect(tx);
-
-  //   // Check if correct PermissionManager events are thrown.
-  //   tx = tx.to
-  //     .emit(createdDao, EVENTS.MetadataSet)
-  //     .withArgs(daoDummyMetadata)
-  //     .to.emit(voting, EVENTS.ConfigUpdated)
-  //     .withArgs(
-  //       dummyVoteSettings.participationRequiredPct,
-  //       dummyVoteSettings.supportRequiredPct,
-  //       dummyVoteSettings.minDuration
-  //     );
-
-  //   // @ts-ignore
-  //   DAOPermissions.map(item => {
-  //     tx = tx.to
-  //       .emit(createdDao, EVENTS.Granted)
-  //       .withArgs(
-  //         item,
-  //         daoFactory.address,
-  //         createdDao.address,
-  //         createdDao.address,
-  //         PermissionManagerAllowFlagAddress
-  //       );
-  //   });
-
-  //   tx = tx.to
-  //     .emit(createdDao, EVENTS.Granted)
-  //     .withArgs(
-  //       SET_CONFIGURATION_PERMISSION_ID,
-  //       daoFactory.address,
-  //       createdDao.address,
-  //       voting.address,
-  //       PermissionManagerAllowFlagAddress
-  //     )
-  //     .to.emit(createdDao, EVENTS.Revoked)
-  //     .withArgs(
-  //       DAOPermissions[1],
-  //       daoFactory.address,
-  //       daoFactory.address,
-  //       createdDao.address
-  //     )
-  //     .to.emit(createdDao, EVENTS.Granted)
-  //     .withArgs(
-  //       EXECUTE_PERMISSION_ID,
-  //       daoFactory.address,
-  //       voting.address,
-  //       createdDao.address,
-  //       PermissionManagerAllowFlagAddress
-  //     );
-
-  //   // ===== Test if user can create a vote and execute it ======
-
-  //   // should be only callable by ERC20Voting
-  //   await expect(createdDao.execute(0, [])).to.be.revertedWith(
-  //     customError(
-  //       'Unauthorized',
-  //       createdDao.address,
-  //       createdDao.address,
-  //       ownerAddress,
-  //       EXECUTE_PERMISSION_ID
-  //     )
-  //   );
-
-  //   await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
-  //     customError(
-  //       'DaoUnauthorized',
-  //       createdDao.address,
-  //       voting.address,
-  //       voting.address,
-  //       ownerAddress,
-  //       SET_CONFIGURATION_PERMISSION_ID
-  //     )
-  //   );
-
-  //   const actions = [
-  //     {
-  //       to: actionExecuteContract.address,
-  //       value: 0,
-  //       data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
-  //     },
-  //     {
-  //       to: voting.address,
-  //       value: 0,
-  //       data: voting.interface.encodeFunctionData(
-  //         'setConfiguration',
-  //         [3, 4, 5]
-  //       ),
-  //     },
-  //   ];
-
-  //   await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
-
-  //   expect(await voting.vote(0, VoteOption.Yes, true))
-  //     .to.emit(createdDao, EVENTS.Executed)
-  //     .withArgs(voting.address, 0, [], [])
-  //     .to.emit(voting, EVENTS.ConfigUpdated)
-  //     .withArgs(3, 4, 5);
-
-  //   expect(await actionExecuteContract.test()).to.equal(true);
-  // });
-
-  // it('creates AllowlistVoting DAO', async () => {
-  //   let tx = await daoFactory.createAllowlistVotingDAO(
-  //     {
-  //       name: daoDummyName,
-  //       metadata: daoDummyMetadata,
-  //     },
-  //     dummyVoteSettings,
-  //     [ownerAddress],
-  //     zeroAddress
-  //   );
-
-  //   const {
-  //     dao: createdDao,
-  //     voting,
-  //     creator,
-  //     name,
-  //   } = await getDeployments(tx, false);
-
-  //   expect(name).to.equal(daoDummyName);
-
-  //   expect(creator).to.equal(ownerAddress);
-
-  //   await ethers.provider.send('evm_mine', []);
-
-  //   const DAOPermissions = await Promise.all([
-  //     createdDao.SET_METADATA_PERMISSION_ID(),
-  //     createdDao.ROOT_PERMISSION_ID(),
-  //     createdDao.WITHDRAW_PERMISSION_ID(),
-  //     createdDao.UPGRADE_PERMISSION_ID(),
-  //     createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
-  //   ]);
-
-  //   // ======== Test Permission events that were emitted successfully ==========
-
-  //   tx = expect(tx);
-
-  //   // Check if correct PermissionManager events are thrown.
-  //   tx = tx.to
-  //     .emit(createdDao, EVENTS.MetadataSet)
-  //     .withArgs(daoDummyMetadata)
-  //     .to.emit(voting, EVENTS.ConfigUpdated)
-  //     .withArgs(
-  //       dummyVoteSettings.participationRequiredPct,
-  //       dummyVoteSettings.supportRequiredPct,
-  //       dummyVoteSettings.minDuration
-  //     );
-
-  //   // @ts-ignore
-  //   DAOPermissions.map(item => {
-  //     tx = tx.to
-  //       .emit(createdDao, EVENTS.Granted)
-  //       .withArgs(
-  //         item,
-  //         daoFactory.address,
-  //         createdDao.address,
-  //         createdDao.address,
-  //         PermissionManagerAllowFlagAddress
-  //       );
-  //   });
-
-  //   tx = tx.to
-  //     .emit(createdDao, EVENTS.Granted)
-  //     .withArgs(
-  //       SET_CONFIGURATION_PERMISSION_ID,
-  //       daoFactory.address,
-  //       createdDao.address,
-  //       voting.address,
-  //       PermissionManagerAllowFlagAddress
-  //     )
-  //     .to.emit(createdDao, EVENTS.Granted)
-  //     .withArgs(
-  //       MODIFY_ALLOWLIST_PERMISSION_ID,
-  //       daoFactory.address,
-  //       createdDao.address,
-  //       voting.address,
-  //       PermissionManagerAllowFlagAddress
-  //     )
-  //     .to.emit(createdDao, EVENTS.Revoked)
-  //     .withArgs(
-  //       DAOPermissions[1],
-  //       daoFactory.address,
-  //       daoFactory.address,
-  //       createdDao.address
-  //     )
-  //     .to.emit(createdDao, EVENTS.Granted)
-  //     .withArgs(
-  //       EXECUTE_PERMISSION_ID,
-  //       daoFactory.address,
-  //       voting.address,
-  //       createdDao.address,
-  //       PermissionManagerAllowFlagAddress
-  //     );
-
-  //   // ===== Test if user can create a vote and execute it ======
-
-  //   // should be only callable by AllowlistVoting
-  //   await expect(createdDao.execute(0, [])).to.be.revertedWith(
-  //     customError(
-  //       'Unauthorized',
-  //       createdDao.address,
-  //       createdDao.address,
-  //       ownerAddress,
-  //       EXECUTE_PERMISSION_ID
-  //     )
-  //   );
-
-  //   await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
-  //     customError(
-  //       'DaoUnauthorized',
-  //       createdDao.address,
-  //       voting.address,
-  //       voting.address,
-  //       ownerAddress,
-  //       SET_CONFIGURATION_PERMISSION_ID
-  //     )
-  //   );
-
-  //   const actions = [
-  //     {
-  //       to: actionExecuteContract.address,
-  //       value: 0,
-  //       data: actionExecuteContract.interface.encodeFunctionData('setTest', []),
-  //     },
-  //     {
-  //       to: voting.address,
-  //       value: 0,
-  //       data: voting.interface.encodeFunctionData(
-  //         'setConfiguration',
-  //         [3, 4, 5]
-  //       ),
-  //     },
-  //   ];
-
-  //   await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
-
-  //   expect(await voting.vote(0, VoteOption.Yes, true))
-  //     .to.emit(createdDao, EVENTS.Executed)
-  //     .withArgs(voting.address, 0, [], [])
-  //     .to.emit(voting, EVENTS.ConfigUpdated)
-  //     .withArgs(3, 4, 5);
-
-  //   expect(await actionExecuteContract.test()).to.equal(true);
-  // });
+  // TODO: test erc20Voting, and allowlistVoting when ready.
 });

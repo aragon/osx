@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {decodeEvent} from './event';
+import {findEvent} from './event';
 import {AragonPluginRegistry, PluginSetupProcessor} from '../../typechain';
 
 export async function deployPluginSetupProcessor(
@@ -47,7 +47,7 @@ export async function prepareInstallation(
     pluginRepo,
     data
   );
-  const event = await decodeEvent(tx, 'InstallationPrepared');
+  const event = await findEvent(tx, 'InstallationPrepared');
   const {plugin, helpers, permissions} = event.args;
   return {
     plugin: plugin,
