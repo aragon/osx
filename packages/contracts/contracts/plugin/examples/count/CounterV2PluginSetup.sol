@@ -13,7 +13,7 @@ import "./CounterV2.sol";
 contract CounterV2PluginSetup is PluginSetup {
     using Clones for address;
 
-    // For testing purposes, the below are public...
+    // For testing purposes, the contracts below are public.
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
@@ -25,10 +25,12 @@ contract CounterV2PluginSetup is PluginSetup {
         counterBase = new CounterV2();
     }
 
+    /// @inheritdoc PluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num, uint newVariable)";
     }
 
+    /// @inheritdoc PluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
@@ -95,10 +97,12 @@ contract CounterV2PluginSetup is PluginSetup {
         return (plugin, helpers, permissions);
     }
 
+    /// @inheritdoc PluginSetup
     function prepareUpdateDataABI() external view virtual override returns (string memory) {
         return "(uint _newVariable)";
     }
 
+    /// @inheritdoc PluginSetup
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
@@ -139,10 +143,12 @@ contract CounterV2PluginSetup is PluginSetup {
         activeHelpers[0] = _helpers[0];
     }
 
+    /// @inheritdoc PluginSetup
     function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc PluginSetup
     function prepareUninstallation(
         address dao,
         address plugin,
@@ -179,6 +185,7 @@ contract CounterV2PluginSetup is PluginSetup {
         }
     }
 
+    /// @inheritdoc PluginSetup
     function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
     }

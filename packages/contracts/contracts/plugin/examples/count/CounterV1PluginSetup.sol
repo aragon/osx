@@ -23,10 +23,12 @@ contract CounterV1PluginSetup is PluginSetup {
         counterBase = new CounterV1();
     }
 
+    /// @inheritdoc PluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num)";
     }
 
+    /// @inheritdoc PluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
@@ -93,10 +95,12 @@ contract CounterV1PluginSetup is PluginSetup {
         return (plugin, helpers, permissions);
     }
 
+    /// @inheritdoc PluginSetup
     function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc PluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
@@ -133,6 +137,7 @@ contract CounterV1PluginSetup is PluginSetup {
         }
     }
 
+    /// @inheritdoc PluginSetup
     function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
     }
