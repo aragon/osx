@@ -404,7 +404,7 @@ describe('Plugin Setup Processor', function () {
             secondPreparation.plugin,
             secondPreparation.prepareInstallpermissions
           )
-        ).to.be.revertedWith(customError('PluginAlreadyApplied'));
+        ).to.be.revertedWith(customError('SetupAlreadyApplied'));
       });
 
       it('Correctly complete an instaltion process', async () => {
@@ -482,7 +482,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginNotApplied'));
+        ).to.be.revertedWith(customError('SetupNotApplied'));
       });
 
       it('Reverts if plugin uninstallation is already prepared', async () => {
@@ -754,7 +754,7 @@ describe('Plugin Setup Processor', function () {
 
         await expect(
           psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
-        ).to.be.revertedWith(customError('PluginNotApplied'));
+        ).to.be.revertedWith(customError('SetupNotApplied'));
       });
 
       it('Revert if helpers passed are missmatched', async () => {

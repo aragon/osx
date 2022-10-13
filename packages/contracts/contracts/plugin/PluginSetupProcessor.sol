@@ -80,17 +80,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin repository is empty.
     error EmptyPluginRepo();
 
-    /// @notice Thrown if a setup was already prepared.
+    /// @notice Thrown if a plugin setup is not prepared.
+    error SetupNotPrepared();
+
+    /// @notice Thrown if a plugin setup was already prepared.
     error SetupAlreadyPrepared();
 
-    /// @notice Thrown if a plugin setup is not prepared.
-    error PluginSetupNotPrepared();
-
     /// @notice Thrown if a plugin setup is not applied.
-    error PluginNotApplied();
+    error SetupNotApplied();
 
-    /// @notice Thrown if a plugin setup is already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
-    error PluginAlreadyApplied();
+    /// @notice Thrown if a plugin setup was already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
+    error SetupAlreadyApplied();
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender to which the plugin belongs to.
@@ -243,7 +243,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 appliedId = _getAppliedId(_dao, _plugin);
 
         if (isInstallationApplied[appliedId]) {
-            revert PluginAlreadyApplied();
+            revert SetupAlreadyApplied();
         }
 
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
@@ -252,7 +252,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check if plugin was actually deployed..
         if (storedPermissionsHash == bytes32(0)) {
-            revert PluginSetupNotPrepared();
+            revert SetupNotPrepared();
         }
 
         bytes32 passedPermissionsHash = _getPermissionsHash(_permissions);
@@ -305,7 +305,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Check if plugin is applied
         bytes32 appliedId = _getAppliedId(_dao, _updateParams.plugin);
         if (!isInstallationApplied[appliedId]) {
-            revert PluginNotApplied();
+            revert SetupNotApplied();
         }
 
         (uint16[3] memory oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
@@ -410,7 +410,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 appliedId = _getAppliedId(_dao, _plugin);
 
         if (!isInstallationApplied[appliedId]) {
-            revert PluginNotApplied();
+            revert SetupNotApplied();
         }
 
         permissions = PluginSetup(_pluginSetup).prepareUninstallation(
@@ -429,7 +429,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Check if this plugin uninstallation is already prepared
         if (uninstallPermissionHashes[setupId] != bytes32(0)) {
-            revert PluginAlreadyApplied();
+            revert SetupAlreadyApplied();
         }
 
         // set permission hashes.
