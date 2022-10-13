@@ -4,10 +4,7 @@ pragma solidity 0.8.10;
 
 import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
 import {IDAO} from "../core/IDAO.sol";
-import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
-
-import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 
 /// @title Register your unique DAO name
 /// @author Aragon Association - 2022
