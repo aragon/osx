@@ -21,7 +21,7 @@ abstract contract PluginSetup is ERC165 {
 
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
-    /// @param _data The `bytes` encoded data containing the input parameters specified in `prepareInstallationDataABI()`.
+    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
     /// @return installedHelpers The address array of all helpers (contracts or EOAs) associated with the plugin to be installed.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
@@ -40,15 +40,15 @@ abstract contract PluginSetup is ERC165 {
     function prepareUpdateDataABI() external view virtual returns (string memory) {}
 
     /// @notice Prepares the update of a plugin.
-    /// @param _dao The address of the installing DAO.
+    /// @param _dao The address of the updating DAO.
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     /// @param _oldVersion The semantic version of the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters specified in `prepareUpdateDataABI()`.
+    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the `prepareUpdateDataABI()` function.
     /// @return updatedHelpers The address array of helpers (contracts or EOAs) associated with the plugin after the update.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the updating DAO.
+    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUpdate(
         address _dao,
         address _plugin,
@@ -70,12 +70,12 @@ abstract contract PluginSetup is ERC165 {
     function prepareUninstallationDataABI() external view virtual returns (string memory);
 
     /// @notice Prepares the uninstallation of a plugin.
-    /// @param _dao The address of the installing DAO.
+    /// @param _dao The address of the uninstalling DAO.
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
-    /// @param _data The `bytes` encoded data containing the input parameters specified in `prepareUninstallationDataABI()`.
+    /// @param _data The `bytes` encoded data containing the input parameters for the uninstalltion as specified in the `prepareUninstallationDataABI()` function.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
+    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUninstallation(
         address _dao,
         address _plugin,
