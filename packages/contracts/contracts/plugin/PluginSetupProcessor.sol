@@ -43,13 +43,22 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address newPluginSetup; // // The `PluginSetup` contract of the version to be updated to.
     }
 
-    /// @notice The mapping containing the information of a setup
+    /// @notice A mapping between a plugin's installations `appliedId` (see [`getAppliedId`](#private-function-`getAppliedId`)) and a boolean expressing if it has been applied. This is used to guarantees that a plugin can only be installed once.
     mapping(bytes32 => bool) private isInstallationApplied;
+
+    /// @notice A mapping between a plugin's [`setupId`](#private-function-`getSetupId`) and the hashed, multi-targeted permission operation list obtained from the [`prepareInstallation`](#external-function-`prepareInstallation`) function.
     mapping(bytes32 => bytes32) private installPermissionHashes;
+
+    /// @notice A mapping between a plugin's [`setupId`](#private-function-`getSetupId`) and the hashed, multi-targeted permission operation list obtained from the [`prepareUpdate`](#external-function-`prepareUpdate`) function.
     mapping(bytes32 => bytes32) private updatePermissionHashes;
+
+    /// @notice A mapping between a plugin's [`setupId`](#private-function-`getSetupId`) and the hashed, multi-targeted permission operation list obtained from the [`prepareUninstallation`](#external-function-`prepareUninstallation`) function.
     mapping(bytes32 => bytes32) private uninstallPermissionHashes;
+
+    /// @notice A mapping between a plugin's [`setupId`](#private-function-`getSetupId`) and the array of helper addresses hashed via [`getHelpersHash`](#private-function-`getHelpersHash`).
     mapping(bytes32 => bytes32) private helpersHashes;
 
+    /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
     PluginRepoRegistry public repoRegistry;
 
     error SetupNotAllowed(address caller, bytes32 permissionId);
