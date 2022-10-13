@@ -2,12 +2,17 @@
 
 pragma solidity 0.8.10;
 
-import "../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
 
-// NON-Upgradeable
+/// @title MultiplyHelper
+/// @author Aragon Association - 2022
+/// @notice A helper contract providing a multiply function for the `CounterV1` and `CounterV2` example contracts.
 contract MultiplyHelper is PluginUUPSUpgradeable {
+    /// @notice The ID of the permission required to call the `multiply` function.
     bytes32 public constant MULTIPLY_PERMISSION_ID = keccak256("MULTIPLY_PERMISSION");
 
+    /// @notice Multiplies the count with a number.
+    /// @param _a The number to multiply the coun with.
     function multiply(uint256 _a, uint256 _b)
         external
         view
