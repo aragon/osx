@@ -13,8 +13,6 @@ import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
 import {Permission, PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 
-/// @notice Plugin setup processor that has root permissions to setup plugin on the dao and apply permissions.
-contract PluginSetupProcessor is DaoAuthorizable {
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
 /// @notice This contract processes the preparation and application of plugin setups (installation, update, uninstallation) on behalf of a requesting DAO.
@@ -100,7 +98,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
     /// @notice Constructs the plugin setup processor by setting the managing DAO and the associated plugin repo registry.
     /// @param _dao The DAO contract.
     /// @param _repoRegistry The plugin repo registry contract.
-    constructor(IDAO _dao, PluginRepoRegistry _repoRegistry) DaoAuthorizableConstructable(_dao) {
+    constructor(IDAO _dao, AragonPluginRegistry _repoRegistry) DaoAuthorizableConstructable(_dao) {
         repoRegistry = _repoRegistry;
     }
 
