@@ -253,7 +253,7 @@ describe('Plugin Setup Processor', function () {
             pluginSetupMockRepoAddress,
             data2
           )
-        ).to.be.revertedWith(customError('InstallationAlreadyPrepared'));
+        ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
       it('Retrun correctly the permissions', async () => {
@@ -533,7 +533,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             ethers.utils.defaultAbiCoder.encode(['bool'], [true])
           )
-        ).to.be.revertedWith(customError('UninstallationAlreadyPrepared'));
+        ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
     });
 
