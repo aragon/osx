@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `DaoAuthorizableBase` and `DaoAuthorizableConstructable` classes.
 - Added `DaoAuthorizableClonable` using OpenZepplin initialization.
 - Added mocks and tests for the `Plugin` and `PluginSetup` classes.
 - Added `PluginSetupProcessor` to be the main class processing `PluginSetup` contracts and applying permissions in the installing DAO.

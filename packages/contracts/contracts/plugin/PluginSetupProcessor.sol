@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
+import {DaoAuthorizableConstructable} from "../core/component/DaoAuthorizableConstructable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
@@ -17,7 +17,7 @@ import {PluginRepo} from "./PluginRepo.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract processes the preparation and application of plugin setups (installation, update, uninstallation) on behalf of a requesting DAO.
 /// @dev This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
-contract PluginSetupProcessor is DaoAuthorizable {
+contract PluginSetupProcessor is DaoAuthorizableConstructable {
     using ERC165Checker for address;
 
     /// @notice The ID of the permission required to call the `applyInstallation` function.
@@ -166,7 +166,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Constructs the plugin setup processor by setting the managing DAO and the associated plugin repo registry.
     /// @param _dao The DAO contract.
     /// @param _repoRegistry The plugin repo registry contract.
-    constructor(IDAO _dao, PluginRepoRegistry _repoRegistry) DaoAuthorizable(_dao) {
+    constructor(IDAO _dao, PluginRepoRegistry _repoRegistry) DaoAuthorizableConstructable(_dao) {
         repoRegistry = _repoRegistry;
     }
 

@@ -36,9 +36,8 @@ contract CounterV1 is PluginUUPSUpgradeable {
 
     /// @notice Multiplies the count with a number.
     /// @param _a The number to multiply the coun with.
-    function multiply(uint256 _a) public auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
-        count = multiplyHelper.multiply(count, _a);
-        return count;
+    function multiply(uint256 _a) public view auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
+        return multiplyHelper.multiply(count, _a);
     }
 
     /// @notice Executes something on the DAO.

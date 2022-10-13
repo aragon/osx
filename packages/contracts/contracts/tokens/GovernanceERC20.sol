@@ -85,4 +85,24 @@ contract GovernanceERC20 is ERC165Upgradeable, ERC20VotesUpgradeable, DaoAuthori
     function _burn(address account, uint256 amount) internal override {
         super._burn(account, amount);
     }
+
+    /// @inheritdoc ContextUpgradeable
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, DaoAuthorizableUpgradeable)
+        returns (address)
+    {
+        return ContextUpgradeable._msgSender();
+    }
+
+    /// @inheritdoc ContextUpgradeable
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, DaoAuthorizableUpgradeable)
+        returns (bytes calldata)
+    {
+        return ContextUpgradeable._msgData();
+    }
 }
