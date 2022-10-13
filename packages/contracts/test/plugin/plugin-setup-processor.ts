@@ -316,7 +316,8 @@ describe('Plugin Setup Processor', function () {
           )
         ).to.be.revertedWith(
           customError(
-            'SetupNotAllowed',
+            'SetupApplicationUnauthorized',
+            targetDao.address,
             ownerAddress,
             APPLY_INSTALLATION_PERMISSION_ID
           )
@@ -556,7 +557,8 @@ describe('Plugin Setup Processor', function () {
           )
         ).to.be.revertedWith(
           customError(
-            'SetupNotAllowed',
+            'SetupApplicationUnauthorized',
+            targetDao.address,
             ownerAddress,
             APPLY_UNINSTALLATION_PERMISSION_ID
           )
@@ -582,7 +584,7 @@ describe('Plugin Setup Processor', function () {
             [],
             []
           )
-        ).to.be.revertedWith(customError('HelpersMismatch'));
+        ).to.be.revertedWith(customError('HelpersHashInvalid'));
       });
 
       it('Revert bad permissions is passed', async () => {
@@ -621,13 +623,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             []
           )
-        ).to.be.revertedWith(
-          customError(
-            'BadPermissions',
-            EMPTY_ID,
-            '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470' // TODO: create function to calculate permissions hashes
-          )
-        );
+        ).to.be.revertedWith(customError('PermissionsHashInvalid'));
       });
 
       it('Correctly complete an uninstallation process', async () => {
@@ -709,7 +705,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginNonUpgradeable', plugin));
+        ).to.be.revertedWith(customError('PluginNonupgradeable', plugin));
       });
 
       it('Reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
@@ -789,7 +785,7 @@ describe('Plugin Setup Processor', function () {
 
         await expect(
           psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
-        ).to.be.revertedWith(customError('HelpersMismatch'));
+        ).to.be.revertedWith(customError('HelpersHashInvalid'));
       });
 
       it('Correctly retrun permissions and initData', async () => {
@@ -886,7 +882,8 @@ describe('Plugin Setup Processor', function () {
           )
         ).to.be.revertedWith(
           customError(
-            'SetupNotAllowed',
+            'SetupApplicationUnauthorized',
+            targetDao.address,
             ownerAddress,
             APPLY_UPDATE_PERMISSION_ID
           )
@@ -904,13 +901,13 @@ describe('Plugin Setup Processor', function () {
             EMPTY_DATA,
             permissions
           )
-        ).to.be.revertedWith(customError('UpdatePermissionsMismatch'));
+        ).to.be.revertedWith(customError('PermissionsHashInvalid'));
       });
 
       // TODO: Find a way to test upgradeProxy
       // also chack this function's errors as they might be missleading
       // it also get threw if UPGRADE_PERMISSION is not granted
-      // it('applyUpdate: reverts if PluginNonUpgradeable', async () => {});
+      // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
 
       it('Correctly process an update', async () => {
         const daoAddress = targetDao.address;

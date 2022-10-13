@@ -61,17 +61,36 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
     PluginRepoRegistry public repoRegistry;
 
-    error SetupNotAllowed(address caller, bytes32 permissionId);
-    error PluginNonUpgradeable(address plugin);
-    error BadPermissions(bytes32 stored, bytes32 passed);
-    error PluginNotPrepared();
-    error HelpersMismatch();
+    /// @notice Thrown if a setup is unauthorized for the associated DAO.
+    /// @param dao The address of the associated DAO.
+    /// @param caller The address (EOA or contract) requesting the application of a setup on `dao`.
+    /// @param permissionId The permission identifier.
+    error SetupApplicationUnauthorized(address dao, address caller, bytes32 permissionId);
+
+    /// @notice Thrown if a plugin is not upgradeable.
+    /// @param plugin The address of the plugin contract.
+    error PluginNonupgradeable(address plugin);
+
+    /// @notice Thrown if a permissions hash obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) is invalid.
+    error PermissionsHashInvalid();
+
+    /// @notice Thrown if a helpers hash obtained via [`getHelpersHash`](#private-function-`getHelpersHash`) is invalid.
+    error HelpersHashInvalid();
+
+    /// @notice Thrown if a plugin repository is empty.
     error EmptyPluginRepo();
-    error PluginAlreadyApplied(); // in case the PluginSetup is malicios and always/sometime returns the same address
-    error UpdatePermissionsMismatch();
+
+    /// @notice Thrown if a setup was already prepared.
+    error SetupAlreadyPrepared();
+
+    /// @notice Thrown if a plugin setup is not prepared.
+    error PluginSetupNotPrepared();
+
+    /// @notice Thrown if a plugin setup is not applied.
     error PluginNotApplied();
-    error InstallationAlreadyPrepared();
-    error UninstallationAlreadyPrepared();
+
+    /// @notice Thrown if a plugin setup is already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
+    error PluginAlreadyApplied();
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender to which the plugin belongs to.
@@ -190,7 +209,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Check if this plugin installation is already prepared
         if (installPermissionHashes[setupId] != bytes32(0)) {
-            revert InstallationAlreadyPrepared();
+            revert SetupAlreadyPrepared();
         }
 
         installPermissionHashes[setupId] = getPermissionsHash(permissions);
@@ -229,18 +248,18 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
-        bytes32 storedPermissionHash = installPermissionHashes[setupId];
+        bytes32 storedPermissionsHash = installPermissionHashes[setupId];
 
         // check if plugin was actually deployed..
-        if (storedPermissionHash == bytes32(0)) {
-            revert PluginNotPrepared();
+        if (storedPermissionsHash == bytes32(0)) {
+            revert PluginSetupNotPrepared();
         }
 
-        bytes32 passedPermissionHash = getPermissionsHash(_permissions);
+        bytes32 passedPermissionsHash = getPermissionsHash(_permissions);
 
         // check that permissions weren't tempered.
-        if (storedPermissionHash != passedPermissionHash) {
-            revert BadPermissions({stored: storedPermissionHash, passed: passedPermissionHash});
+        if (storedPermissionsHash != passedPermissionsHash) {
+            revert PermissionsHashInvalid();
         }
 
         // apply permissions on a dao..
@@ -274,7 +293,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
         if (!_updateParams.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            revert PluginNonUpgradeable({plugin: _updateParams.plugin});
+            revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 
         // Implicitly confirms plugin managers are valid.
@@ -305,7 +324,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         if (helpersHashes[oldSetupId] != getHelpersHash(_currentHelpers)) {
-            revert HelpersMismatch();
+            revert HelpersHashInvalid();
         }
 
         delete helpersHashes[oldSetupId];
@@ -351,7 +370,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
         if (updatePermissionHashes[setupId] != getPermissionsHash(_permissions)) {
-            revert UpdatePermissionsMismatch();
+            revert PermissionsHashInvalid();
         }
 
         upgradeProxy(_plugin, PluginSetup(_pluginSetup).getImplementationAddress(), _initData);
@@ -405,12 +424,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check helpers
         if (helpersHashes[setupId] != getHelpersHash(_currentHelpers)) {
-            revert HelpersMismatch();
+            revert HelpersHashInvalid();
         }
 
         // Check if this plugin uninstallation is already prepared
         if (uninstallPermissionHashes[setupId] != bytes32(0)) {
-            revert UninstallationAlreadyPrepared();
+            revert PluginAlreadyApplied();
         }
 
         // set permission hashes.
@@ -443,15 +462,15 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = getSetupId(_dao, _pluginSetup, _plugin);
 
         if (helpersHashes[setupId] != getHelpersHash(_currentHelpers)) {
-            revert HelpersMismatch();
+            revert HelpersHashInvalid();
         }
 
-        bytes32 storedPermissionHash = uninstallPermissionHashes[setupId];
-        bytes32 passedPermissionHash = getPermissionsHash(_permissions);
+        bytes32 storedPermissionsHash = uninstallPermissionHashes[setupId];
+        bytes32 passedPermissionsHash = getPermissionsHash(_permissions);
 
         // check that permissions weren't tempered.
-        if (storedPermissionHash != passedPermissionHash) {
-            revert BadPermissions({stored: storedPermissionHash, passed: passedPermissionHash});
+        if (storedPermissionsHash != passedPermissionsHash) {
+            revert PermissionsHashInvalid();
         }
 
         DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
@@ -481,8 +500,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
         setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
     }
 
-    /// @notice Returns a hash of an address array of helpers (contracts or EOAs).
-    /// @param _helpers The address array of helpers (contracts or EOAs) associated to be hashed.
+    /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
+    /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.
     function getHelpersHash(address[] memory _helpers) private pure returns (bytes32 helpersHash) {
         helpersHash = keccak256(abi.encode(_helpers));
     }
@@ -528,7 +547,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonUpgradeable({plugin: _proxy});
+                revert PluginNonupgradeable({plugin: _proxy});
             }
         } else {
             try PluginUUPSUpgradeable(_proxy).upgradeTo(_implementation) {} catch Error(
@@ -538,7 +557,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonUpgradeable({plugin: _proxy});
+                revert PluginNonupgradeable({plugin: _proxy});
             }
         }
     }
@@ -551,7 +570,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             msg.sender != _dao &&
             !DAO(payable(_dao)).hasPermission(address(this), msg.sender, _permissionId, bytes(""))
         ) {
-            revert SetupNotAllowed({caller: msg.sender, permissionId: _permissionId});
+            revert SetupApplicationUnauthorized({
+                dao: _dao,
+                caller: msg.sender,
+                permissionId: _permissionId
+            });
         }
     }
 }
