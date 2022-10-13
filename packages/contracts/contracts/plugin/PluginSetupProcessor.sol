@@ -62,7 +62,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     PluginRepoRegistry public repoRegistry;
 
     /// @notice Thrown if a setup is unauthorized for the associated DAO.
-    /// @param dao The address of the associated DAO.
+    /// @param dao The address of the dao to which the plugin belongs.
     /// @param caller The address (EOA or contract) that requested the application of a setup on the associated DAO.
     /// @param permissionId The permission identifier.
     error SetupApplicationUnauthorized(address dao, address caller, bytes32 permissionId);
@@ -93,13 +93,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error SetupAlreadyApplied();
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
-    /// @param sender The sender to which the plugin belongs to.
+    /// @param sender The sender that prepared the plugin installation. // TODO why do we need it? Why don't we have that for every `UpdatePrepared` event?
     /// @param dao The address of the dao to which the plugin belongs.
-    /// @param plugin The plugin of the plugin.
+    /// @param plugin The address of the plugin contract.
     /// @param pluginSetup The address of the `PluginSetup` contract used for the installation.
     /// @param helpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin to be installed.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
-    /// @param data The `bytes` encoded data containing the input parameters specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
+    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
     event InstallationPrepared(
         address indexed sender, //TODO why do we need this information
         address indexed dao,
@@ -112,7 +112,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Emitted after a plugin installation was applied.
     /// @param dao The address of the dao to which the plugin belongs.
-    /// @param plugin the plugin address.
+    /// @param plugin The address of the plugin contract.
     event InstallationApplied(address dao, address plugin);
 
     /// @notice Emitted with a prepared plugin update to store data relevant for the application step.
@@ -120,6 +120,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param updatedHelpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin update.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
     /// @param initData The initialization data to be passed to the upgradeable plugin contract.
+    // TODO Why don't we emit the plugin setup contract here?
     event UpdatePrepared(
         address indexed dao,
         address[] updatedHelpers,
@@ -128,15 +129,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
     );
 
     /// @notice Emitted after a plugin update was applied.
-    /// @param dao The address of the dao to which the plugin belongs to.
-    /// @param plugin the plugin address.
+    /// @param dao The address of the dao to which the plugin belongs.
+    /// @param plugin The address of the plugin contract.
     event UpdateApplied(address indexed dao, address indexed plugin);
 
     /// @notice Emitted with a prepared plugin uninstallation to store data relevant for the application step.
     /// @param dao The address of the dao to which the plugin belongs.
-    /// @param plugin the plugin address.
+    /// @param plugin The address of the plugin contract.
+    /// @param pluginSetup The address of the `PluginSetup` contract used for the uninstallation.
     /// @param currentHelpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin to be installed.
-    /// @param data The initialization data to be passed to the upgradeable plugin contract.
+    /// @param data The `bytes` encoded data containing the input parameters for the uninstallation as specified in the `prepareUninstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
     event UninstallationPrepared(
         address indexed dao,
@@ -148,9 +150,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     );
 
     /// @notice Emitted after a plugin installation was applied.
-    /// @param dao The address of the dao to which the plugin belongs to.
-    /// @param plugin the plugin address.
-    /// @param helpers The address array of all helpers (contracts or EOAs) associated with the plugin to update from.
+    /// @param dao The address of the dao to which the plugin belongs.
+    /// @param plugin The address of the plugin contract.
+    /// @param helpers The address array of all helpers (contracts or EOAs) that were associated with the plugin that was uninstalled. // TODO Why do we emit them?
     event UninstallationApplied(address indexed dao, address indexed plugin, address[] helpers);
 
     /// @notice A modifier to check if a caller has the permission to apply a prepared setup.
@@ -181,7 +183,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
-    /// @param _data The `bytes` encoded data containing the input parameters specified in the `prepareInstallationDataABI()` function in the `_pluginSetup` setup contract.
+    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @return permissions The list of multi-targeted permission operations to be applied to the installing DAO.
     function prepareInstallation(
         address _dao,
@@ -229,10 +231,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return permissions;
     }
 
-    /// @notice Applies the permissions of a prepared installation.
+    /// @notice Applies the permissions of a prepared installation to a DAO.
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
-    /// @param _plugin The address of the plugin contract.
+    /// @param _plugin The address of the `Plugin` contract.
     /// @param _permissions The list of multi-targeted permission operations to apply to the installing DAO.
     function applyInstallation(
         address _dao,
@@ -280,8 +282,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Prepares the update of an UUPS upgradeable plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _updateParams The parameters of the update.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters specified in the `prepareUpdateDataABI()` function in the `newPluginSetup` setup contract inside `_updateParams`.
+    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is prepared to be updated.
+    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the `prepareUpdateDataABI()` function in the `newPluginSetup` setup contract inside `_updateParams`.
     /// @return permissions The list of multi-targeted permission operations to be applied to the updating DAO.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for.
@@ -296,7 +298,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 
-        // Implicitly confirms plugin managers are valid.
+        // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_updateParams.pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -354,16 +356,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return (permissions, initData);
     }
 
-    /// @notice Applies the permissions of a prepared update of an upgradeable contract. //TODO revisit
+    /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
     /// @param _dao The address of the updating DAO.
-    /// @param _plugin The address of the `Plugin` proxy contract. // TODO revisit
+    /// @param _plugin The address of the `PluginUUPSUpgradeable` proxy contract.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _initData The initialization data to be passed to the upgradeable plugin contract via `upgradeToAndCall`. // revisit
     /// @param _permissions The list of multi-targeted permission operations to apply to the updating DAO.
     function applyUpdate(
         address _dao,
-        address _plugin, // proxy contract
-        address _pluginSetup, // new plugin manager upgrade happens to.
+        address _plugin,
+        address _pluginSetup,
         bytes memory _initData,
         Permission.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
@@ -387,8 +389,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _plugin The address of the `Plugin` contract.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters specified in the `prepareUpdateDataABI()` function in the `newPluginSetup` setup contract inside `_updateParams`.
+    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is prepared to be uninstalled.
+    /// @param _data The `bytes` encoded data containing the input parameters for the uninstallation as specified in the `prepareUninstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
     function prepareUninstallation(
         address _dao,
@@ -445,18 +447,18 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
     }
 
-    /// @notice Applies the permissions of a prepared uninstallation.
-    /// @param _dao The address of the updating DAO.
+    /// @notice Applies the permissions of a prepared uninstallation to a DAO.
+    /// @param _dao The address of the DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _plugin The address of the `Plugin` contract.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
+    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is uninstalled.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
     /// @param _permissions The list of multi-targeted permission operations to apply to the uninstalling DAO.
     function applyUninstallation(
         address _dao,
         address _plugin,
         address _pluginSetup,
-        address[] calldata _currentHelpers,
+        address[] calldata _currentHelpers, // TODO Isn't it sufficient to pass the helpers hash?
         Permission.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
@@ -479,19 +481,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         delete uninstallPermissionHashes[setupId];
 
-        emit UninstallationApplied(_dao, _plugin, _currentHelpers); // why we emit the helpers?
+        emit UninstallationApplied(_dao, _plugin, _currentHelpers); // TODO why we emit the helpers?
     }
 
     /// @notice Returns an identifier for applied installations by hashing the DAO and plugin address.
     /// @param _dao The address of the DAO conducting the setup.
-    /// @param _plugin The address of the plugin associated with the setup.
+    /// @param _plugin The address of the `Plugin` contract associated with the setup.
     function _getAppliedId(address _dao, address _plugin) private pure returns (bytes32 appliedId) {
         appliedId = keccak256(abi.encode(_dao, _plugin));
     }
 
     /// @notice Returns an identifier for prepared installations by hashing the DAO and plugin address.
     /// @param _dao The address of the DAO conducting the setup.
-    /// @param _plugin The address of the plugin associated with the setup.
+    /// @param _plugin The address of the `Plugin` contract associated with the setup.
     function _getSetupId(
         address _dao,
         address _pluginSetup,
