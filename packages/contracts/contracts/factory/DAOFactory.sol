@@ -107,7 +107,7 @@ contract DAOFactory {
             revert NoGovernancePluginProvided();
         }
 
-        // Set the rest of DAO's permissions TODO: only set, so it is extendable.
+        // Set the rest of DAO's permissions.
         _setDAOPermissions(dao);
 
         // Revoke the temporarly granted permissions.
