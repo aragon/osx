@@ -584,7 +584,7 @@ describe('Plugin Setup Processor', function () {
             [],
             []
           )
-        ).to.be.revertedWith(customError('HelpersHashInvalid'));
+        ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
       it('Revert bad permissions is passed', async () => {
@@ -623,7 +623,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             []
           )
-        ).to.be.revertedWith(customError('PermissionsHashInvalid'));
+        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
       });
 
       it('Correctly complete an uninstallation process', async () => {
@@ -785,7 +785,7 @@ describe('Plugin Setup Processor', function () {
 
         await expect(
           psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
-        ).to.be.revertedWith(customError('HelpersHashInvalid'));
+        ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
       it('Correctly retrun permissions and initData', async () => {
@@ -901,7 +901,7 @@ describe('Plugin Setup Processor', function () {
             EMPTY_DATA,
             permissions
           )
-        ).to.be.revertedWith(customError('PermissionsHashInvalid'));
+        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
       });
 
       // TODO: Find a way to test upgradeProxy

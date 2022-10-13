@@ -40,7 +40,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address plugin; // The address of the `Plugin` contract being currently active. This can be a proxy or a concrete instance.
         PluginRepo pluginSetupRepo; // The repository storing the `PluginSetup` contracts of all versions of a plugin.
         address currentPluginSetup; // The `PluginSetup` contract of the version being currently active and to be updated from.
-        address newPluginSetup; // // The `PluginSetup` contract of the version to be updated to.
+        address newPluginSetup; // The `PluginSetup` contract of the version to be updated to.
     }
 
     /// @notice A mapping between a plugin's installations `appliedId` (see [`getAppliedId`](#private-function-`getAppliedId`)) and a boolean expressing if it has been applied. This is used to guarantees that a plugin can only be installed once.
@@ -63,7 +63,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Thrown if a setup is unauthorized for the associated DAO.
     /// @param dao The address of the associated DAO.
-    /// @param caller The address (EOA or contract) requesting the application of a setup on `dao`.
+    /// @param caller The address (EOA or contract) that requested the application of a setup on the associated DAO.
     /// @param permissionId The permission identifier.
     error SetupApplicationUnauthorized(address dao, address caller, bytes32 permissionId);
 
@@ -71,11 +71,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
 
-    /// @notice Thrown if a permissions hash obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) is invalid.
-    error PermissionsHashInvalid();
+    /// @notice Thrown if two permissions hashes obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) don't match.
+    error PermissionsHashMismatch();
 
-    /// @notice Thrown if a helpers hash obtained via [`getHelpersHash`](#private-function-`getHelpersHash`) is invalid.
-    error HelpersHashInvalid();
+    /// @notice Thrown if two helpers hashes obtained via  [`getHelpersHash`](#private-function-`getHelpersHash`) don't match.
+    error HelpersHashMismatch();
 
     /// @notice Thrown if a plugin repository is empty.
     error EmptyPluginRepo();
@@ -259,7 +259,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check that permissions weren't tempered.
         if (storedPermissionsHash != passedPermissionsHash) {
-            revert PermissionsHashInvalid();
+            revert PermissionsHashMismatch();
         }
 
         // apply permissions on a dao..
@@ -324,7 +324,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         if (helpersHashes[oldSetupId] != _getHelpersHash(_currentHelpers)) {
-            revert HelpersHashInvalid();
+            revert HelpersHashMismatch();
         }
 
         delete helpersHashes[oldSetupId];
@@ -370,7 +370,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
 
         if (updatePermissionHashes[setupId] != _getPermissionsHash(_permissions)) {
-            revert PermissionsHashInvalid();
+            revert PermissionsHashMismatch();
         }
 
         _upgradeProxy(_plugin, PluginSetup(_pluginSetup).getImplementationAddress(), _initData);
@@ -424,7 +424,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check helpers
         if (helpersHashes[setupId] != _getHelpersHash(_currentHelpers)) {
-            revert HelpersHashInvalid();
+            revert HelpersHashMismatch();
         }
 
         // Check if this plugin uninstallation is already prepared
@@ -462,7 +462,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
 
         if (helpersHashes[setupId] != _getHelpersHash(_currentHelpers)) {
-            revert HelpersHashInvalid();
+            revert HelpersHashMismatch();
         }
 
         bytes32 storedPermissionsHash = uninstallPermissionHashes[setupId];
@@ -470,7 +470,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // check that permissions weren't tempered.
         if (storedPermissionsHash != passedPermissionsHash) {
-            revert PermissionsHashInvalid();
+            revert PermissionsHashMismatch();
         }
 
         DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
