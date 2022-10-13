@@ -431,7 +431,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Check if this plugin uninstallation is already prepared
         if (uninstallPermissionHashes[setupId] != bytes32(0)) {
-            revert SetupAlreadyApplied();
+            revert SetupAlreadyPrepared();
         }
 
         // set permission hashes.
