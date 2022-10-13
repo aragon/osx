@@ -13,14 +13,13 @@ import {IDAO} from "../IDAO.sol";
 abstract contract Plugin is ERC165, DaoAuthorizable {
     bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;
 
-    /// @notice Initializes the DAO by storing the associated DAO and registering the contract's [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID.
-    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
-    /// @param _dao The associated DAO address.
+    /// @notice Constructs the plugin by storing the associated DAO.
+    /// @param _dao The DAO contract.
     constructor(IDAO _dao) DaoAuthorizable(_dao) {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @return bool Returns true if the interface is supported.
     /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return _interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }

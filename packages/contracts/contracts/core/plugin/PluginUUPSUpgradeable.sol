@@ -21,23 +21,22 @@ abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
     /// @dev Used to check the permissions within the upgradability pattern implementation of OZ
     function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
-    /// @notice Checks if an interface is supported by this or the parent contract.
+    /// @notice Checks if an interface is supported by this or its parent contract.
     /// @param _interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID ||
+            _interfaceId == PLUGIN_UPGRADEABLE_INTERFACE_ID ||
             super.supportsInterface(_interfaceId);
     }
 
-    /// @notice used to check the current base logic contract proxy delegates to.
-    /// @return address the address of current base logic contract.
-    function getImplementationAddress() public view returns (address) {
-        return _getImplementation();
+    /// @notice Returns the address of the implementation contract the UUPS proxy is pointing to.
+    /// @return implementation The address of the implementation contract.
+    function getImplementationAddress() public view returns (address implementation) {
+        implementation = _getImplementation();
     }
 
-    /// @dev This empty reserved space is put in place to allow future versions to add new
-    /// variables without shifting down storage in the inheritance chain.
-    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[50] private __gap;
 }
