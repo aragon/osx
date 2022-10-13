@@ -7,18 +7,12 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import {_auth} from "../../utils/auth.sol";
 import {IDAO} from "../IDAO.sol";
 
-/// @title DaoAuthorizable
+/// @title DaoAuthorizableBase
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta-transaction compatible modifier for contracts being generated with `new` to authorize function calls through an associated DAO.
-abstract contract DaoAuthorizable is Context {
+/// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
+abstract contract DaoAuthorizableBase is Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;
-
-    /// @notice Constructs the contract by setting the associated DAO.
-    /// @param _dao The associated DAO address.
-    constructor(IDAO _dao) {
-        dao = _dao;
-    }
 
     /// @notice Returns the DAO contract.
     /// @return IDAO The DAO contract.
