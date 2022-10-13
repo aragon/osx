@@ -4,11 +4,12 @@ pragma solidity 0.8.10;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
+import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoAuthorizableConstructable} from "../core/component/DaoAuthorizableConstructable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
-import {PluginSetup, Permission} from "./PluginSetup.sol";
+import {PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 
 /// @title PluginSetupProcessor
@@ -104,7 +105,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         address indexed plugin,
         address pluginSetup,
         address[] helpers,
-        Permission.ItemMultiTarget[] permissions,
+        BulkPermissionsLib.ItemMultiTarget[] permissions,
         bytes data
     );
 
@@ -122,7 +123,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
     event UpdatePrepared(
         address indexed dao,
         address[] updatedHelpers,
-        Permission.ItemMultiTarget[] permissions,
+        BulkPermissionsLib.ItemMultiTarget[] permissions,
         bytes initData
     );
 
@@ -144,7 +145,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         address indexed pluginSetup,
         address[] currentHelpers,
         bytes data,
-        Permission.ItemMultiTarget[] permissions
+        BulkPermissionsLib.ItemMultiTarget[] permissions
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -188,7 +189,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         bytes memory _data
-    ) external returns (Permission.ItemMultiTarget[] memory) {
+    ) external returns (BulkPermissionsLib.ItemMultiTarget[] memory) {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -201,7 +202,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // Important safety measure to include dao + plugin manager in the encoding.
@@ -238,7 +239,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         address _dao,
         address _pluginSetup, // flip order
         address _plugin,
-        Permission.ItemMultiTarget[] calldata _permissions
+        BulkPermissionsLib.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
         bytes32 appliedId = _getAppliedId(_dao, _plugin);
 
@@ -290,7 +291,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         PluginUpdateParams calldata _updateParams,
         address[] calldata _currentHelpers,
         bytes memory _data
-    ) external returns (Permission.ItemMultiTarget[] memory, bytes memory) {
+    ) external returns (BulkPermissionsLib.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
         if (!_updateParams.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
             revert PluginNonupgradeable({plugin: _updateParams.plugin});
@@ -333,7 +334,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         (
             address[] memory updatedHelpers,
             bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         ) = PluginSetup(_updateParams.newPluginSetup).prepareUpdate(
                 _dao,
                 _updateParams.plugin,
@@ -365,7 +366,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         address _plugin,
         address _pluginSetup,
         bytes memory _initData,
-        Permission.ItemMultiTarget[] calldata _permissions
+        BulkPermissionsLib.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
 
@@ -397,7 +398,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         PluginRepo _pluginSetupRepo,
         address[] calldata _currentHelpers,
         bytes calldata _data
-    ) external returns (Permission.ItemMultiTarget[] memory permissions) {
+    ) external returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions) {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -457,7 +458,7 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
         address _plugin,
         address _pluginSetup,
         address[] calldata _currentHelpers, // TODO Isn't it sufficient to pass the helpers hash?
-        Permission.ItemMultiTarget[] calldata _permissions
+        BulkPermissionsLib.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
 
@@ -509,14 +510,14 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
     /// @notice Returns a hash of an array of multi-targeted permission operations.
     /// @param _permissions The array of of multi-targeted permission operations.
     /// @return bytes The hash of the array of permission operations.
-    function _getPermissionsHash(Permission.ItemMultiTarget[] memory _permissions)
+    function _getPermissionsHash(BulkPermissionsLib.ItemMultiTarget[] memory _permissions)
         private
         pure
         returns (bytes32)
     {
         bytes memory encoded;
         for (uint256 i = 0; i < _permissions.length; i++) {
-            Permission.ItemMultiTarget memory p = _permissions[i];
+            BulkPermissionsLib.ItemMultiTarget memory p = _permissions[i];
             encoded = abi.encodePacked(
                 encoded,
                 p.operation,

@@ -6,7 +6,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {Permission, PluginSetup} from "../../PluginSetup.sol";
+import {BulkPermissionsLib} from "../../../core/permission/BulkPermissionsLib.sol";
+import {PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV2} from "./CounterV2.sol";
 
@@ -41,7 +42,7 @@ contract CounterV2PluginSetup is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {
         // Decode the parameters from the UI
@@ -61,23 +62,25 @@ contract CounterV2PluginSetup is PluginSetup {
             _num
         );
 
-        permissions = new Permission.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](
+            _multiplyHelper == address(0) ? 3 : 2
+        );
         helpers = new address[](1);
 
         // deploy
         plugin = createERC1967Proxy(address(counterBase), initData);
 
         // set permissions
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             plugin,
             _dao,
             NO_ORACLE,
@@ -85,8 +88,8 @@ contract CounterV2PluginSetup is PluginSetup {
         );
 
         if (_multiplyHelper == address(0)) {
-            permissions[2] = Permission.ItemMultiTarget(
-                Permission.Operation.Grant,
+            permissions[2] = BulkPermissionsLib.ItemMultiTarget(
+                BulkPermissionsLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
                 NO_ORACLE,
@@ -119,7 +122,7 @@ contract CounterV2PluginSetup is PluginSetup {
         returns (
             address[] memory activeHelpers,
             bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {
         uint256 _newVariable;
@@ -132,9 +135,9 @@ contract CounterV2PluginSetup is PluginSetup {
             );
         }
 
-        permissions = new Permission.ItemMultiTarget[](1);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](1);
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
@@ -157,20 +160,20 @@ contract CounterV2PluginSetup is PluginSetup {
         address plugin,
         address[] calldata activeHelpers,
         bytes calldata
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-        permissions = new Permission.ItemMultiTarget[](activeHelpers.length != 0 ? 3 : 2);
+    ) external virtual override returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions) {
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](activeHelpers.length != 0 ? 3 : 2);
 
         // set permissions
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Revoke,
             dao,
             plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Revoke,
             plugin,
             dao,
             NO_ORACLE,
@@ -178,8 +181,8 @@ contract CounterV2PluginSetup is PluginSetup {
         );
 
         if (activeHelpers.length != 0) {
-            permissions[2] = Permission.ItemMultiTarget(
-                Permission.Operation.Revoke,
+            permissions[2] = BulkPermissionsLib.ItemMultiTarget(
+                BulkPermissionsLib.Operation.Revoke,
                 activeHelpers[0],
                 plugin,
                 NO_ORACLE,

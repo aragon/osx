@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {BulkPermissionsLib} from "../../../core/permission/BulkPermissionsLib.sol";
+import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
@@ -32,7 +33,7 @@ contract PluginSetupV1Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            BulkPermissionsLib.ItemMultiTarget[] memory permissions
         )
     {
         // Deploy a helper.
@@ -54,17 +55,17 @@ contract PluginSetupV1Mock is PluginSetup {
         helpers[0] = helperAddr;
 
         // Set permissions.
-        permissions = new Permission.ItemMultiTarget[](2);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Grant,
             plugin,
             helperAddr,
             NO_ORACLE,
@@ -81,18 +82,18 @@ contract PluginSetupV1Mock is PluginSetup {
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-        permissions = new Permission.ItemMultiTarget[](2);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+    ) external virtual override returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions) {
+        permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
+        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
+            BulkPermissionsLib.Operation.Revoke,
             _plugin,
             _activeHelpers[0],
             NO_ORACLE,
