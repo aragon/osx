@@ -12,7 +12,7 @@ contract PluginSetupV1Mock is PluginSetup {
 
     uint256 public constant PLUGIN_INIT_NUMBER = 15;
 
-    address private constant NO_ORACLE = address(0);
+    address private noOracle;
 
     constructor() {
         // User the plugin as helper for testing puposes.
@@ -59,7 +59,7 @@ contract PluginSetupV1Mock is PluginSetup {
             Permission.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            noOracle,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -67,7 +67,7 @@ contract PluginSetupV1Mock is PluginSetup {
             Permission.Operation.Grant,
             plugin,
             helperAddr,
-            NO_ORACLE,
+            noOracle,
             keccak256("SETTINGS_PERMISSION")
         );
     }
@@ -87,7 +87,7 @@ contract PluginSetupV1Mock is PluginSetup {
             Permission.Operation.Revoke,
             _dao,
             _plugin,
-            NO_ORACLE,
+            noOracle,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -95,7 +95,7 @@ contract PluginSetupV1Mock is PluginSetup {
             Permission.Operation.Revoke,
             _plugin,
             _activeHelpers[0],
-            NO_ORACLE,
+            noOracle,
             keccak256("SETTINGS_PERMISSION")
         );
     }

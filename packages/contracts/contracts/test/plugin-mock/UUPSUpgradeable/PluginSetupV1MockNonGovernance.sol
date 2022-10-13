@@ -12,7 +12,7 @@ contract PluginSetupV1MockNonGovernance is PluginSetup {
 
     uint256 public constant PLUGIN_INIT_NUMBER = 15;
 
-    address private constant NO_ORACLE = address(0);
+    address private noOracle;
 
     constructor() {
         // User the plugin as helper for testing puposes.
@@ -60,7 +60,7 @@ contract PluginSetupV1MockNonGovernance is PluginSetup {
             Permission.Operation.Grant,
             plugin,
             helperAddr,
-            NO_ORACLE,
+            noOracle,
             keccak256("SETTINGS_PERMISSION")
         );
     }
