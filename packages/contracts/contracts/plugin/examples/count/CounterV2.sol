@@ -6,7 +6,9 @@ import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {IDAO} from "../../../core/IDAO.sol";
 
-/// @notice The updated version of example plugin - CounterV2.
+/// @title CounterV1
+/// @author Aragon Association - 2022
+/// @notice The updated version of an example plugin counting numbers.
 contract CounterV2 is PluginUUPSUpgradeable {
     /// @notice The ID of the permission required to call the `multiply` function.
     bytes32 public constant MULTIPLY_PERMISSION_ID = keccak256("MULTIPLY_PERMISSION");

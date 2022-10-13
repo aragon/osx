@@ -8,8 +8,11 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Permission, PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
-import "./CounterV2.sol";
+import {CounterV2} from "./CounterV2.sol";
 
+/// @title CounterV2PluginSetup
+/// @author Aragon Association - 2022
+/// @notice The setup contract of the `CounterV2` plugin.
 contract CounterV2PluginSetup is PluginSetup {
     using Clones for address;
 
