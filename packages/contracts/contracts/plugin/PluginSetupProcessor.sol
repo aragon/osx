@@ -277,7 +277,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /* TODO: might we need to check when `prepareUpdate` gets called, if plugin actually was installed ?
      * Though problematic, since this check only happens when plugin updates from 1.0 to 1.x
      * and checking it always would cost more... shall we still check it and how ? */
-    /// @notice Prepares the update of a plugin.
+    /// @notice Prepares the update of an UUPS upgradeable plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _updateParams The parameters of the update.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
