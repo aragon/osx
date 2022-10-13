@@ -163,9 +163,11 @@ contract PluginSetupProcessor is DaoAuthorizableConstructable {
     }
 
     /// @notice Constructs the plugin setup processor by setting the managing DAO and the associated plugin repo registry.
-    /// @param _dao The DAO contract.
+    /// @param _managingDao The DAO managing the plugin setup processors permissions.
     /// @param _repoRegistry The plugin repo registry contract.
-    constructor(IDAO _dao, PluginRepoRegistry _repoRegistry) DaoAuthorizableConstructable(_dao) {
+    constructor(IDAO _managingDao, PluginRepoRegistry _repoRegistry)
+        DaoAuthorizableConstructable(_managingDao)
+    {
         repoRegistry = _repoRegistry;
     }
 
