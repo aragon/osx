@@ -12,6 +12,7 @@ import {Plugin} from "./Plugin.sol";
 /// @author Aragon Association - 2022
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
 abstract contract PluginCloneable is ERC165, DaoAuthorizableCloneable {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 public constant PLUGIN_CLONEABLE_INTERFACE_ID = type(PluginCloneable).interfaceId;
 
     /// @notice Initializes the plugin by storing the associated DAO.

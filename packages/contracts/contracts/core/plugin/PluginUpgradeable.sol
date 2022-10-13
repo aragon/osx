@@ -11,6 +11,7 @@ import {IDAO} from "../IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the transparent proxy pattern (see [OpenZepplin's article](https://blog.openzeppelin.com/the-transparent-proxy-pattern/)).
 abstract contract PluginUpgradeable is ERC165Upgradeable, DaoAuthorizableUpgradeable {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 public constant PLUGIN_UPGRADEABLE_INTERFACE_ID = type(PluginUpgradeable).interfaceId;
 
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.

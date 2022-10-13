@@ -12,8 +12,11 @@ import {PluginUpgradeable} from "./PluginUpgradeable.sol";
 /// @author Aragon Association - 2022
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 public constant PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID =
         type(PluginUUPSUpgradeable).interfaceId;
+
+    /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.

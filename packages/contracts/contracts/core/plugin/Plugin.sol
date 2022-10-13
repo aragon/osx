@@ -11,6 +11,7 @@ import {IDAO} from "../IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the `new` keyword.
 abstract contract Plugin is ERC165, DaoAuthorizable {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;
 
     /// @notice Constructs the plugin by storing the associated DAO.
