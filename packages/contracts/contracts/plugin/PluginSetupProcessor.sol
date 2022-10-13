@@ -1,19 +1,23 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity 0.8.10;
+
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
+import {DaoAuthorizableConstructable} from "../core/component/DaoAuthorizableConstructable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
 import {AragonPluginRegistry} from "../registry/AragonPluginRegistry.sol";
 
 import {Permission, PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
 
-/// @notice Plugin setup processor that has root permissions to setup plugin on the dao and apply permissions.
-contract PluginSetupProcessor is DaoAuthorizable {
+/// @title PluginSetupProcessor
+/// @author Aragon Association - 2022
+/// @notice This contract processes the preparation and application of plugin setups (installation, update, uninstallation) on behalf of a requesting DAO.
+/// @dev This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
+contract PluginSetupProcessor is DaoAuthorizableConstructable {
     using ERC165Checker for address;
 
     bytes32 public constant PROCESS_INSTALL_PERMISSION_ID = keccak256("PROCESS_INSTALL_PERMISSION");
@@ -91,7 +95,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _;
     }
 
-    constructor(IDAO _dao, AragonPluginRegistry _repoRegistry) DaoAuthorizable(_dao) {
+    /// @notice Constructs the plugin setup processor by setting the managing DAO and the associated plugin repo registry.
+    /// @param _dao The DAO contract.
+    /// @param _repoRegistry The plugin repo registry contract.
+    constructor(IDAO _dao, AragonPluginRegistry _repoRegistry) DaoAuthorizableConstructable(_dao) {
         repoRegistry = _repoRegistry;
     }
 

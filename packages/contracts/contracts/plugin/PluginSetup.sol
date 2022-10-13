@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
 
-import {PluginERC1967Proxy} from "../utils/PluginERC1967Proxy.sol";
-
 /// NOTE: This is an untested code and should NOT be used in production.
 /// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
 abstract contract PluginSetup is ERC165 {
@@ -61,12 +59,11 @@ abstract contract PluginSetup is ERC165 {
         bytes calldata _data
     ) external virtual returns (Permission.ItemMultiTarget[] memory permissions);
 
-    function createERC1967Proxy(
-        address _dao,
-        address _logic,
-        bytes memory _data
-    ) internal returns (address payable addr) {
-        return payable(address(new PluginERC1967Proxy(_dao, _logic, _data)));
+    function createERC1967Proxy(address _logic, bytes memory _data)
+        internal
+        returns (address payable)
+    {
+        return payable(address(new ERC1967Proxy(_logic, _data)));
     }
 
     /// @notice the plugin's base implementation address proxies need to delegate calls.

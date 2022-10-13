@@ -26,7 +26,7 @@ abstract contract Component is
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The associated DAO address.
     function __Component_init(IDAO _dao) internal virtual onlyInitializing {
-        __DaoAuthorizable_init(_dao);
+        __DaoAuthorizableUpgradeable_init(_dao);
 
         _registerInterface(type(Component).interfaceId);
     }

@@ -13,6 +13,7 @@ contract TestComponent is Component {
 
     function addPermissioned(uint256 _param1, uint256 _param2)
         external
+        view
         auth(DO_SOMETHING_PERMISSION_ID)
         returns (uint256)
     {
@@ -21,6 +22,7 @@ contract TestComponent is Component {
 
     function subPermissioned(uint256 _param1, uint256 _param2)
         external
+        view
         auth(DO_SOMETHING_PERMISSION_ID)
         returns (uint256)
     {

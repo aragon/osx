@@ -19,10 +19,13 @@ contract CounterV2 is PluginUUPSUpgradeable {
     // This only gets called for daos that install it for the first time.
     // initializer modifier protects it from being called 2nd time for old proxies.
     function initialize(
+        IDAO _dao,
         MultiplyHelper _multiplyHelper,
         uint256 _num,
         uint256 _newVariable
     ) external initializer {
+        __DaoAuthorizableUpgradeable_init(_dao);
+
         count = _num;
 
         // Since this is V2 version, and some daos might want to install this right away

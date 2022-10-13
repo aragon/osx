@@ -30,7 +30,7 @@ contract GovernanceERC20 is ERC165Upgradeable, ERC20VotesUpgradeable, DaoAuthori
     ) internal onlyInitializing {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
-        __DaoAuthorizable_init(_dao);
+        __DaoAuthorizableUpgradeable_init(_dao);
     }
 
     /// @notice Initializes the component.
@@ -84,5 +84,25 @@ contract GovernanceERC20 is ERC165Upgradeable, ERC20VotesUpgradeable, DaoAuthori
     /// @inheritdoc ERC20VotesUpgradeable
     function _burn(address account, uint256 amount) internal override {
         super._burn(account, amount);
+    }
+
+    /// @inheritdoc ContextUpgradeable
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, DaoAuthorizableUpgradeable)
+        returns (address)
+    {
+        return ContextUpgradeable._msgSender();
+    }
+
+    /// @inheritdoc ContextUpgradeable
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, DaoAuthorizableUpgradeable)
+        returns (bytes calldata)
+    {
+        return ContextUpgradeable._msgData();
     }
 }

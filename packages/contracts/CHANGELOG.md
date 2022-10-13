@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `DaoAuthorizableBase` and `DaoAuthorizableConstructable` classes.
+- Added `DaoAuthorizableClonable` using OpenZepplin initialization.
 - Added mocks and tests for the `Plugin` and `PluginSetup` classes.
 - Added `PluginSetupProcessor` to be the main class processing `PluginSetup` contracts and applying permissions in the installing DAO.
 - Added `DaoAuthorizableUpgradeable` and a free `_auth` function to provide an `auth` modifier to the different plugin types and prevent code duplication.
 - Added `PluginCloneable`, `PluginTransparentUpgradeable`.
-- Added goerli configuration to deploy to goerli.
+- Added goerli configuration to deploy to the Goerli testnet.
 - Added `AragonPlugin` and `AragonUpgradeablePlugin` for developers to inherit from for their concrete plugin implementations.
 - Added helper function `test/test-utils/ens.ts` deploying the `ENSSubdomainRegistrar` and `ENS`-related contracts.
 - Added Multi Target Bulk Permission object for `PermissionManager` with the oracle option as well.
@@ -33,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `PluginTransparentUpgradeable` to `PluginUpgradeable`.
 - Refactored `AdaptiveERC165` into an independent `CallbackHandler` contract and separated `ERC165` from it.
 - Adapted `Component` to use `DaoAuthorizableUpgradeable` until it is fully refactored to become `Plugin`.
 - Refactored `DaoAuthorizable` to use the newly introduced, free `_auth` function to prevent code duplication.
@@ -55,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed `AppStorage` and related helpers `PluginERC1967Proxy`, `TransparentProxy`.
 - Removed `PluginConstants` that were related to the previous, indexd plugin setup solution.
 - Removed restrictions regarding plugin's address in `PluginRepo`.
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
