@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../IDAO.sol";

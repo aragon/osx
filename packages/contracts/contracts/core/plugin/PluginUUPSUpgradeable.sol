@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {DaoAuthorizableUpgradeable} from "../component/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../IDAO.sol";
