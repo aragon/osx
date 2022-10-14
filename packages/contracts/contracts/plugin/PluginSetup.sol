@@ -23,14 +23,14 @@ abstract contract PluginSetup is ERC165 {
     /// @param _dao The address of the installing DAO.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
-    /// @return installedHelpers The address array of all helpers (contracts or EOAs) associated with the plugin to be installed.
+    /// @return helpers The address array of all helpers (contracts or EOAs) associated with the plugin after the installation.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
         returns (
             address plugin,
-            address[] memory installedHelpers,
+            address[] memory helpers,
             BulkPermissionsLib.ItemMultiTarget[] memory permissions
         );
 
