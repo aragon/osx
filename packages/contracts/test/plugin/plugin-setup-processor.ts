@@ -99,7 +99,7 @@ describe('Plugin Setup Processor', function () {
   let targetDao: any;
   let managingDao: any;
   let pluginRepoFactory: any;
-  let aragonPluginRegistry: PluginRepoRegistry;
+  let pluginRepoRegistry: PluginRepoRegistry;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -126,8 +126,8 @@ describe('Plugin Setup Processor', function () {
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
-    aragonPluginRegistry = await PluginRepoRegistry.deploy();
-    await aragonPluginRegistry.initialize(managingDao.address);
+    pluginRepoRegistry = await PluginRepoRegistry.deploy();
+    await pluginRepoRegistry.initialize(managingDao.address);
 
     // PluginRepoFactory
     const {abi, bytecode} = await getPluginRepoFactoryMergedABI();
@@ -138,12 +138,12 @@ describe('Plugin Setup Processor', function () {
     );
 
     pluginRepoFactory = await PluginRepoFactory.deploy(
-      aragonPluginRegistry.address
+      pluginRepoRegistry.address
     );
 
     // Grant `PLUGIN_REGISTER_PERMISSION` to `PluginRepoFactory`.
     await managingDao.grant(
-      aragonPluginRegistry.address,
+      pluginRepoRegistry.address,
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
     );
@@ -154,7 +154,7 @@ describe('Plugin Setup Processor', function () {
     );
     psp = await PluginSetupProcessor.deploy(
       managingDao.address,
-      aragonPluginRegistry.address
+      pluginRepoRegistry.address
     );
   });
 

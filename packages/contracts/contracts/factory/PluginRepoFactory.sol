@@ -12,7 +12,7 @@ import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
 /// @notice This contract creates `PluginRepo` proxies and registers them on an `PluginRepoRegistry` contract.
 contract PluginRepoFactory {
     /// @notice The Aragon plugin registry contract.
-    PluginRepoRegistry public aragonPluginRegistry;
+    PluginRepoRegistry public pluginRepoRegistry;
 
     /// @notice The address of the `PluginRepo` base contract.
     address public pluginRepoBase;
@@ -21,9 +21,9 @@ contract PluginRepoFactory {
     error EmptyPluginRepoName();
 
     /// @notice Initializes the addresses of the Aragon plugin registry and `PluginRepo` base contract to proxy to.
-    /// @param _aragonPluginRegistry The aragon plugin registry address.
-    constructor(PluginRepoRegistry _aragonPluginRegistry) {
-        aragonPluginRegistry = _aragonPluginRegistry;
+    /// @param _pluginRepoRegistry The aragon plugin registry address.
+    constructor(PluginRepoRegistry _pluginRepoRegistry) {
+        pluginRepoRegistry = _pluginRepoRegistry;
 
         pluginRepoBase = address(new PluginRepo());
     }
@@ -121,6 +121,6 @@ contract PluginRepoFactory {
             )
         );
 
-        aragonPluginRegistry.registerPlugin(_name, address(pluginRepo));
+        pluginRepoRegistry.registerPlugin(_name, address(pluginRepo));
     }
 }
