@@ -55,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed order of deployment scripts.
 - Changed folder structure of tests.
 - Refactored event names and NatSpec comments.
+- Replaces custom ERC1271 interface with Openzeppelins interface.
 
 ### Removed
 
