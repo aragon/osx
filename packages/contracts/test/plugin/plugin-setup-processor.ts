@@ -667,7 +667,7 @@ describe('Plugin Setup Processor', function () {
           )
         )
           .to.emit(psp, EVENTS.UninstallationApplied)
-          .withArgs(targetDao.address, plugin, helpers);
+          .withArgs(targetDao.address, plugin);
       });
     });
   });
