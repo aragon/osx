@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
@@ -21,7 +22,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         pluginBase = new PluginUUPSUpgradeableV1Mock();
     }
 
-    function prepareInstallDataABI() external view virtual override returns (string memory) {
+    function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address samePluginAddress)";
     }
 
@@ -32,11 +33,11 @@ contract PluginSetupV1MockBad is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
         // Deploy a helper.
-        address helperAddr = createERC1967Proxy(_dao, address(helperBase), bytes(""));
+        address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
         address _samePluginAddress = abi.decode(_data, (address));
 
@@ -46,10 +47,10 @@ contract PluginSetupV1MockBad is PluginSetup {
         } else {
             // Deploy and set the plugn.
             plugin = createERC1967Proxy(
-                _dao,
                 address(pluginBase),
                 abi.encodeWithSelector(
-                    bytes4(keccak256("initialize(uint256,address)")),
+                    bytes4(keccak256("initialize(address,uint256,address)")),
+                    _dao,
                     PLUGIN_INIT_NUMBER,
                     helperAddr
                 )
@@ -61,9 +62,9 @@ contract PluginSetupV1MockBad is PluginSetup {
         helpers[0] = helperAddr;
 
         // Set permissions.
-        permissions = new Permission.ItemMultiTarget[](_samePluginAddress != address(0) ? 2 : 1);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions = new PermissionLib.ItemMultiTarget[](_samePluginAddress != address(0) ? 2 : 1);
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
@@ -71,8 +72,8 @@ contract PluginSetupV1MockBad is PluginSetup {
         );
 
         if (_samePluginAddress != address(0)) {
-            permissions[1] = Permission.ItemMultiTarget(
-                Permission.Operation.Grant,
+            permissions[1] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
                 _dao,
                 plugin,
                 NO_ORACLE,
@@ -81,7 +82,7 @@ contract PluginSetupV1MockBad is PluginSetup {
         }
     }
 
-    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "(bool beBad)";
     }
 
@@ -90,12 +91,12 @@ contract PluginSetupV1MockBad is PluginSetup {
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
+    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         bool beBad = abi.decode(_data, (bool));
 
-        permissions = new Permission.ItemMultiTarget[](beBad ? 2 : 1);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions = new PermissionLib.ItemMultiTarget[](beBad ? 2 : 1);
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
@@ -103,8 +104,8 @@ contract PluginSetupV1MockBad is PluginSetup {
         );
 
         if (beBad) {
-            permissions[1] = Permission.ItemMultiTarget(
-                Permission.Operation.Grant,
+            permissions[1] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
                 _plugin,
                 _activeHelpers[0],
                 NO_ORACLE,

@@ -1,6 +1,4 @@
-/*
- * SPDX-License-Identifier: MIT
- */
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.10;
 
@@ -8,10 +6,10 @@ import "./InterfaceBasedRegistry.sol";
 import "../core/IDAO.sol";
 import "../plugin/IPluginRepo.sol";
 
-/// @title AragonPluginRegistry
+/// @title PluginRepoRegistry
 /// @author Aragon Association - 2022
 /// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
-contract AragonPluginRegistry is InterfaceBasedRegistry {
+contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant PLUGIN_REGISTER_PERMISSION_ID = keccak256("PLUGIN_REGISTER_PERMISSION");
 

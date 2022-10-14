@@ -30,7 +30,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     {
         __Component_init(_dao);
 
-        _registerStandard(type(MetaTxComponent).interfaceId);
+        _registerInterface(type(MetaTxComponent).interfaceId);
 
         _setTrustedForwarder(_trustedForwarder);
         emit TrustedForwarderSet(_trustedForwarder);
@@ -40,7 +40,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function _msgSender()
         internal
         view
-        override(ContextUpgradeable, BaseRelayRecipient)
+        override(DaoAuthorizableUpgradeable, BaseRelayRecipient)
         returns (address)
     {
         return BaseRelayRecipient._msgSender();
@@ -50,7 +50,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function _msgData()
         internal
         view
-        override(ContextUpgradeable, BaseRelayRecipient)
+        override(DaoAuthorizableUpgradeable, BaseRelayRecipient)
         returns (bytes calldata)
     {
         return BaseRelayRecipient._msgData();
