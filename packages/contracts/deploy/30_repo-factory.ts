@@ -9,14 +9,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const aragonPluginRegistryAddress = await getContractAddress(
+  const pluginRepoRegistryAddress = await getContractAddress(
     'PluginRepoRegistry',
     hre
   );
 
   await deploy('PluginRepoFactory', {
     from: deployer,
-    args: [aragonPluginRegistryAddress],
+    args: [pluginRepoRegistryAddress],
     log: true,
   });
 };

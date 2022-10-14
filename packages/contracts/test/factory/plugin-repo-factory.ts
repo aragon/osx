@@ -50,7 +50,7 @@ async function getMergedABI() {
 
 describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
-  let aragonPluginRegistry: PluginRepoRegistry;
+  let pluginRepoRegistry: PluginRepoRegistry;
   let ownerAddress: string;
   let managingDao: DAO;
   let pluginRepoFactory: any;
@@ -78,8 +78,8 @@ describe('PluginRepoFactory: ', function () {
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
-    aragonPluginRegistry = await PluginRepoRegistry.deploy();
-    await aragonPluginRegistry.initialize(managingDao.address);
+    pluginRepoRegistry = await PluginRepoRegistry.deploy();
+    await pluginRepoRegistry.initialize(managingDao.address);
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -88,12 +88,12 @@ describe('PluginRepoFactory: ', function () {
       signers[0]
     );
     pluginRepoFactory = await PluginRepoFactory.deploy(
-      aragonPluginRegistry.address
+      pluginRepoRegistry.address
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     managingDao.grant(
-      aragonPluginRegistry.address,
+      pluginRepoRegistry.address,
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
     );
@@ -101,7 +101,7 @@ describe('PluginRepoFactory: ', function () {
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
     managingDao.revoke(
-      aragonPluginRegistry.address,
+      pluginRepoRegistry.address,
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
     );
@@ -114,8 +114,8 @@ describe('PluginRepoFactory: ', function () {
       customError(
         'DaoUnauthorized',
         managingDao.address,
-        aragonPluginRegistry.address,
-        aragonPluginRegistry.address,
+        pluginRepoRegistry.address,
+        pluginRepoRegistry.address,
         pluginRepoFactory.address,
         PLUGIN_REGISTER_PERMISSION_ID
       )
