@@ -7,7 +7,7 @@ import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPerm
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
 import * as Component from '../artifacts/contracts/core/component/Component.sol/Component.json';
-import * as DaoAuthorizable from '../artifacts/contracts/core/component/DaoAuthorizableConstructable.sol/DaoAuthorizableConstructable.json';
+import * as DaoAuthorizable from '../artifacts/contracts/core/component/DaoAuthorizable.sol/DaoAuthorizable.json';
 
 // Factories
 import * as DAOFactory from '../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json';
