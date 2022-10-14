@@ -27,7 +27,6 @@ abstract contract PluginUUPSUpgradeable is PluginUpgradeable, UUPSUpgradeable {
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == PLUGIN_UUPS_UPGRADEABLE_INTERFACE_ID ||
-            _interfaceId == PLUGIN_UPGRADEABLE_INTERFACE_ID ||
             super.supportsInterface(_interfaceId);
     }
 
