@@ -30,11 +30,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 public constant APPLY_UNINSTALLATION_PERMISSION_ID =
         keccak256("APPLY_UNINSTALLATION_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `setRepoRegistry` function.
-    // TODO This permission should be removed because the change of the plugin repository can break the updates and uninstallation of all plugins that don't exist on the new repository.
-    bytes32 public constant SET_REPO_REGISTRY_PERMISSION_ID =
-        keccak256("SET_REPO_REGISTRY_PERMISSION");
-
     struct PluginUpdateParams {
         address plugin; // The address of the `Plugin` contract being currently active. This can be a proxy or a concrete instance.
         PluginRepo pluginSetupRepo; // The repository storing the `PluginSetup` contracts of all versions of a plugin.
@@ -166,16 +161,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _managingDao The DAO managing the plugin setup processors permissions.
     /// @param _repoRegistry The plugin repo registry contract.
     constructor(IDAO _managingDao, PluginRepoRegistry _repoRegistry) DaoAuthorizable(_managingDao) {
-        repoRegistry = _repoRegistry;
-    }
-
-    /// @notice Sets the plugin repository registry.
-    /// @param _repoRegistry The `PluginRepoRegistry` contract.
-    // TODO This function should be removed because the change of the plugin repository can break the updates and uninstallation of all plugins that don't exist on the new repository.
-    function setRepoRegistry(PluginRepoRegistry _repoRegistry)
-        external
-        auth(SET_REPO_REGISTRY_PERMISSION_ID)
-    {
         repoRegistry = _repoRegistry;
     }
 
