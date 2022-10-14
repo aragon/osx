@@ -210,15 +210,15 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         helpersHashes[setupId] = _getHelpersHash(helpers);
 
-        emit InstallationPrepared(
-            msg.sender,
-            _dao,
-            _pluginSetup,
-            plugin,
-            helpers,
-            permissions,
-            _data
-        );
+        emit InstallationPrepared({
+            sender: msg.sender,
+            dao: _dao,
+            pluginSetup: _pluginSetup,
+            plugin: plugin,
+            helpers: helpers,
+            permissions: permissions,
+            data: _data
+        });
 
         return permissions;
     }
@@ -263,7 +263,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         isInstallationApplied[appliedId] = true;
 
         // emit the event to connect plugin to the dao.
-        emit InstallationApplied(_dao, _plugin);
+        emit InstallationApplied({dao: _dao, plugin: _plugin});
 
         delete installPermissionHashes[setupId];
     }
@@ -346,16 +346,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Set new update permission hashes.
         updatePermissionHashes[newSetupId] = _getPermissionsHash(permissions);
 
-        emit UpdatePrepared(
-            msg.sender,
-            _dao,
-            _updateParams.newPluginSetup,
-            _updateParams.plugin,
-            updatedHelpers,
-            permissions,
-            _data,
-            initData
-        );
+        emit UpdatePrepared({
+            sender: msg.sender,
+            dao: _dao,
+            pluginSetup: _updateParams.newPluginSetup,
+            plugin: _updateParams.plugin,
+            updatedHelpers: updatedHelpers,
+            permissions: permissions,
+            data: _data,
+            initData: initData
+        });
 
         return (permissions, initData);
     }
@@ -385,7 +385,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         delete updatePermissionHashes[setupId];
 
-        emit UpdateApplied(_dao, _plugin); // TODO: some other parts might be needed..
+        emit UpdateApplied({dao: _dao, plugin: _plugin});
     }
 
     /// @notice Prepares the uninstallation of a plugin.
@@ -442,15 +442,15 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // set permission hashes.
         uninstallPermissionHashes[setupId] = _getPermissionsHash(permissions);
 
-        emit UninstallationPrepared(
-            msg.sender,
-            _dao,
-            _pluginSetup,
-            _plugin,
-            _currentHelpers,
-            _data,
-            permissions
-        );
+        emit UninstallationPrepared({
+            sender: msg.sender,
+            dao: _dao,
+            pluginSetup: _pluginSetup,
+            plugin: _plugin,
+            currentHelpers: _currentHelpers,
+            data: _data,
+            permissions: permissions
+        });
     }
 
     /// @notice Applies the permissions of a prepared uninstallation to a DAO.
@@ -487,7 +487,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         delete uninstallPermissionHashes[setupId];
 
-        emit UninstallationApplied(_dao, _plugin);
+        emit UninstallationApplied({dao: _dao, plugin: _plugin});
     }
 
     /// @notice Returns an identifier for applied installations by hashing the DAO and plugin address.
