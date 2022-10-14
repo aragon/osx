@@ -14,9 +14,9 @@ import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
 /// @notice An abstract contract providing a meta-transaction compatible modifier for upgradeable contracts to authorize function calls through an associated DAO.
 /// @dev Make sure to call `__DaoAuthorizableUpgradeable_init` during initialization of the inheriting contract.
 abstract contract DaoAuthorizableUpgradeable is
-    DaoAuthorizableBase,
     Initializable,
-    ContextUpgradeable
+    ContextUpgradeable,
+    DaoAuthorizableBase
 {
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
