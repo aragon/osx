@@ -1,9 +1,12 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO, GovernanceERC20} from '../../typechain';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
+import {getInterfaceID} from '../test-utils/interfaces';
+import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
+import {smock} from '@defi-wonderland/smock';
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
@@ -396,6 +399,56 @@ describe('DAO', function () {
 
       // holds amount now
       expect(await ethers.provider.getBalance(dao.address)).to.equal(amount);
+    });
+  });
+
+  describe.only('ERC1271', async () => {
+    it('should register the interfaceId', async () => {
+      expect(
+        await dao.supportsInterface(
+          getInterfaceID(IERC1271__factory.createInterface())
+        )
+      ).to.be.eq(true);
+    });
+
+    it('should return 0 if no validator is set', async () => {
+      expect(
+        await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
+      ).to.be.eq('0x00000000');
+    });
+
+    it('should allow only SET_SIGNATURE_VALIDATOR_PERMISSION_ID to set validator', async () => {
+      const signers = await ethers.getSigners();
+      await expect(
+        dao
+          .connect(signers[2])
+          .setSignatureValidator(ethers.Wallet.createRandom().address)
+      ).to.be.revertedWith('');
+    });
+
+    it('should set validator', async () => {
+      const validatorAddress = ethers.Wallet.createRandom().address;
+      await dao.setSignatureValidator(validatorAddress);
+      expect(await dao.signatureValidator()).to.be.eq(validatorAddress);
+    });
+
+    it('should call the signature validator', async () => {
+      const ERC1271MockFactory = await smock.mock('ERC1271Mock');
+      const erc1271Mock = await ERC1271MockFactory.deploy();
+
+      await dao.setSignatureValidator(erc1271Mock.address);
+      await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00');
+      expect(erc1271Mock.isValidSignature).has.been.callCount(1);
+    });
+
+    it('should return the validators response', async () => {
+      const ERC1271MockFactory = await ethers.getContractFactory('ERC1271Mock');
+      const erc1271Mock = await ERC1271MockFactory.deploy();
+
+      await dao.setSignatureValidator(erc1271Mock.address);
+      expect(
+        await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
+      ).to.be.eq('0x41424344');
     });
   });
 });
