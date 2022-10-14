@@ -402,7 +402,7 @@ describe('DAO', function () {
     });
   });
 
-  describe.only('ERC1271', async () => {
+  describe('ERC1271', async () => {
     it('should register the interfaceId', async () => {
       expect(
         await dao.supportsInterface(
