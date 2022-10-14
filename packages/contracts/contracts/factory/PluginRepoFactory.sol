@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "../utils/Proxy.sol";
 import "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
-import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
+import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022
@@ -68,34 +68,33 @@ contract PluginRepoFactory {
     /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](5);
+        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](5);
 
         // Grant the plugin maintainer all the permissions required
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[0] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.CREATE_VERSION_PERMISSION_ID()
         );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[1] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.UPGRADE_PERMISSION_ID()
         );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[2] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.ROOT_PERMISSION_ID()
         );
 
         // Revoke permissions from the plugin repository factory (`address(this)`).
-        items[3] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Revoke,
+        items[3] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Revoke,
             address(this),
             pluginRepo.ROOT_PERMISSION_ID()
         );
-        items[4] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Revoke,
+        items[4] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Revoke,
             address(this),
             pluginRepo.CREATE_VERSION_PERMISSION_ID()
         );

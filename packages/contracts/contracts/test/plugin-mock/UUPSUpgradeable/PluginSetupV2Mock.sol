@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {BulkPermissionsLib} from "../../../core/permission/BulkPermissionsLib.sol";
+import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
@@ -32,7 +32,7 @@ contract PluginSetupV2Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            BulkPermissionsLib.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
         address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
@@ -48,20 +48,20 @@ contract PluginSetupV2Mock is PluginSetup {
             )
         );
 
-        permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
+        permissions = new PermissionLib.ItemMultiTarget[](2);
         helpers = new address[](1);
 
         helpers[0] = helperAddr;
-        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
-            BulkPermissionsLib.Operation.Grant,
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
-            BulkPermissionsLib.Operation.Grant,
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             plugin,
             helperAddr,
             NO_ORACLE,
@@ -78,7 +78,7 @@ contract PluginSetupV2Mock is PluginSetup {
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external virtual override returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions) {}
+    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {}
 
     function prepareUpdateDataABI() external view virtual override returns (string memory) {
         return "";
@@ -97,7 +97,7 @@ contract PluginSetupV2Mock is PluginSetup {
         returns (
             address[] memory activeHelpers,
             bytes memory initData,
-            BulkPermissionsLib.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
         (_dao); // silence compiler warning
@@ -109,7 +109,7 @@ contract PluginSetupV2Mock is PluginSetup {
 
         address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
-        permissions = new BulkPermissionsLib.ItemMultiTarget[](2);
+        permissions = new PermissionLib.ItemMultiTarget[](2);
         activeHelpers = new address[](_helpers.length + 1);
 
         for (uint256 i = 0; i < _helpers.length; i++) {
@@ -118,16 +118,16 @@ contract PluginSetupV2Mock is PluginSetup {
 
         activeHelpers[_helpers.length] = helperAddr;
 
-        permissions[0] = BulkPermissionsLib.ItemMultiTarget(
-            BulkPermissionsLib.Operation.Grant,
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             helperAddr,
             _plugin,
             NO_ORACLE,
             keccak256("NEW_PERMISSION")
         );
 
-        permissions[1] = BulkPermissionsLib.ItemMultiTarget(
-            BulkPermissionsLib.Operation.Revoke,
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
             _plugin,
             activeHelpers[0],
             NO_ORACLE,

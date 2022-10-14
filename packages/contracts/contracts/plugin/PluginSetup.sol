@@ -7,7 +7,7 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
+import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 /// @title PluginSetup
 /// @author Aragon Association - 2022
@@ -31,7 +31,7 @@ abstract contract PluginSetup is ERC165 {
         returns (
             address plugin,
             address[] memory helpers,
-            BulkPermissionsLib.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         );
 
     /// @notice The ABI required to decode the `bytes` data in `prepareUpdate()`.
@@ -61,7 +61,7 @@ abstract contract PluginSetup is ERC165 {
         returns (
             address[] memory updatedHelpers,
             bytes memory initData,
-            BulkPermissionsLib.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {}
 
@@ -81,7 +81,7 @@ abstract contract PluginSetup is ERC165 {
         address _plugin,
         address[] calldata _currentHelpers,
         bytes calldata _data
-    ) external virtual returns (BulkPermissionsLib.ItemMultiTarget[] memory permissions);
+    ) external virtual returns (PermissionLib.ItemMultiTarget[] memory permissions);
 
     /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
