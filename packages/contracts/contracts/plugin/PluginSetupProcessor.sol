@@ -90,18 +90,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param sender The sender that prepared the plugin installation.
     /// @param dao The address of the dao to which the plugin belongs.
     /// @param pluginSetup The address of the `PluginSetup` contract used for the installation.
+    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @param plugin The address of the plugin contract.
     /// @param helpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin to be installed.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
-    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
+
     event InstallationPrepared(
         address indexed sender,
         address indexed dao,
         address indexed pluginSetup,
+        bytes data,
         address plugin,
         address[] helpers,
-        PermissionLib.ItemMultiTarget[] permissions,
-        bytes data
+        PermissionLib.ItemMultiTarget[] permissions
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -113,19 +114,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param sender The sender that prepared the plugin installation.
     /// @param dao The address of the dao to which the plugin belongs.
     /// @param pluginSetup The address of the `PluginSetup` contract used for the update.
+    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @param plugin The address of the plugin contract.
     /// @param updatedHelpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin update.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
-    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @param initData The initialization data to be passed to the upgradeable plugin contract.
     event UpdatePrepared(
         address indexed sender,
         address indexed dao,
         address indexed pluginSetup,
+        bytes data,
         address plugin,
         address[] updatedHelpers,
         PermissionLib.ItemMultiTarget[] permissions,
-        bytes data,
         bytes initData
     );
 
@@ -138,17 +139,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param sender The sender that prepared the plugin uninstallation.
     /// @param dao The address of the dao to which the plugin belongs.
     /// @param pluginSetup The address of the `PluginSetup` contract used for the uninstallation.
+    /// @param data The `bytes` encoded data containing the input parameters for the uninstallation as specified in the `prepareUninstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @param plugin The address of the plugin contract.
     /// @param currentHelpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin to be installed.
-    /// @param data The `bytes` encoded data containing the input parameters for the uninstallation as specified in the `prepareUninstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
     event UninstallationPrepared(
         address indexed sender,
         address indexed dao,
         address indexed pluginSetup,
+        bytes data,
         address plugin,
         address[] currentHelpers,
-        bytes data,
         PermissionLib.ItemMultiTarget[] permissions
     );
 
@@ -214,10 +215,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
             sender: msg.sender,
             dao: _dao,
             pluginSetup: _pluginSetup,
+            data: _data,
             plugin: plugin,
             helpers: helpers,
-            permissions: permissions,
-            data: _data
+            permissions: permissions
         });
 
         return permissions;
@@ -309,7 +310,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Reverts if newPluginSetup doesn't exist on the repo...
         _updateParams.pluginSetupRepo.getVersionByPluginSetup(_updateParams.newPluginSetup);
 
-        // Remove the old helpersHash and avoid stack too deep compiler error by putting it in curly braces
+        // Avoid stack too deep compiler error by putting the code into curly braces.
         {
             // Check if helpers are correct...
             // Implicitly checks if plugin was installed in the first place.
@@ -339,21 +340,28 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 _data
             );
 
-        // add new helpers for the future update checks
-        bytes32 newSetupId = _getSetupId(_dao, _updateParams.newPluginSetup, _updateParams.plugin);
-        helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
+        // Avoid stack too deep compiler error by putting the code into curly braces.
+        {
+            // add new helpers for the future update checks
+            bytes32 newSetupId = _getSetupId(
+                _dao,
+                _updateParams.newPluginSetup,
+                _updateParams.plugin
+            );
+            helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
 
-        // Set new update permission hashes.
-        updatePermissionHashes[newSetupId] = _getPermissionsHash(permissions);
+            // Set new update permission hashes.
+            updatePermissionHashes[newSetupId] = _getPermissionsHash(permissions);
+        }
 
         emit UpdatePrepared({
             sender: msg.sender,
             dao: _dao,
             pluginSetup: _updateParams.newPluginSetup,
+            data: _data,
             plugin: _updateParams.plugin,
             updatedHelpers: updatedHelpers,
             permissions: permissions,
-            data: _data,
             initData: initData
         });
 
@@ -446,9 +454,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
             sender: msg.sender,
             dao: _dao,
             pluginSetup: _pluginSetup,
+            data: _data,
             plugin: _plugin,
             currentHelpers: _currentHelpers,
-            data: _data,
             permissions: permissions
         });
     }
