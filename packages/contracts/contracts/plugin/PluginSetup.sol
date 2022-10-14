@@ -2,72 +2,101 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {BulkPermissionsLib as Permission} from "../core/permission/BulkPermissionsLib.sol";
+import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
-/// NOTE: This is an untested code and should NOT be used in production.
-/// @notice Abstract Plugin Manager that dev's have to inherit from for their plugin setup contracts.
+/// @title PluginSetup
+/// @author Aragon Association - 2022
+/// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 abstract contract PluginSetup is ERC165 {
     bytes4 public constant PLUGIN_SETUP_INTERFACE_ID = type(PluginSetup).interfaceId;
 
-    /// @notice the ABI in string format that `prepareInstallation()`'s `_data` param needs to use.
-    /// @return ABI in string format.
-    function prepareInstallDataABI() external view virtual returns (string memory);
+    /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.
+    /// @return The ABI in string format.
+    function prepareInstallationDataABI() external view virtual returns (string memory);
 
+    /// @notice Prepares the installation of a plugin.
+    /// @param _dao The address of the installing DAO.
+    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
+    /// @return plugin The address of the `Plugin` contract being prepared for installation.
+    /// @return helpers The address array of all helpers (contracts or EOAs) associated with the plugin after the installation.
+    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         );
 
-    /// @notice The ABI in string format that `prepareUpdateDataABI()`'s `_data` needs to use.
-    /// @dev Not required to be overriden as there might be no update at all by dev.
-    /// @return ABI in string format.
+    /// @notice The ABI required to decode the `bytes` data in `prepareUpdate()`.
+    /// @return The ABI in string format.
+    /// @dev The empty implemention is provided here so that this doesn't need to be overriden and implemented. This is relevant, for example, for the initial version of a plugin for which no update exists.
     function prepareUpdateDataABI() external view virtual returns (string memory) {}
 
+    /// @notice Prepares the update of a plugin.
+    /// @param _dao The address of the updating DAO.
+    /// @param _plugin The address of the `Plugin` contract to update from.
+    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
+    /// @param _oldVersion The semantic version of the plugin to update from.
+    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the `prepareUpdateDataABI()` function.
+    /// @return updatedHelpers The address array of helpers (contracts or EOAs) associated with the plugin after the update.
+    /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
+    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the updating DAO.
+    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUpdate(
         address _dao,
         address _plugin,
-        address[] memory _helpers,
+        address[] memory _currentHelpers,
         uint16[3] calldata _oldVersion,
         bytes memory _data
     )
         external
         virtual
         returns (
-            address[] memory activeHelpers,
+            address[] memory updatedHelpers,
             bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {}
 
-    /// @notice The ABI in string format that `prepareUninstallation()`'s `_data` needs to use.
-    /// @return ABI in string format.
-    function prepareUninstallDataABI() external view virtual returns (string memory);
+    /// @notice The ABI required to decode the `bytes` data in `prepareUninstallation()`.
+    /// @return The ABI in string format.
+    function prepareUninstallationDataABI() external view virtual returns (string memory);
 
+    /// @notice Prepares the uninstallation of a plugin.
+    /// @param _dao The address of the uninstalling DAO.
+    /// @param _plugin The address of the `Plugin` contract to update from.
+    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
+    /// @param _data The `bytes` encoded data containing the input parameters for the uninstalltion as specified in the `prepareUninstallationDataABI()` function.
+    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
+    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUninstallation(
         address _dao,
         address _plugin,
-        address[] calldata _activeHelpers,
+        address[] calldata _currentHelpers,
         bytes calldata _data
-    ) external virtual returns (Permission.ItemMultiTarget[] memory permissions);
+    ) external virtual returns (PermissionLib.ItemMultiTarget[] memory permissions);
 
-    function createERC1967Proxy(address _logic, bytes memory _data)
+    /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.
+    /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
+    /// @param _data The data to initialize the storage of the proxy contract.
+    /// @return proxy The address of the created proxy contract.
+    function createERC1967Proxy(address _implementation, bytes memory _data)
         internal
-        returns (address payable)
+        returns (address payable proxy)
     {
-        return payable(address(new ERC1967Proxy(_logic, _data)));
+        proxy = payable(address(new ERC1967Proxy(_implementation, _data)));
     }
 
-    /// @notice the plugin's base implementation address proxies need to delegate calls.
-    /// @return address of the base contract address.
+    /// @notice Returns the plugin's base implementation.
+    /// @return address The address of the plugin implementation contract.
+    /// @dev The implementation can be instantiated via the `new` keyword, cloned via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)), or proxied via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     function getImplementationAddress() external view virtual returns (address);
 
     /// @inheritdoc ERC165

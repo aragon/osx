@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.10;
 
-/// @title BulkPermissionsLib
+/// @title PermissionLib
 /// @author Aragon Association - 2021, 2022
-/// @notice A library containing objects for bulk permission processing.
-library BulkPermissionsLib {
+/// @notice A library containing objects for permission processing.
+library PermissionLib {
     enum Operation {
         Grant,
         Revoke,
@@ -26,5 +26,4 @@ library BulkPermissionsLib {
         address oracle;
         bytes32 permissionId;
     }
-
 }
