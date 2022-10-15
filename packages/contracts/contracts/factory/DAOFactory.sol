@@ -143,49 +143,48 @@ contract DAOFactory {
     /// @param _voting The voting contract address (`AllowlistVoting` or `ERC20Voting`).
     function setDAOPermissions(DAO _dao, address _voting) internal {
         // set permissionIds on the dao itself.
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](8);
+        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](8);
 
         // Grant DAO all the permissions required
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[0] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_METADATA_PERMISSION_ID()
         );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[1] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.WITHDRAW_PERMISSION_ID()
         );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[2] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.UPGRADE_PERMISSION_ID()
         );
-        items[3] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[3] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.ROOT_PERMISSION_ID()
         );
-        items[4] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[4] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
         );
-        items[5] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[5] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
-        items[6] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[6] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             _voting,
             _dao.EXECUTE_PERMISSION_ID()
         );
 
         // Revoke permissions from factory
-        items[7] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Revoke,
+        items[7] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Revoke,
             address(this),
             _dao.ROOT_PERMISSION_ID()
         );
@@ -218,20 +217,19 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for ERC20Voting
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](3);
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](3);
+        items[0] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             erc20Voting.UPGRADE_PERMISSION_ID()
         );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[1] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             erc20Voting.SET_CONFIGURATION_PERMISSION_ID()
         );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[2] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             erc20Voting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
@@ -264,25 +262,24 @@ contract DAOFactory {
         );
 
         // Grant dao the necessary permissions for AllowlistVoting
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](4);
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](4);
+        items[0] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             allowlistVoting.MODIFY_ALLOWLIST_PERMISSION_ID()
         );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[1] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             allowlistVoting.SET_CONFIGURATION_PERMISSION_ID()
         );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[2] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             allowlistVoting.UPGRADE_PERMISSION_ID()
         );
-        items[3] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[3] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             allowlistVoting.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
