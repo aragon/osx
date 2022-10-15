@@ -82,6 +82,8 @@ abstract contract MajorityVotingBase is
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal onlyInitializing {
+        __PluginUpgradeable_init(_dao);
+        
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
