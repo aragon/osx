@@ -22,7 +22,8 @@ abstract contract MajorityVotingBase is
     PluginUUPSUpgradeable
 {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
+    bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID =
+        type(IMajorityVoting).interfaceId ^ this.supportsInterface.selector;
 
     /// @notice The ID of the permission required to call the `setConfiguration` function.
     bytes32 public constant SET_CONFIGURATION_PERMISSION_ID =
