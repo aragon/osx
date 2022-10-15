@@ -42,7 +42,6 @@ describe('MerkleDistributor', function () {
     beforeEach(async () => {
       await distributor.initialize(
         dao.address,
-        ethers.constants.AddressZero,
         token.address,
         ZERO_BYTES32
       );
@@ -85,7 +84,6 @@ describe('MerkleDistributor', function () {
 
       await distributor.initialize(
         dao.address,
-        ethers.constants.AddressZero,
         token.address,
         tree.getHexRoot()
       );
@@ -208,7 +206,6 @@ describe('MerkleDistributor', function () {
       );
       await distributor.initialize(
         dao.address,
-        ethers.constants.AddressZero,
         token.address,
         tree.getHexRoot()
       );

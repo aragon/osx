@@ -53,8 +53,7 @@ describe('MerkleDistributor', function () {
     );
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
-    token = await GovernanceERC20.deploy();
-    await token.initialize(managingDao.address, 'GOV', 'GOV');
+    token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV');
 
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
@@ -65,7 +64,6 @@ describe('MerkleDistributor', function () {
     minter = await MerkleMinter.deploy();
     await minter.initialize(
       managingDao.address,
-      ethers.constants.AddressZero,
       token.address,
       distributor.address
     );
