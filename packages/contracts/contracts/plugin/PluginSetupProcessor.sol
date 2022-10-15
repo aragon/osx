@@ -6,7 +6,7 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
+import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginSetup} from "./PluginSetup.sol";

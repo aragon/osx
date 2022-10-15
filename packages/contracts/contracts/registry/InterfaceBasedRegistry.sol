@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-import "../core/component/DaoAuthorizableUpgradeable.sol";
+import "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022

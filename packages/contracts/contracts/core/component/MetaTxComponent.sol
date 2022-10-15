@@ -40,7 +40,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function _msgSender()
         internal
         view
-        override(DaoAuthorizableUpgradeable, BaseRelayRecipient)
+        override(ContextUpgradeable, BaseRelayRecipient)
         returns (address)
     {
         return BaseRelayRecipient._msgSender();
@@ -50,7 +50,7 @@ abstract contract MetaTxComponent is Component, BaseRelayRecipient {
     function _msgData()
         internal
         view
-        override(DaoAuthorizableUpgradeable, BaseRelayRecipient)
+        override(ContextUpgradeable, BaseRelayRecipient)
         returns (bytes calldata)
     {
         return BaseRelayRecipient._msgData();

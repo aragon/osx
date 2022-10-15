@@ -9,10 +9,14 @@ import "../core/component/MetaTxComponent.sol";
 import "./IERC20MintableUpgradeable.sol";
 import "./MerkleDistributor.sol";
 
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+
 /// @title MerkleMinter
 /// @author Aragon Association
 /// @notice A component minting [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributing them on merkle trees using `MerkleDistributor` clones.
-contract MerkleMinter is MetaTxComponent {
+contract MerkleMinter is PluginUUPSUpgradeable {
     using Clones for address;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -44,26 +48,30 @@ contract MerkleMinter is MetaTxComponent {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _distributorBase A `MerkleDistributor` to be cloned.
     function initialize(
         IDAO _dao,
-        address _trustedForwarder,
         IERC20MintableUpgradeable _token,
-        MerkleDistributor _distributorBase
+        address _distributorBase
     ) external initializer {
-        _registerInterface(MERKLE_MINTER_INTERFACE_ID);
-        __MetaTxComponent_init(_dao, _trustedForwarder);
+        __PluginUpgradeable_init(_dao);
 
         token = _token;
-        distributorBase = address(_distributorBase);
+        distributorBase = _distributorBase;
     }
 
-    /// @notice Returns the version of the GSN relay recipient.
-    /// @dev Describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.MerkleMinter";
+    /// @inheritdoc ERC165Upgradeable
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        return
+            interfaceId == MERKLE_MINTER_INTERFACE_ID ||
+            super.supportsInterface(interfaceId);
     }
 
     /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributes them using a `MerkleDistributor`.
@@ -81,7 +89,6 @@ contract MerkleMinter is MetaTxComponent {
         address distributorAddr = distributorBase.clone();
         MerkleDistributor(distributorAddr).initialize(
             dao,
-            dao.getTrustedForwarder(),
             token,
             _merkleRoot
         );

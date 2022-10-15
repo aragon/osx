@@ -10,10 +10,12 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 import "../core/component/MetaTxComponent.sol";
 
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+
 /// @title MerkleDistributor
 /// @author Uniswap 2020
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
-contract MerkleDistributor is MetaTxComponent {
+contract MerkleDistributor is PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract
@@ -48,26 +50,22 @@ contract MerkleDistributor is MetaTxComponent {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _merkleRoot The merkle root of the balance tree.
     function initialize(
         IDAO _dao,
-        address _trustedForwarder,
         IERC20Upgradeable _token,
         bytes32 _merkleRoot
     ) external initializer {
-        _registerInterface(MERKLE_DISTRIBUTOR_INTERFACE_ID);
-        __MetaTxComponent_init(_dao, _trustedForwarder);
-
+        __PluginUpgradeable_init(_dao);
         token = _token;
         merkleRoot = _merkleRoot;
     }
 
-    /// @notice Returns the version of the GSN relay recipient.
-    /// @dev Describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.MerkleDistributor";
+    /// @inheritdoc ERC165Upgradeable
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == MERKLE_DISTRIBUTOR_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @notice Claims tokens from the balance tree and sends it to an address.

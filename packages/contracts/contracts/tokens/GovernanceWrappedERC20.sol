@@ -2,16 +2,18 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@opengsn/contracts/src/BaseRelayRecipient.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {ERC20WrapperUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
+import {IERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {IERC20MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
-import "../core/IDAO.sol";
+import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../core/IDAO.sol";
 
 /// @title GovernanceWrappedERC20
 /// @author Aragon Association
@@ -25,28 +27,21 @@ contract GovernanceWrappedERC20 is
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
-    ERC20WrapperUpgradeable,
-    BaseRelayRecipient
-    // Inheritance Chain: GovernanceWrappedERC20 => ERC20WrapperUpgradeable => ERC20VotesUpgradeable => ERC20PermitUpgradeable => EIP712Upgradeable => ERC20Upgradeable => Initializable => BaseRelayRecipient
+    ERC20WrapperUpgradeable
 {
-    /// @notice Returns the version of the GSN relay recipient
-    /// @dev Describes the version and contract for GSN compatibility
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.GovernanceWrappedERC20";
-    }
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 public constant GOVERNANCE_INTERFACE_ID =
+        this.decimals.selector ^ this.supportsInterface.selector;
 
-    /// @notice Internal initialization method.
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
-    function __GovernanceWrappedERC20_init(
+    constructor(
         IERC20Upgradeable _token,
-        string calldata _name,
-        string calldata _symbol
-    ) internal onlyInitializing {
-        __ERC20_init(_name, _symbol);
-        __ERC20Permit_init(_name);
-        __ERC20Wrapper_init(_token);
+        string memory _name,
+        string memory _symbol
+    ) {
+        initialize(_token, _name, _symbol);
     }
 
     /// @notice Initializes the component.
@@ -55,10 +50,12 @@ contract GovernanceWrappedERC20 is
     /// @param _symbol The symbol fo the wrapped token.
     function initialize(
         IERC20Upgradeable _token,
-        string calldata _name,
-        string calldata _symbol
-    ) external initializer {
-        __GovernanceWrappedERC20_init(_token, _name, _symbol);
+        string memory _name,
+        string memory _symbol
+    ) public initializer {
+        __ERC20_init(_name, _symbol);
+        __ERC20Permit_init(_name);
+        __ERC20Wrapper_init(_token);
     }
 
     /// @inheritdoc ERC165Upgradeable
@@ -67,6 +64,8 @@ contract GovernanceWrappedERC20 is
             interfaceId == type(IERC20Upgradeable).interfaceId ||
             interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
             interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
+            interfaceId == type(ERC20VotesUpgradeable).interfaceId ||
+            interfaceId == type(ERC20WrapperUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -81,34 +80,10 @@ contract GovernanceWrappedERC20 is
         return ERC20WrapperUpgradeable.decimals();
     }
 
-    /// @notice Uses the `BaseRelayRecipient` `_msgSender()` context.
-    /// @dev `BaseRelayRecipient` is the first contract in the inheritance chain and is thus called by `super._msgSender()`.
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(BaseRelayRecipient, ContextUpgradeable)
-        returns (address)
-    {
-        return super._msgSender();
-    }
-
-    /// @notice Uses the `BaseRelayRecipient` `_msgData()` context.
-    /// @dev `BaseRelayRecipient` is the first contract in the inheritance chain and is thus called by `super._msgData()`.
-    function _msgData()
-        internal
-        view
-        virtual
-        override(BaseRelayRecipient, ContextUpgradeable)
-        returns (bytes calldata)
-    {
-        return super._msgData();
-    }
-
     // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
 
-    /// @inheritdoc ERC20Upgradeable
+    /// @inheritdoc ERC20VotesUpgradeable
     function _afterTokenTransfer(
         address from,
         address to,
@@ -121,7 +96,7 @@ contract GovernanceWrappedERC20 is
         }
     }
 
-    /// @inheritdoc ERC20Upgradeable
+    /// @inheritdoc ERC20VotesUpgradeable
     function _mint(address to, uint256 amount)
         internal
         override(ERC20VotesUpgradeable, ERC20Upgradeable)
@@ -129,7 +104,7 @@ contract GovernanceWrappedERC20 is
         super._mint(to, amount);
     }
 
-    /// @inheritdoc ERC20Upgradeable
+    /// @inheritdoc ERC20VotesUpgradeable
     function _burn(address account, uint256 amount)
         internal
         override(ERC20VotesUpgradeable, ERC20Upgradeable)
