@@ -2,21 +2,22 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-import "../core/component/DaoAuthorizableUpgradeable.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {IDAO} from "../../core/IDAO.sol";
+
+import {DaoAuthorizable} from "../../core/component/DaoAuthorizable.sol";
 
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
-//TODO Make this PluginUUPSUpgradeable
-abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgradeable {
+abstract contract InterfaceBasedRegistry is DaoAuthorizable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID that the target contracts being registered must support.
-    bytes4 public targetInterfaceId;
+    bytes4 public immutable targetInterfaceId;
 
     /// @notice The mapping containing the registry entries returning true for registererd contract addresses.
     mapping(address => bool) public entries;
@@ -37,23 +38,11 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgr
     /// @param registrant The address of the contract.
     error ContractERC165SupportInvalid(address registrant);
 
-    /// @notice Initializes the component.
-    /// @dev This is required for the UUPS upgradability pattern.
     /// @param _managingDao The interface of the DAO managing the components permissions.
-    /// @param _targetInterfaceId The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface id of the contracts to be registered.
-    function __InterfaceBasedRegistry_init(IDAO _managingDao, bytes4 _targetInterfaceId)
-        internal
-        virtual
-        onlyInitializing
-    {
-        __DaoAuthorizableUpgradeable_init(_managingDao);
-
+    /// @param _targetInterfaceId The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface id of the contracts to be regist
+    constructor(IDAO _managingDao, bytes4 _targetInterfaceId) DaoAuthorizable(_managingDao) {
         targetInterfaceId = _targetInterfaceId;
     }
-
-    /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
 
     /// @notice Register an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract address.
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar.
