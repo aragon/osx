@@ -5,8 +5,24 @@ on:
   issue_comment:
     types: [created]
 
-jobs:
+jobs:  
+  check_user_permission:
+    runs-on: ubuntu-latest
+    name: A job to check user's permission level
+    steps:
+      # Check for write permission
+      - name: Check user permission
+        id: check
+        uses: scherermichael-oss/action-has-permission@master
+        with:
+          required-permission: write
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: abort
+        if: "! steps.check.outputs.has-permission"
+        run: exit 1
   mythx_partial:
+    needs: [check_user_permission]
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
     outputs:
@@ -24,8 +40,10 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment.body }}" | sed "s|/mythx partial ||" | sed "s/ //")
+          mode=$(echo "$BODY" | sed "s|/mythx partial ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
+        env:
+          BODY: ${{ github.event.comment.body }}
   mythx_partial_run:
     needs: ['mythx_partial']
     if: needs.mythx_partial.outputs.run == 'true'
@@ -36,6 +54,7 @@ jobs:
     secrets: inherit
 
   mythx_full:
+    needs: [check_user_permission]
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
     outputs:
@@ -53,8 +72,10 @@ jobs:
       - name: Get mode
         id: mode
         run: |
-          mode=$(echo "${{ github.event.comment.body }}" | sed "s|/mythx full ||" | sed "s/ //")
+          mode=$(echo "$BODY" | sed "s|/mythx full ||" | sed "s/ //")
           echo "::set-output name=mode::$mode"
+        env:
+          BODY: ${{ github.event.comment.body }}
   mythx_full_run:
     needs: ['mythx_full']
     if: needs.mythx_full.outputs.run == 'true'
@@ -66,6 +87,7 @@ jobs:
 
 
   release_label:
+    needs: [check_user_permission]
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
     steps:
@@ -80,8 +102,10 @@ jobs:
       - name: Get type
         id: type
         run: |
-          type=$(echo "${{ github.event.comment.body }}" | sed "s|/release ||" | sed "s/ //")
+          type=$(echo "$BODY" | sed "s|/release ||" | sed "s/ //")
           echo "::set-output name=type::$type"
+        env:
+          BODY: ${{ github.event.comment.body }}
       - name: add label
         if: steps.check.outputs.triggered == 'true'
         uses: actions-ecosystem/action-add-labels@v1
@@ -89,6 +113,7 @@ jobs:
           labels: release:${{ steps.type.outputs.type }}
 
   subgraph_label:
+    needs: [check_user_permission]
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
     steps:
@@ -103,8 +128,10 @@ jobs:
       - name: Get type
         id: type
         run: |
-          type=$(echo "${{ github.event.comment.body }}" | sed "s|/subgraph ||" | sed "s/ //")
+          type=$(echo "$BODY" | sed "s|/subgraph ||" | sed "s/ //")
           echo "::set-output name=type::$type"
+        env:
+          BODY: ${{ github.event.comment.body }}
       - name: add label
         if: steps.check.outputs.triggered == 'true'
         uses: actions-ecosystem/action-add-labels@v1

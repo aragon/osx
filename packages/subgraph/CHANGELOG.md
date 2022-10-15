@@ -7,11 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.4.0-alpha
+On 2022-10-07 15:20:00
+### Added
+- `executable` property to `ERC20VotingProposal` and `AllowlistProposal`.
+
+## 0.2.1-alpha
+On 2022-10-03 10:38:36
+
 ### Added
 
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
 - added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
+- addes type field to `VaultTransfer` to differntiate between deposits and withdraws
 
 ### Changed
 
@@ -20,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `manifest`, `registry`, `registry.test`.
 - Refactored import statements.
 - Refactored event names.
+- Refactored `deposits` and `withdraws` into one field `transfers`.
+- Refactored `VaultWithdraw` and `VaultDeposit` into one type `VaultTransfer`.
+- Removes not null enforcing `Proposal.metadata`.
+
 
 ## v0.2.0-alpha
 

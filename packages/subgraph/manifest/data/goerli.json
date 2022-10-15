@@ -1,0 +1,11 @@
+{
+  "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
+  "network": "goerli",
+  "dataSources": {
+    "DAORegistry": {
+      "name": "DAORegistry",
+      "address": "0x2B8C4DD137104d1E869105cd0106e7D9EF955BfE",
+      "startBlock": 7727664
+    }
+  }
+}

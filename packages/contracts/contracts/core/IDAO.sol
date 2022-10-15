@@ -6,13 +6,13 @@ pragma solidity 0.8.10;
 /// @author Aragon Association - 2022
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
 abstract contract IDAO {
-    /// @notice The `IDAO` interface ID.
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant DAO_INTERFACE_ID = type(IDAO).interfaceId;
 
     struct Action {
         address to; // Address to call
         uint256 value; // Value to be sent with the call (for example ETH if on mainnet)
-        bytes data; // FuncSig + arguments
+        bytes data; // Function selector + arguments
     }
 
     /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
@@ -50,10 +50,20 @@ abstract contract IDAO {
     /// @param actor The address of the caller.
     /// @param callId The id of the call.
     /// @dev The value of callId is defined by the component/contract calling the execute function.
-    ///      A Component implementation can use it, for example, as a nonce.
+    ///      A `Plugin` implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed.
     /// @param execResults Array with the results of the executed actions.
     event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
+
+    /// @notice Emitted when a standard callback is registered.
+    /// @param interfaceId The ID of the interface.
+    /// @param callbackSelector The selector of the callback function.
+    /// @param magicNumber The magic number to be registered for the callback function selector.
+    event StandardCallbackRegistered(
+        bytes4 interfaceId,
+        bytes4 callbackSelector,
+        bytes4 magicNumber
+    );
 
     /// @notice Deposits (native) tokens to the DAO contract with a reference string.
     /// @param _token The address of the token or address(0) in case of the native token.
@@ -78,7 +88,7 @@ abstract contract IDAO {
     );
 
     /// @notice Emitted when a native token deposit has been made to the DAO.
-    /// @dev This event is intended to be emitted in the `receive` function and is therefore bound by the gas limitations for `send`/`transfer` calls introduced by EIP-2929.
+    /// @dev This event is intended to be emitted in the `receive` function and is therefore bound by the gas limitations for `send`/`transfer` calls introduced by [ERC-2929](https://eips.ethereum.org/EIPS/eip-2929).
     /// @param sender The address of the sender.
     /// @param amount The amount of native tokens deposited.
     event NativeTokenDeposited(address sender, uint256 amount);
@@ -114,8 +124,8 @@ abstract contract IDAO {
     /// @param forwarder the new forwarder address.
     event TrustedForwarderSet(address forwarder);
 
-    /// @notice Setter for the ERC1271 signature validator contract.
-    /// @param _signatureValidator ERC1271 SignatureValidator.
+    /// @notice Setter for the [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
+    /// @param _signatureValidator The address of the signature validator.
     function setSignatureValidator(address _signatureValidator) external virtual;
 
     /// @notice Checks whether a signature is valid for the provided data.
@@ -126,4 +136,14 @@ abstract contract IDAO {
         external
         virtual
         returns (bytes4);
+
+    /// @notice Registers an ERC standard having a callback by registering its [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
+    /// @param _interfaceId The ID of the interface.
+    /// @param _callbackSelector The selector of the callback function.
+    /// @param _magicNumber The magic number to be registered for the function signature.
+    function registerStandardCallback(
+        bytes4 _interfaceId,
+        bytes4 _callbackSelector,
+        bytes4 _magicNumber
+    ) external virtual;
 }

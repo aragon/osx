@@ -2,6 +2,8 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
+import {ensDomainHash} from '../../utils/ensHelpers';
+import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {VoteOption} from '../test-utils/voting';
 import {customError} from '../test-utils/custom-error-helper';
 
@@ -30,6 +32,7 @@ const PermissionManagerAnyAddress =
 const PermissionManagerAllowFlagAddress =
   '0x0000000000000000000000000000000000000002';
 const daoDummyName = 'dao1';
+const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
 const dummyVoteSettings = {
   participationRequiredPct: 1,
@@ -40,7 +43,7 @@ const dummyVoteSettings = {
 async function getDeployments(tx: any, tokenVoting: boolean) {
   const data = await tx.wait();
   const {events} = data;
-  const {name, dao, creator} = events.find(
+  const {dao, creator, name} = events.find(
     ({event}: {event: any}) => event === EVENTS.DAORegistered
   ).args;
 
@@ -54,8 +57,8 @@ async function getDeployments(tx: any, tokenVoting: boolean) {
   ).args;
 
   return {
-    token: await ethers.getContractAt('GovernanceERC20', token),
     dao: await ethers.getContractAt('DAO', dao),
+    token: await ethers.getContractAt('GovernanceERC20', token),
     voting: tokenVoting
       ? await ethers.getContractAt('ERC20Voting', voting)
       : await ethers.getContractAt('AllowlistVoting', voting),
@@ -68,7 +71,7 @@ async function getDeployments(tx: any, tokenVoting: boolean) {
 
 describe('DAOFactory: ', function () {
   let daoFactory: any;
-  let managingDAO: any;
+  let managingDao: any;
 
   let actionExecuteContract: any; // contract
 
@@ -128,23 +131,33 @@ describe('DAOFactory: ', function () {
   beforeEach(async function () {
     // Managing DAO
     const ManagingDAO = await ethers.getContractFactory('DAO');
-    managingDAO = await ManagingDAO.deploy();
-    await managingDAO.initialize(
+    managingDao = await ManagingDAO.deploy();
+    await managingDao.initialize(
       '0x00',
       ownerAddress,
       ethers.constants.AddressZero
     );
 
+    // ENS subdomain Registry
+    const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
+      signers[0],
+      managingDao,
+      registrarManagedDomain
+    );
+
     // DAO Registry
-    const Registry = await ethers.getContractFactory('DAORegistry');
-    const registry = await Registry.deploy();
-    await registry.initialize(managingDAO.address);
+    const DAORegistry = await ethers.getContractFactory('DAORegistry');
+    const daoRegistry = await DAORegistry.deploy();
+    await daoRegistry.initialize(
+      managingDao.address,
+      ensSubdomainRegistrar.address
+    );
 
     // Token Facotry
     const TokenFactory = await ethers.getContractFactory('TokenFactory');
     const tokenFactory = await TokenFactory.deploy();
 
-    // Dao Facotry
+    // DAO Factory
     const DAOFactory = new ethers.ContractFactory(
       mergedABI,
       daoFactoryBytecode,
@@ -152,7 +165,7 @@ describe('DAOFactory: ', function () {
     );
 
     daoFactory = await DAOFactory.deploy(
-      registry.address,
+      daoRegistry.address,
       tokenFactory.address
     );
 
@@ -161,11 +174,18 @@ describe('DAOFactory: ', function () {
     );
     actionExecuteContract = await ActionExecuteContract.deploy();
 
-    // Grant the `REGISTER_DAO_PERMISSION_ID` permission to the `daoFactory`
-    managingDAO.grant(
-      registry.address,
+    // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
+    await managingDao.grant(
+      daoRegistry.address,
       daoFactory.address,
       ethers.utils.id('REGISTER_DAO_PERMISSION')
+    );
+
+    // Grant the `REGISTER_ENS_SUBDOMAIN_PERMISSION` permission on the ENS subdomain registrar to the DAO registry contract
+    await managingDao.grant(
+      ensSubdomainRegistrar.address,
+      daoRegistry.address,
+      ethers.utils.id('REGISTER_ENS_SUBDOMAIN_PERMISSION')
     );
   });
 
@@ -194,11 +214,11 @@ describe('DAOFactory: ', function () {
     const blockNum = await ethers.provider.getBlockNumber();
 
     const {
-      name,
-      dao: managingDao,
+      dao: createdDao,
       token,
-      creator,
       voting,
+      creator,
+      name,
     } = await getDeployments(tx, true);
 
     expect(name).to.equal(daoDummyName);
@@ -211,14 +231,14 @@ describe('DAOFactory: ', function () {
       mintAmount
     );
 
-    const EXECUTE_PERMISSION_ID = await managingDao.EXECUTE_PERMISSION_ID();
+    const EXECUTE_PERMISSION_ID = await createdDao.EXECUTE_PERMISSION_ID();
 
     const DAOPermissions = await Promise.all([
-      managingDao.SET_METADATA_PERMISSION_ID(),
-      managingDao.ROOT_PERMISSION_ID(),
-      managingDao.WITHDRAW_PERMISSION_ID(),
-      managingDao.UPGRADE_PERMISSION_ID(),
-      managingDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
+      createdDao.SET_METADATA_PERMISSION_ID(),
+      createdDao.ROOT_PERMISSION_ID(),
+      createdDao.WITHDRAW_PERMISSION_ID(),
+      createdDao.UPGRADE_PERMISSION_ID(),
+      createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
     // ======== Test Permission events that were emitted successfully ==========
@@ -227,7 +247,7 @@ describe('DAOFactory: ', function () {
 
     // Check if correct PermissionManager events are thrown.
     tx = tx.to
-      .emit(managingDao, EVENTS.MetadataSet)
+      .emit(createdDao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(
@@ -239,49 +259,49 @@ describe('DAOFactory: ', function () {
     // @ts-ignore
     DAOPermissions.map(item => {
       tx = tx.to
-        .emit(managingDao, EVENTS.Granted)
+        .emit(createdDao, EVENTS.Granted)
         .withArgs(
           item,
           daoFactory.address,
-          managingDao.address,
-          managingDao.address,
+          createdDao.address,
+          createdDao.address,
           PermissionManagerAllowFlagAddress
         );
     });
 
     tx = tx.to
-      .emit(managingDao, EVENTS.Granted)
+      .emit(createdDao, EVENTS.Granted)
       .withArgs(
         SET_CONFIGURATION_PERMISSION_ID,
         daoFactory.address,
-        managingDao.address,
+        createdDao.address,
         voting.address,
         PermissionManagerAllowFlagAddress
       )
-      .to.emit(managingDao, EVENTS.Revoked)
+      .to.emit(createdDao, EVENTS.Revoked)
       .withArgs(
         DAOPermissions[1],
         daoFactory.address,
         daoFactory.address,
-        managingDao.address
+        createdDao.address
       )
-      .to.emit(managingDao, EVENTS.Granted)
+      .to.emit(createdDao, EVENTS.Granted)
       .withArgs(
         EXECUTE_PERMISSION_ID,
         daoFactory.address,
         voting.address,
-        managingDao.address,
+        createdDao.address,
         PermissionManagerAllowFlagAddress
       );
 
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by ERC20Voting
-    await expect(managingDao.execute(0, [])).to.be.revertedWith(
+    await expect(createdDao.execute(0, [])).to.be.revertedWith(
       customError(
         'Unauthorized',
-        managingDao.address,
-        managingDao.address,
+        createdDao.address,
+        createdDao.address,
         ownerAddress,
         EXECUTE_PERMISSION_ID
       )
@@ -290,7 +310,7 @@ describe('DAOFactory: ', function () {
     await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
         'DaoUnauthorized',
-        managingDao.address,
+        createdDao.address,
         voting.address,
         voting.address,
         ownerAddress,
@@ -317,7 +337,7 @@ describe('DAOFactory: ', function () {
     await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
     expect(await voting.vote(0, VoteOption.Yes, true))
-      .to.emit(managingDao, EVENTS.Executed)
+      .to.emit(createdDao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(3, 4, 5);
@@ -337,24 +357,24 @@ describe('DAOFactory: ', function () {
     );
 
     const {
-      name,
-      dao: managingDao,
-      token,
-      creator,
+      dao: createdDao,
       voting,
+      creator,
+      name,
     } = await getDeployments(tx, false);
 
     expect(name).to.equal(daoDummyName);
+
     expect(creator).to.equal(ownerAddress);
 
     await ethers.provider.send('evm_mine', []);
 
     const DAOPermissions = await Promise.all([
-      managingDao.SET_METADATA_PERMISSION_ID(),
-      managingDao.ROOT_PERMISSION_ID(),
-      managingDao.WITHDRAW_PERMISSION_ID(),
-      managingDao.UPGRADE_PERMISSION_ID(),
-      managingDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
+      createdDao.SET_METADATA_PERMISSION_ID(),
+      createdDao.ROOT_PERMISSION_ID(),
+      createdDao.WITHDRAW_PERMISSION_ID(),
+      createdDao.UPGRADE_PERMISSION_ID(),
+      createdDao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID(),
     ]);
 
     // ======== Test Permission events that were emitted successfully ==========
@@ -363,7 +383,7 @@ describe('DAOFactory: ', function () {
 
     // Check if correct PermissionManager events are thrown.
     tx = tx.to
-      .emit(managingDao, EVENTS.MetadataSet)
+      .emit(createdDao, EVENTS.MetadataSet)
       .withArgs(daoDummyMetadata)
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(
@@ -375,57 +395,57 @@ describe('DAOFactory: ', function () {
     // @ts-ignore
     DAOPermissions.map(item => {
       tx = tx.to
-        .emit(managingDao, EVENTS.Granted)
+        .emit(createdDao, EVENTS.Granted)
         .withArgs(
           item,
           daoFactory.address,
-          managingDao.address,
-          managingDao.address,
+          createdDao.address,
+          createdDao.address,
           PermissionManagerAllowFlagAddress
         );
     });
 
     tx = tx.to
-      .emit(managingDao, EVENTS.Granted)
+      .emit(createdDao, EVENTS.Granted)
       .withArgs(
         SET_CONFIGURATION_PERMISSION_ID,
         daoFactory.address,
-        managingDao.address,
+        createdDao.address,
         voting.address,
         PermissionManagerAllowFlagAddress
       )
-      .to.emit(managingDao, EVENTS.Granted)
+      .to.emit(createdDao, EVENTS.Granted)
       .withArgs(
         MODIFY_ALLOWLIST_PERMISSION_ID,
         daoFactory.address,
-        managingDao.address,
+        createdDao.address,
         voting.address,
         PermissionManagerAllowFlagAddress
       )
-      .to.emit(managingDao, EVENTS.Revoked)
+      .to.emit(createdDao, EVENTS.Revoked)
       .withArgs(
         DAOPermissions[1],
         daoFactory.address,
         daoFactory.address,
-        managingDao.address
+        createdDao.address
       )
-      .to.emit(managingDao, EVENTS.Granted)
+      .to.emit(createdDao, EVENTS.Granted)
       .withArgs(
         EXECUTE_PERMISSION_ID,
         daoFactory.address,
         voting.address,
-        managingDao.address,
+        createdDao.address,
         PermissionManagerAllowFlagAddress
       );
 
     // ===== Test if user can create a vote and execute it ======
 
     // should be only callable by AllowlistVoting
-    await expect(managingDao.execute(0, [])).to.be.revertedWith(
+    await expect(createdDao.execute(0, [])).to.be.revertedWith(
       customError(
         'Unauthorized',
-        managingDao.address,
-        managingDao.address,
+        createdDao.address,
+        createdDao.address,
         ownerAddress,
         EXECUTE_PERMISSION_ID
       )
@@ -434,7 +454,7 @@ describe('DAOFactory: ', function () {
     await expect(voting.setConfiguration(1, 2, 3)).to.be.revertedWith(
       customError(
         'DaoUnauthorized',
-        managingDao.address,
+        createdDao.address,
         voting.address,
         voting.address,
         ownerAddress,
@@ -461,7 +481,7 @@ describe('DAOFactory: ', function () {
     await voting.createVote('0x', actions, 0, 0, false, VoteOption.Yes);
 
     expect(await voting.vote(0, VoteOption.Yes, true))
-      .to.emit(managingDao, EVENTS.Executed)
+      .to.emit(createdDao, EVENTS.Executed)
       .withArgs(voting.address, 0, [], [])
       .to.emit(voting, EVENTS.ConfigUpdated)
       .withArgs(3, 4, 5);

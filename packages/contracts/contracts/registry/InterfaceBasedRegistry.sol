@@ -3,14 +3,15 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-import "../core/component/DaoAuthorizable.sol";
-import "../core/erc165/AdaptiveERC165.sol";
+import "../core/component/DaoAuthorizableUpgradeable.sol";
 
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
-abstract contract InterfaceBasedRegistry is DaoAuthorizable, UUPSUpgradeable {
+//TODO Make this PluginUUPSUpgradeable
+abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgradeable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
@@ -45,7 +46,7 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizable, UUPSUpgradeable {
         virtual
         onlyInitializing
     {
-        __DaoAuthorizable_init(_managingDao);
+        __DaoAuthorizableUpgradeable_init(_managingDao);
 
         targetInterfaceId = _targetInterfaceId;
     }
@@ -56,20 +57,20 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizable, UUPSUpgradeable {
 
     /// @notice Register an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract address.
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar.
-    /// @param registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract.
-    function _register(address registrant) internal {
-        if (!Address.isContract(registrant)) {
-            revert ContractAddressInvalid({registrant: registrant});
+    /// @param _registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract.
+    function _register(address _registrant) internal {
+        if (!Address.isContract(_registrant)) {
+            revert ContractAddressInvalid({registrant: _registrant});
         }
 
-        if (entries[registrant]) revert ContractAlreadyRegistered({registrant: registrant});
+        if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
 
-        try AdaptiveERC165(registrant).supportsInterface(targetInterfaceId) returns (bool result) {
-            if (!result) revert ContractInterfaceInvalid(registrant);
+        try IERC165(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
+            if (!result) revert ContractInterfaceInvalid(_registrant);
         } catch {
-            revert ContractERC165SupportInvalid({registrant: registrant});
+            revert ContractERC165SupportInvalid({registrant: _registrant});
         }
 
-        entries[registrant] = true;
+        entries[_registrant] = true;
     }
 }

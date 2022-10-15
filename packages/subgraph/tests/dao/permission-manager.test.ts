@@ -239,6 +239,11 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
 
   let permissionEntity = new Permission(permissionEntityID);
   permissionEntity.contractPermissionId = contractPermissionIdEntity.id;
+  permissionEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
+  permissionEntity.where = Address.fromString(VOTING_ADDRESS);
+  permissionEntity.contractPermissionId = contractPermissionId.toHexString();
+  permissionEntity.who = Address.fromString(ADDRESS_ONE);
+  permissionEntity.actor = Address.fromString(ADDRESS_ONE);
   permissionEntity.save();
 
   // check state exist

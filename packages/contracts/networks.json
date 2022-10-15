@@ -1,4 +1,9 @@
 {
+  "goerli": {
+    "url": "https://goerli.infura.io/v3/92aa62d2bb5449cfafe04b83ca8636f1",
+    "isTestnet": true,
+    "chainId": 5
+  },
   "mainnet": {
     "url": "https://mainnet.eth.aragon.network/",
     "isTestnet": false,

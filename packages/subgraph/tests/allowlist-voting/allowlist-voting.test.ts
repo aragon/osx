@@ -10,11 +10,7 @@ import {
   handleConfigUpdated,
   _handleVoteCreated
 } from '../../src/packages/allowlist/allowlist-voting';
-import {
-  AllowlistPackage,
-  AllowlistProposal,
-  AllowlistVoter
-} from '../../generated/schema';
+import {AllowlistPackage, AllowlistVoter} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -22,7 +18,14 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   ADDRESS_TWO,
-  ADDRESS_ZERO
+  ADDRESS_ZERO,
+  VOTE_ID,
+  START_DATE,
+  END_DATE,
+  SNAPSHOT_BLOCK,
+  MIN_SUPPORT,
+  MIN_TURNOUT,
+  VOTING_POWER
 } from '../constants';
 import {createDummyAcctions, createGetVoteCall} from '../utils';
 import {
@@ -33,7 +36,8 @@ import {
   createNewVoteCreatedEvent,
   createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
-  getVotesLengthCall
+  getVotesLengthCall,
+  createAllowlistProposalEntityState
 } from './utils';
 
 let voteId = '0';
@@ -124,23 +128,20 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
 
 test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   // create state
-  let proposalId =
-    Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let erc20VotingProposal = new AllowlistProposal(proposalId);
-  erc20VotingProposal.save();
+  let proposal = createAllowlistProposalEntityState();
 
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    VOTE_ID,
     true,
     false,
-    startDate,
-    endDate,
-    snapshotBlock,
-    supportRequiredPct,
-    participationRequiredPct,
-    votingPower,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+    MIN_SUPPORT,
+    MIN_TURNOUT,
+    VOTING_POWER,
     '1',
     '0',
     '0',
@@ -149,36 +150,42 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event = createNewVoteCastEvent(
-    voteId,
+    VOTE_ID,
     ADDRESS_ONE,
     '2',
-    votingPower,
+    '1',
     VOTING_ADDRESS
   );
 
   handleVoteCast(event);
 
   // checks
-  let entityID = ADDRESS_ONE + '_' + proposalId;
+  let entityID = ADDRESS_ONE + '_' + proposal.id;
   assert.fieldEquals('AllowlistVote', entityID, 'id', entityID);
 
   // check proposal
-  assert.fieldEquals('AllowlistProposal', proposalId, 'yes', '1');
-
+  assert.fieldEquals('AllowlistProposal', proposal.id, 'yes', '1');
+  // check executable
+  // the total voting power is 3, currently total votes = 1
+  // the min participation is 0.5; 0.33 <= 0.5 => false
+  // currently yes = 1
+  // the min support is 0.5; 1 >= 0.5 => true
+  // is not executable 
+  assert.fieldEquals('AllowlistProposal', proposal.id, 'executable', 'false');
   // check vote count
-  assert.fieldEquals('AllowlistProposal', proposalId, 'voteCount', '1');
+  assert.fieldEquals('AllowlistProposal', proposal.id, 'voteCount', '1');
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    VOTE_ID,
     true,
     false,
-    startDate,
-    endDate,
-    snapshotBlock,
-    supportRequiredPct,
-    participationRequiredPct,
-    votingPower,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+    MIN_SUPPORT,
+    MIN_TURNOUT,
+    VOTING_POWER,
     '1',
     '0',
     '1',
@@ -186,16 +193,23 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   );
   // create event
   let event2 = createNewVoteCastEvent(
-    voteId,
+    VOTE_ID,
     ADDRESS_ONE,
     '1', // abstain
-    votingPower,
+    '1',
     VOTING_ADDRESS
   );
 
   handleVoteCast(event2);
+  // check executable
+  // the total voting power is 3, currently total votes = 2
+  // the min participation is 0.5; 0.66 >= 0.5 => true
+  // currently yes = 1, abstain = 1
+  // the min support is 0.5; 0.5 >= 0.5 => true
+  // is executable 
+  assert.fieldEquals('AllowlistProposal', proposal.id, 'executable', 'true');
 
-  assert.fieldEquals('AllowlistProposal', proposalId, 'voteCount', '2');
+  assert.fieldEquals('AllowlistProposal', proposal.id, 'voteCount', '2');
 
   clearStore();
 });
@@ -203,8 +217,12 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
 test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  let erc20VotingProposal = new AllowlistProposal(entityID);
-  erc20VotingProposal.save();
+  createAllowlistProposalEntityState(
+    entityID,
+    DAO_ADDRESS,
+    VOTING_ADDRESS,
+    ADDRESS_ONE
+  );
 
   // create event
   let event = createNewVoteExecutedEvent('0', VOTING_ADDRESS);
@@ -290,6 +308,7 @@ test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
   for (let index = 0; index < userArray.length; index++) {
     const user = userArray[index];
     let userEntity = new AllowlistVoter(user.toHexString());
+    userEntity.pkg = Address.fromString(VOTING_ADDRESS).toHexString();
     userEntity.save();
   }
 

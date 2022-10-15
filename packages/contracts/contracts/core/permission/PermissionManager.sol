@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IPermissionOracle.sol";
-import "./BulkPermissionsLib.sol";
+import "./PermissionLib.sol";
 
 /// @title PermissionManager
 /// @author Aragon Association - 2021, 2022
@@ -157,18 +157,18 @@ contract PermissionManager is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the contract.
     /// @param items The array of bulk items to process.
-    function bulkOnSingleTarget(address _where, BulkPermissionsLib.ItemSingleTarget[] calldata items)
+    function bulkOnSingleTarget(address _where, PermissionLib.ItemSingleTarget[] calldata items)
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
         for (uint256 i = 0; i < items.length; i++) {
-            BulkPermissionsLib.ItemSingleTarget memory item = items[i];
+            PermissionLib.ItemSingleTarget memory item = items[i];
 
-            if (item.operation == BulkPermissionsLib.Operation.Grant)
+            if (item.operation == PermissionLib.Operation.Grant)
                 _grant(_where, item.who, item.permissionId);
-            else if (item.operation == BulkPermissionsLib.Operation.Revoke)
+            else if (item.operation == PermissionLib.Operation.Revoke)
                 _revoke(_where, item.who, item.permissionId);
-            else if (item.operation == BulkPermissionsLib.Operation.Freeze)
+            else if (item.operation == PermissionLib.Operation.Freeze)
                 _freeze(_where, item.permissionId);
         }
     }
@@ -176,29 +176,28 @@ contract PermissionManager is Initializable {
     /// @notice Processes bulk items on the permission manager.
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
-    function bulkOnMultiTarget(BulkPermissionsLib.ItemMultiTarget[] calldata items) external {
+    function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
         for (uint256 i = 0; i < items.length; i++) {
-            BulkPermissionsLib.ItemMultiTarget memory item = items[i];
+            PermissionLib.ItemMultiTarget memory item = items[i];
 
             // TODO: Optimize
             _auth(item.where, ROOT_PERMISSION_ID);
-            
-            if (item.operation == BulkPermissionsLib.Operation.Grant)
+
+            if (item.operation == PermissionLib.Operation.Grant)
                 _grant(item.where, item.who, item.permissionId);
-            else if (item.operation == BulkPermissionsLib.Operation.Revoke)
+            else if (item.operation == PermissionLib.Operation.Revoke)
                 _revoke(item.where, item.who, item.permissionId);
-            else if (item.operation == BulkPermissionsLib.Operation.Freeze)
+            else if (item.operation == PermissionLib.Operation.Freeze)
                 _freeze(item.where, item.permissionId);
-            else if (item.operation == BulkPermissionsLib.Operation.GrantWithOracle)
+            else if (item.operation == PermissionLib.Operation.GrantWithOracle)
                 _grantWithOracle(
-                    item.where, 
-                    item.who, 
+                    item.where,
+                    item.who,
                     item.permissionId,
                     IPermissionOracle(item.oracle)
                 );
         }
     }
-    
 
     /// @notice Checks if an address has permission on a contract via a permission identifier and considers if `ANY_ADDRESS` was used in the granting process.
     /// @param _where The address of the target contract for which `who` recieves permission.

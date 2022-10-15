@@ -61,7 +61,7 @@ contract ENSSubdomainRegistrar is Component {
         __Component_init(_managingDao);
 
         // Register the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID for the `Component`.
-        _registerStandard(REGISTRY_INTERFACE_ID);
+        _registerInterface(REGISTRY_INTERFACE_ID);
 
         ens = _ens;
         node = _node;
