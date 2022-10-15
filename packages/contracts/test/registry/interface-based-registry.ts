@@ -31,10 +31,7 @@ describe('InterfaceBasedRegistry', function () {
     const InterfaceBasedRegistryMock = await ethers.getContractFactory(
       'InterfaceBasedRegistryMock'
     );
-    interfaceBasedRegistryMock = await InterfaceBasedRegistryMock.deploy();
-
-    // Let the interface registry register `DAO` contracts for testing purposes
-    await interfaceBasedRegistryMock.initialize(dao.address);
+    interfaceBasedRegistryMock = await InterfaceBasedRegistryMock.deploy(dao.address);
 
     // grant REGISTER_PERMISSION_ID to registrer
     dao.grant(

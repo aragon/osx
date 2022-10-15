@@ -147,12 +147,8 @@ describe('DAOFactory: ', function () {
 
     // DAO Registry
     const DAORegistry = await ethers.getContractFactory('DAORegistry');
-    const daoRegistry = await DAORegistry.deploy();
-    await daoRegistry.initialize(
-      managingDao.address,
-      ensSubdomainRegistrar.address
-    );
-
+    const daoRegistry = await DAORegistry.deploy(managingDao.address, ensSubdomainRegistrar.address);
+    
     // Token Facotry
     const TokenFactory = await ethers.getContractFactory('TokenFactory');
     const tokenFactory = await TokenFactory.deploy();

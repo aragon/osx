@@ -70,7 +70,7 @@ async function setupENS(
   );
 
   // Deploy the registrar
-  let registrar = await ENSSubdomainRegistrar.deploy();
+  let registrar = await ENSSubdomainRegistrar.deploy(dao.address);
 
   return [ens, resolver, dao, registrar];
 }
@@ -147,7 +147,7 @@ describe('ENSSubdomainRegistrar', function () {
       expect(
         await registrar
           .connect(signers[0])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+          .initialize(ens.address, ensDomainHash('test'))
       );
     });
 
@@ -156,7 +156,6 @@ describe('ENSSubdomainRegistrar', function () {
     it('reverts if the ownership of the domain node is removed from the registrar', async () => {
       // Initialize the registrar with the 'test' domain
       registrar.initialize(
-        managingDao.address,
         ens.address,
         ensDomainHash('test')
       );
@@ -206,7 +205,7 @@ describe('ENSSubdomainRegistrar', function () {
       expect(
         await registrar
           .connect(signers[0])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+          .initialize(ens.address, ensDomainHash('test'))
       );
 
       // the default resolver is the resolver of the parent domain node
@@ -218,7 +217,6 @@ describe('ENSSubdomainRegistrar', function () {
     it('reverts if the approval of the registrar is removed', async () => {
       // Initialize the registrar with the 'test' domain
       registrar.initialize(
-        managingDao.address,
         ens.address,
         ensDomainHash('test')
       );
@@ -264,7 +262,7 @@ describe('ENSSubdomainRegistrar', function () {
       await expect(
         registrar
           .connect(signers[0])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+          .initialize(ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
           'UnauthorizedRegistrar',
@@ -286,7 +284,7 @@ describe('ENSSubdomainRegistrar', function () {
       await expect(
         registrar
           .connect(signers[1])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+          .initialize(ens.address, ensDomainHash('test'))
       ).to.be.revertedWith(
         customError(
           'UnauthorizedRegistrar',
@@ -298,6 +296,9 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('reverts on attempted subnode registration', async () => {
       // signers[1] can register subdomain
+      // TODO: Michael 
+      // The below test succeeds but it should be failing ! 
+      // mainly every to.be.reverted needs checking in this file !!!
       await expect(
         registrar
           .connect(signers[1])
@@ -308,6 +309,9 @@ describe('ENSSubdomainRegistrar', function () {
     it('reverts on attempted default resolver setting', async () => {
       const newResolverAddr = ethers.constants.AddressZero;
 
+      // TODO: Michael 
+      // It seems to.be.reverted is buggy. This test fails ! if you type to.be.revertedWith("correctMessage")
+      // Then it continues working well. In this file, please check all the tests that use `to.be.reverted` !
       // signers[1] can register subdomain
       await expect(
         registrar.connect(signers[1]).setDefaultResolver(newResolverAddr)
@@ -320,7 +324,6 @@ describe('ENSSubdomainRegistrar', function () {
       beforeEach(async () => {
         // Initialize the registrar with the 'test' domain
         registrar.initialize(
-          managingDao.address,
           ens.address,
           ensDomainHash('test')
         );
@@ -329,7 +332,6 @@ describe('ENSSubdomainRegistrar', function () {
       it('reverts if initialized a second time', async () => {
         await expect(
           registrar.initialize(
-            managingDao.address,
             ens.address,
             ensDomainHash('foo')
           )

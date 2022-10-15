@@ -47,14 +47,14 @@ export async function deployENSSubdomainRegistrar(
   }
 
   // Deploy the ENS and approve the subdomain registrar
-  const ensSubdomainRegistrar = await ENSSubdomainRegistrar.deploy();
+  const ensSubdomainRegistrar = await ENSSubdomainRegistrar.deploy(managingDao.address);
   await ens
     .connect(owner)
     .setApprovalForAll(ensSubdomainRegistrar.address, true);
 
   // Initialize it with the domain
   const node = ethers.utils.namehash(domain);
-  ensSubdomainRegistrar.initialize(managingDao.address, ens.address, node);
+  ensSubdomainRegistrar.initialize(ens.address, node);
 
   return ensSubdomainRegistrar;
 }
