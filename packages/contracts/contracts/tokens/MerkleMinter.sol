@@ -25,6 +25,10 @@ contract MerkleMinter is PluginUUPSUpgradeable {
     /// @notice The ID of the permission required to call the `merkleMint` function.
     bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION");
 
+    /// @notice The ID of the permission required to change distributor base.
+    bytes32 public constant CHANGE_DISTRIBUTOR_PERMISSION_ID =
+        keccak256("CHANGE_DISTRIBUTOR_PERMISSION");
+
     /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
     IERC20MintableUpgradeable public token;
 
@@ -60,18 +64,17 @@ contract MerkleMinter is PluginUUPSUpgradeable {
         token = _token;
         distributorBase = _distributorBase;
     }
+    
+    function changeDistributorBase(address _distributorBase)
+        external
+        auth(CHANGE_DISTRIBUTOR_PERMISSION_ID)
+    {
+        distributorBase = _distributorBase;
+    }
 
     /// @inheritdoc ERC165Upgradeable
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
-        return
-            interfaceId == MERKLE_MINTER_INTERFACE_ID ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == MERKLE_MINTER_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributes them using a `MerkleDistributor`.
@@ -87,11 +90,7 @@ contract MerkleMinter is PluginUUPSUpgradeable {
         bytes calldata _context
     ) external auth(MERKLE_MINT_PERMISSION_ID) returns (MerkleDistributor distributor) {
         address distributorAddr = distributorBase.clone();
-        MerkleDistributor(distributorAddr).initialize(
-            dao,
-            token,
-            _merkleRoot
-        );
+        MerkleDistributor(distributorAddr).initialize(dao, token, _merkleRoot);
 
         token.mint(distributorAddr, _totalAmount);
 
