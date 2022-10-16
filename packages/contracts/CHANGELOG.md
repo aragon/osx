@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added deployment script for `managing-dao`, `plugin-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
+- Added ens support for `PluginRepoRegistry`.
 
 ### Changed
 
@@ -50,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated deployment scripts for `managing-dao`, `dao-registry`, `aragon-plugin-registry`, `dao-factory`.
 - Changed `registry.ts` to `dao-registry.ts` and updated testing.
 - Changed `Registry` to `DAORegistry` and updated to inherit from `InterfaceBasedRegistry`.
+- Changed `InterfaceBasedRegistry` to make it non-upgradable with a constructor.
+- Changed `DAORegistry`, `PluginRepoRegistry` to be non-upgradable.
 - Bumped `@openzeppelin/contracts` and `@openzeppelin/contracts-upgradeable` to `4.7.0` and fixed `GovernanceWrappedERC20` accordingly.
 - Refactored import statements.
 - Changed `ERC165RegistryBase` to `InterfaceBasedRegistry`.

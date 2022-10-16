@@ -108,6 +108,14 @@ describe('DAORegistry', function () {
     );
   });
 
+  it('fail to register if DAO name is empty', async function () {
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, "")
+    ).to.be.revertedWith(
+      customError('EmptyDAOName')
+    );
+  });
+
   it('fail to register if DAO already exists', async function () {
     await daoRegistry.register(
       targetDao.address,
