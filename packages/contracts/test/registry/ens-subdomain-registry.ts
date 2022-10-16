@@ -272,33 +272,10 @@ describe('ENSSubdomainRegistrar', function () {
       );
     });
 
-    expectedUnauthorizedRegistrarReverts();
-  });
-
-  describe('Random signer with no permissions at all', () => {
-    expectedUnauthorizedRegistrarReverts();
-  });
-
-  function expectedUnauthorizedRegistrarReverts() {
-    it('reverts during initialization', async () => {
-      await expect(
-        registrar
-          .connect(signers[1])
-          .initialize(ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
-
     it('reverts on attempted subnode registration', async () => {
       // signers[1] can register subdomain
-      // TODO: Michael 
-      // The below test succeeds but it should be failing ! 
-      // mainly every to.be.reverted needs checking in this file !!!
+      // but it will revert due to another error(as contract is not initialized..)
+    
       await expect(
         registrar
           .connect(signers[1])
@@ -308,16 +285,12 @@ describe('ENSSubdomainRegistrar', function () {
 
     it('reverts on attempted default resolver setting', async () => {
       const newResolverAddr = ethers.constants.AddressZero;
-
-      // TODO: Michael 
-      // It seems to.be.reverted is buggy. This test fails ! if you type to.be.revertedWith("correctMessage")
-      // Then it continues working well. In this file, please check all the tests that use `to.be.reverted` !
-      // signers[1] can register subdomain
+      expect(await registrar.connect(signers[1]).setDefaultResolver(newResolverAddr))
       await expect(
-        registrar.connect(signers[1]).setDefaultResolver(newResolverAddr)
+        registrar.connect(signers[2]).setDefaultResolver(newResolverAddr)
       ).to.be.reverted;
     });
-  }
+  });
 
   function postInitializationTests() {
     describe('After registrar initialization', () => {
