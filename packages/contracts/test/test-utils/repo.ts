@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 
 import {
-  AragonPluginRegistry,
+  PluginRepoRegistry,
   PluginRepoFactory,
   PluginSetupV1Mock,
 } from '../../typechain';
@@ -24,11 +24,11 @@ export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {
 export async function deployPluginRepoFactory(
   signers: any,
   managingDao: any,
-  aragonPluginRegistry: AragonPluginRegistry
+  pluginRepoRegistry: PluginRepoRegistry
 ): Promise<any> {
   // @ts-ignore
-  const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
-    'AragonPluginRegistry'
+  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
+    'PluginRepoRegistry'
   );
   // @ts-ignore
   const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
@@ -37,7 +37,7 @@ export async function deployPluginRepoFactory(
 
   const _merged = [
     ...PluginRepoFactoryArtifact.abi,
-    ...AragonPluginRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
+    ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
   ];
 
   // remove duplicated events
@@ -54,12 +54,12 @@ export async function deployPluginRepoFactory(
   );
 
   const pluginRepoFactory = await PluginRepoFactory.deploy(
-    aragonPluginRegistry.address
+    pluginRepoRegistry.address
   );
 
   // Grant `PLUGIN_REGISTER_PERMISSION` to `PluginRepoFactory`.
   await managingDao.grant(
-    aragonPluginRegistry.address,
+    pluginRepoRegistry.address,
     pluginRepoFactory.address,
     ethers.utils.id('PLUGIN_REGISTER_PERMISSION')
   );

@@ -5,14 +5,14 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {customError} from '../test-utils/custom-error-helper';
 import {
-  AragonPluginRegistry,
   DAORegistry,
   PluginRepoFactory,
   PluginSetupProcessor,
   PluginSetupV1Mock,
+  PluginRepoRegistry,
 } from '../../typechain';
 import {
-  deployAragonPluginRegistry,
+  deployPluginRepoRegistry,
   deployPluginSetupProcessor,
 } from '../test-utils/plugin-setup-processor';
 import {deployPluginRepoFactory} from '../test-utils/repo';
@@ -27,8 +27,8 @@ const EVENTS = {
   Granted: 'Granted',
 };
 
-const PROCESS_INSTALL_PERMISSION_ID = ethers.utils.id(
-  'PROCESS_INSTALL_PERMISSION'
+const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
+  'APPLY_INSTALLATION_PERMISSION'
 );
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const WITHDRAW_PERMISSION_ID = ethers.utils.id('WITHDRAW_PERMISSION');
@@ -82,7 +82,7 @@ describe('DAOFactory: ', function () {
   let managingDao: any;
 
   let psp: PluginSetupProcessor;
-  let aragonPluginRegistry: AragonPluginRegistry;
+  let pluginRepoRegistry: PluginRepoRegistry;
   let pluginSetupV1Mock: PluginSetupV1Mock;
   let pluginRepoFactory: any;
   let pluginSetupMockRepoAddress: any;
@@ -164,12 +164,12 @@ describe('DAOFactory: ', function () {
       ensSubdomainRegistrar.address
     );
 
-    aragonPluginRegistry = await deployAragonPluginRegistry(managingDao);
-    psp = await deployPluginSetupProcessor(managingDao, aragonPluginRegistry);
+    pluginRepoRegistry = await deployPluginRepoRegistry(managingDao);
+    psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
     pluginRepoFactory = await deployPluginRepoFactory(
       signers,
       managingDao,
-      aragonPluginRegistry
+      pluginRepoRegistry
     );
 
     // Create and register a plugin on the AragonPluginRegistry
@@ -231,34 +231,6 @@ describe('DAOFactory: ', function () {
     );
   });
 
-  it('Revert if no governance plugin is provided', async () => {
-    const PluginSetupV1MockNonGovernance = await ethers.getContractFactory(
-      'PluginSetupV1MockNonGovernance'
-    );
-    const pluginSetupV1MockNonGovernance =
-      await PluginSetupV1MockNonGovernance.deploy();
-
-    const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      'PluginSetupV1NonGovernance',
-      [1, 0, 0],
-      pluginSetupV1MockNonGovernance.address,
-      '0x00',
-      ownerAddress
-    );
-    const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
-    const pluginSetupV1MockNonGovernanceRepoAddress = event.args.pluginRepo;
-
-    const nonGovernancepluginSettings = {
-      pluginSetup: pluginSetupV1MockNonGovernance.address,
-      pluginSetupRepo: pluginSetupV1MockNonGovernanceRepoAddress,
-      data: EMPTY_DATA,
-    };
-
-    await expect(
-      daoFactory.createDao(daoSettings, [nonGovernancepluginSettings])
-    ).to.be.revertedWith(customError('NoGovernancePluginProvided'));
-  });
-
   it('Correclty create a DAO with one plugin', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao, plugin, helpers, permissions} =
@@ -297,7 +269,7 @@ describe('DAOFactory: ', function () {
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(
-        PROCESS_INSTALL_PERMISSION_ID,
+        APPLY_INSTALLATION_PERMISSION_ID,
         daoFactory.address,
         daoFactory.address,
         psp.address

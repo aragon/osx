@@ -1,10 +1,10 @@
 import {ethers} from 'hardhat';
 import {findEvent} from './event';
-import {AragonPluginRegistry, PluginSetupProcessor} from '../../typechain';
+import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
 
 export async function deployPluginSetupProcessor(
   managingDao: any,
-  aragonPluginRegistry: AragonPluginRegistry
+  pluginRepoRegistry: PluginRepoRegistry
 ): Promise<PluginSetupProcessor> {
   let psp: PluginSetupProcessor;
 
@@ -14,24 +14,24 @@ export async function deployPluginSetupProcessor(
   );
   psp = await PluginSetupProcessor.deploy(
     managingDao.address,
-    aragonPluginRegistry.address
+    pluginRepoRegistry.address
   );
 
   return psp;
 }
 
-export async function deployAragonPluginRegistry(
+export async function deployPluginRepoRegistry(
   managingDao: any
-): Promise<AragonPluginRegistry> {
-  let aragonPluginRegistry: AragonPluginRegistry;
+): Promise<PluginRepoRegistry> {
+  let pluginRepoRegistry: PluginRepoRegistry;
 
-  const AragonPluginRegistry = await ethers.getContractFactory(
-    'AragonPluginRegistry'
+  const PluginRepoRegistry = await ethers.getContractFactory(
+    'PluginRepoRegistry'
   );
-  aragonPluginRegistry = await AragonPluginRegistry.deploy();
-  await aragonPluginRegistry.initialize(managingDao.address);
+  pluginRepoRegistry = await PluginRepoRegistry.deploy();
+  await pluginRepoRegistry.initialize(managingDao.address);
 
-  return aragonPluginRegistry;
+  return pluginRepoRegistry;
 }
 
 export async function prepareInstallation(
