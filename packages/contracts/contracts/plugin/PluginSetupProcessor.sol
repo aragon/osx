@@ -177,9 +177,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
-    /// @return plugin The plugin contract address.
-    /// @return helpers The list of helper contract addresses, that the plugin needs to operate.
-    /// @return permissions The list of multi-targeted permission operations to be applied to the installing DAO.
+    /// @return plugin The prepared plugin contract address.
+    /// @return helpers The prepared list of helper contract addresses, that a plugin might require to operate.
+    /// @return permissions The prepared list of multi-targeted permission operations to be applied to the installing DAO.
     function prepareInstallation(
         address _dao,
         address _pluginSetup,

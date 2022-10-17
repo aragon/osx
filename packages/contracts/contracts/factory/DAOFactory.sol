@@ -13,27 +13,31 @@ import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
+    /// @notice The DAO base contract, to be used for creating new `DAO`s via `createProxy` function.
     address public daoBase;
 
+    /// @notice The DAO registry listing the `DAO` contracts created via this contract.
     DAORegistry public daoRegistry;
+
+    /// @notice The plugin setup processor for installing plugins on the newly created `DAO`s.
     PluginSetupProcessor public pluginSetupProcessor;
 
     struct DAOSettings {
-        address trustedForwarder;
-        string name;
-        bytes metadata;
+        address trustedForwarder; // The address of the trusted forwarder required for meta transactions.
+        string name; // The name of the DAO.
+        bytes metadata; // Meta data of the DAO.
     }
 
     struct PluginSettings {
-        address pluginSetup;
-        PluginRepo pluginSetupRepo;
-        bytes data;
+        address pluginSetup; // The `PluginSetup` address of the plugin.
+        PluginRepo pluginSetupRepo; // The `PluginRepo` of the plugin.
+        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
     error NoPluginProvided();
 
-    /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
+    /// @notice The constructor setting the registry and plugin setup processor and creating the base contracts for the factory.
     /// @param _registry The DAO registry to register the DAO by its name.
     /// @param _pluginSetupProcessor The addres of PluginSetupProcessor.
     constructor(DAORegistry _registry, PluginSetupProcessor _pluginSetupProcessor) {
@@ -43,12 +47,15 @@ contract DAOFactory {
         daoBase = address(new DAO());
     }
 
-    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata pluginSettings)
+    /// @notice Creates a new DAO and setup a number of plugins.
+    /// @param _daoSettings The DAO settings containing `trustedForwarder`, `name` and `metadata`.
+    /// @param _pluginSettings The list of plugin settings that will be installed after the DAO creation, containing `pluginSetup`, `pluginSetupRepo`, and `data`.
+    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata _pluginSettings)
         external
         returns (DAO dao)
     {
         // Check if no plugin is provided.
-        if (pluginSettings.length == 0) {
+        if (_pluginSettings.length == 0) {
             revert NoPluginProvided();
         }
 
@@ -70,7 +77,7 @@ contract DAOFactory {
         );
 
         // Install plugins on the newly created DAO.
-        for (uint256 i = 0; i < pluginSettings.length; i++) {
+        for (uint256 i = 0; i < _pluginSettings.length; i++) {
             // Prepare plugin.
             (
                 address plugin,
@@ -78,15 +85,15 @@ contract DAOFactory {
                 PermissionLib.ItemMultiTarget[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(dao),
-                    pluginSettings[i].pluginSetup,
-                    pluginSettings[i].pluginSetupRepo,
-                    pluginSettings[i].data
+                    _pluginSettings[i].pluginSetup,
+                    _pluginSettings[i].pluginSetupRepo,
+                    _pluginSettings[i].data
                 );
 
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(dao),
-                pluginSettings[i].pluginSetup,
+                _pluginSettings[i].pluginSetup,
                 plugin,
                 permissions
             );
@@ -111,8 +118,8 @@ contract DAOFactory {
         dao.revoke(address(dao), address(this), dao.ROOT_PERMISSION_ID());
     }
 
-    /// @notice Creates a new DAO.
-    /// @param _daoSettings The name and metadata hash of the DAO it creates.
+    /// @notice Creates a new DAO, and initialize it with this contract as intial owner.
+    /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // create dao
         dao = DAO(createProxy(daoBase, bytes("")));
