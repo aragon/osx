@@ -6,6 +6,7 @@ import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.
 import {IDAO} from "../../../core/IDAO.sol";
 
 contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
+    // V1 storage
     uint256 public num;
     address public helper;
 
