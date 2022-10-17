@@ -530,20 +530,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         pure
         returns (bytes32)
     {
-        bytes memory encoded;
-        for (uint256 i = 0; i < _permissions.length; i++) {
-            PermissionLib.ItemMultiTarget memory p = _permissions[i];
-            encoded = abi.encodePacked(
-                encoded,
-                p.operation,
-                p.where,
-                p.who,
-                p.oracle,
-                p.permissionId
-            );
-        }
-
-        return keccak256(encoded);
+        return keccak256(abi.encode(_permissions));
     }
 
     /// @notice Upgrades an UUPSUpgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
