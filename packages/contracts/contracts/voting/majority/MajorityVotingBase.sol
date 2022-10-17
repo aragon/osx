@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.10;
 
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -22,8 +23,7 @@ abstract contract MajorityVotingBase is
     PluginUUPSUpgradeable
 {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID =
-        type(IMajorityVoting).interfaceId ^ this.supportsInterface.selector;
+    bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
     /// @notice The ID of the permission required to call the `setConfiguration` function.
     bytes32 public constant SET_CONFIGURATION_PERMISSION_ID =
@@ -83,7 +83,7 @@ abstract contract MajorityVotingBase is
         uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUpgradeable_init(_dao);
-        
+
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);

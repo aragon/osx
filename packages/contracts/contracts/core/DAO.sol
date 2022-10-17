@@ -19,10 +19,10 @@ import "./IDAO.sol";
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 contract DAO is
-    IDAO,
     Initializable,
-    ERC1271,
     ERC165StorageUpgradeable,
+    IDAO,
+    ERC1271,
     UUPSUpgradeable,
     PermissionManager,
     CallbackHandler

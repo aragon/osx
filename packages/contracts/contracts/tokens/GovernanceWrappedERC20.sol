@@ -9,6 +9,7 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 import {IERC20MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
@@ -31,7 +32,7 @@ contract GovernanceWrappedERC20 is
 {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 public constant GOVERNANCE_INTERFACE_ID =
-        this.decimals.selector ^ this.supportsInterface.selector;
+        this.decimals.selector ^ this.initialize.selector;
 
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
@@ -61,6 +62,7 @@ contract GovernanceWrappedERC20 is
     /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
+            interfaceId == GOVERNANCE_INTERFACE_ID ||
             interfaceId == type(IERC20Upgradeable).interfaceId ||
             interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
             interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||

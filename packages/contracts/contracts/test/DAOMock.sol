@@ -24,6 +24,10 @@ contract DAOMock is IDAO, PermissionManager {
         return true;
     }
 
+    function supportsInterface(bytes4 interfaceId) external view returns(bool) {
+        return true;
+    }
+    
     function getTrustedForwarder() public pure override returns (address) {
         return address(0);
     }
