@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {AragonPluginRegistry, DAO} from '../../typechain';
+import {PluginRepoRegistry, DAO} from '../../typechain';
 
 import {customError} from '../test-utils/custom-error-helper';
 import {deployMockPluginSetup} from '../test-utils/repo';
@@ -16,7 +16,7 @@ const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
   'PLUGIN_REGISTER_PERMISSION'
 );
 
-async function getAragonPluginRegistryEvents(tx: any) {
+async function getPluginRepoRegistryEvents(tx: any) {
   const data = await tx.wait();
   const {events} = data;
   const {name, pluginRepo} = events.find(
@@ -31,8 +31,8 @@ async function getAragonPluginRegistryEvents(tx: any) {
 
 async function getMergedABI() {
   // @ts-ignore
-  const AragonPluginRegistryArtifact = await hre.artifacts.readArtifact(
-    'AragonPluginRegistry'
+  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
+    'PluginRepoRegistry'
   );
   // @ts-ignore
   const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
@@ -42,9 +42,7 @@ async function getMergedABI() {
   return {
     abi: [
       ...PluginRepoFactoryArtifact.abi,
-      ...AragonPluginRegistryArtifact.abi.filter(
-        (f: any) => f.type === 'event'
-      ),
+      ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
     ],
     bytecode: PluginRepoFactoryArtifact.bytecode,
   };
@@ -52,7 +50,7 @@ async function getMergedABI() {
 
 describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
-  let aragonPluginRegistry: AragonPluginRegistry;
+  let pluginRepoRegistry: PluginRepoRegistry;
   let ownerAddress: string;
   let managingDao: DAO;
   let pluginRepoFactory: any;
@@ -76,12 +74,12 @@ describe('PluginRepoFactory: ', function () {
     managingDao = await DAO.deploy();
     await managingDao.initialize('0x00', ownerAddress, zeroAddress);
 
-    // deploy and initialize AragonPluginRegistry
-    const AragonPluginRegistry = await ethers.getContractFactory(
-      'AragonPluginRegistry'
+    // deploy and initialize PluginRepoRegistry
+    const PluginRepoRegistry = await ethers.getContractFactory(
+      'PluginRepoRegistry'
     );
-    aragonPluginRegistry = await AragonPluginRegistry.deploy();
-    await aragonPluginRegistry.initialize(managingDao.address);
+    pluginRepoRegistry = await PluginRepoRegistry.deploy();
+    await pluginRepoRegistry.initialize(managingDao.address);
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -90,12 +88,12 @@ describe('PluginRepoFactory: ', function () {
       signers[0]
     );
     pluginRepoFactory = await PluginRepoFactory.deploy(
-      aragonPluginRegistry.address
+      pluginRepoRegistry.address
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
     managingDao.grant(
-      aragonPluginRegistry.address,
+      pluginRepoRegistry.address,
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
     );
@@ -103,7 +101,7 @@ describe('PluginRepoFactory: ', function () {
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
     managingDao.revoke(
-      aragonPluginRegistry.address,
+      pluginRepoRegistry.address,
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
     );
@@ -116,8 +114,8 @@ describe('PluginRepoFactory: ', function () {
       customError(
         'DaoUnauthorized',
         managingDao.address,
-        aragonPluginRegistry.address,
-        aragonPluginRegistry.address,
+        pluginRepoRegistry.address,
+        pluginRepoRegistry.address,
         pluginRepoFactory.address,
         PLUGIN_REGISTER_PERMISSION_ID
       )
@@ -140,7 +138,7 @@ describe('PluginRepoFactory: ', function () {
       ownerAddress
     );
 
-    const {name, pluginRepo} = await getAragonPluginRegistryEvents(tx);
+    const {name, pluginRepo} = await getPluginRepoRegistryEvents(tx);
 
     expect(name).to.equal(pluginRepoName);
     expect(pluginRepo).not.undefined;
@@ -181,7 +179,7 @@ describe('PluginRepoFactory: ', function () {
       ownerAddress
     );
 
-    const {name, pluginRepo} = await getAragonPluginRegistryEvents(tx);
+    const {name, pluginRepo} = await getPluginRepoRegistryEvents(tx);
 
     expect(name).to.equal(pluginRepoName);
     expect(pluginRepo).not.undefined;

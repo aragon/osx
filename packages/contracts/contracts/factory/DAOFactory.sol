@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {DAORegistry} from "../registry/DAORegistry.sol";
 import {DAO} from "../core/DAO.sol";
-import {BulkPermissionsLib} from "../core/permission/BulkPermissionsLib.sol";
+import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {createProxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
@@ -33,9 +33,6 @@ contract DAOFactory {
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
     error NoPluginProvided();
 
-    /// @notice Thrown if none of the provided `PluginSettings` is a governance plugin.
-    error NoGovernancePluginProvided();
-
     /// @notice The constructor setting the registry and token factory address and creating the base contracts for the factory to clone from.
     /// @param _registry The DAO registry to register the DAO by its name.
     /// @param _pluginSetupProcessor The addres of PluginSetupProcessor.
@@ -62,36 +59,29 @@ contract DAOFactory {
         daoRegistry.register(dao, msg.sender, _daoSettings.name);
 
         // Grant the temporary permissions.
-        // Grant Temporarly `ROOT_PERMISSION_ID` to `pluginSetupProcessor`.
+        // Grant Temporarly `ROOT_PERMISSION` to `pluginSetupProcessor`.
         dao.grant(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
 
-        // Grant Temporarly `PROCESS_INSTALL_PERMISSION_ID` on `pluginSetupProcessor` to this `DAOFactory`.
+        // Grant Temporarly `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
         dao.grant(
             address(pluginSetupProcessor),
             address(this),
-            pluginSetupProcessor.PROCESS_INSTALL_PERMISSION_ID()
+            pluginSetupProcessor.APPLY_INSTALLATION_PERMISSION_ID()
         );
 
         // Install plugins on the newly created DAO.
-        bool hasGovernancePlugin;
-
         for (uint256 i = 0; i < pluginSettings.length; i++) {
             // Prepare plugin.
             (
                 address plugin,
                 ,
-                BulkPermissionsLib.ItemMultiTarget[] memory permissions
+                PermissionLib.ItemMultiTarget[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(dao),
                     pluginSettings[i].pluginSetup,
                     pluginSettings[i].pluginSetupRepo,
                     pluginSettings[i].data
                 );
-
-            // Check if plugin is a governance plugin.
-            if (!hasGovernancePlugin) {
-                hasGovernancePlugin = hasExecutePermission(permissions);
-            }
 
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
@@ -102,11 +92,6 @@ contract DAOFactory {
             );
         }
 
-        // Check one of the plugin was governance plugin.
-        if (!hasGovernancePlugin) {
-            revert NoGovernancePluginProvided();
-        }
-
         // Set the rest of DAO's permissions.
         _setDAOPermissions(dao);
 
@@ -114,11 +99,11 @@ contract DAOFactory {
         // Revoke Temporarly `ROOT_PERMISSION` from `pluginSetupProcessor`.
         dao.revoke(address(dao), address(pluginSetupProcessor), dao.ROOT_PERMISSION_ID());
 
-        // Revoke `PROCESS_INSTALL_PERMISSION_ID` on `pluginSetupProcessor` from this `DAOFactory` .
+        // Revoke `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` from this `DAOFactory` .
         dao.revoke(
             address(pluginSetupProcessor),
             address(this),
-            pluginSetupProcessor.PROCESS_INSTALL_PERMISSION_ID()
+            pluginSetupProcessor.APPLY_INSTALLATION_PERMISSION_ID()
         );
 
         // Revoke Temporarly `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implecitly granted to this `DaoFactory`
@@ -140,60 +125,40 @@ contract DAOFactory {
     /// @param _dao The DAO instance just created.
     function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
-        BulkPermissionsLib.ItemSingleTarget[]
-            memory items = new BulkPermissionsLib.ItemSingleTarget[](6);
+        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](6);
 
-        // Grant DAO all the permissions required.
-        items[0] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        // Grant DAO all the permissions required
+        items[0] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.ROOT_PERMISSION_ID()
         );
-        items[1] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[1] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.WITHDRAW_PERMISSION_ID()
         );
-        items[2] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[2] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.UPGRADE_PERMISSION_ID()
         );
-        items[3] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[3] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
         );
-        items[4] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[4] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
-        items[5] = BulkPermissionsLib.ItemSingleTarget(
-            BulkPermissionsLib.Operation.Grant,
+        items[5] = PermissionLib.ItemSingleTarget(
+            PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_METADATA_PERMISSION_ID()
         );
 
         _dao.bulkOnSingleTarget(address(_dao), items);
-    }
-
-    /// @notice Check if one of the permissions is granting `EXECUTE_PERMISSION_ID`.
-    /// @param permissions List of permissions to be checked.
-    function hasExecutePermission(BulkPermissionsLib.ItemMultiTarget[] memory permissions)
-        internal
-        view
-        returns (bool)
-    {
-        for (uint256 i = 0; i < permissions.length; i++) {
-            if (
-                permissions[i].operation == BulkPermissionsLib.Operation.Grant &&
-                permissions[i].permissionId == DAO(payable(daoBase)).EXECUTE_PERMISSION_ID()
-            ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

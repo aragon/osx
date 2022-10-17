@@ -4,41 +4,48 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
-import {_auth} from "../../utils/auth.sol";
-
-import {IDAO} from "./../IDAO.sol";
+import {IDAO} from "../IDAO.sol";
+import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
 
 /// @title DaoAuthorizableUpgradeable
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
-/// This contract provides an `auth` modifier that can be applied to functions in inheriting contracts. The permission to call these functions is managed by the associated DAO.
-/// @dev Make sure to call `__DaoAuthorizable_init` during initialization of the inheriting contract.
-///      This contract is compatible with meta transactions through OZ's `ContextUpgradeable`.
-abstract contract DaoAuthorizableUpgradeable is Initializable, ContextUpgradeable {
-    /// @notice The associated DAO managing the permissions of inheriting contracts.
-    IDAO internal dao;
-
+/// @notice An abstract contract providing a meta-transaction compatible modifier for upgradeable contracts to authorize function calls through an associated DAO.
+/// @dev Make sure to call `__DaoAuthorizableUpgradeable_init` during initialization of the inheriting contract.
+abstract contract DaoAuthorizableUpgradeable is
+    Initializable,
+    ContextUpgradeable,
+    DaoAuthorizableBase
+{
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
-    function __DaoAuthorizable_init(IDAO _dao) internal virtual onlyInitializing {
+    function __DaoAuthorizableUpgradeable_init(IDAO _dao) internal onlyInitializing {
         dao = _dao;
     }
 
-    /// @notice Get the DAO that was set at the moment of creation or initialization.
-    function getDAO() external view returns (IDAO) {
-        return dao;
+    /// @inheritdoc ContextUpgradeable
+    function _msgSender()
+        internal
+        view
+        virtual
+        override(Context, ContextUpgradeable)
+        returns (address)
+    {
+        return ContextUpgradeable._msgSender();
     }
 
-    /// @notice A modifier to be used to check permissions on a target contract via the associated DAO.
-    /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
-    modifier auth(bytes32 _permissionId) {
-        _auth(dao, address(this), _msgSender(), _permissionId, _msgData());
-        _;
+    /// @inheritdoc ContextUpgradeable
+    function _msgData()
+        internal
+        view
+        virtual
+        override(Context, ContextUpgradeable)
+        returns (bytes calldata)
+    {
+        return ContextUpgradeable._msgData();
     }
 
-    /// @dev This empty reserved space is put in place to allow future versions to add new
-    /// variables without shifting down storage in the inheritance chain.
-    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[49] private __gap;
 }

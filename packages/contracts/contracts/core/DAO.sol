@@ -2,22 +2,31 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 import "./erc1271/ERC1271.sol";
-import "./erc165/AdaptiveERC165.sol";
+import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
 
-/// @title The public interface of the Aragon DAO framework.
+/// @title DAO
 /// @author Aragon Association - 2021
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
-contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271, AdaptiveERC165 {
+contract DAO is
+    IDAO,
+    Initializable,
+    ERC1271,
+    ERC165StorageUpgradeable,
+    UUPSUpgradeable,
+    PermissionManager,
+    CallbackHandler
+{
     using SafeERC20 for ERC20;
     using Address for address;
 
@@ -40,6 +49,10 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
     /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `registerStandardCallback` function.
+    bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
+        keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     ERC1271 signatureValidator;
@@ -74,8 +87,8 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         address _initialOwner,
         address _trustedForwarder
     ) external initializer {
-        _registerStandard(DAO_INTERFACE_ID);
-        _registerStandard(type(ERC1271).interfaceId);
+        _registerInterface(DAO_INTERFACE_ID);
+        _registerInterface(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
@@ -217,7 +230,7 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
 
     /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
     fallback() external {
-        _handleCallback(msg.sig, msg.data); // WARN: does a low-level return, any code below would be unreacheable
+        _handleCallback(msg.sig); // WARN: does a low-level return, any code below would be unreacheable
     }
 
     /// @notice Emits the MetadataSet event if new metadata is set.
@@ -232,5 +245,16 @@ contract DAO is IDAO, Initializable, UUPSUpgradeable, PermissionManager, ERC1271
         trustedForwarder = _trustedForwarder;
 
         emit TrustedForwarderSet(_trustedForwarder);
+    }
+
+    /// @inheritdoc IDAO
+    function registerStandardCallback(
+        bytes4 _interfaceId,
+        bytes4 _callbackSelector,
+        bytes4 _magicNumber
+    ) external override auth(address(this), REGISTER_STANDARD_CALLBACK_PERMISSION_ID) {
+        _registerInterface(_interfaceId);
+        _registerCallback(_callbackSelector, _magicNumber);
+        emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
     }
 }
