@@ -566,8 +566,7 @@ describe('Core: PermissionManager', function () {
       }
     });
 
-    // TODO: find out what is wrong with this test
-    it.skip('should revert on errors', async () => {
+    it('throws Unauthorized error when caller does not have ROOT_PERMISSION_ID permission', async () => {
       const signers = await ethers.getSigners();
       const bulkItems: ItemMultiTarget[] = [
         {
@@ -579,9 +578,17 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await expect(pm.connect(signers[2]).bulkOnMultiTarget(bulkItems)).to.be.revertedWith(
-        customError('Unauthorized', pm.address, signers[1].address, signers[2].address, ROOT_PERMISSION_ID)
-      )
+      await expect(
+        pm.connect(signers[2]).bulkOnMultiTarget(bulkItems)
+      ).to.be.revertedWith(
+        customError(
+          'Unauthorized',
+          pm.address,
+          signers[1].address,
+          signers[2].address,
+          ROOT_PERMISSION_ID
+        )
+      );
     });
   });
   describe('bulk on single target', () => {
