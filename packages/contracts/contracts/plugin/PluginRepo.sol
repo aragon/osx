@@ -18,9 +18,9 @@ import {IPluginRepo} from "./IPluginRepo.sol";
 /// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
 //TODO Rename to PluginSetupRepo?
 contract PluginRepo is
-    IPluginRepo,
     Initializable,
     ERC165Upgradeable,
+    IPluginRepo,
     UUPSUpgradeable,
     PermissionManager
 {
@@ -255,6 +255,9 @@ contract PluginRepo is
 
     /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IPluginRepo).interfaceId || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IPluginRepo).interfaceId ||
+            interfaceId == type(UUPSUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 }

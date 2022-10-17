@@ -7,6 +7,7 @@ pragma solidity 0.8.10;
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
 abstract contract IDAO {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    // TODO:GIORGI move it
     bytes4 internal constant DAO_INTERFACE_ID = type(IDAO).interfaceId;
 
     struct Action {

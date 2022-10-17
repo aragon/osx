@@ -19,7 +19,6 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
-        MAJORITY_VOTING_INTERFACE_ID ^
             this.addAllowedUsers.selector ^
             this.removeAllowedUsers.selector ^
             this.isAllowed.selector ^

@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import {ERC20WrapperUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
+import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {IERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-IERC20PermitUpgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IERC20MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
@@ -13,6 +14,7 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
+import {IGovernanceWrappedERC20} from "./IGovernanceWrappedERC20.sol";
 import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../core/IDAO.sol";
 
@@ -25,15 +27,12 @@ import {IDAO} from "../core/IDAO.sol";
 /// To get the [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens back, the owner of the wrapped tokens can call `withdrawFor`, which  burns the wrapped tokens [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and safely transfers the underlying tokens back to the owner.
 /// @dev This contract intentionally has no public mint functionality because this is the responsibility of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token contract.
 contract GovernanceWrappedERC20 is
+    IGovernanceWrappedERC20,
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
     ERC20WrapperUpgradeable
 {
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 public constant GOVERNANCE_INTERFACE_ID =
-        this.decimals.selector ^ this.initialize.selector;
-
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
@@ -45,15 +44,12 @@ contract GovernanceWrappedERC20 is
         initialize(_token, _name, _symbol);
     }
 
-    /// @notice Initializes the component.
-    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
-    /// @param _name The name of the wrapped token.
-    /// @param _symbol The symbol fo the wrapped token.
+    /// @inheritdoc IGovernanceWrappedERC20
     function initialize(
         IERC20Upgradeable _token,
         string memory _name,
         string memory _symbol
-    ) public initializer {
+    ) public override initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
@@ -62,21 +58,20 @@ contract GovernanceWrappedERC20 is
     /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == GOVERNANCE_INTERFACE_ID ||
+            interfaceId == type(IGovernanceWrappedERC20).interfaceId ||
             interfaceId == type(IERC20Upgradeable).interfaceId ||
             interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
             interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
-            interfaceId == type(ERC20VotesUpgradeable).interfaceId ||
+            interfaceId == type(IVotesUpgradeable).interfaceId ||
             interfaceId == type(ERC20WrapperUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
-    /// @inheritdoc ERC20WrapperUpgradeable
-    /// @dev Uses the `decimals` of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @inheritdoc IGovernanceWrappedERC20
     function decimals()
         public
         view
-        override(ERC20Upgradeable, ERC20WrapperUpgradeable)
+        override(ERC20Upgradeable, IGovernanceWrappedERC20, ERC20WrapperUpgradeable)
         returns (uint8)
     {
         return ERC20WrapperUpgradeable.decimals();

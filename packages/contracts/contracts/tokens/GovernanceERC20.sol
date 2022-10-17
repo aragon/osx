@@ -11,14 +11,16 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-
+import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../core/IDAO.sol";
+import {IGovernanceERC20} from "./IGovernanceERC20.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
 /// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
 contract GovernanceERC20 is
+    IGovernanceERC20,
     Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
@@ -27,9 +29,7 @@ contract GovernanceERC20 is
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 public constant GOVERNANCE_INTERFACE_ID =
-        this.mint.selector ^ this.initialize.selector;
-
+    
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
@@ -49,7 +49,7 @@ contract GovernanceERC20 is
         IDAO _dao,
         string memory _name,
         string memory _symbol
-    ) public initializer {
+    ) public override initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
@@ -58,18 +58,16 @@ contract GovernanceERC20 is
     /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == GOVERNANCE_INTERFACE_ID ||
+            interfaceId == type(IGovernanceERC20).interfaceId ||
             interfaceId == type(IERC20Upgradeable).interfaceId ||
             interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
             interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
-            interfaceId == type(ERC20VotesUpgradeable).interfaceId ||
+            interfaceId == type(IVotesUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
-    /// @notice Mints tokens to an address.
-    /// @param to The address receiving the tokens.
-    /// @param amount The amount of tokens to be minted.
-    function mint(address to, uint256 amount) external auth(MINT_PERMISSION_ID) {
+    /// @inheritdoc IGovernanceERC20
+    function mint(address to, uint256 amount) external override auth(MINT_PERMISSION_ID) {
         _mint(to, amount);
     }
 

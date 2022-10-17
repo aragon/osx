@@ -35,7 +35,7 @@ contract CounterV2 is PluginUUPSUpgradeable {
         uint256 _count,
         uint256 _newVariable
     ) external initializer {
-        __PluginUpgradeable_init(_dao);
+        __PluginUUPSUpgradeable_init(_dao);
 
         count = _count;
 

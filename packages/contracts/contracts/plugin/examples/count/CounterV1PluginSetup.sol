@@ -6,6 +6,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IPluginSetup} from "../../IPluginSetup.sol";
 import {PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
@@ -27,12 +28,12 @@ contract CounterV1PluginSetup is PluginSetup {
         counterBase = new CounterV1();
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address multiplyHelper, uint num)";
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
         virtual
@@ -99,12 +100,12 @@ contract CounterV1PluginSetup is PluginSetup {
         return (plugin, helpers, permissions);
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
@@ -141,7 +142,7 @@ contract CounterV1PluginSetup is PluginSetup {
         }
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view virtual override returns (address) {
         return address(counterBase);
     }

@@ -6,6 +6,8 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {IPluginUUPSUpgradeable} from "../core/plugin/IPluginUUPSUpgradeable.sol";
+
 import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
@@ -287,7 +289,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes memory _data
     ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits from PluginUUPSUpgradeable
-        if (!_updateParams.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
+        if (!_updateParams.plugin.supportsInterface(type(IPluginUUPSUpgradeable).interfaceId)) {
             revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 

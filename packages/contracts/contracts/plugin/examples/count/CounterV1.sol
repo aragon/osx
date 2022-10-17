@@ -28,7 +28,7 @@ contract CounterV1 is PluginUUPSUpgradeable {
         MultiplyHelper _multiplyHelper,
         uint256 _count
     ) external initializer {
-        __DaoAuthorizableUpgradeable_init(_dao);
+        __PluginUUPSUpgradeable_init(_dao);
 
         count = _count;
         multiplyHelper = _multiplyHelper;

@@ -14,8 +14,7 @@ import { IMajorityVoting } from '../majority/IMajorityVoting.sol';
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract ERC20Voting is MajorityVotingBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
-        MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
+    bytes4 internal constant ERC20_VOTING_INTERFACE_ID = this.getVotingToken.selector ^ this.initialize.selector;
 
     /// @notice An [ERC20Votes](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Votes) compatible contract referencing the token being used for voting.
     ERC20VotesUpgradeable private votingToken;
