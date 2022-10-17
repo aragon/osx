@@ -2,25 +2,22 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
-
-import "../core/IDAO.sol";
-import "../core/component/MetaTxComponent.sol";
-import "./IERC20MintableUpgradeable.sol";
-import "./MerkleDistributor.sol";
-import {IMerkleDistributor} from './IMerkleDistributor.sol';
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {IDAO} from "../core/IDAO.sol";
+import {IERC20MintableUpgradeable} from "./IERC20MintableUpgradeable.sol";
+import {MerkleDistributor} from "./MerkleDistributor.sol";
+import {IMerkleDistributor} from "./IMerkleDistributor.sol";
+
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import { IMerkleMinter } from './IMerkleMinter.sol';
+import {IMerkleMinter} from "./IMerkleMinter.sol";
 
 /// @title MerkleMinter
 /// @author Aragon Association
 /// @notice A component minting [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributing them on merkle trees using `MerkleDistributor` clones.
 contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     using Clones for address;
-
-    // TODO:GIORGI how to add below functions in interface.. 
 
     /// @notice The ID of the permission required to call the `merkleMint` function.
     bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION");
@@ -29,11 +26,11 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     bytes32 public constant CHANGE_DISTRIBUTOR_PERMISSION_ID =
         keccak256("CHANGE_DISTRIBUTOR_PERMISSION");
 
-    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
-    IERC20MintableUpgradeable public token;
+    /// @inheritdoc IMerkleMinter
+    IERC20MintableUpgradeable public override token;
 
-    /// @notice The address of the `MerkleDistributor` to clone from.
-    address public distributorBase;
+    /// @inheritdoc IMerkleMinter
+    address public override distributorBase;
 
     /// @inheritdoc IMerkleMinter
     function initialize(
@@ -46,9 +43,11 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
         token = _token;
         distributorBase = _distributorBase;
     }
-    
+
+    /// @inheritdoc IMerkleMinter
     function changeDistributorBase(address _distributorBase)
-        external override
+        external
+        override
         auth(CHANGE_DISTRIBUTOR_PERMISSION_ID)
     {
         distributorBase = _distributorBase;
@@ -56,7 +55,8 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
 
     /// @inheritdoc ERC165Upgradeable
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IMerkleMinter).interfaceId || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IMerkleMinter).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens and distributes them using a `MerkleDistributor`.

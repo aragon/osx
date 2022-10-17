@@ -4,14 +4,15 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-
-import "../core/component/MetaTxComponent.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
+import {IMerkleDistributor} from "./IMerkleDistributor.sol";
+import {IDAO} from "../core/IDAO.sol";
 
 /// @title MerkleDistributor
 /// @author Uniswap 2020
@@ -19,12 +20,11 @@ import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    // TODO:GIORGI how to include below 2 functions in interface ?
-    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
-    IERC20Upgradeable public token;
+    /// @inheritdoc IMerkleDistributor
+    IERC20Upgradeable public override token;
 
-    /// @notice The merkle root of the balance tree storing the claims.
-    bytes32 public merkleRoot;
+    /// @inheritdoc IMerkleDistributor
+    bytes32 public override merkleRoot;
 
     /// @notice A packed array of booleans containing the information who claimed.
     mapping(uint256 => uint256) private claimedBitMap;
