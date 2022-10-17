@@ -23,7 +23,7 @@ contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeable {
         string memory _str,
         bool _boolVar
     ) external reinitializer(3) {
-        __DaoAuthorizableUpgradeable_init(_dao);
+        __PluginUpgradeable_init(_dao);
         num = _num;
         helper = _helper;
         str = _str;
