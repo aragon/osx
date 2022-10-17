@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import console from 'console';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -21,18 +20,13 @@ import {findEvent} from '../test-utils/event';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
+  Op,
+  mockPermissions,
 } from '../test-utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../test-utils/repo';
-
-enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -51,8 +45,6 @@ const EMPTY_DATA = '0x';
 const AddressZero = ethers.constants.AddressZero;
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
-const EMPTY_ID = `0x${'00'.repeat(32)}`;
-
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
   'APPLY_INSTALLATION_PERMISSION'
@@ -60,9 +52,6 @@ const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
 const APPLY_UPDATE_PERMISSION_ID = ethers.utils.id('APPLY_UPDATE_PERMISSION');
 const APPLY_UNINSTALLATION_PERMISSION_ID = ethers.utils.id(
   'APPLY_UNINSTALLATION_PERMISSION'
-);
-const SET_REPO_REGISTRY_PERMISSION_ID = ethers.utils.id(
-  'SET_REPO_REGISTRY_PERMISSION'
 );
 const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
   'REGISTER_PLUGIN_REPO_PERMISSION'
@@ -256,7 +245,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('retruns correctly the plugin, helpers, and permissions', async () => {
+      it('Return the correct permissions', async () => {
         const {plugin, helpers, permissions} =
           await psp.callStatic.prepareInstallation(
             targetDao.address,
@@ -267,22 +256,7 @@ describe('Plugin Setup Processor', function () {
 
         expect(plugin).not.to.be.equal(AddressZero);
         expect(helpers.length).to.be.equal(1);
-        expect(permissions).to.deep.equal([
-          [
-            Op.Grant,
-            targetDao.address,
-            plugin,
-            AddressZero,
-            ethers.utils.id('EXECUTE_PERMISSION'),
-          ],
-          [
-            Op.Grant,
-            plugin,
-            helpers[0],
-            AddressZero,
-            ethers.utils.id('SETTINGS_PERMISSION'),
-          ],
-        ]);
+        expect(permissions).to.deep.equal(mockPermissions(1, Op.Grant));
       });
     });
 
@@ -324,7 +298,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+      it.only("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
         // revoke root permission on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
@@ -342,6 +316,8 @@ describe('Plugin Setup Processor', function () {
           pluginSetupMockRepoAddress,
           EMPTY_DATA
         );
+
+        const mockPermission = mockPermissions(1, Op.Grant)[0];
 
         await expect(
           psp.applyInstallation(
@@ -860,7 +836,7 @@ describe('Plugin Setup Processor', function () {
         const permissions = result[0];
         const initData = result[1];
 
-        expect(permissions.length).to.be.equal(2);
+        expect(permissions).to.deep.equal(mockPermissions(1, Op.Revoke));
         expect(initData).not.to.be.equal('');
       });
 

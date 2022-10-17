@@ -6,17 +6,23 @@ import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.
 import {IDAO} from "../../../core/IDAO.sol";
 
 contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
-    // V1 storage
-    uint256 public num;
-    address public helper;
-
-    function initialize(
-        IDAO _dao,
-        uint256 _num,
-        address _helper
-    ) external initializer {
+    function initialize(IDAO _dao) external virtual initializer {
         __PluginUUPSUpgradeable_init(_dao);
-        num = _num;
-        helper = _helper;
     }
+}
+
+contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeableV1Mock {
+    function initialize(IDAO _dao) external virtual override reinitializer(2) {
+        __PluginUUPSUpgradeable_init(_dao);
+    }
+
+    function initializeV2(string memory _str) external reinitializer(2) {}
+}
+
+contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeableV2Mock {
+    function initialize(IDAO _dao) external override reinitializer(3) {
+        __PluginUUPSUpgradeable_init(_dao);
+    }
+
+    function initializeV3(string memory _str) external reinitializer(3) {}
 }

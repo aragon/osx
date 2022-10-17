@@ -41,3 +41,26 @@ export async function prepareInstallation(
     prepareInstallpermissions: permissions,
   };
 }
+
+export enum Op {
+  Grant,
+  Revoke,
+  Freeze,
+  GrantWithOracle,
+}
+
+export function mockPermissions(amount: number, op: Op) {
+  let arr = [];
+
+  for (let i = 0; i < amount; i++) {
+    arr.push([
+      op,
+      ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
+      ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
+      ethers.constants.AddressZero,
+      ethers.utils.id('MOCK_PERMISSION'),
+    ]);
+  }
+
+  return arr;
+}
