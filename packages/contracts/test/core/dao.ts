@@ -163,34 +163,6 @@ describe('DAO', function () {
     });
   });
 
-  describe('setSignatureValidator:', async () => {
-    it('reverts if the sender lacks the required permissionId', async () => {
-      await dao.revoke(
-        dao.address,
-        ownerAddress,
-        PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
-      );
-
-      await expect(dao.setSignatureValidator(dummyAddress2)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
-          dao.address,
-          dao.address,
-          ownerAddress,
-          PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
-        )
-      );
-    });
-
-    it.skip('sets a new signature validator', async () => {
-      expect(false).to.be.equal(true); // TODO
-    });
-
-    it.skip('validates signatures', async () => {
-      expect(false).to.be.equal(true); // TODO
-    });
-  });
-
   describe('execute:', async () => {
     const dummyActions = [
       {
