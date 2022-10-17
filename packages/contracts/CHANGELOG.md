@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added test util functions such as `deployAragonPluginRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory` and `filterEvents`.
-- Added `PluginSetupV1MockNonGovernance` mock and testing `DAOFactory` with non-governance plugins.
+- Added test util functions such as `deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory` and `filterEvents`.
 - Added `DaoAuthorizableBase` class.
 - Added `DaoAuthorizableClonable` using OpenZepplin initialization.
 - Added mocks and tests for the `Plugin` and `PluginSetup` classes.
