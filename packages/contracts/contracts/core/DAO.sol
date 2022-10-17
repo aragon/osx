@@ -87,7 +87,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder
     ) external initializer {
-        _registerInterface(DAO_INTERFACE_ID);
+        _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);

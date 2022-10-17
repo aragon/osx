@@ -11,6 +11,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
+import {IPluginSetup} from './PluginSetup.sol';
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
@@ -102,7 +103,7 @@ contract PluginRepo is
         // the below approach aims to still return custom error which not possible with try/catch..
         // NOTE: also checks if _pluginSetup is a contract and reverts if not.
         bytes memory data = _pluginSetup.functionCall(
-            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(PluginSetup).interfaceId)
+            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(IPluginSetup).interfaceId)
         );
 
         // NOTE: if data contains 32 bytes that can't be decoded with uint256
