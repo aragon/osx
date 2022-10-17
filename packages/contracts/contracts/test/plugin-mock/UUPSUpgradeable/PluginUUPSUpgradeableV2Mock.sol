@@ -28,6 +28,4 @@ contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeable {
     function initializeV2(string memory _str) external reinitializer(2) {
         str = _str;
     }
-
-    function execute() external {}
 }

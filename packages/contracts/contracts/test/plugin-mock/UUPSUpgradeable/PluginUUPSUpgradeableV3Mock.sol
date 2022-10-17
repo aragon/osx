@@ -38,6 +38,4 @@ contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeable {
     function initializeFromV2(bool _boolVar) external reinitializer(3) {
         boolVar = _boolVar;
     }
-
-    function execute() external {}
 }
