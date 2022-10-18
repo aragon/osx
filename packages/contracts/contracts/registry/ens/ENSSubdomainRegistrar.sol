@@ -5,12 +5,13 @@ pragma solidity 0.8.10;
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
-import "../../core/component/Component.sol";
+import { IDAO } from '../../core/IDAO.sol';
+import { PluginUUPSUpgradeable } from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
 /// @title ENSSubdomainRegistrar
 /// @author Aragon Association - 2022
 /// @notice This contract registers ENS subdomains under a parent domain specified in the initialization process and maintains ownership of the subdomain since only the resolver address is set. This contract must either be the domain node owner or an approved operator of the node owner. The default resolver being used is the one specified in the parent domain.
-contract ENSSubdomainRegistrar is Component {
+contract ENSSubdomainRegistrar is PluginUUPSUpgradeable {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant REGISTRY_INTERFACE_ID =
         this.registerSubnode.selector ^ this.setDefaultResolver.selector;
@@ -58,14 +59,19 @@ contract ENSSubdomainRegistrar is Component {
             revert UnauthorizedRegistrar({nodeOwner: nodeOwner, here: address(this)});
         }
 
-        __Component_init(_managingDao);
-
-        // Register the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID for the `Component`.
-        _registerInterface(REGISTRY_INTERFACE_ID);
-
+        __PluginUpgradeable_init(_managingDao);
+        
         ens = _ens;
         node = _node;
         resolver = ens.resolver(_node);
+    }
+
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return
+            _interfaceId == REGISTRY_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
