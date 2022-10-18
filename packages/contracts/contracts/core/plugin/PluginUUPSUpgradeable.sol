@@ -3,21 +3,29 @@
 pragma solidity 0.8.10;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {IERC1822ProxiableUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol";
+
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {DaoAuthorizableUpgradeable} from "../component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../IDAO.sol";
-import {IPluginUUPSUpgradeable} from "./IPluginUUPSUpgradeable.sol";
+import {IPlugin} from "./IPlugin.sol";
 
 /// @title PluginUUPSUpgradeable
 /// @author Aragon Association - 2022
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract PluginUUPSUpgradeable is
-    IPluginUUPSUpgradeable,
+    IPlugin,
     ERC165Upgradeable,
     UUPSUpgradeable,
     DaoAuthorizableUpgradeable
 {
+
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
+
+    /// @inheritdoc IPlugin
+    function pluginType() public pure override returns(PluginType) {
+        return PluginType.UUPS;
+    }
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
@@ -33,14 +41,14 @@ abstract contract PluginUUPSUpgradeable is
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            _interfaceId == type(IPluginUUPSUpgradeable).interfaceId ||
-            _interfaceId == type(UUPSUpgradeable).interfaceId ||
+            _interfaceId == type(IPlugin).interfaceId ||
+            _interfaceId == type(IERC1822ProxiableUpgradeable).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
     /// @notice Returns the address of the implementation contract in the [proxy storage slot](https://eips.ethereum.org/EIPS/eip-1967) slot the [UUPS proxy](https://eips.ethereum.org/EIPS/eip-1822) is pointing to.
     /// @return implementation The address of the implementation contract.
-    function getImplementationAddress() public view override returns (address implementation) {
+    function getImplementationAddress() public view returns (address implementation) {
         implementation = _getImplementation();
     }
 

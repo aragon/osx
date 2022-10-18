@@ -6,8 +6,7 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {IPluginUUPSUpgradeable} from "../core/plugin/IPluginUUPSUpgradeable.sol";
-
+import { IPlugin } from "../core/plugin/IPlugin.sol";
 import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
@@ -66,6 +65,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin is not upgradeable.
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
+
+    /// @notice Thrown if a plugin isn't IPlugin interface..
+    /// @param plugin The address of the plugin contract.
+    error WrongInterface(address plugin);
 
     /// @notice Thrown if two permissions hashes obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) don't match.
     error PermissionsHashMismatch();
@@ -288,9 +291,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address[] calldata _currentHelpers,
         bytes memory _data
     ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
-        // check that plugin inherits from PluginUUPSUpgradeable
-        if (!_updateParams.plugin.supportsInterface(type(IPluginUUPSUpgradeable).interfaceId)) {
-            revert PluginNonupgradeable({plugin: _updateParams.plugin});
+        // check that plugin inherits is PluginUUPSUpgradable.
+        if(!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+            revert WrongInterface({plugin: _updateParams.plugin});
+        }
+
+        if(IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+             revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 
         // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.

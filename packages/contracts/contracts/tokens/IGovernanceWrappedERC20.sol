@@ -7,16 +7,13 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 import {ERC20WrapperUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
 
 interface IGovernanceWrappedERC20 {
-    /// @notice Initializes the GovernanceWrappedERC20.
-    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
-    /// @param _name The name of the wrapped token.
-    /// @param _symbol The symbol fo the wrapped token.
-    function initialize(
-        IERC20Upgradeable _token,
-        string memory _name,
-        string memory _symbol
-    ) external;
+    /// @notice Allow a user to deposit underlying tokens and mint the corresponding number of wrapped tokens.
+    /// @param account the user address where the tokens should be minted.
+    /// @param amount how much will be minted on the account
+    function depositFor(address account, uint256 amount) external returns (bool);
 
-    /// @notice Returns the number of decimals used to get its user representation.
-    function decimals() external view returns (uint8);
+    /// @notice Allow a user to burn a number of wrapped tokens and withdraw the corresponding number of underlying tokens.
+    /// @param account the user address where the tokens should be minted.
+    /// @param amount how much will be minted on the account
+    function withdrawTo(address account, uint256 amount) external returns (bool);
 }

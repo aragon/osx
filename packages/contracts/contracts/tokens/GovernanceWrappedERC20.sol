@@ -42,12 +42,15 @@ contract GovernanceWrappedERC20 is
         initialize(_token, _name, _symbol);
     }
 
-    /// @inheritdoc IGovernanceWrappedERC20
+    /// @notice Initializes the GovernanceWrappedERC20.
+    /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
+    /// @param _name The name of the wrapped token.
+    /// @param _symbol The symbol fo the wrapped token.
     function initialize(
         IERC20Upgradeable _token,
         string memory _name,
         string memory _symbol
-    ) public override initializer {
+    ) public initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __ERC20Wrapper_init(_token);
@@ -61,18 +64,36 @@ contract GovernanceWrappedERC20 is
             interfaceId == type(IERC20PermitUpgradeable).interfaceId ||
             interfaceId == type(IERC20MetadataUpgradeable).interfaceId ||
             interfaceId == type(IVotesUpgradeable).interfaceId ||
-            interfaceId == type(ERC20WrapperUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
-    /// @inheritdoc IGovernanceWrappedERC20
+    /// @inheritdoc ERC20WrapperUpgradeable
+    /// @dev Uses the `decimals` of the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     function decimals()
         public
         view
-        override(ERC20Upgradeable, IGovernanceWrappedERC20, ERC20WrapperUpgradeable)
+        override(ERC20Upgradeable, ERC20WrapperUpgradeable)
         returns (uint8)
     {
         return ERC20WrapperUpgradeable.decimals();
+    }
+
+    /// @inheritdoc IGovernanceWrappedERC20
+    function depositFor(address account, uint256 amount)
+        public
+        override(IGovernanceWrappedERC20, ERC20WrapperUpgradeable)
+        returns (bool)
+    {
+        return ERC20WrapperUpgradeable.depositFor(account, amount);
+    }
+
+    /// @inheritdoc IGovernanceWrappedERC20
+    function withdrawTo(address account, uint256 amount)
+        public
+        override(IGovernanceWrappedERC20, ERC20WrapperUpgradeable)
+        returns (bool)
+    {
+        return ERC20WrapperUpgradeable.withdrawTo(account, amount);
     }
 
     // The functions below are overrides required by Solidity.

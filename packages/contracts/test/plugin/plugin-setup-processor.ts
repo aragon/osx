@@ -3,6 +3,7 @@ import console from 'console';
 import {ethers} from 'hardhat';
 import {
   PluginSetupProcessor,
+  PluginClonableMock,
   PluginSetupV1Mock,
   PluginSetupV2Mock,
   PluginSetupV1MockBad,
@@ -91,6 +92,7 @@ describe('Plugin Setup Processor', function () {
   let signers: any;
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
+  let pluginClonableMock: PluginClonableMock;
   let pluginSetupV1Mock: PluginSetupV1Mock;
   let pluginSetupMockRepoAddress: any;
   let pluginSetupV2Mock: PluginSetupV2Mock;
@@ -107,6 +109,12 @@ describe('Plugin Setup Processor', function () {
   });
 
   before(async () => {
+    // Directly deploy PluginCloneableMock
+    const _PluginClonableMock = await ethers.getContractFactory(
+      'PluginClonableMock'
+    );
+    pluginClonableMock = await _PluginClonableMock.deploy();
+
     // PluginSetupV1
     const PluginSetupV1Mock = await ethers.getContractFactory(
       'PluginSetupV1Mock'
@@ -256,7 +264,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('Retrun correctly the permissions', async () => {
+      it('Return correctly the permissions', async () => {
         const {plugin, helpers, prepareInstallpermissions} =
           await prepareInstallation(
             psp,
@@ -687,10 +695,10 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('PrepareUpdate', function () {
-      it('Reverts if plugin does not support `PluginUUPSUpgradeable` interface', async () => {
+      it('Reverts if plugin does not support `IPlugin` interface', async () => {
         const pluginSetupRepoAddr = ADDRESS_TWO;
         const plugin = AddressZero;
-        const pluginUpdateParams = {
+        let pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupRepoAddr,
           currentPluginSetup: AddressZero,
@@ -705,7 +713,28 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginNonupgradeable', plugin));
+        ).to.be.revertedWith(customError('WrongInterface', plugin));
+      });
+
+      it('Reverts if plugin supports IPlugin, but is non upgradable', async () => {
+        let pluginUpdateParams = {
+          plugin: pluginClonableMock.address,
+          pluginSetupRepo: ADDRESS_TWO,
+          currentPluginSetup: AddressZero,
+          newPluginSetup: AddressZero,
+        };
+
+        const helpers = [AddressZero];
+        await expect(
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            helpers,
+            EMPTY_DATA
+          )
+        ).to.be.revertedWith(
+          customError('PluginNonupgradeable', pluginClonableMock.address)
+        );
       });
 
       it('Reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
