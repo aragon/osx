@@ -225,13 +225,13 @@ describe('DAOFactory: ', function () {
     };
   });
 
-  it('Revert if no plugin is provided', async () => {
+  it('reverts if no plugin is provided', async () => {
     await expect(daoFactory.createDao(daoSettings, [])).to.be.revertedWith(
       customError('NoPluginProvided')
     );
   });
 
-  it('Correclty create a DAO with one plugin', async () => {
+  it('correctly creates a DAO with one plugin', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao, plugin, helpers, permissions} =
       await extractInfoFromCreateDaoTx(tx);
@@ -255,7 +255,7 @@ describe('DAOFactory: ', function () {
       .withArgs(dao, plugin);
   });
 
-  it('Makes sure all temporarly granted permissions are revoked', async () => {
+  it('makes sure all temporarly granted permissions are revoked', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
@@ -285,7 +285,7 @@ describe('DAOFactory: ', function () {
       );
   });
 
-  it('Makes sure all DAO permissions are correctly granted', async () => {
+  it('makes sure all DAO permissions are correctly granted', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
