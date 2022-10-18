@@ -11,7 +11,7 @@ import "../core/component/DaoAuthorizableUpgradeable.sol";
 /// @author Aragon Association - 2022
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 //TODO Make this PluginUUPSUpgradeable
-abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgradeable {
+abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
