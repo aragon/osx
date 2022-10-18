@@ -72,12 +72,10 @@ describe('DAORegistry', function () {
     );
   });
 
-  it('fail to register if DAO name is empty', async function () {
+  it('fails to register if DAO name is empty', async function () {
     await expect(
-      daoRegistry.register(targetDao.address, ownerAddress, "")
-    ).to.be.revertedWith(
-      customError('EmptyDAOName')
-    );
+      daoRegistry.register(targetDao.address, ownerAddress, '')
+    ).to.be.revertedWith(customError('EmptyDAOName'));
   });
 
   it('Should register a new DAO successfully', async function () {
@@ -90,7 +88,7 @@ describe('DAORegistry', function () {
     expect(await daoRegistry.entries(targetDao.address)).to.equal(true);
   });
 
-  it('fail to register if the sender lacks the required role', async () => {
+  it('fails to register if the sender lacks the required role', async () => {
     // Register a DAO successfully
     await daoRegistry.register(targetDao.address, ownerAddress, daoName);
 
@@ -117,7 +115,7 @@ describe('DAORegistry', function () {
     );
   });
 
-  it('fail to register if DAO already exists', async function () {
+  it('fails to register if DAO already exists', async function () {
     await daoRegistry.register(
       targetDao.address,
       ownerAddress,
