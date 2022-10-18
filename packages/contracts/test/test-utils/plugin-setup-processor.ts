@@ -20,20 +20,6 @@ export async function deployPluginSetupProcessor(
   return psp;
 }
 
-export async function deployPluginRepoRegistry(
-  managingDao: any
-): Promise<PluginRepoRegistry> {
-  let pluginRepoRegistry: PluginRepoRegistry;
-
-  const PluginRepoRegistry = await ethers.getContractFactory(
-    'PluginRepoRegistry'
-  );
-  pluginRepoRegistry = await PluginRepoRegistry.deploy();
-  await pluginRepoRegistry.initialize(managingDao.address);
-
-  return pluginRepoRegistry;
-}
-
 export async function prepareInstallation(
   pluginSetupProcessorContract: PluginSetupProcessor,
   daoAddress: string,

@@ -57,12 +57,23 @@ export async function deployPluginRepoFactory(
     pluginRepoRegistry.address
   );
 
-  // Grant `PLUGIN_REGISTER_PERMISSION` to `PluginRepoFactory`.
-  await managingDao.grant(
-    pluginRepoRegistry.address,
-    pluginRepoFactory.address,
-    ethers.utils.id('PLUGIN_REGISTER_PERMISSION')
+  return pluginRepoFactory;
+}
+
+export async function deployPluginRepoRegistry(
+  managingDao: any,
+  ensSubdomainRegistrar: any
+): Promise<PluginRepoRegistry> {
+  let pluginRepoRegistry: PluginRepoRegistry;
+
+  const PluginRepoRegistry = await ethers.getContractFactory(
+    'PluginRepoRegistry'
+  );
+  pluginRepoRegistry = await PluginRepoRegistry.deploy();
+  await pluginRepoRegistry.initialize(
+    managingDao.address,
+    ensSubdomainRegistrar.address
   );
 
-  return pluginRepoFactory;
+  return pluginRepoRegistry;
 }

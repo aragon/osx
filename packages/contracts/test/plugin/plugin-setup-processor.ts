@@ -1,26 +1,29 @@
 import {expect} from 'chai';
 import console from 'console';
 import {ethers} from 'hardhat';
+
 import {
   PluginSetupProcessor,
   PluginSetupV1Mock,
   PluginSetupV2Mock,
   PluginSetupV1MockBad,
-  PluginRepoFactory,
   PluginRepoRegistry,
   PluginRepo,
 } from '../../typechain';
+
 import {customError} from '../test-utils/custom-error-helper';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 import {deployNewDAO} from '../test-utils/dao';
 import {findEvent} from '../test-utils/event';
 import {
-  deployPluginRepoRegistry,
   deployPluginSetupProcessor,
   prepareInstallation,
 } from '../test-utils/plugin-setup-processor';
-import {deployPluginRepoFactory} from '../test-utils/repo';
+import {
+  deployPluginRepoFactory,
+  deployPluginRepoRegistry,
+} from '../test-utils/repo';
 
 enum Op {
   Grant,
@@ -112,13 +115,13 @@ describe('Plugin Setup Processor', function () {
       'dao.eth'
     );
 
-    // PluginRepoRegistry
+    // Plugin Repo Registry
     pluginRepoRegistry = await deployPluginRepoRegistry(
       managingDao,
       ensSubdomainRegistrar
     );
 
-    // PluginRepoFactory
+    // Plugin Repo Factory
     pluginRepoFactory = await deployPluginRepoFactory(
       signers,
       managingDao,
@@ -139,7 +142,7 @@ describe('Plugin Setup Processor', function () {
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
 
-    // PluginSetupProcessor
+    // Plugin Setup Processor
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
   });
 
