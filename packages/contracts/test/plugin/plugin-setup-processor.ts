@@ -10,6 +10,7 @@ import {
   PluginSetupV1MockBad,
   PluginRepoRegistry,
   PluginRepo,
+  DAO,
 } from '../../typechain';
 
 import {customError} from '../test-utils/custom-error-helper';
@@ -76,8 +77,8 @@ describe('Plugin Setup Processor', function () {
   let pluginSetupV2Mock: PluginSetupV2Mock;
   let pluginSetupV1MockBad: PluginSetupV1MockBad;
   let ownerAddress: string;
-  let targetDao: any;
-  let managingDao: any;
+  let targetDao: DAO;
+  let managingDao: DAO;
   let pluginRepoFactory: any;
   let pluginRepoRegistry: PluginRepoRegistry;
 
@@ -167,6 +168,7 @@ describe('Plugin Setup Processor', function () {
     // Add PluginSetupV2Mock to the PluginRepo.
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     pluginRepo = PluginRepo.attach(pluginSetupMockRepoAddress);
+
     await pluginRepo.createVersion(
       [2, 0, 0],
       pluginSetupV2Mock.address,
@@ -317,8 +319,6 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         );
 
-        const mockPermission = mockPermissions(1, Op.Grant)[0];
-
         await expect(
           psp.applyInstallation(
             targetDao.address,
@@ -331,7 +331,7 @@ describe('Plugin Setup Processor', function () {
           customError(
             'Unauthorized',
             targetDao.address,
-            targetDao.address,
+            prepareInstallpermissions[0]['where'],
             psp.address,
             ROOT_PERMISSION_ID
           )
@@ -798,7 +798,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
-      it('correctly retruns permissions and initData', async () => {
+      it('Correctly return permissions and initData', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
@@ -836,8 +836,8 @@ describe('Plugin Setup Processor', function () {
         const permissions = result[0];
         const initData = result[1];
 
-        expect(permissions).to.deep.equal(mockPermissions(1, Op.Revoke));
-        expect(initData).not.to.be.equal('');
+        expect(permissions).to.deep.equal(mockPermissions(1, Op.Freeze));
+        expect(initData).not.to.be.equal(''); // TODO, improve test
       });
 
       it('correctly prepares an update', async () => {

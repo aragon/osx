@@ -82,7 +82,7 @@ contract PluginSetupV2Mock is PluginSetupV1Mock {
 
     function prepareUpdate(
         address _dao,
-        address _plugin, // proxy
+        address _plugin,
         address[] memory _helpers,
         uint16[3] calldata,
         bytes memory
@@ -97,7 +97,8 @@ contract PluginSetupV2Mock is PluginSetupV1Mock {
         )
     {
         activeHelpers = mockHelpers(1);
-        permissions = mockPermissions(1, PermissionLib.Operation.Revoke);
+        initData = abi.encodeWithSelector(bytes4(keccak256("initializeV2(string)")), "hello world");
+        permissions = mockPermissions(1, PermissionLib.Operation.Freeze);
     }
 }
 
