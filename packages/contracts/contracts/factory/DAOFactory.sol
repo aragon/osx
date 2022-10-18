@@ -14,13 +14,13 @@ import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createProxy` function.
-    address public daoBase;
+    address public immutable daoBase;
 
     /// @notice The DAO registry listing the `DAO` contracts created via this contract.
-    DAORegistry public daoRegistry;
+    DAORegistry public immutable daoRegistry;
 
     /// @notice The plugin setup processor for installing plugins on the newly created `DAO`s.
-    PluginSetupProcessor public pluginSetupProcessor;
+    PluginSetupProcessor public immutable pluginSetupProcessor;
 
     struct DAOSettings {
         address trustedForwarder; // The address of the trusted forwarder required for meta transactions.

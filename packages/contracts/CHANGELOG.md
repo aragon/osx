@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refactored 'DAOFactory`to use`PluginSetupProcessor`.
+- Refactored `DAOFactory`to use`PluginSetupProcessor`.
 - Refactored NatSpec comments and names for the contracts related to the `Plugin` and `PluginSetup`.
 - Renamed `PluginTransparentUpgradeable` to `PluginUpgradeable`.
 - Refactored `AdaptiveERC165` into an independent `CallbackHandler` contract and separated `ERC165` from it.

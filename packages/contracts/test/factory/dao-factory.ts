@@ -255,7 +255,7 @@ describe('DAOFactory: ', function () {
       .withArgs(dao, plugin);
   });
 
-  it('Make sure all temporarly granted permissions are revoked', async () => {
+  it('Makes sure all temporarly granted permissions are revoked', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
@@ -285,7 +285,7 @@ describe('DAOFactory: ', function () {
       );
   });
 
-  it('Make sure all DAO permissions are correctly granted', async () => {
+  it('Makes sure all DAO permissions are correctly granted', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 

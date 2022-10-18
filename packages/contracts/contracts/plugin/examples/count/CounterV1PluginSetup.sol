@@ -20,7 +20,7 @@ contract CounterV1PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
 
-    address private noOracle;
+    address private constant NO_ORACLE = address(0);
 
     constructor() {
         multiplyHelperBase = new MultiplyHelper();
@@ -71,7 +71,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            noOracle,
+            NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -79,7 +79,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            noOracle,
+            NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -88,7 +88,7 @@ contract CounterV1PluginSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
-                noOracle,
+                NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -118,7 +118,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
-            noOracle,
+            NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -126,7 +126,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
-            noOracle,
+            NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -135,7 +135,7 @@ contract CounterV1PluginSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 _activeHelpers[0],
                 _plugin,
-                noOracle,
+                NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }

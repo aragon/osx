@@ -21,7 +21,7 @@ contract CounterV2PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
-    address private noOracle;
+    address private constant NO_ORACLE = address(0);
 
     // MultiplyHelper doesn't change. so dev decides to pass the old one.
     constructor(MultiplyHelper _helper) {
@@ -73,7 +73,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            noOracle,
+            NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -81,7 +81,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            noOracle,
+            NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -90,7 +90,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
-                noOracle,
+                NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -138,7 +138,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
-            noOracle,
+            NO_ORACLE,
             multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -166,7 +166,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             dao,
             plugin,
-            noOracle,
+            NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -174,7 +174,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             plugin,
             dao,
-            noOracle,
+            NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -183,7 +183,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 activeHelpers[0],
                 plugin,
-                noOracle,
+                NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
