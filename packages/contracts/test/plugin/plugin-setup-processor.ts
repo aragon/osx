@@ -11,6 +11,7 @@ import {
   PluginRepo,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 import {deployNewDAO} from '../test-utils/dao';
 import {decodeEvent} from '../test-utils/event';
@@ -59,6 +60,10 @@ const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
 
+const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
+);
+
 // Util Helper Functions
 async function getPluginRepoFactoryMergedABI() {
   // @ts-ignore
@@ -86,6 +91,8 @@ async function getPluginRepoFactoryMergedABI() {
     bytecode: PluginRepoFactoryArtifact.bytecode,
   };
 }
+
+let counter = 0;
 
 describe('Plugin Setup Processor', function () {
   let signers: any;
@@ -122,13 +129,21 @@ describe('Plugin Setup Processor', function () {
     // Managing DAO that have permission to manage PluginSetupProcessor
     managingDao = await deployNewDAO(ownerAddress);
 
+    // ENS
+    const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
+      signers[0],
+      managingDao,
+      'dao.eth'
+    );
+
     // PluginRepoRegistry
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
     pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(managingDao.address);
-
+    await pluginRepoRegistry.initialize(managingDao.address, ensSubdomainRegistrar.address);
+    
+    
     // PluginRepoFactory
     const {abi, bytecode} = await getPluginRepoFactoryMergedABI();
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -148,6 +163,13 @@ describe('Plugin Setup Processor', function () {
       PLUGIN_REGISTER_PERMISSION_ID
     );
 
+    // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` to `PluginRepoFactory`.
+    await managingDao.grant(
+      ensSubdomainRegistrar.address,
+      pluginRepoRegistry.address,
+      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+
     // PluginSetupProcessor
     const PluginSetupProcessor = await ethers.getContractFactory(
       'PluginSetupProcessor'
@@ -164,12 +186,14 @@ describe('Plugin Setup Processor', function () {
 
     // Create and register a plugin on the PluginRepoRegistry
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      'PluginSetupV1Mock',
+      `PluginSetupV1Mock-${counter}`,
       [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',
       ownerAddress
     );
+
+    counter++;
 
     const event = await decodeEvent(tx, EVENTS.PluginRepoRegistered);
 

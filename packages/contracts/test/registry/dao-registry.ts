@@ -43,7 +43,7 @@ describe('DAORegistry', function () {
     ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
       signers[0],
       managingDao,
-      'dao.eth'
+      topLevelDomain
     );
 
     // Target DAO to be used as an example DAO to be registered
@@ -69,6 +69,14 @@ describe('DAORegistry', function () {
       ensSubdomainRegistrar.address,
       daoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+  });
+
+  it('fail to register if DAO name is empty', async function () {
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, "")
+    ).to.be.revertedWith(
+      customError('EmptyDAOName')
     );
   });
 

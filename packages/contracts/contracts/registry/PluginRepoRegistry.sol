@@ -2,9 +2,10 @@
 
 pragma solidity 0.8.10;
 
-import "./InterfaceBasedRegistry.sol";
-import "../core/IDAO.sol";
-import "../plugin/IPluginRepo.sol";
+import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
+import {IDAO} from "../core/IDAO.sol";
+import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
+import {IPluginRepo} from "../plugin/IPluginRepo.sol";
 
 /// @title PluginRepoRegistry
 /// @author Aragon Association - 2022
@@ -12,6 +13,9 @@ import "../plugin/IPluginRepo.sol";
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant PLUGIN_REGISTER_PERMISSION_ID = keccak256("PLUGIN_REGISTER_PERMISSION");
+    
+    /// @notice The ENS subdomain registrar registering the PluginRepo names.
+    ENSSubdomainRegistrar public subdomainRegistrar;
 
     /// @notice Emitted if a new plugin repository is registered.
     /// @param name The name of the plugin repository.
@@ -20,19 +24,25 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
 
     /// @notice Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
     /// @param _dao The address of the managing DAO.
-    function initialize(IDAO _dao) public initializer {
+    function initialize(IDAO _dao, ENSSubdomainRegistrar _subdomainRegistrar) public initializer {
         bytes4 pluginRepoInterfaceId = type(IPluginRepo).interfaceId;
         __InterfaceBasedRegistry_init(_dao, pluginRepoInterfaceId);
+
+        subdomainRegistrar = _subdomainRegistrar;
     }
 
     /// @notice Registers a plugin repository with a name and address.
     /// @param name The name of the PluginRepo.
     /// @param registrant The address of the PluginRepo contract.
-    function registerPlugin(string calldata name, address registrant)
+    function registerPluginRepo(string calldata name, address registrant)
         external
         auth(PLUGIN_REGISTER_PERMISSION_ID)
     {
-        // TODO: Implement ENS subdomain. Currently plugin's name can be repeated, will be resolved once the ENS subdomain is implemented.
+        // The caller(PluginRepoFactory) explicitly checks
+        // if the name is empty and reverts.
+
+        bytes32 labelhash = keccak256(bytes(name));
+        subdomainRegistrar.registerSubnode(labelhash, registrant);
 
         _register(registrant);
 

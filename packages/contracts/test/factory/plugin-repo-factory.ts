@@ -5,6 +5,7 @@ import {PluginRepoRegistry, DAO} from '../../typechain';
 
 import {customError} from '../test-utils/custom-error-helper';
 import {deployMockPluginSetup} from '../test-utils/repo';
+import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -14,6 +15,10 @@ const zeroAddress = ethers.constants.AddressZero;
 
 const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
   'PLUGIN_REGISTER_PERMISSION'
+);
+
+const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
 async function getPluginRepoRegistryEvents(tx: any) {
@@ -74,12 +79,21 @@ describe('PluginRepoFactory: ', function () {
     managingDao = await DAO.deploy();
     await managingDao.initialize('0x00', ownerAddress, zeroAddress);
 
+    // ENS subdomain Registry
+    const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
+      signers[0],
+      managingDao,
+      'dao.eth'
+    );
+
     // deploy and initialize PluginRepoRegistry
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
+    
+    
     pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(managingDao.address);
+    await pluginRepoRegistry.initialize(managingDao.address, ensSubdomainRegistrar.address);
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -97,6 +111,14 @@ describe('PluginRepoFactory: ', function () {
       pluginRepoFactory.address,
       PLUGIN_REGISTER_PERMISSION_ID
     );
+
+     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
+     managingDao.grant(
+      ensSubdomainRegistrar.address,
+      pluginRepoRegistry.address,
+      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+
   });
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
