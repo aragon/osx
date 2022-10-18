@@ -62,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoFactoryAddress = await getContractAddress('DAOFactory', hre);
 
   console.log(
-    `Granting the REGISTER_DAO_PERMISSION_ID permission to daoRegistry (${daoRegistryAddress})`
+    `Granting the REGISTER_DAO_PERMISSION_ID permission of daoRegistry (${daoRegistryAddress}) to DAOFactory (${daoFactoryAddress})`
   );
   grantTx = await managingDaoContract.grant(
     daoRegistryAddress,
