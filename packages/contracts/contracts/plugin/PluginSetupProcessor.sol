@@ -184,7 +184,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _dao,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
-        bytes memory _data // encoded per pluginSetup's prepareInstallation ABI
+        bytes memory _data
     )
         external
         returns (

@@ -253,9 +253,24 @@ describe('DAOFactory: ', function () {
     await expect(tx)
       .to.emit(psp, EVENTS.InstallationApplied)
       .withArgs(dao, plugin);
+
+    const factory = await ethers.getContractFactory('DAO');
+    const daoContract = factory.attach(dao);
+
+    for (let i = 0; i < permissions.length; i++) {
+      const permission = permissions[i];
+      expect(
+        await daoContract.hasPermission(
+          permission.where,
+          permission.who,
+          permission.permissionId,
+          EMPTY_DATA
+        )
+      ).to.equal(true);
+    }
   });
 
-  it('makes sure all temporarly granted permissions are revoked', async () => {
+  it('revokes all temporarly granted permissions', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
@@ -285,7 +300,7 @@ describe('DAOFactory: ', function () {
       );
   });
 
-  it('makes sure all DAO permissions are correctly granted', async () => {
+  it('emits events containing all the correct permissions to be set in the created DAO', async () => {
     const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
@@ -347,6 +362,4 @@ describe('DAOFactory: ', function () {
         PermissionManagerAllowFlagAddress
       );
   });
-
-  // TODO: test erc20Voting, and allowlistVoting when ready.
 });
