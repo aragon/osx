@@ -13,8 +13,13 @@ import {
 import {customError} from '../test-utils/custom-error-helper';
 
 import {deployNewDAO} from '../test-utils/dao';
-import {decodeEvent} from '../test-utils/event';
-import {prepareInstallation} from '../test-utils/plugin-setup-processor';
+import {findEvent} from '../test-utils/event';
+import {
+  deployPluginRepoRegistry,
+  deployPluginSetupProcessor,
+  prepareInstallation,
+} from '../test-utils/plugin-setup-processor';
+import {deployPluginRepoFactory} from '../test-utils/repo';
 
 enum Op {
   Grant,
@@ -38,7 +43,6 @@ const EVENTS = {
 const EMPTY_DATA = '0x';
 
 const AddressZero = ethers.constants.AddressZero;
-// default oracle address emitted from permission manager
 const ADDRESS_TWO = `0x${'00'.repeat(19)}02`;
 
 const EMPTY_ID = `0x${'00'.repeat(32)}`;
@@ -58,34 +62,6 @@ const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
   'PLUGIN_REGISTER_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
-
-// Util Helper Functions
-async function getPluginRepoFactoryMergedABI() {
-  // @ts-ignore
-  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoRegistry'
-  );
-  // @ts-ignore
-  const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoFactory'
-  );
-
-  const _merged = [
-    ...PluginRepoFactoryArtifact.abi,
-    ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-  ];
-
-  // remove duplicated events
-  const merged = _merged.filter(
-    (value, index, self) =>
-      index === self.findIndex(event => event.name === value.name)
-  );
-
-  return {
-    abi: merged,
-    bytecode: PluginRepoFactoryArtifact.bytecode,
-  };
-}
 
 describe('Plugin Setup Processor', function () {
   let signers: any;
@@ -122,39 +98,12 @@ describe('Plugin Setup Processor', function () {
     // Managing DAO that have permission to manage PluginSetupProcessor
     managingDao = await deployNewDAO(ownerAddress);
 
-    // PluginRepoRegistry
-    const PluginRepoRegistry = await ethers.getContractFactory(
-      'PluginRepoRegistry'
-    );
-    pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(managingDao.address);
-
-    // PluginRepoFactory
-    const {abi, bytecode} = await getPluginRepoFactoryMergedABI();
-    const PluginRepoFactory = new ethers.ContractFactory(
-      abi,
-      bytecode,
-      signers[0]
-    );
-
-    pluginRepoFactory = await PluginRepoFactory.deploy(
-      pluginRepoRegistry.address
-    );
-
-    // Grant `PLUGIN_REGISTER_PERMISSION` to `PluginRepoFactory`.
-    await managingDao.grant(
-      pluginRepoRegistry.address,
-      pluginRepoFactory.address,
-      PLUGIN_REGISTER_PERMISSION_ID
-    );
-
-    // PluginSetupProcessor
-    const PluginSetupProcessor = await ethers.getContractFactory(
-      'PluginSetupProcessor'
-    );
-    psp = await PluginSetupProcessor.deploy(
-      managingDao.address,
-      pluginRepoRegistry.address
+    pluginRepoRegistry = await deployPluginRepoRegistry(managingDao);
+    psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
+    pluginRepoFactory = await deployPluginRepoFactory(
+      signers,
+      managingDao,
+      pluginRepoRegistry
     );
   });
 
@@ -171,7 +120,7 @@ describe('Plugin Setup Processor', function () {
       ownerAddress
     );
 
-    const event = await decodeEvent(tx, EVENTS.PluginRepoRegistered);
+    const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
 
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
@@ -256,10 +205,9 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('Retrun correctly the permissions', async () => {
-        const {plugin, helpers, prepareInstallpermissions} =
-          await prepareInstallation(
-            psp,
+      it('Retrun correctly the plugin, helpers, and permissions', async () => {
+        const {plugin, helpers, permissions} =
+          await psp.callStatic.prepareInstallation(
             targetDao.address,
             pluginSetupV1Mock.address,
             pluginSetupMockRepoAddress,
@@ -268,7 +216,7 @@ describe('Plugin Setup Processor', function () {
 
         expect(plugin).not.to.be.equal(AddressZero);
         expect(helpers.length).to.be.equal(1);
-        expect(prepareInstallpermissions).to.deep.equal([
+        expect(permissions).to.deep.equal([
           [
             Op.Grant,
             targetDao.address,
@@ -654,7 +602,7 @@ describe('Plugin Setup Processor', function () {
           EMPTY_DATA
         );
 
-        const event = await decodeEvent(tx, 'UninstallationPrepared');
+        const event = await findEvent(tx, 'UninstallationPrepared');
         const {permissions} = event.args;
 
         await expect(
@@ -692,6 +640,7 @@ describe('Plugin Setup Processor', function () {
         const plugin = AddressZero;
         const pluginUpdateParams = {
           plugin: plugin,
+          oldPluginSetup: pluginSetupV1Mock.address,
           pluginSetupRepo: pluginSetupRepoAddr,
           currentPluginSetup: AddressZero,
           newPluginSetup: AddressZero,
@@ -941,7 +890,7 @@ describe('Plugin Setup Processor', function () {
           helpers,
           EMPTY_DATA
         );
-        const prepareUpdateEvent = await decodeEvent(
+        const prepareUpdateEvent = await findEvent(
           prepareUpdateTx,
           EVENTS.UpdatePrepared
         );

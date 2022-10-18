@@ -177,13 +177,22 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
-    /// @return permissions The list of multi-targeted permission operations to be applied to the installing DAO.
+    /// @return plugin The prepared plugin contract address.
+    /// @return helpers The prepared list of helper contract addresses, that a plugin might require to operate.
+    /// @return permissions The prepared list of multi-targeted permission operations to be applied to the installing DAO.
     function prepareInstallation(
         address _dao,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         bytes memory _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory) {
+    )
+        external
+        returns (
+            address plugin,
+            address[] memory helpers,
+            PermissionLib.ItemMultiTarget[] memory permissions
+        )
+    {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -193,11 +202,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
         // prepareInstallation
-        (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
+        (plugin, helpers, permissions) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // Important safety measure to include dao + plugin manager in the encoding.
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, plugin);
@@ -220,8 +225,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             helpers: helpers,
             permissions: permissions
         });
-
-        return permissions;
     }
 
     /// @notice Applies the permissions of a prepared installation to a DAO.
