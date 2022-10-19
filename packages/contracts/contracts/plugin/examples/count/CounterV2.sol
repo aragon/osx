@@ -34,8 +34,8 @@ contract CounterV2 is PluginUUPSUpgradeable {
         MultiplyHelper _multiplyHelper,
         uint256 _count,
         uint256 _newVariable
-    ) external initializer {
-        __PluginUUPSUpgradeable_init(_dao);
+    ) external reinitializer(2) {
+        __PluginUpgradeable_init(_dao);
 
         count = _count;
 
@@ -49,7 +49,6 @@ contract CounterV2 is PluginUUPSUpgradeable {
     /// @notice Sets a the new variable that was added in V2.
     /// @param _newVariable The new variable.
     /// @dev This gets called when a dao already has `CounterV1` installed and updates to this verison `CounterV2`. For these DAOs, this `setNewVariable` can only be called once which is achieved by `reinitializer(2)`.
-    // TODO: This might still be called by daos that install CounterV2 for the first time, calls initialize and then calls setNewVariable.
     function setNewVariable(uint256 _newVariable) external reinitializer(2) {
         newVariable = _newVariable;
     }
