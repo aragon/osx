@@ -554,7 +554,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('revert if helpers do not match', async () => {
+      it('reverts if helpers do not match', async () => {
         const pluginSetup = pluginSetupV1Mock.address;
 
         const {plugin} = await prepareInstallation(
