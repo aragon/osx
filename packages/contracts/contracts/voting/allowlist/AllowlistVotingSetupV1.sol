@@ -11,7 +11,7 @@ import {AllowlistVoting} from "./AllowlistVoting.sol";
 /// @title AllowlistVotingSetup
 /// @author Aragon Association - 2022
 /// @notice The setup contract of the `AllowlistVoting` plugin.
-contract AllowlistVotingSetup is PluginSetup {
+contract AllowlistVotingSetupV1 is PluginSetup {
     AllowlistVoting private immutable allowlistVotingBase;
 
     address private constant NO_ORACLE = address(0);
@@ -23,7 +23,7 @@ contract AllowlistVotingSetup is PluginSetup {
     /// @inheritdoc PluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return
-            "(address participationRequiredPct, address supportRequiredPct, address minDuration, address[] allowed)";
+            "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, address[] allowed)";
     }
 
     /// @inheritdoc PluginSetup
@@ -41,11 +41,11 @@ contract AllowlistVotingSetup is PluginSetup {
 
         // Decode data
         (
-            address participationRequiredPct,
-            address supportRequiredPct,
-            address minDuration,
+            uint64 participationRequiredPct,
+            uint64 supportRequiredPct,
+            uint64 minDuration,
             address[] memory allowed
-        ) = abi.decode(_data, (address, address, address, address[]));
+        ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
 
         // Prepare plugin
         plugin = createERC1967Proxy(
