@@ -138,7 +138,7 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function execute(uint256 callId, Action[] memory _actions)
+    function execute(uint256 callId, Action[] calldata _actions)
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
@@ -146,7 +146,7 @@ contract DAO is
     {
         bytes[] memory execResults = new bytes[](_actions.length);
 
-        for (uint256 i = 0; i < _actions.length; i++) {
+        for (uint256 i = 0; i < _actions.length;) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );
@@ -154,6 +154,10 @@ contract DAO is
             if (!success) revert ActionFailed();
 
             execResults[i] = response;
+
+            unchecked {
+                i++;
+            }
         }
 
         emit Executed(msg.sender, callId, _actions, execResults);

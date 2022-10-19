@@ -15,6 +15,7 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 );
 
 const addressZero = ethers.constants.AddressZero;
+const addressUint160Max = "0xffffffffffffffffffffffffffffffffffffffff";
 
 enum Operation {
   Grant,
@@ -105,6 +106,14 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
+      );
+    });
+
+    it('should revert if permission is ROOT on ANY_ADDR', async () => {
+      await expect(
+        pm.grant(pm.address, addressUint160Max, ROOT_PERMISSION_ID)
+      ).to.be.revertedWith(
+        customError('RootPermissionForAnyAddressDisallowed')
       );
     });
 
@@ -426,6 +435,14 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
+      );
+    });
+
+    it('should not allow when where is ANY_ADDR', async () => {
+      await expect(
+        pm.freeze(addressUint160Max, ADMIN_PERMISSION_ID)
+      ).to.be.revertedWith(
+        customError('FreezeOnAnyAddressDisallowed')
       );
     });
   });

@@ -6,6 +6,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IPermissionOracle.sol";
 import "./PermissionLib.sol";
 
+import {_uncheckedIncrement} from "../../utils/UncheckedMath.sol";
+
 /// @title PermissionManager
 /// @author Aragon Association - 2021, 2022
 /// @notice The permission manager used in a DAO and its associated components.
@@ -51,6 +53,12 @@ contract PermissionManager is Initializable {
     /// @param where The address of the target contract for which the permission is frozen.
     /// @param permissionId The permission identifier.
     error PermissionFrozen(address where, bytes32 permissionId);
+
+    /// @notice Thrown if a Root permission is set on ANY_ADDR.
+    error RootPermissionForAnyAddressDisallowed();
+
+    /// @notice Thrown if a freeze happens on ANY_ADDR.
+    error FreezeOnAnyAddressDisallowed();
 
     // Events
 
@@ -161,15 +169,20 @@ contract PermissionManager is Initializable {
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
-        for (uint256 i = 0; i < items.length; i++) {
+        for (uint256 i = 0; i < items.length; ) {
             PermissionLib.ItemSingleTarget memory item = items[i];
 
-            if (item.operation == PermissionLib.Operation.Grant)
+            if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(_where, item.who, item.permissionId);
-            else if (item.operation == PermissionLib.Operation.Revoke)
+            } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(_where, item.who, item.permissionId);
-            else if (item.operation == PermissionLib.Operation.Freeze)
+            } else if (item.operation == PermissionLib.Operation.Freeze) {
                 _freeze(_where, item.permissionId);
+            }
+
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -177,25 +190,30 @@ contract PermissionManager is Initializable {
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
     function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
-        for (uint256 i = 0; i < items.length; i++) {
+        for (uint256 i = 0; i < items.length; ) {
             PermissionLib.ItemMultiTarget memory item = items[i];
 
             // TODO: Optimize
             _auth(item.where, ROOT_PERMISSION_ID);
 
-            if (item.operation == PermissionLib.Operation.Grant)
+            if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(item.where, item.who, item.permissionId);
-            else if (item.operation == PermissionLib.Operation.Revoke)
+            } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(item.where, item.who, item.permissionId);
-            else if (item.operation == PermissionLib.Operation.Freeze)
+            } else if (item.operation == PermissionLib.Operation.Freeze) {
                 _freeze(item.where, item.permissionId);
-            else if (item.operation == PermissionLib.Operation.GrantWithOracle)
+            } else if (item.operation == PermissionLib.Operation.GrantWithOracle) {
                 _grantWithOracle(
                     item.where,
                     item.who,
                     item.permissionId,
                     IPermissionOracle(item.oracle)
                 );
+            }
+
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -254,6 +272,10 @@ contract PermissionManager is Initializable {
         bytes32 _permissionId,
         IPermissionOracle _oracle
     ) internal {
+        if (_permissionId == ROOT_PERMISSION_ID && _who == ANY_ADDR) {
+            revert RootPermissionForAnyAddressDisallowed();
+        }
+
         if (isFrozen(_where, _permissionId)) {
             revert PermissionFrozen({where: _where, permissionId: _permissionId});
         }
@@ -302,10 +324,15 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which the permission is frozen.
     /// @param _permissionId The permission identifier.
     function _freeze(address _where, bytes32 _permissionId) internal {
+        if (_where == ANY_ADDR) {
+            revert FreezeOnAnyAddressDisallowed();
+        }
+
         bytes32 frozenPermHash = frozenPermissionHash(_where, _permissionId);
         if (frozenPermissionsHashed[frozenPermHash]) {
             revert PermissionFrozen({where: _where, permissionId: _permissionId});
         }
+
         frozenPermissionsHashed[frozenPermHash] = true;
 
         emit Frozen(_permissionId, msg.sender, _where);
