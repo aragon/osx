@@ -128,7 +128,7 @@ describe('PluginRepoRegistry', function () {
     );
   });
 
-  it('fail to register if pluginRepo already exists in the interface entries', async function () {
+  it('reverts the registration if the plugin repo already exists in the registry', async function () {
     await pluginRepoRegistry.registerPluginRepo('repo-1', pluginRepo.address);
 
     await expect(
@@ -138,11 +138,8 @@ describe('PluginRepoRegistry', function () {
     );
   });
 
-  it('fail to register if pluginRepo already exists in ens', async function () {
-    await pluginRepoRegistry.registerPluginRepo(
-      pluginRepoName,
-      pluginRepo.address
-    );
+  it("reverts the registration if the plugin repo's ENS name is already taken", async function () {
+    await pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address);
 
     const pluginRepoNameDomainHash = ensDomainHash(
       pluginRepoName + '.' + topLevelDomain

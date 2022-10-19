@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Abstract `PluginSetup` for the devs to inherit from for their concrete plugin manager implementation.
 - Added the `solidity-docgen` hardhat plugin by OpenZepplin to automatically generate documentation via `yarn docgen`.
 - Added deployment script for `ENSSubdomainRegistrar`.
-- Added `ENSSubdomainRegistrar` `Component` to register subdomains at the `ENS`.
+- Added `ENSSubdomainRegistrar` `Component` to register subdomains at the ENS.
 - Added `IPluginRepo` interface for plugin PluginRepo contract.
 - Added `PluginRepo` contract.
 - Added `InterfaceBasedRegistry` base to be used for creating any ERC165-based registry such as DAO-Registry and `AragonPluginRegistry`.
@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added deployment script for `managing-dao`, `plugin-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
-- Added `ENS` support for `PluginRepoRegistry`.
+- Added ENS support for `PluginRepoRegistry`.
 
 ### Changed
 

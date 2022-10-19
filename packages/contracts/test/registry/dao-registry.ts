@@ -72,10 +72,10 @@ describe('DAORegistry', function () {
     );
   });
 
-  it('fails to register if DAO name is empty', async function () {
+  it('reverts the registration if the DAO name is empty', async function () {
     await expect(
       daoRegistry.register(targetDao.address, ownerAddress, '')
-    ).to.be.revertedWith(customError('EmptyDAOName'));
+    ).to.be.revertedWith(customError('EmptyDaoName'));
   });
 
   it('Should register a new DAO successfully', async function () {

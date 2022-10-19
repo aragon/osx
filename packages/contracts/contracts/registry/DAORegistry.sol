@@ -17,7 +17,7 @@ contract DAORegistry is InterfaceBasedRegistry {
     ENSSubdomainRegistrar private subdomainRegistrar;
 
     // @notice Thrown if the plugin repository name is empty.
-    error EmptyDAOName();
+    error EmptyDaoName();
 
     /// @notice Emitted when a new DAO is registered.
     /// @param dao The address of the DAO contract.
@@ -48,7 +48,7 @@ contract DAORegistry is InterfaceBasedRegistry {
         address daoAddr = address(_dao);
 
         if (!(bytes(_name).length > 0)) {
-            revert EmptyDAOName();
+            revert EmptyDaoName();
         }
         
         _register(daoAddr);
