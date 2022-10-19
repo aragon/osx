@@ -16,7 +16,7 @@ abstract contract DaoAuthorizableBaseUpgradeable is ContextUpgradeable {
 
     /// @notice Returns the DAO contract.
     /// @return IDAO The DAO contract.
-    function getDAO() public view returns (IDAO) {
+    function getDAO() external view returns (IDAO) {
         return dao;
     }
 
