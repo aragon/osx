@@ -123,7 +123,7 @@ describe('PluginRepoRegistry', function () {
     );
   });
 
-  it('fail to register if pluginRepo already exists in ens', async function () {
+  it('reverts the registration if the plugin repo's ENS name is already taken', async function () {
     await pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address);
 
     const pluginRepoNameDomainHash = ensDomainHash(pluginRepoName + '.' + topLevelDomain);
