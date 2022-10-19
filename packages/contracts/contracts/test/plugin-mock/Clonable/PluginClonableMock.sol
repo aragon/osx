@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {PluginCloneable} from "../../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../../core/IDAO.sol";
 
-contract PluginClonableMock is PluginCloneable {
+contract PluginCloneableMock is PluginCloneable {
 
     function initialize(
         IDAO _dao
