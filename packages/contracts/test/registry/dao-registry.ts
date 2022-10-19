@@ -43,7 +43,7 @@ describe('DAORegistry', function () {
     ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
       signers[0],
       managingDao,
-      'dao.eth'
+      topLevelDomain
     );
 
     // Target DAO to be used as an example DAO to be registered
@@ -72,6 +72,12 @@ describe('DAORegistry', function () {
     );
   });
 
+  it('reverts the registration if the DAO name is empty', async function () {
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, '')
+    ).to.be.revertedWith(customError('EmptyDaoName'));
+  });
+
   it('Should register a new DAO successfully', async function () {
     await expect(
       await daoRegistry.register(targetDao.address, ownerAddress, daoName)
@@ -82,7 +88,7 @@ describe('DAORegistry', function () {
     expect(await daoRegistry.entries(targetDao.address)).to.equal(true);
   });
 
-  it('fail to register if the sender lacks the required role', async () => {
+  it('fails to register if the sender lacks the required role', async () => {
     // Register a DAO successfully
     await daoRegistry.register(targetDao.address, ownerAddress, daoName);
 
@@ -109,7 +115,7 @@ describe('DAORegistry', function () {
     );
   });
 
-  it('fail to register if DAO already exists', async function () {
+  it('fails to register if DAO already exists', async function () {
     await daoRegistry.register(
       targetDao.address,
       ownerAddress,

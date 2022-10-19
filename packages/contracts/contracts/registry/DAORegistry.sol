@@ -16,6 +16,9 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ENS subdomain registrar registering the DAO names.
     ENSSubdomainRegistrar private subdomainRegistrar;
 
+    // @notice Thrown if the plugin repository name is empty.
+    error EmptyDaoName();
+
     /// @notice Emitted when a new DAO is registered.
     /// @param dao The address of the DAO contract.
     /// @param creator The address of the creator.
@@ -44,6 +47,10 @@ contract DAORegistry is InterfaceBasedRegistry {
     ) external auth(REGISTER_DAO_PERMISSION_ID) {
         address daoAddr = address(_dao);
 
+        if (!(bytes(_name).length > 0)) {
+            revert EmptyDaoName();
+        }
+        
         _register(daoAddr);
 
         bytes32 labelhash = keccak256(bytes(_name));

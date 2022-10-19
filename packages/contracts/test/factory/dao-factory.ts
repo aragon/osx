@@ -2,20 +2,20 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {customError} from '../test-utils/custom-error-helper';
 import {
   DAORegistry,
-  PluginRepoFactory,
   PluginSetupProcessor,
   PluginSetupV1Mock,
   PluginRepoRegistry,
 } from '../../typechain';
+
+import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+import {customError} from '../test-utils/custom-error-helper';
+import {deployPluginSetupProcessor} from '../test-utils/plugin-setup-processor';
 import {
+  deployPluginRepoFactory,
   deployPluginRepoRegistry,
-  deployPluginSetupProcessor,
-} from '../test-utils/plugin-setup-processor';
-import {deployPluginRepoFactory} from '../test-utils/repo';
+} from '../test-utils/repo';
 import {findEvent} from '../test-utils/event';
 
 const EVENTS = {
@@ -40,6 +40,14 @@ const SET_TRUSTED_FORWARDER_PERMISSION_ID = ethers.utils.id(
   'SET_TRUSTED_FORWARDER_PERMISSION'
 );
 const SET_METADATA_PERMISSION_ID = ethers.utils.id('SET_METADATA_PERMISSION');
+const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_PLUGIN_REPO_PERMISSION'
+);
+const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_ENS_SUBDOMAIN_PERMISSION'
+);
+
+const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
 const PermissionManagerAllowFlagAddress =
   '0x0000000000000000000000000000000000000002';
@@ -164,21 +172,63 @@ describe('DAOFactory: ', function () {
       ensSubdomainRegistrar.address
     );
 
-    pluginRepoRegistry = await deployPluginRepoRegistry(managingDao);
+    // Plugin Repo Registry
+    pluginRepoRegistry = await deployPluginRepoRegistry(
+      managingDao,
+      ensSubdomainRegistrar
+    );
+
+    // Plugin Setup Processor
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
+
+    // Plugin Repo Factory
     pluginRepoFactory = await deployPluginRepoFactory(
       signers,
-      managingDao,
       pluginRepoRegistry
     );
 
-    // Create and register a plugin on the AragonPluginRegistry
+    // Deploy DAO Factory
+    const DAOFactory = new ethers.ContractFactory(
+      mergedABI,
+      daoFactoryBytecode,
+      signers[0]
+    );
+    daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
+
+    // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
+    await managingDao.grant(
+      daoRegistry.address,
+      daoFactory.address,
+      REGISTER_DAO_PERMISSION_ID
+    );
+
+    // Grant the `REGISTER_ENS_SUBDOMAIN_PERMISSION` permission on the ENS subdomain registrar to the DAO registry contract
+    await managingDao.grant(
+      ensSubdomainRegistrar.address,
+      daoRegistry.address,
+      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+
+    // Grant `PLUGIN_REGISTER_PERMISSION` to `pluginRepoFactory`.
+    await managingDao.grant(
+      pluginRepoRegistry.address,
+      pluginRepoFactory.address,
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
+    );
+
+    // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` to `PluginRepoFactory`.
+    await managingDao.grant(
+      ensSubdomainRegistrar.address,
+      pluginRepoRegistry.address,
+      REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+
+    // Create and register a plugin on the `PluginRepoRegistry`.
     // PluginSetupV1
     const PluginSetupV1Mock = await ethers.getContractFactory(
       'PluginSetupV1Mock'
     );
     pluginSetupV1Mock = await PluginSetupV1Mock.deploy();
-
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
       'PluginSetupV1Mock',
       [1, 0, 0],
@@ -189,29 +239,7 @@ describe('DAOFactory: ', function () {
     const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
-    // Deploy DAO Factory
-    const DAOFactory = new ethers.ContractFactory(
-      mergedABI,
-      daoFactoryBytecode,
-      signers[0]
-    );
-
-    daoFactory = await DAOFactory.deploy(daoRegistry.address, psp.address);
-
-    // Grant the `REGISTER_DAO_PERMISSION` permission to the `daoFactory`
-    await managingDao.grant(
-      daoRegistry.address,
-      daoFactory.address,
-      ethers.utils.id('REGISTER_DAO_PERMISSION')
-    );
-
-    // Grant the `REGISTER_ENS_SUBDOMAIN_PERMISSION` permission on the ENS subdomain registrar to the DAO registry contract
-    await managingDao.grant(
-      ensSubdomainRegistrar.address,
-      daoRegistry.address,
-      ethers.utils.id('REGISTER_ENS_SUBDOMAIN_PERMISSION')
-    );
-
+    // default params
     daoSettings = {
       trustedForwarder: AddressZero,
       name: daoDummyName,
