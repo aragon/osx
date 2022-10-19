@@ -48,7 +48,7 @@ contract DAORegistry is InterfaceBasedRegistry {
         address daoAddr = address(_dao);
 
         if (!(bytes(_name).length > 0)) {
-            revert EmptyDAOName();
+            revert EmptyDaoName();
         }
         
         _register(daoAddr);
