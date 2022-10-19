@@ -79,7 +79,7 @@ describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
-  let pluginClonableMock: PluginClonableMock;
+  let pluginCloneableMock: PluginCloneableMock;
   let pluginSetupV1Mock: PluginSetupV1Mock;
   let pluginSetupMockRepoAddress: any;
   let pluginSetupV2Mock: PluginSetupV2Mock;
