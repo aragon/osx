@@ -89,9 +89,10 @@ abstract contract MajorityVotingBase is
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
     }
 
-    /// @notice adds a IERC165 to check whether contract supports MAJORITY_VOTING_INTERFACE_ID or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or MAJORITY_VOTING_INTERFACE_ID
+   /// @notice Checks if this or the parent contract supports an interface by 
+its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId)
         public
         view
