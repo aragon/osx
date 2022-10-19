@@ -93,8 +93,6 @@ templates:
           handler: handleVoteCreated
         - event: ConfigUpdated(uint64,uint64,uint64)
           handler: handleConfigUpdated
-        - event: TrustedForwarderSet(address)
-          handler: handleTrustedForwarderSet
   # AllowlistVoting (package)
   - name: AllowlistVoting
     kind: ethereum/contract
@@ -124,5 +122,3 @@ templates:
           handler: handleUsersAdded
         - event: UsersRemoved(address[])
           handler: handleUsersRemoved
-        - event: TrustedForwarderSet(address)
-          handler: handleTrustedForwarderSet

@@ -130,7 +130,6 @@ enum VoteOption {
 type ERC20VotingPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  trustedForwarder: Bytes
   proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
   supportRequiredPct: BigInt
   participationRequiredPct: BigInt
@@ -188,7 +187,6 @@ type ERC20VotingProposal implements Proposal @entity {
 type AllowlistPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  trustedForwarder: Bytes
   proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
   supportRequiredPct: BigInt
   participationRequiredPct: BigInt

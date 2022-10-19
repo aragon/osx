@@ -4,7 +4,6 @@ import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   handleVoteCast,
   handleVoteExecuted,
-  handleTrustedForwarderSet,
   handleConfigUpdated,
   _handleVoteCreated
 } from '../../src/packages/erc20/erc20-voting';
@@ -29,7 +28,6 @@ import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
   createNewVoteCreatedEvent,
-  createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
   getVotesLengthCall,
   createERC20VotingProposalEntityState
@@ -198,7 +196,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   // the min participation is 0.5; 0.33 <= 0.5 => false
   // currently yes = 1
   // the min support is 0.5; 1 >= 0.5 => true
-  // is not executable 
+  // is not executable
   assert.fieldEquals('ERC20VotingProposal', proposal.id, 'executable', 'false');
   // check vote count
   assert.fieldEquals('ERC20VotingProposal', proposal.id, 'voteCount', '1');
@@ -235,7 +233,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   // the min participation is 0.5; 0.66 >= 0.5 => true
   // currently yes = 1, abstain = 1
   // the min support is 0.5; 0.5 >= 0.5 => true
-  // is executable 
+  // is executable
   assert.fieldEquals('ERC20VotingProposal', proposal.id, 'executable', 'true');
 
   assert.fieldEquals('ERC20VotingProposal', proposal.id, 'voteCount', '2');
@@ -307,30 +305,6 @@ test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
     '2'
   );
   assert.fieldEquals('ERC20VotingPackage', entityID, 'minDuration', '3600');
-
-  clearStore();
-});
-
-test('Run ERC Voting (handleTrustedForwarderSet) mappings with mock event', () => {
-  // create state
-  let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPackage = new ERC20VotingPackage(entityID);
-  erc20VotingPackage.save();
-
-  // create event
-  let event = createNewTrustedForwarderSetEvent(ADDRESS_ZERO, VOTING_ADDRESS);
-
-  // handle event
-  handleTrustedForwarderSet(event);
-
-  // checks
-  assert.fieldEquals('ERC20VotingPackage', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'ERC20VotingPackage',
-    entityID,
-    'trustedForwarder',
-    Address.fromString(ADDRESS_ZERO).toHexString()
-  );
 
   clearStore();
 });
