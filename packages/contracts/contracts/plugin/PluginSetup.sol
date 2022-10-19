@@ -46,7 +46,9 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
         proxy = payable(address(new ERC1967Proxy(_implementation, _data)));
     }
 
-    /// @inheritdoc ERC165
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IPluginSetup).interfaceId || super.supportsInterface(interfaceId);
