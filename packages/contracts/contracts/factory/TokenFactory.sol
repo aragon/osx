@@ -137,7 +137,6 @@ contract TokenFactory {
     }
 
     /// @notice Private helper method to set up the required base contracts on TokenFactory deployment.
-    // TODO: Why is this outside the constructor?
     function setupBases() private {
         distributorBase = new MerkleDistributor();
         governanceERC20Base = address(
