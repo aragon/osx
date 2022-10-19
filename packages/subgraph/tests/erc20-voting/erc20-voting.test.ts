@@ -4,7 +4,6 @@ import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   handleVoteCast,
   handleVoteExecuted,
-  // handleTrustedForwarderSet,
   handleConfigUpdated,
   _handleVoteCreated
 } from '../../src/packages/erc20/erc20-voting';
