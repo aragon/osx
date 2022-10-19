@@ -708,7 +708,7 @@ describe('Plugin Setup Processor', function () {
 
       it('reverts if plugin supports IPlugin, but is non upgradable', async () => {
         let pluginUpdateParams = {
-          plugin: pluginClonableMock.address,
+          plugin: pluginCloneableMock.address,
           pluginSetupRepo: ADDRESS_TWO,
           currentPluginSetup: AddressZero,
           newPluginSetup: AddressZero,
