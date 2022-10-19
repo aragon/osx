@@ -21,8 +21,8 @@ import "./IDAO.sol";
 contract DAO is
     Initializable,
     ERC165StorageUpgradeable,
-    IDAO,
     ERC1271,
+    IDAO,
     UUPSUpgradeable,
     PermissionManager,
     CallbackHandler

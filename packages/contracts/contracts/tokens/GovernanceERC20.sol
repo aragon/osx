@@ -17,8 +17,8 @@ import {IERC20MintableUpgradeable} from './IERC20MintableUpgradeable.sol';
 /// @author Aragon Association
 /// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
 contract GovernanceERC20 is
-    Initializable,
     IERC20MintableUpgradeable,
+    Initializable,
     ERC165Upgradeable,
     ERC20VotesUpgradeable,
     DaoAuthorizableUpgradeable

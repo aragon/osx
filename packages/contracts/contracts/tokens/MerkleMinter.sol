@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import {IDAO} from "../core/IDAO.sol";
 import {IERC20MintableUpgradeable} from "./IERC20MintableUpgradeable.sol";
@@ -74,7 +75,11 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
         bytes calldata _context
     ) external override auth(MERKLE_MINT_PERMISSION_ID) returns (IMerkleDistributor distributor) {
         address distributorAddr = distributorBase.clone();
-        MerkleDistributor(distributorAddr).initialize(dao, token, _merkleRoot);
+        MerkleDistributor(distributorAddr).initialize(
+            dao,
+            IERC20Upgradeable(address(token)),
+            _merkleRoot
+        );
 
         token.mint(distributorAddr, _totalAmount);
 

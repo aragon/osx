@@ -16,9 +16,9 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @notice The abstract implementation of majority voting components.
 /// @dev This component implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
+    IMajorityVoting,
     Initializable,
     ERC165Upgradeable,
-    IMajorityVoting,
     TimeHelpers,
     PluginUUPSUpgradeable
 {

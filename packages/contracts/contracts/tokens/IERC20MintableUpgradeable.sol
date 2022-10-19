@@ -2,11 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-
 /// @title IERC20MintableUpgradeable
 /// @notice Interface to allow minting of [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens.
-interface IERC20MintableUpgradeable is IERC20Upgradeable {
+interface IERC20MintableUpgradeable {
     /// @notice Mints [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens for a receiving address.
     /// @param _to The receiving address.
     /// @param _amount The amount of tokens.
