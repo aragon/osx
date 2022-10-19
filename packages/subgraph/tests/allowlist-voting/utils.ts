@@ -8,8 +8,7 @@ import {
   VoteExecuted,
   ConfigUpdated,
   UsersAdded,
-  UsersRemoved,
-  TrustedForwarderSet
+  UsersRemoved
 } from '../../generated/templates/AllowlistVoting/AllowlistVoting';
 import {
   ADDRESS_ONE,
@@ -27,27 +26,6 @@ import {
 } from '../constants';
 
 // events
-
-export function createNewTrustedForwarderSetEvent(
-  forwarderAddress: string,
-  contractAddress: string
-): TrustedForwarderSet {
-  let newTrustedForwarderSetEvent = changetype<TrustedForwarderSet>(
-    newMockEvent()
-  );
-
-  newTrustedForwarderSetEvent.address = Address.fromString(contractAddress);
-  newTrustedForwarderSetEvent.parameters = [];
-
-  let forwarderAddressParam = new ethereum.EventParam(
-    'forwarder',
-    ethereum.Value.fromAddress(Address.fromString(forwarderAddress))
-  );
-
-  newTrustedForwarderSetEvent.parameters.push(forwarderAddressParam);
-
-  return newTrustedForwarderSetEvent;
-}
 
 export function createNewVoteCreatedEvent(
   voteId: string,
