@@ -22,7 +22,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     /// @notice The ID of the permission required to call the `merkleMint` function.
     bytes32 public constant MERKLE_MINT_PERMISSION_ID = keccak256("MERKLE_MINT_PERMISSION");
 
-    /// @notice The ID of the permission required to change distributor base.
+    /// @notice The ID of the permission required to call the `changeDistributor` function.
     bytes32 public constant CHANGE_DISTRIBUTOR_PERMISSION_ID =
         keccak256("CHANGE_DISTRIBUTOR_PERMISSION");
 
