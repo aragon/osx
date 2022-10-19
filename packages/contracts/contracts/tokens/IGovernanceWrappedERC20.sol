@@ -12,8 +12,8 @@ interface IGovernanceWrappedERC20 {
     /// @param amount The amount of tokens to be  minted.
     function depositFor(address account, uint256 amount) external returns (bool);
 
-    /// @notice Allow a user to burn a number of wrapped tokens and withdraw the corresponding number of underlying tokens.
-    /// @param account the user address where the tokens should be minted.
-    /// @param amount how much will be minted on the account
+    /// @notice Withdraws  an amount of underlying tokens to an receiving address and burns the corresponding number of wrapped tokens.
+    /// @param account The address receiving the withdrawn, underlying tokens.
+    /// @param amount The amount of underlying tokens to be withdrawn.
     function withdrawTo(address account, uint256 amount) external returns (bool);
 }
