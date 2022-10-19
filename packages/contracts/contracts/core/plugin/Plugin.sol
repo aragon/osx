@@ -13,7 +13,7 @@ import {IPlugin} from "./IPlugin.sol";
 /// @notice An abstract, non-upgradeDaoAuthorizableo inherit from when creating a plugin being deployed via the `new` keyword.
 abstract contract Plugin is ERC165, IPlugin, DaoAuthorizable {
     /// @notice Constructs the plugin by storing the associated DAO.
-    /// @param _dao The DAODaoAuthorizable
+    /// @param _dao The DAO contract.
     constructor(IDAO _dao) DaoAuthorizable(_dao) {}
     
     /// @inheritdoc IPlugin

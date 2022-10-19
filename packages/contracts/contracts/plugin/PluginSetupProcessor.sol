@@ -66,9 +66,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
 
-    /// @notice Thrown if a plugin isn't IPlugin interface..
-    /// @param plugin The address of the plugin contract.
-    error WrongInterface(address plugin);
+    /// @notice Thrown if a contract does not support the `IPlugin` interface.
+    /// @param plugin The address of the contract.
+    error IPluginNotSupported(address plugin);
 
     /// @notice Thrown if two permissions hashes obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) don't match.
     error PermissionsHashMismatch();
@@ -296,7 +296,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits is PluginUUPSUpgradable.
         if(!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
-            revert WrongInterface({plugin: _updateParams.plugin});
+            revert IPluginNotSupported({plugin: _updateParams.plugin});
         }
 
         if(IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {

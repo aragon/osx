@@ -51,7 +51,9 @@ contract GovernanceERC20 is
         __DaoAuthorizableUpgradeable_init(_dao);
     }
 
-    /// @inheritdoc ERC165Upgradeable
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC20Upgradeable).interfaceId ||
