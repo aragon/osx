@@ -50,7 +50,9 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
         merkleRoot = _merkleRoot;
     }
 
-    /// @inheritdoc ERC165Upgradeable
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IMerkleDistributor).interfaceId ||

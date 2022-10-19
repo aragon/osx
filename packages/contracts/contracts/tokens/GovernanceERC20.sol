@@ -52,7 +52,7 @@ contract GovernanceERC20 is
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param _interfaceId The ID of the interace.
+    /// @param interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
