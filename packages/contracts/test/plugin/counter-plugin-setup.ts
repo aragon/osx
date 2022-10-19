@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {BigNumberish} from 'ethers';
 import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAOMock,
@@ -30,7 +31,7 @@ const EMPTY_DATA = '0x';
 // TODO 2. in order to detect encode abi for deploy/update, use deployABI/updateABI
 describe('CounterPluginSetup(Example)', function () {
   let ownerAddress: string;
-  let signers: any;
+  let signers: SignerWithAddress[];
   let counterV1Setup: CounterV1PluginSetup;
   let counterV2Setup: CounterV2PluginSetup;
   let implementationAddress: string;
@@ -40,7 +41,7 @@ describe('CounterPluginSetup(Example)', function () {
   let address1: string;
   let address2: string;
 
-  async function decodeEvent(tx: any, eventName: string) {
+  async function findEvent(tx: any, eventName: string) {
     const {events} = await tx.wait();
     const event = events.find(
       ({event}: {event: any}) => event === eventName

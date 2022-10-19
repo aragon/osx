@@ -339,8 +339,8 @@ contract PermissionManager is Initializable {
 
         return false;
     }
-
-    /// @notice A modifier to be used to check permissions on a target contract.
+    
+    /// @notice A private function to be used to check permissions on a target contract.
     /// @param _where The address of the target contract for which the permission is required.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(address _where, bytes32 _permissionId) private view {

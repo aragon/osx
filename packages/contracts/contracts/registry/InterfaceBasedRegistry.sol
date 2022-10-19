@@ -11,7 +11,7 @@ import "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 /// @author Aragon Association - 2022
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 //TODO Make this PluginUUPSUpgradeable
-abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgradeable {
+abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
@@ -73,4 +73,7 @@ abstract contract InterfaceBasedRegistry is DaoAuthorizableUpgradeable, UUPSUpgr
 
         entries[_registrant] = true;
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[48] private __gap;
 }
