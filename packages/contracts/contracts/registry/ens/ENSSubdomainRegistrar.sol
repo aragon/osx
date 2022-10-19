@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
@@ -14,11 +13,7 @@ import {DaoAuthorizableUpgradeable} from "../../core/component/DaoAuthorizableUp
 /// @title ENSSubdomainRegistrar
 /// @author Aragon Association - 2022
 /// @notice This contract registers ENS subdomains under a parent domain specified in the initialization process and maintains ownership of the subdomain since only the resolver address is set. This contract must either be the domain node owner or an approved operator of the node owner. The default resolver being used is the one specified in the parent domain.
-contract ENSSubdomainRegistrar is ERC165Upgradeable, UUPSUpgradeable, DaoAuthorizableUpgradeable {
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant REGISTRY_INTERFACE_ID =
-        this.registerSubnode.selector ^ this.setDefaultResolver.selector;
-
+contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
 
@@ -70,13 +65,6 @@ contract ENSSubdomainRegistrar is ERC165Upgradeable, UUPSUpgradeable, DaoAuthori
         ens = _ens;
         node = _node;
         resolver = ens.resolver(_node);
-    }
-
-    /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param _interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == REGISTRY_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
