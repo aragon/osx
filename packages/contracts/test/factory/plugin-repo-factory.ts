@@ -13,8 +13,8 @@ const EVENTS = {
 
 const zeroAddress = ethers.constants.AddressZero;
 
-const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
-  'PLUGIN_REGISTER_PERMISSION'
+const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_PLUGIN_REPO_PERMISSION'
 );
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
@@ -109,7 +109,7 @@ describe('PluginRepoFactory: ', function () {
     managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      PLUGIN_REGISTER_PERMISSION_ID
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
      // grant REGISTER_PERMISSION_ID to pluginRepoFactory
@@ -125,7 +125,7 @@ describe('PluginRepoFactory: ', function () {
     managingDao.revoke(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      PLUGIN_REGISTER_PERMISSION_ID
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     const pluginRepoName = 'my-pluginRepo';
@@ -139,7 +139,7 @@ describe('PluginRepoFactory: ', function () {
         pluginRepoRegistry.address,
         pluginRepoRegistry.address,
         pluginRepoFactory.address,
-        PLUGIN_REGISTER_PERMISSION_ID
+        REGISTER_PLUGIN_REPO_PERMISSION_ID
       )
     );
   });

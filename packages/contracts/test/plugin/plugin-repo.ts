@@ -3,6 +3,7 @@
 
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {PluginRepo, PluginSetupV1Mock} from '../../typechain';
 import {deployMockPluginSetup} from '../test-utils/repo';
@@ -13,7 +14,7 @@ const emptyBytes = '0x00';
 describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
-  let signers: any;
+  let signers: SignerWithAddress[];
   let pluginSetupMock: PluginSetupV1Mock;
 
   function assertVersion(

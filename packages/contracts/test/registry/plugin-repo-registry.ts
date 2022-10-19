@@ -1,7 +1,13 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {DAO, PluginRepo, ENSSubdomainRegistrar} from '../../typechain';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {
+  DAO,
+  PluginRepo,
+  ENSSubdomainRegistrar,
+  PluginRepoRegistry,
+} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployNewPluginRepo} from '../test-utils/repo';
@@ -13,15 +19,15 @@ const EVENTS = {
 };
 
 describe('PluginRepoRegistry', function () {
-  let signers:any;
+  let signers: SignerWithAddress[];
   let ensSubdomainRegistrar: ENSSubdomainRegistrar;
-  let pluginRepoRegistry: any;
+  let pluginRepoRegistry: PluginRepoRegistry;
   let ownerAddress: string;
   let managingDAO: DAO;
   let pluginRepo: PluginRepo;
 
-  const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
-    'PLUGIN_REGISTER_PERMISSION'
+  const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
+    'REGISTER_PLUGIN_REPO_PERMISSION'
   );
 
   const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
@@ -52,7 +58,10 @@ describe('PluginRepoRegistry', function () {
       'PluginRepoRegistry'
     );
     pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(managingDAO.address, ensSubdomainRegistrar.address);
+    await pluginRepoRegistry.initialize(
+      managingDAO.address,
+      ensSubdomainRegistrar.address
+    );
 
     // deploy a pluginRepo and initialize
     pluginRepo = await deployNewPluginRepo(ownerAddress);
@@ -61,7 +70,7 @@ describe('PluginRepoRegistry', function () {
     managingDAO.grant(
       pluginRepoRegistry.address,
       ownerAddress,
-      PLUGIN_REGISTER_PERMISSION_ID
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // grant REGISTER_PERMISSION_ID to registrer
@@ -87,20 +96,26 @@ describe('PluginRepoRegistry', function () {
 
   it('fail to register if the sender lacks the required role', async () => {
     // Register a plugin successfully
-    await pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address);
+    await pluginRepoRegistry.registerPluginRepo(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
     // Revoke the permission
     await managingDAO.revoke(
       pluginRepoRegistry.address,
       ownerAddress,
-      PLUGIN_REGISTER_PERMISSION_ID
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // deploy a pluginRepo
     const newPluginRepo = await deployNewPluginRepo(ownerAddress);
 
     await expect(
-      pluginRepoRegistry.registerPluginRepo(pluginRepoName, newPluginRepo.address)
+      pluginRepoRegistry.registerPluginRepo(
+        pluginRepoName,
+        newPluginRepo.address
+      )
     ).to.be.revertedWith(
       customError(
         'DaoUnauthorized',
@@ -108,7 +123,7 @@ describe('PluginRepoRegistry', function () {
         pluginRepoRegistry.address,
         pluginRepoRegistry.address,
         ownerAddress,
-        PLUGIN_REGISTER_PERMISSION_ID
+        REGISTER_PLUGIN_REPO_PERMISSION_ID
       )
     );
   });
@@ -124,14 +139,23 @@ describe('PluginRepoRegistry', function () {
   });
 
   it('fail to register if pluginRepo already exists in ens', async function () {
-    await pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address);
+    await pluginRepoRegistry.registerPluginRepo(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
-    const pluginRepoNameDomainHash = ensDomainHash(pluginRepoName + '.' + topLevelDomain);
+    const pluginRepoNameDomainHash = ensDomainHash(
+      pluginRepoName + '.' + topLevelDomain
+    );
 
     await expect(
       pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address)
     ).to.be.revertedWith(
-      customError('AlreadyRegistered', pluginRepoNameDomainHash, ensSubdomainRegistrar.address)
+      customError(
+        'AlreadyRegistered',
+        pluginRepoNameDomainHash,
+        ensSubdomainRegistrar.address
+      )
     );
   });
 });

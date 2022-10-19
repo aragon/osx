@@ -23,7 +23,6 @@ export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {
 
 export async function deployPluginRepoFactory(
   signers: any,
-  managingDao: any,
   pluginRepoRegistry: PluginRepoRegistry
 ): Promise<any> {
   // @ts-ignore

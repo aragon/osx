@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import console from 'console';
 import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   PluginSetupProcessor,
@@ -62,8 +63,8 @@ const APPLY_UNINSTALLATION_PERMISSION_ID = ethers.utils.id(
 const SET_REPO_REGISTRY_PERMISSION_ID = ethers.utils.id(
   'SET_REPO_REGISTRY_PERMISSION'
 );
-const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
-  'PLUGIN_REGISTER_PERMISSION'
+const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_PLUGIN_REPO_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
 
@@ -74,7 +75,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 let counter = 0;
 
 describe('Plugin Setup Processor', function () {
-  let signers: any;
+  let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
   let pluginSetupV1Mock: PluginSetupV1Mock;
@@ -124,7 +125,6 @@ describe('Plugin Setup Processor', function () {
     // Plugin Repo Factory
     pluginRepoFactory = await deployPluginRepoFactory(
       signers,
-      managingDao,
       pluginRepoRegistry
     );
 
@@ -132,7 +132,7 @@ describe('Plugin Setup Processor', function () {
     await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      PLUGIN_REGISTER_PERMISSION_ID
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` to `PluginRepoFactory`.

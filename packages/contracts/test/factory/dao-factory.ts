@@ -40,8 +40,8 @@ const SET_TRUSTED_FORWARDER_PERMISSION_ID = ethers.utils.id(
   'SET_TRUSTED_FORWARDER_PERMISSION'
 );
 const SET_METADATA_PERMISSION_ID = ethers.utils.id('SET_METADATA_PERMISSION');
-const PLUGIN_REGISTER_PERMISSION_ID = ethers.utils.id(
-  'PLUGIN_REGISTER_PERMISSION'
+const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
+  'REGISTER_PLUGIN_REPO_PERMISSION'
 );
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -184,7 +184,6 @@ describe('DAOFactory: ', function () {
     // Plugin Repo Factory
     pluginRepoFactory = await deployPluginRepoFactory(
       signers,
-      managingDao,
       pluginRepoRegistry
     );
 
@@ -214,7 +213,7 @@ describe('DAOFactory: ', function () {
     await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
-      PLUGIN_REGISTER_PERMISSION_ID
+      REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // Grant `REGISTER_ENS_SUBDOMAIN_PERMISSION` to `PluginRepoFactory`.

@@ -12,7 +12,7 @@ import {IPluginRepo} from "../plugin/IPluginRepo.sol";
 /// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
-    bytes32 public constant PLUGIN_REGISTER_PERMISSION_ID = keccak256("PLUGIN_REGISTER_PERMISSION");
+    bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID = keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
     
     /// @notice The ENS subdomain registrar registering the PluginRepo names.
     ENSSubdomainRegistrar public subdomainRegistrar;
@@ -36,7 +36,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @param registrant The address of the PluginRepo contract.
     function registerPluginRepo(string calldata name, address registrant)
         external
-        auth(PLUGIN_REGISTER_PERMISSION_ID)
+        auth(REGISTER_PLUGIN_REPO_PERMISSION_ID)
     {
         // The caller(PluginRepoFactory) explicitly checks
         // if the name is empty and reverts.
