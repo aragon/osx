@@ -723,7 +723,7 @@ describe('Plugin Setup Processor', function () {
             EMPTY_DATA
           )
         ).to.be.revertedWith(
-          customError('PluginNonupgradeable', pluginClonableMock.address)
+          customError('PluginNonupgradeable', pluginCloneableMock.address)
         );
       });
 
