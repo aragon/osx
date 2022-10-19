@@ -97,10 +97,10 @@ describe('Plugin Setup Processor', function () {
 
   before(async () => {
     // Directly deploy PluginCloneableMock
-    const _PluginClonableMock = await ethers.getContractFactory(
-      'PluginClonableMock'
+    const _PluginCloneableMock = await ethers.getContractFactory(
+      'PluginCloneableMock'
     );
-    pluginClonableMock = await _PluginClonableMock.deploy();
+    pluginCloneableMock = await _PluginCloneableMock.deploy();
 
     // PluginSetupV1
     const PluginSetupV1Mock = await ethers.getContractFactory(
