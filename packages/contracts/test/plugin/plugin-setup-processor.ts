@@ -703,7 +703,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('WrongInterface', plugin));
+        ).to.be.revertedWith(customError('IPluginNotSupported', plugin));
       });
 
       it('reverts if plugin supports IPlugin, but is non upgradable', async () => {
