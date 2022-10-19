@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   PluginSetupProcessor,
-  PluginClonableMock,
+  PluginCloneableMock,
   PluginSetupV1Mock,
   PluginSetupV2Mock,
   PluginSetupV1MockBad,

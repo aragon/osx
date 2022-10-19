@@ -54,7 +54,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param _interfaceId The ID of the interace.
+    /// @param interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
@@ -82,4 +82,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
 
         return MerkleDistributor(distributorAddr);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[48] private __gap;
 }
