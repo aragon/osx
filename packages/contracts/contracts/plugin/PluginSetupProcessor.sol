@@ -66,9 +66,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
 
-    /// @notice Thrown if a plugin isn't IPlugin interface..
-    /// @param plugin The address of the plugin contract.
-    error WrongInterface(address plugin);
+    /// @notice Thrown if a contract does not support the `IPlugin` interface.
+    /// @param plugin The address of the contract.
+    error IPluginNotSupported(address plugin);
 
     /// @notice Thrown if two permissions hashes obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) don't match.
     error PermissionsHashMismatch();
