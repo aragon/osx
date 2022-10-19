@@ -5,7 +5,6 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IPermissionOracle.sol";
 import "./PermissionLib.sol";
-
 import {_uncheckedIncrement} from "../../utils/UncheckedMath.sol";
 
 /// @title PermissionManager
