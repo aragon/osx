@@ -28,22 +28,23 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
     ERC20Voting private immutable erc20VotingBase;
 
+    /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
 
-    /// @notice The address of the `GovernanceERC20` base contract to clone from.
+    /// @notice The address of the `GovernanceERC20` base contract.
     address public governanceERC20Base;
 
-    /// @notice The address of the `GovernanceWrappedERC20` base contract to clone from.
+    /// @notice The address of the `GovernanceWrappedERC20` base contract.
     address public governanceWrappedERC20Base;
 
-    /// @notice The address of the `MerkleMinter` base contract to clone from.
+    /// @notice The address of the `MerkleMinter` base contract.
     address public merkleMinterBase;
 
-    /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter` clones.
+    /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter`.
     address public distributorBase;
 
     struct TokenSettings {
-        address addr;
+        address addr; //
         string name;
         string symbol;
     }
@@ -53,9 +54,16 @@ contract ERC20VotingSetupV1 is PluginSetup {
         uint256[] amounts;
     }
 
+    /// @notice Thrown if `MintSettings`'s params are not of the same length.
+    /// @param receiversArrayLength The array length of `receivers`.
+    /// @param amountsArrayLength The array length of `amounts`.
     error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
+
+    /// @notice Thrown if passed helpers array is of worng length.
+    /// @param length The array length of passed helpers.
     error WrongHelpersLength(uint256 length);
 
+    /// @notice The contract constructor, that deployes the bases.
     constructor() {
         distributorBase = address(new MerkleDistributor());
         governanceERC20Base = address(new GovernanceERC20(IDAO(address(0)), "", ""));
@@ -83,7 +91,8 @@ contract ERC20VotingSetupV1 is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode data
+        // Decode `_data` to extract the params needed for deploying and initializing `ERC20Voting` plugin,
+        // and the required helpers
         (
             uint64 participationRequiredPct,
             uint64 supportRequiredPct,
@@ -92,6 +101,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
             MintSettings memory mintSettings
         ) = abi.decode(_data, (uint64, uint64, uint64, TokenSettings, MintSettings));
 
+        // Check mint setting.
         if (mintSettings.receivers.length != mintSettings.amounts.length) {
             revert MintArrayLengthMismatch({
                 receiversArrayLength: mintSettings.receivers.length,
@@ -111,7 +121,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 // GovernanceWrappedERC20 in order to make the token
                 // include governance functionality.
                 GovernanceWrappedERC20(token).initialize(
-                    IERC20Upgradeable(tokenSettings.addr),
+                    IERC20Upgradeable(token),
                     tokenSettings.name,
                     tokenSettings.symbol
                 );
@@ -122,19 +132,22 @@ contract ERC20VotingSetupV1 is PluginSetup {
             token = governanceERC20Base.clone();
             GovernanceERC20(token).initialize(dao, tokenSettings.name, tokenSettings.symbol);
 
-            // Clone and initialize a `MerkleMinter`
-            address merkleMinter = merkleMinterBase.clone();
-            MerkleMinter(merkleMinter).initialize(
-                dao,
-                IERC20MintableUpgradeable(token),
-                distributorBase
+            // Create a `MerkleMinter`
+            address merkleMinter = createERC1967Proxy(
+                address(merkleMinterBase),
+                abi.encodeWithSelector(
+                    MerkleMinter.initialize.selector,
+                    dao,
+                    IERC20MintableUpgradeable(token),
+                    distributorBase
+                )
             );
 
             helpers[0] = token;
             helpers[1] = merkleMinter;
         }
 
-        // Prepare plugin
+        // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
             address(erc20VotingBase),
             abi.encodeWithSelector(
@@ -216,7 +229,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         address _plugin,
         address[] calldata _helpers,
         bytes calldata
-    ) external returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
         uint256 helperLength = _helpers.length;
         if (helperLength == 1) {

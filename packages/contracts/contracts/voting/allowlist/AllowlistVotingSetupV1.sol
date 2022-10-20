@@ -12,10 +12,13 @@ import {AllowlistVoting} from "./AllowlistVoting.sol";
 /// @author Aragon Association - 2022
 /// @notice The setup contract of the `AllowlistVoting` plugin.
 contract AllowlistVotingSetupV1 is PluginSetup {
+    /// @notice The address of `AllowlistVoting` plugin logic contract to be used in creating proxy contracts.
     AllowlistVoting private immutable allowlistVotingBase;
 
+    /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
 
+    /// @notice The contract constructor, that deployes the `AllowlistVoting` plugin logic contract.
     constructor() {
         allowlistVotingBase = new AllowlistVoting();
     }
@@ -37,7 +40,7 @@ contract AllowlistVotingSetupV1 is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode data
+        // Decode `_data` to extract the params needed for deploying and initializing `AllowlistVoting` plugin.
         (
             uint64 participationRequiredPct,
             uint64 supportRequiredPct,
@@ -45,7 +48,7 @@ contract AllowlistVotingSetupV1 is PluginSetup {
             address[] memory allowed
         ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
 
-        // Prepare plugin
+        // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             address(allowlistVotingBase),
             abi.encodeWithSelector(
@@ -66,6 +69,7 @@ contract AllowlistVotingSetupV1 is PluginSetup {
         permissions = new PermissionLib.ItemMultiTarget[](4);
 
         // Set permissions to be granted.
+        // Grant the list of prmissions of the plugin to the DAO.
         permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             plugin,
@@ -90,6 +94,7 @@ contract AllowlistVotingSetupV1 is PluginSetup {
             allowlistVotingBase.UPGRADE_PERMISSION_ID()
         );
 
+        // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
         permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             _dao,
