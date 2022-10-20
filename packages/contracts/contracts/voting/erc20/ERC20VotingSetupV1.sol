@@ -44,7 +44,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
     address public distributorBase;
 
     struct TokenSettings {
-        address addr; //
+        address addr;
         string name;
         string symbol;
     }
@@ -61,7 +61,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
     /// @notice Thrown if passed helpers array is of worng length.
     /// @param length The array length of passed helpers.
-    error WrongHelpersLength(uint256 length);
+    error WrongHelpersArrayLength(uint256 length);
 
     /// @notice The contract constructor, that deployes the bases.
     constructor() {
@@ -111,7 +111,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
         address token = tokenSettings.addr;
 
-        // Prepare helpers
+        // Prepare helpers.
         helpers = new address[](token != address(0) ? 1 : 2);
 
         if (token != address(0)) {
@@ -129,10 +129,11 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
             helpers[0] = token;
         } else {
+            // Clone a `GovernanceERC20`.
             token = governanceERC20Base.clone();
             GovernanceERC20(token).initialize(dao, tokenSettings.name, tokenSettings.symbol);
 
-            // Create a `MerkleMinter`
+            // Create a `MerkleMinter`.
             address merkleMinter = createERC1967Proxy(
                 address(merkleMinterBase),
                 abi.encodeWithSelector(
@@ -165,6 +166,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 6);
 
         // Set plugin permissions to be granted.
+        // Grant the list of prmissions of the plugin to the DAO.
         permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             plugin,
@@ -181,6 +183,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
             erc20VotingBase.UPGRADE_PERMISSION_ID()
         );
 
+        // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
         permissions[2] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             _dao,
@@ -230,14 +233,14 @@ contract ERC20VotingSetupV1 is PluginSetup {
         address[] calldata _helpers,
         bytes calldata
     ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        // Prepare permissions
+        // Prepare permissions.
         uint256 helperLength = _helpers.length;
         if (helperLength == 1) {
             permissions = new PermissionLib.ItemMultiTarget[](3);
         } else if (helperLength == 2) {
             permissions = new PermissionLib.ItemMultiTarget[](6);
         } else {
-            revert WrongHelpersLength({length: helperLength});
+            revert WrongHelpersArrayLength({length: helperLength});
         }
 
         // Set permissions to be Revoked.
