@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
@@ -14,6 +15,7 @@ import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
+import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol";
 import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
 import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
@@ -25,6 +27,7 @@ import {ERC20Voting} from "./ERC20Voting.sol";
 contract ERC20VotingSetupV1 is PluginSetup {
     using Address for address;
     using Clones for address;
+    using ERC165Checker for address;
 
     ERC20Voting private immutable erc20VotingBase;
 
@@ -58,6 +61,14 @@ contract ERC20VotingSetupV1 is PluginSetup {
     /// @param receiversArrayLength The array length of `receivers`.
     /// @param amountsArrayLength The array length of `amounts`.
     error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
+
+    /// @notice Thrown if token address is passed which is not a token.
+    /// @param token The token address
+    error TokenNotContract(address token);
+
+    /// @notice Thrown if token address is not ERC20.
+    /// @param token The token address
+    error TokenNotERC20(address token);
 
     /// @notice Thrown if passed helpers array is of worng length.
     /// @param length The array length of passed helpers.
@@ -115,7 +126,30 @@ contract ERC20VotingSetupV1 is PluginSetup {
         helpers = new address[](token != address(0) ? 1 : 2);
 
         if (token != address(0)) {
-            if (!isGovernanceToken(token)) {
+            // the following 2 calls(_getTokenInterfaceIds, isERC20) don't use
+            // OZ's function calls due to the fact that OZ reverts in case of an error
+            // which in this case not desirable as we still continue the execution.
+            // Try/catch more unpredictable + messy.
+            if (!token.isContract()) {
+                revert TokenNotContract(token);
+            }
+
+            if (!_isERC20(token)) {
+                revert TokenNotERC20(token);
+            }
+
+            // [0] = IERC20Upgradeable, [1] = IVotesUpgradeable, [2] = IGovernanceWrappedERC20
+            bool[] memory supportedIds = _getTokenInterfaceIds(token);
+
+            if (
+                // If token supports none of them
+                // it's simply ERC20 which gets checked by _isERC20
+                // Currently, not a satisfiable check..
+                (!supportedIds[0] && !supportedIds[1] && !supportedIds[2]) ||
+                // If token supports IERC20Upgradeable, but neither 
+                // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
+                (supportedIds[0] && !supportedIds[1] && !supportedIds[2])
+            ) {
                 token = governanceWrappedERC20Base.clone();
                 // User already has a token. We need to wrap it in
                 // GovernanceWrappedERC20 in order to make the token
@@ -305,13 +339,24 @@ contract ERC20VotingSetupV1 is PluginSetup {
         return address(erc20VotingBase);
     }
 
-    function isGovernanceToken(address token) private returns (bool) {
-        // Validate if token is ERC20
-        // Not Enough Checks, but better than nothing.
-        token.functionCall(
+    /// @notice gets the information which interface ids token supports.
+    /// @dev it's important to check first whether token is a contract.
+    /// @param token address
+    function _getTokenInterfaceIds(address token) private view returns (bool[] memory) {
+        bytes4[] memory interfaceIds = new bytes4[](3);
+        interfaceIds[0] = type(IERC20Upgradeable).interfaceId;
+        interfaceIds[1] = type(IVotesUpgradeable).interfaceId;
+        interfaceIds[2] = type(IGovernanceWrappedERC20).interfaceId;
+        return token.getSupportedInterfaces(interfaceIds);
+    }
+
+    /// @notice unsatisfiably determines if contract is ERC20.. 
+    /// @dev it's important to check first whether token is a contract.
+    /// @param token address
+    function _isERC20(address token) private view returns (bool) {
+        (bool success, ) = token.staticcall{gas: gasleft()}(
             abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
         );
-
-        return IERC165(token).supportsInterface(type(IVotesUpgradeable).interfaceId);
+        return success;
     }
 }
