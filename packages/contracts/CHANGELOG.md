@@ -59,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed order of deployment scripts.
 - Changed folder structure of tests.
 - Refactored event names and NatSpec comments.
+- Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
+- Renamed `createProxy` function to `createERC1967Proxy`.
 
 ### Removed
 
