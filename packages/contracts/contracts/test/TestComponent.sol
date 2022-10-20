@@ -2,13 +2,14 @@
 
 pragma solidity 0.8.10;
 
-import "../core/component/Component.sol";
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import { IDAO } from '../core/IDAO.sol';
 
-contract TestComponent is Component {
+contract TestComponent is PluginUUPSUpgradeable {
     bytes32 public constant DO_SOMETHING_PERMISSION_ID = keccak256("DO_SOMETHING_PERMISSION");
 
     function initialize(IDAO _dao) external initializer {
-        __Component_init(_dao);
+        __PluginUUPSUpgradeable_init(_dao);
     }
 
     function addPermissioned(uint256 _param1, uint256 _param2)

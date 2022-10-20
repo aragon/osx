@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import "../core/permission/IPermissionOracle.sol";
-import "./TestComponent.sol";
+import {IPermissionOracle} from "../core/permission/IPermissionOracle.sol";
+import {TestComponent} from "./TestComponent.sol";
 
 contract TestParameterScopingPermissionOracle is IPermissionOracle {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestComponent.addPermissioned.selector;
