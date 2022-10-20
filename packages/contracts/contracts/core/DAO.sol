@@ -207,12 +207,6 @@ contract DAO is
         override
         auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID)
     {
-        _setSignatureValidator(_signatureValidator);
-    }
-
-    /// @notice Sets the signature validator on the DAO and emits the associated event.
-    /// @param _signatureValidator The signature validator address.
-    function _setSignatureValidator(address _signatureValidator) internal {
         signatureValidator = IERC1271(_signatureValidator);
 
         emit SignatureValidatorSet({signatureValidator: _signatureValidator});

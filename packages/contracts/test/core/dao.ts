@@ -409,15 +409,6 @@ describe('DAO', function () {
         .withArgs(validatorAddress);
     });
 
-    // it('emits event when setting a new signature validator', async () => {
-    //   const ERC1271MockFactory = await ethers.getContractFactory('ERC1271Mock');
-    //   const erc1271Mock = await ERC1271MockFactory.deploy();
-
-    //   expect(await dao.setSignatureValidator(erc1271Mock.address))
-    //     .to.emit(dao, EVENTS.SignatureValidatorSet)
-    //     .withArgs(erc1271Mock.address);
-    // });
-
     it('should call the signature validator', async () => {
       const ERC1271MockFactory = await smock.mock('ERC1271Mock');
       const erc1271Mock = await ERC1271MockFactory.deploy();
