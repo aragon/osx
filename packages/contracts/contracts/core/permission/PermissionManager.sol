@@ -272,7 +272,11 @@ contract PermissionManager is Initializable {
         bytes32 _permissionId,
         IPermissionOracle _oracle
     ) internal {
-        if (_permissionId == ROOT_PERMISSION_ID && _who == ANY_ADDR) {
+        if (
+            _permissionId == ROOT_PERMISSION_ID &&
+            _who == ANY_ADDR &&
+            (address(_oracle) == ALLOW_FLAG || address(_oracle) == UNSET_FLAG)
+        ) {
             revert RootPermissionForAnyAddressDisallowed();
         }
 

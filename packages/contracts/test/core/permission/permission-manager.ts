@@ -38,7 +38,7 @@ interface ItemMultiTarget {
   permissionId: string;
 }
 
-describe('Core: PermissionManager', function () {
+describe.only('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let ownerSigner: SignerWithAddress;
   let otherSigner: SignerWithAddress;
@@ -89,6 +89,14 @@ describe('Core: PermissionManager', function () {
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
 
+    it('should revert if permission is ROOT on ANY_ADDR', async () => {
+      await expect(
+        pm.grant(pm.address, addressUint160Max, ROOT_PERMISSION_ID)
+      ).to.be.revertedWith(
+        customError('RootPermissionForAnyAddressDisallowed')
+      );
+    });
+
     it('should emit Granted', async () => {
       await expect(
         pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
@@ -106,14 +114,6 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           ADMIN_PERMISSION_ID
         )
-      );
-    });
-
-    it('should revert if permission is ROOT on ANY_ADDR', async () => {
-      await expect(
-        pm.grant(pm.address, addressUint160Max, ROOT_PERMISSION_ID)
-      ).to.be.revertedWith(
-        customError('RootPermissionForAnyAddressDisallowed')
       );
     });
 
