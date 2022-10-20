@@ -24,6 +24,7 @@ const EVENTS = {
   Withdrawn: 'Withdrawn',
   Executed: 'Executed',
   NativeTokenDeposited: 'NativeTokenDeposited',
+  SignatureValidatorSet: 'SignatureValidatorSet',
 };
 
 const PERMISSION_IDS = {
@@ -398,11 +399,25 @@ describe('DAO', function () {
       ).to.be.revertedWith('');
     });
 
-    it('should set validator', async () => {
+    it('should set validator and emits event', async () => {
       const validatorAddress = ethers.Wallet.createRandom().address;
-      await dao.setSignatureValidator(validatorAddress);
+      const tx = await dao.setSignatureValidator(validatorAddress);
+
       expect(await dao.signatureValidator()).to.be.eq(validatorAddress);
+
+      expect(tx)
+        .to.emit(dao, EVENTS.SignatureValidatorSet)
+        .withArgs(validatorAddress);
     });
+
+    // it('emits event when setting a new signature validator', async () => {
+    //   const ERC1271MockFactory = await ethers.getContractFactory('ERC1271Mock');
+    //   const erc1271Mock = await ERC1271MockFactory.deploy();
+
+    //   expect(await dao.setSignatureValidator(erc1271Mock.address))
+    //     .to.emit(dao, EVENTS.SignatureValidatorSet)
+    //     .withArgs(erc1271Mock.address);
+    // });
 
     it('should call the signature validator', async () => {
       const ERC1271MockFactory = await smock.mock('ERC1271Mock');
