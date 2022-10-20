@@ -11,7 +11,7 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {PluginSetup} from "../../plugin/PluginSetup.sol";
+import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
 import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
@@ -40,7 +40,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
     address public merkleMinterBase;
 
     /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter` clones.
-    MerkleDistributor public distributorBase;
+    address public distributorBase;
 
     struct TokenSettings {
         address addr;
@@ -57,24 +57,24 @@ contract ERC20VotingSetupV1 is PluginSetup {
     error WrongHelpersLength(uint256 length);
 
     constructor() {
-        distributorBase = new MerkleDistributor();
-        governanceERC20Base = address(new GovernanceERC20());
-        governanceWrappedERC20Base = address(new GovernanceWrappedERC20());
+        distributorBase = address(new MerkleDistributor());
+        governanceERC20Base = address(new GovernanceERC20(IDAO(address(0)), "", ""));
+        governanceWrappedERC20Base = address(
+            new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
+        );
         merkleMinterBase = address(new MerkleMinter());
         erc20VotingBase = new ERC20Voting();
     }
 
-    /// @inheritdoc PluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareInstallationDataABI() external pure returns (string memory) {
         return
             "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, address[] amounts) mintSettings)";
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
-        virtual
-        override
         returns (
             address plugin,
             address[] memory helpers,
@@ -126,7 +126,6 @@ contract ERC20VotingSetupV1 is PluginSetup {
             address merkleMinter = merkleMinterBase.clone();
             MerkleMinter(merkleMinter).initialize(
                 dao,
-                dao.getTrustedForwarder(),
                 IERC20MintableUpgradeable(token),
                 distributorBase
             );
@@ -150,7 +149,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         );
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 4 : 7);
+        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 6);
 
         // Set plugin permissions to be granted.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -171,14 +170,6 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
         permissions[2] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            NO_ORACLE,
-            erc20VotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
-
-        permissions[3] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
@@ -188,7 +179,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         if (tokenSettings.addr == address(0)) {
             bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
 
-            permissions[4] = PermissionLib.ItemMultiTarget(
+            permissions[3] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Grant,
                 token,
                 _dao,
@@ -196,7 +187,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 tokenMintPermission
             );
 
-            permissions[5] = PermissionLib.ItemMultiTarget(
+            permissions[4] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Grant,
                 token,
                 helpers[1],
@@ -204,7 +195,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 tokenMintPermission
             );
 
-            permissions[6] = PermissionLib.ItemMultiTarget(
+            permissions[5] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Grant,
                 helpers[1],
                 _dao,
@@ -214,24 +205,24 @@ contract ERC20VotingSetupV1 is PluginSetup {
         }
     }
 
-    /// @inheritdoc PluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallationDataABI() external pure returns (string memory) {
         return "";
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
         address[] calldata _helpers,
         bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
         uint256 helperLength = _helpers.length;
         if (helperLength == 1) {
-            permissions = new PermissionLib.ItemMultiTarget[](4);
+            permissions = new PermissionLib.ItemMultiTarget[](3);
         } else if (helperLength == 2) {
-            permissions = new PermissionLib.ItemMultiTarget[](7);
+            permissions = new PermissionLib.ItemMultiTarget[](6);
         } else {
             revert WrongHelpersLength({length: helperLength});
         }
@@ -255,14 +246,6 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
         permissions[2] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
-            _plugin,
-            _dao,
-            NO_ORACLE,
-            erc20VotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
-
-        permissions[3] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
@@ -275,7 +258,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
 
             bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
 
-            permissions[4] = PermissionLib.ItemMultiTarget(
+            permissions[3] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
                 token,
                 _dao,
@@ -283,7 +266,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 tokenMintPermission
             );
 
-            permissions[5] = PermissionLib.ItemMultiTarget(
+            permissions[4] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
                 token,
                 merkleMinter,
@@ -291,7 +274,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 tokenMintPermission
             );
 
-            permissions[6] = PermissionLib.ItemMultiTarget(
+            permissions[5] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
                 merkleMinter,
                 _dao,
@@ -301,7 +284,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         }
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view virtual override returns (address) {
         return address(erc20VotingBase);
     }

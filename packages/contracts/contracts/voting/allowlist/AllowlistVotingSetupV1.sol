@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {PluginSetup} from "../../plugin/PluginSetup.sol";
+import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {AllowlistVoting} from "./AllowlistVoting.sol";
 
 /// @title AllowlistVotingSetup
@@ -20,17 +20,15 @@ contract AllowlistVotingSetupV1 is PluginSetup {
         allowlistVotingBase = new AllowlistVoting();
     }
 
-    /// @inheritdoc PluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareInstallationDataABI() external pure returns (string memory) {
         return
             "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, address[] allowed)";
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
-        virtual
-        override
         returns (
             address plugin,
             address[] memory helpers,
@@ -65,7 +63,7 @@ contract AllowlistVotingSetupV1 is PluginSetup {
         helpers = new address[](0);
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](5);
+        permissions = new PermissionLib.ItemMultiTarget[](4);
 
         // Set permissions to be granted.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -94,14 +92,6 @@ contract AllowlistVotingSetupV1 is PluginSetup {
 
         permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            NO_ORACLE,
-            allowlistVotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
-
-        permissions[4] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
@@ -109,20 +99,20 @@ contract AllowlistVotingSetupV1 is PluginSetup {
         );
     }
 
-    /// @inheritdoc PluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallationDataABI() external pure returns (string memory) {
         return "";
     }
 
-    /// @inheritdoc PluginSetup
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
         address[] calldata,
         bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](5);
+        permissions = new PermissionLib.ItemMultiTarget[](4);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -151,14 +141,6 @@ contract AllowlistVotingSetupV1 is PluginSetup {
 
         permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
-            _plugin,
-            _dao,
-            NO_ORACLE,
-            allowlistVotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
-        );
-
-        permissions[4] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
@@ -166,8 +148,8 @@ contract AllowlistVotingSetupV1 is PluginSetup {
         );
     }
 
-    /// @inheritdoc PluginSetup
-    function getImplementationAddress() external view virtual override returns (address) {
+    /// @inheritdoc IPluginSetup
+    function getImplementationAddress() external view returns (address) {
         return address(allowlistVotingBase);
     }
 }
