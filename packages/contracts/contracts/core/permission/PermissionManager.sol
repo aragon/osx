@@ -274,7 +274,7 @@ contract PermissionManager is Initializable {
         if (
             _permissionId == ROOT_PERMISSION_ID &&
             _who == ANY_ADDR &&
-            (address(_oracle) == ALLOW_FLAG || address(_oracle) == UNSET_FLAG)
+            address(_oracle) == ALLOW_FLAG
         ) {
             revert RootPermissionForAnyAddressDisallowed();
         }

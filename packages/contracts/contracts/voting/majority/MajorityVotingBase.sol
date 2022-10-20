@@ -181,9 +181,9 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
     /// @notice Internal function to execute a vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
-        bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
-
         votes[_voteId].executed = true;
+        
+        bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         emit VoteExecuted(_voteId, execResults);
     }
