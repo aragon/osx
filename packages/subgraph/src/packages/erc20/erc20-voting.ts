@@ -5,8 +5,7 @@ import {
   VoteCreated,
   VoteExecuted,
   ConfigUpdated,
-  ERC20Voting,
-  TrustedForwarderSet
+  ERC20Voting
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
 import {
   Action,
@@ -153,9 +152,7 @@ export function handleVoteCast(event: VoteCast): void {
           )
         ) &&
         currentSupport.ge(
-          proposalEntity.supportRequiredPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+          proposalEntity.supportRequiredPct.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
     }
@@ -200,14 +197,6 @@ export function handleConfigUpdated(event: ConfigUpdated): void {
     packageEntity.participationRequiredPct =
       event.params.participationRequiredPct;
     packageEntity.minDuration = event.params.minDuration;
-    packageEntity.save();
-  }
-}
-
-export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
-  let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
-  if (packageEntity) {
-    packageEntity.trustedForwarder = event.params.trustedForwarder;
     packageEntity.save();
   }
 }

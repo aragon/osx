@@ -6,7 +6,8 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {DaoAuthorizable} from "../core/component/DaoAuthorizable.sol";
+import { IPlugin } from "../core/plugin/IPlugin.sol";
+import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginSetup} from "./PluginSetup.sol";
@@ -64,6 +65,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin is not upgradeable.
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
+
+    /// @notice Thrown if a contract does not support the `IPlugin` interface.
+    /// @param plugin The address of the contract.
+    error IPluginNotSupported(address plugin);
 
     /// @notice Thrown if two permissions hashes obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) don't match.
     error PermissionsHashMismatch();
@@ -177,13 +182,22 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
-    /// @return permissions The list of multi-targeted permission operations to be applied to the installing DAO.
+    /// @return plugin The prepared plugin contract address.
+    /// @return helpers The prepared list of helper contract addresses, that a plugin might require to operate.
+    /// @return permissions The prepared list of multi-targeted permission operations to be applied to the installing DAO.
     function prepareInstallation(
         address _dao,
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         bytes memory _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory) {
+    )
+        external
+        returns (
+            address plugin,
+            address[] memory helpers,
+            PermissionLib.ItemMultiTarget[] memory permissions
+        )
+    {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert EmptyPluginRepo();
@@ -193,11 +207,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
 
         // prepareInstallation
-        (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        ) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
+        (plugin, helpers, permissions) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // Important safety measure to include dao + plugin manager in the encoding.
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, plugin);
@@ -220,8 +230,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             helpers: helpers,
             permissions: permissions
         });
-
-        return permissions;
     }
 
     /// @notice Applies the permissions of a prepared installation to a DAO.
@@ -286,9 +294,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address[] calldata _currentHelpers,
         bytes memory _data
     ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
-        // check that plugin inherits from PluginUUPSUpgradeable
-        if (!_updateParams.plugin.supportsInterface(type(PluginUUPSUpgradeable).interfaceId)) {
-            revert PluginNonupgradeable({plugin: _updateParams.plugin});
+        // check that plugin inherits is PluginUUPSUpgradable.
+        if(!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+            revert IPluginNotSupported({plugin: _updateParams.plugin});
+        }
+
+        if(IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+             revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 
         // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.

@@ -7,8 +7,8 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpg
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "../component/CallbackHandler.sol";
-import "../IDAO.sol";
-import {DaoAuthorizableUpgradeable} from "./DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../IDAO.sol";
+import {DaoAuthorizableUpgradeable} from "./dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
 /// @title Component
 /// @author Aragon Association - 2021, 2022

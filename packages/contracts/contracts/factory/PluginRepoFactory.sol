@@ -120,6 +120,6 @@ contract PluginRepoFactory {
             )
         );
 
-        pluginRepoRegistry.registerPlugin(_name, address(pluginRepo));
+        pluginRepoRegistry.registerPluginRepo(_name, address(pluginRepo));
     }
 }

@@ -4,27 +4,27 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-import "../core/component/MetaTxComponent.sol";
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {IMerkleDistributor} from "./IMerkleDistributor.sol";
+import {IMerkleDistributor} from "./IMerkleDistributor.sol";
+import {IDAO} from "../core/IDAO.sol";
 
 /// @title MerkleDistributor
 /// @author Uniswap 2020
 /// @notice A component distributing claimable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens via a merkle tree.
-contract MerkleDistributor is MetaTxComponent {
+contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract
-    bytes4 internal constant MERKLE_DISTRIBUTOR_INTERFACE_ID =
-        this.claim.selector ^ this.unclaimedBalance.selector ^ this.isClaimed.selector;
+    /// @inheritdoc IMerkleDistributor
+    IERC20Upgradeable public override token;
 
-    /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
-    IERC20Upgradeable public token;
-
-    /// @notice The merkle root of the balance tree storing the claims.
-    bytes32 public merkleRoot;
+    /// @inheritdoc IMerkleDistributor
+    bytes32 public override merkleRoot;
 
     /// @notice A packed array of booleans containing the information who claimed.
     mapping(uint256 => uint256) private claimedBitMap;
@@ -39,48 +39,33 @@ contract MerkleDistributor is MetaTxComponent {
     /// @param amount The amount to be claimed.
     error TokenClaimInvalid(uint256 index, address to, uint256 amount);
 
-    /// @notice Emitted when tokens are claimed from the distributor.
-    /// @param index The index in the balance tree that was claimed.
-    /// @param to The address to which the tokens are send.
-    /// @param amount The claimed amount.
-    event Claimed(uint256 indexed index, address indexed to, uint256 amount);
-
-    /// @notice Initializes the component.
-    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
-    /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
-    /// @param _token A mintable [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
-    /// @param _merkleRoot The merkle root of the balance tree.
+    /// @inheritdoc IMerkleDistributor
     function initialize(
         IDAO _dao,
-        address _trustedForwarder,
         IERC20Upgradeable _token,
         bytes32 _merkleRoot
-    ) external initializer {
-        _registerInterface(MERKLE_DISTRIBUTOR_INTERFACE_ID);
-        __MetaTxComponent_init(_dao, _trustedForwarder);
-
+    ) external override initializer {
+        __PluginUUPSUpgradeable_init(_dao);
         token = _token;
         merkleRoot = _merkleRoot;
     }
 
-    /// @notice Returns the version of the GSN relay recipient.
-    /// @dev Describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.MerkleDistributor";
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IMerkleDistributor).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
-    /// @notice Claims tokens from the balance tree and sends it to an address.
-    /// @param _index The index in the balance tree to be claimed.
-    /// @param _to The receiving address.
-    /// @param _amount The amount of tokens.
-    /// @param _proof The merkle proof to be verified.
+    /// @inheritdoc IMerkleDistributor
     function claim(
         uint256 _index,
         address _to,
         uint256 _amount,
         bytes32[] calldata _proof
-    ) external {
+    ) external override {
         if (isClaimed(_index)) revert TokenAlreadyClaimed({index: _index});
         if (!_verifyBalanceOnTree(_index, _to, _amount, _proof))
             revert TokenClaimInvalid({index: _index, to: _to, amount: _amount});
@@ -91,18 +76,13 @@ contract MerkleDistributor is MetaTxComponent {
         emit Claimed(_index, _to, _amount);
     }
 
-    /// @notice Returns the amount of unclaimed tokens.
-    /// @param _index The index in the balance tree to be claimed.
-    /// @param _to The receiving address.
-    /// @param _amount The amount of tokens.
-    /// @param _proof The merkle proof to be verified.
-    /// @return The unclaimed amount.
+    /// @inheritdoc IMerkleDistributor
     function unclaimedBalance(
         uint256 _index,
         address _to,
         uint256 _amount,
         bytes32[] memory _proof
-    ) public view returns (uint256) {
+    ) public view override returns (uint256) {
         if (isClaimed(_index)) return 0;
         return _verifyBalanceOnTree(_index, _to, _amount, _proof) ? _amount : 0;
     }
@@ -123,10 +103,8 @@ contract MerkleDistributor is MetaTxComponent {
         return MerkleProof.verify(_proof, merkleRoot, node);
     }
 
-    /// @notice Checks if an index on the merkle tree is claimed.
-    /// @param _index The index in the balance tree to be claimed.
-    /// @return True if the index is claimed.
-    function isClaimed(uint256 _index) public view returns (bool) {
+    /// @inheritdoc IMerkleDistributor
+    function isClaimed(uint256 _index) public view override returns (bool) {
         uint256 claimedWord_index = _index / 256;
         uint256 claimedBit_index = _index % 256;
         uint256 claimedWord = claimedBitMap[claimedWord_index];
@@ -143,4 +121,7 @@ contract MerkleDistributor is MetaTxComponent {
             claimedBitMap[claimedWord_index] |
             (1 << claimedBit_index);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[47] private __gap;
 }

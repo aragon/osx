@@ -1,5 +1,24 @@
-import {PluginSetupProcessor} from '../../typechain';
-import {decodeEvent} from './event';
+import {ethers} from 'hardhat';
+import {findEvent} from './event';
+import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
+
+export async function deployPluginSetupProcessor(
+  managingDao: any,
+  pluginRepoRegistry: PluginRepoRegistry
+): Promise<PluginSetupProcessor> {
+  let psp: PluginSetupProcessor;
+
+  // PluginSetupProcessor
+  const PluginSetupProcessor = await ethers.getContractFactory(
+    'PluginSetupProcessor'
+  );
+  psp = await PluginSetupProcessor.deploy(
+    managingDao.address,
+    pluginRepoRegistry.address
+  );
+
+  return psp;
+}
 
 export async function prepareInstallation(
   pluginSetupProcessorContract: PluginSetupProcessor,
@@ -14,7 +33,7 @@ export async function prepareInstallation(
     pluginRepo,
     data
   );
-  const event = await decodeEvent(tx, 'InstallationPrepared');
+  const event = await findEvent(tx, 'InstallationPrepared');
   const {plugin, helpers, permissions} = event.args;
   return {
     plugin: plugin,

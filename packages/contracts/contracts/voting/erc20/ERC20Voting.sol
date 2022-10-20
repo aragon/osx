@@ -2,9 +2,11 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import "../majority/MajorityVotingBase.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
+import { IDAO } from '../../core/IDAO.sol';
+import { IMajorityVoting } from '../majority/IMajorityVoting.sol';
 
 /// @title ERC20Voting
 /// @author Aragon Association - 2021-2022
@@ -12,8 +14,7 @@ import "../majority/MajorityVotingBase.sol";
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract ERC20Voting is MajorityVotingBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
-        MAJORITY_VOTING_INTERFACE_ID ^ this.getVotingToken.selector;
+    bytes4 internal constant ERC20_VOTING_INTERFACE_ID = this.getVotingToken.selector ^ this.initialize.selector;
 
     /// @notice An [ERC20Votes](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Votes) compatible contract referencing the token being used for voting.
     ERC20VotesUpgradeable private votingToken;
@@ -37,7 +38,6 @@ contract ERC20Voting is MajorityVotingBase {
         uint64 _minDuration,
         ERC20VotesUpgradeable _token
     ) public initializer {
-        _registerInterface(ERC20_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
             _dao,
             _trustedForwarder,
@@ -49,17 +49,18 @@ contract ERC20Voting is MajorityVotingBase {
         votingToken = _token;
     }
 
+    /// @notice adds a IERC165 to check whether contract supports ERC20_VOTING_INTERFACE_ID or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or ERC20_VOTING_INTERFACE_ID
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == ERC20_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }
+
     /// @notice getter function for the voting token.
     /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface.
     /// @return ERC20VotesUpgradeable the token used for voting.
     function getVotingToken() public view returns (ERC20VotesUpgradeable) {
         return votingToken;
-    }
-
-    /// @notice Returns the version of the GSN relay recipient.
-    /// @dev Describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.ERC20Voting";
     }
 
     /// @inheritdoc IMajorityVoting
@@ -159,4 +160,9 @@ contract ERC20Voting is MajorityVotingBase {
         Vote storage vote_ = votes[_voteId];
         return _isVoteOpen(vote_) && votingToken.getPastVotes(_voter, vote_.snapshotBlock) > 0;
     }
+
+    /// @dev This empty reserved space is put in place to allow future versions to add new
+    /// variables without shifting down storage in the inheritance chain.
+    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    uint256[49] private __gap;
 }

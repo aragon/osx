@@ -7,8 +7,7 @@ import {
   ConfigUpdated,
   UsersAdded,
   UsersRemoved,
-  AllowlistVoting,
-  TrustedForwarderSet
+  AllowlistVoting
 } from '../../../generated/templates/AllowlistVoting/AllowlistVoting';
 import {
   Action,
@@ -142,9 +141,7 @@ export function handleVoteCast(event: VoteCast): void {
           )
         ) &&
         currentSupport.ge(
-          proposalEntity.supportRequiredPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+          proposalEntity.supportRequiredPct.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
     }
@@ -215,13 +212,5 @@ export function handleUsersRemoved(event: UsersRemoved): void {
     if (voterEntity) {
       store.remove('AllowlistVoter', user.toHexString());
     }
-  }
-}
-
-export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
-  let packageEntity = AllowlistPackage.load(event.address.toHexString());
-  if (packageEntity) {
-    packageEntity.trustedForwarder = event.params.trustedForwarder;
-    packageEntity.save();
   }
 }
