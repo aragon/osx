@@ -128,6 +128,10 @@ abstract contract IDAO {
     /// @param _signatureValidator The address of the signature validator.
     function setSignatureValidator(address _signatureValidator) external virtual;
 
+    /// @notice Emitted when the signature validator address is updated.
+    /// @param signatureValidator The address of the signature validator.
+    event SignatureValidatorSet(address signatureValidator);
+
     /// @notice Checks whether a signature is valid for the provided data.
     /// @param _hash The keccak256 hash of arbitrary length data signed on the behalf of `address(this)`.
     /// @param _signature Signature byte array associated with _data.
