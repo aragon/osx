@@ -19,10 +19,10 @@ import "./IDAO.sol";
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 contract DAO is
-    IDAO,
     Initializable,
-    ERC1271,
     ERC165StorageUpgradeable,
+    ERC1271,
+    IDAO,
     UUPSUpgradeable,
     PermissionManager,
     CallbackHandler
@@ -87,7 +87,7 @@ contract DAO is
         address _initialOwner,
         address _trustedForwarder
     ) external initializer {
-        _registerInterface(DAO_INTERFACE_ID);
+        _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(ERC1271).interfaceId);
 
         _setMetadata(_metadata);
@@ -261,4 +261,7 @@ contract DAO is
         _registerCallback(_callbackSelector, _magicNumber);
         emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[48] private __gap;
 }

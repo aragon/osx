@@ -369,8 +369,8 @@ contract PermissionManager is Initializable {
 
         return false;
     }
-
-    /// @notice A modifier to be used to check permissions on a target contract.
+    
+    /// @notice A private function to be used to check permissions on a target contract.
     /// @param _where The address of the target contract for which the permission is required.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(address _where, bytes32 _permissionId) private view {
@@ -410,4 +410,7 @@ contract PermissionManager is Initializable {
     {
         return keccak256(abi.encodePacked("IMMUTABLE", _where, _permissionId));
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[48] private __gap;
 }

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
 - Added `DaoAuthorizableClonable` using OpenZepplin initialization.
 - Added mocks and tests for the `Plugin` and `PluginSetup` classes.
@@ -32,9 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added deployment script for `managing-dao`, `plugin-registry` and `pluginRepo-factory`.
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
+- Added ENS support for `PluginRepoRegistry`.
 
 ### Changed
 
+- Refactored `DAOFactory`to use`PluginSetupProcessor`.
 - Refactored NatSpec comments and names for the contracts related to the `Plugin` and `PluginSetup`.
 - Renamed `PluginTransparentUpgradeable` to `PluginUpgradeable`.
 - Refactored `AdaptiveERC165` into an independent `CallbackHandler` contract and separated `ERC165` from it.

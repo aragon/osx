@@ -2,15 +2,18 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import "../tokens/GovernanceERC20.sol";
-import "../tokens/GovernanceWrappedERC20.sol";
-import "../core/DAO.sol";
-import "../tokens/MerkleMinter.sol";
-import "../tokens/MerkleDistributor.sol";
+import {GovernanceERC20} from "../tokens/GovernanceERC20.sol";
+import {GovernanceWrappedERC20} from "../tokens/GovernanceWrappedERC20.sol";
+import {DAO} from "../core/DAO.sol";
+import {IDAO} from "../core/IDAO.sol";
+import {IERC20MintableUpgradeable} from "../tokens/IERC20MintableUpgradeable.sol";
+import {MerkleMinter} from "../tokens/MerkleMinter.sol";
+import {MerkleDistributor} from "../tokens/MerkleDistributor.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022
@@ -101,9 +104,8 @@ contract TokenFactory {
         address merkleMinter = merkleMinterBase.clone();
         MerkleMinter(merkleMinter).initialize(
             _managingDao,
-            _managingDao.getTrustedForwarder(),
             IERC20MintableUpgradeable(token),
-            distributorBase
+            address(distributorBase)
         );
 
         // Emit the event
@@ -141,11 +143,14 @@ contract TokenFactory {
     }
 
     /// @notice Private helper method to set up the required base contracts on TokenFactory deployment.
-    // TODO: Why is this outside the constructor?
     function setupBases() private {
         distributorBase = new MerkleDistributor();
-        governanceERC20Base = address(new GovernanceERC20());
-        governanceWrappedERC20Base = address(new GovernanceWrappedERC20());
+        governanceERC20Base = address(
+            new GovernanceERC20(IDAO(address(0)), "baseName", "baseSymbol")
+        );
+        governanceWrappedERC20Base = address(
+            new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "baseName", "baseSymbol")
+        );
         merkleMinterBase = address(new MerkleMinter());
     }
 }
