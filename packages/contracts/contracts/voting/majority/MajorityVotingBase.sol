@@ -2,15 +2,26 @@
 
 pragma solidity 0.8.10;
 
-import "../../core/component/MetaTxComponent.sol";
-import "../../utils/TimeHelpers.sol";
-import "./IMajorityVoting.sol";
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+import {TimeHelpers} from "../../utils/TimeHelpers.sol";
+import {IMajorityVoting} from "./IMajorityVoting.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components.
 /// @dev This component implements the `IMajorityVoting` interface.
-abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHelpers {
+abstract contract MajorityVotingBase is
+    IMajorityVoting,
+    Initializable,
+    ERC165Upgradeable,
+    TimeHelpers,
+    PluginUUPSUpgradeable
+{
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
@@ -71,12 +82,24 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         uint64 _supportRequiredPct,
         uint64 _minDuration
     ) internal onlyInitializing {
-        _registerInterface(MAJORITY_VOTING_INTERFACE_ID);
+        __PluginUUPSUpgradeable_init(_dao);
+
         _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
 
-        __MetaTxComponent_init(_dao, _trustedForwarder);
-
         emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
+    }
+
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165Upgradeable, PluginUUPSUpgradeable)
+        returns (bool)
+    {
+        return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -284,4 +307,7 @@ abstract contract MajorityVotingBase is IMajorityVoting, MetaTxComponent, TimeHe
         supportRequiredPct = _supportRequiredPct;
         minDuration = _minDuration;
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[47] private __gap;
 }

@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
@@ -20,11 +22,13 @@ contract PluginSetupV1Mock is PluginSetup {
         // V1 version.
         pluginBase = new PluginUUPSUpgradeableV1Mock();
     }
-
-    function prepareInstallDataABI() external view virtual override returns (string memory) {
+    
+    /// @inheritdoc IPluginSetup
+    function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory)
         public
         virtual
@@ -32,7 +36,7 @@ contract PluginSetupV1Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
         // Deploy a helper.
@@ -54,17 +58,17 @@ contract PluginSetupV1Mock is PluginSetup {
         helpers[0] = helperAddr;
 
         // Set permissions.
-        permissions = new Permission.ItemMultiTarget[](2);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions = new PermissionLib.ItemMultiTarget[](2);
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             plugin,
             helperAddr,
             NO_ORACLE,
@@ -72,27 +76,29 @@ contract PluginSetupV1Mock is PluginSetup {
         );
     }
 
-    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {
-        permissions = new Permission.ItemMultiTarget[](2);
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+        permissions = new PermissionLib.ItemMultiTarget[](2);
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
             _plugin,
             _activeHelpers[0],
             NO_ORACLE,
@@ -100,6 +106,7 @@ contract PluginSetupV1Mock is PluginSetup {
         );
     }
 
+    /// @inheritdoc IPluginSetup
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
     }

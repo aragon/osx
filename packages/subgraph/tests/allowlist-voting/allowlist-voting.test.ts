@@ -6,7 +6,6 @@ import {
   handleVoteCast,
   handleVoteExecuted,
   handleUsersRemoved,
-  handleTrustedForwarderSet,
   handleConfigUpdated,
   _handleVoteCreated
 } from '../../src/packages/allowlist/allowlist-voting';
@@ -34,7 +33,6 @@ import {
   createNewVoteExecutedEvent,
   createNewUsersRemovedEvent,
   createNewVoteCreatedEvent,
-  createNewTrustedForwarderSetEvent,
   createNewConfigUpdatedEvent,
   getVotesLengthCall,
   createAllowlistProposalEntityState
@@ -170,7 +168,7 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   // the min participation is 0.5; 0.33 <= 0.5 => false
   // currently yes = 1
   // the min support is 0.5; 1 >= 0.5 => true
-  // is not executable 
+  // is not executable
   assert.fieldEquals('AllowlistProposal', proposal.id, 'executable', 'false');
   // check vote count
   assert.fieldEquals('AllowlistProposal', proposal.id, 'voteCount', '1');
@@ -206,7 +204,7 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   // the min participation is 0.5; 0.66 >= 0.5 => true
   // currently yes = 1, abstain = 1
   // the min support is 0.5; 0.5 >= 0.5 => true
-  // is executable 
+  // is executable
   assert.fieldEquals('AllowlistProposal', proposal.id, 'executable', 'true');
 
   assert.fieldEquals('AllowlistProposal', proposal.id, 'voteCount', '2');
@@ -326,30 +324,6 @@ test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
     userArray[0].toHexString()
   );
   assert.notInStore('AllowlistVoter', userArray[1].toHexString());
-
-  clearStore();
-});
-
-test('Run Allowlist Voting (handleTrustedForwarderSet) mappings with mock event', () => {
-  // create state
-  let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let allowlistVotingPackage = new AllowlistPackage(entityID);
-  allowlistVotingPackage.save();
-
-  // create event
-  let event = createNewTrustedForwarderSetEvent(ADDRESS_ZERO, VOTING_ADDRESS);
-
-  // handle event
-  handleTrustedForwarderSet(event);
-
-  // checks
-  assert.fieldEquals('AllowlistPackage', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'AllowlistPackage',
-    entityID,
-    'trustedForwarder',
-    Address.fromString(ADDRESS_ZERO).toHexString()
-  );
 
   clearStore();
 });

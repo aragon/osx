@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {Permission, PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
 // The second version of plugin manager.
@@ -20,10 +22,12 @@ contract PluginSetupV2Mock is PluginSetup {
         pluginBase = new PluginUUPSUpgradeableV2Mock();
     }
 
-    function prepareInstallDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address samePluginAddress)";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory)
         public
         virtual
@@ -31,7 +35,7 @@ contract PluginSetupV2Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            Permission.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
         address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
@@ -47,20 +51,20 @@ contract PluginSetupV2Mock is PluginSetup {
             )
         );
 
-        permissions = new Permission.ItemMultiTarget[](2);
+        permissions = new PermissionLib.ItemMultiTarget[](2);
         helpers = new address[](1);
 
         helpers[0] = helperAddr;
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             _dao,
             plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             plugin,
             helperAddr,
             NO_ORACLE,
@@ -68,21 +72,24 @@ contract PluginSetupV2Mock is PluginSetup {
         );
     }
 
-    function prepareUninstallDataABI() external view virtual override returns (string memory) {
+    /// @inheritdoc IPluginSetup
+    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
         address[] calldata _activeHelpers,
         bytes calldata _data
-    ) external virtual override returns (Permission.ItemMultiTarget[] memory permissions) {}
+    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {}
 
     function prepareUpdateDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
@@ -96,7 +103,7 @@ contract PluginSetupV2Mock is PluginSetup {
         returns (
             address[] memory activeHelpers,
             bytes memory initData,
-            Permission.ItemMultiTarget[] memory permissions
+            PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
         (_dao); // silence compiler warning
@@ -108,7 +115,7 @@ contract PluginSetupV2Mock is PluginSetup {
 
         address helperAddr = createERC1967Proxy(address(helperBase), bytes(""));
 
-        permissions = new Permission.ItemMultiTarget[](2);
+        permissions = new PermissionLib.ItemMultiTarget[](2);
         activeHelpers = new address[](_helpers.length + 1);
 
         for (uint256 i = 0; i < _helpers.length; i++) {
@@ -117,23 +124,24 @@ contract PluginSetupV2Mock is PluginSetup {
 
         activeHelpers[_helpers.length] = helperAddr;
 
-        permissions[0] = Permission.ItemMultiTarget(
-            Permission.Operation.Grant,
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
             helperAddr,
             _plugin,
             NO_ORACLE,
             keccak256("NEW_PERMISSION")
         );
 
-        permissions[1] = Permission.ItemMultiTarget(
-            Permission.Operation.Revoke,
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
             _plugin,
             activeHelpers[0],
             NO_ORACLE,
             keccak256("SETTINGS_PERMISSION")
         );
     }
-
+    
+    /// @inheritdoc IPluginSetup
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
     }

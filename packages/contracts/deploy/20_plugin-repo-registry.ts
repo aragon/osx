@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  await deploy('AragonPluginRegistry', {
+  await deploy('PluginRepoRegistry', {
     from: deployer,
     args: [],
     log: true,
@@ -30,4 +30,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 // func.runAtTheEnd = true;
-func.tags = ['AragonPluginRegistry'];
+func.tags = ['PluginRepoRegistry'];

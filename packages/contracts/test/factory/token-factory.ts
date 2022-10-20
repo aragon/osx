@@ -40,13 +40,13 @@ describe('Core: TokenFactory', () => {
     const GovernanceBaseFactory = await smock.mock<GovernanceERC20__factory>(
       'GovernanceERC20'
     );
-    governanceBase = await GovernanceBaseFactory.deploy();
+    governanceBase = await GovernanceBaseFactory.deploy(ethers.constants.AddressZero, "name", "symbol");
 
     const GovernanceWrappedBaseFactory =
       await smock.mock<GovernanceWrappedERC20__factory>(
         'GovernanceWrappedERC20'
       );
-    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy({});
+    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(ethers.constants.AddressZero, "name", "symbol");
 
     const MerkleMinterBaseFactory = await smock.mock<MerkleMinter__factory>(
       'MerkleMinter'

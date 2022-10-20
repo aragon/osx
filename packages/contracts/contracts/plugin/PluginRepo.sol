@@ -1,27 +1,27 @@
-/*
- * SPDX-License-Identifier:    MIT
- */
+// SPDX-License-Identifier:    MIT
 
 pragma solidity 0.8.10;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {PermissionManager} from "../core/permission/PermissionManager.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
+import {IPluginSetup} from './PluginSetup.sol';
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
-/// @notice The repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
+/// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
+//TODO Rename to PluginSetupRepo?
 contract PluginRepo is
-    IPluginRepo,
     Initializable,
     ERC165Upgradeable,
+    IPluginRepo,
     UUPSUpgradeable,
     PermissionManager
 {
@@ -103,7 +103,7 @@ contract PluginRepo is
         // the below approach aims to still return custom error which not possible with try/catch..
         // NOTE: also checks if _pluginSetup is a contract and reverts if not.
         bytes memory data = _pluginSetup.functionCall(
-            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(PluginSetup).interfaceId)
+            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(IPluginSetup).interfaceId)
         );
 
         // NOTE: if data contains 32 bytes that can't be decoded with uint256
@@ -213,7 +213,7 @@ contract PluginRepo is
     /// @notice Checks if a version bump is valid.
     /// @param _oldVersion The old semantic version number.
     /// @param _newVersion The new semantic version number.
-    /// @return bool True if the bump is valid.
+    /// @return bool Returns true if the bump is valid.
     function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
         public
         pure
@@ -254,8 +254,13 @@ contract PluginRepo is
         auth(address(this), UPGRADE_PERMISSION_ID)
     {}
 
-    /// @inheritdoc ERC165Upgradeable
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IPluginRepo).interfaceId || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IPluginRepo).interfaceId ||
+            interfaceId == type(UUPSUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 }

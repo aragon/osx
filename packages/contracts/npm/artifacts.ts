@@ -2,12 +2,12 @@
 
 // Core contracts
 import * as PermissionManager from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionManager.json';
-import * as BulkPermissionsLib from '../artifacts/contracts/core/permission/BulkPermissionsLib.sol/BulkPermissionsLib.json';
+import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionLib.sol/PermissionLib.json';
 import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
 import * as Component from '../artifacts/contracts/core/component/Component.sol/Component.json';
-import * as DaoAuthorizable from '../artifacts/contracts/core/component/DaoAuthorizableConstructable.sol/DaoAuthorizableConstructable.json';
+import * as DaoAuthorizable from '../artifacts/contracts/core/component/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
 
 // Factories
 import * as DAOFactory from '../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json';
@@ -28,7 +28,7 @@ import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/Me
 
 export default {
   PermissionManager,
-  BulkPermissionsLib,
+  PermissionLib,
   IPermissionOracle,
   DAO,
   IDAO,

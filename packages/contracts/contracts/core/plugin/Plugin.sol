@@ -2,24 +2,29 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {DaoAuthorizableConstructable} from "../component/DaoAuthorizableConstructable.sol";
+import {DaoAuthorizable} from "../component/dao-authorizable/DaoAuthorizable.sol";
 import {IDAO} from "../IDAO.sol";
+import {IPlugin} from "./IPlugin.sol";
 
 /// @title Plugin
 /// @author Aragon Association - 2022
-/// @notice An abstract, non-upgradeDaoAuthorizableConstructableo inherit from when creating a plugin being deployed via the `new` keyword.
-abstract contract Plugin is ERC165, DaoAuthorizableConstructable {
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 public constant PLUGIN_INTERFACE_ID = type(Plugin).interfaceId;
-
+/// @notice An abstract, non-upgradeable inherit from when creating a plugin being deployed via the `new` keyword.
+abstract contract Plugin is ERC165, IPlugin, DaoAuthorizable {
     /// @notice Constructs the plugin by storing the associated DAO.
-    /// @param _dao The DAODaoAuthorizableConstructable
-    constructor(IDAO _dao) DaoAuthorizableConstructable(_dao) {}
+    /// @param _dao The DAO contract.
+    constructor(IDAO _dao) DaoAuthorizable(_dao) {}
+    
+    /// @inheritdoc IPlugin
+    function pluginType() public pure override returns(PluginType) {
+        return PluginType.Constructable;
+    }
 
-    /// @inheritdoc ERC165
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == PLUGIN_INTERFACE_ID || super.supportsInterface(interfaceId);
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return _interfaceId == type(IPlugin).interfaceId || super.supportsInterface(_interfaceId);
     }
 }

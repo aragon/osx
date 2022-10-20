@@ -14,7 +14,7 @@ contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
         uint256 _num,
         address _helper
     ) external initializer {
-        __DaoAuthorizableUpgradeable_init(_dao);
+        __PluginUUPSUpgradeable_init(_dao);
         num = _num;
         helper = _helper;
     }

@@ -2,10 +2,13 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/Checkpoints.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/Checkpoints.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
-import "../../utils/UncheckedMath.sol";
-import "../majority/MajorityVotingBase.sol";
+import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
+import {IDAO} from "../../core/IDAO.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title AllowlistVoting
 /// @author Aragon Association - 2021-2022.
@@ -16,7 +19,6 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
-        MAJORITY_VOTING_INTERFACE_ID ^
             this.addAllowedUsers.selector ^
             this.removeAllowedUsers.selector ^
             this.isAllowed.selector ^
@@ -60,7 +62,6 @@ contract AllowlistVoting is MajorityVotingBase {
         uint64 _minDuration,
         address[] calldata _allowed
     ) public initializer {
-        _registerInterface(ALLOWLIST_VOTING_INTERFACE_ID);
         __MajorityVotingBase_init(
             _dao,
             _trustedForwarder,
@@ -73,10 +74,11 @@ contract AllowlistVoting is MajorityVotingBase {
         _addAllowedUsers(_allowed);
     }
 
-    /// @notice Returns the version of the GSN relay recipient.
-    /// @dev Describes the version and contract for GSN compatibility.
-    function versionRecipient() external view virtual override returns (string memory) {
-        return "0.0.1+opengsn.recipient.AllowlistVoting";
+    /// @notice adds a IERC165 to check whether contract supports ALLOWLIST_VOTING_INTERFACE_ID or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or ALLOWLIST_VOTING_INTERFACE_ID
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == ALLOWLIST_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @notice Adds new users to the allowlist.
@@ -232,4 +234,9 @@ contract AllowlistVoting is MajorityVotingBase {
             _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
         }
     }
+
+    /// @dev This empty reserved space is put in place to allow future versions to add new
+    /// variables without shifting down storage in the inheritance chain.
+    /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+    uint256[48] private __gap;
 }
