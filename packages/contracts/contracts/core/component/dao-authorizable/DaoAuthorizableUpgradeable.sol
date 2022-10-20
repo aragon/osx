@@ -4,10 +4,9 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
 
-import {IDAO} from "../IDAO.sol";
-import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
+import {IDAO} from "../../IDAO.sol";
+import {DaoAuthorizableBaseUpgradeable} from "./bases/DaoAuthorizableBaseUpgradeable.sol";
 
 /// @title DaoAuthorizableUpgradeable
 /// @author Aragon Association - 2022
@@ -16,7 +15,7 @@ import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
 abstract contract DaoAuthorizableUpgradeable is
     Initializable,
     ContextUpgradeable,
-    DaoAuthorizableBase
+    DaoAuthorizableBaseUpgradeable
 {
     /// @notice Initializes the contract by setting the associated DAO.
     /// @param _dao The associated DAO address.
@@ -24,28 +23,6 @@ abstract contract DaoAuthorizableUpgradeable is
         dao = _dao;
     }
 
-    /// @inheritdoc ContextUpgradeable
-    function _msgSender()
-        internal
-        view
-        virtual
-        override(Context, ContextUpgradeable)
-        returns (address)
-    {
-        return ContextUpgradeable._msgSender();
-    }
-
-    /// @inheritdoc ContextUpgradeable
-    function _msgData()
-        internal
-        view
-        virtual
-        override(Context, ContextUpgradeable)
-        returns (bytes calldata)
-    {
-        return ContextUpgradeable._msgData();
-    }
-
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[49] private __gap;
+    uint256[50] private __gap;
 }

@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
 // The second version of plugin manager.
@@ -21,10 +22,12 @@ contract PluginSetupV2Mock is PluginSetup {
         pluginBase = new PluginUUPSUpgradeableV2Mock();
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "(address samePluginAddress)";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory)
         public
         virtual
@@ -69,10 +72,12 @@ contract PluginSetupV2Mock is PluginSetup {
         );
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
@@ -84,6 +89,7 @@ contract PluginSetupV2Mock is PluginSetup {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
@@ -134,7 +140,8 @@ contract PluginSetupV2Mock is PluginSetup {
             keccak256("SETTINGS_PERMISSION")
         );
     }
-
+    
+    /// @inheritdoc IPluginSetup
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
     }

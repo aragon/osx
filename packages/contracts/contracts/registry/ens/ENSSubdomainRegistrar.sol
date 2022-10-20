@@ -8,7 +8,7 @@ import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {DaoAuthorizableUpgradeable} from "../../core/component/DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "../../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
 /// @title ENSSubdomainRegistrar
 /// @author Aragon Association - 2022
@@ -98,4 +98,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     {
         resolver = address(_resolver);
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[47] private __gap;
 }

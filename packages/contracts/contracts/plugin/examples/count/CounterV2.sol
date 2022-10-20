@@ -35,7 +35,7 @@ contract CounterV2 is PluginUUPSUpgradeable {
         uint256 _count,
         uint256 _newVariable
     ) external reinitializer(2) {
-        __PluginUpgradeable_init(_dao);
+        __PluginUUPSUpgradeable_init(_dao);
 
         count = _count;
 
@@ -61,8 +61,10 @@ contract CounterV2 is PluginUUPSUpgradeable {
 
     /// @notice Executes something on the DAO.
     function execute() public {
-        // IDAO dao = getDao();
         // In order to do this, Count needs permission on the dao (EXEC_ROLE)
         //dao.execute(...)
     }
+
+    /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
+    uint256[47] private __gap;
 }

@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   PluginSetupProcessor,
+  PluginCloneableMock,
   PluginSetupV1Mock,
   PluginSetupV2Mock,
   PluginSetupV1MockBad,
@@ -78,6 +79,7 @@ describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
+  let pluginCloneableMock: PluginCloneableMock;
   let pluginSetupV1Mock: PluginSetupV1Mock;
   let pluginSetupMockRepoAddress: any;
   let pluginSetupV2Mock: PluginSetupV2Mock;
@@ -94,6 +96,12 @@ describe('Plugin Setup Processor', function () {
   });
 
   before(async () => {
+    // Directly deploy PluginCloneableMock
+    const _PluginCloneableMock = await ethers.getContractFactory(
+      'PluginCloneableMock'
+    );
+    pluginCloneableMock = await _PluginCloneableMock.deploy();
+
     // PluginSetupV1
     const PluginSetupV1Mock = await ethers.getContractFactory(
       'PluginSetupV1Mock'
@@ -676,10 +684,10 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('PrepareUpdate', function () {
-      it('reverts if plugin does not support `PluginUUPSUpgradeable` interface', async () => {
+      it('reverts if plugin does not support `IPlugin` interface', async () => {
         const pluginSetupRepoAddr = ADDRESS_TWO;
         const plugin = AddressZero;
-        const pluginUpdateParams = {
+        let pluginUpdateParams = {
           plugin: plugin,
           oldPluginSetup: pluginSetupV1Mock.address,
           pluginSetupRepo: pluginSetupRepoAddr,
@@ -695,7 +703,28 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginNonupgradeable', plugin));
+        ).to.be.revertedWith(customError('IPluginNotSupported', plugin));
+      });
+
+      it('reverts if plugin supports IPlugin, but is non upgradable', async () => {
+        let pluginUpdateParams = {
+          plugin: pluginCloneableMock.address,
+          pluginSetupRepo: ADDRESS_TWO,
+          currentPluginSetup: AddressZero,
+          newPluginSetup: AddressZero,
+        };
+
+        const helpers = [AddressZero];
+        await expect(
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            helpers,
+            EMPTY_DATA
+          )
+        ).to.be.revertedWith(
+          customError('PluginNonupgradeable', pluginCloneableMock.address)
+        );
       });
 
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {

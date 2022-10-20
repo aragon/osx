@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
+import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
@@ -21,11 +22,13 @@ contract PluginSetupV1Mock is PluginSetup {
         // V1 version.
         pluginBase = new PluginUUPSUpgradeableV1Mock();
     }
-
+    
+    /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory)
         public
         virtual
@@ -73,10 +76,12 @@ contract PluginSetupV1Mock is PluginSetup {
         );
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUninstallationDataABI() external view virtual override returns (string memory) {
         return "";
     }
 
+    /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
         address _plugin,
@@ -101,6 +106,7 @@ contract PluginSetupV1Mock is PluginSetup {
         );
     }
 
+    /// @inheritdoc IPluginSetup
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
     }
