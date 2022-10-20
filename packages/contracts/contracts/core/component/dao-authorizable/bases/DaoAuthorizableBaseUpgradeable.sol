@@ -9,7 +9,7 @@ import {IDAO} from "../../../IDAO.sol";
 
 /// @title DaoAuthorizableBase
 /// @author Aragon Association - 2022
-/// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
+/// @notice An abstract contract providing a meta transaction compatible modifier for upgradeable contracts to authorize function calls through an associated DAO.
 abstract contract DaoAuthorizableBaseUpgradeable is ContextUpgradeable {
     /// @notice The associated DAO managing the permissions of inheriting contracts.
     IDAO internal dao;

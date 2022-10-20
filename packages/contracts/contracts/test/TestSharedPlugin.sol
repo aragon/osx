@@ -9,9 +9,9 @@ import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoUnauthorized} from "../utils/auth.sol";
 import {IDAO} from "../core/IDAO.sol";
 
-/// @notice A test component that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
+/// @notice A test Plugin that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
 /// @dev This is realized by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager.
-contract TestSharedComponent is PluginUUPSUpgradeable {
+contract TestSharedPlugin is PluginUUPSUpgradeable {
     bytes32 public constant ID_GATED_ACTION_PERMISSION_ID = keccak256("ID_GATED_ACTION_PERMISSION");
 
     mapping(uint256 => IDAO) public ownedIds;
@@ -59,7 +59,7 @@ contract TestSharedComponent is PluginUUPSUpgradeable {
     }
 }
 
-/// @notice The oracle associated with `TestSharedComponent`
+/// @notice The oracle associated with `TestSharedPlugin`
 contract TestIdGatingOracle is IPermissionOracle {
     uint256 public allowedId;
 

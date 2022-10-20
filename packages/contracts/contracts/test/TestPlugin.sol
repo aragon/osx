@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import { IDAO } from '../core/IDAO.sol';
 
-contract TestComponent is PluginUUPSUpgradeable {
+contract TestPlugin is PluginUUPSUpgradeable {
     bytes32 public constant DO_SOMETHING_PERMISSION_ID = keccak256("DO_SOMETHING_PERMISSION");
 
     function initialize(IDAO _dao) external initializer {
