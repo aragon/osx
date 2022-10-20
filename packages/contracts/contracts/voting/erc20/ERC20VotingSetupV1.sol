@@ -354,7 +354,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
     /// @dev it's important to check first whether token is a contract.
     /// @param token address
     function _isERC20(address token) private view returns (bool) {
-        (bool success, ) = token.staticcall{gas: gasleft()}(
+        (bool success, ) = token.staticcall(
             abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
         );
         return success;
