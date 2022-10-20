@@ -54,6 +54,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
     }
 
     error MintArrayLengthMismatch(uint256 receiversArrayLength, uint256 amountsArrayLength);
+    error WrongHelpersLength(uint256 length);
 
     constructor() {
         distributorBase = new MerkleDistributor();
@@ -99,7 +100,6 @@ contract ERC20VotingSetupV1 is PluginSetup {
         }
 
         address token = tokenSettings.addr;
-        bool isTokenGovernance = false;
 
         // Prepare helpers
         helpers = new address[](token != address(0) ? 1 : 2);
@@ -115,8 +115,6 @@ contract ERC20VotingSetupV1 is PluginSetup {
                     tokenSettings.name,
                     tokenSettings.symbol
                 );
-            } else {
-                isTokenGovernance = true;
             }
 
             helpers[0] = token;
@@ -152,38 +150,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         );
 
         // Prepare permissions
-        if (tokenSettings.addr != address(0)) {
-            permissions = new PermissionLib.ItemMultiTarget[](4);
-        } else {
-            permissions = new PermissionLib.ItemMultiTarget[](7);
-
-            bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
-            bytes32 merkleMintPermission = MerkleMinter(helpers[1]).MERKLE_MINT_PERMISSION_ID();
-
-            permissions[4] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
-                token,
-                _dao,
-                NO_ORACLE,
-                tokenMintPermission
-            );
-
-            permissions[5] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
-                token,
-                helpers[1],
-                NO_ORACLE,
-                tokenMintPermission
-            );
-
-            permissions[6] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
-                helpers[1],
-                _dao,
-                NO_ORACLE,
-                merkleMintPermission
-            );
-        }
+        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 4 : 7);
 
         // Set plugin permissions to be granted.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -217,6 +184,34 @@ contract ERC20VotingSetupV1 is PluginSetup {
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        if (tokenSettings.addr == address(0)) {
+            bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
+
+            permissions[4] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
+                token,
+                _dao,
+                NO_ORACLE,
+                tokenMintPermission
+            );
+
+            permissions[5] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
+                token,
+                helpers[1],
+                NO_ORACLE,
+                tokenMintPermission
+            );
+
+            permissions[6] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
+                helpers[1],
+                _dao,
+                NO_ORACLE,
+                MerkleMinter(helpers[1]).MERKLE_MINT_PERMISSION_ID()
+            );
+        }
     }
 
     /// @inheritdoc PluginSetup
@@ -229,19 +224,81 @@ contract ERC20VotingSetupV1 is PluginSetup {
         address _dao,
         address _plugin,
         address[] calldata _helpers,
-        bytes calldata _data
+        bytes calldata
     ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](5);
+        uint256 helperLength = _helpers.length;
+        if (helperLength == 1) {
+            permissions = new PermissionLib.ItemMultiTarget[](4);
+        } else if (helperLength == 2) {
+            permissions = new PermissionLib.ItemMultiTarget[](7);
+        } else {
+            revert WrongHelpersLength({length: helperLength});
+        }
 
         // Set permissions to be Revoked.
-        permissions[4] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
+            _plugin,
+            _dao,
+            NO_ORACLE,
+            erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
+        );
+
+        permissions[1] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
+            _plugin,
+            _dao,
+            NO_ORACLE,
+            erc20VotingBase.UPGRADE_PERMISSION_ID()
+        );
+
+        permissions[2] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Revoke,
+            _plugin,
+            _dao,
+            NO_ORACLE,
+            erc20VotingBase.SET_TRUSTED_FORWARDER_PERMISSION_ID()
+        );
+
+        permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        if (helperLength == 2) {
+            address token = _helpers[0];
+            address merkleMinter = _helpers[1];
+
+            bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
+
+            permissions[4] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Revoke,
+                token,
+                _dao,
+                NO_ORACLE,
+                tokenMintPermission
+            );
+
+            permissions[5] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Revoke,
+                token,
+                merkleMinter,
+                NO_ORACLE,
+                tokenMintPermission
+            );
+
+            permissions[6] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Revoke,
+                merkleMinter,
+                _dao,
+                NO_ORACLE,
+                MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID()
+            );
+        }
     }
 
     /// @inheritdoc PluginSetup
