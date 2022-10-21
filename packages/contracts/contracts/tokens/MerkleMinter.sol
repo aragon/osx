@@ -13,6 +13,7 @@ import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {IMerkleMinter} from "./IMerkleMinter.sol";
+import {createProxy} from "../utils/Proxy.sol";
 
 /// @title MerkleMinter
 /// @author Aragon Association
@@ -31,13 +32,13 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     IERC20MintableUpgradeable public override token;
 
     /// @inheritdoc IMerkleMinter
-    address public override distributorBase;
+    IMerkleDistributor public override distributorBase;
 
     /// @inheritdoc IMerkleMinter
     function initialize(
         IDAO _dao,
         IERC20MintableUpgradeable _token,
-        address _distributorBase
+        IMerkleDistributor _distributorBase
     ) external override initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
@@ -46,7 +47,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     }
 
     /// @inheritdoc IMerkleMinter
-    function changeDistributorBase(address _distributorBase)
+    function changeDistributorBase(IMerkleDistributor _distributorBase)
         external
         override
         auth(CHANGE_DISTRIBUTOR_PERMISSION_ID)
@@ -74,18 +75,21 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
         bytes calldata _tree,
         bytes calldata _context
     ) external override auth(MERKLE_MINT_PERMISSION_ID) returns (IMerkleDistributor distributor) {
-        address distributorAddr = distributorBase.clone();
-        MerkleDistributor(distributorAddr).initialize(
-            dao,
-            IERC20Upgradeable(address(token)),
-            _merkleRoot
+        address distributorAddr = createProxy(
+            address(distributorBase),
+            abi.encodeWithSelector(
+                distributorBase.initialize.selector,
+                dao,
+                IERC20Upgradeable(address(token)),
+                _merkleRoot
+            )
         );
 
         token.mint(distributorAddr, _totalAmount);
 
         emit MerkleMinted(distributorAddr, _merkleRoot, _totalAmount, _tree, _context);
 
-        return MerkleDistributor(distributorAddr);
+        return IMerkleDistributor(distributorAddr);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

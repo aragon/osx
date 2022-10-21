@@ -18,7 +18,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
   console.log('Granting permissions');
-  const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
+  const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
+    'REGISTER_PLUGIN_REPO_PERMISSION'
+  );
   const pluginRepoRegistryAddress = await getContractAddress(
     'PluginRepoRegistry',
     hre
@@ -29,12 +31,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   console.log(
-    `Granting the REGISTER_PERMISSION_ID permission to the pluginRepoFactory (${pluginRepoFactoryAddress})`
+    `Granting the REGISTER_PLUGIN_REPO_PERMISSION_ID permission to the pluginRepoFactory (${pluginRepoFactoryAddress})`
   );
   grantTx = await managingDaoContract.grant(
     pluginRepoRegistryAddress,
     pluginRepoFactoryAddress,
-    REGISTER_PERMISSION_ID
+    REGISTER_PLUGIN_REPO_PERMISSION_ID
   );
   await grantTx.wait();
 
@@ -53,6 +55,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   grantTx = await managingDaoContract.grant(
     ensSubdomainRegistrarAddress,
     daoRegistryAddress,
+    REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+  );
+  await grantTx.wait();
+
+  console.log(
+    `Granting the REGISTER_ENS_SUBDOMAIN_PERMISSION_ID permission to the pluginRepoRegistry (${pluginRepoRegistryAddress})`
+  );
+  grantTx = await managingDaoContract.grant(
+    ensSubdomainRegistrarAddress,
+    pluginRepoRegistryAddress,
     REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
   );
   await grantTx.wait();
