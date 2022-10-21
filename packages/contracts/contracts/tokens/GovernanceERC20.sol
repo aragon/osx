@@ -71,7 +71,6 @@ contract GovernanceERC20 is
         _mint(to, amount);
     }
 
-    // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
     /// @inheritdoc ERC20VotesUpgradeable
     function _afterTokenTransfer(
@@ -86,13 +85,4 @@ contract GovernanceERC20 is
         }
     }
 
-    /// @inheritdoc ERC20VotesUpgradeable
-    function _mint(address to, uint256 amount) internal override {
-        super._mint(to, amount);
-    }
-
-    /// @inheritdoc ERC20VotesUpgradeable
-    function _burn(address account, uint256 amount) internal override {
-        super._burn(account, amount);
-    }
 }

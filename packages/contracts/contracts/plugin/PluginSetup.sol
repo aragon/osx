@@ -7,6 +7,7 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
+import {createERC1967Proxy as createERC1967} from "../utils/Proxy.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
@@ -38,12 +39,12 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
     /// @param _data The data to initialize the storage of the proxy contract.
-    /// @return proxy The address of the created proxy contract.
+    /// @return address The address of the created proxy contract.
     function createERC1967Proxy(address _implementation, bytes memory _data)
         internal
-        returns (address payable proxy)
+        returns (address)
     {
-        proxy = payable(address(new ERC1967Proxy(_implementation, _data)));
+        return createERC1967(_implementation, _data);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.

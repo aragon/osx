@@ -6,7 +6,6 @@ import * as PermissionLib from '../artifacts/contracts/core/permission/Permissio
 import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
-import * as Component from '../artifacts/contracts/core/component/Component.sol/Component.json';
 import * as DaoAuthorizable from '../artifacts/contracts/core/component/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
 
 // Factories
@@ -32,7 +31,6 @@ export default {
   IPermissionOracle,
   DAO,
   IDAO,
-  Component,
   DaoAuthorizable,
   DAOFactory,
   TokenFactory,
