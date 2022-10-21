@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-/// @notice Free function to create a ERC1967Proxy contract based on the passed base contract address.
+/// @notice Free function to create a [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract based on the passed base contract address.
 /// @param _logic The base contract address.
 /// @param _data The constructor arguments for this contract.
 /// @return address The address of the proxy contract created.
