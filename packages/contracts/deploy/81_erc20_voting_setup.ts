@@ -9,11 +9,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  await deploy('ERC20VotingSetupV1', {
+  await deploy('ERC20VotingSetup', {
     from: deployer,
     args: [],
     log: true,
   });
 };
 export default func;
-func.tags = ['ERC20VotingSetupV1'];
+func.tags = ['ERC20VotingSetup'];

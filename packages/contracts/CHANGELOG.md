@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `AllowlistVotingSetupV1` and `ERC20VotingSetupV1`.
+- Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
 - Added `DaoAuthorizableClonable` using OpenZepplin initialization.

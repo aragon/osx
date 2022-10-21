@@ -24,7 +24,7 @@ import {ERC20Voting} from "./ERC20Voting.sol";
 /// @title AllowlistVotingSetup
 /// @author Aragon Association - 2022
 /// @notice The setup contract of the `ERC20Voting` plugin.
-contract ERC20VotingSetupV1 is PluginSetup {
+contract ERC20VotingSetup is PluginSetup {
     using Address for address;
     using Clones for address;
     using ERC165Checker for address;

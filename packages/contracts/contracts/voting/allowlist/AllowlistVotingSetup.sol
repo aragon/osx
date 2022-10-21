@@ -11,7 +11,7 @@ import {AllowlistVoting} from "./AllowlistVoting.sol";
 /// @title AllowlistVotingSetup
 /// @author Aragon Association - 2022
 /// @notice The setup contract of the `AllowlistVoting` plugin.
-contract AllowlistVotingSetupV1 is PluginSetup {
+contract AllowlistVotingSetup is PluginSetup {
     /// @notice The address of `AllowlistVoting` plugin logic contract to be used in creating proxy contracts.
     AllowlistVoting private immutable allowlistVotingBase;
 
