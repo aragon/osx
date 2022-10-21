@@ -438,7 +438,7 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should not allow when where is ANY_ADDR', async () => {
+    it('reverts if `_where` is `ANY_ADDR`', async () => {
       await expect(
         pm.freeze(addressUint160Max, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
