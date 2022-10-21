@@ -15,7 +15,7 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 );
 
 const addressZero = ethers.constants.AddressZero;
-const addressUint160Max = "0xffffffffffffffffffffffffffffffffffffffff";
+const ANY_ADDR = "0xffffffffffffffffffffffffffffffffffffffff";
 
 enum Operation {
   Grant,
