@@ -29,6 +29,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
     using Clones for address;
     using ERC165Checker for address;
 
+    /// @notice The address of the `ERC20Voting` base contract.
     ERC20Voting private immutable erc20VotingBase;
 
     /// @notice The address zero to be used as oracle address for permissions.
@@ -146,7 +147,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 // it's simply ERC20 which gets checked by _isERC20
                 // Currently, not a satisfiable check..
                 (!supportedIds[0] && !supportedIds[1] && !supportedIds[2]) ||
-                // If token supports IERC20Upgradeable, but neither 
+                // If token supports IERC20Upgradeable, but neither
                 // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
                 (supportedIds[0] && !supportedIds[1] && !supportedIds[2])
             ) {
@@ -197,7 +198,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         );
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 6);
+        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 7);
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -240,17 +241,25 @@ contract ERC20VotingSetupV1 is PluginSetup {
             permissions[4] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Grant,
                 token,
-                helpers[1],
+                helpers[1], // merkleMinter
                 NO_ORACLE,
                 tokenMintPermission
             );
 
             permissions[5] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Grant,
-                helpers[1],
+                helpers[1], // merkleMinter
                 _dao,
                 NO_ORACLE,
                 MerkleMinter(helpers[1]).MERKLE_MINT_PERMISSION_ID()
+            );
+
+            permissions[6] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
+                helpers[1], // merkleMinter
+                _dao,
+                NO_ORACLE,
+                MerkleMinter(helpers[1]).UPGRADE_PERMISSION_ID()
             );
         }
     }
@@ -272,7 +281,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         if (helperLength == 1) {
             permissions = new PermissionLib.ItemMultiTarget[](3);
         } else if (helperLength == 2) {
-            permissions = new PermissionLib.ItemMultiTarget[](6);
+            permissions = new PermissionLib.ItemMultiTarget[](7);
         } else {
             revert WrongHelpersArrayLength({length: helperLength});
         }
@@ -331,6 +340,14 @@ contract ERC20VotingSetupV1 is PluginSetup {
                 NO_ORACLE,
                 MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID()
             );
+
+            permissions[6] = PermissionLib.ItemMultiTarget(
+                PermissionLib.Operation.Grant,
+                merkleMinter,
+                _dao,
+                NO_ORACLE,
+                MerkleMinter(merkleMinter).UPGRADE_PERMISSION_ID()
+            );
         }
     }
 
@@ -350,7 +367,7 @@ contract ERC20VotingSetupV1 is PluginSetup {
         return token.getSupportedInterfaces(interfaceIds);
     }
 
-    /// @notice unsatisfiably determines if contract is ERC20.. 
+    /// @notice unsatisfiably determines if contract is ERC20..
     /// @dev it's important to check first whether token is a contract.
     /// @param token address
     function _isERC20(address token) private view returns (bool) {
