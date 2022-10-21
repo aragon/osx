@@ -10,6 +10,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
+  const ensSubdomainRegistrarAddress = await getContractAddress(
+    'ENSSubdomainRegistrar',
+    hre
+  );
 
   await deploy('PluginRepoRegistry', {
     from: deployer,
@@ -22,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managingDAOAddress],
+          args: [managingDAOAddress, ensSubdomainRegistrarAddress],
         },
       },
     },
