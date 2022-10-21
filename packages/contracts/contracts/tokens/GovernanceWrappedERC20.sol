@@ -98,7 +98,6 @@ contract GovernanceWrappedERC20 is
         return ERC20WrapperUpgradeable.withdrawTo(account, amount);
     }
 
-    // The functions below are overrides required by Solidity.
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
     /// @inheritdoc ERC20VotesUpgradeable
     function _afterTokenTransfer(
