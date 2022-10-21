@@ -13,7 +13,7 @@ import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {IMerkleMinter} from "./IMerkleMinter.sol";
-import {createProxy} from "../utils/Proxy.sol";
+import {createERC1967Proxy} from "../utils/Proxy.sol";
 
 /// @title MerkleMinter
 /// @author Aragon Association
@@ -75,7 +75,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
         bytes calldata _tree,
         bytes calldata _context
     ) external override auth(MERKLE_MINT_PERMISSION_ID) returns (IMerkleDistributor distributor) {
-        address distributorAddr = createProxy(
+        address distributorAddr = createERC1967Proxy(
             address(distributorBase),
             abi.encodeWithSelector(
                 distributorBase.initialize.selector,
