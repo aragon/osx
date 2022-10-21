@@ -71,13 +71,11 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
-        address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration
