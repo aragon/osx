@@ -34,7 +34,6 @@ describe('MajorityVotingMock', function () {
   ) {
     return votingBase.initializeMock(
       daoMock.address,
-      ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
       minDuration

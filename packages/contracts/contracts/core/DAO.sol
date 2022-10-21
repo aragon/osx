@@ -8,8 +8,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import "./erc1271/ERC1271.sol";
 import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
@@ -20,8 +20,8 @@ import "./IDAO.sol";
 /// @dev Public API of the Aragon DAO framework.
 contract DAO is
     Initializable,
+    IERC1271,
     ERC165StorageUpgradeable,
-    ERC1271,
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
@@ -55,7 +55,7 @@ contract DAO is
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
-    ERC1271 signatureValidator;
+    IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
@@ -88,7 +88,7 @@ contract DAO is
         address _trustedForwarder
     ) external initializer {
         _registerInterface(type(IDAO).interfaceId);
-        _registerInterface(type(ERC1271).interfaceId);
+        _registerInterface(type(IERC1271).interfaceId);
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
@@ -211,14 +211,16 @@ contract DAO is
         override
         auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID)
     {
-        signatureValidator = ERC1271(_signatureValidator);
+        signatureValidator = IERC1271(_signatureValidator);
+
+        emit SignatureValidatorSet({signatureValidator: _signatureValidator});
     }
 
     /// @inheritdoc IDAO
     function isValidSignature(bytes32 _hash, bytes memory _signature)
         external
         view
-        override(IDAO, ERC1271)
+        override(IDAO, IERC1271)
         returns (bytes4)
     {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number

@@ -19,7 +19,7 @@ contract AllowlistVoting is MajorityVotingBase {
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
-            this.addAllowedUsers.selector ^
+        this.addAllowedUsers.selector ^
             this.removeAllowedUsers.selector ^
             this.isAllowed.selector ^
             this.allowedUserCount.selector;
@@ -49,14 +49,12 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote.
     /// @param _allowed The allowed addresses.
     function initialize(
         IDAO _dao,
-        address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration,
@@ -64,7 +62,6 @@ contract AllowlistVoting is MajorityVotingBase {
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
-            _trustedForwarder,
             _participationRequiredPct,
             _supportRequiredPct,
             _minDuration

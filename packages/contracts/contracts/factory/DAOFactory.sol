@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {DAORegistry} from "../registry/DAORegistry.sol";
 import {DAO} from "../core/DAO.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
-import {createProxy} from "../utils/Proxy.sol";
+import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 
@@ -13,7 +13,7 @@ import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
 /// @author Aragon Association - 2022
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
-    /// @notice The DAO base contract, to be used for creating new `DAO`s via `createProxy` function.
+    /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.
     address public immutable daoBase;
 
     /// @notice The DAO registry listing the `DAO` contracts created via this contract.
@@ -131,7 +131,7 @@ contract DAOFactory {
     /// @param _daoSettings The trusted forwarder, name and metadata hash of the DAO it creates.
     function _createDAO(DAOSettings calldata _daoSettings) internal returns (DAO dao) {
         // create dao
-        dao = DAO(createProxy(daoBase, bytes("")));
+        dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
         dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder);

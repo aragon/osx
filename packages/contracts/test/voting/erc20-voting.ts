@@ -47,7 +47,6 @@ describe('ERC20Voting', function () {
   ) {
     return voting.initialize(
       daoMock.address,
-      ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
       minDuration,

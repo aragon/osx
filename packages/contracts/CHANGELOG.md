@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
 - Added `DaoAuthorizableClonable` using OpenZepplin initialization.
@@ -59,6 +60,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed order of deployment scripts.
 - Changed folder structure of tests.
 - Refactored event names and NatSpec comments.
+- Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
+- Renamed `createProxy` function to `createERC1967Proxy`.
+- Replaces custom ERC1271 interface with Openzeppelins interface.
 
 ### Removed
 
@@ -67,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed restrictions regarding plugin's address in `PluginRepo`.
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
 - Removed `ERC165Registry`.
+- Removed `Component` and `MetaTxComponent`.
 
 ## v0.2.0-alpha
 

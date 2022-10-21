@@ -14,6 +14,7 @@ import {IDAO} from "../core/IDAO.sol";
 import {IERC20MintableUpgradeable} from "../tokens/IERC20MintableUpgradeable.sol";
 import {MerkleMinter} from "../tokens/MerkleMinter.sol";
 import {MerkleDistributor} from "../tokens/MerkleDistributor.sol";
+import {IMerkleDistributor} from "../tokens/IMerkleDistributor.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022
@@ -38,7 +39,7 @@ contract TokenFactory {
     /// @param token [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token address.
     /// @param minter The `MerkleMinter` contract minting the new token.
     /// @param distributor The `MerkleDistibutor` contract distributing the new token.
-    event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, MerkleDistributor distributor);
+    event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, IMerkleDistributor distributor);
     
     /// @notice Emitted when an existing token is passed and wrapped one is created.
     /// @param token GovernanceWrappedERC20 token address
@@ -105,14 +106,14 @@ contract TokenFactory {
         MerkleMinter(merkleMinter).initialize(
             _managingDao,
             IERC20MintableUpgradeable(token),
-            address(distributorBase)
+            distributorBase
         );
 
         // Emit the event
         emit TokenCreated(
             IERC20Upgradeable(token),
             MerkleMinter(merkleMinter),
-            MerkleDistributor(distributorBase)
+            distributorBase
         );
 
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();

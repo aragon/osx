@@ -44,7 +44,6 @@ describe('AllowlistVoting', function () {
   ) {
     return voting.initialize(
       daoMock.address,
-      ethers.constants.AddressZero,
       participationRequired,
       supportRequired,
       minDuration,

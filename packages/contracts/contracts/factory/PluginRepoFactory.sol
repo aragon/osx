@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import "../utils/Proxy.sol";
-import "../registry/PluginRepoRegistry.sol";
+import {createERC1967Proxy} from "../utils/Proxy.sol";
+import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
@@ -114,7 +114,7 @@ contract PluginRepoFactory {
         }
 
         pluginRepo = PluginRepo(
-            createProxy(
+            createERC1967Proxy(
                 pluginRepoBase,
                 abi.encodeWithSelector(PluginRepo.initialize.selector, _initialOwner)
             )
