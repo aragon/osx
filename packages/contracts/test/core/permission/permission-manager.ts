@@ -89,7 +89,7 @@ describe('Core: PermissionManager', function () {
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
 
-    it('should revert if permission is ROOT on ANY_ADDR', async () => {
+    it('reverts if the `ROOT_PERMISSION_ID permission is granted with `_who = ANY_ADDR`', async () => {
       await expect(
         pm.grant(pm.address, addressUint160Max, ROOT_PERMISSION_ID)
       ).to.be.revertedWith(
