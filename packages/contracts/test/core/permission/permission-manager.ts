@@ -38,7 +38,7 @@ interface ItemMultiTarget {
   permissionId: string;
 }
 
-describe.only('Core: PermissionManager', function () {
+describe('Core: PermissionManager', function () {
   let pm: PermissionManagerTest;
   let ownerSigner: SignerWithAddress;
   let otherSigner: SignerWithAddress;
