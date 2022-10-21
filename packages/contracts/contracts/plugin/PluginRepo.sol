@@ -117,16 +117,16 @@ contract PluginRepo is
 
         uint256 currentVersionIndex = nextVersionIndex - 1;
 
-        uint16[3] memory currentSematicVersion;
+        uint16[3] memory currentSemanticVersion;
 
         if (currentVersionIndex > 0) {
             Version storage currentVersion = versions[currentVersionIndex];
-            currentSematicVersion = currentVersion.semanticVersion;
+            currentSemanticVersion = currentVersion.semanticVersion;
         }
 
-        if (!isValidBump(currentSematicVersion, _newSemanticVersion)) {
+        if (!isValidBump(currentSemanticVersion, _newSemanticVersion)) {
             revert InvalidBump({
-                currentVersion: currentSematicVersion,
+                currentVersion: currentSemanticVersion,
                 nextVersion: _newSemanticVersion
             });
         }
