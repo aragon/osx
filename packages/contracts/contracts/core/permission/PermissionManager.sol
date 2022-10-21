@@ -270,11 +270,7 @@ contract PermissionManager is Initializable {
         bytes32 _permissionId,
         IPermissionOracle _oracle
     ) internal {
-        if (
-            _permissionId == ROOT_PERMISSION_ID &&
-            _who == ANY_ADDR &&
-            address(_oracle) == ALLOW_FLAG
-        ) {
+        if (_permissionId == ROOT_PERMISSION_ID && (_who == ANY_ADDR || _where == ANY_ADDR)) {
             revert RootPermissionForAnyAddressDisallowed();
         }
 
@@ -368,7 +364,7 @@ contract PermissionManager is Initializable {
 
         return false;
     }
-    
+
     /// @notice A private function to be used to check permissions on a target contract.
     /// @param _where The address of the target contract for which the permission is required.
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
