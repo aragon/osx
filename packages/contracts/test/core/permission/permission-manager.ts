@@ -91,7 +91,7 @@ describe('Core: PermissionManager', function () {
 
     it('reverts if the `ROOT_PERMISSION_ID permission is granted with `_who = ANY_ADDR`', async () => {
       await expect(
-        pm.grant(pm.address, addressUint160Max, ROOT_PERMISSION_ID)
+        pm.grant(pm.address, ANY_ADDR, ROOT_PERMISSION_ID)
       ).to.be.revertedWith(
         customError('RootPermissionForAnyAddressDisallowed')
       );
