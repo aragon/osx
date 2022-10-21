@@ -440,7 +440,7 @@ describe('Core: PermissionManager', function () {
 
     it('reverts if `_where` is `ANY_ADDR`', async () => {
       await expect(
-        pm.freeze(addressUint160Max, ADMIN_PERMISSION_ID)
+        pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)
       ).to.be.revertedWith(
         customError('FreezeOnAnyAddressDisallowed')
       );
