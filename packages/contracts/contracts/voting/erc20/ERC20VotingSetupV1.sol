@@ -36,16 +36,16 @@ contract ERC20VotingSetupV1 is PluginSetup {
     address private constant NO_ORACLE = address(0);
 
     /// @notice The address of the `GovernanceERC20` base contract.
-    address public governanceERC20Base;
+    address public immutable governanceERC20Base;
 
     /// @notice The address of the `GovernanceWrappedERC20` base contract.
-    address public governanceWrappedERC20Base;
+    address public immutable governanceWrappedERC20Base;
 
     /// @notice The address of the `MerkleMinter` base contract.
-    address public merkleMinterBase;
+    address public immutable merkleMinterBase;
 
     /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter`.
-    address public distributorBase;
+    address public immutable distributorBase;
 
     struct TokenSettings {
         address addr;
