@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
 - Added `DaoAuthorizableClonable` using OpenZepplin initialization.
@@ -61,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored event names and NatSpec comments.
 - Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
 - Renamed `createProxy` function to `createERC1967Proxy`.
+- Replaces custom ERC1271 interface with Openzeppelins interface.
 
 ### Removed
 

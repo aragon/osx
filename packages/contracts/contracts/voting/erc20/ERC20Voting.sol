@@ -5,8 +5,8 @@ pragma solidity 0.8.10;
 import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
-import { IDAO } from '../../core/IDAO.sol';
-import { IMajorityVoting } from '../majority/IMajorityVoting.sol';
+import {IDAO} from "../../core/IDAO.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title ERC20Voting
 /// @author Aragon Association - 2021-2022
@@ -14,7 +14,8 @@ import { IMajorityVoting } from '../majority/IMajorityVoting.sol';
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract ERC20Voting is MajorityVotingBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ERC20_VOTING_INTERFACE_ID = this.getVotingToken.selector ^ this.initialize.selector;
+    bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
+        this.getVotingToken.selector ^ this.initialize.selector;
 
     /// @notice An [ERC20Votes](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Votes) compatible contract referencing the token being used for voting.
     ERC20VotesUpgradeable private votingToken;
@@ -25,14 +26,12 @@ contract ERC20Voting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _trustedForwarder The address of the trusted forwarder required for meta transactions.
     /// @param _participationRequiredPct The minimal required participation in percent.
     /// @param _supportRequiredPct The minimal required support in percent.
     /// @param _minDuration The minimal duration of a vote.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
-        address _trustedForwarder,
         uint64 _participationRequiredPct,
         uint64 _supportRequiredPct,
         uint64 _minDuration,
@@ -40,7 +39,6 @@ contract ERC20Voting is MajorityVotingBase {
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
-            _trustedForwarder,
             _participationRequiredPct,
             _supportRequiredPct,
             _minDuration
