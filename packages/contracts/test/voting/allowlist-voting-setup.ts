@@ -16,7 +16,12 @@ enum Op {
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
-const EMPTY_BYTES_32 = `0x${'00'.repeat(32)}`;
+
+// minimum bytes for `AllowlistVotingSetup` data param.
+const MINIMUM_DATA = abiCoder.encode(
+  ['uint64', 'uint64', 'uint64', 'address[]'],
+  [1, 1, 1, []]
+);
 
 // Permissions
 const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
@@ -76,7 +81,7 @@ describe('AllowlistVotingSetup', function () {
       );
     });
 
-    it('fails if data is empty', async () => {
+    it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         allowlistVotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
       ).to.be.reverted;
@@ -84,9 +89,16 @@ describe('AllowlistVotingSetup', function () {
       await expect(
         allowlistVotingSetup.prepareInstallation(
           targetDao.address,
-          EMPTY_BYTES_32
+          MINIMUM_DATA.substring(0, MINIMUM_DATA.length - 1)
         )
       ).to.be.reverted;
+
+      await expect(
+        allowlistVotingSetup.prepareInstallation(
+          targetDao.address,
+          MINIMUM_DATA
+        )
+      ).not.to.be.reverted;
     });
 
     it('correctly returns plugin, helpers and permissions', async () => {
@@ -98,15 +110,10 @@ describe('AllowlistVotingSetup', function () {
         nonce,
       });
 
-      const data = abiCoder.encode(
-        ['uint64', 'uint64', 'uint64', 'address[]'],
-        [1, 2, 3, [ownerAddress]]
-      );
-
       const {plugin, helpers, permissions} =
         await allowlistVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
-          data
+          MINIMUM_DATA
         );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
@@ -142,6 +149,53 @@ describe('AllowlistVotingSetup', function () {
           EXECUTE_PERMISSION_ID,
         ],
       ]);
+    });
+
+    it('correctly setups the plugin', async () => {
+      const daoAddress = targetDao.address;
+      const participationRequiredPct = 1;
+      const supportRequiredPct = 2;
+      const minDuration = 3;
+      const allowed = [ownerAddress];
+
+      const data = abiCoder.encode(
+        ['uint64', 'uint64', 'uint64', 'address[]'],
+        [participationRequiredPct, supportRequiredPct, minDuration, allowed]
+      );
+
+      const nonce = await ethers.provider.getTransactionCount(
+        allowlistVotingSetup.address
+      );
+      const anticipatedPluginAddress = ethers.utils.getContractAddress({
+        from: allowlistVotingSetup.address,
+        nonce,
+      });
+
+      await allowlistVotingSetup.prepareInstallation(daoAddress, data);
+
+      const factory = await ethers.getContractFactory('AllowlistVoting');
+      const allowlistVotingContract = factory.attach(anticipatedPluginAddress);
+      const latestBlock = await ethers.provider.getBlock('latest');
+
+      expect(await allowlistVotingContract.getDAO()).to.be.equal(daoAddress);
+      expect(
+        await allowlistVotingContract.participationRequiredPct()
+      ).to.be.equal(participationRequiredPct);
+      expect(await allowlistVotingContract.supportRequiredPct()).to.be.equal(
+        supportRequiredPct
+      );
+      expect(await allowlistVotingContract.minDuration()).to.be.equal(
+        minDuration
+      );
+
+      await ethers.provider.send('evm_mine', []);
+
+      expect(
+        await allowlistVotingContract.allowedUserCount(latestBlock.number)
+      ).to.be.equal(allowed.length);
+      expect(
+        await allowlistVotingContract.isAllowed(allowed[0], latestBlock.number)
+      ).to.be.equal(true);
     });
   });
 
