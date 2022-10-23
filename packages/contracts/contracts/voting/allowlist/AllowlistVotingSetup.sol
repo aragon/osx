@@ -54,7 +54,6 @@ contract AllowlistVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 AllowlistVoting.initialize.selector,
                 dao,
-                dao.getTrustedForwarder(),
                 participationRequiredPct,
                 supportRequiredPct,
                 minDuration,
