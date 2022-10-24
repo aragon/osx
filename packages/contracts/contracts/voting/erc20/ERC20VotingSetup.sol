@@ -215,7 +215,7 @@ contract ERC20VotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.UPGRADE_PERMISSION_ID()
+            erc20VotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -259,7 +259,7 @@ contract ERC20VotingSetup is PluginSetup {
                 helpers[1], // merkleMinter
                 _dao,
                 NO_ORACLE,
-                MerkleMinter(helpers[1]).UPGRADE_PERMISSION_ID()
+                MerkleMinter(helpers[1]).UPGRADE_PLUGIN_PERMISSION_ID()
             );
         }
     }
@@ -300,7 +300,7 @@ contract ERC20VotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.UPGRADE_PERMISSION_ID()
+            erc20VotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -346,7 +346,7 @@ contract ERC20VotingSetup is PluginSetup {
                 merkleMinter,
                 _dao,
                 NO_ORACLE,
-                MerkleMinter(merkleMinter).UPGRADE_PERMISSION_ID()
+                MerkleMinter(merkleMinter).UPGRADE_PLUGIN_PERMISSION_ID()
             );
         }
     }

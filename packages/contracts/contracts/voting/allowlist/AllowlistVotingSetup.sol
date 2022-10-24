@@ -91,7 +91,7 @@ contract AllowlistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.UPGRADE_PERMISSION_ID()
+            allowlistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -141,7 +141,7 @@ contract AllowlistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.UPGRADE_PERMISSION_ID()
+            allowlistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[3] = PermissionLib.ItemMultiTarget(

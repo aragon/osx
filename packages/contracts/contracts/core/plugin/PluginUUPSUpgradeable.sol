@@ -19,17 +19,16 @@ abstract contract PluginUUPSUpgradeable is
     UUPSUpgradeable,
     DaoAuthorizableUpgradeable
 {
-
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 
     /// @inheritdoc IPlugin
-    function pluginType() public pure override returns(PluginType) {
+    function pluginType() public pure override returns (PluginType) {
         return PluginType.UUPS;
     }
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
-    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
-    
+    bytes32 public constant UPGRADE_PLUGIN_PERMISSION_ID = keccak256("UPGRADE_PLUGIN_PERMISSION");
+
     /// @notice Initializes the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     function __PluginUUPSUpgradeable_init(IDAO _dao) internal virtual onlyInitializing {
@@ -53,8 +52,13 @@ abstract contract PluginUUPSUpgradeable is
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
+    /// @dev The caller must have the `UPGRADE_PLUGIN_PERMISSION_ID` permission.
+    function _authorizeUpgrade(address)
+        internal
+        virtual
+        override
+        auth(UPGRADE_PLUGIN_PERMISSION_ID)
+    {}
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[50] private __gap;

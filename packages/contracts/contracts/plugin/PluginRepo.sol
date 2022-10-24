@@ -11,7 +11,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
-import {IPluginSetup} from './PluginSetup.sol';
+import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
@@ -37,7 +37,7 @@ contract PluginRepo is
     bytes32 public constant CREATE_VERSION_PERMISSION_ID = keccak256("CREATE_VERSION_PERMISSION");
 
     /// @notice The ID of the permission required to call the `createVersion` function.
-    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
+    bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
     /// @notice The index of the next version to be created.
     uint256 internal nextVersionIndex;
@@ -103,7 +103,10 @@ contract PluginRepo is
         // the below approach aims to still return custom error which not possible with try/catch..
         // NOTE: also checks if _pluginSetup is a contract and reverts if not.
         bytes memory data = _pluginSetup.functionCall(
-            abi.encodeWithSelector(ERC165.supportsInterface.selector, type(IPluginSetup).interfaceId)
+            abi.encodeWithSelector(
+                ERC165.supportsInterface.selector,
+                type(IPluginSetup).interfaceId
+            )
         );
 
         // NOTE: if data contains 32 bytes that can't be decoded with uint256
@@ -246,12 +249,12 @@ contract PluginRepo is
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    /// @dev The caller must have the `UPGRADE_REPO_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
         internal
         virtual
         override
-        auth(address(this), UPGRADE_PERMISSION_ID)
+        auth(address(this), UPGRADE_REPO_PERMISSION_ID)
     {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.

@@ -32,7 +32,7 @@ const APPLY_INSTALLATION_PERMISSION_ID = ethers.utils.id(
 );
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const WITHDRAW_PERMISSION_ID = ethers.utils.id('WITHDRAW_PERMISSION');
-const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
+const UPGRADE_DAO_PERMISSION_ID = ethers.utils.id('UPGRADE_DAO_PERMISSION');
 const SET_SIGNATURE_VALIDATOR_PERMISSION_ID = ethers.utils.id(
   'SET_SIGNATURE_VALIDATOR_PERMISSION'
 );
@@ -356,7 +356,7 @@ describe('DAOFactory: ', function () {
     await expect(tx)
       .to.emit(daoContract, EVENTS.Granted)
       .withArgs(
-        UPGRADE_PERMISSION_ID,
+        UPGRADE_DAO_PERMISSION_ID,
         daoFactory.address,
         dao,
         dao,

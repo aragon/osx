@@ -28,7 +28,7 @@ const EVENTS = {
 };
 
 const PERMISSION_IDS = {
-  UPGRADE_PERMISSION_ID: ethers.utils.id('UPGRADE_PERMISSION'),
+  UPGRADE_DAO_PERMISSION_ID: ethers.utils.id('UPGRADE_DAO_PERMISSION'),
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
   WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION'),
@@ -78,7 +78,7 @@ describe('DAO', function () {
       dao.grant(
         dao.address,
         ownerAddress,
-        PERMISSION_IDS.UPGRADE_PERMISSION_ID
+        PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
       ),
       dao.grant(
         dao.address,
