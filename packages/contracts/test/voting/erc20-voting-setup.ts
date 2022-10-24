@@ -41,7 +41,7 @@ const merkleMintToAmountArray = [1];
 const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
   'SET_CONFIGURATION_PERMISSION'
 );
-const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
+const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
