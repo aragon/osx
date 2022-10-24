@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Transferred the core docs from aragon/builders-portal to this repository.
 - Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
