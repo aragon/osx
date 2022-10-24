@@ -28,8 +28,10 @@ jobs:
           ref: staging
           path: builders-portal
           token: ${{ secrets.ARABOT_PAT }}
-      - name: Copy docs
-        run: cp -R packages/contracts/docs/core/* $GITHUB_WORKSPACE/builders-portal/docs/core/
+      - name: Remove the docs/core folder in the builders-portal
+        run: rm -rf $GITHUB_WORKSPACE/builders-portal/docs/core
+      - name: Copy the docs/core folder to the builders-portal
+        run: cp -R packages/contracts/docs/core $GITHUB_WORKSPACE/builders-portal/docs/core
       - name: Get short commit hash
         id: hash
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
