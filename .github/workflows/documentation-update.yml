@@ -29,7 +29,7 @@ jobs:
           path: builders-portal
           token: ${{ secrets.ARABOT_PAT }}
       - name: Copy docs
-        run: cp -R packages/contracts/docs/generated/* $GITHUB_WORKSPACE/builders-portal/docs/smart-contracts/
+        run: cp -R packages/contracts/docs/core/* $GITHUB_WORKSPACE/builders-portal/docs/core/
       - name: Get short commit hash
         id: hash
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
@@ -38,11 +38,11 @@ jobs:
         with:
           token: ${{ secrets.ARABOT_PAT }}
           path: builders-portal
-          commit-message: "Update smart-contract docs by commit ${{ steps.hash.outputs.sha_short }}"
-          committer: "Arabot <arabot-1@users.noreply.github.com>"
-          branch: patch/smart-contracts-docs
+          commit-message: 'Update core docs by commit ${{ steps.hash.outputs.sha_short }}'
+          committer: 'Arabot <arabot-1@users.noreply.github.com>'
+          branch: patch/core-docs
           delete-branch: true
           title: Updates docs for smart contracts
-          body: "Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))"
+          body: 'Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))'
           reviewers: ${{ github.actor }}
           team-reviewers: devrel

@@ -72,7 +72,7 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   docgen: {
-    outputDir: 'docs/generated',
+    outputDir: 'docs/core/03-reference-guide',
     theme: 'markdown',
     pages: 'files',
     templates: 'docs/templates',
