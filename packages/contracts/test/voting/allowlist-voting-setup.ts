@@ -17,7 +17,7 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-// minimum bytes for `AllowlistVotingSetup` data param.
+// minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(
   ['uint64', 'uint64', 'uint64', 'address[]'],
   [1, 1, 1, []]
