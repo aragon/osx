@@ -89,7 +89,7 @@ contract ERC20VotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, address[] amounts) mintSettings)";
+            "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -156,7 +156,7 @@ contract ERC20VotingSetup is PluginSetup {
                 // GovernanceWrappedERC20 in order to make the token
                 // include governance functionality.
                 GovernanceWrappedERC20(token).initialize(
-                    IERC20Upgradeable(token),
+                    IERC20Upgradeable(tokenSettings.addr),
                     tokenSettings.name,
                     tokenSettings.symbol
                 );
@@ -189,7 +189,6 @@ contract ERC20VotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 ERC20Voting.initialize.selector,
                 dao,
-                dao.getTrustedForwarder(),
                 participationRequiredPct,
                 supportRequiredPct,
                 minDuration,
@@ -342,7 +341,7 @@ contract ERC20VotingSetup is PluginSetup {
             );
 
             permissions[6] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
+                PermissionLib.Operation.Revoke,
                 merkleMinter,
                 _dao,
                 NO_ORACLE,
