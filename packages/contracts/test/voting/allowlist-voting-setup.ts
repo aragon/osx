@@ -150,7 +150,7 @@ describe('AllowlistVotingSetup', function () {
       ]);
     });
 
-    it('correctly setups the plugin', async () => {
+    it('correctly sets up the plugin', async () => {
       const daoAddress = targetDao.address;
       const participationRequiredPct = 1;
       const supportRequiredPct = 2;

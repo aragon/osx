@@ -34,7 +34,7 @@ const supportRequiredPct = 2;
 const minDuration = 3;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
-const merkleMintToAddressAddress = [ethers.Wallet.createRandom().address];
+const merkleMintToAddressArray = [ethers.Wallet.createRandom().address];
 const merkleMintToAmountArray = [1];
 
 // Permissions
@@ -440,7 +440,7 @@ describe('ERC20VotingSetup', function () {
           supportRequiredPct,
           minDuration,
           [AddressZero, tokenName, tokenSymbol],
-          [merkleMintToAddressAddress, merkleMintToAmountArray],
+          [merkleMintToAddressArray, merkleMintToAmountArray],
         ]
       );
 
