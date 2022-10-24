@@ -230,7 +230,7 @@ describe('ERC20VotingSetup', function () {
       ]);
     });
 
-    it('correctly setup `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied', async () => {
+    it('correctly sets up `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied', async () => {
       const nonce = await ethers.provider.getTransactionCount(
         erc20VotingSetup.address
       );
@@ -424,7 +424,7 @@ describe('ERC20VotingSetup', function () {
       ]);
     });
 
-    it('correctly setups the plugin and helpers, when a token address is not passed', async () => {
+    it('correctly sets up the plugin and helpers, when a token address is not passed', async () => {
       const daoAddress = targetDao.address;
 
       const data = abiCoder.encode(
@@ -569,7 +569,7 @@ describe('ERC20VotingSetup', function () {
           EMPTY_DATA
         );
 
-      const essencialPermissions = [
+      const essentialPermissions = [
         [
           Op.Revoke,
           plugin,
@@ -594,7 +594,7 @@ describe('ERC20VotingSetup', function () {
       ];
 
       expect(permissions1.length).to.be.equal(3);
-      expect(permissions1).to.deep.equal([...essencialPermissions]);
+      expect(permissions1).to.deep.equal([...essentialPermissions]);
 
       const permissions2 =
         await erc20VotingSetup.callStatic.prepareUninstallation(
@@ -606,7 +606,7 @@ describe('ERC20VotingSetup', function () {
 
       expect(permissions2.length).to.be.equal(7);
       expect(permissions2).to.deep.equal([
-        ...essencialPermissions,
+        ...essentialPermissions,
         [
           Op.Revoke,
           token.address,
