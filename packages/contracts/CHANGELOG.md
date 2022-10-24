@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `UPGRADE_PERMISSION` to be more specific (e.g., to `UPGRADE_DAO_PERMISSION` and `UPGRADE_PLUGIN_PERMISSION`).
 - Refactored `DAOFactory`to use`PluginSetupProcessor`.
 - Refactored NatSpec comments and names for the contracts related to the `Plugin` and `PluginSetup`.
 - Renamed `PluginTransparentUpgradeable` to `PluginUpgradeable`.
