@@ -117,7 +117,7 @@ contract PluginRepo is
         uint16[3] memory currentSematicVersion;
 
         if (currentVersionIndex > 0) {
-            Version memory currentVersion = versions[currentVersionIndex];
+            Version storage currentVersion = versions[currentVersionIndex];
             currentSematicVersion = currentVersion.semanticVersion;
         }
 

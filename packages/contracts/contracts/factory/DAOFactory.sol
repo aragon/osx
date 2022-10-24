@@ -98,6 +98,7 @@ contract DAOFactory {
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
                 _pluginSettings[i].pluginSetup,
+                _pluginSettings[i].pluginSetupRepo,
                 plugin,
                 permissions
             );

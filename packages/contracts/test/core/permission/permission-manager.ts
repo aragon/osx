@@ -15,6 +15,7 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 );
 
 const addressZero = ethers.constants.AddressZero;
+const ANY_ADDR = "0xffffffffffffffffffffffffffffffffffffffff";
 
 enum Operation {
   Grant,
@@ -86,6 +87,22 @@ describe('Core: PermissionManager', function () {
         ADMIN_PERMISSION_ID
       );
       expect(permission).to.be.equal(ALLOW_FLAG);
+    });
+
+    it('reverts if the `ROOT_PERMISSION_ID permission is granted with `_who = ANY_ADDR`', async () => {
+      await expect(
+        pm.grant(pm.address, ANY_ADDR, ROOT_PERMISSION_ID)
+      ).to.be.revertedWith(
+        customError('RootPermissionForAnyAddressDisallowed')
+      );
+    });
+
+    it('reverts if the `ROOT_PERMISSION_ID permission is granted with `where = ANY_ADDR`', async () => {
+      await expect(
+        pm.grant(ANY_ADDR, pm.address, ROOT_PERMISSION_ID)
+      ).to.be.revertedWith(
+        customError('RootPermissionForAnyAddressDisallowed')
+      );
     });
 
     it('should emit Granted', async () => {
@@ -426,6 +443,14 @@ describe('Core: PermissionManager', function () {
           otherSigner.address,
           ROOT_PERMISSION_ID
         )
+      );
+    });
+
+    it('reverts if `_where` is `ANY_ADDR`', async () => {
+      await expect(
+        pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)
+      ).to.be.revertedWith(
+        customError('FreezeOnAnyAddressDisallowed')
       );
     });
   });

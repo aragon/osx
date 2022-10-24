@@ -40,6 +40,10 @@ contract TokenFactory {
     /// @param minter The `MerkleMinter` contract minting the new token.
     /// @param distributor The `MerkleDistibutor` contract distributing the new token.
     event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, IMerkleDistributor distributor);
+    
+    /// @notice Emitted when an existing token is passed and wrapped one is created.
+    /// @param token GovernanceWrappedERC20 token address
+    event WrappedToken(GovernanceWrappedERC20 token);
 
     struct TokenConfig {
         address addr;
@@ -88,6 +92,8 @@ contract TokenFactory {
                 _tokenConfig.name,
                 _tokenConfig.symbol
             );
+
+            emit WrappedToken(GovernanceWrappedERC20(token));
 
             return (ERC20VotesUpgradeable(token), MerkleMinter(address(0)));
         }

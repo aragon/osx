@@ -6,7 +6,7 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import { IPlugin } from "../core/plugin/IPlugin.sol";
+import {IPlugin} from "../core/plugin/IPlugin.sol";
 import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
@@ -181,6 +181,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
+    /// @param _pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
     /// @return plugin The prepared plugin contract address.
     /// @return helpers The prepared list of helper contract addresses, that a plugin might require to operate.
@@ -210,7 +211,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         (plugin, helpers, permissions) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
 
         // Important safety measure to include dao + plugin manager in the encoding.
-        bytes32 setupId = _getSetupId(_dao, _pluginSetup, plugin);
+        bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), plugin);
 
         // Check if this plugin installation is already prepared
         if (installPermissionHashes[setupId] != bytes32(0)) {
@@ -235,11 +236,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Applies the permissions of a prepared installation to a DAO.
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
+    /// @param _pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param _plugin The address of the `Plugin` contract.
     /// @param _permissions The list of multi-targeted permission operations to apply to the installing DAO.
     function applyInstallation(
         address _dao,
-        address _pluginSetup, // flip order
+        address _pluginSetup,
+        PluginRepo _pluginSetupRepo,
         address _plugin,
         PermissionLib.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
@@ -249,7 +252,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert SetupAlreadyApplied();
         }
 
-        bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
+        bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), _plugin);
 
         bytes32 storedPermissionsHash = installPermissionHashes[setupId];
 
@@ -295,12 +298,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes memory _data
     ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
         // check that plugin inherits is PluginUUPSUpgradable.
-        if(!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+        if (!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
             revert IPluginNotSupported({plugin: _updateParams.plugin});
         }
 
-        if(IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
-             revert PluginNonupgradeable({plugin: _updateParams.plugin});
+        if (IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+            revert PluginNonupgradeable({plugin: _updateParams.plugin});
         }
 
         // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.
@@ -329,6 +332,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes32 oldSetupId = _getSetupId(
                 _dao,
                 _updateParams.currentPluginSetup,
+                address(_updateParams.pluginSetupRepo),
                 _updateParams.plugin
             );
 
@@ -358,6 +362,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes32 newSetupId = _getSetupId(
                 _dao,
                 _updateParams.newPluginSetup,
+                address(_updateParams.pluginSetupRepo),
                 _updateParams.plugin
             );
             helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
@@ -384,16 +389,18 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the updating DAO.
     /// @param _plugin The address of the `PluginUUPSUpgradeable` proxy contract.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
+    /// @param _pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param _initData The initialization data to be passed to the upgradeable plugin contract via `upgradeToAndCall`. // revisit
     /// @param _permissions The list of multi-targeted permission operations to apply to the updating DAO.
     function applyUpdate(
         address _dao,
         address _plugin,
         address _pluginSetup,
+        PluginRepo _pluginSetupRepo,
         bytes memory _initData,
         PermissionLib.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
-        bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
+        bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), _plugin);
 
         if (updatePermissionHashes[setupId] != _getPermissionsHash(_permissions)) {
             revert PermissionsHashMismatch();
@@ -447,7 +454,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _data
         );
 
-        bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
+        bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), _plugin);
 
         // check helpers
         if (helpersHashes[setupId] != _getHelpersHash(_currentHelpers)) {
@@ -476,6 +483,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Applies the permissions of a prepared uninstallation to a DAO.
     /// @param _dao The address of the DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.
+    /// @param _pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param _plugin The address of the `Plugin` contract.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is uninstalled.
     /// @param _permissions The list of multi-targeted permission operations to apply to the uninstalling DAO.
@@ -484,10 +492,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _dao,
         address _plugin,
         address _pluginSetup,
+        PluginRepo _pluginSetupRepo,
         address[] calldata _currentHelpers, // TODO Isn't it sufficient to pass the helpers hash?
         PermissionLib.ItemMultiTarget[] calldata _permissions
     ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
-        bytes32 setupId = _getSetupId(_dao, _pluginSetup, _plugin);
+        bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), _plugin);
 
         if (helpersHashes[setupId] != _getHelpersHash(_currentHelpers)) {
             revert HelpersHashMismatch();
@@ -519,13 +528,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Returns an identifier for prepared installations by hashing the DAO and plugin address.
     /// @param _dao The address of the DAO conducting the setup.
+    /// @param _pluginSetup The address of the plugin setup.
+    /// @param _pluginSetupRepo The address of plugin setup repo.
     /// @param _plugin The address of the `Plugin` contract associated with the setup.
     function _getSetupId(
         address _dao,
         address _pluginSetup,
+        address _pluginSetupRepo,
         address _plugin
     ) private pure returns (bytes32 setupId) {
-        setupId = keccak256(abi.encode(_dao, _pluginSetup, _plugin));
+        setupId = keccak256(abi.encode(_dao, _pluginSetup, _pluginSetupRepo, _plugin));
     }
 
     /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
