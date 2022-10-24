@@ -1,8 +1,7 @@
 import {expect} from 'chai';
-import {BigNumberish} from 'ethers';
 import {ethers} from 'hardhat';
 
-import {AllowlistVotingSetup, AllowlistVoting__factory} from '../../typechain';
+import {AllowlistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 

@@ -1,8 +1,7 @@
 import {expect} from 'chai';
-import {BigNumberish} from 'ethers';
 import {ethers} from 'hardhat';
 
-import {ERC20, ERC20VotingSetup, ERC20Voting__factory} from '../../typechain';
+import {ERC20, ERC20VotingSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
