@@ -65,7 +65,7 @@ contract PluginRepoFactory {
     /// @notice Set the final permissions for the published plugin repository maintainer. All permissions are revoked from the the plugin factory and granted to the specified plugin maintainer.
     /// @param pluginRepo The plugin repository instance just created.
     /// @param maintainer The plugin maintainer address.
-    /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
+    /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_REPO_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
         PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](5);
@@ -79,7 +79,7 @@ contract PluginRepoFactory {
         items[1] = PermissionLib.ItemSingleTarget(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.UPGRADE_PERMISSION_ID()
+            pluginRepo.UPGRADE_REPO_PERMISSION_ID()
         );
         items[2] = PermissionLib.ItemSingleTarget(
             PermissionLib.Operation.Grant,

@@ -31,7 +31,7 @@ contract DAO is
     using Address for address;
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
-    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
+    bytes32 public constant UPGRADE_DAO_PERMISSION_ID = keccak256("UPGRADE_DAO_PERMISSION");
 
     /// @notice The ID of the permission required to call the `setMetadata` function.
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION");
@@ -96,12 +96,12 @@ contract DAO is
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
+    /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
     function _authorizeUpgrade(address)
         internal
         virtual
         override
-        auth(address(this), UPGRADE_PERMISSION_ID)
+        auth(address(this), UPGRADE_DAO_PERMISSION_ID)
     {}
 
     /// @inheritdoc IDAO

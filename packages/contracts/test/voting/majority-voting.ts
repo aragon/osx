@@ -54,14 +54,6 @@ describe('MajorityVotingMock', function () {
         customError('VoteDurationZero')
       );
     });
-
-    it.skip('should initialize the Component it inherits from as well', async () => {
-      await expect(false).to.equal(true);
-      // TODO: Waffle's calledOnContractWith is not supported by Hardhat
-      // await voting['initialize(address,address,uint64[3],bytes[])']
-      //          (daoMock.address, erc20VoteMock.address, [1, 2, 3], [])
-      // expect('initialize').to.be.calledOnContractWith(voting, [daoMock.address]);
-    });
   });
 
   describe('setConfiguration: ', async () => {

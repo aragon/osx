@@ -15,7 +15,8 @@ import {DaoAuthorizableUpgradeable} from "../../core/component/dao-authorizable/
 /// @notice This contract registers ENS subdomains under a parent domain specified in the initialization process and maintains ownership of the subdomain since only the resolver address is set. This contract must either be the domain node owner or an approved operator of the node owner. The default resolver being used is the one specified in the parent domain.
 contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
-    bytes32 public constant UPGRADE_PERMISSION_ID = keccak256("UPGRADE_PERMISSION");
+    bytes32 public constant UPGRADE_REGISTRAR_PERMISSION_ID =
+        keccak256("UPGRADE_REGISTRAR_PERMISSION");
 
     /// @notice The ID of the permission required to call the `registerSubnode` and `setDefaultResolver` function.
     bytes32 public constant REGISTER_ENS_SUBDOMAIN_PERMISSION_ID =
@@ -68,8 +69,13 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
-    /// @dev The caller must have the `UPGRADE_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address) internal virtual override auth(UPGRADE_PERMISSION_ID) {}
+    /// @dev The caller must have the `UPGRADE_REGISTRAR_PERMISSION_ID` permission.
+    function _authorizeUpgrade(address)
+        internal
+        virtual
+        override
+        auth(UPGRADE_REGISTRAR_PERMISSION_ID)
+    {}
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
     /// @param _label The labelhash of the subdomain name.

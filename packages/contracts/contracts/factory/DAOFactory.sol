@@ -157,7 +157,7 @@ contract DAOFactory {
         items[2] = PermissionLib.ItemSingleTarget(
             PermissionLib.Operation.Grant,
             address(_dao),
-            _dao.UPGRADE_PERMISSION_ID()
+            _dao.UPGRADE_DAO_PERMISSION_ID()
         );
         items[3] = PermissionLib.ItemSingleTarget(
             PermissionLib.Operation.Grant,

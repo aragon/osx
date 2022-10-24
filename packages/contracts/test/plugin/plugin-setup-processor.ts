@@ -67,7 +67,9 @@ const SET_REPO_REGISTRY_PERMISSION_ID = ethers.utils.id(
 const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
   'REGISTER_PLUGIN_REPO_PERMISSION'
 );
-const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PERMISSION');
+const UPGRADE_PLUGIN_PERMISSION_ID = ethers.utils.id(
+  'UPGRADE_PLUGIN_PERMISSION'
+);
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -941,8 +943,8 @@ describe('Plugin Setup Processor', function () {
       });
 
       // TODO: Find a way to test upgradeProxy
-      // also chack this function's errors as they might be missleading
-      // it also get threw if UPGRADE_PERMISSION is not granted
+      // also check this function's errors as they might be misleading
+      // it also get thrown if UPGRADE_PLUGIN_PERMISSION_ID permission is not granted
       // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
 
       it('correctly applies an update', async () => {
@@ -984,7 +986,11 @@ describe('Plugin Setup Processor', function () {
         );
         const {permissions, initData} = prepareUpdateEvent.args;
 
-        await targetDao.grant(plugin, psp.address, UPGRADE_PERMISSION_ID);
+        await targetDao.grant(
+          plugin,
+          psp.address,
+          UPGRADE_PLUGIN_PERMISSION_ID
+        );
 
         await expect(
           psp.applyUpdate(
