@@ -300,7 +300,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it.only("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+      it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
         // revoke root permission on dao for plugin installer
         // to see that it can't set permissions without it.
         await targetDao.revoke(
