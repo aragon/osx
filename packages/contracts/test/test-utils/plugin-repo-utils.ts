@@ -4,7 +4,7 @@ import {
   PluginRepoRegistry,
   PluginRepoFactory,
   PluginSetupV1Mock,
-} from '../../../../../typechain';
+} from '../../typechain';
 
 export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
   const PluginSetupMock = await ethers.getContractFactory('PluginSetupV1Mock');

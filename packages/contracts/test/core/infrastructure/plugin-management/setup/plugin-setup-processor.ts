@@ -25,7 +25,7 @@ import {
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
-} from '../curation/plugin-repo-utils';
+} from '../../../../test-utils/plugin-repo-utils';
 
 enum Op {
   Grant,
