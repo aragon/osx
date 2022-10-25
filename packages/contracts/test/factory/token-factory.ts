@@ -40,13 +40,21 @@ describe('Core: TokenFactory', () => {
     const GovernanceBaseFactory = await smock.mock<GovernanceERC20__factory>(
       'GovernanceERC20'
     );
-    governanceBase = await GovernanceBaseFactory.deploy(ethers.constants.AddressZero, "name", "symbol");
+    governanceBase = await GovernanceBaseFactory.deploy(
+      ethers.constants.AddressZero,
+      'name',
+      'symbol'
+    );
 
     const GovernanceWrappedBaseFactory =
       await smock.mock<GovernanceWrappedERC20__factory>(
         'GovernanceWrappedERC20'
       );
-    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(ethers.constants.AddressZero, "name", "symbol");
+    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(
+      ethers.constants.AddressZero,
+      'name',
+      'symbol'
+    );
 
     const MerkleMinterBaseFactory = await smock.mock<MerkleMinter__factory>(
       'MerkleMinter'
@@ -76,7 +84,7 @@ describe('Core: TokenFactory', () => {
 
     it('should fail if token addr is no ERC20 contract', async () => {
       const dummyContractFactory = await ethers.getContractFactory(
-        'DummyContract'
+        'TestPlugin'
       );
       const dummyContract = await dummyContractFactory.deploy();
       const config: TokenConfig = {
