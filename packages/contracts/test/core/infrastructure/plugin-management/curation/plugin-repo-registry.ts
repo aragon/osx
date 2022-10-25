@@ -13,7 +13,7 @@ import {
   deployNewDAO,
   deployNewPluginRepo,
 } from '../../../../test-utils/deploy-helpers';
-import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
+import {deployENSSubdomainRegistrar} from '../../../../test-utils/ens-utils';
 import {ensDomainHash, ensLabelHash} from '../../../../../utils/ensHelpers';
 
 const EVENTS = {
