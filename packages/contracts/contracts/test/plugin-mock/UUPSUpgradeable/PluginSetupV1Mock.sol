@@ -50,6 +50,7 @@ contract PluginSetupV1Mock is PluginSetup {
         address[] calldata _activeHelpers,
         bytes calldata
     ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+        (_dao, _plugin, _activeHelpers);
         permissions = mockPermissions(1, PermissionLib.Operation.Revoke);
     }
 
@@ -62,6 +63,7 @@ contract PluginSetupV1Mock is PluginSetup {
 contract PluginSetupV1MockBad is PluginSetupV1Mock {
     function prepareInstallation(address _dao, bytes memory)
         public
+        pure
         override
         returns (
             address plugin,
@@ -69,6 +71,7 @@ contract PluginSetupV1MockBad is PluginSetupV1Mock {
             PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
+        (_dao);
         plugin = address(0); // The bad behaviour is returning the same address over and over again
         helpers = mockHelpers(1);
         permissions = mockPermissions(1, PermissionLib.Operation.Grant);
@@ -96,6 +99,7 @@ contract PluginSetupV2Mock is PluginSetupV1Mock {
             PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
+        (_dao, _plugin, _helpers);
         activeHelpers = mockHelpers(1);
         initData = abi.encodeWithSelector(bytes4(keccak256("initializeV2(string)")), "hello world");
         permissions = mockPermissions(1, PermissionLib.Operation.Freeze);
