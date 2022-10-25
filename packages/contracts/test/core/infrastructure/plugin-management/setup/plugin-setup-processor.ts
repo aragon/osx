@@ -16,13 +16,13 @@ import {
 import {customError} from '../../../../test-utils/custom-error-helper';
 import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
 
-import {deployNewDAO} from '../../../../test-utils/deploy-helpers';
 import {findEvent} from '../../../../test-utils/event';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
 } from './plugin-setup-processor-utils';
 import {
+  deployNewDAO,
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../../../../test-utils/deploy-helpers';
