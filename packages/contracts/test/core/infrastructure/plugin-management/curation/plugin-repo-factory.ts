@@ -4,7 +4,7 @@ import {ethers} from 'hardhat';
 import {PluginRepoRegistry, DAO} from '../../../../../typechain';
 
 import {customError} from '../../../../test-utils/custom-error-helper';
-import {deployMockPluginSetup} from '../../../../test-utils/repo';
+import {deployMockPluginSetup} from './plugin-repo-utils';
 import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
 
 const EVENTS = {
