@@ -9,7 +9,7 @@ import {
   PluginRepoRegistry,
 } from '../../../../../typechain';
 import {customError} from '../../../../test-utils/custom-error-helper';
-import {deployNewDAO} from '../../../../test-utils/dao';
+import {deployNewDAO} from '../../../../test-utils/deploy-helpers';
 import {deployNewPluginRepo} from './plugin-repo-utils';
 import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
 import {ensDomainHash, ensLabelHash} from '../../../../../utils/ensHelpers';

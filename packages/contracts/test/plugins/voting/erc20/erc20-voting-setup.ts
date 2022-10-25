@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 
 import {ERC20, ERC20VotingSetup} from '../../../../typechain';
 import {customError} from '../../../test-utils/custom-error-helper';
-import {deployNewDAO} from '../../../test-utils/dao';
+import {deployNewDAO} from '../../../test-utils/deploy-helpers';
 import {getInterfaceID} from '../../../test-utils/interfaces';
 
 enum Op {
