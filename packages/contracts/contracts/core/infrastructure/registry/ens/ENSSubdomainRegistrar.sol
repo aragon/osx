@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/PublicResolver.sol";
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {IDAO} from "../../../primitives/dao/IDAO.sol";
