@@ -3,8 +3,8 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {hexDataSlice, id} from 'ethers/lib/utils';
 
-import {DAO, CallbackHandlerMockHelper} from '../../../typechain';
-import {customError} from '../../test-utils/custom-error-helper';
+import {DAO, CallbackHandlerMockHelper} from '../../../../typechain';
+import {customError} from '../../../test-utils/custom-error-helper';
 
 const EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',

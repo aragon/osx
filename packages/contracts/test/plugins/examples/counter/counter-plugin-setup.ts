@@ -8,7 +8,7 @@ import {
   CounterV1PluginSetup,
   CounterV2PluginSetup,
   MultiplyHelper,
-} from '../../typechain';
+} from '../../../../typechain';
 
 const EVENTS = {
   PLUGIN_UPDATED: 'PluginUpdated',

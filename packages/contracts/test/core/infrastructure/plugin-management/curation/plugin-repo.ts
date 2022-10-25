@@ -5,9 +5,9 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {PluginRepo, PluginSetupV1Mock} from '../../typechain';
-import {deployMockPluginSetup} from '../test-utils/repo';
-import {customError} from '../test-utils/custom-error-helper';
+import {PluginRepo, PluginSetupV1Mock} from '../../../../../typechain';
+import {deployMockPluginSetup} from '../../../../test-utils/repo';
+import {customError} from '../../../../test-utils/custom-error-helper';
 
 const emptyBytes = '0x00';
 

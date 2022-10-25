@@ -1,6 +1,9 @@
 import {ethers} from 'hardhat';
-import {findEvent} from './event';
-import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
+import {findEvent} from '../../../../../test-utils/event';
+import {
+  PluginSetupProcessor,
+  PluginRepoRegistry,
+} from '../../../../../../typechain';
 
 export async function deployPluginSetupProcessor(
   managingDao: any,

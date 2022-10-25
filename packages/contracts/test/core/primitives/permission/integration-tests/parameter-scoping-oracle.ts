@@ -6,8 +6,8 @@ import {
   TestParameterScopingPermissionOracle,
   TestPlugin,
   DAO,
-} from '../../../../typechain';
-import {customError} from '../../../test-utils/custom-error-helper';
+} from '../../../../../typechain';
+import {customError} from '../../../../test-utils/custom-error-helper';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 

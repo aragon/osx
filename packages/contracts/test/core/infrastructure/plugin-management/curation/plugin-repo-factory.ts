@@ -1,11 +1,11 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {PluginRepoRegistry, DAO} from '../../typechain';
+import {PluginRepoRegistry, DAO} from '../../../../../typechain';
 
-import {customError} from '../test-utils/custom-error-helper';
-import {deployMockPluginSetup} from '../test-utils/repo';
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+import {customError} from '../../../../test-utils/custom-error-helper';
+import {deployMockPluginSetup} from '../../../../test-utils/repo';
+import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -90,10 +90,12 @@ describe('PluginRepoFactory: ', function () {
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
-    
-    
+
     pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(managingDao.address, ensSubdomainRegistrar.address);
+    await pluginRepoRegistry.initialize(
+      managingDao.address,
+      ensSubdomainRegistrar.address
+    );
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -112,13 +114,12 @@ describe('PluginRepoFactory: ', function () {
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
-     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-     managingDao.grant(
+    // grant REGISTER_PERMISSION_ID to pluginRepoFactory
+    managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
-
   });
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {

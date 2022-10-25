@@ -6,8 +6,8 @@ import {
   TestSharedPlugin,
   TestIdGatingOracle,
   DAO,
-} from '../../../../typechain';
-import {customError} from '../../../test-utils/custom-error-helper';
+} from '../../../../../typechain';
+import {customError} from '../../../../test-utils/custom-error-helper';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
   'ID_GATED_ACTION_PERMISSION'

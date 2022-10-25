@@ -1,13 +1,13 @@
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash} from '../../../../../utils/ensHelpers';
 import {
   DAO,
   ENSSubdomainRegistrar,
   ENSRegistry,
   PublicResolver,
-} from '../../typechain';
+} from '../../../../../typechain';
 
 export async function deployENSSubdomainRegistrar(
   owner: SignerWithAddress,

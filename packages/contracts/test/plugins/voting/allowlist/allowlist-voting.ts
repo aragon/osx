@@ -2,9 +2,9 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AllowlistVoting, DAOMock} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {AllowlistVoting, DAOMock} from '../../../../typechain';
+import {customError, ERRORS} from '../../../test-utils/custom-error-helper';
+import {VoteOption, VOTING_EVENTS, pct16} from '../majority-voting-utils';
 
 describe('AllowlistVoting', function () {
   let signers: SignerWithAddress[];

@@ -11,21 +11,21 @@ import {
   PluginSetupV1MockBad,
   PluginRepoRegistry,
   PluginRepo,
-} from '../../typechain';
+} from '../../../../../typechain';
 
-import {customError} from '../test-utils/custom-error-helper';
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+import {customError} from '../../../../test-utils/custom-error-helper';
+import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
 
-import {deployNewDAO} from '../test-utils/dao';
-import {findEvent} from '../test-utils/event';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {findEvent} from '../../../../test-utils/event';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
-} from '../test-utils/plugin-setup-processor';
+} from './utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
-} from '../test-utils/repo';
+} from '../../../../test-utils/repo';
 
 enum Op {
   Grant,

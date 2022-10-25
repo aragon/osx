@@ -2,8 +2,11 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {PermissionManagerTest, PermissionOracleMock} from '../../../typechain';
-import {customError} from '../../test-utils/custom-error-helper';
+import {
+  PermissionManagerTest,
+  PermissionOracleMock,
+} from '../../../../typechain';
+import {customError} from '../../../test-utils/custom-error-helper';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
@@ -15,7 +18,7 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 );
 
 const addressZero = ethers.constants.AddressZero;
-const ANY_ADDR = "0xffffffffffffffffffffffffffffffffffffffff";
+const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
 enum Operation {
   Grant,
@@ -447,9 +450,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('reverts if `_where` is `ANY_ADDR`', async () => {
-      await expect(
-        pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWith(
+      await expect(pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)).to.be.revertedWith(
         customError('FreezeOnAnyAddressDisallowed')
       );
     });

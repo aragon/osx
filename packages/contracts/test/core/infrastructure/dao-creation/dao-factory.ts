@@ -7,16 +7,16 @@ import {
   PluginSetupProcessor,
   PluginSetupV1Mock,
   PluginRepoRegistry,
-} from '../../typechain';
+} from '../../../../typechain';
 
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {customError} from '../test-utils/custom-error-helper';
-import {deployPluginSetupProcessor} from '../test-utils/plugin-setup-processor';
+import {deployENSSubdomainRegistrar} from '../registry/ens/ens-utils';
+import {customError} from '../../../test-utils/custom-error-helper';
+import {deployPluginSetupProcessor} from '../plugin-management/setup/utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
-} from '../test-utils/repo';
-import {findEvent} from '../test-utils/event';
+} from '../../../test-utils/repo';
+import {findEvent} from '../../../test-utils/event';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

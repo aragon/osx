@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {AllowlistVotingSetup} from '../../typechain';
-import {deployNewDAO} from '../test-utils/dao';
-import {getInterfaceID} from '../test-utils/interfaces';
+import {AllowlistVotingSetup} from '../../../../typechain';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 
 enum Op {
   Grant,

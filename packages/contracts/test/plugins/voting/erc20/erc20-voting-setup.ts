@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {ERC20, ERC20VotingSetup} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
-import {deployNewDAO} from '../test-utils/dao';
-import {getInterfaceID} from '../test-utils/interfaces';
+import {ERC20, ERC20VotingSetup} from '../../../../typechain';
+import {customError} from '../../../test-utils/custom-error-helper';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
 
 enum Op {
   Grant,

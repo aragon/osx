@@ -2,10 +2,10 @@ import {expect} from 'chai';
 import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20} from '../../typechain';
-import {ERRORS, customError} from '../test-utils/custom-error-helper';
-import {getInterfaceID} from '../test-utils/interfaces';
-import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
+import {DAO, GovernanceERC20} from '../../../../typechain';
+import {ERRORS, customError} from '../../../test-utils/custom-error-helper';
+import {getInterfaceID} from '../../../test-utils/interfaces';
+import {IERC1271__factory} from '../../../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';

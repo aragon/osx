@@ -5,9 +5,9 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
-import BalanceTree from './src/balance-tree';
+import {MerkleDistributor, DAO, TestERC20} from '../../../typechain';
+import {customError} from '../../test-utils/custom-error-helper';
+import BalanceTree from './utils/balance-tree';
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
@@ -40,11 +40,7 @@ describe('MerkleDistributor', function () {
     const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
     beforeEach(async () => {
-      await distributor.initialize(
-        dao.address,
-        token.address,
-        ZERO_BYTES32
-      );
+      await distributor.initialize(dao.address, token.address, ZERO_BYTES32);
     });
 
     describe('#token', () => {

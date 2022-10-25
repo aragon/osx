@@ -10,9 +10,9 @@ import {
   MerkleDistributor,
   DAO,
   GovernanceERC20,
-} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
-import BalanceTree from './src/balance-tree';
+} from '../../../typechain';
+import {customError} from '../../test-utils/custom-error-helper';
+import BalanceTree from './utils/balance-tree';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');

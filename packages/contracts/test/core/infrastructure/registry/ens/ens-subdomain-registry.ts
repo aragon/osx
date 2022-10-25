@@ -7,9 +7,9 @@ import {
   DAO,
   PublicResolver,
   ENSRegistry,
-} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+} from '../../../../../typechain';
+import {customError} from '../../../../test-utils/custom-error-helper';
+import {ensDomainHash, ensLabelHash} from '../../../../../utils/ensHelpers';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'

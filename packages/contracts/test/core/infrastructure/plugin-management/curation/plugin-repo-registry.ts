@@ -7,12 +7,12 @@ import {
   PluginRepo,
   ENSSubdomainRegistrar,
   PluginRepoRegistry,
-} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
-import {deployNewDAO} from '../test-utils/dao';
-import {deployNewPluginRepo} from '../test-utils/repo';
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+} from '../../../../../typechain';
+import {customError} from '../../../../test-utils/custom-error-helper';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {deployNewPluginRepo} from '../../../../test-utils/repo';
+import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
+import {ensDomainHash, ensLabelHash} from '../../../../../utils/ensHelpers';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -139,7 +139,10 @@ describe('PluginRepoRegistry', function () {
   });
 
   it("reverts the registration if the plugin repo's ENS name is already taken", async function () {
-    await pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address);
+    await pluginRepoRegistry.registerPluginRepo(
+      pluginRepoName,
+      pluginRepo.address
+    );
 
     const pluginRepoNameDomainHash = ensDomainHash(
       pluginRepoName + '.' + topLevelDomain
