@@ -21,7 +21,7 @@ import {findEvent} from '../../../../test-utils/event';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
-} from './utils/plugin-setup-processor';
+} from './plugin-setup-processor-utils';
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,

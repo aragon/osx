@@ -11,7 +11,7 @@ import {
 
 import {deployENSSubdomainRegistrar} from '../registry/ens/ens-utils';
 import {customError} from '../../../test-utils/custom-error-helper';
-import {deployPluginSetupProcessor} from '../plugin-management/setup/utils/plugin-setup-processor';
+import {deployPluginSetupProcessor} from '../plugin-management/setup/plugin-setup-processor-utils';
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
