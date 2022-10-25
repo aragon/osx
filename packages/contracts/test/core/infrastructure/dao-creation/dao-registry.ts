@@ -5,7 +5,7 @@ import {ensDomainHash, ensLabelHash} from '../../../../utils/ensHelpers';
 import {DAO, DAORegistry, ENSSubdomainRegistrar} from '../../../../typechain';
 import {customError} from '../../../test-utils/custom-error-helper';
 import {deployNewDAO} from '../../../test-utils/deploy-helpers';
-import {deployENSSubdomainRegistrar} from '../../../test-utils/ens-utils';
+import {deployENSSubdomainRegistrar} from '../../../test-utils/deploy-helpers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const EVENTS = {

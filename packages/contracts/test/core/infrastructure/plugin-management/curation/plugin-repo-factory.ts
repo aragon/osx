@@ -5,7 +5,7 @@ import {PluginRepoRegistry, DAO} from '../../../../../typechain';
 
 import {customError} from '../../../../test-utils/custom-error-helper';
 import {deployMockPluginSetup} from '../../../../test-utils/deploy-helpers';
-import {deployENSSubdomainRegistrar} from '../../../../test-utils/ens-utils';
+import {deployENSSubdomainRegistrar} from '../../../../test-utils/deploy-helpers';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

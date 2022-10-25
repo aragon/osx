@@ -14,7 +14,7 @@ import {
 } from '../../../../../typechain';
 
 import {customError} from '../../../../test-utils/custom-error-helper';
-import {deployENSSubdomainRegistrar} from '../../../../test-utils/ens-utils';
+import {deployENSSubdomainRegistrar} from '../../../../test-utils/deploy-helpers';
 
 import {findEvent} from '../../../../test-utils/event';
 import {

@@ -9,7 +9,7 @@ import {
   PluginRepoRegistry,
 } from '../../../../typechain';
 
-import {deployENSSubdomainRegistrar} from '../../../test-utils/ens-utils';
+import {deployENSSubdomainRegistrar} from '../../../test-utils/deploy-helpers';
 import {customError} from '../../../test-utils/custom-error-helper';
 import {deployPluginSetupProcessor} from '../plugin-management/setup/plugin-setup-processor-utils';
 import {
