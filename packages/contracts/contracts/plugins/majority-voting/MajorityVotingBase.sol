@@ -8,7 +8,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 
 import {PluginUUPSUpgradeable} from "../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/primitives/dao/IDAO.sol";
-import {TimeHelpers} from "../../utils/TimeHelpers.sol";
+import {TimeHelpers} from "./utils/TimeHelpers.sol";
 import {IMajorityVoting} from "./IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
