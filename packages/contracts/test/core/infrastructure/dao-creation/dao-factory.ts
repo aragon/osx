@@ -15,7 +15,7 @@ import {deployPluginSetupProcessor} from '../plugin-management/setup/plugin-setu
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
-} from '../../../test-utils/plugin-repo-utils';
+} from '../../../test-utils/deploy-helpers';
 import {findEvent} from '../../../test-utils/event';
 
 const EVENTS = {

@@ -10,7 +10,7 @@ import {
 } from '../../../../../typechain';
 import {customError} from '../../../../test-utils/custom-error-helper';
 import {deployNewDAO} from '../../../../test-utils/deploy-helpers';
-import {deployNewPluginRepo} from '../../../../test-utils/plugin-repo-utils';
+import {deployNewPluginRepo} from '../../../../test-utils/deploy-helpers';
 import {deployENSSubdomainRegistrar} from '../../registry/ens/ens-utils';
 import {ensDomainHash, ensLabelHash} from '../../../../../utils/ensHelpers';
 
