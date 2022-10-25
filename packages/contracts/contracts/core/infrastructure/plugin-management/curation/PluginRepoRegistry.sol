@@ -2,18 +2,19 @@
 
 pragma solidity 0.8.10;
 
-import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
-import {IPluginRepo} from "../plugin/IPluginRepo.sol";
+import {ENSSubdomainRegistrar} from "../../registry/ens/ENSSubdomainRegistrar.sol";
+import {IDAO} from "../../../primitives/dao/IDAO.sol";
+import {InterfaceBasedRegistry} from "../../registry/InterfaceBasedRegistry.sol";
+import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepoRegistry
 /// @author Aragon Association - 2022
 /// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
-    bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID = keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
-    
+    bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
+        keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
+
     /// @notice The ENS subdomain registrar registering the PluginRepo names.
     ENSSubdomainRegistrar public subdomainRegistrar;
 

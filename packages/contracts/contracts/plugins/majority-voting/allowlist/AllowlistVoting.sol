@@ -3,12 +3,11 @@
 pragma solidity 0.8.10;
 
 import {Checkpoints} from "@openzeppelin/contracts/utils/Checkpoints.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
-import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
-import {IDAO} from "../../core/IDAO.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {IDAO} from "../../../core/primitives/dao/IDAO.sol";
+import {_uncheckedAdd, _uncheckedSub} from "../../../utils/UncheckedMath.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
+import {IMajorityVoting} from "../IMajorityVoting.sol";
 
 /// @title AllowlistVoting
 /// @author Aragon Association - 2021-2022.

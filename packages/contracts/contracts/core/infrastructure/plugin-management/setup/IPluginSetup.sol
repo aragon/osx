@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {PermissionLib} from "../core/permission/PermissionLib.sol";
+import {PermissionLib} from "../../../primitives/permission/PermissionLib.sol";
 
 interface IPluginSetup {
     /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.
@@ -17,7 +17,6 @@ interface IPluginSetup {
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
     function prepareInstallation(address _dao, bytes memory _data)
         external
-    
         returns (
             address plugin,
             address[] memory helpers,
@@ -47,7 +46,6 @@ interface IPluginSetup {
         bytes memory _data
     )
         external
-    
         returns (
             address[] memory updatedHelpers,
             bytes memory initData,

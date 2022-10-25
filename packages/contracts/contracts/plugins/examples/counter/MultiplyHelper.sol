@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
 
 /// @title MultiplyHelper
 /// @author Aragon Association - 2022

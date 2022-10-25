@@ -4,14 +4,14 @@ pragma solidity 0.8.10;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import {PermissionLib} from "../core/permission/PermissionLib.sol";
-import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {IPlugin} from "../core/plugin/IPlugin.sol";
-import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
-import {DAO, IDAO} from "../core/DAO.sol";
-import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
-import {PluginSetup} from "./PluginSetup.sol";
-import {PluginRepo} from "./PluginRepo.sol";
+import {PermissionLib} from "../../../primitives/permission/PermissionLib.sol";
+import {PluginUUPSUpgradeable} from "../../../primitives/plugin/PluginUUPSUpgradeable.sol";
+import {IPlugin} from "../../../primitives/plugin/IPlugin.sol";
+import {DaoAuthorizable} from "../../../primitives/dao-authorizable/DaoAuthorizable.sol";
+import {DAO, IDAO} from "../../../primitives/dao/DAO.sol";
+import {PluginRepoRegistry} from "../curation/PluginRepoRegistry.sol";
+import {PluginRepo} from "../curation/PluginRepo.sol";
+import {PluginSetup} from "../setup/PluginSetup.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022

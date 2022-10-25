@@ -4,7 +4,8 @@ pragma solidity 0.8.10;
 
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {ERC20WrapperUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20WrapperUpgradeable.sol";
-import {IDAO} from "../core/IDAO.sol";
+
+import {IDAO} from "../../core/primitives/dao/IDAO.sol";
 
 interface IMerkleDistributor {
     /// @notice Emitted when tokens are claimed from the distributor.
@@ -14,10 +15,10 @@ interface IMerkleDistributor {
     event Claimed(uint256 indexed index, address indexed to, uint256 amount);
 
     /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
-    function token() external returns(IERC20Upgradeable);
+    function token() external returns (IERC20Upgradeable);
 
     /// @notice The merkle root of the balance tree storing the claims.
-    function merkleRoot() external returns(bytes32);
+    function merkleRoot() external returns (bytes32);
 
     /// @notice Initializes the plugin.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

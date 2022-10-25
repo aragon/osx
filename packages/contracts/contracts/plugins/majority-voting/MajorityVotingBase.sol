@@ -6,10 +6,10 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+import {PluginUUPSUpgradeable} from "../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../core/primitives/dao/IDAO.sol";
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 import {IMajorityVoting} from "./IMajorityVoting.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
@@ -203,7 +203,7 @@ abstract contract MajorityVotingBase is
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
         votes[_voteId].executed = true;
-        
+
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         emit VoteExecuted(_voteId, execResults);

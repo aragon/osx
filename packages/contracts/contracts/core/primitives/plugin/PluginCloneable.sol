@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {DaoAuthorizableCloneable} from "../component/dao-authorizable/DaoAuthorizableCloneable.sol";
-import {IDAO} from "../IDAO.sol";
+import {DaoAuthorizableCloneable} from "../dao-authorizable/DaoAuthorizableCloneable.sol";
+import {IDAO} from "../dao/IDAO.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title PluginCloneable
@@ -19,7 +19,7 @@ abstract contract PluginCloneable is ERC165, IPlugin, DaoAuthorizableCloneable {
     }
 
     /// @inheritdoc IPlugin
-    function pluginType() public pure override returns(PluginType) {
+    function pluginType() public pure override returns (PluginType) {
         return PluginType.Cloneable;
     }
 
@@ -27,7 +27,6 @@ abstract contract PluginCloneable is ERC165, IPlugin, DaoAuthorizableCloneable {
     /// @param _interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return
-            _interfaceId == type(IPlugin).interfaceId || super.supportsInterface(_interfaceId);
+        return _interfaceId == type(IPlugin).interfaceId || super.supportsInterface(_interfaceId);
     }
 }

@@ -6,8 +6,8 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {IERC1822ProxiableUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol";
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {DaoAuthorizableUpgradeable} from "../component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "../IDAO.sol";
+import {DaoAuthorizableUpgradeable} from "../dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../dao/IDAO.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title PluginUUPSUpgradeable

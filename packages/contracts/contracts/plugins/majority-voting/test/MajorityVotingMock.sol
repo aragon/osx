@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "../voting/majority/MajorityVotingBase.sol";
+import "../MajorityVotingBase.sol";
 
 contract MajorityVotingMock is MajorityVotingBase {
     function initializeMock(

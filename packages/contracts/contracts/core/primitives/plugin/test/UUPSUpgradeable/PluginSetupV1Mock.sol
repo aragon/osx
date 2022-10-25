@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {PluginSetup} from "../../../plugin/PluginSetup.sol";
-import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
+import {PermissionLib} from "../../../permission/PermissionLib.sol";
+import {PluginSetup} from "../../../../infrastructure/plugin-management/setup/PluginSetup.sol";
+import {IPluginSetup} from "../../../../infrastructure/plugin-management/setup/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
 
 // The first version of plugin setup.
@@ -22,7 +22,7 @@ contract PluginSetupV1Mock is PluginSetup {
         // V1 version.
         pluginBase = new PluginUUPSUpgradeableV1Mock();
     }
-    
+
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external view virtual override returns (string memory) {
         return "";

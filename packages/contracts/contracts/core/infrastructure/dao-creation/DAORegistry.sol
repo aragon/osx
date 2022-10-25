@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
+import {IDAO} from "../../primitives/dao/IDAO.sol";
+import {ENSSubdomainRegistrar} from "../registry/ens/ENSSubdomainRegistrar.sol";
+import {InterfaceBasedRegistry} from "../registry/InterfaceBasedRegistry.sol";
 
 /// @title Register your unique DAO name
 /// @author Aragon Association - 2022
@@ -50,7 +50,7 @@ contract DAORegistry is InterfaceBasedRegistry {
         if (!(bytes(_name).length > 0)) {
             revert EmptyDaoName();
         }
-        
+
         _register(daoAddr);
 
         bytes32 labelhash = keccak256(bytes(_name));

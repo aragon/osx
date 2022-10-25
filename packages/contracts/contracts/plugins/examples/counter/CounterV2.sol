@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../../core/primitives/dao/IDAO.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
-import {IDAO} from "../../../core/IDAO.sol";
 
 /// @title CounterV1
 /// @author Aragon Association - 2022

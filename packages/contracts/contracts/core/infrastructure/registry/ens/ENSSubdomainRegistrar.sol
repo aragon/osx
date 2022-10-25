@@ -6,9 +6,9 @@ import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import {IDAO} from "../../core/IDAO.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {DaoAuthorizableUpgradeable} from "../../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../../../primitives/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../primitives/plugin/PluginUUPSUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "../../../primitives/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
 /// @title ENSSubdomainRegistrar
 /// @author Aragon Association - 2022

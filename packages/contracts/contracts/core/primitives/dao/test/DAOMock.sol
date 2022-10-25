@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/permission/PermissionManager.sol";
-import "../core/IDAO.sol";
+import "../../permission/PermissionManager.sol";
+import "../IDAO.sol";
 
 contract DAOMock is IDAO, PermissionManager {
     mapping(uint256 => uint256) public totalSupply;
@@ -23,7 +23,7 @@ contract DAOMock is IDAO, PermissionManager {
     ) public pure override returns (bool) {
         return true;
     }
-        
+
     function getTrustedForwarder() public pure override returns (address) {
         return address(0);
     }

@@ -7,14 +7,14 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import {GovernanceERC20} from "../tokens/GovernanceERC20.sol";
-import {GovernanceWrappedERC20} from "../tokens/GovernanceWrappedERC20.sol";
-import {DAO} from "../core/DAO.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IERC20MintableUpgradeable} from "../tokens/IERC20MintableUpgradeable.sol";
-import {MerkleMinter} from "../tokens/MerkleMinter.sol";
-import {MerkleDistributor} from "../tokens/MerkleDistributor.sol";
-import {IMerkleDistributor} from "../tokens/IMerkleDistributor.sol";
+import {MerkleMinter} from "../../../plugins/token-creation/MerkleMinter.sol";
+import {MerkleDistributor} from "../../../plugins/token-creation/MerkleDistributor.sol";
+import {IMerkleDistributor} from "../../../plugins/token-creation/IMerkleDistributor.sol";
+import {IERC20MintableUpgradeable} from "../../../tokens/IERC20MintableUpgradeable.sol";
+import {GovernanceERC20} from "../../../tokens/GovernanceERC20.sol";
+import {GovernanceWrappedERC20} from "../../../tokens/GovernanceWrappedERC20.sol";
+import {DAO} from "../../primitives/dao/DAO.sol";
+import {IDAO} from "../../primitives/dao/IDAO.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022
@@ -39,8 +39,12 @@ contract TokenFactory {
     /// @param token [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token address.
     /// @param minter The `MerkleMinter` contract minting the new token.
     /// @param distributor The `MerkleDistibutor` contract distributing the new token.
-    event TokenCreated(IERC20Upgradeable token, MerkleMinter minter, IMerkleDistributor distributor);
-    
+    event TokenCreated(
+        IERC20Upgradeable token,
+        MerkleMinter minter,
+        IMerkleDistributor distributor
+    );
+
     /// @notice Emitted when an existing token is passed and wrapped one is created.
     /// @param token GovernanceWrappedERC20 token address
     event WrappedToken(GovernanceWrappedERC20 token);
@@ -110,11 +114,7 @@ contract TokenFactory {
         );
 
         // Emit the event
-        emit TokenCreated(
-            IERC20Upgradeable(token),
-            MerkleMinter(merkleMinter),
-            distributorBase
-        );
+        emit TokenCreated(IERC20Upgradeable(token), MerkleMinter(merkleMinter), distributorBase);
 
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();

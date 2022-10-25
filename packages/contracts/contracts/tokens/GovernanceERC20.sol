@@ -9,9 +9,10 @@ import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/E
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
-import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IERC20MintableUpgradeable} from './IERC20MintableUpgradeable.sol';
+
+import {DaoAuthorizableUpgradeable} from "../core/primitives/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../core/primitives/dao/IDAO.sol";
+import {IERC20MintableUpgradeable} from "./IERC20MintableUpgradeable.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
@@ -25,7 +26,7 @@ contract GovernanceERC20 is
 {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
-    
+
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
@@ -84,5 +85,4 @@ contract GovernanceERC20 is
             _delegate(to, to);
         }
     }
-
 }

@@ -1,44 +1,81 @@
 // JSON artifacts of the contracts
 
-// Core contracts
-import * as PermissionManager from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionManager.json';
-import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionLib.sol/PermissionLib.json';
-import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
-import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
-import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
-import * as DaoAuthorizable from '../artifacts/contracts/core/component/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
+// Core Primitives
 
-// Factories
-import * as DAOFactory from '../artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json';
-import * as TokenFactory from '../artifacts/contracts/factory/TokenFactory.sol/TokenFactory.json';
+//// Permission
+import * as PermissionManager from '../artifacts/contracts/core/primitives/permission/PermissionManager.sol/PermissionManager.json';
+import * as PermissionLib from '../artifacts/contracts/core/primitives/permission/PermissionLib.sol/PermissionLib.json';
+import * as IPermissionOracle from '../artifacts/contracts/core/primitives/permission/IPermissionOracle.sol/IPermissionOracle.json';
 
-// Registry
-import * as DAORegistry from '../artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json';
+//// DAO
+import * as DAO from '../artifacts/contracts/core/primitives/dao/DAO.sol/DAO.json';
+import * as IDAO from '../artifacts/contracts/core/primitives/dao/IDAO.sol/IDAO.json';
+import * as DaoAuthorizable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
+import * as DaoAuthorizableCloneable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizableCloneable.sol/DaoAuthorizableCloneable.json';
+import * as DaoAuthorizableUpgradeable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizableUpgradeable.sol/DaoAuthorizableUpgradeable.json';
+
+// Infrastructure
+
+//// DAO Creation
+import * as DAOFactory from '../artifacts/contracts/core/infrastructure/dao-creation/DAOFactory.sol/DAOFactory.json';
+import * as DAORegistry from '../artifacts/contracts/core/infrastructure/dao-creation/DAORegistry.sol/DAORegistry.json';
+
+//// Plugin Management
+
+////// Curation
+import * as PluginRepoFactory from '../artifacts/contracts/core/infrastructure/plugin-management/curation/PluginRepoFactory.sol/PluginRepoFactory.json';
+import * as PluginRepoRegistry from '../artifacts/contracts/core/infrastructure/plugin-management/curation/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+
+////// Setup
+import * as PluginSetup from '../artifacts/contracts/core/infrastructure/plugin-management/setup/PluginSetup.sol/PluginSetup.json';
+import * as PluginSetupProcessor from '../artifacts/contracts/core/infrastructure/plugin-management/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
+
+//// Plugins
+
+////// Majority Voting
+import * as ERC20Voting from '../artifacts/contracts/plugins/majority-voting/erc20/ERC20Voting.sol/ERC20Voting.json';
+import * as AllowlistVoting from '../artifacts/contracts/plugins/majority-voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json';
+
+////// Token Creation
+import * as MerkleMinter from '../artifacts/contracts/plugins/token-creation/MerkleMinter.sol/MerkleMinter.json';
+import * as MerkleDistributor from '../artifacts/contracts/plugins/token-creation/MerkleDistributor.sol/MerkleDistributor.json';
 
 // Tokens
 import * as GovernanceERC20 from '../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import * as GovernanceWrappedERC20 from '../artifacts/contracts/tokens/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 
-// DAO Plugins
-import * as ERC20Voting from '../artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json';
-import * as AllowlistVoting from '../artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json';
-import * as MerkleDistributor from '../artifacts/contracts/tokens/MerkleDistributor.sol/MerkleDistributor.json';
-import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json';
+// To be deprecated
+import * as TokenFactory from '../artifacts/contracts/core/infrastructure/deprecated/TokenFactory.sol/TokenFactory.json';
 
 export default {
   PermissionManager,
   PermissionLib,
   IPermissionOracle,
+
   DAO,
   IDAO,
+
   DaoAuthorizable,
+  DaoAuthorizableCloneable,
+  DaoAuthorizableUpgradeable,
+
+  PluginRepoFactory,
+  PluginRepoRegistry,
+
+  PluginSetup,
+  PluginSetupProcessor,
+
   DAOFactory,
-  TokenFactory,
   DAORegistry,
-  GovernanceERC20,
-  GovernanceWrappedERC20,
-  MerkleDistributor,
-  MerkleMinter,
+
   ERC20Voting,
   AllowlistVoting,
+
+  MerkleDistributor,
+  MerkleMinter,
+
+  GovernanceERC20,
+  GovernanceWrappedERC20,
+
+  TokenFactory,
 };

@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {DaoAuthorizable} from "../component/dao-authorizable/DaoAuthorizable.sol";
-import {IDAO} from "../IDAO.sol";
+import {DaoAuthorizable} from "../dao-authorizable/DaoAuthorizable.sol";
+import {IDAO} from "../dao/IDAO.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title Plugin
@@ -15,9 +15,9 @@ abstract contract Plugin is ERC165, IPlugin, DaoAuthorizable {
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     constructor(IDAO _dao) DaoAuthorizable(_dao) {}
-    
+
     /// @inheritdoc IPlugin
-    function pluginType() public pure override returns(PluginType) {
+    function pluginType() public pure override returns (PluginType) {
         return PluginType.Constructable;
     }
 

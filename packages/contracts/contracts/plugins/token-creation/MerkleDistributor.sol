@@ -9,10 +9,10 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../core/primitives/dao/IDAO.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
-import {IDAO} from "../core/IDAO.sol";
 
 /// @title MerkleDistributor
 /// @author Uniswap 2020

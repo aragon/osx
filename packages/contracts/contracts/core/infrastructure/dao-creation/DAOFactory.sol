@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import {DAORegistry} from "../registry/DAORegistry.sol";
-import {DAO} from "../core/DAO.sol";
-import {PermissionLib} from "../core/permission/PermissionLib.sol";
-import {createERC1967Proxy} from "../utils/Proxy.sol";
-import {PluginRepo} from "../plugin/PluginRepo.sol";
-import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
+import {DAORegistry} from "./DAORegistry.sol";
+import {DAO} from "../../primitives/dao/DAO.sol";
+import {PermissionLib} from "../../primitives/permission/PermissionLib.sol";
+import {createERC1967Proxy} from "../../../utils/Proxy.sol";
+import {PluginRepo} from "../plugin-management/curation/PluginRepo.sol";
+import {PluginSetupProcessor} from "../plugin-management/setup/PluginSetupProcessor.sol";
 
 /// @title DAOFactory
 /// @author Aragon Association - 2022

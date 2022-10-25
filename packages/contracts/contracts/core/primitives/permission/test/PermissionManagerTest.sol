@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/permission/PermissionManager.sol";
+import "../PermissionManager.sol";
 
 contract PermissionManagerTest is PermissionManager {
     function init(address _who) public initializer {

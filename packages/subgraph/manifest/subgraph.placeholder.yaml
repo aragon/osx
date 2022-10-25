@@ -22,7 +22,7 @@ dataSources:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: DAORegistry
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/infrastructure/dao-creation/DAORegistry.sol/DAORegistry.json
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
@@ -48,11 +48,11 @@ templates:
         - name: ERC165
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/majority-voting/erc20/ERC20Voting.sol/ERC20Voting.json
         - name: AllowlistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/majority-voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
         - name: DAO
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/primitives/dao/DAO.sol/DAO.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
@@ -83,7 +83,7 @@ templates:
         - Dao
       abis:
         - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/majority-voting/erc20/ERC20Voting.sol/ERC20Voting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
@@ -108,7 +108,7 @@ templates:
         - Dao
       abis:
         - name: AllowlistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/majority-voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast

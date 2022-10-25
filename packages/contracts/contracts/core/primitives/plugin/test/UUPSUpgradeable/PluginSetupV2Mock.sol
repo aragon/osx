@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {PluginSetup} from "../../../plugin/PluginSetup.sol";
-import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
+import {PermissionLib} from "../../../permission/PermissionLib.sol";
+import {PluginSetup} from "../../../../infrastructure/plugin-management/setup/PluginSetup.sol";
+import {IPluginSetup} from "../../../../infrastructure/plugin-management/setup/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
 // The second version of plugin manager.
@@ -140,7 +140,7 @@ contract PluginSetupV2Mock is PluginSetup {
             keccak256("SETTINGS_PERMISSION")
         );
     }
-    
+
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);

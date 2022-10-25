@@ -6,9 +6,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {PluginSetup} from "../../PluginSetup.sol";
-import {IPluginSetup} from "../../IPluginSetup.sol";
+import {PermissionLib} from "../../../core/primitives/permission/PermissionLib.sol";
+import {IPluginSetup} from "../../../core/infrastructure/plugin-management/setup/IPluginSetup.sol";
+import {PluginSetup} from "../../../core/infrastructure/plugin-management/setup/PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV2} from "./CounterV2.sol";
 

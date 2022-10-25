@@ -10,8 +10,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import "./component/CallbackHandler.sol";
-import "./permission/PermissionManager.sol";
+import "../permission/PermissionManager.sol";
+import "./CallbackHandler.sol";
 import "./IDAO.sol";
 
 /// @title DAO
@@ -146,7 +146,7 @@ contract DAO is
     {
         bytes[] memory execResults = new bytes[](_actions.length);
 
-        for (uint256 i = 0; i < _actions.length;) {
+        for (uint256 i = 0; i < _actions.length; ) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );

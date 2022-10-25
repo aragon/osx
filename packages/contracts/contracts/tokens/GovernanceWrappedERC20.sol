@@ -12,9 +12,9 @@ import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/E
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
+import {DaoAuthorizableUpgradeable} from "../core/primitives/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../core/primitives/dao/IDAO.sol";
 import {IGovernanceWrappedERC20} from "./IGovernanceWrappedERC20.sol";
-import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "../core/IDAO.sol";
 
 /// @title GovernanceWrappedERC20
 /// @author Aragon Association
