@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {PluginCloneable} from "../../PluginCloneable.sol";
-import {IDAO} from "../../../dao/IDAO.sol";
+import {PluginCloneable} from "../PluginCloneable.sol";
+import {IDAO} from "../../dao/IDAO.sol";
 
 contract PluginCloneableMock is PluginCloneable {
     function initialize(IDAO _dao) external initializer {
