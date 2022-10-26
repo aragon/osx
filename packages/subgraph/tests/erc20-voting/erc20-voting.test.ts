@@ -23,7 +23,7 @@ import {
   START_DATE,
   VOTING_POWER
 } from '../constants';
-import {createDummyAcctions, createGetVoteCall} from '../utils';
+import {createDummyActions, createGetVoteCall} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
@@ -40,7 +40,7 @@ let snapshotBlock = '100';
 let supportRequiredPct = '1000';
 let participationRequiredPct = '500';
 let votingPower = '1000';
-let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
