@@ -326,9 +326,9 @@ export function createNewExecutedEvent(
 }
 
 export function createStandardCallbackRegisteredEvent(
-  interfaceId: Bytes,
-  callbackSelector: Bytes,
-  magicNumber: Bytes,
+  interfaceId: string,
+  callbackSelector: string,
+  magicNumber: string,
   contractAddress: string
 ): StandardCallbackRegistered {
   let newStandardCallbackEvent = changetype<StandardCallbackRegistered>(
@@ -340,17 +340,17 @@ export function createStandardCallbackRegisteredEvent(
 
   let interfaceIdParam = new ethereum.EventParam(
     'interfaceId',
-    ethereum.Value.fromBytes(interfaceId)
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
   );
 
   let callbackSelectorParam = new ethereum.EventParam(
     'callbackSelector',
-    ethereum.Value.fromBytes(callbackSelector)
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(callbackSelector) as Bytes)
   );
 
   let magicNumberParam = new ethereum.EventParam(
     'magicNumber',
-    ethereum.Value.fromBytes(magicNumber)
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(magicNumber) as Bytes)
   );
 
   newStandardCallbackEvent.parameters.push(interfaceIdParam);

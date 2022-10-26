@@ -445,3 +445,73 @@ test('Run dao (handleSignatureValidatorSet) mappings with mock event', () => {
 
   clearStore();
 });
+
+test('Run dao (handleStandardCallbackRegistered) mappings with mock event', () => {
+  // create state
+  let daoAddress = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(daoAddress, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
+
+  let newEvent = createStandardCallbackRegisteredEvent(
+    '0xaaaaaaaa',
+    '0xaaaaaaab',
+    '0xaaaaaaac',
+    DAO_ADDRESS
+  );
+  // handle event
+  handleStandardCallbackRegistered(newEvent);
+
+  newEvent = createStandardCallbackRegisteredEvent(
+    '0xbbaaaaaa',
+    '0xbbaaaaab',
+    '0xbbaaaaac',
+    DAO_ADDRESS
+  );
+
+  // handle event
+  handleStandardCallbackRegistered(newEvent);
+  
+  // checks
+  let entityID = `${daoAddress}_0xaaaaaaaa`;
+  assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'interfaceId',
+    '0xaaaaaaaa'
+  );
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'callbackSelector',
+    '0xaaaaaaab'
+  );
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'magicNumber',
+    '0xaaaaaaac'
+  );
+
+  entityID = `${daoAddress}_0xbbaaaaaa`;
+  assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'interfaceId',
+    '0xbbaaaaaa'
+  );
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'callbackSelector',
+    '0xbbaaaaab'
+  );
+  assert.fieldEquals(
+    'StandardCallback',
+    entityID,
+    'magicNumber',
+    '0xbbaaaaac'
+  );
+
+  clearStore();
+});

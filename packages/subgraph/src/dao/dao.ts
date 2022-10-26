@@ -18,7 +18,8 @@ import {
   Dao,
   ContractPermissionId,
   Permission,
-  VaultTransfer
+  VaultTransfer,
+  StandardCallback
 } from '../../generated/schema';
 
 import {ADDRESS_ZERO} from '../utils/constants';
@@ -328,12 +329,14 @@ export function handleStandardCallbackRegistered(
   event: StandardCallbackRegistered
 ): void {
   let daoId = event.address.toHexString();
-  let entity = Dao.load(daoId);
-  if (entity) {
-    if(!entity.supportedInterfaces.length) {
-      entity.supportedInterfaces = []
-    }
-    entity.supportedInterfaces.push(event.params.interfaceId)
-    entity.save();
+  let entityId = `${daoId}_${event.params.interfaceId.toHexString()}`;
+  let entity = StandardCallback.load(entityId);
+  if (!entity) {
+    entity = new StandardCallback(entityId);
+    entity.dao = daoId;
   }
+  entity.interfaceId = event.params.interfaceId;
+  entity.callbackSelector = event.params.callbackSelector;
+  entity.magicNumber = event.params.magicNumber;
+  entity.save();
 }
