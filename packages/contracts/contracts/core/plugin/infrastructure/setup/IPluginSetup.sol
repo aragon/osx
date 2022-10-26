@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {PermissionLib} from "../../../primitives/permission/PermissionLib.sol";
+import {PermissionLib} from "../../../dao/primitives/permission/PermissionLib.sol";
 
 interface IPluginSetup {
     /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.

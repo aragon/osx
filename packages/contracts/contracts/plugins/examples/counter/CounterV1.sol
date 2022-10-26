@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {PluginUUPSUpgradeable} from "../../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../../core/primitives/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../core/plugin/primitives/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../../core/dao/primitives/IDAO.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 
 /// @title CounterV1

@@ -13,8 +13,8 @@ import {IMerkleDistributor} from "../../../plugins/token-creation/IMerkleDistrib
 import {IERC20MintableUpgradeable} from "../../../tokens/IERC20MintableUpgradeable.sol";
 import {GovernanceERC20} from "../../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../../tokens/GovernanceWrappedERC20.sol";
-import {DAO} from "../../primitives/dao/DAO.sol";
-import {IDAO} from "../../primitives/dao/IDAO.sol";
+import {DAO} from "../../dao/primitives/DAO.sol";
+import {IDAO} from "../../dao/primitives/IDAO.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022

@@ -8,8 +8,8 @@ import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-import {PermissionManager} from "../../../primitives/permission/PermissionManager.sol";
 import {_uncheckedIncrement} from "../../../../utils/UncheckedMath.sol";
+import {PermissionManager} from "../../../dao/primitives/permission/PermissionManager.sol";
 import {PluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";

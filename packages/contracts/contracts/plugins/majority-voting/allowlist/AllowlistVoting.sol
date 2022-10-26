@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {Checkpoints} from "@openzeppelin/contracts/utils/Checkpoints.sol";
 
-import {IDAO} from "../../../core/primitives/dao/IDAO.sol";
+import {IDAO} from "../../../core/dao/primitives/IDAO.sol";
 import {_uncheckedAdd, _uncheckedSub} from "../../../utils/UncheckedMath.sol";
 import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {IMajorityVoting} from "../IMajorityVoting.sol";

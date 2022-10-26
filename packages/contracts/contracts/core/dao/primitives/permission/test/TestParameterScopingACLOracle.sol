@@ -3,7 +3,7 @@
 pragma solidity 0.8.10;
 
 import {IPermissionOracle} from "../../permission/IPermissionOracle.sol";
-import {TestPlugin} from "../../plugin/test/TestPlugin.sol";
+import {TestPlugin} from "../../../../plugin/primitives/test/TestPlugin.sol";
 
 contract TestParameterScopingPermissionOracle is IPermissionOracle {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestPlugin.addPermissioned.selector;

@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./IPermissionOracle.sol";
-import "./PermissionLib.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {IPermissionOracle} from "./IPermissionOracle.sol";
+import {PermissionLib} from "./PermissionLib.sol";
 
 /// @title PermissionManager
 /// @author Aragon Association - 2021, 2022

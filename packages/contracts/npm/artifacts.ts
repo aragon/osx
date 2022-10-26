@@ -8,8 +8,8 @@ import * as PermissionLib from '../artifacts/contracts/core/primitives/permissio
 import * as IPermissionOracle from '../artifacts/contracts/core/primitives/permission/IPermissionOracle.sol/IPermissionOracle.json';
 
 //// DAO
-import * as DAO from '../artifacts/contracts/core/primitives/dao/DAO.sol/DAO.json';
-import * as IDAO from '../artifacts/contracts/core/primitives/dao/IDAO.sol/IDAO.json';
+import * as DAO from '../artifacts/contracts/core/dao/primitives/DAO.sol/DAO.json';
+import * as IDAO from '../artifacts/contracts/core/dao/primitives/IDAO.sol/IDAO.json';
 import * as DaoAuthorizable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
 import * as DaoAuthorizableCloneable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizableCloneable.sol/DaoAuthorizableCloneable.json';
 import * as DaoAuthorizableUpgradeable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizableUpgradeable.sol/DaoAuthorizableUpgradeable.json';
@@ -17,20 +17,20 @@ import * as DaoAuthorizableUpgradeable from '../artifacts/contracts/core/primiti
 // Infrastructure
 
 //// DAO Creation
-import * as DAOFactory from '../artifacts/contracts/core/infrastructure/dao/DAOFactory.sol/DAOFactory.json';
-import * as DAORegistry from '../artifacts/contracts/core/infrastructure/dao/DAORegistry.sol/DAORegistry.json';
+import * as DAOFactory from '../artifacts/contracts/core/dao/infrastructure/DAOFactory.sol/DAOFactory.json';
+import * as DAORegistry from '../artifacts/contracts/core/dao/infrastructure/DAORegistry.sol/DAORegistry.json';
 
 //// Plugin Management
 
 ///// Creation
-import * as PluginRepoFactory from '../artifacts/contracts/core/infrastructure/plugin/factory/PluginRepoFactory.sol/PluginRepoFactory.json';
+import * as PluginRepoFactory from '../artifacts/contracts/core/plugin/infrastructure/factory/PluginRepoFactory.sol/PluginRepoFactory.json';
 
 ////// Curation
-import * as PluginRepoRegistry from '../artifacts/contracts/core/infrastructure/plugin/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+import * as PluginRepoRegistry from '../artifacts/contracts/core/plugin/infrastructure/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 
 ////// Setup
-import * as PluginSetup from '../artifacts/contracts/core/infrastructure/plugin/setup/PluginSetup.sol/PluginSetup.json';
-import * as PluginSetupProcessor from '../artifacts/contracts/core/infrastructure/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
+import * as PluginSetup from '../artifacts/contracts/core/plugin/infrastructure/setup/PluginSetup.sol/PluginSetup.json';
+import * as PluginSetupProcessor from '../artifacts/contracts/core/plugin/infrastructure/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
 
 //// Plugins
 

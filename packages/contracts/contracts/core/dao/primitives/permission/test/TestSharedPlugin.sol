@@ -3,11 +3,11 @@
 pragma solidity 0.8.10;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IPermissionOracle} from "../../permission/IPermissionOracle.sol";
 
-import {PluginUUPSUpgradeable} from "../../plugin/PluginUUPSUpgradeable.sol";
-import {DaoUnauthorized} from "../../dao-authorizable/bases/auth.sol";
-import {IDAO} from "../../dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../../plugin/primitives/PluginUUPSUpgradeable.sol";
+import {DaoUnauthorized} from "../../../../general/dao-authorizable/bases/auth.sol";
+import {IDAO} from "../../../../dao/primitives/IDAO.sol";
+import {IPermissionOracle} from "../../permission/IPermissionOracle.sol";
 
 /// @notice A test Plugin that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
 /// @dev This is realized by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager.

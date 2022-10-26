@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 import {_auth} from "./auth.sol";
-import {IDAO} from "../../dao/IDAO.sol";
+import {IDAO} from "../../../dao/primitives/IDAO.sol";
 
 /// @title DaoAuthorizableBase
 /// @author Aragon Association - 2022

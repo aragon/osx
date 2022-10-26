@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {IDAO} from "../dao/IDAO.sol";
+import {IDAO} from "../../dao/primitives/IDAO.sol";
 import {DaoAuthorizableBase} from "./bases/DaoAuthorizableBase.sol";
 
 /// @title DaoAuthorizable

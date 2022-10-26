@@ -4,11 +4,12 @@ pragma solidity 0.8.10;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import {PermissionLib} from "../../../primitives/permission/PermissionLib.sol";
-import {PluginUUPSUpgradeable} from "../../../primitives/plugin/PluginUUPSUpgradeable.sol";
-import {IPlugin} from "../../../primitives/plugin/IPlugin.sol";
-import {DaoAuthorizable} from "../../../primitives/dao-authorizable/DaoAuthorizable.sol";
-import {DAO, IDAO} from "../../../primitives/dao/DAO.sol";
+import {PermissionLib} from "../../../dao/primitives/permission/PermissionLib.sol";
+import {PluginUUPSUpgradeable} from "../../primitives/PluginUUPSUpgradeable.sol";
+import {IPlugin} from "../../primitives/IPlugin.sol";
+import {DaoAuthorizable} from "../../../general/dao-authorizable/DaoAuthorizable.sol";
+import {IDAO} from "../../../dao/primitives/IDAO.sol";
+import {DAO} from "../../../dao/primitives/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "../registry/PluginRepo.sol";
 import {PluginSetup} from "../setup/PluginSetup.sol";

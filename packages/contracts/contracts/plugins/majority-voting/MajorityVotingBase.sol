@@ -6,8 +6,8 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import {PluginUUPSUpgradeable} from "../../core/primitives/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../core/primitives/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/primitives/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../core/dao/primitives/IDAO.sol";
 import {TimeHelpers} from "./utils/TimeHelpers.sol";
 import {IMajorityVoting} from "./IMajorityVoting.sol";
 

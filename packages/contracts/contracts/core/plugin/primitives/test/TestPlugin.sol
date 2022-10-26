@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {PluginUUPSUpgradeable} from "../../plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../dao/IDAO.sol";
+import {IDAO} from "../../../dao/primitives/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../PluginUUPSUpgradeable.sol";
 
 contract TestPlugin is PluginUUPSUpgradeable {
     bytes32 public constant DO_SOMETHING_PERMISSION_ID = keccak256("DO_SOMETHING_PERMISSION");
