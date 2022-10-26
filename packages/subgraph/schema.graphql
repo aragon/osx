@@ -91,7 +91,7 @@ type Dao @entity {
   proposals: [Proposal!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
-  supportedInterfaces: Bytes[]
+  supportedInterfaces: [Bytes!]
 }
 
 # Packages
