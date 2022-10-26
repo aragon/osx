@@ -6,10 +6,12 @@ import {getContractAddress} from '../helpers';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-
   const {deployer} = await getNamedAccounts();
 
+  // Get `DAORegistry` address.
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
+
+  // Get `PluginSetupProcessor` address.
   const pluginSetupProcessorAddress = await getContractAddress(
     'PluginSetupProcessor',
     hre

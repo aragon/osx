@@ -6,9 +6,9 @@ import {getContractAddress} from '../helpers';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deploy} = deployments;
-
   const {deployer} = await getNamedAccounts();
 
+  // Get `PluginRepoRegistry` address.
   const pluginRepoRegistryAddress = await getContractAddress(
     'PluginRepoRegistry',
     hre

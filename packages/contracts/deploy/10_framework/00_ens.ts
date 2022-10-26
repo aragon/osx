@@ -1,11 +1,12 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
+import {setupENS} from '../../utils/ensHelpers';
+
 import {
   detemineAccountNextAddress,
   ENS_ADDRESSES,
   getContractAddress,
-  setupENS,
 } from '../helpers';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -14,13 +15,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployments, getNamedAccounts, ethers, network} = hre;
   const {deploy} = deployments;
-
   const {deployer} = await getNamedAccounts();
 
+  // Get managing DAO address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
+  // Prepare ENS.
   const daoDomain =
     process.env[`${network.name.toUpperCase()}_ENS_DOMAIN`] || '';
+
   if (!daoDomain) throw new Error('DAO domain has not been set in .env');
 
   const node = ethers.utils.namehash(daoDomain);
@@ -28,7 +31,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let ensRegistryAddress = ENS_ADDRESSES[network.name];
 
   if (!ensRegistryAddress) {
-    ensRegistryAddress = await setupENS(hre, daoDomain);
+    const ens = await setupENS(hre, daoDomain);
+    ensRegistryAddress = ens.address;
   }
 
   const ensRegistryContract = await ethers.getContractAt(
@@ -36,14 +40,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ensRegistryAddress
   );
 
-  // deterministic
-  const futureAddress = await detemineAccountNextAddress(2, hre); // use 2 because next deploy will be the implementation
-
+  // Approving future `ENSSubdomainRegistrar` address
+  // by using index 2, because the next deploy will be the logic address.
+  const futureAddress = await detemineAccountNextAddress(2, hre);
   const approveTx = await ensRegistryContract.setApprovalForAll(
     futureAddress,
     true
   );
-
   await approveTx.wait();
 
   await deploy('DAO_ENSSubdomainRegistrar', {
