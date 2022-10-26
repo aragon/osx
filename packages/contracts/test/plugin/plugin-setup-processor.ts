@@ -224,7 +224,7 @@ describe('Plugin Setup Processor', function () {
           ['address'],
           [AddressZero]
         );
-        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetupBad,
@@ -274,7 +274,7 @@ describe('Plugin Setup Processor', function () {
 
         const pluginSetup = pluginSetupV1Mock.address;
 
-        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
@@ -288,7 +288,7 @@ describe('Plugin Setup Processor', function () {
             pluginSetup,
             pluginSetupMockRepoAddress,
             plugin,
-            prepareInstallpermissions
+            prepareInstallPermissions
           )
         ).to.be.revertedWith(
           customError(
@@ -311,7 +311,7 @@ describe('Plugin Setup Processor', function () {
 
         const pluginSetup = pluginSetupV1Mock.address;
 
-        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
@@ -325,13 +325,13 @@ describe('Plugin Setup Processor', function () {
             pluginSetup,
             pluginSetupMockRepoAddress,
             plugin,
-            prepareInstallpermissions
+            prepareInstallPermissions
           )
         ).to.be.revertedWith(
           customError(
             'Unauthorized',
             targetDao.address,
-            prepareInstallpermissions[0]['where'],
+            prepareInstallPermissions[0]['where'],
             psp.address,
             ROOT_PERMISSION_ID
           )
@@ -345,7 +345,7 @@ describe('Plugin Setup Processor', function () {
           ['address'],
           [AddressZero]
         );
-        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetupBad,
@@ -358,7 +358,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetupBad,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         // user2 tries to prepare bad installation with the same plugin address.
@@ -381,7 +381,7 @@ describe('Plugin Setup Processor', function () {
             pluginSetupBad,
             pluginSetupMockRepoAddress,
             secondPreparation.plugin,
-            secondPreparation.prepareInstallpermissions
+            secondPreparation.prepareInstallPermissions
           )
         ).to.be.revertedWith(customError('SetupAlreadyApplied'));
       });
@@ -389,7 +389,7 @@ describe('Plugin Setup Processor', function () {
       it('correctly complete an instaltion process', async () => {
         const pluginSetup = pluginSetupV1Mock.address;
 
-        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
@@ -403,7 +403,7 @@ describe('Plugin Setup Processor', function () {
             pluginSetup,
             pluginSetupMockRepoAddress,
             plugin,
-            prepareInstallpermissions
+            prepareInstallPermissions
           )
         )
           .to.emit(psp, EVENTS.InstallationApplied)
@@ -472,7 +472,7 @@ describe('Plugin Setup Processor', function () {
           ['address'],
           [AddressZero]
         );
-        const {plugin, helpers, prepareInstallpermissions} =
+        const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             targetDao.address,
@@ -486,7 +486,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetupBad,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         // prepare first uninstallation
@@ -573,7 +573,7 @@ describe('Plugin Setup Processor', function () {
       it('revert bad permissions is passed', async () => {
         const pluginSetup = pluginSetupV1Mock.address;
 
-        const {plugin, helpers, prepareInstallpermissions} =
+        const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             targetDao.address,
@@ -587,7 +587,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetup,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         await psp.callStatic.prepareUninstallation(
@@ -614,7 +614,7 @@ describe('Plugin Setup Processor', function () {
       it('correctly complete an uninstallation process', async () => {
         const pluginSetup = pluginSetupV1Mock.address;
 
-        const {plugin, helpers, prepareInstallpermissions} =
+        const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             targetDao.address,
@@ -628,7 +628,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetup,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         const tx = await psp.prepareUninstallation(
@@ -770,7 +770,7 @@ describe('Plugin Setup Processor', function () {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
-        const {plugin, prepareInstallpermissions} = await prepareInstallation(
+        const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           daoAddress,
           pluginSetupV1,
@@ -783,7 +783,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetupV1,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
@@ -802,7 +802,7 @@ describe('Plugin Setup Processor', function () {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
-        const {plugin, helpers, prepareInstallpermissions} =
+        const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             daoAddress,
@@ -816,7 +816,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetupV1,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
@@ -844,7 +844,7 @@ describe('Plugin Setup Processor', function () {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
-        const {plugin, helpers, prepareInstallpermissions} =
+        const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             daoAddress,
@@ -858,7 +858,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetupV1,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
@@ -927,7 +927,7 @@ describe('Plugin Setup Processor', function () {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = pluginSetupV1Mock.address;
 
-        const {plugin, helpers, prepareInstallpermissions} =
+        const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             daoAddress,
@@ -941,7 +941,7 @@ describe('Plugin Setup Processor', function () {
           pluginSetupV1,
           pluginSetupMockRepoAddress,
           plugin,
-          prepareInstallpermissions
+          prepareInstallPermissions
         );
 
         const pluginUpdateParams = {

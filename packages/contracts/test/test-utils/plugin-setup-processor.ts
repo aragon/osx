@@ -38,7 +38,7 @@ export async function prepareInstallation(
   return {
     plugin: plugin,
     helpers: helpers,
-    prepareInstallpermissions: permissions,
+    prepareInstallPermissions: permissions,
   };
 }
 
