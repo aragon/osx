@@ -26,25 +26,26 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let ensRegistryAddress = ENS_ADDRESSES[network.name];
 
   if (!ensRegistryAddress) {
-    ensRegistryAddress = await setupENS(hre, daoDomain.split('.')[0]);
-  } else {
-    const ensRegistryContract = await ethers.getContractAt(
-      'ENSRegistry',
-      ensRegistryAddress
-    );
-
-    // deterministic
-    const futureAddress = await detemineAccountNextAddress(2, hre); // use 2 because next deploy will be the implementation
-
-    const approveTx = await ensRegistryContract.setApprovalForAll(
-      futureAddress,
-      true
-    );
-
-    await approveTx.wait();
+    ensRegistryAddress = await setupENS(hre, daoDomain);
   }
 
-  await deploy('ENSSubdomainRegistrar', {
+  const ensRegistryContract = await ethers.getContractAt(
+    'ENSRegistry',
+    ensRegistryAddress
+  );
+
+  // deterministic
+  const futureAddress = await detemineAccountNextAddress(2, hre); // use 2 because next deploy will be the implementation
+
+  const approveTx = await ensRegistryContract.setApprovalForAll(
+    futureAddress,
+    true
+  );
+
+  await approveTx.wait();
+
+  await deploy('DAO_ENSSubdomainRegistrar', {
+    contract: 'ENSSubdomainRegistrar',
     from: deployer,
     args: [],
     log: true,

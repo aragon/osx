@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
   const managingDAOAddress = await getContractAddress('DAO', hre);
   const ensSubdomainRegistrarAddress = await getContractAddress(
-    'ENSSubdomainRegistrar',
+    'DAO_ENSSubdomainRegistrar',
     hre
   );
 

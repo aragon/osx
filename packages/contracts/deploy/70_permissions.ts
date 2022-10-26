@@ -45,7 +45,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'REGISTER_ENS_SUBDOMAIN_PERMISSION'
   );
   const ensSubdomainRegistrarAddress = await getContractAddress(
-    'ENSSubdomainRegistrar',
+    'DAO_ENSSubdomainRegistrar',
     hre
   );
 
