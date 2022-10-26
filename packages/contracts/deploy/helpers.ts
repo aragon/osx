@@ -4,6 +4,7 @@ import {BigNumberish} from 'ethers';
 
 import {findEvent} from '../test/test-utils/event';
 import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
+import {getMergedABI} from '../utils/abi';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -59,46 +60,6 @@ export async function updateActiveContractsJSON(payload: {
   );
 }
 
-export async function setupENS(
-  hre: HardhatRuntimeEnvironment,
-  domain: string
-): Promise<any> {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
-
-  const ENSRegistry = await ethers.getContractFactory('ENSRegistry');
-  const PublicResolver = await ethers.getContractFactory('PublicResolver');
-
-  // Deploy the ENSRegistry
-  let ens = await ENSRegistry.deploy();
-  await ens.deployed();
-
-  // Deploy the Resolver
-  let resolver = await PublicResolver.deploy(
-    ens.address,
-    ethers.constants.AddressZero
-  );
-  await resolver.deployed();
-
-  // Register subdomains in the reverse order
-  let domainNamesReversed = domain.split('.');
-  domainNamesReversed.push(''); //add the root domain
-  domainNamesReversed = domainNamesReversed.reverse();
-
-  for (let i = 0; i < domainNamesReversed.length - 1; i++) {
-    await ens.setSubnodeRecord(
-      ensDomainHash(domainNamesReversed[i]),
-      ensLabelHash(domainNamesReversed[i + 1]),
-      deployer,
-      resolver.address,
-      0
-    );
-  }
-
-  return ens.address;
-}
-
 export async function detemineAccountNextAddress(
   index: number,
   hre: HardhatRuntimeEnvironment
@@ -114,37 +75,6 @@ export async function detemineAccountNextAddress(
     nonce: nonce + index,
   });
   return futureAddress;
-}
-
-async function getMergedABI(
-  hre: any,
-  primary: string,
-  secondaries: string[]
-): Promise<{abi: any; bytecode: any}> {
-  // @ts-ignore
-  const primaryArtifact = await hre.artifacts.readArtifact(primary);
-
-  const secondariesArtifacts = secondaries.map(
-    async name => await hre.artifacts.readArtifact('PluginRepoRegistry')
-  );
-
-  const _merged = [...primaryArtifact.abi];
-
-  for (let i = 0; i < secondariesArtifacts.length; i++) {
-    const artifact = await secondariesArtifacts[i];
-    _merged.push(...artifact.abi.filter((f: any) => f.type === 'event'));
-  }
-
-  // remove duplicated events
-  const merged = _merged.filter(
-    (value, index, self) =>
-      index === self.findIndex(event => event.name === value.name)
-  );
-
-  return {
-    abi: merged,
-    bytecode: primaryArtifact.bytecode,
-  };
 }
 
 export async function createAndRegisterPluginRepo(
