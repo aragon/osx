@@ -13,7 +13,6 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ steps.prepare.outputs.environment }}
       matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
       - uses: actions/checkout@v2
@@ -23,10 +22,6 @@ jobs:
   test:
     needs: [prepare]
     runs-on: ubuntu-latest
-    environment: ${{ needs.prepare.outputs.environment }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     defaults:
       run:
         working-directory: ${{env.working-directory}}
