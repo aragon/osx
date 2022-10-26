@@ -16,7 +16,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../test-utils/repo';
-import {findEvent} from '../test-utils/event';
+import {findEvent} from '../../utils/event';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

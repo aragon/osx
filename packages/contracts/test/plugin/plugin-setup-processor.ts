@@ -17,7 +17,7 @@ import {customError} from '../test-utils/custom-error-helper';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 import {deployNewDAO} from '../test-utils/dao';
-import {findEvent} from '../test-utils/event';
+import {findEvent} from '../../utils/event';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,

@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {BigNumberish} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {findEvent} from '../test/test-utils/event';
+import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
