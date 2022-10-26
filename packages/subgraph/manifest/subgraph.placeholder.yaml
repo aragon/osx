@@ -73,7 +73,9 @@ templates:
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
         - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
-          handler: handleStandardCallbackRegistered
+          handler: handleStandardCallbackRegistered(address)
+        - event: SignatureValidatorSet
+          handler: handleSignatureValidatorSet
   # ERC20Voting (package)
   - name: ERC20Voting
     kind: ethereum/contract
