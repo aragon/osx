@@ -1,9 +1,9 @@
 import {promises as fs} from 'fs';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {ethers} from 'hardhat';
 import {BigNumberish} from 'ethers';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 import {findEvent} from '../test/test-utils/event';
-import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
 import {getMergedABI} from '../utils/abi';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
@@ -60,14 +60,10 @@ export async function updateActiveContractsJSON(payload: {
   );
 }
 
-export async function detemineAccountNextAddress(
+export async function detemineDeployerNextAddress(
   index: number,
-  hre: HardhatRuntimeEnvironment
+  deployer: any
 ): Promise<string> {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
-
   const [owner] = await ethers.getSigners();
   const nonce = await owner.getTransactionCount();
   const futureAddress = ethers.utils.getContractAddress({

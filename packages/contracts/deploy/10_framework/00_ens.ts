@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {setupENS} from '../../utils/ensHelpers';
 
 import {
-  detemineAccountNextAddress,
+  detemineDeployerNextAddress,
   ENS_ADDRESSES,
   getContractAddress,
 } from '../helpers';
@@ -42,7 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Approving future `ENSSubdomainRegistrar` address
   // by using index 2, because the next deploy will be the logic address.
-  const futureAddress = await detemineAccountNextAddress(2, hre);
+  const futureAddress = await detemineDeployerNextAddress(2, deployer);
   const approveTx = await ensRegistryContract.setApprovalForAll(
     futureAddress,
     true
