@@ -16,7 +16,7 @@ On 2022-10-07 15:20:00
 On 2022-10-03 10:38:36
 
 ### Added
-
+- Added `Withdrawn`, `TrustedForwarderSet`, `StandardCallbackRegistered` and `handleStandardCallbackRegistered` events handling to `DaoTemplate`
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
 - added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
