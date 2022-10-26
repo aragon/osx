@@ -9,23 +9,16 @@ export function ensDomainHash(name: string): string {
   return ethers.utils.namehash(name);
 }
 
-export async function setupENS(
-  hre: HardhatRuntimeEnvironment,
-  domain: string
-): Promise<any> {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
-
+export async function setupENS(deployer: any, domain: string): Promise<any> {
   const ENSRegistry = await ethers.getContractFactory('ENSRegistry');
   const PublicResolver = await ethers.getContractFactory('PublicResolver');
 
   // Deploy the ENSRegistry
-  let ens = await ENSRegistry.deploy();
+  const ens = await ENSRegistry.deploy();
   await ens.deployed();
 
   // Deploy the Resolver
-  let resolver = await PublicResolver.deploy(
+  const resolver = await PublicResolver.deploy(
     ens.address,
     ethers.constants.AddressZero
   );

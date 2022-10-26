@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let ensRegistryAddress = ENS_ADDRESSES[network.name];
 
   if (!ensRegistryAddress) {
-    const ens = await setupENS(hre, daoDomain);
+    const ens = await setupENS(deployer, daoDomain);
     ensRegistryAddress = ens.address;
   }
 
