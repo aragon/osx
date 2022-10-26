@@ -1,13 +1,13 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {createAndRegisterPluginRepo} from '../../helpers';
+import {createPluginRepo} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating plugin repos.`);
 
   // AllowlistVoting
-  await createAndRegisterPluginRepo(
+  await createPluginRepo(
     hre,
     'AllowlistVoting',
     'AllowlistVotingSetup',
@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // ERC20VotingSetup
-  await createAndRegisterPluginRepo(
+  await createPluginRepo(
     hre,
     'ERC20Voting',
     'ERC20VotingSetup',

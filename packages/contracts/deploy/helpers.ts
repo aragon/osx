@@ -73,14 +73,13 @@ export async function detemineDeployerNextAddress(
   return futureAddress;
 }
 
-export async function createAndRegisterPluginRepo(
+export async function createPluginRepo(
   hre: HardhatRuntimeEnvironment,
   pluginContractName: string,
   pluginSetupContractName: string,
   version: [BigNumberish, BigNumberish, BigNumberish],
   contentURI: string
 ): Promise<void> {
-  const {ethers} = hre;
   const signers = await ethers.getSigners();
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
