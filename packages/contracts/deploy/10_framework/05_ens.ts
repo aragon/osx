@@ -6,7 +6,7 @@ import {
   ENS_ADDRESSES,
   getContractAddress,
   setupENS,
-} from './helpers';
+} from '../helpers';
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
