@@ -22,13 +22,13 @@ import * as PluginSetupProcessor from '../artifacts/contracts/core/plugin/infras
 
 // General
 //// Permission
-import * as PermissionManager from '../artifacts/contracts/core/primitives/permission/PermissionManager.sol/PermissionManager.json';
-import * as PermissionLib from '../artifacts/contracts/core/primitives/permission/PermissionLib.sol/PermissionLib.json';
-import * as IPermissionOracle from '../artifacts/contracts/core/primitives/permission/IPermissionOracle.sol/IPermissionOracle.json';
+import * as PermissionManager from '../artifacts/contracts/core/general/permission/PermissionManager.sol/PermissionManager.json';
+import * as PermissionLib from '../artifacts/contracts/core/general/permission/PermissionLib.sol/PermissionLib.json';
+import * as IPermissionOracle from '../artifacts/contracts/core/general/permission/IPermissionOracle.sol/IPermissionOracle.json';
 //// DaoAuthorizable
-import * as DaoAuthorizable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
-import * as DaoAuthorizableCloneable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizableCloneable.sol/DaoAuthorizableCloneable.json';
-import * as DaoAuthorizableUpgradeable from '../artifacts/contracts/core/primitives/dao-authorizable/DaoAuthorizableUpgradeable.sol/DaoAuthorizableUpgradeable.json';
+import * as DaoAuthorizable from '../artifacts/contracts/core/general/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
+import * as DaoAuthorizableCloneable from '../artifacts/contracts/core/general/dao-authorizable/DaoAuthorizableCloneable.sol/DaoAuthorizableCloneable.json';
+import * as DaoAuthorizableUpgradeable from '../artifacts/contracts/core/general/dao-authorizable/DaoAuthorizableUpgradeable.sol/DaoAuthorizableUpgradeable.json';
 
 // To be separated away from core:
 // Plugins
