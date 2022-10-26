@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import {PermissionLib} from "../../../core/dao/primitives/permission/PermissionLib.sol";
+import {PermissionLib} from "../../../core/general/permission/PermissionLib.sol";
 import {IPluginSetup} from "../../../core/plugin/infrastructure/setup/IPluginSetup.sol";
 import {PluginSetup} from "../../../core/plugin/infrastructure/setup/PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";

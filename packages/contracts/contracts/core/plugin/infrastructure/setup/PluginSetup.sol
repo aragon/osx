@@ -8,7 +8,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {createERC1967Proxy as createERC1967} from "../../../../utils/Proxy.sol";
-import {PermissionLib} from "../../../dao/primitives/permission/PermissionLib.sol";
+import {PermissionLib} from "../../../general/permission/PermissionLib.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
 
 /// @title PluginSetup

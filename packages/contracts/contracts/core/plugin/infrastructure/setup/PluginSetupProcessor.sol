@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import {PermissionLib} from "../../../dao/primitives/permission/PermissionLib.sol";
+import {PermissionLib} from "../../../general/permission/PermissionLib.sol";
 import {PluginUUPSUpgradeable} from "../../primitives/PluginUUPSUpgradeable.sol";
 import {IPlugin} from "../../primitives/IPlugin.sol";
 import {DaoAuthorizable} from "../../../general/dao-authorizable/DaoAuthorizable.sol";

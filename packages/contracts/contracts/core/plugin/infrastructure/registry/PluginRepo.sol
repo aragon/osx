@@ -9,7 +9,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {_uncheckedIncrement} from "../../../../utils/UncheckedMath.sol";
-import {PermissionManager} from "../../../dao/primitives/permission/PermissionManager.sol";
+import {PermissionManager} from "../../../general/permission/PermissionManager.sol";
 import {PluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";

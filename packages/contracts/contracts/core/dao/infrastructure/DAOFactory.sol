@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {createERC1967Proxy} from "../../../utils/Proxy.sol";
 import {PluginRepo} from "../../plugin/infrastructure/registry/PluginRepo.sol";
 import {PluginSetupProcessor} from "../../plugin/infrastructure/setup/PluginSetupProcessor.sol";
-import {PermissionLib} from "../primitives/permission/PermissionLib.sol";
+import {PermissionLib} from "../../general/permission/PermissionLib.sol";
 import {DAO} from "../primitives/DAO.sol";
 import {DAORegistry} from "./DAORegistry.sol";
 

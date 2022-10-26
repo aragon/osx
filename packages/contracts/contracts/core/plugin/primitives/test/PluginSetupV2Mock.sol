@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {PermissionLib} from "../../../dao/primitives/permission/PermissionLib.sol";
+import {PermissionLib} from "../../../general/permission/PermissionLib.sol";
 import {PluginSetup} from "../../infrastructure/setup/PluginSetup.sol";
 import {IPluginSetup} from "../../infrastructure/setup/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";

@@ -10,7 +10,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import {PermissionManager} from "./permission/PermissionManager.sol";
+import {PermissionManager} from "../../general/permission/PermissionManager.sol";
 import {CallbackHandler} from "./CallbackHandler.sol";
 import {IDAO} from "./IDAO.sol";
 
