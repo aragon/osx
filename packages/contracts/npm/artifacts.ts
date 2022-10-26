@@ -22,8 +22,10 @@ import * as DAORegistry from '../artifacts/contracts/core/infrastructure/dao/DAO
 
 //// Plugin Management
 
+///// Creation
+import * as PluginRepoFactory from '../artifacts/contracts/core/infrastructure/plugin/factory/PluginRepoFactory.sol/PluginRepoFactory.json';
+
 ////// Curation
-import * as PluginRepoFactory from '../artifacts/contracts/core/infrastructure/plugin/registry/PluginRepoFactory.sol/PluginRepoFactory.json';
 import * as PluginRepoRegistry from '../artifacts/contracts/core/infrastructure/plugin/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 
 ////// Setup
