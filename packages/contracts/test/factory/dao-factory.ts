@@ -2,13 +2,6 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {
-  DAORegistry,
-  PluginSetupProcessor,
-  PluginSetupV1Mock,
-  PluginRepoRegistry,
-} from '../../typechain';
-
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployPluginSetupProcessor} from '../test-utils/plugin-setup-processor';
@@ -16,7 +9,15 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../test-utils/repo';
+
+import {
+  DAORegistry,
+  PluginSetupProcessor,
+  PluginSetupV1Mock,
+  PluginRepoRegistry,
+} from '../../typechain';
 import {findEvent} from '../../utils/event';
+import {getMergedABI} from '../../utils/abi';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -104,44 +105,16 @@ describe('DAOFactory: ', function () {
   let mergedABI: any;
   let daoFactoryBytecode: any;
 
-  async function getMergedABI() {
-    // @ts-ignore
-    const DAOFactoryArtifact = await hre.artifacts.readArtifact('DAOFactory');
-    // @ts-ignore
-    const RegistryArtifact = await hre.artifacts.readArtifact('DAORegistry');
-    // @ts-ignore
-    const PluginSetupProcessorArtifact = await hre.artifacts.readArtifact(
-      'PluginSetupProcessor'
-    );
-    // @ts-ignore
-    const DaoArtifact = await hre.artifacts.readArtifact('DAO');
-
-    const _merged = [
-      ...DAOFactoryArtifact.abi,
-      ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...DaoArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...PluginSetupProcessorArtifact.abi.filter(
-        (f: any) => f.type === 'event'
-      ),
-    ];
-
-    // remove duplicated events
-    const merged = _merged.filter(
-      (value, index, self) =>
-        index === self.findIndex(event => event.name === value.name)
-    );
-
-    return {
-      abi: merged,
-      bytecode: DAOFactoryArtifact.bytecode,
-    };
-  }
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const {abi, bytecode} = await getMergedABI();
+    const {abi, bytecode} = await getMergedABI(
+      // @ts-ignore
+      hre,
+      'DAOFactory',
+      ['DAORegistry', 'PluginSetupProcessor', 'DAO']
+    );
 
     mergedABI = abi;
     daoFactoryBytecode = bytecode;

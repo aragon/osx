@@ -1,5 +1,3 @@
-import {ethers} from 'hardhat';
-
 export async function getMergedABI(
   hre: any,
   primary: string,
@@ -9,7 +7,7 @@ export async function getMergedABI(
   const primaryArtifact = await hre.artifacts.readArtifact(primary);
 
   const secondariesArtifacts = secondaries.map(
-    async name => await hre.artifacts.readArtifact('PluginRepoRegistry')
+    async name => await hre.artifacts.readArtifact(name)
   );
 
   const _merged = [...primaryArtifact.abi];

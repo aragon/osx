@@ -1,5 +1,4 @@
 import {ethers} from 'hardhat';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export function ensLabelHash(label: string): string {
   return ethers.utils.id(label);
