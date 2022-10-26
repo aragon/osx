@@ -6,7 +6,10 @@ import {
   handleDeposited,
   handleExecuted,
   _handleMetadataSet,
-  handleWithdrawn
+  handleWithdrawn,
+  handleTrustedForwarderSet,
+  handleSignatureValidatorSet,
+  handleStandardCallbackRegistered
 } from '../../src/dao/dao';
 import {
   DAO_ADDRESS,
@@ -25,7 +28,10 @@ import {
   getBalanceOf,
   createNewExecutedEvent,
   createDaoEntityState,
-  createNewWithdrawnEvent
+  createNewWithdrawnEvent,
+  createTrustedForwarderSetEvent,
+  createSignatureValidatorSetEvent,
+  createStandardCallbackRegisteredEvent
 } from './utils';
 import {createERC20VotingProposalEntityState} from '../erc20-voting/utils';
 
@@ -228,7 +234,7 @@ test('Run dao (handleWithdrawn) for Token mappings with mock event', () => {
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ONE_ETH);
   handleWithdrawn(newEvent);
-  
+
   // check balance
   assert.fieldEquals(
     'Balance',
@@ -279,7 +285,18 @@ test('Run dao (handleWithdrawn) for Token mappings with mock event', () => {
     'token',
     Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
   );
-  assert.fieldEquals('VaultTransfer', entityID, 'sender', ADDRESS_ONE);
+  assert.fieldEquals(
+    'VaultTransfer',
+    entityID,
+    'sender',
+    Address.fromString(DAO_ADDRESS).toHexString()
+  );
+  assert.fieldEquals(
+    'VaultTransfer',
+    entityID,
+    'to',
+    Address.fromString(ADDRESS_ONE).toHexString()
+  );
   assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
   assert.fieldEquals('VaultTransfer', entityID, 'reference', STRING_DATA);
   assert.fieldEquals(
@@ -294,7 +311,7 @@ test('Run dao (handleWithdrawn) for Token mappings with mock event', () => {
     'createdAt',
     newEvent.block.timestamp.toString()
   );
-  assert.fieldEquals('VaultTransfer', entityID, 'type', 'Deposit');
+  assert.fieldEquals('VaultTransfer', entityID, 'type', 'Withdraw');
 
   clearStore();
 });
@@ -375,6 +392,55 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
     entityID,
     'createdAt',
     event.block.timestamp.toString()
+  );
+
+  clearStore();
+});
+
+test('Run dao (handleTrustedForwarderSet) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
+
+  let trustedForwarder = ADDRESS_ONE;
+
+  let newEvent = createTrustedForwarderSetEvent(trustedForwarder, DAO_ADDRESS);
+  // handle event
+  handleTrustedForwarderSet(newEvent);
+
+  // checks
+  assert.fieldEquals('Dao', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'Dao',
+    entityID,
+    'trustedForwarder',
+    Address.fromString(ADDRESS_ONE).toHexString()
+  );
+
+  clearStore();
+});
+
+test('Run dao (handleSignatureValidatorSet) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(DAO_ADDRESS).toHexString();
+  createDaoEntityState(entityID, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
+
+  let signatureValidator = ADDRESS_ONE;
+
+  let newEvent = createSignatureValidatorSetEvent(
+    signatureValidator,
+    DAO_ADDRESS
+  );
+  // handle event
+  handleSignatureValidatorSet(newEvent);
+
+  // checks
+  assert.fieldEquals('Dao', entityID, 'id', entityID);
+  assert.fieldEquals(
+    'Dao',
+    entityID,
+    'signatureValidator',
+    Address.fromString(ADDRESS_ONE).toHexString()
   );
 
   clearStore();

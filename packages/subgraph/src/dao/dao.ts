@@ -1,4 +1,4 @@
-import { Address, Bytes, store } from '@graphprotocol/graph-ts';
+import {Address, Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
   DAO as DAOContract,
@@ -8,7 +8,11 @@ import {
   NativeTokenDeposited,
   Granted,
   Frozen,
-  Revoked
+  Revoked,
+  Withdrawn,
+  TrustedForwarderSet,
+  SignatureValidatorSet,
+  StandardCallbackRegistered
 } from '../../generated/templates/DaoTemplate/DAO';
 import {
   Dao,
@@ -17,9 +21,9 @@ import {
   VaultTransfer
 } from '../../generated/schema';
 
-import { ADDRESS_ZERO } from '../utils/constants';
-import { handleERC20Token, updateBalance } from '../utils/tokens';
-import { addPackage, decodeWithdrawParams, removePackage } from './utils';
+import {ADDRESS_ZERO} from '../utils/constants';
+import {handleERC20Token, updateBalance} from '../utils/tokens';
+import {addPackage, decodeWithdrawParams, removePackage} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -66,9 +70,8 @@ export function handleDeposited(event: Deposited): void {
   entity.reference = event.params._reference;
   entity.transaction = event.transaction.hash.toHexString();
   entity.createdAt = event.block.timestamp;
-  entity.type = "Deposit";
+  entity.type = 'Deposit';
   entity.save();
-
 }
 
 export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
@@ -102,7 +105,7 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
   entity.reference = 'Eth deposit';
   entity.transaction = event.transaction.hash.toHexString();
   entity.createdAt = event.block.timestamp;
-  entity.type = "Deposit";
+  entity.type = 'Deposit';
   entity.save();
 }
 
@@ -173,7 +176,7 @@ export function handleExecuted(event: Executed): void {
       vaultWithdrawEntity.proposal = proposalId;
       vaultWithdrawEntity.transaction = event.transaction.hash.toHexString();
       vaultWithdrawEntity.createdAt = event.block.timestamp;
-      vaultWithdrawEntity.type = "Withdraw";
+      vaultWithdrawEntity.type = 'Withdraw';
       vaultWithdrawEntity.save();
     }
   }
@@ -269,4 +272,68 @@ export function handleFrozen(event: Frozen): void {
   }
   contractPermissionIdEntity.frozen = true;
   contractPermissionIdEntity.save();
+}
+
+export function handleWithdrawn(event: Withdrawn): void {
+  let daoId = event.address.toHexString();
+  let withdrawnId = `${event.address.toHexString()}_${event.transaction.hash.toHexString()}_${event.transactionLogIndex.toHexString()}`;
+  let token = event.params.token;
+  let balanceId = `${daoId}_${token.toHexString()}`;
+
+  let tokenId = handleERC20Token(token);
+
+  updateBalance(
+    balanceId,
+    event.address,
+    token,
+    event.params.amount,
+    false,
+    event.block.timestamp
+  );
+
+  let entity = new VaultTransfer(withdrawnId);
+  entity.dao = daoId;
+  entity.token = tokenId;
+  entity.sender = event.address;
+  entity.to = event.params.to;
+  entity.amount = event.params.amount;
+  entity.reference = event.params._reference;
+  entity.transaction = event.transaction.hash.toHexString();
+  entity.createdAt = event.block.timestamp;
+  entity.type = 'Withdraw';
+  entity.save();
+}
+
+export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
+  let daoId = event.address.toHexString();
+  let entity = Dao.load(daoId);
+  if (entity) {
+    entity.trustedForwarder = event.params.forwarder;
+    entity.save();
+  }
+}
+
+export function handleSignatureValidatorSet(
+  event: SignatureValidatorSet
+): void {
+  let daoId = event.address.toHexString();
+  let entity = Dao.load(daoId);
+  if (entity) {
+    entity.signatureValidator = event.params.signatureValidator;
+    entity.save();
+  }
+}
+
+export function handleStandardCallbackRegistered(
+  event: StandardCallbackRegistered
+): void {
+  let daoId = event.address.toHexString();
+  let entity = Dao.load(daoId);
+  if (entity) {
+    if(!entity.supportedInterfaces.length) {
+      entity.supportedInterfaces = []
+    }
+    entity.supportedInterfaces.push(event.params.interfaceId)
+    entity.save();
+  }
 }

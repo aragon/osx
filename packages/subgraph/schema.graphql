@@ -89,6 +89,9 @@ type Dao @entity {
   permissions: [Permission!]! @derivedFrom(field: "dao")
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
+  trustedForwarder: Bytes
+  signatureValidator: Bytes
+  supportedInterfaces: Bytes[]
 }
 
 # Packages
