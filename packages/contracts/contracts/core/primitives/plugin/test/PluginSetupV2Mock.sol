@@ -3,8 +3,8 @@
 pragma solidity 0.8.10;
 
 import {PermissionLib} from "../../permission/PermissionLib.sol";
-import {PluginSetup} from "../../../infrastructure/plugin-management/setup/PluginSetup.sol";
-import {IPluginSetup} from "../../../infrastructure/plugin-management/setup/IPluginSetup.sol";
+import {PluginSetup} from "../../../infrastructure/plugin/setup/PluginSetup.sol";
+import {IPluginSetup} from "../../../infrastructure/plugin/setup/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV2Mock} from "./PluginUUPSUpgradeableV2Mock.sol";
 
 // The second version of plugin manager.

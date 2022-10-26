@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {ENSSubdomainRegistrar} from "../../registry/ens/ENSSubdomainRegistrar.sol";
 import {IDAO} from "../../../primitives/dao/IDAO.sol";
-import {InterfaceBasedRegistry} from "../../registry/InterfaceBasedRegistry.sol";
+import {ENSSubdomainRegistrar} from "../../general/registry/ens/ENSSubdomainRegistrar.sol";
+import {InterfaceBasedRegistry} from "../../general/registry/InterfaceBasedRegistry.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepoRegistry

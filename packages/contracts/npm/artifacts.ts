@@ -17,18 +17,18 @@ import * as DaoAuthorizableUpgradeable from '../artifacts/contracts/core/primiti
 // Infrastructure
 
 //// DAO Creation
-import * as DAOFactory from '../artifacts/contracts/core/infrastructure/dao-creation/DAOFactory.sol/DAOFactory.json';
-import * as DAORegistry from '../artifacts/contracts/core/infrastructure/dao-creation/DAORegistry.sol/DAORegistry.json';
+import * as DAOFactory from '../artifacts/contracts/core/infrastructure/dao/DAOFactory.sol/DAOFactory.json';
+import * as DAORegistry from '../artifacts/contracts/core/infrastructure/dao/DAORegistry.sol/DAORegistry.json';
 
 //// Plugin Management
 
 ////// Curation
-import * as PluginRepoFactory from '../artifacts/contracts/core/infrastructure/plugin-management/curation/PluginRepoFactory.sol/PluginRepoFactory.json';
-import * as PluginRepoRegistry from '../artifacts/contracts/core/infrastructure/plugin-management/curation/PluginRepoRegistry.sol/PluginRepoRegistry.json';
+import * as PluginRepoFactory from '../artifacts/contracts/core/infrastructure/plugin/registry/PluginRepoFactory.sol/PluginRepoFactory.json';
+import * as PluginRepoRegistry from '../artifacts/contracts/core/infrastructure/plugin/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json';
 
 ////// Setup
-import * as PluginSetup from '../artifacts/contracts/core/infrastructure/plugin-management/setup/PluginSetup.sol/PluginSetup.json';
-import * as PluginSetupProcessor from '../artifacts/contracts/core/infrastructure/plugin-management/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
+import * as PluginSetup from '../artifacts/contracts/core/infrastructure/plugin/setup/PluginSetup.sol/PluginSetup.json';
+import * as PluginSetupProcessor from '../artifacts/contracts/core/infrastructure/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json';
 
 //// Plugins
 

@@ -6,8 +6,8 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {PermissionLib} from "../../../core/primitives/permission/PermissionLib.sol";
-import {IPluginSetup} from "../../../core/infrastructure/plugin-management/setup/IPluginSetup.sol";
-import {PluginSetup} from "../../../core/infrastructure/plugin-management/setup/PluginSetup.sol";
+import {IPluginSetup} from "../../../core/infrastructure/plugin/setup/IPluginSetup.sol";
+import {PluginSetup} from "../../../core/infrastructure/plugin/setup/PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 

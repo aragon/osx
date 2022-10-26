@@ -12,7 +12,7 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 import {IDAO} from "../../../core/primitives/dao/IDAO.sol";
 import {DAO} from "../../../core/primitives/dao/DAO.sol";
 import {PermissionLib} from "../../../core/primitives/permission/PermissionLib.sol";
-import {PluginSetup, IPluginSetup} from "../../../core/infrastructure/plugin-management/setup/PluginSetup.sol";
+import {PluginSetup, IPluginSetup} from "../../../core/infrastructure/plugin/setup/PluginSetup.sol";
 import {GovernanceERC20} from "../../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../../tokens/GovernanceWrappedERC20.sol";
 import {IGovernanceWrappedERC20} from "../../../tokens/IGovernanceWrappedERC20.sol";

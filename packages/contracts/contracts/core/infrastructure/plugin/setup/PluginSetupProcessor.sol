@@ -9,8 +9,8 @@ import {PluginUUPSUpgradeable} from "../../../primitives/plugin/PluginUUPSUpgrad
 import {IPlugin} from "../../../primitives/plugin/IPlugin.sol";
 import {DaoAuthorizable} from "../../../primitives/dao-authorizable/DaoAuthorizable.sol";
 import {DAO, IDAO} from "../../../primitives/dao/DAO.sol";
-import {PluginRepoRegistry} from "../curation/PluginRepoRegistry.sol";
-import {PluginRepo} from "../curation/PluginRepo.sol";
+import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
+import {PluginRepo} from "../registry/PluginRepo.sol";
 import {PluginSetup} from "../setup/PluginSetup.sol";
 
 /// @title PluginSetupProcessor

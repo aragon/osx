@@ -3,8 +3,8 @@
 pragma solidity 0.8.10;
 
 import {IDAO} from "../../primitives/dao/IDAO.sol";
-import {ENSSubdomainRegistrar} from "../registry/ens/ENSSubdomainRegistrar.sol";
-import {InterfaceBasedRegistry} from "../registry/InterfaceBasedRegistry.sol";
+import {ENSSubdomainRegistrar} from "../general/registry/ens/ENSSubdomainRegistrar.sol";
+import {InterfaceBasedRegistry} from "../general/registry/InterfaceBasedRegistry.sol";
 
 /// @title Register your unique DAO name
 /// @author Aragon Association - 2022

@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 
 import {createERC1967Proxy} from "../../../../utils/Proxy.sol";
 import {PermissionLib} from "../../../primitives/permission/PermissionLib.sol";
-import {PluginRepoRegistry} from "./PluginRepoRegistry.sol";
-import {PluginRepo} from "./PluginRepo.sol";
+import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
+import {PluginRepo} from "../registry/PluginRepo.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022

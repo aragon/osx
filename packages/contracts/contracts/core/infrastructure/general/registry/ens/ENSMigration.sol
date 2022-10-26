@@ -4,7 +4,7 @@
 
 pragma solidity 0.8.10;
 
-import "@ensdomains/ens-contracts/contracts/registry/ENSRegistry.sol";
-import "@ensdomains/ens-contracts/contracts/resolvers/PublicResolver.sol";
+import {ENSRegistry} from "@ensdomains/ens-contracts/contracts/registry/ENSRegistry.sol";
+import {PublicResolver} from "@ensdomains/ens-contracts/contracts/resolvers/PublicResolver.sol";
 
 contract ENSMigration {}

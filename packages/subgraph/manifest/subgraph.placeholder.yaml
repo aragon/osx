@@ -22,7 +22,7 @@ dataSources:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: DAORegistry
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/infrastructure/dao-creation/DAORegistry.sol/DAORegistry.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/infrastructure/dao/DAORegistry.sol/DAORegistry.json
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {PluginSetup, IPluginSetup} from "../../../core/infrastructure/plugin-management/setup/PluginSetup.sol";
+import {PluginSetup, IPluginSetup} from "../../../core/infrastructure/plugin/setup/PluginSetup.sol";
 import {PermissionLib} from "../../../core/primitives/permission/PermissionLib.sol";
 import {IDAO} from "../../../core/primitives/dao/IDAO.sol";
 import {DAO} from "../../../core/primitives/dao/DAO.sol";
