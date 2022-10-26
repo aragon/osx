@@ -4,10 +4,9 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
+  console.log(`\nSetting framework permission.`);
 
-  const {deployer} = await getNamedAccounts();
+  const {ethers} = hre;
   let grantTx;
 
   const managingDAOAddress = await getContractAddress('DAO', hre);
@@ -17,7 +16,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const daoRegistryAddress = await getContractAddress('DAORegistry', hre);
 
-  console.log('Granting permissions');
   const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
     'REGISTER_PLUGIN_REPO_PERMISSION'
   );

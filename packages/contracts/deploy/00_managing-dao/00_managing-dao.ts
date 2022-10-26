@@ -6,6 +6,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
  */
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log(`\nDeploying ManagingDao.`);
+
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deploy} = deployments;
 

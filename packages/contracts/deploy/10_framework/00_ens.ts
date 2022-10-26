@@ -10,6 +10,8 @@ import {
 
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log(`\nDeploying framework.`);
+
   const {deployments, getNamedAccounts, ethers, network} = hre;
   const {deploy} = deployments;
 

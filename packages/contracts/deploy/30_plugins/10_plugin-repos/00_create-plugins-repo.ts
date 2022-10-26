@@ -4,6 +4,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {createAndRegisterPluginRepo} from '../../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log(`\nCreating plugin repos.`);
+
   // AllowlistVoting
   await createAndRegisterPluginRepo(
     hre,
