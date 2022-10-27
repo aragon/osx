@@ -67,17 +67,16 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
-let counter = 0;
-
 describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
   let pluginCloneableMock: PluginCloneableMock;
   let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
-  let pluginSetupMockRepoAddress: string;
   let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
+  let pluginSetupV3Mock: PluginUUPSUpgradeableSetupV2Mock;
   let pluginSetupV1MockBad: PluginUUPSUpgradeableSetupV1MockBad;
+  let pluginSetupMockRepoAddress: string;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -94,35 +93,44 @@ describe('Plugin Setup Processor', function () {
     );
     pluginCloneableMock = await _PluginCloneableMock.deploy();
 
-    // PluginSetupV1
+    // Deploy PluginUUPSUpgradeableSetupMock
     const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
     pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
-    // PluginSetupV2
     const PluginUUPSUpgradeableSetupV2Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
     pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
 
-    // Managing DAO that have permission to manage PluginSetupProcessor
+    const PluginUUPSUpgradeableSetupV3Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV3Mock'
+    );
+    pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
+
+    const PluginUUPSUpgradeableSetupV1MockBad = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV1MockBad'
+    );
+    pluginSetupV1MockBad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
+
+    // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(ownerAddress);
 
-    // ENS subdomain Registry
+    // Deploy ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
       signers[0],
       managingDao,
       'dao.eth'
     );
 
-    // Plugin Repo Registry
+    // Deploy Plugin Repo Registry
     pluginRepoRegistry = await deployPluginRepoRegistry(
       managingDao,
       ensSubdomainRegistrar
     );
 
-    // Plugin Repo Factory
+    // Deploy Plugin Repo Factory
     pluginRepoFactory = await deployPluginRepoFactory(
       signers,
       pluginRepoRegistry
@@ -144,25 +152,16 @@ describe('Plugin Setup Processor', function () {
 
     // Plugin Setup Processor
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
-  });
-
-  beforeEach(async function () {
-    // Target DAO to be used as an example DAO
-    targetDao = await deployNewDAO(ownerAddress);
 
     // Create and register a plugin on the PluginRepoRegistry
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      `PluginUUPSUpgradeableSetupV1Mock-${counter}`,
+      `PluginUUPSUpgradeableMock`,
       [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',
       ownerAddress
     );
-
-    counter++;
-
     const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
-
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
     // Add PluginUUPSUpgradeableSetupV1Mock to the PluginRepo.
@@ -175,17 +174,17 @@ describe('Plugin Setup Processor', function () {
       '0x00'
     );
 
-    const PluginUUPSUpgradeableSetupV1MockBad = await ethers.getContractFactory(
-      'PluginUUPSUpgradeableSetupV1MockBad'
-    );
-    pluginSetupV1MockBad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
-
     // register the bad plugin setup on `PluginRepoRegistry`.
     await pluginRepo.createVersion(
       [3, 0, 0],
       pluginSetupV1MockBad.address,
       '0x00'
     );
+  });
+
+  beforeEach(async function () {
+    // Target DAO to be used as an example DAO
+    targetDao = await deployNewDAO(ownerAddress);
 
     // Grant
     await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);
