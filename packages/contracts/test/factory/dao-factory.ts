@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAORegistry,
   PluginSetupProcessor,
-  PluginSetupV1Mock,
+  PluginUUPSUpgradeableSetupV1Mock,
   PluginRepoRegistry,
 } from '../../typechain';
 
@@ -91,7 +91,7 @@ describe('DAOFactory: ', function () {
 
   let psp: PluginSetupProcessor;
   let pluginRepoRegistry: PluginRepoRegistry;
-  let pluginSetupV1Mock: PluginSetupV1Mock;
+  let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
   let pluginRepoFactory: any;
   let pluginSetupMockRepoAddress: any;
   let daoRegistry: DAORegistry;
@@ -225,12 +225,12 @@ describe('DAOFactory: ', function () {
 
     // Create and register a plugin on the `PluginRepoRegistry`.
     // PluginSetupV1
-    const PluginSetupV1Mock = await ethers.getContractFactory(
-      'PluginSetupV1Mock'
+    const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV1Mock'
     );
-    pluginSetupV1Mock = await PluginSetupV1Mock.deploy();
+    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      'PluginSetupV1Mock',
+      'PluginUUPSUpgradeableSetupV1Mock',
       [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',

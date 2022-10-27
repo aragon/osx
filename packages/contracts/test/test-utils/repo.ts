@@ -3,11 +3,13 @@ import {ethers} from 'hardhat';
 import {
   PluginRepoRegistry,
   PluginRepoFactory,
-  PluginSetupV1Mock,
+  PluginUUPSUpgradeableSetupV1Mock,
 } from '../../typechain';
 
-export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
-  const PluginSetupMock = await ethers.getContractFactory('PluginSetupV1Mock');
+export async function deployMockPluginSetup(): Promise<PluginUUPSUpgradeableSetupV1Mock> {
+  const PluginSetupMock = await ethers.getContractFactory(
+    'PluginUUPSUpgradeableSetupV1Mock'
+  );
   const pluginSetupMockContract = await PluginSetupMock.deploy();
 
   return pluginSetupMockContract;

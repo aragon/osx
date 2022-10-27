@@ -5,12 +5,12 @@ pragma solidity 0.8.10;
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
-import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableV1Mock.sol";
+import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
 
 import "./PluginMockData.sol";
 
 // The first version of plugin setup.
-contract PluginSetupV1Mock is PluginSetup {
+contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     address public pluginBase;
 
     constructor() {
@@ -60,7 +60,7 @@ contract PluginSetupV1Mock is PluginSetup {
     }
 }
 
-contract PluginSetupV1MockBad is PluginSetupV1Mock {
+contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
     function prepareInstallation(address _dao, bytes memory)
         public
         pure
@@ -78,7 +78,7 @@ contract PluginSetupV1MockBad is PluginSetupV1Mock {
     }
 }
 
-contract PluginSetupV2Mock is PluginSetupV1Mock {
+contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
     constructor() {
         pluginBase = address(new PluginUUPSUpgradeableV2Mock());
     }
@@ -106,7 +106,7 @@ contract PluginSetupV2Mock is PluginSetupV1Mock {
     }
 }
 
-contract PluginSetupV3Mock is PluginSetupV2Mock {
+contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
     constructor() {
         pluginBase = address(new PluginUUPSUpgradeableV3Mock());
     }

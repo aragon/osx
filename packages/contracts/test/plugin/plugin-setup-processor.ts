@@ -5,9 +5,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   PluginSetupProcessor,
   PluginCloneableMock,
-  PluginSetupV1Mock,
-  PluginSetupV2Mock,
-  PluginSetupV1MockBad,
+  PluginUUPSUpgradeableSetupV1Mock,
+  PluginUUPSUpgradeableSetupV2Mock,
+  PluginUUPSUpgradeableSetupV1MockBad,
   PluginRepoRegistry,
   PluginRepo,
   DAO,
@@ -67,15 +67,15 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 let counter = 0;
 
-describe('Plugin Setup Processor', function () {
+describe.only('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
   let pluginCloneableMock: PluginCloneableMock;
-  let pluginSetupV1Mock: PluginSetupV1Mock;
+  let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
   let pluginSetupMockRepoAddress: any;
-  let pluginSetupV2Mock: PluginSetupV2Mock;
-  let pluginSetupV1MockBad: PluginSetupV1MockBad;
+  let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
+  let pluginSetupV1MockBad: PluginUUPSUpgradeableSetupV1MockBad;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -95,16 +95,16 @@ describe('Plugin Setup Processor', function () {
     pluginCloneableMock = await _PluginCloneableMock.deploy();
 
     // PluginSetupV1
-    const PluginSetupV1Mock = await ethers.getContractFactory(
-      'PluginSetupV1Mock'
+    const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV1Mock'
     );
-    pluginSetupV1Mock = await PluginSetupV1Mock.deploy();
+    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
     // PluginSetupV2
-    const PluginSetupV2Mock = await ethers.getContractFactory(
-      'PluginSetupV2Mock'
+    const PluginUUPSUpgradeableSetupV2Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV2Mock'
     );
-    pluginSetupV2Mock = await PluginSetupV2Mock.deploy();
+    pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
 
     // Managing DAO that have permission to manage PluginSetupProcessor
     managingDao = await deployNewDAO(ownerAddress);
@@ -152,7 +152,7 @@ describe('Plugin Setup Processor', function () {
 
     // Create and register a plugin on the PluginRepoRegistry
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      `PluginSetupV1Mock-${counter}`,
+      `PluginUUPSUpgradeableSetupV1Mock-${counter}`,
       [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',
@@ -165,7 +165,7 @@ describe('Plugin Setup Processor', function () {
 
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
-    // Add PluginSetupV2Mock to the PluginRepo.
+    // Add PluginUUPSUpgradeableSetupV2Mock to the PluginRepo.
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     pluginRepo = PluginRepo.attach(pluginSetupMockRepoAddress);
 
@@ -175,10 +175,10 @@ describe('Plugin Setup Processor', function () {
       '0x00'
     );
 
-    const PluginSetupV1MockBad = await ethers.getContractFactory(
-      'PluginSetupV1MockBad'
+    const PluginUUPSUpgradeableSetupV1MockBad = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV1MockBad'
     );
-    pluginSetupV1MockBad = await PluginSetupV1MockBad.deploy();
+    pluginSetupV1MockBad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
 
     // register the bad plugin setup on `PluginRepoRegistry`.
     await pluginRepo.createVersion(

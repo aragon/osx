@@ -5,7 +5,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {PluginRepo, PluginSetupV1Mock} from '../../typechain';
+import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../typechain';
 import {deployMockPluginSetup} from '../test-utils/repo';
 import {customError} from '../test-utils/custom-error-helper';
 
@@ -15,7 +15,7 @@ describe('PluginRepo', function () {
   let ownerAddress: string;
   let pluginRepo: PluginRepo;
   let signers: SignerWithAddress[];
-  let pluginSetupMock: PluginSetupV1Mock;
+  let pluginSetupMock: PluginUUPSUpgradeableSetupV1Mock;
 
   function assertVersion(
     actualVersionData: any,
