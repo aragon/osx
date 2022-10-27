@@ -11,7 +11,7 @@ import "./PluginMockData.sol";
 
 // The first version of plugin setup.
 contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
-    address public pluginBase; // TODO make internal
+    address internal pluginBase;
 
     constructor() {
         pluginBase = address(new PluginUUPSUpgradeableV1Mock());
@@ -54,9 +54,8 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         permissions = mockPermissions(1, PermissionLib.Operation.Revoke);
     }
 
-    // TODO make external
     /// @inheritdoc IPluginSetup
-    function getImplementationAddress() public view virtual override returns (address) {
+    function getImplementationAddress() external view virtual override returns (address) {
         return address(pluginBase);
     }
 }
