@@ -76,7 +76,6 @@ describe('Plugin Setup Processor', function () {
   let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
   let pluginSetupV3Mock: PluginUUPSUpgradeableSetupV2Mock;
   let pluginSetupV1MockBad: PluginUUPSUpgradeableSetupV1MockBad;
-  let pluginSetupMockRepoAddress: string;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -162,12 +161,10 @@ describe('Plugin Setup Processor', function () {
       ownerAddress
     );
     const event = await findEvent(tx, EVENTS.PluginRepoRegistered);
-    pluginSetupMockRepoAddress = event.args.pluginRepo;
-
-    // Add PluginUUPSUpgradeableSetupV1Mock to the PluginRepo.
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
-    pluginRepo = PluginRepo.attach(pluginSetupMockRepoAddress);
+    pluginRepo = PluginRepo.attach(event.args.pluginRepo);
 
+    // Add PluginUUPSUpgradeableSetupV2Mock to the PluginRepo.
     await pluginRepo.createVersion(
       [2, 0, 0],
       pluginSetupV2Mock.address,
@@ -227,7 +224,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetupBad,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           data1
         );
 
@@ -240,7 +237,7 @@ describe('Plugin Setup Processor', function () {
           psp.prepareInstallation(
             targetDao.address,
             pluginSetupBad,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             data2
           )
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
@@ -251,7 +248,7 @@ describe('Plugin Setup Processor', function () {
           await psp.callStatic.prepareInstallation(
             targetDao.address,
             pluginSetupV1Mock.address,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             EMPTY_DATA
           );
 
@@ -277,7 +274,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
@@ -285,7 +282,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             plugin,
             prepareInstallPermissions
           )
@@ -314,7 +311,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
@@ -322,7 +319,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             plugin,
             prepareInstallPermissions
           )
@@ -348,14 +345,14 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetupBad,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           dataUser1
         );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupBad,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
@@ -370,7 +367,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetupBad,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           dataUser2
         );
 
@@ -378,7 +375,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetupBad,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             secondPreparation.plugin,
             secondPreparation.prepareInstallPermissions
           )
@@ -392,7 +389,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
@@ -400,7 +397,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             plugin,
             prepareInstallPermissions
           )
@@ -448,7 +445,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
@@ -457,7 +454,7 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             plugin,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             helpers,
             EMPTY_DATA
           )
@@ -476,14 +473,14 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             pluginSetupBad,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             installData
           );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupBad,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
@@ -498,7 +495,7 @@ describe('Plugin Setup Processor', function () {
           targetDao.address,
           plugin,
           pluginSetupBad,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           helpers,
           uninstallData
         );
@@ -509,7 +506,7 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             plugin,
             pluginSetupBad,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             helpers,
             ethers.utils.defaultAbiCoder.encode(['bool'], [true])
           )
@@ -553,7 +550,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
@@ -562,7 +559,7 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             plugin,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             [],
             []
           )
@@ -577,14 +574,14 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
@@ -593,7 +590,7 @@ describe('Plugin Setup Processor', function () {
           targetDao.address,
           plugin,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           helpers,
           EMPTY_DATA
         );
@@ -603,7 +600,7 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             plugin,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             helpers,
             []
           )
@@ -618,14 +615,14 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
@@ -634,7 +631,7 @@ describe('Plugin Setup Processor', function () {
           targetDao.address,
           plugin,
           pluginSetup,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           helpers,
           EMPTY_DATA
         );
@@ -647,7 +644,7 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             plugin,
             pluginSetup,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             helpers,
             permissions
           )
@@ -724,7 +721,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           daoAddress,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
@@ -749,13 +746,13 @@ describe('Plugin Setup Processor', function () {
           psp,
           daoAddress,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
         const pluginUpdateParams = {
           plugin: plugin,
-          pluginSetupRepo: pluginSetupMockRepoAddress,
+          pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
@@ -773,21 +770,21 @@ describe('Plugin Setup Processor', function () {
           psp,
           daoAddress,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           EMPTY_DATA
         );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
           plugin: plugin,
-          pluginSetupRepo: pluginSetupMockRepoAddress,
+          pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
@@ -806,21 +803,21 @@ describe('Plugin Setup Processor', function () {
             psp,
             daoAddress,
             pluginSetupV1,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
           plugin: plugin,
-          pluginSetupRepo: pluginSetupMockRepoAddress,
+          pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
@@ -848,21 +845,21 @@ describe('Plugin Setup Processor', function () {
             psp,
             daoAddress,
             pluginSetupV1,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
           plugin: plugin,
-          pluginSetupRepo: pluginSetupMockRepoAddress,
+          pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
@@ -931,21 +928,21 @@ describe('Plugin Setup Processor', function () {
             psp,
             daoAddress,
             pluginSetupV1,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupV1,
-          pluginSetupMockRepoAddress,
+          pluginRepo.address,
           plugin,
           prepareInstallPermissions
         );
 
         const pluginUpdateParams = {
           plugin: plugin,
-          pluginSetupRepo: pluginSetupMockRepoAddress,
+          pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
           newPluginSetup: pluginSetupV2Mock.address,
         };
@@ -972,7 +969,7 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             plugin,
             pluginSetupV2Mock.address,
-            pluginSetupMockRepoAddress,
+            pluginRepo.address,
             initData,
             permissions
           )
