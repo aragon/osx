@@ -7,6 +7,7 @@ import {
   PluginCloneableMock,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginUUPSUpgradeableSetupV2Mock,
+  PluginUUPSUpgradeableSetupV3Mock,
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginRepoRegistry,
   PluginRepo,
@@ -67,7 +68,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 
 let counter = 0;
 
-describe.only('Plugin Setup Processor', function () {
+describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
@@ -85,9 +86,7 @@ describe.only('Plugin Setup Processor', function () {
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-  });
 
-  before(async () => {
     // Directly deploy PluginCloneableMock
     const _PluginCloneableMock = await ethers.getContractFactory(
       'PluginCloneableMock'
@@ -202,7 +201,7 @@ describe.only('Plugin Setup Processor', function () {
       );
     });
 
-    describe('PrepareInstallation', function () {
+    describe('prepareInstallation', function () {
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         const data = '0x';
         const pluginSetupRepoAddr = ADDRESS_TWO;
@@ -262,7 +261,7 @@ describe.only('Plugin Setup Processor', function () {
       });
     });
 
-    describe('ApplyInstallation', function () {
+    describe('applyInstallation', function () {
       it('reverts if caller does not have `APPLY_INSTALLATION_PERMISSION`', async () => {
         // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
@@ -412,7 +411,7 @@ describe.only('Plugin Setup Processor', function () {
     });
   });
 
-  describe('Plugin Uninstall', function () {
+  describe('Uninstall Plugin', function () {
     beforeEach(async () => {
       // Grant necessary permission to `ownerAddress` so it can install/uninstall plugin on behalf of the DAO,
       // this way we don't have to create DAO execute call.
@@ -428,7 +427,7 @@ describe.only('Plugin Setup Processor', function () {
       );
     });
 
-    describe('PrepareUninstallation', function () {
+    describe('prepareUninstallation', function () {
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         await expect(
           psp.prepareUninstallation(
@@ -518,7 +517,7 @@ describe.only('Plugin Setup Processor', function () {
       });
     });
 
-    describe('ApplyUninstallation', function () {
+    describe('applyUninstallation', function () {
       it('reverts if caller does not have `APPLY_UNINSTALLATION_PERMISSION`', async () => {
         // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
@@ -659,7 +658,7 @@ describe.only('Plugin Setup Processor', function () {
     });
   });
 
-  describe('Plugin Update', function () {
+  describe('Update Plugin', function () {
     beforeEach(async () => {
       await targetDao.grant(
         psp.address,
@@ -673,7 +672,7 @@ describe.only('Plugin Setup Processor', function () {
       );
     });
 
-    describe('PrepareUpdate', function () {
+    describe('prepareUpdate', function () {
       it('reverts if plugin does not support `IPlugin` interface', async () => {
         const pluginSetupRepoAddr = ADDRESS_TWO;
         const plugin = AddressZero;
@@ -874,7 +873,7 @@ describe.only('Plugin Setup Processor', function () {
       });
     });
 
-    describe('ApplyUpdate', function () {
+    describe('applyUpdate', function () {
       it('reverts if caller does not have `APPLY_UPDATE_PERMISSION`', async () => {
         // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
         // to see that it can't set permissions without it.
