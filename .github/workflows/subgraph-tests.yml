@@ -22,6 +22,9 @@ jobs:
   checkManifests:
     needs: [prepare]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{env.working-directory}}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
