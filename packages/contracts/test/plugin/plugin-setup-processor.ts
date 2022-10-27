@@ -180,8 +180,7 @@ describe('Plugin Setup Processor', function () {
 
   describe('Install Plugin', function () {
     beforeEach(async () => {
-      // Grant necessary permission to `ownerAddress` so it can install plugin on behalf of the DAO,
-      // this way we don't have to create DAO execute call.
+      // Grant necessary permission to `ownerAddress` so it can install plugins on behalf of the DAO.
       await targetDao.grant(
         psp.address,
         ownerAddress,
@@ -401,8 +400,7 @@ describe('Plugin Setup Processor', function () {
 
   describe('Uninstall Plugin', function () {
     beforeEach(async () => {
-      // Grant necessary permission to `ownerAddress` so it can install/uninstall plugin on behalf of the DAO,
-      // this way we don't have to create DAO execute call.
+      // Grant necessary permission to `ownerAddress` so it can install and uninstall plugins on behalf of the DAO.
       await targetDao.grant(
         psp.address,
         ownerAddress,
@@ -648,6 +646,7 @@ describe('Plugin Setup Processor', function () {
 
   describe('Update Plugin', function () {
     beforeEach(async () => {
+      // Grant necessary permission to `ownerAddress` so it can install and upadate plugins on behalf of the DAO.
       await targetDao.grant(
         psp.address,
         ownerAddress,
