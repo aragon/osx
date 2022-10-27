@@ -771,13 +771,13 @@ describe('Plugin Setup Processor', function () {
       });
 
       context(`V1 was installed`, function () {
-        let pluginV1: string; // TODO rename this to proxy or proxyToV1
+        let pluginProxy: string;
         let helpersV1: string[];
         let permissionsV1: PermissionOperation[];
 
         beforeEach(async () => {
           ({
-            plugin: pluginV1,
+            plugin: pluginProxy, // points to pluginV1 implementation // TODO check
             helpers: helpersV1,
             permissions: permissionsV1,
           } = await prepareInstallation(
@@ -792,8 +792,23 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             setupV1.address,
             pluginRepo.address,
-            pluginV1,
+            pluginProxy,
             permissionsV1
+          );
+        });
+
+        it('points to the right implementation', async () => {
+          const proxyLogic = await PluginUUPSUpgradeableV1Mock.attach(
+            pluginProxy
+          ).callStatic.getImplementationAddress();
+          expect(proxyLogic).to.equal(
+            await setupV1.callStatic.getImplementationAddress()
+          );
+          expect(proxyLogic).to.not.equal(
+            await setupV2.callStatic.getImplementationAddress()
+          );
+          expect(proxyLogic).to.not.equal(
+            await setupV3.callStatic.getImplementationAddress()
           );
         });
 
@@ -825,7 +840,7 @@ describe('Plugin Setup Processor', function () {
 
         it('revert if helpers passed are missmatched', async () => {
           const pluginUpdateParams = {
-            plugin: pluginV1,
+            plugin: pluginProxy,
             pluginSetupRepo: pluginRepo.address,
             currentPluginSetup: setupV1.address,
             newPluginSetup: setupV2.address,
@@ -843,7 +858,7 @@ describe('Plugin Setup Processor', function () {
 
         it('returns permissions and initData correctly', async () => {
           const pluginUpdateParams = {
-            plugin: pluginV1,
+            plugin: pluginProxy,
             pluginSetupRepo: pluginRepo.address,
             currentPluginSetup: setupV1.address,
             newPluginSetup: setupV2.address,
@@ -869,7 +884,7 @@ describe('Plugin Setup Processor', function () {
 
         it('prepares an update correctly', async () => {
           const pluginUpdateParams = {
-            plugin: pluginV1,
+            plugin: pluginProxy,
             pluginSetupRepo: pluginRepo.address,
             currentPluginSetup: setupV1.address,
             newPluginSetup: setupV2.address,
@@ -893,7 +908,7 @@ describe('Plugin Setup Processor', function () {
 
           beforeEach(async () => {
             await targetDao.grant(
-              pluginV1,
+              pluginProxy,
               psp.address,
               UPGRADE_PLUGIN_PERMISSION_ID
             );
@@ -906,7 +921,7 @@ describe('Plugin Setup Processor', function () {
             } = await prepareUpdate(
               psp,
               targetDao.address,
-              pluginV1,
+              pluginProxy,
               setupV1.address,
               setupV2.address,
               pluginRepo.address,
@@ -914,11 +929,11 @@ describe('Plugin Setup Processor', function () {
               EMPTY_DATA
             ));
 
-            expect(pluginV2).to.equal(pluginV1);
+            expect(pluginV2).to.equal(pluginProxy);
 
             await psp.applyUpdate(
               targetDao.address,
-              pluginV1, //pluginV2
+              pluginProxy,
               setupV2.address,
               pluginRepo.address,
               //helpersV2, //TODO why are they not checked again?
@@ -926,6 +941,22 @@ describe('Plugin Setup Processor', function () {
               permissionsV2
             );
           });
+
+          it('points to the right implementation', async () => {
+            const proxyLogic = await PluginUUPSUpgradeableV1Mock.attach(
+              pluginProxy
+            ).callStatic.getImplementationAddress();
+            expect(proxyLogic).to.not.equal(
+              await setupV1.callStatic.getImplementationAddress()
+            );
+            expect(proxyLogic).to.equal(
+              await setupV2.callStatic.getImplementationAddress()
+            );
+            expect(proxyLogic).to.not.equal(
+              await setupV3.callStatic.getImplementationAddress()
+            );
+          });
+
           it('prepares the follow-up update to v3 correctly', async () => {
             const pluginUpdateParams = {
               plugin: pluginV2,
