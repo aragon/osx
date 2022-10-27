@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {findEvent} from './event';
 import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
-import {BigNumber, utils} from 'ethers';
+import {BytesLike, utils, constants} from 'ethers';
 
 export async function deployPluginSetupProcessor(
   managingDao: any,
@@ -33,11 +33,11 @@ export type PermissionOperation = {
   where: string;
   who: string;
   oracle: string;
-  permissionId: utils.BytesLike;
+  permissionId: BytesLike;
 };
 
 export async function prepareInstallation(
-  pluginSetupProcessorContract: PluginSetupProcessor,
+  psp: PluginSetupProcessor,
   daoAddress: string,
   pluginSetup: string,
   pluginRepo: string,
@@ -47,7 +47,7 @@ export async function prepareInstallation(
   helpers: string[];
   permissions: PermissionOperation[];
 }> {
-  const tx = await pluginSetupProcessorContract.prepareInstallation(
+  const tx = await psp.prepareInstallation(
     daoAddress,
     pluginSetup,
     pluginRepo,
@@ -62,6 +62,70 @@ export async function prepareInstallation(
   };
 }
 
+export async function prepareUpdate(
+  psp: PluginSetupProcessor,
+  daoAddress: string,
+  plugin: string,
+  currentPluginSetup: string,
+  newPluginSetup: string,
+  pluginRepo: string,
+  currentHelpers: string[],
+  data: string
+): Promise<{
+  returnedPluginAddress: string;
+  updatedHelpers: string[];
+  permissions: PermissionOperation[];
+  initData: BytesLike;
+}> {
+  const pluginUpdateParams = {
+    plugin: plugin,
+    pluginSetupRepo: pluginRepo,
+    currentPluginSetup: currentPluginSetup,
+    newPluginSetup: newPluginSetup,
+  };
+
+  const tx = await psp.prepareUpdate(
+    daoAddress,
+    pluginUpdateParams,
+    currentHelpers,
+    data
+  );
+
+  const event = await findEvent(tx, 'UpdatePrepared');
+  let {
+    plugin: returnedPluginAddress,
+    updatedHelpers,
+    permissions,
+    initData,
+  } = event.args;
+
+  return {
+    returnedPluginAddress: returnedPluginAddress,
+    updatedHelpers: updatedHelpers,
+    permissions: permissions,
+    initData: initData,
+  };
+}
+/*event UpdatePrepared(
+  address indexed sender,
+  address indexed dao,
+  address indexed pluginSetup,
+  bytes data,
+  address plugin,
+  address[] updatedHelpers,
+  PermissionLib.ItemMultiTarget[] permissions,
+  bytes initData
+);
+event InstallationPrepared(
+  address indexed sender,
+  address indexed dao,
+  address indexed pluginSetup,
+  bytes data,
+  address plugin,
+  address[] helpers,
+  PermissionLib.ItemMultiTarget[] permissions
+);*/
+
 export function mockPermissionsOperations(
   amount: number,
   op: Operation
@@ -71,10 +135,10 @@ export function mockPermissionsOperations(
   for (let i = 0; i < amount; i++) {
     arr.push({
       operation: op,
-      where: ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
-      who: ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
-      oracle: ethers.constants.AddressZero,
-      permissionId: ethers.utils.id('MOCK_PERMISSION'),
+      where: utils.hexZeroPad(ethers.utils.hexlify(i), 20),
+      who: utils.hexZeroPad(ethers.utils.hexlify(i), 20),
+      oracle: constants.AddressZero,
+      permissionId: utils.id('MOCK_PERMISSION'),
     });
   }
 

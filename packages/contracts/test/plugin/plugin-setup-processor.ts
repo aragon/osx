@@ -5,9 +5,15 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   PluginSetupProcessor,
   PluginCloneableMock,
+  PluginUUPSUpgradeableV1Mock__factory,
+  PluginUUPSUpgradeableV2Mock__factory,
+  PluginUUPSUpgradeableV3Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginUUPSUpgradeableSetupV2Mock,
   PluginUUPSUpgradeableSetupV3Mock,
+  PluginUUPSUpgradeableSetupV1Mock__factory,
+  PluginUUPSUpgradeableSetupV2Mock__factory,
+  PluginUUPSUpgradeableSetupV3Mock__factory,
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginRepoFactory,
   PluginRepoRegistry,
@@ -23,6 +29,7 @@ import {findEvent} from '../test-utils/event';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
+  prepareUpdate,
   Operation,
   mockPermissionsOperations,
   PermissionOperation,
@@ -31,6 +38,7 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../test-utils/repo';
+import {BytesLike} from 'ethers';
 
 const EVENTS = {
   InstallationPrepared: 'InstallationPrepared',
@@ -73,9 +81,15 @@ describe('Plugin Setup Processor', function () {
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
   let pluginCloneableMock: PluginCloneableMock;
+  let PluginUUPSUpgradeableSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock__factory;
+  let PluginUUPSUpgradeableSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock__factory;
+  let PluginUUPSUpgradeableSetupV3Mock: PluginUUPSUpgradeableSetupV3Mock__factory;
   let setupV1: PluginUUPSUpgradeableSetupV1Mock;
   let setupV2: PluginUUPSUpgradeableSetupV2Mock;
   let setupV3: PluginUUPSUpgradeableSetupV2Mock;
+  let PluginUUPSUpgradeableV1Mock: PluginUUPSUpgradeableV1Mock__factory;
+  let PluginUUPSUpgradeableV2Mock: PluginUUPSUpgradeableV2Mock__factory;
+  let PluginUUPSUpgradeableV3Mock: PluginUUPSUpgradeableV3Mock__factory;
   let setupV1Bad: PluginUUPSUpgradeableSetupV1MockBad;
   let ownerAddress: string;
   let targetDao: DAO;
@@ -93,18 +107,29 @@ describe('Plugin Setup Processor', function () {
     );
     pluginCloneableMock = await _PluginCloneableMock.deploy();
 
+    // Deploy PluginUUPSUpgradeableMock
+    PluginUUPSUpgradeableV1Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableV1Mock'
+    );
+    PluginUUPSUpgradeableV2Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableV2Mock'
+    );
+    PluginUUPSUpgradeableV3Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableV3Mock'
+    );
+
     // Deploy PluginUUPSUpgradeableSetupMock
-    const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
+    PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
     setupV1 = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
-    const PluginUUPSUpgradeableSetupV2Mock = await ethers.getContractFactory(
+    PluginUUPSUpgradeableSetupV2Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
     setupV2 = await PluginUUPSUpgradeableSetupV2Mock.deploy();
 
-    const PluginUUPSUpgradeableSetupV3Mock = await ethers.getContractFactory(
+    PluginUUPSUpgradeableSetupV3Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
     setupV3 = await PluginUUPSUpgradeableSetupV3Mock.deploy();
@@ -746,12 +771,16 @@ describe('Plugin Setup Processor', function () {
       });
 
       context(`V1 was installed`, function () {
-        let plugin: string;
-        let helpers: string[];
-        let permissions: PermissionOperation[];
+        let pluginV1: string; // TODO rename this to proxy or proxyToV1
+        let helpersV1: string[];
+        let permissionsV1: PermissionOperation[];
 
         beforeEach(async () => {
-          ({plugin, helpers, permissions} = await prepareInstallation(
+          ({
+            plugin: pluginV1,
+            helpers: helpersV1,
+            permissions: permissionsV1,
+          } = await prepareInstallation(
             psp,
             targetDao.address,
             setupV1.address,
@@ -763,8 +792,8 @@ describe('Plugin Setup Processor', function () {
             targetDao.address,
             setupV1.address,
             pluginRepo.address,
-            plugin,
-            permissions
+            pluginV1,
+            permissionsV1
           );
         });
 
@@ -796,7 +825,7 @@ describe('Plugin Setup Processor', function () {
 
         it('revert if helpers passed are missmatched', async () => {
           const pluginUpdateParams = {
-            plugin: plugin,
+            plugin: pluginV1,
             pluginSetupRepo: pluginRepo.address,
             currentPluginSetup: setupV1.address,
             newPluginSetup: setupV2.address,
@@ -814,7 +843,7 @@ describe('Plugin Setup Processor', function () {
 
         it('returns permissions and initData correctly', async () => {
           const pluginUpdateParams = {
-            plugin: plugin,
+            plugin: pluginV1,
             pluginSetupRepo: pluginRepo.address,
             currentPluginSetup: setupV1.address,
             newPluginSetup: setupV2.address,
@@ -823,7 +852,7 @@ describe('Plugin Setup Processor', function () {
           const result = await psp.callStatic.prepareUpdate(
             targetDao.address,
             pluginUpdateParams,
-            helpers,
+            helpersV1,
             EMPTY_DATA
           );
 
@@ -831,7 +860,7 @@ describe('Plugin Setup Processor', function () {
           const initData = result[1];
 
           expect(permissions).to.deep.equal(
-            mockPermissionsOperations(1, Operation.Freeze).map(perm =>
+            mockPermissionsOperations(2, Operation.Freeze).map(perm =>
               Object.values(perm)
             )
           );
@@ -840,7 +869,7 @@ describe('Plugin Setup Processor', function () {
 
         it('prepares an update correctly', async () => {
           const pluginUpdateParams = {
-            plugin: plugin,
+            plugin: pluginV1,
             pluginSetupRepo: pluginRepo.address,
             currentPluginSetup: setupV1.address,
             newPluginSetup: setupV2.address,
@@ -850,10 +879,71 @@ describe('Plugin Setup Processor', function () {
             psp.prepareUpdate(
               targetDao.address,
               pluginUpdateParams,
-              helpers,
+              helpersV1,
               EMPTY_DATA
             )
           ).to.emit(psp, EVENTS.UpdatePrepared);
+        });
+
+        context(`V1 was updated to V2`, function () {
+          let pluginV2: string;
+          let helpersV2: string[];
+          let permissionsV2: PermissionOperation[];
+          let initDataV2: BytesLike;
+
+          beforeEach(async () => {
+            await targetDao.grant(
+              pluginV1,
+              psp.address,
+              UPGRADE_PLUGIN_PERMISSION_ID
+            );
+
+            ({
+              returnedPluginAddress: pluginV2,
+              updatedHelpers: helpersV2,
+              permissions: permissionsV2,
+              initData: initDataV2,
+            } = await prepareUpdate(
+              psp,
+              targetDao.address,
+              pluginV1,
+              setupV1.address,
+              setupV2.address,
+              pluginRepo.address,
+              helpersV1,
+              EMPTY_DATA
+            ));
+
+            expect(pluginV2).to.equal(pluginV1);
+
+            await psp.applyUpdate(
+              targetDao.address,
+              pluginV1, //pluginV2
+              setupV2.address,
+              pluginRepo.address,
+              //helpersV2, //TODO why are they not checked again?
+              initDataV2,
+              permissionsV2
+            );
+          });
+          it('prepares the follow-up update to v3 correctly', async () => {
+            const pluginUpdateParams = {
+              plugin: pluginV2,
+              pluginSetupRepo: pluginRepo.address,
+              currentPluginSetup: setupV2.address,
+              newPluginSetup: setupV3.address,
+            };
+
+            await expect(
+              psp.prepareUpdate(
+                targetDao.address,
+                pluginUpdateParams,
+                helpersV2,
+                EMPTY_DATA
+              )
+            ).to.emit(psp, EVENTS.UpdatePrepared);
+            // TODO check event
+          });
         });
       });
     });

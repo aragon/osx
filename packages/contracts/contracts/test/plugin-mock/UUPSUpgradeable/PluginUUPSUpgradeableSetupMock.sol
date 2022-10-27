@@ -11,7 +11,7 @@ import "./PluginMockData.sol";
 
 // The first version of plugin setup.
 contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
-    address public pluginBase;
+    address public pluginBase; // TODO make internal
 
     constructor() {
         pluginBase = address(new PluginUUPSUpgradeableV1Mock());
@@ -54,6 +54,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         permissions = mockPermissions(1, PermissionLib.Operation.Revoke);
     }
 
+    // TODO make external
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() public view virtual override returns (address) {
         return address(pluginBase);
@@ -83,6 +84,22 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         pluginBase = address(new PluginUUPSUpgradeableV2Mock());
     }
 
+    /// @inheritdoc IPluginSetup
+    function prepareInstallation(address _dao, bytes memory)
+        public
+        virtual
+        override
+        returns (
+            address plugin,
+            address[] memory helpers,
+            PermissionLib.ItemMultiTarget[] memory permissions
+        )
+    {
+        plugin = mockPluginProxy(pluginBase, _dao);
+        helpers = mockHelpers(2);
+        permissions = mockPermissions(2, PermissionLib.Operation.Grant);
+    }
+
     function prepareUpdate(
         address _dao,
         address _plugin,
@@ -100,9 +117,9 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         )
     {
         (_dao, _plugin, _helpers);
-        activeHelpers = mockHelpers(1);
+        activeHelpers = mockHelpers(2);
         initData = abi.encodeWithSelector(PluginUUPSUpgradeableV2Mock.initializeV2.selector);
-        permissions = mockPermissions(1, PermissionLib.Operation.Freeze);
+        permissions = mockPermissions(2, PermissionLib.Operation.Freeze);
     }
 }
 
@@ -111,6 +128,22 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         pluginBase = address(new PluginUUPSUpgradeableV3Mock());
     }
 
+    /// @inheritdoc IPluginSetup
+    function prepareInstallation(address _dao, bytes memory)
+        public
+        virtual
+        override
+        returns (
+            address plugin,
+            address[] memory helpers,
+            PermissionLib.ItemMultiTarget[] memory permissions
+        )
+    {
+        plugin = mockPluginProxy(pluginBase, _dao);
+        helpers = mockHelpers(3);
+        permissions = mockPermissions(3, PermissionLib.Operation.Grant);
+    }
+
     function prepareUpdate(
         address _dao,
         address _plugin,
@@ -128,8 +161,8 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         )
     {
         (_dao, _plugin, _helpers);
-        activeHelpers = mockHelpers(1);
+        activeHelpers = mockHelpers(3);
         initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
-        permissions = mockPermissions(1, PermissionLib.Operation.Freeze);
+        permissions = mockPermissions(3, PermissionLib.Operation.Freeze);
     }
 }
