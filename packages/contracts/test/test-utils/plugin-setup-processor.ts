@@ -1,6 +1,7 @@
 import {ethers} from 'hardhat';
 import {findEvent} from './event';
 import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
+import {BigNumber, utils} from 'ethers';
 
 export async function deployPluginSetupProcessor(
   managingDao: any,
@@ -20,13 +21,32 @@ export async function deployPluginSetupProcessor(
   return psp;
 }
 
+export enum Operation {
+  Grant,
+  Revoke,
+  Freeze,
+  GrantWithOracle,
+}
+
+export type PermissionOperation = {
+  operation: Operation;
+  where: string;
+  who: string;
+  oracle: string;
+  permissionId: utils.BytesLike;
+};
+
 export async function prepareInstallation(
   pluginSetupProcessorContract: PluginSetupProcessor,
   daoAddress: string,
   pluginSetup: string,
   pluginRepo: string,
   data: string
-) {
+): Promise<{
+  plugin: string;
+  helpers: string[];
+  permissions: PermissionOperation[];
+}> {
   const tx = await pluginSetupProcessorContract.prepareInstallation(
     daoAddress,
     pluginSetup,
@@ -34,32 +54,28 @@ export async function prepareInstallation(
     data
   );
   const event = await findEvent(tx, 'InstallationPrepared');
-  const {plugin, helpers, permissions} = event.args;
+  let {plugin, helpers, permissions} = event.args;
   return {
     plugin: plugin,
     helpers: helpers,
-    prepareInstallPermissions: permissions,
+    permissions: permissions,
   };
 }
 
-export enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
-
-export function mockPermissions(amount: number, op: Op) {
-  let arr = [];
+export function mockPermissions(
+  amount: number,
+  op: Operation
+): PermissionOperation[] {
+  let arr: PermissionOperation[] = [];
 
   for (let i = 0; i < amount; i++) {
-    arr.push([
-      op,
-      ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
-      ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
-      ethers.constants.AddressZero,
-      ethers.utils.id('MOCK_PERMISSION'),
-    ]);
+    arr.push({
+      operation: op,
+      where: ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
+      who: ethers.utils.hexZeroPad(ethers.utils.hexlify(i), 20),
+      oracle: ethers.constants.AddressZero,
+      permissionId: ethers.utils.id('MOCK_PERMISSION'),
+    });
   }
 
   return arr;
