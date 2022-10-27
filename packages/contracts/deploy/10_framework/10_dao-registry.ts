@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get managing DAO address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  // Get DAO's `ENSSubdomainRegistrar` address.
+  // Get DAO's `ENSSubdomainRegistrar` contract.
   const ensSubdomainRegistrarAddress = await getContractAddress(
     'DAO_ENSSubdomainRegistrar',
     hre

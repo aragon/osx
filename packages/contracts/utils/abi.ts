@@ -1,12 +1,13 @@
-export async function getMergedABI(
-  hre: any,
-  primary: string,
-  secondaries: string[]
-): Promise<{abi: any; bytecode: any}> {
-  // @ts-ignore
-  const primaryArtifact = await hre.artifacts.readArtifact(primary);
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-  const secondariesArtifacts = secondaries.map(
+export async function getMergedABI(
+  hre: HardhatRuntimeEnvironment,
+  primaryABI: string,
+  secondaryABIs: string[]
+): Promise<{abi: any; bytecode: any}> {
+  const primaryArtifact = await hre.artifacts.readArtifact(primaryABI);
+
+  const secondariesArtifacts = secondaryABIs.map(
     async name => await hre.artifacts.readArtifact(name)
   );
 
