@@ -233,7 +233,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('Return the correct permissions', async () => {
+      it('return the correct permissions', async () => {
         const {plugin, helpers, permissions} =
           await psp.callStatic.prepareInstallation(
             targetDao.address,
@@ -372,7 +372,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyApplied'));
       });
 
-      it('correctly complete an instaltion process', async () => {
+      it('applies an instaltion process correctly', async () => {
         const pluginSetup = setupV1.address;
 
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
@@ -596,7 +596,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('PermissionsHashMismatch'));
       });
 
-      it('correctly complete an uninstallation process', async () => {
+      it('applies an uninstallation process correctly', async () => {
         const pluginSetup = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
@@ -784,7 +784,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
-      it('Correctly return permissions and initData', async () => {
+      it('returns permissions and initData correctly', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = setupV1.address;
 
@@ -826,7 +826,7 @@ describe('Plugin Setup Processor', function () {
         expect(initData).not.to.be.equal(''); // TODO, improve test
       });
 
-      it('correctly prepares an update', async () => {
+      it('prepares an update correctly', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = setupV1.address;
 
@@ -909,7 +909,7 @@ describe('Plugin Setup Processor', function () {
       // it also get thrown if UPGRADE_PLUGIN_PERMISSION_ID permission is not granted
       // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
 
-      it('correctly applies an update', async () => {
+      it('applies an update correctly', async () => {
         const daoAddress = targetDao.address;
         const pluginSetupV1 = setupV1.address;
 
