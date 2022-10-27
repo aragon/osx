@@ -101,7 +101,7 @@ contract PluginSetupV2Mock is PluginSetupV1Mock {
     {
         (_dao, _plugin, _helpers);
         activeHelpers = mockHelpers(1);
-        initData = abi.encodeWithSelector(bytes4(keccak256("initializeV2(string)")), "hello world");
+        initData = abi.encodeWithSelector(PluginUUPSUpgradeableV2Mock.initializeV2.selector);
         permissions = mockPermissions(1, PermissionLib.Operation.Freeze);
     }
 }
@@ -109,5 +109,27 @@ contract PluginSetupV2Mock is PluginSetupV1Mock {
 contract PluginSetupV3Mock is PluginSetupV2Mock {
     constructor() {
         pluginBase = address(new PluginUUPSUpgradeableV3Mock());
+    }
+
+    function prepareUpdate(
+        address _dao,
+        address _plugin,
+        address[] memory _helpers,
+        uint16[3] calldata,
+        bytes memory
+    )
+        public
+        virtual
+        override
+        returns (
+            address[] memory activeHelpers,
+            bytes memory initData,
+            PermissionLib.ItemMultiTarget[] memory permissions
+        )
+    {
+        (_dao, _plugin, _helpers);
+        activeHelpers = mockHelpers(1);
+        initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
+        permissions = mockPermissions(1, PermissionLib.Operation.Freeze);
     }
 }
