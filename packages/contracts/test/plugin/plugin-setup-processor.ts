@@ -9,6 +9,7 @@ import {
   PluginUUPSUpgradeableSetupV2Mock,
   PluginUUPSUpgradeableSetupV3Mock,
   PluginUUPSUpgradeableSetupV1MockBad,
+  PluginRepoFactory,
   PluginRepoRegistry,
   PluginRepo,
   DAO,
@@ -74,13 +75,13 @@ describe('Plugin Setup Processor', function () {
   let pluginRepo: PluginRepo;
   let pluginCloneableMock: PluginCloneableMock;
   let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
-  let pluginSetupMockRepoAddress: any;
+  let pluginSetupMockRepoAddress: string;
   let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
   let pluginSetupV1MockBad: PluginUUPSUpgradeableSetupV1MockBad;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
-  let pluginRepoFactory: any;
+  let pluginRepoFactory: PluginRepoFactory;
   let pluginRepoRegistry: PluginRepoRegistry;
 
   before(async () => {
@@ -164,7 +165,7 @@ describe('Plugin Setup Processor', function () {
 
     pluginSetupMockRepoAddress = event.args.pluginRepo;
 
-    // Add PluginUUPSUpgradeableSetupV2Mock to the PluginRepo.
+    // Add PluginUUPSUpgradeableSetupV1Mock to the PluginRepo.
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     pluginRepo = PluginRepo.attach(pluginSetupMockRepoAddress);
 
