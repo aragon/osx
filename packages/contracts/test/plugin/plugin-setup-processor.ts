@@ -704,11 +704,9 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
-        const daoAddress = targetDao.address;
-
         const {plugin, helpers} = await prepareInstallation(
           psp,
-          daoAddress,
+          targetDao.address,
           setupV1.address,
           pluginRepo.address,
           EMPTY_DATA
@@ -723,16 +721,19 @@ describe('Plugin Setup Processor', function () {
         };
 
         await expect(
-          psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            helpers,
+            EMPTY_DATA
+          )
         ).to.be.revertedWith(customError('EmptyPluginRepo'));
       });
 
       it('revert if plugin is not applied', async () => {
-        const daoAddress = targetDao.address;
-
         const {plugin, helpers} = await prepareInstallation(
           psp,
-          daoAddress,
+          targetDao.address,
           setupV1.address,
           pluginRepo.address,
           EMPTY_DATA
@@ -746,16 +747,19 @@ describe('Plugin Setup Processor', function () {
         };
 
         await expect(
-          psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            helpers,
+            EMPTY_DATA
+          )
         ).to.be.revertedWith(customError('SetupNotApplied'));
       });
 
       it('revert if helpers passed are missmatched', async () => {
-        const daoAddress = targetDao.address;
-
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
-          daoAddress,
+          targetDao.address,
           setupV1.address,
           pluginRepo.address,
           EMPTY_DATA
@@ -777,17 +781,20 @@ describe('Plugin Setup Processor', function () {
         };
 
         await expect(
-          psp.prepareUpdate(daoAddress, pluginUpdateParams, [], EMPTY_DATA)
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            [],
+            EMPTY_DATA
+          )
         ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
       it('returns permissions and initData correctly', async () => {
-        const daoAddress = targetDao.address;
-
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
-            daoAddress,
+            targetDao.address,
             setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
@@ -809,7 +816,7 @@ describe('Plugin Setup Processor', function () {
         };
 
         const result = await psp.callStatic.prepareUpdate(
-          daoAddress,
+          targetDao.address,
           pluginUpdateParams,
           helpers,
           EMPTY_DATA
@@ -823,12 +830,10 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('prepares an update correctly', async () => {
-        const daoAddress = targetDao.address;
-
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
-            daoAddress,
+            targetDao.address,
             setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
@@ -850,7 +855,12 @@ describe('Plugin Setup Processor', function () {
         };
 
         await expect(
-          psp.prepareUpdate(daoAddress, pluginUpdateParams, helpers, EMPTY_DATA)
+          psp.prepareUpdate(
+            targetDao.address,
+            pluginUpdateParams,
+            helpers,
+            EMPTY_DATA
+          )
         ).to.emit(psp, EVENTS.UpdatePrepared);
       });
     });
@@ -905,12 +915,10 @@ describe('Plugin Setup Processor', function () {
       // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
 
       it('applies an update correctly', async () => {
-        const daoAddress = targetDao.address;
-
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
-            daoAddress,
+            targetDao.address,
             setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
