@@ -66,6 +66,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param plugin The address of the plugin contract.
     error PluginNonupgradeable(address plugin);
 
+    /// @notice Thrown if the upgrade of a plugin proxy failed.
+    /// @param proxy The address of the UUPSUpgradeable proxy.
+    /// @param implementation The address of the implementation contract.
+    /// @param initData The initialization data to be passed to the upgradeable plugin contract via `upgradeToAndCall`.
+    error PluginProxyUpgradeFailed(address proxy, address implementation, bytes initData);
+
     /// @notice Thrown if a contract does not support the `IPlugin` interface.
     /// @param plugin The address of the contract.
     error IPluginNotSupported(address plugin);
@@ -574,7 +580,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonupgradeable({plugin: _proxy});
+                revert PluginProxyUpgradeFailed({
+                    proxy: _proxy,
+                    implementation: _implementation,
+                    initData: _initData
+                });
             }
         } else {
             try PluginUUPSUpgradeable(_proxy).upgradeTo(_implementation) {} catch Error(
@@ -584,7 +594,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             } catch (
                 bytes memory /*lowLevelData*/
             ) {
-                revert PluginNonupgradeable({plugin: _proxy});
+                revert PluginProxyUpgradeFailed({
+                    proxy: _proxy,
+                    implementation: _implementation,
+                    initData: _initData
+                });
             }
         }
     }
