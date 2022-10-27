@@ -705,12 +705,11 @@ describe('Plugin Setup Processor', function () {
 
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers} = await prepareInstallation(
           psp,
           daoAddress,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           EMPTY_DATA
         );
@@ -719,7 +718,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupRepoAddr,
-          currentPluginSetup: pluginSetupV1,
+          currentPluginSetup: setupV1.address,
           newPluginSetup: setupV2.address,
         };
 
@@ -730,12 +729,11 @@ describe('Plugin Setup Processor', function () {
 
       it('revert if plugin is not applied', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers} = await prepareInstallation(
           psp,
           daoAddress,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           EMPTY_DATA
         );
@@ -743,7 +741,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
-          currentPluginSetup: pluginSetupV1,
+          currentPluginSetup: setupV1.address,
           newPluginSetup: setupV2.address,
         };
 
@@ -754,19 +752,18 @@ describe('Plugin Setup Processor', function () {
 
       it('revert if helpers passed are missmatched', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = setupV1.address;
 
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
           daoAddress,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           EMPTY_DATA
         );
 
         await psp.applyInstallation(
           targetDao.address,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           plugin,
           prepareInstallPermissions
@@ -775,7 +772,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
-          currentPluginSetup: pluginSetupV1,
+          currentPluginSetup: setupV1.address,
           newPluginSetup: setupV2.address,
         };
 
@@ -786,20 +783,19 @@ describe('Plugin Setup Processor', function () {
 
       it('returns permissions and initData correctly', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             daoAddress,
-            pluginSetupV1,
+            setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           plugin,
           prepareInstallPermissions
@@ -808,7 +804,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
-          currentPluginSetup: pluginSetupV1,
+          currentPluginSetup: setupV1.address,
           newPluginSetup: setupV2.address,
         };
 
@@ -828,20 +824,19 @@ describe('Plugin Setup Processor', function () {
 
       it('prepares an update correctly', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             daoAddress,
-            pluginSetupV1,
+            setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           plugin,
           prepareInstallPermissions
@@ -850,7 +845,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
-          currentPluginSetup: pluginSetupV1,
+          currentPluginSetup: setupV1.address,
           newPluginSetup: setupV2.address,
         };
 
@@ -911,20 +906,19 @@ describe('Plugin Setup Processor', function () {
 
       it('applies an update correctly', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
             psp,
             daoAddress,
-            pluginSetupV1,
+            setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
           );
 
         await psp.applyInstallation(
           targetDao.address,
-          pluginSetupV1,
+          setupV1.address,
           pluginRepo.address,
           plugin,
           prepareInstallPermissions
@@ -933,7 +927,7 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
-          currentPluginSetup: pluginSetupV1,
+          currentPluginSetup: setupV1.address,
           newPluginSetup: setupV2.address,
         };
         const prepareUpdateTx = await psp.prepareUpdate(
