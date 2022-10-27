@@ -72,10 +72,10 @@ describe('Plugin Setup Processor', function () {
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
   let pluginCloneableMock: PluginCloneableMock;
-  let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
-  let pluginSetupV2Mock: PluginUUPSUpgradeableSetupV2Mock;
-  let pluginSetupV3Mock: PluginUUPSUpgradeableSetupV2Mock;
-  let pluginSetupV1MockBad: PluginUUPSUpgradeableSetupV1MockBad;
+  let setupV1: PluginUUPSUpgradeableSetupV1Mock;
+  let setupV2: PluginUUPSUpgradeableSetupV2Mock;
+  let setupV3: PluginUUPSUpgradeableSetupV2Mock;
+  let setupV1Bad: PluginUUPSUpgradeableSetupV1MockBad;
   let ownerAddress: string;
   let targetDao: DAO;
   let managingDao: DAO;
@@ -96,22 +96,22 @@ describe('Plugin Setup Processor', function () {
     const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
-    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
+    setupV1 = await PluginUUPSUpgradeableSetupV1Mock.deploy();
 
     const PluginUUPSUpgradeableSetupV2Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
-    pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
+    setupV2 = await PluginUUPSUpgradeableSetupV2Mock.deploy();
 
     const PluginUUPSUpgradeableSetupV3Mock = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
-    pluginSetupV2Mock = await PluginUUPSUpgradeableSetupV2Mock.deploy();
+    setupV3 = await PluginUUPSUpgradeableSetupV3Mock.deploy();
 
     const PluginUUPSUpgradeableSetupV1MockBad = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1MockBad'
     );
-    pluginSetupV1MockBad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
+    setupV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(ownerAddress);
@@ -156,7 +156,7 @@ describe('Plugin Setup Processor', function () {
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
       `PluginUUPSUpgradeableMock`,
       [1, 0, 0],
-      pluginSetupV1Mock.address,
+      setupV1.address,
       '0x00',
       ownerAddress
     );
@@ -164,19 +164,10 @@ describe('Plugin Setup Processor', function () {
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     pluginRepo = PluginRepo.attach(event.args.pluginRepo);
 
-    // Add PluginUUPSUpgradeableSetupV2Mock to the PluginRepo.
-    await pluginRepo.createVersion(
-      [2, 0, 0],
-      pluginSetupV2Mock.address,
-      '0x00'
-    );
-
-    // register the bad plugin setup on `PluginRepoRegistry`.
-    await pluginRepo.createVersion(
-      [3, 0, 0],
-      pluginSetupV1MockBad.address,
-      '0x00'
-    );
+    // Add setups
+    await pluginRepo.createVersion([2, 0, 0], setupV2.address, '0x00');
+    await pluginRepo.createVersion([3, 0, 0], setupV3.address, '0x00');
+    await pluginRepo.createVersion([4, 0, 0], setupV1Bad.address, '0x00');
   });
 
   beforeEach(async function () {
@@ -206,7 +197,7 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.prepareInstallation(
             targetDao.address,
-            pluginSetupV1Mock.address,
+            setupV1.address,
             pluginSetupRepoAddr,
             data
           )
@@ -214,7 +205,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if installation already prepared', async () => {
-        const pluginSetupBad = pluginSetupV1MockBad.address;
+        const pluginSetupBad = setupV1Bad.address;
 
         const data1 = ethers.utils.defaultAbiCoder.encode(
           ['address'],
@@ -247,7 +238,7 @@ describe('Plugin Setup Processor', function () {
         const {plugin, helpers, permissions} =
           await psp.callStatic.prepareInstallation(
             targetDao.address,
-            pluginSetupV1Mock.address,
+            setupV1.address,
             pluginRepo.address,
             EMPTY_DATA
           );
@@ -268,7 +259,7 @@ describe('Plugin Setup Processor', function () {
           APPLY_INSTALLATION_PERMISSION_ID
         );
 
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
@@ -305,7 +296,7 @@ describe('Plugin Setup Processor', function () {
           ROOT_PERMISSION_ID
         );
 
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
@@ -335,7 +326,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if plugin setup return the same address', async () => {
-        const pluginSetupBad = pluginSetupV1MockBad.address;
+        const pluginSetupBad = setupV1Bad.address;
 
         const dataUser1 = ethers.utils.defaultAbiCoder.encode(
           ['address'],
@@ -383,7 +374,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('correctly complete an instaltion process', async () => {
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
@@ -439,7 +430,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if plugin is not applied yet', async () => {
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin, helpers} = await prepareInstallation(
           psp,
@@ -462,7 +453,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if plugin uninstallation is already prepared', async () => {
-        const pluginSetupBad = pluginSetupV1MockBad.address;
+        const pluginSetupBad = setupV1Bad.address;
 
         const installData = ethers.utils.defaultAbiCoder.encode(
           ['address'],
@@ -544,7 +535,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if helpers do not match', async () => {
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin} = await prepareInstallation(
           psp,
@@ -567,7 +558,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('revert bad permissions is passed', async () => {
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
@@ -608,7 +599,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('correctly complete an uninstallation process', async () => {
-        const pluginSetup = pluginSetupV1Mock.address;
+        const pluginSetup = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
@@ -675,7 +666,7 @@ describe('Plugin Setup Processor', function () {
         const plugin = AddressZero;
         let pluginUpdateParams = {
           plugin: plugin,
-          oldPluginSetup: pluginSetupV1Mock.address,
+          oldPluginSetup: setupV1.address,
           pluginSetupRepo: pluginSetupRepoAddr,
           currentPluginSetup: AddressZero,
           newPluginSetup: AddressZero,
@@ -715,7 +706,7 @@ describe('Plugin Setup Processor', function () {
 
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
+        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers} = await prepareInstallation(
           psp,
@@ -730,7 +721,7 @@ describe('Plugin Setup Processor', function () {
           plugin: plugin,
           pluginSetupRepo: pluginSetupRepoAddr,
           currentPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
+          newPluginSetup: setupV2.address,
         };
 
         await expect(
@@ -740,7 +731,7 @@ describe('Plugin Setup Processor', function () {
 
       it('revert if plugin is not applied', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
+        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers} = await prepareInstallation(
           psp,
@@ -754,7 +745,7 @@ describe('Plugin Setup Processor', function () {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
+          newPluginSetup: setupV2.address,
         };
 
         await expect(
@@ -764,7 +755,7 @@ describe('Plugin Setup Processor', function () {
 
       it('revert if helpers passed are missmatched', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
+        const pluginSetupV1 = setupV1.address;
 
         const {plugin, prepareInstallPermissions} = await prepareInstallation(
           psp,
@@ -786,7 +777,7 @@ describe('Plugin Setup Processor', function () {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
+          newPluginSetup: setupV2.address,
         };
 
         await expect(
@@ -796,7 +787,7 @@ describe('Plugin Setup Processor', function () {
 
       it('Correctly return permissions and initData', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
+        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
@@ -819,7 +810,7 @@ describe('Plugin Setup Processor', function () {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
+          newPluginSetup: setupV2.address,
         };
 
         const result = await psp.callStatic.prepareUpdate(
@@ -838,7 +829,7 @@ describe('Plugin Setup Processor', function () {
 
       it('correctly prepares an update', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
+        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
@@ -861,7 +852,7 @@ describe('Plugin Setup Processor', function () {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
+          newPluginSetup: setupV2.address,
         };
 
         await expect(
@@ -921,7 +912,7 @@ describe('Plugin Setup Processor', function () {
 
       it('correctly applies an update', async () => {
         const daoAddress = targetDao.address;
-        const pluginSetupV1 = pluginSetupV1Mock.address;
+        const pluginSetupV1 = setupV1.address;
 
         const {plugin, helpers, prepareInstallPermissions} =
           await prepareInstallation(
@@ -944,7 +935,7 @@ describe('Plugin Setup Processor', function () {
           plugin: plugin,
           pluginSetupRepo: pluginRepo.address,
           currentPluginSetup: pluginSetupV1,
-          newPluginSetup: pluginSetupV2Mock.address,
+          newPluginSetup: setupV2.address,
         };
         const prepareUpdateTx = await psp.prepareUpdate(
           targetDao.address,
@@ -968,7 +959,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyUpdate(
             targetDao.address,
             plugin,
-            pluginSetupV2Mock.address,
+            setupV2.address,
             pluginRepo.address,
             initData,
             permissions
