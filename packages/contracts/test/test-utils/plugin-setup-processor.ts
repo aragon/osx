@@ -62,7 +62,7 @@ export async function prepareInstallation(
   };
 }
 
-export function mockPermissions(
+export function mockPermissionsOperations(
   amount: number,
   op: Operation
 ): PermissionOperation[] {

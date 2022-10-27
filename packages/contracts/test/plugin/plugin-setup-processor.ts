@@ -24,7 +24,7 @@ import {
   deployPluginSetupProcessor,
   prepareInstallation,
   Operation,
-  mockPermissions,
+  mockPermissionsOperations,
   PermissionOperation,
 } from '../test-utils/plugin-setup-processor';
 import {
@@ -247,7 +247,9 @@ describe('Plugin Setup Processor', function () {
         expect(helpers.length).to.be.equal(1);
 
         expect(permissions).to.deep.equal(
-          mockPermissions(1, Operation.Grant).map(perm => Object.values(perm))
+          mockPermissionsOperations(1, Operation.Grant).map(perm =>
+            Object.values(perm)
+          )
         );
       });
     });
@@ -829,7 +831,7 @@ describe('Plugin Setup Processor', function () {
           const initData = result[1];
 
           expect(permissions).to.deep.equal(
-            mockPermissions(1, Operation.Freeze).map(perm =>
+            mockPermissionsOperations(1, Operation.Freeze).map(perm =>
               Object.values(perm)
             )
           );
