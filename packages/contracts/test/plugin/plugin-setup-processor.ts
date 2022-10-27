@@ -165,9 +165,9 @@ describe('Plugin Setup Processor', function () {
     pluginRepo = PluginRepo.attach(event.args.pluginRepo);
 
     // Add setups
-    await pluginRepo.createVersion([2, 0, 0], setupV2.address, '0x00');
-    await pluginRepo.createVersion([3, 0, 0], setupV3.address, '0x00');
-    await pluginRepo.createVersion([4, 0, 0], setupV1Bad.address, '0x00');
+    await pluginRepo.createVersion([2, 0, 0], setupV2.address, EMPTY_DATA);
+    await pluginRepo.createVersion([3, 0, 0], setupV3.address, EMPTY_DATA);
+    await pluginRepo.createVersion([4, 0, 0], setupV1Bad.address, EMPTY_DATA);
   });
 
   beforeEach(async function () {
