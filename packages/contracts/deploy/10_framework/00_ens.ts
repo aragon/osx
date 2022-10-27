@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {setupENS} from '../../utils/ensHelpers';
+import {setupENS} from '../../utils/ens';
 
 import {
   detemineDeployerNextAddress,

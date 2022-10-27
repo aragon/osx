@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
 import {
   DAO,
   ENSSubdomainRegistrar,

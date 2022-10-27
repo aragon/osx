@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {DAO, DAORegistry, ENSSubdomainRegistrar} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
