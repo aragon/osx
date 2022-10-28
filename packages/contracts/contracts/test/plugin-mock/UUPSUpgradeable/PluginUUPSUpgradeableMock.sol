@@ -23,8 +23,8 @@ contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeableV1Mock {
         v2 = 2;
     }
 
-    function initializeV2() external reinitializer(2) {
-        v2 = v2;
+    function initializeV1toV2() external reinitializer(2) {
+        v2 = 2;
     }
 }
 
@@ -38,7 +38,12 @@ contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeableV2Mock {
         v3 = 3;
     }
 
-    function initializeV3() external reinitializer(3) {
+    function initializeV1toV3() external reinitializer(3) {
+        v2 = 2;
+        v3 = 3;
+    }
+
+    function initializeV2toV3() external reinitializer(3) {
         v3 = 3;
     }
 }

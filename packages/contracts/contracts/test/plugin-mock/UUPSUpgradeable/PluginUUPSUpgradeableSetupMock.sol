@@ -119,7 +119,9 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
             activeHelpers = mockHelpers(2);
-            initData = abi.encodeWithSelector(PluginUUPSUpgradeableV2Mock.initializeV2.selector);
+            initData = abi.encodeWithSelector(
+                PluginUUPSUpgradeableV2Mock.initializeV1toV2.selector
+            );
             permissions = mockPermissions(1, 2, PermissionLib.Operation.Grant);
         }
     }
@@ -168,7 +170,9 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
             activeHelpers = mockHelpers(3);
-            initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
+            initData = abi.encodeWithSelector(
+                PluginUUPSUpgradeableV3Mock.initializeV1toV3.selector
+            );
             permissions = mockPermissions(1, 3, PermissionLib.Operation.Grant);
         }
 
@@ -176,7 +180,9 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         if (_oldVersion[0] == 2 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
             activeHelpers = mockHelpers(3);
-            initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
+            initData = abi.encodeWithSelector(
+                PluginUUPSUpgradeableV3Mock.initializeV2toV3.selector
+            );
             permissions = mockPermissions(2, 3, PermissionLib.Operation.Grant);
         }
     }
