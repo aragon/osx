@@ -1102,7 +1102,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it.skip('cannot update to V1 again', async () => {
+      it('cannot update to V1', async () => {
         await expect(
           updateHelper(
             psp,
@@ -1135,6 +1135,20 @@ describe('Plugin Setup Processor', function () {
             setupV1,
             setupV2
           ));
+        });
+
+        it('cannot update to V2 again', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV2,
+              setupV2,
+              setupV2
+            )
+          ).to.be.reverted;
         });
 
         it('points to the V2 implementation', async () => {
