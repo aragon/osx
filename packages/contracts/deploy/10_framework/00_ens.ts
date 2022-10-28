@@ -26,6 +26,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (!daoDomain) throw new Error('DAO domain has not been set in .env');
 
+  console.log(
+    `Using domain of "${daoDomain}", that it is owned by the deployer ${deployer}.`
+  );
+
   const node = ethers.utils.namehash(daoDomain);
 
   let ensRegistryAddress = ENS_ADDRESSES[network.name];

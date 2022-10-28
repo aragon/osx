@@ -115,6 +115,8 @@ export async function createPluginRepo(
     managingDAOAddress
   );
 
+  await tx.wait();
+
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
 
