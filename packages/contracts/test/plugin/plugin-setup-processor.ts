@@ -1093,7 +1093,7 @@ describe('Plugin Setup Processor', function () {
               EVENTS.UpdatePrepared
             );
             const {permissions: permissionsV3, initData: initDataV3} =
-              prepareUpdateEvent.args; // HERE IS SOME ERROR
+              prepareUpdateEvent.args;
 
             /*await targetDao.grant(
               proxy,
