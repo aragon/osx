@@ -307,15 +307,15 @@ describe('DAOFactory: ', function () {
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
-      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, psp.address, dao);
+      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, dao, psp.address);
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(
         APPLY_INSTALLATION_PERMISSION_ID,
         daoFactory.address,
-        daoFactory.address,
-        psp.address
+        psp.address,
+        daoFactory.address
       );
 
     await expect(tx)
@@ -323,8 +323,8 @@ describe('DAOFactory: ', function () {
       .withArgs(
         ROOT_PERMISSION_ID,
         daoFactory.address,
-        daoFactory.address,
-        dao
+        dao,
+        daoFactory.address
       );
   });
 
