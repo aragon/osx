@@ -36,6 +36,7 @@ import {
   Operation,
   mockPermissionsOperations,
   PermissionOperation,
+  mockHelpers,
 } from '../test-utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,
@@ -1000,7 +1001,7 @@ describe('Plugin Setup Processor', function () {
             initDataV2,
             permissionsV2
           )
-        ).to.revertedWith(
+        ).to.be.revertedWith(
           customError(
             'PluginProxyUpgradeFailed',
             proxy,
@@ -1065,6 +1066,18 @@ describe('Plugin Setup Processor', function () {
         ).to.equal(await setupV1.callStatic.getImplementationAddress());
       });
 
+      it('sets the V1 helpers', async () => {
+        expect(helpersV1).to.deep.equal(mockHelpers(1));
+      });
+
+      it('sets the V1 permissions', async () => {
+        expect(permissionsV1).to.deep.equal(
+          mockPermissionsOperations(0, 1, Operation.Grant).map(perm =>
+            Object.values(perm)
+          )
+        );
+      });
+
       it('updates from V1 to V2', async () => {
         await updateHelper(
           psp,
@@ -1089,27 +1102,57 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
+      it.skip('cannot update to V1 again', async () => {
+        await expect(
+          updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV1,
+            setupV1,
+            setupV1
+          )
+        ).to.be.reverted;
+      });
+
       context(`and updated to V2`, function () {
         let helpersV2: string[];
-        let permissionsV2: PermissionOperation[];
+        let permissionsV1V2: PermissionOperation[];
+        let initDataV1V2: BytesLike;
 
         beforeEach(async () => {
-          ({updatedHelpers: helpersV2, permissions: permissionsV2} =
-            await updateHelper(
-              psp,
-              targetDao,
-              proxy,
-              pluginRepo,
-              helpersV1,
-              setupV1,
-              setupV2
-            ));
+          ({
+            updatedHelpers: helpersV2,
+            permissions: permissionsV1V2,
+            initData: initDataV1V2,
+          } = await updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV1,
+            setupV1,
+            setupV2
+          ));
         });
 
         it('points to the V2 implementation', async () => {
           expect(
             await PluginV2.attach(proxy).callStatic.getImplementationAddress()
           ).to.equal(await setupV2.callStatic.getImplementationAddress());
+        });
+
+        it('sets the V2 helpers', async () => {
+          expect(helpersV2).to.deep.equal(mockHelpers(2));
+        });
+
+        it('sets the V1 to V2 permissions', async () => {
+          expect(permissionsV1V2).to.deep.equal(
+            mockPermissionsOperations(1, 2, Operation.Grant).map(perm =>
+              Object.values(perm)
+            )
+          );
         });
 
         it('updates from V2 to V3', async () => {
@@ -1125,20 +1168,23 @@ describe('Plugin Setup Processor', function () {
         });
         context(`and updated to V3`, function () {
           let helpersV3: string[];
-          let permissionsV3: PermissionOperation[];
-          let initDataV3: BytesLike;
+          let permissionsV2V3: PermissionOperation[];
+          let initDataV2V3: BytesLike;
 
           beforeEach(async () => {
-            ({updatedHelpers: helpersV3, permissions: permissionsV3} =
-              await updateHelper(
-                psp,
-                targetDao,
-                proxy,
-                pluginRepo,
-                helpersV2,
-                setupV2,
-                setupV3
-              ));
+            ({
+              updatedHelpers: helpersV3,
+              permissions: permissionsV2V3,
+              initData: initDataV2V3,
+            } = await updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV2,
+              setupV2,
+              setupV3
+            ));
           });
 
           it('points to the V3 implementation', async () => {
@@ -1146,30 +1192,57 @@ describe('Plugin Setup Processor', function () {
               await PluginV3.attach(proxy).callStatic.getImplementationAddress()
             ).to.equal(await setupV3.callStatic.getImplementationAddress());
           });
+
+          it('sets the V3 helpers', async () => {
+            expect(helpersV3).to.deep.equal(mockHelpers(3));
+          });
+
+          it('sets the V2 to V3 permissions', async () => {
+            expect(permissionsV2V3).to.deep.equal(
+              mockPermissionsOperations(2, 3, Operation.Grant).map(perm =>
+                Object.values(perm)
+              )
+            );
+          });
         });
       });
       context(`and updated to V3`, function () {
         let helpersV3: string[];
-        let permissionsV3: PermissionOperation[];
-        let initDataV3: BytesLike;
+        let permissionsV1V3: PermissionOperation[];
+        let initDataV1V3: BytesLike;
 
         beforeEach(async () => {
-          ({updatedHelpers: helpersV3, permissions: permissionsV3} =
-            await updateHelper(
-              psp,
-              targetDao,
-              proxy,
-              pluginRepo,
-              helpersV1,
-              setupV1,
-              setupV3
-            ));
+          ({
+            updatedHelpers: helpersV3,
+            permissions: permissionsV1V3,
+            initData: initDataV1V3,
+          } = await updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV1,
+            setupV1,
+            setupV3
+          ));
         });
 
         it('points to the V3 implementation', async () => {
           expect(
             await PluginV3.attach(proxy).callStatic.getImplementationAddress()
           ).to.equal(await setupV3.callStatic.getImplementationAddress());
+        });
+
+        it('sets the V3 helpers', async () => {
+          expect(helpersV3).to.deep.equal(mockHelpers(3));
+        });
+
+        it('sets the V1 to V3 permissions', async () => {
+          expect(permissionsV1V3).to.deep.equal(
+            mockPermissionsOperations(1, 3, Operation.Grant).map(perm =>
+              Object.values(perm)
+            )
+          );
         });
       });
     });
@@ -1193,6 +1266,18 @@ describe('Plugin Setup Processor', function () {
         ).to.equal(await setupV2.callStatic.getImplementationAddress());
       });
 
+      it('sets the V2 helpers', async () => {
+        expect(helpersV2).to.deep.equal(mockHelpers(2));
+      });
+
+      it('sets the V2 permissions', async () => {
+        expect(permissionsV2).to.deep.equal(
+          mockPermissionsOperations(0, 2, Operation.Grant).map(perm =>
+            Object.values(perm)
+          )
+        );
+      });
+
       it('updates from V2 to V3', async () => {
         await updateHelper(
           psp,
@@ -1203,6 +1288,46 @@ describe('Plugin Setup Processor', function () {
           setupV2,
           setupV3
         );
+      });
+
+      context(`and updated to V3`, function () {
+        let helpersV3: string[];
+        let permissionsV2V3: PermissionOperation[];
+        let initDataV2V3: BytesLike;
+
+        beforeEach(async () => {
+          ({
+            updatedHelpers: helpersV3,
+            permissions: permissionsV2V3,
+            initData: initDataV2V3,
+          } = await updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV2,
+            setupV2,
+            setupV3
+          ));
+        });
+
+        it('points to the V3 implementation', async () => {
+          expect(
+            await PluginV3.attach(proxy).callStatic.getImplementationAddress()
+          ).to.equal(await setupV3.callStatic.getImplementationAddress());
+        });
+
+        it('sets the V3 helpers', async () => {
+          expect(helpersV3).to.deep.equal(mockHelpers(3));
+        });
+
+        it('sets the V2 to V3 permissions', async () => {
+          expect(permissionsV2V3).to.deep.equal(
+            mockPermissionsOperations(2, 3, Operation.Grant).map(perm =>
+              Object.values(perm)
+            )
+          );
+        });
       });
     });
 
@@ -1223,6 +1348,18 @@ describe('Plugin Setup Processor', function () {
         expect(
           await PluginV3.attach(proxy).callStatic.getImplementationAddress()
         ).to.equal(await setupV3.callStatic.getImplementationAddress());
+      });
+
+      it('sets the V3 helpers', async () => {
+        expect(helpersV3).to.deep.equal(mockHelpers(3));
+      });
+
+      it('sets the V3 permissions', async () => {
+        expect(permissionsV3).to.deep.equal(
+          mockPermissionsOperations(0, 3, Operation.Grant).map(perm =>
+            Object.values(perm)
+          )
+        );
       });
     });
   });
@@ -1282,6 +1419,7 @@ async function updateHelper(
 ): Promise<{
   updatedHelpers: string[];
   permissions: PermissionOperation[];
+  initData: BytesLike;
 }> {
   const pluginUpdateParams = {
     plugin: proxy,
@@ -1308,7 +1446,6 @@ async function updateHelper(
     permissions: permissions,
     initData: initData,
   } = prepareUpdateEvent.args;
-  // TODO check them
 
   // Grant the `UPGRADE_PLUGIN_PERMISSION_ID` permission to the plugin setup processor
   await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
@@ -1331,5 +1468,5 @@ async function updateHelper(
   );
   expect(appliedUpdateEvent).to.not.equal(undefined);
 
-  return {updatedHelpers, permissions};
+  return {updatedHelpers, permissions, initData};
 }

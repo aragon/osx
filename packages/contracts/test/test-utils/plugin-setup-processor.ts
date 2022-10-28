@@ -126,3 +126,13 @@ export function mockPermissionsOperations(
 
   return arr;
 }
+
+export function mockHelpers(amount: number): string[] {
+  let arr: string[] = [];
+
+  for (let i = 0; i < amount; i++) {
+    arr.push(utils.hexZeroPad(ethers.utils.hexlify(i), 20));
+  }
+
+  return arr;
+}
