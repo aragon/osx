@@ -79,7 +79,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
-describe.only('Plugin Setup Processor', function () {
+describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let pluginRepo: PluginRepo;
@@ -310,6 +310,71 @@ describe.only('Plugin Setup Processor', function () {
       });
     });
 
+    it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
+      let proxy: string;
+      let helpersV1: string[];
+      let permissionsV1: PermissionOperation[];
+
+      ({
+        plugin: proxy,
+        helpers: helpersV1,
+        permissions: permissionsV1,
+      } = await prepareInstallation(
+        psp,
+        targetDao.address,
+        setupV1.address,
+        pluginRepo.address,
+        EMPTY_DATA
+      ));
+
+      await psp.applyInstallation(
+        targetDao.address,
+        setupV1.address,
+        pluginRepo.address,
+        proxy,
+        permissionsV1
+      );
+
+      const pluginUpdateParams = {
+        plugin: proxy,
+        pluginSetupRepo: pluginRepo.address,
+        currentPluginSetup: setupV1.address,
+        newPluginSetup: setupV2.address,
+      };
+      const prepareUpdateTx = await psp.prepareUpdate(
+        targetDao.address,
+        pluginUpdateParams,
+        helpersV1,
+        EMPTY_DATA
+      );
+
+      const prepareUpdateEvent = await findEvent(
+        prepareUpdateTx,
+        EVENTS.UpdatePrepared
+      );
+
+      const {permissions: permissionsV2, initData: initDataV2} =
+        prepareUpdateEvent.args;
+
+      await expect(
+        psp.applyUpdate(
+          targetDao.address,
+          proxy,
+          setupV2.address,
+          pluginRepo.address,
+          initDataV2,
+          permissionsV2
+        )
+      ).to.revertedWith(
+        customError(
+          'PluginProxyUpgradeFailed',
+          proxy,
+          await setupV2.callStatic.getImplementationAddress(),
+          initDataV2
+        )
+      );
+    });
+
     describe('applyInstallation', function () {
       it('reverts if caller does not have `APPLY_INSTALLATION_PERMISSION`', async () => {
         // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
@@ -434,7 +499,7 @@ describe.only('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyApplied'));
       });
 
-      it('applies an instaltion process correctly', async () => {
+      it('applies a prepared installation', async () => {
         const pluginSetup = setupV1.address;
 
         const {plugin, permissions: permissions} = await prepareInstallation(
@@ -664,7 +729,7 @@ describe.only('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('PermissionsHashMismatch'));
       });
 
-      it('applies an uninstallation process correctly', async () => {
+      it('applies a prepared uninstallation', async () => {
         const pluginSetup = setupV1.address;
 
         const {
@@ -945,21 +1010,6 @@ describe.only('Plugin Setup Processor', function () {
         );
       });
 
-      it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
-        const permissions: any[] = [];
-
-        await expect(
-          psp.applyUpdate(
-            targetDao.address,
-            AddressZero,
-            AddressZero,
-            AddressZero,
-            EMPTY_DATA,
-            permissions
-          )
-        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
-      });
-
       it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
         let proxy: string;
         let helpersV1: string[];
@@ -1025,9 +1075,23 @@ describe.only('Plugin Setup Processor', function () {
         );
       });
 
+      it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
+        const permissions: any[] = [];
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            AddressZero,
+            AddressZero,
+            AddressZero,
+            EMPTY_DATA,
+            permissions
+          )
+        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
+      });
+
       // TODO: Find a way to test upgradeProxy
       // also check this function's errors as they might be misleading
-      // it also get thrown if UPGRADE_PLUGIN_PERMISSION_ID permission is not granted
       // it('applyUpdate: reverts if PluginNonupgradeable', async () => {});
     });
   });
@@ -1123,6 +1187,30 @@ describe.only('Plugin Setup Processor', function () {
             setupV2,
             setupV3
           );
+        });
+        context(`and updated to V3`, function () {
+          let helpersV3: string[];
+          let permissionsV3: PermissionOperation[];
+          let initDataV3: BytesLike;
+
+          beforeEach(async () => {
+            ({updatedHelpers: helpersV3, permissions: permissionsV3} =
+              await updateHelper(
+                psp,
+                targetDao,
+                proxy,
+                pluginRepo,
+                helpersV2,
+                setupV2,
+                setupV3
+              ));
+          });
+
+          it('points to the V3 implementation', async () => {
+            expect(
+              await PluginV3.attach(proxy).callStatic.getImplementationAddress()
+            ).to.equal(await setupV3.callStatic.getImplementationAddress());
+          });
         });
       });
       context(`and updated to V3`, function () {
