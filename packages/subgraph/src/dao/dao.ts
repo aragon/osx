@@ -166,7 +166,13 @@ export function handleExecuted(event: Executed): void {
         '_' +
         event.transactionLogIndex.toHexString() +
         '_' +
-        index.toString();
+        withdrawParams.to +
+        '_' +
+        withdrawParams.amount +
+        '_' +
+        tokenId +
+        '_' +
+        withdrawParams.reference;
 
       let vaultWithdrawEntity = new VaultTransfer(withdrawId);
       vaultWithdrawEntity.dao = daoId;
@@ -277,11 +283,28 @@ export function handleFrozen(event: Frozen): void {
 
 export function handleWithdrawn(event: Withdrawn): void {
   let daoId = event.address.toHexString();
-  let withdrawnId = `${event.address.toHexString()}_${event.transaction.hash.toHexString()}_${event.transactionLogIndex.toHexString()}`;
   let token = event.params.token;
+  let tokenId = handleERC20Token(token);
+  let withdrawnId =
+    daoId +
+    '_' +
+    event.transaction.hash.toHexString() +
+    '_' +
+    event.transactionLogIndex.toHexString() +
+    '_' +
+    event.params.to +
+    '_' +
+    event.params.amount +
+    '_' +
+    tokenId +
+    '_' +
+    event.params._reference;
   let balanceId = `${daoId}_${token.toHexString()}`;
 
-  let tokenId = handleERC20Token(token);
+  let entity = VaultTransfer.load(withdrawnId);
+  if (entity) {
+    return;
+  }
 
   updateBalance(
     balanceId,
@@ -292,7 +315,7 @@ export function handleWithdrawn(event: Withdrawn): void {
     event.block.timestamp
   );
 
-  let entity = new VaultTransfer(withdrawnId);
+  entity = new VaultTransfer(withdrawnId);
   entity.dao = daoId;
   entity.token = tokenId;
   entity.sender = event.address;
