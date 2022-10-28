@@ -6,6 +6,10 @@ import {createPluginRepo} from '../../helpers';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating plugin repos.`);
 
+  console.warn(
+    'Please make sure pluginRepo is not created more than once with the same name.'
+  );
+
   // AllowlistVoting
   await createPluginRepo(
     hre,

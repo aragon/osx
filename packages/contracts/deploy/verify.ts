@@ -24,11 +24,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await delay(msDelay);
 
-  // await run(TASK_ETHERSCAN_VERIFY, {
-  //   solcInput: true,
-  //   sleep: true,
-  // });
-
   // Prepare contracts and addresses
   const managingDAOAddress = await getContractAddress('DAO', hre);
 

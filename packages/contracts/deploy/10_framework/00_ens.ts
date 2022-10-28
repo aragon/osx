@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {setupENS} from '../../utils/ens';
+import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
 
 import {
   detemineDeployerNextAddress,
@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Prepare ENS.
   const daoDomain =
-    process.env[`${network.name.toUpperCase()}_ENS_DOMAIN`] || '';
+    process.env[`${network.name.toUpperCase()}_DAO_ENS_DOMAIN`] || '';
 
   if (!daoDomain) throw new Error('DAO domain has not been set in .env');
 
@@ -30,13 +30,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     `Using domain of "${daoDomain}", that it is owned by the deployer ${deployer}.`
   );
 
-  const node = ethers.utils.namehash(daoDomain);
+  const daoNode = ethers.utils.namehash(daoDomain);
 
-  let ensRegistryAddress = ENS_ADDRESSES[network.name];
+  const officialEnsRegistryAddress = ENS_ADDRESSES[network.name];
+  let ensRegistryAddress;
 
-  if (!ensRegistryAddress) {
+  if (!officialEnsRegistryAddress) {
     const ens = await setupENS(deployer, daoDomain);
     ensRegistryAddress = ens.address;
+  } else {
+    ensRegistryAddress = officialEnsRegistryAddress;
   }
 
   const ensRegistryContract = await ethers.getContractAt(
@@ -65,7 +68,62 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [managingDAOAddress, ensRegistryAddress, node],
+          args: [managingDAOAddress, ensRegistryAddress, daoNode],
+        },
+      },
+    },
+  });
+
+  //////////////////////// Plugin ENS //////////////////////////
+  const pluginDomain =
+    process.env[`${network.name.toUpperCase()}_PLUGIN_ENS_DOMAIN`] || '';
+
+  if (!officialEnsRegistryAddress) {
+    // Deploy the Resolver
+    const PublicResolver = await ethers.getContractFactory('PublicResolver');
+    const resolver = await PublicResolver.deploy(
+      ensRegistryContract.address,
+      ethers.constants.AddressZero
+    );
+    await resolver.deployed();
+
+    // Register subdomains in the reverse order
+    let domainNamesReversed = pluginDomain.split('.');
+    domainNamesReversed = domainNamesReversed.reverse();
+
+    for (let i = 0; i < domainNamesReversed.length - 1; i++) {
+      await ensRegistryContract.setSubnodeRecord(
+        ensDomainHash(domainNamesReversed[i]),
+        ensLabelHash(domainNamesReversed[i + 1]),
+        deployer,
+        resolver.address,
+        0
+      );
+    }
+  }
+
+  const pluginNode = ethers.utils.namehash(pluginDomain);
+
+  const pluginFutureAddress = await detemineDeployerNextAddress(2, deployer);
+  const pluginApproveTx = await ensRegistryContract.setApprovalForAll(
+    pluginFutureAddress,
+    true
+  );
+  await pluginApproveTx.wait();
+
+  await deploy('Plugin_ENSSubdomainRegistrar', {
+    contract: 'ENSSubdomainRegistrar',
+    from: deployer,
+    args: [],
+    log: true,
+    proxy: {
+      owner: deployer,
+      proxyContract: 'ERC1967Proxy',
+      proxyArgs: ['{implementation}', '{data}'],
+      execute: {
+        init: {
+          methodName: 'initialize',
+          args: [managingDAOAddress, ensRegistryAddress, pluginNode],
         },
       },
     },
