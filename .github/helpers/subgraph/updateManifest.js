@@ -17,31 +17,47 @@ async function main() {
       );
 
       const contracts = await fs.readdir(networkPath, {withFileTypes: true});
+      const manifest = {
+        info: '# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest',
+        network: networkName,
+        dataSources: {},
+      };
+
       for (const contract of contracts) {
-        if (contract.isFile() && contract.name === 'DAORegistry.json') {
+        let name;
+        let dataSourceName;
+        if (contract.isFile()) {
+          switch (contract.name) {
+            case 'DAORegistry.json':
+              dataSourceName = 'DAORegistry';
+              name = 'DAORegistry';
+              break;
+            case 'PluginRepoRegistry.json':
+              dataSourceName = 'PluginRepoRegistry';
+              name = 'PluginRepoRegistry';
+              break;
+          }
+        }
+
+        if (name && dataSourceName) {
           const contractPath = path.join(networkPath, contract.name);
           const contractContent = await fs.readFile(contractPath);
           const contractJson = JSON.parse(contractContent.toString());
-          const manifest = {
-            info: '# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest',
-            network: networkName,
-            dataSources: {
-              Registry: {
-                name: 'DAORegistry',
-                address: contractJson.address,
-                startBlock: contractJson.receipt.blockNumber,
-              },
-            },
+          manifest[dataSourceName] = {
+            name,
+            address: contractJson.address,
+            startBlock: contractJson.receipt.blockNumber,
           };
-          await fs.writeFile(
-            path.join(
-              process.env.GITHUB_WORKSPACE,
-              `packages/subgraph/manifest/data/${networkName}.json`
-            ),
-            JSON.stringify(manifest, null, 2)
-          );
         }
       }
+
+      await fs.writeFile(
+        path.join(
+          process.env.GITHUB_WORKSPACE,
+          `packages/subgraph/manifest/data/${networkName}.json`
+        ),
+        JSON.stringify(manifest, null, 2)
+      );
     }
   }
 }

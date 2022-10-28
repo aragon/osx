@@ -1,11 +1,11 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address} from '@graphprotocol/graph-ts';
 
-import {handleDAORegistered} from '../../src/registry';
+import {handleDAORegistered} from '../../src/registries/daoRegistry';
 import {DAO_ADDRESS, ADDRESS_ONE} from '../constants';
 import {createNewDaoEvent} from './utils';
 
-test('Run registry mappings with mock event', () => {
+test('Run dao registry mappings with mock event', () => {
   // create event
   let newDaoEvent = createNewDaoEvent(DAO_ADDRESS, ADDRESS_ONE, 'mock-Dao');
 
@@ -23,6 +23,12 @@ test('Run registry mappings with mock event', () => {
     Address.fromString(ADDRESS_ONE).toHexString()
   );
   assert.fieldEquals('Dao', entityID, 'name', 'mock-Dao');
+  assert.fieldEquals(
+    'Dao',
+    entityID,
+    'createdAt',
+    newDaoEvent.block.timestamp.toString()
+  );
 
   clearStore();
 });

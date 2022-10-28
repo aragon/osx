@@ -26,7 +26,27 @@ dataSources:
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
-      file: ./src/registry.ts
+      file: ./src/registries/daoRegistry.ts
+  - kind: ethereum/contract
+    name: PluginRepoRegistry
+    network: {{network}}
+    source:
+      abi: PluginRepoRegistry
+      address: '{{dataSources.PluginRepoRegistry.address}}'
+      startBlock: {{dataSources.PluginRepoRegistry.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - PluginRepo
+      abis:        
+        - name: PluginRepoRegistry
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json
+      eventHandlers:
+        - event: PluginRepoRegistered(string,address)
+          handler: handlePluginRepoRegistered
+      file: ./src/registries/pluginRepoRegistry.ts
 # templates
 templates:
   # DAO
@@ -122,3 +142,22 @@ templates:
           handler: handleUsersAdded
         - event: UsersRemoved(address[])
           handler: handleUsersRemoved
+  # PluginRepo
+  - name: PluginRepoTemplate
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: PluginRepo
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/plugin/pluginRepo.ts
+      entities:
+        - PluginRepo
+      abis:
+        - name: PluginRepo
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginRepo.sol/PluginRepo.json
+      eventHandlers:
+        - event: VersionCreated(uint256,uint16[3],indexed address,bytes)
+          handler: handleVersionCreated

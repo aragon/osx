@@ -236,3 +236,17 @@ type AllowlistProposal implements Proposal @entity {
   createdAt: BigInt!
   executable: Boolean
 }
+
+type PluginVersion @entity {
+  id: ID! # pluginRepo + version index
+  pluginRepo: PluginRepo!
+  semanticVersion: [BigInt!]!
+  pluginSetup: String!
+  contentURI: Bytes!
+}
+
+type PluginRepo @entity {
+  id: ID! # address
+  name: String!
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+}
