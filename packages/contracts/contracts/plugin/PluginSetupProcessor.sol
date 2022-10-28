@@ -97,6 +97,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin setup was already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
     error SetupAlreadyApplied();
 
+    /// @notice Thrown if a semantic version number bump is invalid.
+    /// @param currentVersion The current semantic version number.
+    /// @param nextVersion The next semantic version number.
+    error UpdateInvalid(uint16[3] currentVersion, uint16[3] nextVersion);
+
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
     /// @param dao The address of the dao to which the plugin belongs.
@@ -105,7 +110,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param plugin The address of the plugin contract.
     /// @param helpers The address array of all helpers (contracts or EOAs) that were prepared for the plugin to be installed.
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
-
     event InstallationPrepared(
         address indexed sender,
         address indexed dao,
@@ -324,12 +328,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert SetupNotApplied();
         }
 
-        (uint16[3] memory oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
-            _updateParams.currentPluginSetup
-        );
-
-        // Reverts if newPluginSetup doesn't exist on the repo...
-        _updateParams.pluginSetupRepo.getVersionByPluginSetup(_updateParams.newPluginSetup);
+        (uint16[3] memory oldVersion, ) = _checkUpdateParams(_updateParams);
 
         // Avoid stack too deep compiler error by putting the code into curly braces.
         {
@@ -617,5 +616,55 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 permissionId: _permissionId
             });
         }
+    }
+
+    /// @notice Checks the update parameters
+    /// @param _updateParams The parameters of the update.
+    function _checkUpdateParams(PluginUpdateParams calldata _updateParams)
+        internal
+        view
+        returns (uint16[3] memory oldVersion, uint16[3] memory newVersion)
+    {
+        // These revert if the current or new plugin setup are not part of the plugin setup repo
+        (oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+            _updateParams.currentPluginSetup
+        );
+        (newVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+            _updateParams.newPluginSetup
+        );
+
+        // Assert that the version bump valid
+        if (!isValidUpdate(oldVersion, newVersion)) {
+            revert UpdateInvalid({currentVersion: oldVersion, nextVersion: newVersion});
+        }
+    }
+
+    /// @notice Checks if an update is valid by the version numbers.
+    /// @param _oldVersion The old semantic version number.
+    /// @param _newVersion The new semantic version number.
+    /// @return bool Returns true if the bump is valid.
+    function isValidUpdate(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
+        public
+        pure
+        returns (bool)
+    {
+        bool hasIncreased;
+        uint256 i = 0;
+        while (i < 3) {
+            if (hasIncreased) {
+                if (_newVersion[i] != 0) {
+                    return false;
+                }
+            } else if (_newVersion[i] != _oldVersion[i]) {
+                if (_oldVersion[i] > _newVersion[i]) {
+                    return false;
+                }
+                hasIncreased = true;
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        return hasIncreased;
     }
 }

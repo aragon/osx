@@ -177,7 +177,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         }
 
         // Update from V2
-        if (_oldVersion[0] == 2 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
+        if (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
             activeHelpers = mockHelpers(3);
             initData = abi.encodeWithSelector(

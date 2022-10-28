@@ -189,9 +189,9 @@ describe('Plugin Setup Processor', function () {
     pluginRepo = PluginRepo.attach(event.args.pluginRepo);
 
     // Add setups
-    await pluginRepo.createVersion([2, 0, 0], setupV2.address, EMPTY_DATA);
-    await pluginRepo.createVersion([3, 0, 0], setupV3.address, EMPTY_DATA);
-    await pluginRepo.createVersion([4, 0, 0], setupV1Bad.address, EMPTY_DATA);
+    await pluginRepo.createVersion([1, 1, 0], setupV2.address, EMPTY_DATA);
+    await pluginRepo.createVersion([1, 2, 0], setupV3.address, EMPTY_DATA);
+    await pluginRepo.createVersion([1, 3, 0], setupV1Bad.address, EMPTY_DATA);
   });
 
   beforeEach(async function () {
@@ -731,6 +731,36 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
+    describe('isValidUpdate', function () {
+      it('accepts major updates', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [2, 0, 0])).to.equal(true);
+      });
+
+      it('accepts minor updates', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [1, 1, 0])).to.equal(true);
+      });
+
+      it('accepts patch updates', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [1, 0, 1])).to.equal(true);
+      });
+
+      it('denies update to the same version -grades', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [1, 0, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 0], [1, 1, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 1], [1, 1, 1])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 1, 1], [0, 1, 1])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 0, 1], [0, 0, 1])).to.equal(false);
+      });
+
+      it('denies down-grades', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [0, 0, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 0], [1, 0, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 1], [1, 1, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 1, 1], [0, 0, 1])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 0, 1], [0, 0, 0])).to.equal(false);
+      });
+    });
+
     describe('prepareUpdate', function () {
       let proxy: string;
       let helpersV1: string[];
@@ -1106,7 +1136,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it.skip('cannot update to V1', async () => {
+      it('cannot update to V1', async () => {
         await expect(
           updateHelper(
             psp,
@@ -1141,7 +1171,7 @@ describe('Plugin Setup Processor', function () {
           ));
         });
 
-        it.skip('cannot update to V2 again', async () => {
+        it('cannot update to V2 again', async () => {
           await expect(
             updateHelper(
               psp,
@@ -1331,7 +1361,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it.skip('cannot downdate to V1', async () => {
+      it('cannot downdate to V1', async () => {
         await expect(
           updateHelper(
             psp,
