@@ -1078,7 +1078,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('updates from V1 to V2', async () => {
+      it('updates to V2', async () => {
         await updateHelper(
           psp,
           targetDao,
@@ -1090,7 +1090,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('updates from V1 to V3', async () => {
+      it('updates to V3', async () => {
         await updateHelper(
           psp,
           targetDao,
@@ -1169,7 +1169,7 @@ describe('Plugin Setup Processor', function () {
           );
         });
 
-        it('updates from V2 to V3', async () => {
+        it('updates to V3', async () => {
           await updateHelper(
             psp,
             targetDao,
@@ -1180,6 +1180,7 @@ describe('Plugin Setup Processor', function () {
             setupV3
           );
         });
+
         context(`and updated to V3`, function () {
           let helpersV3: string[];
           let permissionsV2V3: PermissionOperation[];
@@ -1292,7 +1293,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('updates from V2 to V3', async () => {
+      it('updates to V3', async () => {
         await updateHelper(
           psp,
           targetDao,
@@ -1302,6 +1303,20 @@ describe('Plugin Setup Processor', function () {
           setupV2,
           setupV3
         );
+      });
+
+      it('cannot downdate to V1', async () => {
+        await expect(
+          updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV2,
+            setupV2,
+            setupV1
+          )
+        ).to.be.reverted;
       });
 
       context(`and updated to V3`, function () {
