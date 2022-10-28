@@ -56,7 +56,10 @@ describe('DAO', function () {
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
-    token = await Token.deploy(dao.address, 'GOV', 'GOV');
+    token = await Token.deploy(dao.address, 'GOV', 'GOV', {
+      receivers: [],
+      amounts: [],
+    });
 
     // Grant permissions
     await Promise.all([

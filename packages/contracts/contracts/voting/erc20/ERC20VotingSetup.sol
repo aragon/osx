@@ -53,11 +53,6 @@ contract ERC20VotingSetup is PluginSetup {
         string symbol;
     }
 
-    struct MintSettings {
-        address[] receivers;
-        uint256[] amounts;
-    }
-
     /// @notice Thrown if `MintSettings`'s params are not of the same length.
     /// @param receiversArrayLength The array length of `receivers`.
     /// @param amountsArrayLength The array length of `amounts`.
@@ -78,7 +73,14 @@ contract ERC20VotingSetup is PluginSetup {
     /// @notice The contract constructor, that deployes the bases.
     constructor() {
         distributorBase = address(new MerkleDistributor());
-        governanceERC20Base = address(new GovernanceERC20(IDAO(address(0)), "", ""));
+        governanceERC20Base = address(
+            new GovernanceERC20(
+                IDAO(address(0)),
+                "",
+                "",
+                GovernanceERC20.MintSettings(new address[](0), new uint256[](0))
+            )
+        );
         governanceWrappedERC20Base = address(
             new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
         );
@@ -110,8 +112,12 @@ contract ERC20VotingSetup is PluginSetup {
             uint64 supportRequiredPct,
             uint64 minDuration,
             TokenSettings memory tokenSettings,
-            MintSettings memory mintSettings
-        ) = abi.decode(_data, (uint64, uint64, uint64, TokenSettings, MintSettings));
+            // only used for GovernanceERC20(token is not passed)
+            GovernanceERC20.MintSettings memory mintSettings
+        ) = abi.decode(
+                _data,
+                (uint64, uint64, uint64, TokenSettings, GovernanceERC20.MintSettings)
+            );
 
         // Check mint setting.
         if (mintSettings.receivers.length != mintSettings.amounts.length) {
@@ -124,7 +130,7 @@ contract ERC20VotingSetup is PluginSetup {
         address token = tokenSettings.addr;
 
         // Prepare helpers.
-        helpers = new address[](token != address(0) ? 1 : 2);
+        helpers = new address[](1);
 
         if (token != address(0)) {
             // the following 2 calls(_getTokenInterfaceIds, isERC20) don't use
@@ -161,27 +167,18 @@ contract ERC20VotingSetup is PluginSetup {
                     tokenSettings.symbol
                 );
             }
-
-            helpers[0] = token;
         } else {
             // Clone a `GovernanceERC20`.
             token = governanceERC20Base.clone();
-            GovernanceERC20(token).initialize(dao, tokenSettings.name, tokenSettings.symbol);
-
-            // Create a `MerkleMinter`.
-            address merkleMinter = createERC1967Proxy(
-                address(merkleMinterBase),
-                abi.encodeWithSelector(
-                    MerkleMinter.initialize.selector,
-                    dao,
-                    IERC20MintableUpgradeable(token),
-                    distributorBase
-                )
+            GovernanceERC20(token).initialize(
+                dao,
+                tokenSettings.name,
+                tokenSettings.symbol,
+                mintSettings
             );
-
-            helpers[0] = token;
-            helpers[1] = merkleMinter;
         }
+
+        helpers[0] = token;
 
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
@@ -197,7 +194,7 @@ contract ERC20VotingSetup is PluginSetup {
         );
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 7);
+        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 4);
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -236,30 +233,6 @@ contract ERC20VotingSetup is PluginSetup {
                 NO_ORACLE,
                 tokenMintPermission
             );
-
-            permissions[4] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
-                token,
-                helpers[1], // merkleMinter
-                NO_ORACLE,
-                tokenMintPermission
-            );
-
-            permissions[5] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
-                helpers[1], // merkleMinter
-                _dao,
-                NO_ORACLE,
-                MerkleMinter(helpers[1]).MERKLE_MINT_PERMISSION_ID()
-            );
-
-            permissions[6] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Grant,
-                helpers[1], // merkleMinter
-                _dao,
-                NO_ORACLE,
-                MerkleMinter(helpers[1]).UPGRADE_PLUGIN_PERMISSION_ID()
-            );
         }
     }
 
@@ -277,13 +250,23 @@ contract ERC20VotingSetup is PluginSetup {
     ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions.
         uint256 helperLength = _helpers.length;
-        if (helperLength == 1) {
-            permissions = new PermissionLib.ItemMultiTarget[](3);
-        } else if (helperLength == 2) {
-            permissions = new PermissionLib.ItemMultiTarget[](7);
-        } else {
+        if(helperLength != 1) {
             revert WrongHelpersArrayLength({length: helperLength});
         }
+        
+        // NOTE: No need to fully validate _helpers[0] as we're sure 
+        // it's either GovernanceWrappedERC20 or GovernanceERC20
+        // which is ensured by PluginSetupProcessor that it can NOT pass helper
+        // that wasn't deployed by the prepareInstall in this plugin setup.
+        address token = _helpers[0];
+
+        bool[] memory supportedIds = _getTokenInterfaceIds(token);
+        
+        // If it's IERC20Upgradeable, IVotesUpgradeable and not IGovernanceWrappedERC20
+        // Then it's GovernanceERC20.
+        bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
+
+        permissions = new PermissionLib.ItemMultiTarget[](isGovernanceERC20 ? 4 : 3);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -310,42 +293,19 @@ contract ERC20VotingSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
-        if (helperLength == 2) {
-            address token = _helpers[0];
-            address merkleMinter = _helpers[1];
-
+        // We only need to revoke permission if the token deployed was GovernanceERC20
+        // As GovernanceWrapped doesn't even have this permission on it.
+        // TODO: depending on the decision if we don't revert on revokes when plugin setup processor
+        // calls dao for the permissions, we might decide to include the below always as it will be
+        // more gas less than checking isGovernanceERC20..
+        if(isGovernanceERC20) {
             bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
-
             permissions[3] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
                 token,
                 _dao,
                 NO_ORACLE,
                 tokenMintPermission
-            );
-
-            permissions[4] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Revoke,
-                token,
-                merkleMinter,
-                NO_ORACLE,
-                tokenMintPermission
-            );
-
-            permissions[5] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Revoke,
-                merkleMinter,
-                _dao,
-                NO_ORACLE,
-                MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID()
-            );
-
-            permissions[6] = PermissionLib.ItemMultiTarget(
-                PermissionLib.Operation.Revoke,
-                merkleMinter,
-                _dao,
-                NO_ORACLE,
-                MerkleMinter(merkleMinter).UPGRADE_PLUGIN_PERMISSION_ID()
             );
         }
     }
