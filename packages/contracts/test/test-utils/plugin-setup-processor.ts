@@ -106,25 +106,6 @@ export async function prepareUpdate(
     initData: initData,
   };
 }
-/*event UpdatePrepared(
-  address indexed sender,
-  address indexed dao,
-  address indexed pluginSetup,
-  bytes data,
-  address plugin,
-  address[] updatedHelpers,
-  PermissionLib.ItemMultiTarget[] permissions,
-  bytes initData
-);
-event InstallationPrepared(
-  address indexed sender,
-  address indexed dao,
-  address indexed pluginSetup,
-  bytes data,
-  address plugin,
-  address[] helpers,
-  PermissionLib.ItemMultiTarget[] permissions
-);*/
 
 export function mockPermissionsOperations(
   start: number,
