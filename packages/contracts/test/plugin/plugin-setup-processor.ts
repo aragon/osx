@@ -1136,7 +1136,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('cannot update to V1', async () => {
+      it('cannot update again to V1', async () => {
         await expect(
           updateHelper(
             psp,
@@ -1169,20 +1169,6 @@ describe('Plugin Setup Processor', function () {
             setupV1,
             setupV2
           ));
-        });
-
-        it('cannot update to V2 again', async () => {
-          await expect(
-            updateHelper(
-              psp,
-              targetDao,
-              proxy,
-              pluginRepo,
-              helpersV2,
-              setupV2,
-              setupV2
-            )
-          ).to.be.reverted;
         });
 
         it('points to the V2 implementation', async () => {
@@ -1218,6 +1204,34 @@ describe('Plugin Setup Processor', function () {
             setupV2,
             setupV3
           );
+        });
+
+        it('cannot update back to V1', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV2,
+              setupV2,
+              setupV1
+            )
+          ).to.be.reverted;
+        });
+
+        it('cannot update again to V2', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV2,
+              setupV2,
+              setupV2
+            )
+          ).to.be.reverted;
         });
 
         context(`and updated to V3`, function () {
@@ -1264,6 +1278,48 @@ describe('Plugin Setup Processor', function () {
               )
             );
           });
+
+          it('cannot update back to V1', async () => {
+            await expect(
+              updateHelper(
+                psp,
+                targetDao,
+                proxy,
+                pluginRepo,
+                helpersV3,
+                setupV3,
+                setupV1
+              )
+            ).to.be.reverted;
+          });
+
+          it('cannot update back to V2', async () => {
+            await expect(
+              updateHelper(
+                psp,
+                targetDao,
+                proxy,
+                pluginRepo,
+                helpersV3,
+                setupV3,
+                setupV2
+              )
+            ).to.be.reverted;
+          });
+
+          it('cannot update again to V3', async () => {
+            await expect(
+              updateHelper(
+                psp,
+                targetDao,
+                proxy,
+                pluginRepo,
+                helpersV3,
+                setupV3,
+                setupV3
+              )
+            ).to.be.reverted;
+          });
         });
       });
       context(`and updated to V3`, function () {
@@ -1309,6 +1365,48 @@ describe('Plugin Setup Processor', function () {
               Object.values(perm)
             )
           );
+        });
+
+        it('cannot update back to V1', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV3,
+              setupV3,
+              setupV1
+            )
+          ).to.be.reverted;
+        });
+
+        it('cannot update back to V2', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV3,
+              setupV3,
+              setupV2
+            )
+          ).to.be.reverted;
+        });
+
+        it('cannot update again to V3', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV3,
+              setupV3,
+              setupV3
+            )
+          ).to.be.reverted;
         });
       });
     });
@@ -1361,7 +1459,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('cannot downdate to V1', async () => {
+      it('cannot update back to V1', async () => {
         await expect(
           updateHelper(
             psp,
@@ -1371,6 +1469,20 @@ describe('Plugin Setup Processor', function () {
             helpersV2,
             setupV2,
             setupV1
+          )
+        ).to.be.reverted;
+      });
+
+      it('cannot update again to V2', async () => {
+        await expect(
+          updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV2,
+            setupV2,
+            setupV2
           )
         ).to.be.reverted;
       });
@@ -1419,6 +1531,48 @@ describe('Plugin Setup Processor', function () {
             )
           );
         });
+
+        it('cannot update again to V3', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV3,
+              setupV3,
+              setupV3
+            )
+          ).to.be.reverted;
+        });
+
+        it('cannot update back to V1', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV3,
+              setupV3,
+              setupV1
+            )
+          ).to.be.reverted;
+        });
+
+        it('cannot update back to V2', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV3,
+              setupV3,
+              setupV2
+            )
+          ).to.be.reverted;
+        });
       });
     });
 
@@ -1457,6 +1611,48 @@ describe('Plugin Setup Processor', function () {
             Object.values(perm)
           )
         );
+      });
+
+      it('cannot update again to V3', async () => {
+        await expect(
+          updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV3,
+            setupV3,
+            setupV3
+          )
+        ).to.be.reverted;
+      });
+
+      it('cannot update back to V1', async () => {
+        await expect(
+          updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV3,
+            setupV3,
+            setupV1
+          )
+        ).to.be.reverted;
+      });
+
+      it('cannot update back to V2', async () => {
+        await expect(
+          updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            pluginRepo,
+            helpersV3,
+            setupV3,
+            setupV2
+          )
+        ).to.be.reverted;
       });
     });
   });
