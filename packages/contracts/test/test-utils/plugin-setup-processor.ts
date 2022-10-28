@@ -41,7 +41,7 @@ export async function prepareInstallation(
   daoAddress: string,
   pluginSetup: string,
   pluginRepo: string,
-  data: string
+  data: BytesLike
 ): Promise<{
   plugin: string;
   helpers: string[];
@@ -70,7 +70,7 @@ export async function prepareUpdate(
   newPluginSetup: string,
   pluginRepo: string,
   currentHelpers: string[],
-  data: string
+  data: BytesLike
 ): Promise<{
   returnedPluginAddress: string;
   updatedHelpers: string[];
@@ -127,12 +127,13 @@ event InstallationPrepared(
 );*/
 
 export function mockPermissionsOperations(
-  amount: number,
+  start: number,
+  end: number,
   op: Operation
 ): PermissionOperation[] {
   let arr: PermissionOperation[] = [];
 
-  for (let i = 0; i < amount; i++) {
+  for (let i = start; i < end; i++) {
     arr.push({
       operation: op,
       where: utils.hexZeroPad(ethers.utils.hexlify(i), 20),

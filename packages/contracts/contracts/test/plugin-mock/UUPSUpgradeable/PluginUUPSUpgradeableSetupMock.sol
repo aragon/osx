@@ -35,7 +35,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     {
         plugin = mockPluginProxy(pluginBase, _dao);
         helpers = mockHelpers(1);
-        permissions = mockPermissions(1, PermissionLib.Operation.Grant);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
@@ -51,7 +51,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         bytes calldata
     ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         (_dao, _plugin, _activeHelpers);
-        permissions = mockPermissions(1, PermissionLib.Operation.Revoke);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
 
     /// @inheritdoc IPluginSetup
@@ -74,7 +74,7 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock
         (_dao);
         plugin = address(0); // The bad behaviour is returning the same address over and over again
         helpers = mockHelpers(1);
-        permissions = mockPermissions(1, PermissionLib.Operation.Grant);
+        permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
     }
 }
 
@@ -96,15 +96,15 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
     {
         plugin = mockPluginProxy(pluginBase, _dao);
         helpers = mockHelpers(2);
-        permissions = mockPermissions(2, PermissionLib.Operation.Grant);
+        permissions = mockPermissions(0, 2, PermissionLib.Operation.Grant);
     }
 
     function prepareUpdate(
         address _dao,
         address _plugin,
         address[] memory _helpers,
-        uint16[3] calldata,
-        bytes memory
+        uint16[3] calldata _oldVersion,
+        bytes calldata
     )
         public
         virtual
@@ -115,10 +115,13 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
             PermissionLib.ItemMultiTarget[] memory permissions
         )
     {
-        (_dao, _plugin, _helpers);
-        activeHelpers = mockHelpers(2);
-        initData = abi.encodeWithSelector(PluginUUPSUpgradeableV2Mock.initializeV2.selector);
-        permissions = mockPermissions(2, PermissionLib.Operation.Freeze);
+        // Update from V1
+        if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
+            (_dao, _plugin, _helpers);
+            activeHelpers = mockHelpers(2);
+            initData = abi.encodeWithSelector(PluginUUPSUpgradeableV2Mock.initializeV2.selector);
+            permissions = mockPermissions(1, 2, PermissionLib.Operation.Grant);
+        }
     }
 }
 
@@ -140,15 +143,15 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
     {
         plugin = mockPluginProxy(pluginBase, _dao);
         helpers = mockHelpers(3);
-        permissions = mockPermissions(3, PermissionLib.Operation.Grant);
+        permissions = mockPermissions(0, 3, PermissionLib.Operation.Grant);
     }
 
     function prepareUpdate(
         address _dao,
         address _plugin,
         address[] memory _helpers,
-        uint16[3] calldata,
-        bytes memory
+        uint16[3] calldata _oldVersion,
+        bytes calldata
     )
         public
         virtual
@@ -160,8 +163,21 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         )
     {
         (_dao, _plugin, _helpers);
-        activeHelpers = mockHelpers(3);
-        initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
-        permissions = mockPermissions(3, PermissionLib.Operation.Freeze);
+
+        // Update from V1
+        if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
+            (_dao, _plugin, _helpers);
+            activeHelpers = mockHelpers(3);
+            initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
+            permissions = mockPermissions(1, 3, PermissionLib.Operation.Grant);
+        }
+
+        // Update from V2
+        if (_oldVersion[0] == 2 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
+            (_dao, _plugin, _helpers);
+            activeHelpers = mockHelpers(3);
+            initData = abi.encodeWithSelector(PluginUUPSUpgradeableV3Mock.initializeV3.selector);
+            permissions = mockPermissions(2, 3, PermissionLib.Operation.Grant);
+        }
     }
 }

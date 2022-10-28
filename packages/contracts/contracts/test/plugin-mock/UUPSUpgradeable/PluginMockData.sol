@@ -7,14 +7,16 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 address constant NO_ORACLE = address(0);
 
-function mockPermissions(uint160 amount, PermissionLib.Operation op)
-    pure
-    returns (PermissionLib.ItemMultiTarget[] memory permissions)
-{
-    permissions = new PermissionLib.ItemMultiTarget[](amount);
+function mockPermissions(
+    uint160 start,
+    uint160 end,
+    PermissionLib.Operation op
+) pure returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    require(end > start);
+    permissions = new PermissionLib.ItemMultiTarget[](end - start);
 
-    for (uint160 i = 0; i < amount; i++) {
-        permissions[i] = PermissionLib.ItemMultiTarget(
+    for (uint160 i = start; i < end; i++) {
+        permissions[i - start] = PermissionLib.ItemMultiTarget(
             op,
             address(i),
             address(i),
