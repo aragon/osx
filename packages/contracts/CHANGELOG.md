@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 - Added ENS support for `PluginRepoRegistry`.
+- Added Mint possibility in the `GovernanceERC20`'s initialize function.
 
 ### Changed
 
@@ -73,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
 - Removed `ERC165Registry`.
 - Removed `Component` and `MetaTxComponent`.
+- Removed `MerkleMinter` Deployment from `ERC20VotingSetup`
 
 ## v0.2.0-alpha
 
