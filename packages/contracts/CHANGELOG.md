@@ -35,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 - Added ENS support for `PluginRepoRegistry`.
-
+- Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
+to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
 ### Changed
 
 - Renamed `UPGRADE_PERMISSION` to be more specific to `UPGRADE_DAO_PERMISSION`, `UPGRADE_PLUGIN_PERMISSION`, etc.
@@ -64,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
 - Renamed `createProxy` function to `createERC1967Proxy`.
 - Replaces custom ERC1271 interface with Openzeppelins interface.
+- Switched order of where and who for the events in `PermissionManager`.
 
 ### Removed
 
