@@ -738,24 +738,10 @@ describe('Plugin Setup Processor', function () {
 
       beforeEach(async () => {
         ({
-          plugin: proxy,
+          proxy: proxy,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await prepareInstallation(
-          psp,
-          targetDao.address,
-          setupV1.address,
-          pluginRepo.address,
-          EMPTY_DATA
-        ));
-
-        await psp.applyInstallation(
-          targetDao.address,
-          setupV1.address,
-          pluginRepo.address,
-          proxy,
-          permissionsV1
-        );
+        } = await installHelper(psp, targetDao, setupV1, pluginRepo));
       });
 
       it('reverts if plugin does not support `IPlugin` interface', async () => {
