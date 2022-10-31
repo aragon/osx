@@ -65,6 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
 - Renamed `createProxy` function to `createERC1967Proxy`.
 - Replaces custom ERC1271 interface with Openzeppelins interface.
+- Extends `VersionCreated` event with `PluginSetup` and `contentURI`
+- Markes parameters of `InstallationApplied` as `indexed`
 
 ### Removed
 
