@@ -323,12 +323,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Check if plugin is applied
-        bytes32 appliedId = _getAppliedId(_dao, _updateParams.plugin);
-        if (!isInstallationApplied[appliedId]) {
+        if (!isInstallationApplied[_getAppliedId(_dao, _updateParams.plugin)]) {
             revert SetupNotApplied();
         }
-
-        (uint16[3] memory oldVersion, ) = _checkUpdateParams(_updateParams);
 
         // Avoid stack too deep compiler error by putting the code into curly braces.
         {
@@ -348,6 +345,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             delete helpersHashes[oldSetupId];
         }
 
+        uint16[3] memory oldVersion = _checkUpdateParams(_updateParams);
         // prepare update
         (
             address[] memory updatedHelpers,
@@ -370,6 +368,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 address(_updateParams.pluginSetupRepo),
                 _updateParams.plugin
             );
+
             helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
 
             // Set new update permission hashes.
@@ -623,17 +622,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
     function _checkUpdateParams(PluginUpdateParams calldata _updateParams)
         internal
         view
-        returns (uint16[3] memory oldVersion, uint16[3] memory newVersion)
+        returns (uint16[3] memory oldVersion)
     {
         // These revert if the current or new plugin setup are not part of the plugin setup repo
         (oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.currentPluginSetup
         );
-        (newVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+        (uint16[3] memory newVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.newPluginSetup
         );
 
-        // Assert that the version bump valid
+        // Check that the version bump valid
         if (!isValidUpdate(oldVersion, newVersion)) {
             revert UpdateInvalid({currentVersion: oldVersion, nextVersion: newVersion});
         }
