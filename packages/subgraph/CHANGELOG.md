@@ -7,12 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
-## 0.4.0-alpha
-On 2022-10-07 15:20:00
 ### Added
+
+- Adds support for `PluginRepo`, `PluginRegistry` and `PluginSetupProcessor`
+
+### Changed
+
+- improved test recompiliation
+- marks some entity as immutable
+
+## 0.4.0-alpha
+
+On 2022-10-07 15:20:00
+
+### Added
+
 - `executable` property to `ERC20VotingProposal` and `AllowlistProposal`.
 
 ## 0.2.1-alpha
+
 On 2022-10-03 10:38:36
 
 ### Added
@@ -32,7 +45,6 @@ On 2022-10-03 10:38:36
 - Refactored `deposits` and `withdraws` into one field `transfers`.
 - Refactored `VaultWithdraw` and `VaultDeposit` into one type `VaultTransfer`.
 - Removes not null enforcing `Proposal.metadata`.
-
 
 ## v0.2.0-alpha
 
