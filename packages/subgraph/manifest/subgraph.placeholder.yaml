@@ -47,6 +47,38 @@ dataSources:
         - event: PluginRepoRegistered(string,address)
           handler: handlePluginRepoRegistered
       file: ./src/registries/pluginRepoRegistry.ts
+  - kind: ethereum/contract
+    name: PluginSetupProcessor
+    network: {{network}}
+    source:
+      abi: PluginSetupProcessor
+      address: '{{dataSources.PluginSetupProcessor.address}}'
+      startBlock: {{dataSources.PluginSetupProcessor.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Plugin
+        - PluginContractPermissionId
+        - PluginGrantedPermission
+      abis:        
+        - name: PluginSetupProcessor
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginSetupProcessor.sol/PluginSetupProcessor.json
+      eventHandlers:
+        - event: InstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+          handler: handleInstallationPrepared
+        - event: InstallationApplied(indexed address,indexed address)
+          handler: handleInstallationApplied
+        - event: UpdatePrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[],bytes)
+          handler: handleUpdatePrepared
+        - event: UpdateApplied(indexed address,indexed address)
+          handler: handleUpdateApplied
+        - event: UninstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+          handler: handleUninstallationPrepared
+        - event: UninstallationApplied(indexed address,indexed address)
+          handler: handleUninstallationApplied
+      file: ./src/plugin/pluginSetupProcessor.ts
 # templates
 templates:
   # DAO

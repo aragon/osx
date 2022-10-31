@@ -89,6 +89,7 @@ type Dao @entity {
   permissions: [Permission!]! @derivedFrom(field: "dao")
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
+  plugins: [Plugin!] @derivedFrom(field: "dao")
 }
 
 # Packages
@@ -237,11 +238,17 @@ type AllowlistProposal implements Proposal @entity {
   executable: Boolean
 }
 
+type PluginSetup @entity {
+  id: ID!
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
+  installations: [Plugin!]! @derivedFrom(field: "pluginSetup")
+}
+
 type PluginVersion @entity {
   id: ID! # pluginRepo + version index
   pluginRepo: PluginRepo!
   semanticVersion: [BigInt!]!
-  pluginSetup: String!
+  pluginSetup: PluginSetup!
   contentURI: Bytes!
 }
 
@@ -249,4 +256,28 @@ type PluginRepo @entity {
   id: ID! # address
   name: String!
   versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+}
+
+type PluginHelper @entity {
+  id: ID! # address
+  plugin: Plugin!
+}
+
+
+type Plugin @entity {
+  id: ID! # address
+  dao: Dao!
+  pluginSetup: PluginSetup!
+  data: Bytes!
+  helpers: [PluginHelper!]! @derivedFrom(field: "plugin")
+  state: PluginState!
+  sender: String!
+}
+
+enum PluginState {
+  InstallationPending,
+  Installed,
+  UpdatePending,
+  UninstallPending
+  Uninstalled
 }

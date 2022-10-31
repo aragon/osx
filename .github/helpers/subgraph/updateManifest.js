@@ -36,6 +36,10 @@ async function main() {
               dataSourceName = 'PluginRepoRegistry';
               name = 'PluginRepoRegistry';
               break;
+            case 'PluginSetupProcessor.json':
+              dataSourceName = 'PluginSetupProcessor';
+              name = 'PluginSetupProcessor';
+              break;
           }
         }
 
