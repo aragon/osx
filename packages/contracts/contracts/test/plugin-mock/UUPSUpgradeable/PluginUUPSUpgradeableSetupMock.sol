@@ -45,10 +45,10 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     function prepareUninstallation(
         address _dao,
         address _plugin,
-        address[] calldata _activeHelpers,
+        address[] calldata _currentHelpers,
         bytes calldata
     ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        (_dao, _plugin, _activeHelpers);
+        (_dao, _plugin, _currentHelpers);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
 
@@ -108,7 +108,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         virtual
         override
         returns (
-            address[] memory activeHelpers,
+            address[] memory currentHelpers,
             bytes memory initData,
             PermissionLib.ItemMultiTarget[] memory permissions
         )
@@ -116,7 +116,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         // Update from V1
         if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
-            activeHelpers = mockHelpers(2);
+            currentHelpers = mockHelpers(2);
             initData = abi.encodeWithSelector(
                 PluginUUPSUpgradeableV2Mock.initializeV1toV2.selector
             );
@@ -157,7 +157,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         virtual
         override
         returns (
-            address[] memory activeHelpers,
+            address[] memory currentHelpers,
             bytes memory initData,
             PermissionLib.ItemMultiTarget[] memory permissions
         )
@@ -167,7 +167,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         // Update from V1
         if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
-            activeHelpers = mockHelpers(3);
+            currentHelpers = mockHelpers(3);
             initData = abi.encodeWithSelector(
                 PluginUUPSUpgradeableV3Mock.initializeV1toV3.selector
             );
@@ -177,7 +177,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         // Update from V2
         if (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0) {
             (_dao, _plugin, _helpers);
-            activeHelpers = mockHelpers(3);
+            currentHelpers = mockHelpers(3);
             initData = abi.encodeWithSelector(
                 PluginUUPSUpgradeableV3Mock.initializeV2toV3.selector
             );
