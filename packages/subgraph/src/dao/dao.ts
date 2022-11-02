@@ -166,9 +166,9 @@ export function handleExecuted(event: Executed): void {
         '_' +
         event.transactionLogIndex.toHexString() +
         '_' +
-        withdrawParams.to +
+        withdrawParams.to.toHexString() +
         '_' +
-        withdrawParams.amount +
+        withdrawParams.amount.toString() +
         '_' +
         tokenId +
         '_' +
@@ -292,9 +292,9 @@ export function handleWithdrawn(event: Withdrawn): void {
     '_' +
     event.transactionLogIndex.toHexString() +
     '_' +
-    event.params.to +
+    event.params.to.toHexString() +
     '_' +
-    event.params.amount +
+    event.params.amount.toString() +
     '_' +
     tokenId +
     '_' +

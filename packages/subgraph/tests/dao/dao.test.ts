@@ -34,6 +34,7 @@ import {
   createStandardCallbackRegisteredEvent
 } from './utils';
 import {createERC20VotingProposalEntityState} from '../erc20-voting/utils';
+import {decodeWithdrawParams} from '../../src/dao/utils';
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
   // create state
@@ -229,7 +230,15 @@ test('Run dao (handleWithdrawn) for Token mappings with mock event', () => {
     '_' +
     newEvent.transaction.hash.toHexString() +
     '_' +
-    newEvent.transactionLogIndex.toHexString();
+    newEvent.transactionLogIndex.toHexString() +
+    '_' +
+    newEvent.params.to.toHexString() +
+    '_' +
+    newEvent.params.amount.toString() +
+    '_' +
+    newEvent.params.token.toHexString() +
+    '_' +
+    newEvent.params._reference;
 
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ONE_ETH);
@@ -345,6 +354,9 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   // handle event
   handleExecuted(event);
 
+  let withDrawParams = decodeWithdrawParams(
+    Bytes.fromHexString('0x' + callData.slice(10))
+  );
   // checks
   let entityID =
     Address.fromHexString(DAO_ADDRESS).toHexString() +
@@ -353,7 +365,14 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
     '_' +
     event.transactionLogIndex.toHexString() +
     '_' +
-    '0';
+    withDrawParams.to.toHexString() +
+    '_' +
+    withDrawParams.amount.toString() +
+    '_' +
+    withDrawParams.token.toHexString() +
+    '_' +
+    withDrawParams.reference;
+
   assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
   assert.fieldEquals(
     'VaultTransfer',
@@ -469,49 +488,29 @@ test('Run dao (handleStandardCallbackRegistered) mappings with mock event', () =
 
   // handle event
   handleStandardCallbackRegistered(newEvent);
-  
+
   // checks
   let entityID = `${daoAddress}_0xaaaaaaaa`;
   assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'StandardCallback',
-    entityID,
-    'interfaceId',
-    '0xaaaaaaaa'
-  );
+  assert.fieldEquals('StandardCallback', entityID, 'interfaceId', '0xaaaaaaaa');
   assert.fieldEquals(
     'StandardCallback',
     entityID,
     'callbackSelector',
     '0xaaaaaaab'
   );
-  assert.fieldEquals(
-    'StandardCallback',
-    entityID,
-    'magicNumber',
-    '0xaaaaaaac'
-  );
+  assert.fieldEquals('StandardCallback', entityID, 'magicNumber', '0xaaaaaaac');
 
   entityID = `${daoAddress}_0xbbaaaaaa`;
   assert.fieldEquals('StandardCallback', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'StandardCallback',
-    entityID,
-    'interfaceId',
-    '0xbbaaaaaa'
-  );
+  assert.fieldEquals('StandardCallback', entityID, 'interfaceId', '0xbbaaaaaa');
   assert.fieldEquals(
     'StandardCallback',
     entityID,
     'callbackSelector',
     '0xbbaaaaab'
   );
-  assert.fieldEquals(
-    'StandardCallback',
-    entityID,
-    'magicNumber',
-    '0xbbaaaaac'
-  );
+  assert.fieldEquals('StandardCallback', entityID, 'magicNumber', '0xbbaaaaac');
 
   clearStore();
 });
