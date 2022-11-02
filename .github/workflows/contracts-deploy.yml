@@ -65,7 +65,7 @@ jobs:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
       - name: Deploy
-        run: cd packages/contracts && yarn run deploy --network $NETWORK"
+        run: cd packages/contracts && yarn run deploy --network "$NETWORK"
         env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
