@@ -5,12 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.3.0-alpha]
+## [UPCOMING]
 
 ### Added
 
 - Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
 - Added more tests for the `PluginSetupProcessor`.
+
+### Changed
+
+- Refactored mocks for `PluginUUPSUpgradeable` and `PluginCloneable` and the respective setups.
+- Moved `event.ts` from `/test/test-utils/` to `/utils/`.
+
+### Removed
+
+## [v0.3.0-alpha]
+
+### Added
 
 - Added `00_create-plugins-repo.ts` for creating and registering plugin repo for plugins.
 - Added `00_allowlist_voting_setup.ts` and `10_erc20_voting_setup.ts` for deploying plugin setup.
@@ -44,9 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added ENS support for `PluginRepoRegistry`.
 
 ### Changed
-
-- Refactored mocks for `PluginUUPSUpgradeable` and `PluginCloneable` and the respective setups.
-- Moved `event.ts` from `/test/test-utils/` to `/utils/`.
 
 - Updated `Verify.ts` for verifying new contracts.
 - Split `permissions.ts` into three files corresponding to `00_ens-permissions.ts`, `10_dao-registry-permissions.ts` and `20_plugin-registrty-permissions.ts`.
