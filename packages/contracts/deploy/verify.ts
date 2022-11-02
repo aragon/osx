@@ -97,14 +97,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await ERC20VotingSetupContract.governanceERC20Base();
   verifyObjArray.push({
     address: governanceERC20Base,
-    args: [managingDAOAddress, '', ''],
+    args: [ethers.constants.AddressZero, '', ''],
   });
 
   const governanceWrappedERC20Base =
     await ERC20VotingSetupContract.governanceWrappedERC20Base();
   verifyObjArray.push({
     address: governanceWrappedERC20Base,
-    args: [governanceERC20Base, '', ''],
+    args: [ethers.constants.AddressZero, '', ''],
   });
 
   const merkleMinterBase = await ERC20VotingSetupContract.merkleMinterBase();
