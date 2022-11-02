@@ -124,14 +124,14 @@ jobs:
           git commit -am "Updates files with deployed contract addresses"
           git push
           echo "::set-output name=commitid::$(git rev-parse HEAD)"
-  call-create-daos-workflow:
-    needs: ['conclude']
-    uses: './.github/workflows/create-dummy-dao.yml'
-    with:
-      last_commit: ${{ needs.conclude.outputs.commitid }}
-    secrets:
-      ETH_KEY: ${{ secrets.ETH_KEY }}
-      ARABOT_PAT: ${{ secrets.ARABOT_PAT }}
+  #call-create-daos-workflow:
+  #  needs: ['conclude']
+  #  uses: './.github/workflows/create-dummy-dao.yml'
+  #  with:
+  #    last_commit: ${{ needs.conclude.outputs.commitid }}
+  #  secrets:
+  #    ETH_KEY: ${{ secrets.ETH_KEY }}
+  #    ARABOT_PAT: ${{ secrets.ARABOT_PAT }}
   npm-release:
     needs: ['conclude']
     uses: './.github/workflows/npm-release-reusable.yml'
