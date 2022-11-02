@@ -50,7 +50,7 @@ test('InstallationPrepared event', function() {
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'InstallationPending');
+  assert.fieldEquals('Plugin', pluginId, 'state', 'InstallationPrepared');
 
   // Plugin Entity exists. previous tests would have failed if not
   let pluginEntity = Plugin.load(pluginId) as Plugin;
@@ -144,7 +144,7 @@ test('UpdatePrepared event (existent plugin)', function() {
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_ONE);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'UpdatePending');
+  assert.fieldEquals('Plugin', pluginId, 'state', 'UpdatePrepared');
 
   // Plugin Entity exists. previous tests would have failed if not
   let pluginEntity = Plugin.load(pluginId) as Plugin;
@@ -181,7 +181,7 @@ test('UpdatePrepared event (non existent plugin)', function() {
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'UpdatePending');
+  assert.fieldEquals('Plugin', pluginId, 'state', 'UpdatePrepared');
 
   // Plugin Entity exists. previous tests would have failed if not
   let pluginEntity = Plugin.load(pluginId) as Plugin;
@@ -274,7 +274,7 @@ test('UninstallationPrepared event (existent plugin)', function() {
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_ONE);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'UninstallPending');
+  assert.fieldEquals('Plugin', pluginId, 'state', 'UninstallPrepared');
 
   // Plugin Entity exists. previous tests would have failed if not
   let pluginEntity = Plugin.load(pluginId) as Plugin;
@@ -310,7 +310,7 @@ test('UninstallationPrepared event (non existent plugin)', function() {
     Address.fromHexString(DAO_ADDRESS).toHexString()
   );
   assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'UninstallPending');
+  assert.fieldEquals('Plugin', pluginId, 'state', 'UninstallPrepared');
 
   // Plugin Entity exists. previous tests would have failed if not
   let pluginEntity = Plugin.load(pluginId) as Plugin;

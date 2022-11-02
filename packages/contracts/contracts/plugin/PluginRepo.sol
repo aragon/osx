@@ -75,6 +75,8 @@ contract PluginRepo is
     /// @notice Emitted when a new version is created.
     /// @param versionId The version index.
     /// @param semanticVersion The semantic version number.
+    /// @param pluginSetup The address of the plugin setup contract.
+    /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
     event VersionCreated(uint256 versionId, uint16[3] semanticVersion, address indexed pluginSetup, bytes contentURI);
 
     /// @notice Initializes the contract by

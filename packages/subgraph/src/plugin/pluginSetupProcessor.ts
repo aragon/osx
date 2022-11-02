@@ -17,7 +17,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   pluginEntity.dao = event.params.dao.toHexString();
   pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
   pluginEntity.data = event.params.data;
-  pluginEntity.state = 'InstallationPending';
+  pluginEntity.state = 'InstallationPrepared';
 
   handleHelperIds(event.params.helpers, pluginId);
   pluginEntity.save();
@@ -45,7 +45,7 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
   pluginEntity.dao = event.params.dao.toHexString();
   pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
   pluginEntity.data = event.params.data;
-  pluginEntity.state = 'UpdatePending';
+  pluginEntity.state = 'UpdatePrepared';
   pluginEntity.save();
 
   handleHelperIds(event.params.updatedHelpers, pluginId);
@@ -78,7 +78,7 @@ export function handleUninstallationPrepared(
   pluginEntity.dao = event.params.dao.toHexString();
   pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
   pluginEntity.data = event.params.data;
-  pluginEntity.state = 'UninstallPending';
+  pluginEntity.state = 'UninstallPrepared';
   pluginEntity.save();
 
   handleHelperIds(event.params.currentHelpers, pluginId);

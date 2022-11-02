@@ -274,9 +274,9 @@ type Plugin @entity {
 }
 
 enum PluginState {
-  InstallationPending
+  InstallationPrepared
   Installed
-  UpdatePending
-  UninstallPending
+  UpdatePrepared
+  UninstallPrepared
   Uninstalled
 }
