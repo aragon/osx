@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `00_create-plugins-repo.ts` for creating and registering plugin repo for plugins.
+- Added `00_allowlist_voting_setup.ts` and `10_erc20_voting_setup.ts` for deploying plugin setup.
+- Added `getMergedAbi()` function to `abi.ts`.
 - Transferred the core docs from aragon/builders-portal to this repository.
 - Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
@@ -39,6 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Moved `event.ts` from `/test/test-utils/` to `/utils/`.
+- Updated `Verify.ts` for verifying new contracts.
+- Splited `permissions.ts` into three files corresponding to `00_ens-permissions.ts`, `10_dao-registry-permissions.ts` and `20_plugin-registrty-permissions.ts`.
+- Refactored `setupENS` function.
 - Renamed `UPGRADE_PERMISSION` to be more specific to `UPGRADE_DAO_PERMISSION`, `UPGRADE_PLUGIN_PERMISSION`, etc.
 - Refactored `DAOFactory`to use`PluginSetupProcessor`.
 - Refactored NatSpec comments and names for the contracts related to the `Plugin` and `PluginSetup`.
@@ -65,6 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
 - Renamed `createProxy` function to `createERC1967Proxy`.
 - Replaces custom ERC1271 interface with Openzeppelins interface.
+- Extends `VersionCreated` event with `PluginSetup` and `contentURI`
+- Markes parameters of `InstallationApplied` as `indexed`
 
 ### Removed
 

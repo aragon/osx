@@ -14,7 +14,7 @@
     "deploy:local": "LOCAL=true scripts/deploy-subgraph.sh",
     "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
     "stop:dev": "docker-compose -f docker/docker-compose.yml down",
-    "test": "rm -r tests/.bin/**; graph test",
+    "test": "graph test -r",
     "coverage": "graph test -c"
   },
   "devDependencies": {

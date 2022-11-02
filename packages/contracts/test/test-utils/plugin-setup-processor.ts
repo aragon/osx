@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {findEvent} from './event';
+import {findEvent} from '../../utils/event';
 import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
 import {BytesLike, utils, constants} from 'ethers';
 

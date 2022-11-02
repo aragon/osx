@@ -123,7 +123,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Emitted after a plugin installation was applied.
     /// @param dao The address of the dao to which the plugin belongs.
     /// @param plugin The address of the plugin contract.
-    event InstallationApplied(address dao, address plugin);
+    event InstallationApplied(address indexed dao, address indexed plugin);
 
     /// @notice Emitted with a prepared plugin update to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.

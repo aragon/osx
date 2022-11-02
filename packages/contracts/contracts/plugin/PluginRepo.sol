@@ -75,7 +75,9 @@ contract PluginRepo is
     /// @notice Emitted when a new version is created.
     /// @param versionId The version index.
     /// @param semanticVersion The semantic version number.
-    event VersionCreated(uint256 versionId, uint16[3] semanticVersion);
+    /// @param pluginSetup The address of the plugin setup contract.
+    /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
+    event VersionCreated(uint256 versionId, uint16[3] semanticVersion, address indexed pluginSetup, bytes contentURI);
 
     /// @notice Initializes the contract by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
@@ -137,7 +139,7 @@ contract PluginRepo is
         versionIndexForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIndex;
         versionIndexForPluginSetup[_pluginSetup] = versionIndex;
 
-        emit VersionCreated(versionIndex, _newSemanticVersion);
+        emit VersionCreated(versionIndex, _newSemanticVersion, _pluginSetup, _contentURI);
     }
 
     /// @notice Gets the version information of the latest version.

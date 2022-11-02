@@ -9,34 +9,15 @@ import {
   ENSRegistry,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash} from '../../utils/ens';
+
+import {setupResolver} from '../test-utils/ens';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
 const DUMMY_METADATA = '0x';
-
-async function setupResolver(
-  ens: ENSRegistry,
-  resolver: PublicResolver,
-  owner: SignerWithAddress
-) {
-  await ens
-    .connect(owner)
-    .setSubnodeOwner(
-      ensDomainHash(''),
-      ensLabelHash('resolver'),
-      await owner.getAddress()
-    );
-
-  const resolverNode = ensDomainHash('resolver');
-
-  await ens.connect(owner).setResolver(resolverNode, resolver.address);
-  await resolver
-    .connect(owner)
-    ['setAddr(bytes32,address)'](resolverNode, resolver.address);
-}
 
 // Setup ENS with signers[0] owning the the ENS root node (''), the resolver node ('resolver'), the managing DAO, and the subdomain registrar
 async function setupENS(

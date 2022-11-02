@@ -16,7 +16,8 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../test-utils/repo';
-import {findEvent} from '../test-utils/event';
+import {findEvent} from '../../utils/event';
+import {getMergedABI} from '../../utils/abi';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -104,44 +105,16 @@ describe('DAOFactory: ', function () {
   let mergedABI: any;
   let daoFactoryBytecode: any;
 
-  async function getMergedABI() {
-    // @ts-ignore
-    const DAOFactoryArtifact = await hre.artifacts.readArtifact('DAOFactory');
-    // @ts-ignore
-    const RegistryArtifact = await hre.artifacts.readArtifact('DAORegistry');
-    // @ts-ignore
-    const PluginSetupProcessorArtifact = await hre.artifacts.readArtifact(
-      'PluginSetupProcessor'
-    );
-    // @ts-ignore
-    const DaoArtifact = await hre.artifacts.readArtifact('DAO');
-
-    const _merged = [
-      ...DAOFactoryArtifact.abi,
-      ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...DaoArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...PluginSetupProcessorArtifact.abi.filter(
-        (f: any) => f.type === 'event'
-      ),
-    ];
-
-    // remove duplicated events
-    const merged = _merged.filter(
-      (value, index, self) =>
-        index === self.findIndex(event => event.name === value.name)
-    );
-
-    return {
-      abi: merged,
-      bytecode: DAOFactoryArtifact.bytecode,
-    };
-  }
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const {abi, bytecode} = await getMergedABI();
+    const {abi, bytecode} = await getMergedABI(
+      // @ts-ignore
+      hre,
+      'DAOFactory',
+      ['DAORegistry', 'PluginSetupProcessor', 'DAO']
+    );
 
     mergedABI = abi;
     daoFactoryBytecode = bytecode;

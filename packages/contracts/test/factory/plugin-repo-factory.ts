@@ -1,11 +1,13 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {PluginRepoRegistry, DAO} from '../../typechain';
 
 import {customError} from '../test-utils/custom-error-helper';
 import {deployMockPluginSetup} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+
+import {PluginRepoRegistry, DAO} from '../../typechain';
+import {getMergedABI} from '../../utils/abi';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -34,25 +36,6 @@ async function getPluginRepoRegistryEvents(tx: any) {
   };
 }
 
-async function getMergedABI() {
-  // @ts-ignore
-  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoRegistry'
-  );
-  // @ts-ignore
-  const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoFactory'
-  );
-
-  return {
-    abi: [
-      ...PluginRepoFactoryArtifact.abi,
-      ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-    ],
-    bytecode: PluginRepoFactoryArtifact.bytecode,
-  };
-}
-
 describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let pluginRepoRegistry: PluginRepoRegistry;
@@ -67,7 +50,12 @@ describe('PluginRepoFactory: ', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const {abi, bytecode} = await getMergedABI();
+    const {abi, bytecode} = await getMergedABI(
+      // @ts-ignore
+      hre,
+      'PluginRepoFactory',
+      ['PluginRepoRegistry']
+    );
 
     mergedABI = abi;
     pluginRepoFactoryBytecode = bytecode;
@@ -90,10 +78,12 @@ describe('PluginRepoFactory: ', function () {
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
-    
-    
+
     pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(managingDao.address, ensSubdomainRegistrar.address);
+    await pluginRepoRegistry.initialize(
+      managingDao.address,
+      ensSubdomainRegistrar.address
+    );
 
     // deploy PluginRepoFactory
     const PluginRepoFactory = new ethers.ContractFactory(
@@ -112,13 +102,12 @@ describe('PluginRepoFactory: ', function () {
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
-     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-     managingDao.grant(
+    // grant REGISTER_PERMISSION_ID to pluginRepoFactory
+    managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
-
   });
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {

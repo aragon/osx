@@ -27,11 +27,9 @@ export const verifyContract = async (
   }
 
   try {
-    console.warn(
-      'Delaying Etherscan verification due their API can not find newly deployed contracts'
-    );
-    const msDelay = 15000; // 15s
-    const times = 4;
+    const msDelay = 500; // minimum dely between tasks
+    const times = 2; // number of retries
+
     // Write a temporal file to host complex parameters for hardhat-etherscan https://github.com/nomiclabs/hardhat/tree/master/packages/hardhat-etherscan#complex-arguments
     const {fd, path, cleanup} = await file({
       prefix: 'verify-params-',
@@ -47,7 +45,9 @@ export const verifyContract = async (
       constructorArgs: path,
     };
     await runTaskWithRetry('verify', params, times, msDelay, cleanup);
-  } catch (error) {}
+  } catch (error) {
+    console.warn(`Verify task error: ${error}`);
+  }
 };
 
 export const runTaskWithRetry = async (
