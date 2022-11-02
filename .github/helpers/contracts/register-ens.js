@@ -3,16 +3,14 @@ const crypto = require('crypto');
 const {setTimeout} = require('timers/promises');
 
 async function main() {
-  if (process.argv.length < 6) {
-    console.log(
-      'register-ens.ts NETWORK DOMAINNAME DURATION RESOLVER'
-    );
+  if (process.argv.length < 5) {
+    console.log('register-ens.ts DOMAINNAME DURATION RESOLVER');
     return;
   }
 
-  const ENS_REGISTRY = '0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5';
+  const ENS_REGISTRY = process.env.ENS_REGISTRY;
   const provider = new ethers.providers.InfuraProvider(
-    process.argv[process.argv.length - 4],
+    process.env.NETWORK,
     '579ebd226d934b2fac48c7ffb0c1907c'
   );
   let wallet = new ethers.Wallet(process.env.ETH_KEY || '');
