@@ -509,7 +509,7 @@ describe('Plugin Setup Processor', function () {
   });
 
   describe('Uninstallation', function () {
-    let proxy: string; //TODO rename to plugin?
+    let proxy: string;
     let helpersV1: string[];
     let permissionsV1: PermissionOperation[];
 
@@ -818,7 +818,7 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('prepareUpdate', function () {
-      let proxy: string; //TODO rename to plugin?
+      let proxy: string;
       let helpersV1: string[];
       let permissionsV1: PermissionOperation[];
 
@@ -853,7 +853,6 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if plugin supports the `IPlugin` interface, but is non-upgradable', async () => {
-        //TODO ADD MORE TESTS
         await targetDao2.grant(
           targetDao2.address,
           psp.address,
@@ -989,7 +988,7 @@ describe('Plugin Setup Processor', function () {
           mockPermissionsOperations(1, 2, Operation.Grant).map(perm =>
             Object.values(perm)
           )
-        ); //TODO use mock perm map everywhere
+        );
         expect(initData).not.to.be.equal(''); // TODO, improve test
       });
 
