@@ -2,7 +2,7 @@
 
 # Token
 
-type ERC20Token @entity {
+type ERC20Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
@@ -21,7 +21,7 @@ type Balance @entity {
 
 # ACL
 
-type ContractPermissionId @entity {
+type ContractPermissionId @entity(immutable: true) {
   id: ID! # where + permissionId
   dao: Dao!
   where: Bytes!
@@ -29,7 +29,7 @@ type ContractPermissionId @entity {
   frozen: Boolean!
 }
 
-type Permission @entity {
+type Permission @entity(immutable: true) {
   "no need to store granted as we can delete permission when revoked"
   id: ID! # where + permissionId + who
   dao: Dao!
@@ -42,7 +42,7 @@ type Permission @entity {
 
 # Executions
 
-type Action @entity {
+type Action @entity(immutable: true) {
   id: ID!
   to: Bytes!
   value: BigInt!
@@ -59,7 +59,7 @@ enum TransferType {
   Deposit
 }
 
-type VaultTransfer @entity {
+type VaultTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
   token: ERC20Token
@@ -97,6 +97,7 @@ type Dao @entity {
   permissions: [Permission!]! @derivedFrom(field: "dao")
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
+  plugins: [Plugin!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
@@ -246,4 +247,47 @@ type AllowlistProposal implements Proposal @entity {
   executed: Boolean!
   createdAt: BigInt!
   executable: Boolean
+}
+
+type PluginSetup @entity(immutable: true) {
+  id: ID!
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
+  installations: [Plugin!]! @derivedFrom(field: "pluginSetup")
+}
+
+type PluginVersion @entity(immutable: true) {
+  id: ID! # pluginRepo + version index
+  pluginRepo: PluginRepo!
+  semanticVersion: [BigInt!]!
+  pluginSetup: PluginSetup!
+  contentURI: Bytes!
+}
+
+type PluginRepo @entity(immutable: true) {
+  id: ID! # address
+  name: String!
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+}
+
+type PluginHelper @entity(immutable: true) {
+  id: ID! # address
+  plugin: Plugin!
+}
+
+type Plugin @entity {
+  id: ID! # address
+  dao: Dao!
+  pluginSetup: PluginSetup!
+  data: Bytes!
+  helpers: [PluginHelper!]! @derivedFrom(field: "plugin")
+  state: PluginState!
+  sender: String!
+}
+
+enum PluginState {
+  InstallationPrepared
+  Installed
+  UpdatePrepared
+  UninstallPrepared
+  Uninstalled
 }
