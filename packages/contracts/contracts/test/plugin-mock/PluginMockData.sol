@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 address constant NO_ORACLE = address(0);

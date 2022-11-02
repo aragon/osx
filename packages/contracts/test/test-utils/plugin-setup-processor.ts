@@ -62,6 +62,41 @@ export async function prepareInstallation(
   };
 }
 
+export async function prepareUninstallation(
+  psp: PluginSetupProcessor,
+  daoAddress: string,
+  plugin: string,
+  pluginSetup: string,
+  pluginRepo: string,
+  currentHelpers: string[],
+  data: BytesLike
+): Promise<{
+  returnedPluginAddress: string;
+  returnedHelpers: string[];
+  permissions: PermissionOperation[];
+}> {
+  const tx = await psp.prepareUninstallation(
+    daoAddress,
+    plugin,
+    pluginSetup,
+    pluginRepo,
+    currentHelpers,
+    data
+  );
+  const event = await findEvent(tx, 'UninstallationPrepared');
+  let {
+    plugin: returnedPluginAddress,
+    currentHelpers: returnedHelpers,
+    permissions,
+  } = event.args;
+
+  return {
+    returnedPluginAddress: returnedPluginAddress,
+    returnedHelpers: returnedHelpers,
+    permissions: permissions,
+  };
+}
+
 export async function prepareUpdate(
   psp: PluginSetupProcessor,
   daoAddress: string,

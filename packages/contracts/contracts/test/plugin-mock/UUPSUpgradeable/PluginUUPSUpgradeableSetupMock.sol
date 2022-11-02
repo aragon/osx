@@ -6,10 +6,8 @@ import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
+import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
 
-import "./PluginMockData.sol";
-
-// The first version of plugin setup.
 contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     address internal pluginBase;
 
