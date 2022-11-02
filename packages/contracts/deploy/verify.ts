@@ -14,15 +14,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployments, ethers, run} = hre;
 
-  const msDelay = 2; // 3 minutes - Etherscan needs some time to process before trying to verify.
+  const minutesDelay = 180000; // 3 minutes - Etherscan needs some time to process before trying to verify.
 
   console.log(
     `Waiting for ${
-      msDelay / 60000
+      minutesDelay / 60000
     } minutes, so Etherscan is aware of contracts before verifying`
   );
 
-  await delay(msDelay);
+  await delay(minutesDelay);
 
   // Prepare contracts and addresses
   const managingDAOAddress = await getContractAddress('DAO', hre);
