@@ -1,7 +1,10 @@
 import {promises as fs} from 'fs';
+import {ethers} from 'hardhat';
+import {BigNumberish} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {ensLabelHash, ensDomainHash} from '../utils/ensHelpers';
+import {findEvent} from '../utils/event';
+import {getMergedABI} from '../utils/abi';
 
 // TODO: Add support for L2 such as Arbitrum. (https://discuss.ens.domains/t/register-using-layer-2/688)
 // Make sure you own the ENS set in the {{NETWORK}}_ENS_DOMAIN variable in .env
@@ -57,92 +60,10 @@ export async function updateActiveContractsJSON(payload: {
   );
 }
 
-export async function setupENS(
-  hre: HardhatRuntimeEnvironment,
-  subDomain: string
-): Promise<any> {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
-
-  const ensRet = await deploy('ENSRegistry', {
-    from: deployer,
-    log: true,
-  });
-  const ensRegistryAddress: string = ensRet.receipt?.contractAddress || '';
-
-  const ensResolverRet = await deploy('PublicResolver', {
-    from: deployer,
-    args: [ensRegistryAddress, ethers.constants.AddressZero],
-    log: true,
-  });
-  const ensResolverAddress: string =
-    ensResolverRet.receipt?.contractAddress || '';
-
-  // setup resolver
-  const ensRegistryContract = await ethers.getContractAt(
-    'ENSRegistry',
-    ensRegistryAddress
-  );
-  const ensResolverContract = await ethers.getContractAt(
-    'PublicResolver',
-    ensResolverAddress
-  );
-  const setSubnodeOwnerTx = await ensRegistryContract.setSubnodeOwner(
-    ensDomainHash(''),
-    ensLabelHash('resolver'),
-    deployer
-  );
-  await setSubnodeOwnerTx.wait();
-
-  const resolverNode = ensDomainHash('resolver');
-
-  const setResolverTx = await ensRegistryContract.setResolver(
-    resolverNode,
-    ensResolverAddress
-  );
-  await setResolverTx.wait();
-
-  await ensResolverContract['setAddr(bytes32,address)'](
-    resolverNode,
-    ensResolverAddress
-  );
-
-  // make the deployer owning the root ('') the owner of the subdomain 'eth'
-  const setSubnodeOwnerETH = await ensRegistryContract.setSubnodeOwner(
-    ensDomainHash(''),
-    ensLabelHash('eth'),
-    deployer
-  );
-  await setSubnodeOwnerETH.wait();
-
-  // make the deployer owning the domain 'eth' the owner of the subdomain 'dao.eth'
-  const setSubnodeOwnerDAO = await ensRegistryContract.setSubnodeOwner(
-    ensDomainHash('eth'),
-    ensLabelHash(subDomain),
-    deployer
-  );
-  await setSubnodeOwnerDAO.wait();
-
-  // deterministic
-  const futureAddress = await detemineAccountNextAddress(2, hre);
-  const setApprovalForAll = await ensRegistryContract.setApprovalForAll(
-    futureAddress,
-    true
-  );
-  await setApprovalForAll.wait();
-
-  return ensRegistryAddress;
-}
-
-export async function detemineAccountNextAddress(
+export async function detemineDeployerNextAddress(
   index: number,
-  hre: HardhatRuntimeEnvironment
+  deployer: any
 ): Promise<string> {
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
-
   const [owner] = await ethers.getSigners();
   const nonce = await owner.getTransactionCount();
   const futureAddress = ethers.utils.getContractAddress({
@@ -150,6 +71,58 @@ export async function detemineAccountNextAddress(
     nonce: nonce + index,
   });
   return futureAddress;
+}
+
+export async function createPluginRepo(
+  hre: HardhatRuntimeEnvironment,
+  pluginContractName: string,
+  pluginSetupContractName: string,
+  version: [BigNumberish, BigNumberish, BigNumberish],
+  contentURI: string
+): Promise<void> {
+  const signers = await ethers.getSigners();
+
+  const managingDAOAddress = await getContractAddress('DAO', hre);
+  const pluginRepoFactoryAddress = await getContractAddress(
+    'PluginRepoFactory',
+    hre
+  );
+
+  const {abi, bytecode} = await getMergedABI(hre, 'PluginRepoFactory', [
+    'PluginRepoRegistry',
+  ]);
+
+  const pluginRepoFactoryFactory = new ethers.ContractFactory(
+    abi,
+    bytecode,
+    signers[0]
+  );
+  const pluginRepoFactoryContract = pluginRepoFactoryFactory.attach(
+    pluginRepoFactoryAddress
+  );
+
+  // register a plugin
+  const pluginSetupAddress = await getContractAddress(
+    pluginSetupContractName,
+    hre
+  );
+
+  const tx = await pluginRepoFactoryContract.createPluginRepoWithVersion(
+    pluginContractName,
+    version,
+    pluginSetupAddress,
+    contentURI,
+    managingDAOAddress
+  );
+
+  await tx.wait();
+
+  const event = await findEvent(tx, 'PluginRepoRegistered');
+  const repoAddress = event.args.pluginRepo;
+
+  console.log(
+    `Created & registered repo for ${pluginContractName} with version ${version} at address: ${repoAddress}`
+  );
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file
