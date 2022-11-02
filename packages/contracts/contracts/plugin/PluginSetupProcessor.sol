@@ -97,10 +97,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin setup was already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
     error SetupAlreadyApplied();
 
-    /// @notice Thrown if a semantic version number bump is invalid.
+    /// @notice Thrown if an update to the same or an earlier version is prepared.
     /// @param currentVersion The current semantic version number.
-    /// @param nextVersion The next semantic version number.
-    error UpdateInvalid(uint16[3] currentVersion, uint16[3] nextVersion);
+    /// @param invalidNextVersion The next version number of the version that was invalidly prepared.
+    error UpdateInvalid(uint16[3] currentVersion, uint16[3] invalidNextVersion);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -639,7 +639,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         if (oldVersionIndex >= newVersionIndex) {
-            revert UpdateInvalid({currentVersion: oldVersion, nextVersion: newVersion});
+            revert UpdateInvalid({currentVersion: oldVersion, invalidNextVersion: newVersion});
         }
     }
 }
