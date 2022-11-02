@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
+- Added more tests for the `PluginSetupProcessor`.
+
 - Added `00_create-plugins-repo.ts` for creating and registering plugin repo for plugins.
 - Added `00_allowlist_voting_setup.ts` and `10_erc20_voting_setup.ts` for deploying plugin setup.
 - Added `getMergedAbi()` function to `abi.ts`.
@@ -42,9 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refactored mocks for `PluginUUPSUpgradeable` and `PluginCloneable` and the respective setups.
 - Moved `event.ts` from `/test/test-utils/` to `/utils/`.
+
 - Updated `Verify.ts` for verifying new contracts.
-- Splited `permissions.ts` into three files corresponding to `00_ens-permissions.ts`, `10_dao-registry-permissions.ts` and `20_plugin-registrty-permissions.ts`.
+- Split `permissions.ts` into three files corresponding to `00_ens-permissions.ts`, `10_dao-registry-permissions.ts` and `20_plugin-registrty-permissions.ts`.
 - Refactored `setupENS` function.
 - Renamed `UPGRADE_PERMISSION` to be more specific to `UPGRADE_DAO_PERMISSION`, `UPGRADE_PLUGIN_PERMISSION`, etc.
 - Refactored `DAOFactory`to use`PluginSetupProcessor`.
