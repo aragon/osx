@@ -35,7 +35,7 @@ export function createTokenCalls(
   ]);
 }
 
-export function createDummyAcctions(
+export function createDummyActions(
   address: string,
   value: string,
   data: string

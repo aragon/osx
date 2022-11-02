@@ -120,6 +120,14 @@ templates:
           handler: handleRevoked
         - event: Frozen(indexed bytes32,indexed address,address)
           handler: handleFrozen
+        - event: Withdrawn(indexed address,indexed address,uint256,string)
+          handler: handleWithdrawn
+        - event: TrustedForwarderSet(address)
+          handler: handleTrustedForwarderSet
+        - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
+          handler: handleStandardCallbackRegistered(address)
+        - event: SignatureValidatorSet(address)
+          handler: handleSignatureValidatorSet
   # ERC20Voting (package)
   - name: ERC20Voting
     kind: ethereum/contract

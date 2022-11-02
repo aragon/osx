@@ -73,6 +73,14 @@ type VaultTransfer @entity(immutable: true) {
   type: TransferType!
 }
 
+type StandardCallback @entity {
+  id: ID!
+  dao: Dao!
+  interfaceId: Bytes!
+  callbackSelector: Bytes!
+  magicNumber: Bytes!
+}
+
 # Dao
 
 type Dao @entity {
@@ -90,6 +98,9 @@ type Dao @entity {
   packages: [DaoPackage!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
   plugins: [Plugin!] @derivedFrom(field: "dao")
+  trustedForwarder: Bytes
+  signatureValidator: Bytes
+  standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
 }
 
 # Packages
