@@ -57,11 +57,19 @@ jobs:
         run: yarn install --pure-lockfile
       - name: Compile
         run: cd packages/contracts && yarn run build
+      - name: Register Random ENS
+        if: matrix.network == 'goerli'
+        run: node .github/helpers/contracts/register-ens.js ${{ matrix.network }} aragon-plugins-${{ github.run_number	}}-${{ github.run_id	}} 31536000 0xE264d5bb84bA3b8061ADC38D3D76e6674aB91852
+        env:
+          ENS_REGISTRY: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5"
+          ETH_KEY: ${{ secrets.ETH_KEY }}
       - name: Deploy
         run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.prepare.outputs.tags }}"
         env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
+          GOERLI_DAO_ENS_DOMAIN: dao.eth
+          GOERLI_PLUGIN_ENS_DOMAIN: "aragon-plugins-${{ github.run_number	}}-${{ github.run_id	}}.eth"
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.network}}
