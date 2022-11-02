@@ -26,10 +26,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (!daoDomain) throw new Error('DAO domain has not been set in .env');
 
-  console.log(
-    `Using domain of "${daoDomain}", that it is owned by the deployer ${deployer}.`
-  );
-
   const daoNode = ethers.utils.namehash(daoDomain);
 
   const officialEnsRegistryAddress = ENS_ADDRESSES[network.name];
@@ -45,6 +41,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const ensRegistryContract = await ethers.getContractAt(
     'ENSRegistry',
     ensRegistryAddress
+  );
+
+  // Check if domain is owned by the deployer
+  const daoDomainOwnerAddress = await ensRegistryContract.owner(daoNode);
+  if (daoDomainOwnerAddress != deployer) {
+    throw new Error(`${daoDomain} is not owned by deployer: ${deployer}.`);
+  }
+
+  console.log(
+    `Using domain of "${daoDomain}", that it is owned by the deployer ${deployer}.`
   );
 
   // Approving future `ENSSubdomainRegistrar` address
@@ -103,6 +109,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const pluginNode = ethers.utils.namehash(pluginDomain);
+
+  // Check if domain is owned by the deployer
+  const pluginDomainOwnerAddress = await ensRegistryContract.owner(pluginNode);
+  if (pluginDomainOwnerAddress != deployer) {
+    throw new Error(`${pluginDomain} is not owned by deployer: ${deployer}.`);
+  }
+
+  console.log(
+    `Using domain of "${pluginDomain}", that it is owned by the deployer ${deployer}.`
+  );
 
   const pluginFutureAddress = await detemineDeployerNextAddress(2, deployer);
   const pluginApproveTx = await ensRegistryContract.setApprovalForAll(
