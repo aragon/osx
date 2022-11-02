@@ -27,7 +27,6 @@ async function main() {
   console.log(`Registering: ${domainName}.eth`);
   console.log(`Duration: ${duration}`);
   console.log(`Resolver: ${resolver}`);
-  console.log(`WrapperExpiry: ${wrapperExpiry}`);
   console.log(`Using Secret: ${secret}`);
 
   console.log('Get contract object');

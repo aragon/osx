@@ -9,6 +9,7 @@ on:
     paths:
       - 'packages/contracts/**'
       - '.github/workflows/contracts-deploy.yml'
+      - '.github/helpers/contracts/**'
 
 jobs:
   test:
