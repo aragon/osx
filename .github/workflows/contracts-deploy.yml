@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       environment: ${{ steps.prepare.outputs.environment }}
-      tags: ${{ steps.prepare.outputs.tags }}
       matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
       - uses: actions/checkout@v2
@@ -65,43 +64,20 @@ jobs:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
       - name: Deploy
-        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "DAOFactory,TokenFactory,${{ needs.prepare.outputs.tags }}"
+        run: cd packages/contracts && yarn run deploy --network $NETWORK"
         env:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
           GOERLI_DAO_ENS_DOMAIN: dao.eth
           GOERLI_PLUGIN_ENS_DOMAIN: 'aragon-plugins-${{ github.run_number	}}-${{ github.run_id	}}.eth'
+          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
+          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
+          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.network}}
           path: ./packages/contracts/deployments/*
           retention-days: 1
-  verfiyContracts:
-    runs-on: ubuntu-latest
-    needs: [build-deploy, prepare]
-    environment: ${{ needs.prepare.outputs.environment }}
-    strategy:
-      fail-fast: true
-      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
-      - name: Install dependencies
-        run: yarn install --pure-lockfile
-      - uses: actions/download-artifact@v3
-        with:
-          name: ${{matrix.network}}
-          path: ./packages/contracts/deployments/
-      - name: Verify
-        run: cd packages/contracts && yarn run deploy --network $NETWORK --tags "Verify"
-        env:
-          NETWORK: ${{ matrix.network }}
-          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
-          ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
-          POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}
   conclude:
     runs-on: ubuntu-latest
     outputs:

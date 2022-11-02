@@ -18,7 +18,6 @@ async function main(ref) {
   console.log(
     `::set-output name=environment::${isTestnet ? 'staging' : 'production'}`
   );
-  console.log(`::set-output name=tags::${isTestnet ? 'Registry' : ''}`);
   console.log(`::set-output name=matrix::${JSON.stringify(matrix)}`);
 }
 
