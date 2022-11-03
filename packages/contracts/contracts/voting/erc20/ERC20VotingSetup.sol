@@ -305,7 +305,7 @@ contract ERC20VotingSetup is PluginSetup {
                 token,
                 _dao,
                 NO_ORACLE,
-                tokenMintPermission
+                GovernanceERC20(token).MINT_PERMISSION_ID()
             );
         }
     }
