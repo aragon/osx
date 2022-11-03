@@ -60,8 +60,6 @@ contract GovernanceERC20 is
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
 
-        // NOTE: It's deployer's responsibility to ensure that
-        // receivers.length matches amounts.length
         for(uint i = 0; i < _mintSettings.receivers.length; i++) {
             _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
         }
