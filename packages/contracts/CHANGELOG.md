@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 - Added ENS support for `PluginRepoRegistry`.
-- Added Mint possibility in the `GovernanceERC20`'s initialize function.
+- Added minting functionality to the `initialize` function of `GovernanceERC20`.
 
 ### Changed
 
