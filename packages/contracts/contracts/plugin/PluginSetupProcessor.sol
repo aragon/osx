@@ -617,29 +617,30 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    /// @notice Checks if an update is valid by comparing the version indices.
+    /// @notice Checks if an update is valid by ensuring that the semantic version is incremented.
     /// @param _updateParams The parameters of the update.
-    /// @return oldVersion The old semantic version number.
+    /// @return uint16[3] The old semantic version number being needed in the context for further usage.
     function _checkUpdateValidity(PluginUpdateParams calldata _updateParams)
         internal
         view
-        returns (uint16[3] memory oldVersion)
+        returns (uint16[3] memory)
     {
-        uint256 oldVersionIndex = _updateParams.pluginSetupRepo.versionIndexForPluginSetup(
+        (uint16[3] memory oldSemVer, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.currentPluginSetup
         );
 
-        uint256 newVersionIndex = _updateParams.pluginSetupRepo.versionIndexForPluginSetup(
+        (uint16[3] memory newSemVer, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.newPluginSetup
         );
 
-        (oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionById(oldVersionIndex);
-        (uint16[3] memory newVersion, , ) = _updateParams.pluginSetupRepo.getVersionById(
-            newVersionIndex
-        );
-
-        if (oldVersionIndex >= newVersionIndex) {
-            revert UpdateInvalid({currentVersion: oldVersion, invalidNextVersion: newVersion});
+        if (newSemVer[0] > oldSemVer[0]) {
+            return oldSemVer;
+        } else if (newSemVer[1] > oldSemVer[1]) {
+            return oldSemVer;
+        } else if (newSemVer[2] > oldSemVer[2]) {
+            return oldSemVer;
+        } else {
+            revert UpdateInvalid({currentVersion: oldSemVer, invalidNextVersion: newSemVer});
         }
     }
 }

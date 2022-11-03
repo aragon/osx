@@ -46,10 +46,10 @@ contract PluginRepo is
     mapping(uint256 => Version) internal versions;
 
     /// @notice A mapping between the semantic version number hash and the version index.
-    mapping(bytes32 => uint256) public versionIndexForSemantic;
+    mapping(bytes32 => uint256) internal versionIndexForSemantic;
 
     /// @notice A mapping between the `PluginSetup` contract addresses and the version index.
-    mapping(address => uint256) public versionIndexForPluginSetup;
+    mapping(address => uint256) internal versionIndexForPluginSetup;
 
     /// @notice Thrown if a semantic version number bump is invalid.
     /// @param currentVersion The current semantic version number.
