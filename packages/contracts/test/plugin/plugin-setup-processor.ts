@@ -81,7 +81,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
-describe('Plugin Setup Processor', function () {
+describe.only('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoUUPS: PluginRepo;
@@ -817,6 +817,36 @@ describe('Plugin Setup Processor', function () {
       );
     });
 
+    describe('isValidUpdate', function () {
+      it('accepts major updates', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [2, 0, 0])).to.equal(true);
+      });
+
+      it('accepts minor updates', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [1, 1, 0])).to.equal(true);
+      });
+
+      it('accepts patch updates', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [1, 0, 1])).to.equal(true);
+      });
+
+      it('denies update to the same version upgrades', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [1, 0, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 0], [1, 1, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 1], [1, 1, 1])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 1, 1], [0, 1, 1])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 0, 1], [0, 0, 1])).to.equal(false);
+      });
+
+      it('denies downgrades', async () => {
+        expect(await psp.isValidUpdate([1, 0, 0], [0, 0, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 0], [1, 0, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([1, 1, 1], [1, 1, 0])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 1, 1], [0, 0, 1])).to.equal(false);
+        expect(await psp.isValidUpdate([0, 0, 1], [0, 0, 0])).to.equal(false);
+      });
+    });
+
     describe('prepareUpdate', function () {
       let proxy: string;
       let helpersV1: string[];
@@ -1227,6 +1257,20 @@ describe('Plugin Setup Processor', function () {
             setupV2
           ));
         });
+
+        /*it('cannot update to V2 again', async () => {
+          await expect(
+            updateHelper(
+              psp,
+              targetDao,
+              proxy,
+              pluginRepo,
+              helpersV2,
+              setupV2,
+              setupV2
+            )
+          ).to.be.reverted;
+        });*/
 
         it('points to the V2 implementation', async () => {
           expect(

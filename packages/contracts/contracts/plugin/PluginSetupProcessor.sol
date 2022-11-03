@@ -346,6 +346,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         uint16[3] memory oldVersion = _checkUpdateValidity(_updateParams);
+
         // prepare update
         (
             address[] memory updatedHelpers,
@@ -617,30 +618,54 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    /// @notice Checks if an update is valid by ensuring that the semantic version is incremented.
+    /// @notice Checks the update parameters
     /// @param _updateParams The parameters of the update.
-    /// @return uint16[3] The old semantic version number being needed in the context for further usage.
+    /// @return oldVersion The old semantic version number being needed in the context for further usage.
     function _checkUpdateValidity(PluginUpdateParams calldata _updateParams)
         internal
         view
-        returns (uint16[3] memory)
+        returns (uint16[3] memory oldVersion)
     {
-        (uint16[3] memory oldSemVer, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+        // These revert if the current or new plugin setup are not part of the plugin setup repo
+        (oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.currentPluginSetup
         );
-
-        (uint16[3] memory newSemVer, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+        (uint16[3] memory newVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
             _updateParams.newPluginSetup
         );
 
-        if (newSemVer[0] > oldSemVer[0]) {
-            return oldSemVer;
-        } else if (newSemVer[1] > oldSemVer[1]) {
-            return oldSemVer;
-        } else if (newSemVer[2] > oldSemVer[2]) {
-            return oldSemVer;
-        } else {
-            revert UpdateInvalid({currentVersion: oldSemVer, invalidNextVersion: newSemVer});
+        // Assert that the version bump valid
+        if (!isValidUpdate(oldVersion, newVersion)) {
+            revert UpdateInvalid({currentVersion: oldVersion, invalidNextVersion: newVersion});
         }
+    }
+
+    /// @notice Checks if an update is valid by the version numbers.
+    /// @param _oldVersion The old semantic version number.
+    /// @param _newVersion The new semantic version number.
+    /// @return bool Returns true if the bump is valid.
+    function isValidUpdate(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
+        public
+        pure
+        returns (bool)
+    {
+        bool hasIncreased;
+        uint256 i = 0;
+        while (i < 3) {
+            if (hasIncreased) {
+                if (_newVersion[i] != 0) {
+                    return false;
+                }
+            } else if (_newVersion[i] != _oldVersion[i]) {
+                if (_oldVersion[i] > _newVersion[i]) {
+                    return false;
+                }
+                hasIncreased = true;
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        return hasIncreased;
     }
 }
