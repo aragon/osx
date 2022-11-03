@@ -80,7 +80,7 @@ jobs:
       - name: updates changelog.md
         run:
           VERSION=$(cat package.json | jq -r .version)
-          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./CHANGELOG.md"
+          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./packages/${{ matrix.package }}/CHANGELOG.md"
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.package}}
