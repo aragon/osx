@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
 - Removed `ERC165Registry`.
 - Removed `Component` and `MetaTxComponent`.
-- Removed `MerkleMinter` Deployment from `ERC20VotingSetup`
+- Removed `MerkleMinter` deployment from `ERC20VotingSetup`.
 
 ## v0.2.0-alpha
 
