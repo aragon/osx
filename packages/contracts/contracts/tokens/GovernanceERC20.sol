@@ -48,7 +48,8 @@ contract GovernanceERC20 is
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
-    /// @param _mintSettings The initial mint settings
+    /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
+    /// @dev The lengths of `receivers` and `amounts` must match.
     function initialize(
         IDAO _dao,
         string memory _name,
