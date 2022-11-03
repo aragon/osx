@@ -47,7 +47,7 @@ async function main() {
           const contractPath = path.join(networkPath, contract.name);
           const contractContent = await fs.readFile(contractPath);
           const contractJson = JSON.parse(contractContent.toString());
-          manifest[dataSourceName] = {
+          manifest.dataSources[dataSourceName] = {
             name,
             address: contractJson.address,
             startBlock: contractJson.receipt.blockNumber,
