@@ -299,7 +299,6 @@ contract ERC20VotingSetup is PluginSetup {
         // calls dao for the permissions, we might decide to include the below always as it will be
         // more gas less than checking isGovernanceERC20..
         if(isGovernanceERC20) {
-            bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
             permissions[3] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
                 token,
