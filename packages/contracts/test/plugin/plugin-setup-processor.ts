@@ -94,7 +94,6 @@ describe('Plugin Setup Processor', function () {
   let setupCV2: PluginCloneableSetupV2Mock;
   let ownerAddress: string;
   let targetDao: DAO;
-  let targetDao2: DAO;
   let managingDao: DAO;
   let pluginRepoFactory: PluginRepoFactory;
   let pluginRepoRegistry: PluginRepoRegistry;
@@ -210,7 +209,6 @@ describe('Plugin Setup Processor', function () {
   beforeEach(async function () {
     // Target DAO to be used as an example DAO
     targetDao = await deployNewDAO(ownerAddress);
-    targetDao2 = await deployNewDAO(ownerAddress);
 
     // Grant
     await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);
@@ -849,28 +847,12 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if plugin supports the `IPlugin` interface, but is non-upgradable', async () => {
-        await targetDao2.grant(
-          targetDao2.address,
-          psp.address,
-          ROOT_PERMISSION_ID
-        );
-        await targetDao2.grant(
-          psp.address,
-          ownerAddress,
-          APPLY_INSTALLATION_PERMISSION_ID
-        );
-        await targetDao2.grant(
-          psp.address,
-          ownerAddress,
-          APPLY_UPDATE_PERMISSION_ID
-        );
-
         let pluginCloneable;
         ({
           plugin: pluginCloneable,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await installHelper(psp, targetDao2, setupCV1, repoC));
+        } = await installHelper(psp, targetDao, setupCV1, repoC));
 
         let pluginUpdateParams = {
           plugin: pluginCloneable,
@@ -881,7 +863,7 @@ describe('Plugin Setup Processor', function () {
 
         await expect(
           psp.prepareUpdate(
-            targetDao2.address,
+            targetDao.address,
             pluginUpdateParams,
             helpersV1,
             EMPTY_DATA
