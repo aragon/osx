@@ -7,8 +7,6 @@ import {
   PluginUUPSUpgradeableV1Mock__factory,
   PluginUUPSUpgradeableV2Mock__factory,
   PluginUUPSUpgradeableV3Mock__factory,
-  PluginCloneableV1Mock__factory,
-  PluginCloneableV2Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginUUPSUpgradeableSetupV2Mock,
@@ -299,7 +297,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('returns the plugin, helpers, and permissions', async () => {
+      it('prepares a UUPS upgradeable plugin installation', async () => {
         let plugin;
         let helpersV1;
         let permissionsV1;
@@ -324,28 +322,29 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('prepares a UUPS upgradeable plugin installation', async () => {
-        await expect(
-          prepareInstallation(
-            psp,
-            targetDao.address,
-            setupUV1.address,
-            repoU.address,
-            EMPTY_DATA
-          )
-        ).to.not.be.reverted;
-      });
-
       it('prepares a cloneable plugin installation', async () => {
-        await expect(
-          prepareInstallation(
-            psp,
-            targetDao.address,
-            setupCV1.address,
-            repoC.address,
-            EMPTY_DATA
+        let plugin;
+        let helpersV1;
+        let permissionsV1;
+        ({
+          plugin: plugin,
+          helpers: helpersV1,
+          permissions: permissionsV1,
+        } = await prepareInstallation(
+          psp,
+          targetDao.address,
+          setupCV1.address,
+          repoC.address,
+          EMPTY_DATA
+        ));
+
+        expect(plugin).to.not.equal(AddressZero);
+        expect(helpersV1).to.deep.equal(mockHelpers(1));
+        expect(permissionsV1).to.deep.equal(
+          mockPermissionsOperations(5, 6, Operation.Grant).map(perm =>
+            Object.values(perm)
           )
-        ).to.not.be.reverted;
+        );
       });
     });
 
@@ -926,7 +925,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupNotApplied'));
       });
 
-      it('revert if helpers passed do not match', async () => {
+      it('reverts if helpers passed do not match', async () => {
         const pluginUpdateParams = {
           plugin: proxy,
           pluginSetupRepo: repoU.address,

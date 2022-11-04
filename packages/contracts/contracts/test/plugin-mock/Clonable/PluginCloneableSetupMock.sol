@@ -33,7 +33,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     {
         plugin = mockPluginProxy(pluginBase, _dao);
         helpers = mockHelpers(1);
-        permissions = mockPermissions(10, 11, PermissionLib.Operation.Grant);
+        permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
@@ -49,7 +49,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         bytes calldata
     ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         (_dao, _plugin, _currentHelpers);
-        permissions = mockPermissions(10, 11, PermissionLib.Operation.Revoke);
+        permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
     }
 
     /// @inheritdoc IPluginSetup
@@ -81,7 +81,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     {
         plugin = mockPluginProxy(pluginBase, _dao);
         helpers = mockHelpers(1);
-        permissions = mockPermissions(10, 12, PermissionLib.Operation.Grant);
+        permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
@@ -97,7 +97,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
         bytes calldata
     ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         (_dao, _plugin, _currentHelpers);
-        permissions = mockPermissions(10, 12, PermissionLib.Operation.Revoke);
+        permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);
     }
 
     /// @inheritdoc IPluginSetup
