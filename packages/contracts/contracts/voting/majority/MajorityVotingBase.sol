@@ -14,6 +14,10 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components.
+/// TODO    We use the following definitions
+/// TODO    $support = \frac{N_{yes}}{N_{yes}+N_{no}}$
+/// TODO    $relative = \frac{N_{yes}}{N_{total}}$
+/// TODO    $participation = \frac{N_{yes}+N_{no}+N_{abstain}}{N_{total}}$
 /// @dev This component implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
@@ -58,12 +62,15 @@ abstract contract MajorityVotingBase is
     error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
-    error VoteDurationZero();
+    error VoteDurationZero(); ///TODO  remove
+
+    /// @notice Thrown if zero is not allowed as a value
+    error ZeroValueNotAllowed();
 
     /// @notice Thrown if a voter is not allowed to cast a vote.
     /// @param voteId The ID of the vote.
     /// @param sender The address of the voter.
-    error VoteCastingForbidden(uint256 voteId, address sender);
+    error VoteCastForbidden(uint256 voteId, address sender);
 
     /// @notice Thrown if the vote execution is forbidden
     error VoteExecutionForbidden(uint256 voteId);
@@ -128,7 +135,7 @@ abstract contract MajorityVotingBase is
         bool _executesIfDecided
     ) external {
         if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender()))
-            revert VoteCastingForbidden(_voteId, _msgSender());
+            revert VoteCastForbidden(_voteId, _msgSender());
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
@@ -203,7 +210,7 @@ abstract contract MajorityVotingBase is
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
         votes[_voteId].executed = true;
-        
+
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         emit VoteExecuted(_voteId, execResults);
@@ -218,41 +225,48 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
     /// @return True if the given vote can be executed, false otherwise.
+
+    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
+    /// This function assumes vote configurations with `supportRequiredPct` values >= 50%.
+    ///     Under this assumption and if the number of yes votes relative to the total `votingPower` is
+    ///     larger than `supportRequiredPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
+    /// @param _voteId The ID of the vote.
+    /// @return True if the given vote can be executed, false otherwise.
     function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
         Vote storage vote_ = votes[_voteId];
 
+        // Verify that the vote has not been executed already.
         if (vote_.executed) {
             return false;
         }
 
-        // Voting is already decided
-        if (_isValuePct(vote_.yes, vote_.votingPower, vote_.supportRequiredPct)) {
+        // Early execution criterium: The vote can execute immediately, if the number of yes votes relative to the
+        // total voting power is larger than the relative required support, even if the voting period has not ended yet.
+        // The reasoning behind this is, assuming `supportRequiredPct` values >= 50%, that the outcome cannot change anymore,
+        // because the majority has already approved the decision.
+        if (_calculatePct(vote_.yes, vote_.votingPower) > vote_.supportRequiredPct) {
             return true;
         }
 
-        // Vote ended?
+        // Verify that the vote has ended.
         if (_isVoteOpen(vote_)) {
             return false;
         }
 
-        uint256 totalVotes = vote_.yes + vote_.no;
-
-        // Have enough people's stakes participated ? then proceed.
+        // Verify that the total number of votes casted relative to the overall voting power is larger than the required relative participation.
         if (
-            !_isValuePct(
-                totalVotes + vote_.abstain,
-                vote_.votingPower,
-                vote_.participationRequiredPct
-            )
+            _calculatePct(vote_.yes + vote_.no + vote_.abstain, vote_.votingPower) <=
+            vote_.participationRequiredPct
         ) {
             return false;
         }
 
-        // Has enough support?
-        if (!_isValuePct(vote_.yes, totalVotes, vote_.supportRequiredPct)) {
+        // Verify that the number of yes votes casted relative to the sum of yes and no votes is larger than the required relative support.
+        if (_calculatePct(vote_.yes, vote_.yes + vote_.no) <= vote_.supportRequiredPct) {
             return false;
         }
 
+        // The criteria above are met and the vote can execute.
         return true;
     }
 
@@ -266,22 +280,16 @@ abstract contract MajorityVotingBase is
             !vote_.executed;
     }
 
-    /// @notice Calculates whether `_value` is more than a percentage `_pct` of `_total`.
-    /// @param _value the current value.
-    /// @param _total the total value.
-    /// @param _pct the required support percentage.
-    /// @return returns if the _value is _pct or more percentage of _total.
-    function _isValuePct(
-        uint256 _value,
-        uint256 _total,
-        uint256 _pct
-    ) internal pure returns (bool) {
+    /// @notice Calculates the relative of value with respect to a total as a percentage.
+    /// @param _value The value.
+    /// @param _total The total.
+    /// @return returns The relative value as a percentage.
+    function _calculatePct(uint256 _value, uint256 _total) internal pure returns (uint256) {
         if (_total == 0) {
-            return false;
+            revert ZeroValueNotAllowed();
         }
 
-        uint256 computedPct = (_value * PCT_BASE) / _total;
-        return computedPct > _pct;
+        return (_value * PCT_BASE) / _total;
     }
 
     function _validateAndSetSettings(

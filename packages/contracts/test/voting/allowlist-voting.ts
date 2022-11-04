@@ -1,18 +1,20 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {Bytes} from 'ethers';
 
-import {AllowlistVoting, DAOMock} from '../../typechain';
+import {AllowlistVoting, DAO} from '../../typechain';
 import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('AllowlistVoting', function () {
   let signers: SignerWithAddress[];
   let voting: AllowlistVoting;
-  let daoMock: DAOMock;
+  let dao: DAO;
   let ownerAddress: string;
   let user1: string;
   let dummyActions: any;
+  let dummyMetadata: string;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -26,14 +28,28 @@ describe('AllowlistVoting', function () {
         value: 0,
       },
     ];
+    dummyMetadata = ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('0x123456789')
+    );
 
-    const DAOMock = await ethers.getContractFactory('DAOMock');
-    daoMock = await DAOMock.deploy(ownerAddress);
+    const DAO = await ethers.getContractFactory('DAO');
+    dao = await DAO.deploy();
+    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
   });
 
   beforeEach(async () => {
     const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
     voting = await AllowlistVoting.deploy();
+    dao.grant(
+      dao.address,
+      voting.address,
+      ethers.utils.id('EXECUTE_PERMISSION')
+    );
+    dao.grant(
+      voting.address,
+      ownerAddress,
+      ethers.utils.id('MODIFY_ALLOWLIST_PERMISSION')
+    );
   });
 
   function initializeVoting(
@@ -43,7 +59,7 @@ describe('AllowlistVoting', function () {
     allowed: Array<string>
   ) {
     return voting.initialize(
-      daoMock.address,
+      dao.address,
       participationRequired,
       supportRequired,
       minDuration,
@@ -61,7 +77,7 @@ describe('AllowlistVoting', function () {
     });
   });
 
-  describe('AllowlistingUsers: ', async () => {
+  describe('WhitelistingUsers: ', async () => {
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, []);
     });
@@ -73,7 +89,7 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    it('should add new users in the allowlist', async () => {
+    it('should add new users in the whitelist', async () => {
       await voting.addAllowedUsers([ownerAddress, user1]);
 
       const block = await ethers.provider.getBlock('latest');
@@ -85,7 +101,7 @@ describe('AllowlistVoting', function () {
       expect(await voting.isAllowed(user1, 0)).to.equal(true);
     });
 
-    it('should remove users from the allowlist', async () => {
+    it('should remove users from the whitelist', async () => {
       await voting.addAllowedUsers([ownerAddress]);
 
       const block1 = await ethers.provider.getBlock('latest');
@@ -117,7 +133,7 @@ describe('AllowlistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createVote('0x00', [], 0, 0, false, VoteOption.None)
+          .createVote(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(
         customError('VoteCreationForbidden', signers[1].address)
       );
@@ -130,7 +146,7 @@ describe('AllowlistVoting', function () {
       const endDate = startDate + (minDuration - 1);
       await expect(
         voting.createVote(
-          '0x00',
+          dummyMetadata,
           [],
           startDate,
           endDate,
@@ -153,7 +169,7 @@ describe('AllowlistVoting', function () {
 
       expect(
         await voting.createVote(
-          '0x00',
+          dummyMetadata,
           dummyActions,
           0,
           0,
@@ -162,7 +178,7 @@ describe('AllowlistVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
-        .withArgs(0, ownerAddress, '0x00');
+        .withArgs(id, ownerAddress, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -192,7 +208,7 @@ describe('AllowlistVoting', function () {
 
       expect(
         await voting.createVote(
-          '0x00',
+          dummyMetadata,
           dummyActions,
           0,
           0,
@@ -201,7 +217,7 @@ describe('AllowlistVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
-        .withArgs(id, ownerAddress, '0x00')
+        .withArgs(id, ownerAddress, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
@@ -220,8 +236,8 @@ describe('AllowlistVoting', function () {
 
   describe('Vote + Execute:', async () => {
     let minDuration = 500;
-    let supportRequired = pct16(29);
-    let minimumQuorom = pct16(19);
+    let supportRequiredPct = pct16(29);
+    let participationRequiredPct = pct16(19);
     const id = 0; // voteId
 
     beforeEach(async () => {
@@ -235,14 +251,14 @@ describe('AllowlistVoting', function () {
       // voting will be initialized with 10 allowed addresses
       // Which means votingPower = 10 at this point.
       await initializeVoting(
-        minimumQuorom,
-        supportRequired,
+        participationRequiredPct,
+        supportRequiredPct,
         minDuration,
         addresses
       );
 
       await voting.createVote(
-        '0x00',
+        dummyMetadata,
         dummyActions,
         0,
         0,
@@ -275,26 +291,26 @@ describe('AllowlistVoting', function () {
       expect(vote.abstain).to.equal(1);
     });
 
-    it('voting multiple times should not increase yes or no multiple times', async () => {
+    it('should not double-count votes by the same address', async () => {
       // yes still ends up to be 1 here even after voting
       // 2 times from the same wallet.
       await voting.vote(id, VoteOption.Yes, false);
       await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getVote(0)).yes).to.equal(1);
+      expect((await voting.getVote(id)).yes).to.equal(1);
 
       // yes gets removed, no ends up as 1.
       await voting.vote(id, VoteOption.No, false);
       await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getVote(0)).no).to.equal(1);
+      expect((await voting.getVote(id)).no).to.equal(1);
 
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getVote(0)).abstain).to.equal(1);
+      expect((await voting.getVote(id)).abstain).to.equal(1);
     });
 
-    it('makes executable if enough yes is given from on voting power', async () => {
+    it('becomes executable if enough yes is given from on voting power', async () => {
       // Since voting power is set to 29%, and
-      // allowed is 10 addresses, voting yes
+      // whitelised is 10 addresses, voting yes
       // from 3 addresses should be enough to
       // make vote executable
       await voting.vote(id, VoteOption.Yes, false);
@@ -308,7 +324,7 @@ describe('AllowlistVoting', function () {
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('makes executable if enough yes is given depending on yes + no total', async () => {
+    it('becomes executable if enough yes is given depending on yes + no total', async () => {
       // 2 supports
       await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
@@ -323,11 +339,11 @@ describe('AllowlistVoting', function () {
 
       expect(await voting.canExecute(id)).to.equal(false);
 
-      // makes the voting closed.
+      // closes the vote.
       await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
       await ethers.provider.send('evm_mine', []);
 
-      // 2 voted yes, 2 voted yes. 2 voted abstain.
+      // 2 voted yes, 2 voted no. 2 voted abstain.
       // Enough to surpass supportedRequired percentage
       expect(await voting.canExecute(id)).to.equal(true);
     });
@@ -343,7 +359,7 @@ describe('AllowlistVoting', function () {
 
       // check for the `Executed` event in the DAO
       {
-        let {actor, callId, actions, execResults} = daoMock.interface.parseLog(
+        let {actor, callId, actions, execResults} = dao.interface.parseLog(
           rc.logs[1]
         ).args;
 
@@ -379,6 +395,192 @@ describe('AllowlistVoting', function () {
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('VoteExecutionForbidden', id)
       );
+    });
+  });
+
+  describe('Parameters can satisfy different use cases:', async () => {
+    const id = 0; // voteId
+
+    describe('A simple majority vote with >50% support and >25% participation required', async () => {
+      let minDuration = 500;
+      let supportRequiredPct = pct16(50);
+      let participationRequiredPct = pct16(25);
+
+      beforeEach(async () => {
+        const addresses = [];
+
+        for (let i = 0; i < 10; i++) {
+          const addr = await signers[i].getAddress();
+          addresses.push(addr);
+        }
+
+        // voting will be initialized with 10 allowed addresses
+        // Which means votingPower = 10 at this point.
+        await initializeVoting(
+          participationRequiredPct,
+          supportRequiredPct,
+          minDuration,
+          addresses
+        );
+
+        await voting.createVote(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.None
+        );
+      });
+
+      it('does not execute if support is high enough but participation and approval (absolute support) are too low', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 10% !  0  | 10% | 100%
+        //  𐄂  !  𐄂  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // Reason: approval and participation are too low
+
+        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
+        await ethers.provider.send('evm_mine', []);
+        // app ! dur | par | sup
+        // 10% ! 510 | 10% | 100%
+        //  𐄂  !  ✓  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
+      });
+
+      it('does not execute if participation is high enough but support is too low', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.No, false);
+        // app ! dur | par | sup
+        // 30% !  0  | 30% | 33%
+        //  𐄂  !  𐄂  |  ✓  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // approval too low, duration and support criterium are not met
+
+        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
+        await ethers.provider.send('evm_mine', []);
+        // app ! dur | par | sup
+        // 30% ! 510 | 30% | 33%
+        //  𐄂  !  ✓  |  ✓  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
+      });
+
+      it('executes after the duration if participation, and support criteria are met', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 30% !  0  | 30% | 100%
+        //  𐄂  !  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // Reason: duration criterium is not met
+
+        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
+        await ethers.provider.send('evm_mine', []);
+        // app ! dur | par | sup
+        // 30% ! 510 | 30% | 100%
+        //  𐄂  !  ✓  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
+      });
+
+      it('executes early if the approval (absolute support) exceeds the required support (assuming the latter is > 50%)', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 50% !  0  | 50% | 100%
+        //  𐄂  !  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // Reason: app > supReq == false
+
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 60% !  0  | 60% | 100%
+        //  ✓  !  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // Correct because more voting doesn't change the outcome
+
+        await voting.connect(signers[6]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[7]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[8]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[9]).vote(id, VoteOption.No, false);
+        // app ! dur | par | sup
+        // 60% !  0  | 100%| 60%
+        //  ✓  !  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // The outcome did not change
+      });
+    });
+
+    describe('A 3/5 multi-sig', async () => {
+      let minDuration = 500;
+
+      // pay attention to decrement the required percentage value by one because the compared value has to be larger
+      let supportRequiredPct = pct16(60).sub(ethers.BigNumber.from(1));
+      let participationRequiredPct = supportRequiredPct;
+
+      beforeEach(async () => {
+        const addresses = [];
+
+        for (let i = 0; i < 5; i++) {
+          const addr = await signers[i].getAddress();
+          addresses.push(addr);
+        }
+
+        // voting will be initialized with 5 allowed addresses
+        // Which means votingPower = 5 at this point.
+        await initializeVoting(
+          participationRequiredPct,
+          supportRequiredPct,
+          minDuration,
+          addresses
+        );
+
+        await voting.createVote(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.None
+        );
+      });
+
+      it('early execution is possible', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 20% !  0  | 20% | 100%
+        //  𐄂  !  𐄂  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 40% !  0  | 40% | 100%
+        //  𐄂  !  𐄂  |  𐄂  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        // app ! dur | par | sup
+        // 60% !  0  | 60% | 100%
+        //  𐄂  !  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it.skip('should not execute with only 2 yes votes', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.No, false);
+        // app ! dur | par | sup
+        // 40% !  0  | 60% | 67%
+        //  𐄂  !  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        // Wait until the voting period is over.
+        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
+        await ethers.provider.send('evm_mine', []);
+        // app ! dur | par | sup
+        // 40% ! 510 | 60% | 67%
+        //  𐄂  !  ✓  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // this fails because all criteria are met
+      });
     });
   });
 });

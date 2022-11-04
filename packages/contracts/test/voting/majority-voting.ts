@@ -2,22 +2,23 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MajorityVotingMock, DAOMock} from '../../typechain';
+import {MajorityVotingMock, DAO} from '../../typechain';
 import {VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
   let votingBase: MajorityVotingMock;
-  let daoMock: DAOMock;
+  let dao: DAO;
   let ownerAddress: string;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const DAOMock = await ethers.getContractFactory('DAOMock');
-    daoMock = await DAOMock.deploy(ownerAddress);
+    const DAO = await ethers.getContractFactory('DAO');
+    dao = await DAO.deploy();
+    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
   });
 
   beforeEach(async () => {
@@ -25,6 +26,11 @@ describe('MajorityVotingMock', function () {
       'MajorityVotingMock'
     );
     votingBase = await MajorityVotingBase.deploy();
+    dao.grant(
+      votingBase.address,
+      ownerAddress,
+      ethers.utils.id('SET_CONFIGURATION_PERMISSION')
+    );
   });
 
   function initializeMock(
@@ -33,7 +39,7 @@ describe('MajorityVotingMock', function () {
     minDuration: any
   ) {
     return votingBase.initializeMock(
-      daoMock.address,
+      dao.address,
       participationRequired,
       supportRequired,
       minDuration
@@ -56,7 +62,7 @@ describe('MajorityVotingMock', function () {
     });
   });
 
-  describe('setConfiguration: ', async () => {
+  describe('changeVoteConfig: ', async () => {
     beforeEach(async () => {
       await initializeMock(1, 2, 3);
     });
