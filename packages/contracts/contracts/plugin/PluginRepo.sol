@@ -52,11 +52,6 @@ contract PluginRepo is
     /// @notice A mapping between the `PluginSetup` contract addresses and the version index.
     mapping(address => uint256) internal versionIndexForPluginSetup;
 
-    /// @notice Thrown if a semantic version number bump is invalid.
-    /// @param currentVersion The current semantic version number.
-    /// @param nextVersion The next semantic version number.
-    error BumpInvalid(uint16[3] currentVersion, uint16[3] nextVersion);
-
     /// @notice Thrown if version does not exist.
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);
