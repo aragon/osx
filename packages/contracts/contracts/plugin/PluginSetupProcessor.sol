@@ -12,7 +12,7 @@ import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
-import {isValidBump, BumpInvalid} from "./SemanticVersioning.sol";
+import {isValidBumpLoose, BumpInvalid} from "./SemanticVersioning.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -631,7 +631,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         // Assert that the version bump valid
-        if (!isValidBump(oldVersion, newVersion, false)) {
+        if (!isValidBumpLoose(oldVersion, newVersion)) {
             revert BumpInvalid({currentVersion: oldVersion, nextVersion: newVersion});
         }
     }

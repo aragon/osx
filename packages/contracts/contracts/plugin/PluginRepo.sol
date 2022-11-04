@@ -13,7 +13,7 @@ import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
-import {isValidBump, BumpInvalid} from "./SemanticVersioning.sol";
+import {isValidBumpStrict, BumpInvalid} from "./SemanticVersioning.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -132,7 +132,7 @@ contract PluginRepo is
             currentSemanticVersion = currentVersion.semanticVersion;
         }
 
-        if (!isValidBump(currentSemanticVersion, _newSemanticVersion, true)) {
+        if (!isValidBumpStrict(currentSemanticVersion, _newSemanticVersion)) {
             revert BumpInvalid({
                 currentVersion: currentSemanticVersion,
                 nextVersion: _newSemanticVersion
