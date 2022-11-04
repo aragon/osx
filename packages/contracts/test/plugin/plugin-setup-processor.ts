@@ -7,6 +7,8 @@ import {
   PluginUUPSUpgradeableV1Mock__factory,
   PluginUUPSUpgradeableV2Mock__factory,
   PluginUUPSUpgradeableV3Mock__factory,
+  PluginCloneableV1Mock__factory,
+  PluginCloneableV2Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginUUPSUpgradeableSetupV2Mock,
@@ -101,7 +103,6 @@ describe('Plugin Setup Processor', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    // Deploy PluginUUPSUpgradeableMock
     PluginUV1 = await ethers.getContractFactory('PluginUUPSUpgradeableV1Mock');
     PluginUV2 = await ethers.getContractFactory('PluginUUPSUpgradeableV2Mock');
     PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
@@ -122,6 +123,7 @@ describe('Plugin Setup Processor', function () {
     );
     setupUV3 = await SetupV3.deploy();
 
+    // Deploy PluginCloneableSetupMock
     const SetupC1 = await ethers.getContractFactory(
       'PluginCloneableSetupV1Mock'
     );
@@ -214,7 +216,7 @@ describe('Plugin Setup Processor', function () {
     await targetDao.grant(targetDao.address, psp.address, ROOT_PERMISSION_ID);
   });
 
-  describe('Plugin Setup Mocks', function () {
+  describe('PluginUUPSUpgradeableSetupMock', function () {
     it('points to the V1 implementation', async () => {
       await checkImplementation(setupUV1, PluginUV1);
     });
