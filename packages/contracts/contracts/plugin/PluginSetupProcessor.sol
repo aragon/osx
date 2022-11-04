@@ -12,6 +12,7 @@ import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {PluginRepo} from "./PluginRepo.sol";
+import {isValidSemanticBump} from "./SemanticVersioning.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -618,7 +619,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    /// @notice Checks the update parameters
+    /// @notice Checks if the update is valid by assuring that the semantic version bump is correct.
     /// @param _updateParams The parameters of the update.
     /// @return oldVersion The old semantic version number being needed in the context for further usage.
     function _checkUpdateValidity(PluginUpdateParams calldata _updateParams)
@@ -635,37 +636,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         // Assert that the version bump valid
-        if (!isValidUpdate(oldVersion, newVersion)) {
+
+        if (!isValidSemanticBump(oldVersion, newVersion)) {
             revert UpdateInvalid({currentVersion: oldVersion, invalidNextVersion: newVersion});
         }
-    }
-
-    /// @notice Checks if an update is valid by the version numbers.
-    /// @param _oldVersion The old semantic version number.
-    /// @param _newVersion The new semantic version number.
-    /// @return bool Returns true if the bump is valid.
-    function isValidUpdate(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
-        public
-        pure
-        returns (bool)
-    {
-        bool hasIncreased;
-        uint256 i = 0;
-        while (i < 3) {
-            if (hasIncreased) {
-                if (_newVersion[i] != 0) {
-                    return false;
-                }
-            } else if (_newVersion[i] != _oldVersion[i]) {
-                if (_oldVersion[i] > _newVersion[i]) {
-                    return false;
-                }
-                hasIncreased = true;
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        return hasIncreased;
     }
 }
