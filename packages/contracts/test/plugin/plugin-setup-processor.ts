@@ -429,7 +429,7 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('reverts if plugin setup return the same address', async () => {
+      it('reverts if a `PluginSetup` contract returns the same plugin address multiple times across different setups', async () => {
         const pluginSetupBad = setupV1Bad.address;
 
         const dataUser1 = ethers.utils.defaultAbiCoder.encode(
