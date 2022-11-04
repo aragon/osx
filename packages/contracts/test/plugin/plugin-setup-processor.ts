@@ -1003,9 +1003,19 @@ describe('Plugin Setup Processor', function () {
     });
 
     describe('applyUpdate', function () {
+      let proxy: string;
+      let helpersV1: string[];
+      let permissionsV1: PermissionOperation[];
+
+      beforeEach(async () => {
+        ({
+          plugin: proxy,
+          helpers: helpersV1,
+          permissions: permissionsV1,
+        } = await installHelper(psp, targetDao, setupV1, repoUUPS));
+      });
+
       it('reverts if caller does not have `APPLY_UPDATE_PERMISSION` permission', async () => {
-        // revoke `APPLY_INSTALLATION_PERMISSION_ID` on dao for plugin installer
-        // to see that it can't set permissions without it.
         await targetDao.revoke(
           psp.address,
           ownerAddress,
@@ -1031,31 +1041,58 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
-        let proxy: string;
-        let helpersV1: string[];
-        let permissionsV1: PermissionOperation[];
-
-        ({
-          plugin: proxy,
-          helpers: helpersV1,
-          permissions: permissionsV1,
-        } = await prepareInstallation(
-          psp,
+      it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
+        await targetDao.revoke(
           targetDao.address,
-          setupV1.address,
-          repoUUPS.address,
-          EMPTY_DATA
-        ));
-
-        await psp.applyInstallation(
-          targetDao.address,
-          setupV1.address,
-          repoUUPS.address,
-          proxy,
-          permissionsV1
+          psp.address,
+          ROOT_PERMISSION_ID
         );
 
+        // Grant the `UPGRADE_PLUGIN_PERMISSION_ID` permission to the plugin setup processor
+        await targetDao.grant(proxy, psp.address, UPGRADE_PLUGIN_PERMISSION_ID);
+
+        const pluginUpdateParams = {
+          plugin: proxy,
+          pluginSetupRepo: repoUUPS.address,
+          currentPluginSetup: setupV1.address,
+          newPluginSetup: setupV2.address,
+        };
+        const prepareUpdateTx = await psp.prepareUpdate(
+          targetDao.address,
+          pluginUpdateParams,
+          helpersV1,
+          EMPTY_DATA
+        );
+
+        const prepareUpdateEvent = await findEvent(
+          prepareUpdateTx,
+          EVENTS.UpdatePrepared
+        );
+
+        const {permissions: permissionsV2, initData: initDataV2} =
+          prepareUpdateEvent.args;
+
+        await expect(
+          psp.applyUpdate(
+            targetDao.address,
+            proxy,
+            setupV2.address,
+            repoUUPS.address,
+            initDataV2,
+            permissionsV2
+          )
+        ).to.be.revertedWith(
+          customError(
+            'Unauthorized',
+            targetDao.address,
+            permissionsV2[0]['where'],
+            psp.address,
+            ROOT_PERMISSION_ID
+          )
+        );
+      });
+
+      it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
         const pluginUpdateParams = {
           plugin: proxy,
           pluginSetupRepo: repoUUPS.address,
