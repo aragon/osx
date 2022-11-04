@@ -1154,7 +1154,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('initializes the members', async () => {
-        expect(await PluginV1.attach(proxy).v1()).to.equal(1);
+        expect(await PluginV1.attach(proxy).state1()).to.equal(1);
       });
 
       it('sets the V1 helpers', async () => {
@@ -1249,8 +1249,8 @@ describe('Plugin Setup Processor', function () {
         });
 
         it('initializes the members', async () => {
-          expect(await PluginV2.attach(proxy).v1()).to.equal(1);
-          expect(await PluginV2.attach(proxy).v2()).to.equal(2);
+          expect(await PluginV2.attach(proxy).state1()).to.equal(1);
+          expect(await PluginV2.attach(proxy).state2()).to.equal(2);
         });
 
         it('sets the V2 helpers', async () => {
@@ -1333,9 +1333,9 @@ describe('Plugin Setup Processor', function () {
           });
 
           it('initializes the members', async () => {
-            expect(await PluginV3.attach(proxy).v1()).to.equal(1);
-            expect(await PluginV3.attach(proxy).v2()).to.equal(2);
-            expect(await PluginV3.attach(proxy).v3()).to.equal(3);
+            expect(await PluginV3.attach(proxy).state1()).to.equal(1);
+            expect(await PluginV3.attach(proxy).state2()).to.equal(2);
+            expect(await PluginV3.attach(proxy).state3()).to.equal(3);
           });
 
           it('sets the V3 helpers', async () => {
@@ -1421,9 +1421,9 @@ describe('Plugin Setup Processor', function () {
         });
 
         it('initializes the members', async () => {
-          expect(await PluginV3.attach(proxy).v1()).to.equal(1);
-          expect(await PluginV3.attach(proxy).v2()).to.equal(2);
-          expect(await PluginV3.attach(proxy).v3()).to.equal(3);
+          expect(await PluginV3.attach(proxy).state1()).to.equal(1);
+          expect(await PluginV3.attach(proxy).state2()).to.equal(2);
+          expect(await PluginV3.attach(proxy).state3()).to.equal(3);
         });
 
         it('sets the V3 helpers', async () => {
@@ -1502,8 +1502,8 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('initializes the members', async () => {
-        expect(await PluginV2.attach(proxy).v1()).to.equal(1);
-        expect(await PluginV2.attach(proxy).v2()).to.equal(2);
+        expect(await PluginV2.attach(proxy).state1()).to.equal(1);
+        expect(await PluginV2.attach(proxy).state2()).to.equal(2);
       });
 
       it('sets the V2 helpers', async () => {
@@ -1586,9 +1586,9 @@ describe('Plugin Setup Processor', function () {
         });
 
         it('initializes the members', async () => {
-          expect(await PluginV3.attach(proxy).v1()).to.equal(1);
-          expect(await PluginV3.attach(proxy).v2()).to.equal(2);
-          expect(await PluginV3.attach(proxy).v3()).to.equal(3);
+          expect(await PluginV3.attach(proxy).state1()).to.equal(1);
+          expect(await PluginV3.attach(proxy).state2()).to.equal(2);
+          expect(await PluginV3.attach(proxy).state3()).to.equal(3);
         });
 
         it('sets the V3 helpers', async () => {
@@ -1667,9 +1667,9 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('initializes the members', async () => {
-        expect(await PluginV3.attach(proxy).v1()).to.equal(1);
-        expect(await PluginV3.attach(proxy).v2()).to.equal(2);
-        expect(await PluginV3.attach(proxy).v3()).to.equal(3);
+        expect(await PluginV3.attach(proxy).state1()).to.equal(1);
+        expect(await PluginV3.attach(proxy).state2()).to.equal(2);
+        expect(await PluginV3.attach(proxy).state3()).to.equal(3);
       });
 
       it('sets the V3 helpers', async () => {
