@@ -171,7 +171,7 @@ describe('PluginRepoFactory: ', function () {
         contentURI,
         ownerAddress
       )
-    ).to.be.revertedWith('InvalidBump([0, 0, 0], [0, 0, 0])');
+    ).to.be.revertedWith('BumpInvalid([0, 0, 0], [0, 0, 0])');
   });
 
   it('create new pluginRepo with version', async () => {

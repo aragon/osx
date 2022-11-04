@@ -52,37 +52,11 @@ describe('PluginRepo', function () {
     pluginSetupMock = await deployMockPluginSetup();
   });
 
-  it('computes correct valid bumps', async function () {
-    expect(await pluginRepo.isValidBump([0, 0, 0], [0, 0, 1])).to.equal(true);
-    expect(await pluginRepo.isValidBump([0, 0, 0], [0, 1, 0])).to.equal(true);
-    expect(await pluginRepo.isValidBump([0, 0, 0], [1, 0, 0])).to.equal(true);
-    expect(await pluginRepo.isValidBump([1, 4, 7], [2, 0, 0])).to.equal(true);
-    expect(await pluginRepo.isValidBump([147, 4, 7], [147, 5, 0])).to.equal(
-      true
-    );
-
-    expect(await pluginRepo.isValidBump([0, 0, 1], [0, 0, 1])).to.equal(false);
-    expect(await pluginRepo.isValidBump([0, 1, 0], [0, 2, 1])).to.equal(false);
-    expect(await pluginRepo.isValidBump([0, 0, 2], [0, 0, 1])).to.equal(false);
-    expect(await pluginRepo.isValidBump([2, 1, 0], [2, 2, 1])).to.equal(false);
-    expect(await pluginRepo.isValidBump([1, 1, 1], [5, 0, 0])).to.equal(false);
-    expect(await pluginRepo.isValidBump([5, 0, 0], [5, 2, 0])).to.equal(false);
-    expect(await pluginRepo.isValidBump([0, 1, 2], [1, 1, 2])).to.equal(false);
-
-    const maxUint16Value = Math.pow(2, 16) - 1; // 65535
-    expect(
-      await pluginRepo.isValidBump(
-        [0, 0, maxUint16Value],
-        [0, 0, maxUint16Value - 1]
-      )
-    ).to.equal(false);
-  });
-
   // valid version as being a correct bump from 0.0.0
   it('cannot create invalid first version', async function () {
     await expect(
       pluginRepo.createVersion([1, 1, 0], pluginSetupMock.address, emptyBytes)
-    ).to.be.revertedWith('InvalidBump([0, 0, 0], [1, 1, 0])');
+    ).to.be.revertedWith('BumpInvalid([0, 0, 0], [1, 1, 0])');
   });
 
   it('cannot create version with unsupported interface contract', async function () {
@@ -167,7 +141,7 @@ describe('PluginRepo', function () {
     it('fails when version bump is invalid', async () => {
       await expect(
         pluginRepo.createVersion([1, 2, 0], initialPluginSetup, initialContent)
-      ).to.be.revertedWith('InvalidBump([1, 0, 0], [1, 2, 0])');
+      ).to.be.revertedWith('BumpInvalid([1, 0, 0], [1, 2, 0])');
     });
 
     it('fails if requesting version 0', async () => {

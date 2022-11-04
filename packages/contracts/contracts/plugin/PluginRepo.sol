@@ -13,6 +13,7 @@ import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
+import {isValidBump, BumpInvalid} from "./SemanticVersioning.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -54,7 +55,7 @@ contract PluginRepo is
     /// @notice Thrown if a semantic version number bump is invalid.
     /// @param currentVersion The current semantic version number.
     /// @param nextVersion The next semantic version number.
-    error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
+    error BumpInvalid(uint16[3] currentVersion, uint16[3] nextVersion);
 
     /// @notice Thrown if version does not exist.
     /// @param versionIndex The index of the version.
@@ -77,7 +78,12 @@ contract PluginRepo is
     /// @param semanticVersion The semantic version number.
     /// @param pluginSetup The address of the plugin setup contract.
     /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
-    event VersionCreated(uint256 versionId, uint16[3] semanticVersion, address indexed pluginSetup, bytes contentURI);
+    event VersionCreated(
+        uint256 versionId,
+        uint16[3] semanticVersion,
+        address indexed pluginSetup,
+        bytes contentURI
+    );
 
     /// @notice Initializes the contract by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
@@ -126,8 +132,8 @@ contract PluginRepo is
             currentSemanticVersion = currentVersion.semanticVersion;
         }
 
-        if (!isValidBump(currentSemanticVersion, _newSemanticVersion)) {
-            revert InvalidBump({
+        if (!isValidBump(currentSemanticVersion, _newSemanticVersion, true)) {
+            revert BumpInvalid({
                 currentVersion: currentSemanticVersion,
                 nextVersion: _newSemanticVersion
             });
@@ -213,33 +219,6 @@ contract PluginRepo is
     /// @return uint256 The number of published versions.
     function getVersionCount() public view returns (uint256) {
         return nextVersionIndex - 1;
-    }
-
-    /// @notice Checks if a version bump is valid.
-    /// @param _oldVersion The old semantic version number.
-    /// @param _newVersion The new semantic version number.
-    /// @return bool Returns true if the bump is valid.
-    function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
-        public
-        pure
-        returns (bool)
-    {
-        bool hasBumped;
-        uint256 i = 0;
-        while (i < 3) {
-            if (hasBumped) {
-                if (_newVersion[i] != 0) {
-                    return false;
-                }
-            } else if (_newVersion[i] != _oldVersion[i]) {
-                if (_oldVersion[i] > _newVersion[i] || _newVersion[i] - _oldVersion[i] != 1) {
-                    return false;
-                }
-                hasBumped = true;
-            }
-            i = _uncheckedIncrement(i);
-        }
-        return hasBumped;
     }
 
     /// @notice Generates a hash from a semantic version number.
