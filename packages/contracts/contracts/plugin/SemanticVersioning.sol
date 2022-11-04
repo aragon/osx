@@ -39,28 +39,3 @@ function isValidBump(
     }
     return hasIncreased;
 }
-
-/*function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
-    public
-    pure
-    returns (bool)
-{
-    bool hasBumped;
-    uint256 i = 0;
-    while (i < 3) {
-        if (hasBumped) {
-            if (_newVersion[i] != 0) {
-                return false;
-            }
-        } else if (_newVersion[i] != _oldVersion[i]) {
-            if (_oldVersion[i] > _newVersion[i] || _newVersion[i] - _oldVersion[i] != 1) {
-                return false;
-            }
-            hasBumped = true;
-        }
-        unchecked {
-            ++i;
-        }
-    }
-    return hasBumped;
-}*/
