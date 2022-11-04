@@ -8,16 +8,17 @@ import {IDAO} from "../../../core/IDAO.sol";
 contract PluginUUPSUpgradeableV1Mock is PluginUUPSUpgradeable {
     uint256 public state1;
 
-    function initialize(IDAO _dao) external virtual initializer {
+    function initialize(IDAO _dao) external initializer {
         __PluginUUPSUpgradeable_init(_dao);
         state1 = 1;
     }
 }
 
-contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeableV1Mock {
+contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeable {
+    uint256 public state1;
     uint256 public state2;
 
-    function initialize(IDAO _dao) external virtual override reinitializer(2) {
+    function initialize(IDAO _dao) external reinitializer(2) {
         __PluginUUPSUpgradeable_init(_dao);
         state1 = 1;
         state2 = 2;
@@ -28,10 +29,12 @@ contract PluginUUPSUpgradeableV2Mock is PluginUUPSUpgradeableV1Mock {
     }
 }
 
-contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeableV2Mock {
+contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeable {
+    uint256 public state1;
+    uint256 public state2;
     uint256 public state3;
 
-    function initialize(IDAO _dao) external override reinitializer(3) {
+    function initialize(IDAO _dao) external reinitializer(3) {
         __PluginUUPSUpgradeable_init(_dao);
         state1 = 1;
         state2 = 2;

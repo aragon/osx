@@ -14,7 +14,8 @@ contract PluginCloneableV1Mock is PluginCloneable {
     }
 }
 
-contract PluginCloneableV2Mock is PluginCloneableV1Mock {
+contract PluginCloneableV2Mock is PluginCloneable {
+    uint256 public state1;
     uint256 public state2;
 
     function initialize(IDAO _dao) external virtual override initializer {
