@@ -14,9 +14,6 @@ import {
   PluginUUPSUpgradeableSetupV1Mock,
   PluginUUPSUpgradeableSetupV2Mock,
   PluginUUPSUpgradeableSetupV3Mock,
-  PluginUUPSUpgradeableSetupV1Mock__factory,
-  PluginUUPSUpgradeableSetupV2Mock__factory,
-  PluginUUPSUpgradeableSetupV3Mock__factory,
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginRepoFactory,
   PluginRepoRegistry,
@@ -89,9 +86,6 @@ describe('Plugin Setup Processor', function () {
   let PluginV1: PluginUUPSUpgradeableV1Mock__factory;
   let PluginV2: PluginUUPSUpgradeableV2Mock__factory;
   let PluginV3: PluginUUPSUpgradeableV3Mock__factory;
-  let SetupV1: PluginUUPSUpgradeableSetupV1Mock__factory;
-  let SetupV2: PluginUUPSUpgradeableSetupV2Mock__factory;
-  let SetupV3: PluginUUPSUpgradeableSetupV3Mock__factory;
   let setupV1: PluginUUPSUpgradeableSetupV1Mock;
   let setupV2: PluginUUPSUpgradeableSetupV2Mock;
   let setupV3: PluginUUPSUpgradeableSetupV3Mock;
@@ -117,17 +111,17 @@ describe('Plugin Setup Processor', function () {
     PluginV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
 
     // Deploy PluginUUPSUpgradeableSetupMock
-    SetupV1 = await ethers.getContractFactory(
+    const SetupV1 = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
     setupV1 = await SetupV1.deploy();
 
-    SetupV2 = await ethers.getContractFactory(
+    const SetupV2 = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
     setupV2 = await SetupV2.deploy();
 
-    SetupV3 = await ethers.getContractFactory(
+    const SetupV3 = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
     setupV3 = await SetupV3.deploy();
