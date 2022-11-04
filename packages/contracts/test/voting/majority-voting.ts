@@ -3,7 +3,8 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MajorityVotingMock, DAO} from '../../typechain';
-import {VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {VOTING_EVENTS} from '../../utils/event';
+import {pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('MajorityVotingMock', function () {

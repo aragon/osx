@@ -1,16 +1,16 @@
 import {expect} from 'chai';
 import {ethers, waffle} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {Bytes} from 'ethers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import {ERC20Voting, DAO} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {VoteOption, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 const {deployMockContract} = waffle;
 
-describe.only('ERC20Voting', function () {
+describe('ERC20Voting', function () {
   let signers: SignerWithAddress[];
   let voting: ERC20Voting;
   let dao: DAO;
@@ -354,17 +354,15 @@ describe.only('ERC20Voting', function () {
 
       // check for the `Executed` event in the DAO
       {
-        let {actor, callId, actions, execResults} = dao.interface.parseLog(
-          rc.logs[1]
-        ).args;
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-        expect(actor).to.equal(voting.address);
-        expect(callId).to.equal(id);
-        expect(actions.length).to.equal(1);
-        expect(actions[0].to).to.equal(dummyActions[0].to);
-        expect(actions[0].value).to.equal(dummyActions[0].value);
-        expect(actions[0].data).to.equal(dummyActions[0].data);
-        expect(execResults).to.deep.equal(['0x']);
+        expect(event.args.actor).to.equal(voting.address);
+        expect(event.args.callId).to.equal(id);
+        expect(event.args.actions.length).to.equal(1);
+        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+        expect(event.args.execResults).to.deep.equal(['0x']);
 
         const vote = await voting.getVote(id);
 
@@ -373,11 +371,10 @@ describe.only('ERC20Voting', function () {
 
       // check for the `VoteExecuted` event in the voting contract
       {
-        const {voteId, execResults} = voting.interface.parseLog(
-          rc.logs[2]
-        ).args;
-        expect(voteId).to.equal(id);
-        expect(execResults).to.deep.equal(['0x']);
+        const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
+
+        expect(event.args.voteId).to.equal(id);
+        expect(event.args.execResults).to.deep.equal(['0x']);
       }
 
       // calling execute again should fail
