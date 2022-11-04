@@ -4,17 +4,15 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   PluginSetupProcessor,
-  PluginCloneableSetupV1Mock,
-  PluginCloneableSetupV2Mock,
-  PluginCloneableSetupV1Mock__factory,
-  PluginCloneableSetupV2Mock__factory,
   PluginUUPSUpgradeableV1Mock__factory,
   PluginUUPSUpgradeableV2Mock__factory,
   PluginUUPSUpgradeableV3Mock__factory,
   PluginUUPSUpgradeableSetupV1Mock,
+  PluginUUPSUpgradeableSetupV1MockBad,
   PluginUUPSUpgradeableSetupV2Mock,
   PluginUUPSUpgradeableSetupV3Mock,
-  PluginUUPSUpgradeableSetupV1MockBad,
+  PluginCloneableSetupV1Mock,
+  PluginCloneableSetupV2Mock,
   PluginRepoFactory,
   PluginRepoRegistry,
   PluginRepo,
@@ -81,19 +79,17 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 describe('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
-  let repoUUPS: PluginRepo;
-  let repoClones: PluginRepo;
-  let PluginV1: PluginUUPSUpgradeableV1Mock__factory;
-  let PluginV2: PluginUUPSUpgradeableV2Mock__factory;
-  let PluginV3: PluginUUPSUpgradeableV3Mock__factory;
-  let setupV1: PluginUUPSUpgradeableSetupV1Mock;
-  let setupV2: PluginUUPSUpgradeableSetupV2Mock;
-  let setupV3: PluginUUPSUpgradeableSetupV3Mock;
-  let SetupC1: PluginCloneableSetupV1Mock__factory;
-  let SetupC2: PluginCloneableSetupV2Mock__factory;
-  let setupC1: PluginCloneableSetupV1Mock;
-  let setupC2: PluginCloneableSetupV2Mock;
-  let setupV1Bad: PluginUUPSUpgradeableSetupV1MockBad;
+  let repoU: PluginRepo;
+  let PluginUV1: PluginUUPSUpgradeableV1Mock__factory;
+  let PluginUV2: PluginUUPSUpgradeableV2Mock__factory;
+  let PluginUV3: PluginUUPSUpgradeableV3Mock__factory;
+  let setupUV1: PluginUUPSUpgradeableSetupV1Mock;
+  let setupUV2: PluginUUPSUpgradeableSetupV2Mock;
+  let setupUV3: PluginUUPSUpgradeableSetupV3Mock;
+  let setupUV1Bad: PluginUUPSUpgradeableSetupV1MockBad;
+  let repoC: PluginRepo;
+  let setupCV1: PluginCloneableSetupV1Mock;
+  let setupCV2: PluginCloneableSetupV2Mock;
   let ownerAddress: string;
   let targetDao: DAO;
   let targetDao2: DAO;
@@ -106,36 +102,40 @@ describe('Plugin Setup Processor', function () {
     ownerAddress = await signers[0].getAddress();
 
     // Deploy PluginUUPSUpgradeableMock
-    PluginV1 = await ethers.getContractFactory('PluginUUPSUpgradeableV1Mock');
-    PluginV2 = await ethers.getContractFactory('PluginUUPSUpgradeableV2Mock');
-    PluginV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
+    PluginUV1 = await ethers.getContractFactory('PluginUUPSUpgradeableV1Mock');
+    PluginUV2 = await ethers.getContractFactory('PluginUUPSUpgradeableV2Mock');
+    PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
 
     // Deploy PluginUUPSUpgradeableSetupMock
     const SetupV1 = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1Mock'
     );
-    setupV1 = await SetupV1.deploy();
+    setupUV1 = await SetupV1.deploy();
 
     const SetupV2 = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV2Mock'
     );
-    setupV2 = await SetupV2.deploy();
+    setupUV2 = await SetupV2.deploy();
 
     const SetupV3 = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV3Mock'
     );
-    setupV3 = await SetupV3.deploy();
+    setupUV3 = await SetupV3.deploy();
 
-    SetupC1 = await ethers.getContractFactory('PluginCloneableSetupV1Mock');
-    setupC1 = await SetupC1.deploy();
+    const SetupC1 = await ethers.getContractFactory(
+      'PluginCloneableSetupV1Mock'
+    );
+    setupCV1 = await SetupC1.deploy();
 
-    SetupC2 = await ethers.getContractFactory('PluginCloneableSetupV2Mock');
-    setupC2 = await SetupC2.deploy();
+    const SetupC2 = await ethers.getContractFactory(
+      'PluginCloneableSetupV2Mock'
+    );
+    setupCV2 = await SetupC2.deploy();
 
     const PluginUUPSUpgradeableSetupV1MockBad = await ethers.getContractFactory(
       'PluginUUPSUpgradeableSetupV1MockBad'
     );
-    setupV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
+    setupUV1Bad = await PluginUUPSUpgradeableSetupV1MockBad.deploy();
 
     // Deploy yhe managing DAO having permission to manage `PluginSetupProcessor`
     managingDao = await deployNewDAO(ownerAddress);
@@ -180,29 +180,29 @@ describe('Plugin Setup Processor', function () {
     let tx = await pluginRepoFactory.createPluginRepoWithVersion(
       `PluginUUPSUpgradeableMock`,
       [1, 0, 0],
-      setupV1.address,
+      setupUV1.address,
       '0x00',
       ownerAddress
     );
     let event = await findEvent(tx, EVENTS.PluginRepoRegistered);
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
-    repoUUPS = PluginRepo.attach(event.args.pluginRepo);
+    repoU = PluginRepo.attach(event.args.pluginRepo);
 
     // Add setups
-    await repoUUPS.createVersion([1, 1, 0], setupV2.address, EMPTY_DATA);
-    await repoUUPS.createVersion([1, 2, 0], setupV3.address, EMPTY_DATA);
-    await repoUUPS.createVersion([1, 3, 0], setupV1Bad.address, EMPTY_DATA);
+    await repoU.createVersion([1, 1, 0], setupUV2.address, EMPTY_DATA);
+    await repoU.createVersion([1, 2, 0], setupUV3.address, EMPTY_DATA);
+    await repoU.createVersion([1, 3, 0], setupUV1Bad.address, EMPTY_DATA);
 
     tx = await pluginRepoFactory.createPluginRepoWithVersion(
       `PluginCloneableMock`,
       [1, 0, 0],
-      setupC1.address,
+      setupCV1.address,
       '0x00',
       ownerAddress
     );
     event = await findEvent(tx, EVENTS.PluginRepoRegistered);
-    repoClones = PluginRepo.attach(event.args.pluginRepo);
-    await repoClones.createVersion([1, 1, 0], setupC2.address, EMPTY_DATA);
+    repoC = PluginRepo.attach(event.args.pluginRepo);
+    await repoC.createVersion([1, 1, 0], setupCV2.address, EMPTY_DATA);
   });
 
   beforeEach(async function () {
@@ -216,15 +216,15 @@ describe('Plugin Setup Processor', function () {
 
   describe('Plugin Setup Mocks', function () {
     it('points to the V1 implementation', async () => {
-      await checkImplementation(setupV1, PluginV1);
+      await checkImplementation(setupUV1, PluginUV1);
     });
 
     it('points to the V2 implementation', async () => {
-      await checkImplementation(setupV2, PluginV2);
+      await checkImplementation(setupUV2, PluginUV2);
     });
 
     it('points to the V3 implementation', async () => {
-      await checkImplementation(setupV3, PluginV3);
+      await checkImplementation(setupUV3, PluginUV3);
     });
 
     async function checkImplementation(setup: any, pluginFactory: any) {
@@ -232,7 +232,7 @@ describe('Plugin Setup Processor', function () {
         psp,
         targetDao.address,
         setup.address,
-        repoUUPS.address,
+        repoU.address,
         EMPTY_DATA
       );
 
@@ -262,7 +262,7 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.prepareInstallation(
             targetDao.address,
-            setupV1.address,
+            setupUV1.address,
             pluginSetupRepoAddr,
             data
           )
@@ -270,7 +270,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if installation already prepared', async () => {
-        const pluginSetupBad = setupV1Bad.address;
+        const pluginSetupBad = setupUV1Bad.address;
 
         const data1 = ethers.utils.defaultAbiCoder.encode(
           ['address'],
@@ -280,7 +280,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetupBad,
-          repoUUPS.address,
+          repoU.address,
           data1
         );
 
@@ -293,7 +293,7 @@ describe('Plugin Setup Processor', function () {
           psp.prepareInstallation(
             targetDao.address,
             pluginSetupBad,
-            repoUUPS.address,
+            repoU.address,
             data2
           )
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
@@ -310,8 +310,8 @@ describe('Plugin Setup Processor', function () {
         } = await prepareInstallation(
           psp,
           targetDao.address,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           EMPTY_DATA
         ));
 
@@ -329,8 +329,8 @@ describe('Plugin Setup Processor', function () {
           prepareInstallation(
             psp,
             targetDao.address,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             EMPTY_DATA
           )
         ).to.not.be.reverted;
@@ -341,8 +341,8 @@ describe('Plugin Setup Processor', function () {
           prepareInstallation(
             psp,
             targetDao.address,
-            setupC1.address,
-            repoClones.address,
+            setupCV1.address,
+            repoC.address,
             EMPTY_DATA
           )
         ).to.not.be.reverted;
@@ -359,13 +359,13 @@ describe('Plugin Setup Processor', function () {
           APPLY_INSTALLATION_PERMISSION_ID
         );
 
-        const pluginSetup = setupV1.address;
+        const pluginSetup = setupUV1.address;
 
         const {plugin, permissions: permissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
-          repoUUPS.address,
+          repoU.address,
           EMPTY_DATA
         );
 
@@ -373,7 +373,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetup,
-            repoUUPS.address,
+            repoU.address,
             plugin,
             permissions
           )
@@ -394,13 +394,13 @@ describe('Plugin Setup Processor', function () {
           ROOT_PERMISSION_ID
         );
 
-        const pluginSetup = setupV1.address;
+        const pluginSetup = setupUV1.address;
 
         const {plugin, permissions: permissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
-          repoUUPS.address,
+          repoU.address,
           EMPTY_DATA
         );
 
@@ -408,7 +408,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetup,
-            repoUUPS.address,
+            repoU.address,
             plugin,
             permissions
           )
@@ -424,7 +424,7 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if a `PluginSetup` contract returns the same plugin address multiple times across different setups', async () => {
-        const pluginSetupBad = setupV1Bad.address;
+        const pluginSetupBad = setupUV1Bad.address;
 
         const dataUser1 = ethers.utils.defaultAbiCoder.encode(
           ['address'],
@@ -434,14 +434,14 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetupBad,
-          repoUUPS.address,
+          repoU.address,
           dataUser1
         );
 
         await psp.applyInstallation(
           targetDao.address,
           pluginSetupBad,
-          repoUUPS.address,
+          repoU.address,
           plugin,
           permissions
         );
@@ -456,7 +456,7 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           pluginSetupBad,
-          repoUUPS.address,
+          repoU.address,
           dataUser2
         );
 
@@ -464,7 +464,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetupBad,
-            repoUUPS.address,
+            repoU.address,
             secondPreparation.plugin,
             secondPreparation.permissions
           )
@@ -472,13 +472,13 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('applies a prepared installation', async () => {
-        const pluginSetup = setupV1.address;
+        const pluginSetup = setupUV1.address;
 
         const {plugin, permissions: permissions} = await prepareInstallation(
           psp,
           targetDao.address,
           pluginSetup,
-          repoUUPS.address,
+          repoU.address,
           EMPTY_DATA
         );
 
@@ -486,7 +486,7 @@ describe('Plugin Setup Processor', function () {
           psp.applyInstallation(
             targetDao.address,
             pluginSetup,
-            repoUUPS.address,
+            repoU.address,
             plugin,
             permissions
           )
@@ -496,8 +496,8 @@ describe('Plugin Setup Processor', function () {
       });
 
       it.skip('applies multiple prepared installations of the same plugin', async () => {
-        await installHelper(psp, targetDao, setupV1, repoUUPS);
-        await installHelper(psp, targetDao, setupV1, repoUUPS); // This reverts, because permissions cannot be regranted.
+        await installHelper(psp, targetDao, setupUV1, repoU);
+        await installHelper(psp, targetDao, setupUV1, repoU); // This reverts, because permissions cannot be regranted.
       });
     });
   });
@@ -523,7 +523,7 @@ describe('Plugin Setup Processor', function () {
         plugin: proxy,
         helpers: helpersV1,
         permissions: permissionsV1,
-      } = await installHelper(psp, targetDao, setupV1, repoUUPS));
+      } = await installHelper(psp, targetDao, setupUV1, repoU));
     });
 
     describe('prepareUninstallation', function () {
@@ -544,8 +544,8 @@ describe('Plugin Setup Processor', function () {
         const {plugin, helpers} = await prepareInstallation(
           psp,
           targetDao.address,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           EMPTY_DATA
         );
 
@@ -553,8 +553,8 @@ describe('Plugin Setup Processor', function () {
           psp.prepareUninstallation(
             targetDao.address,
             plugin,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             helpers,
             EMPTY_DATA
           )
@@ -567,8 +567,8 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           proxy,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           helpersV1,
           EMPTY_DATA
         );
@@ -579,8 +579,8 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             proxy,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             helpersV1,
             EMPTY_DATA
           )
@@ -599,8 +599,8 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           proxy,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           helpersV1,
           EMPTY_DATA
         ));
@@ -620,8 +620,8 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             proxy,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             helpersV1,
             EMPTY_DATA
           )
@@ -637,15 +637,15 @@ describe('Plugin Setup Processor', function () {
           plugin: clone,
           helpers: helpersC1,
           permissions: permissionsC1,
-        } = await installHelper(psp, targetDao, setupC1, repoClones));
+        } = await installHelper(psp, targetDao, setupCV1, repoC));
 
         await expect(
           prepareUninstallation(
             psp,
             targetDao.address,
             clone,
-            setupC1.address,
-            repoClones.address,
+            setupCV1.address,
+            repoC.address,
             helpersC1,
             EMPTY_DATA
           )
@@ -667,8 +667,8 @@ describe('Plugin Setup Processor', function () {
           psp.applyUninstallation(
             targetDao.address,
             proxy,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             helpersV1,
             permissionsV1
           )
@@ -700,8 +700,8 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao.address,
           proxy,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           helpersV1,
           EMPTY_DATA
         ));
@@ -710,8 +710,8 @@ describe('Plugin Setup Processor', function () {
           psp.applyUninstallation(
             targetDao.address,
             proxy,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             helpersV1,
             uninstallPermissionsV1
           )
@@ -731,8 +731,8 @@ describe('Plugin Setup Processor', function () {
           psp.applyUninstallation(
             targetDao.address,
             proxy,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             [],
             []
           )
@@ -743,8 +743,8 @@ describe('Plugin Setup Processor', function () {
         await psp.callStatic.prepareUninstallation(
           targetDao.address,
           proxy,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           helpersV1,
           EMPTY_DATA
         );
@@ -754,8 +754,8 @@ describe('Plugin Setup Processor', function () {
           psp.applyUninstallation(
             targetDao.address,
             proxy,
-            setupV1.address,
-            repoUUPS.address,
+            setupUV1.address,
+            repoU.address,
             helpersV1,
             badPermissions
           )
@@ -764,7 +764,7 @@ describe('Plugin Setup Processor', function () {
 
       it('applies a prepared uninstallation', async () => {
         await expect(
-          uninstallHelper(psp, targetDao, proxy, helpersV1, setupV1, repoUUPS)
+          uninstallHelper(psp, targetDao, proxy, helpersV1, setupUV1, repoU)
         ).to.not.be.reverted;
       });
 
@@ -773,24 +773,24 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await installHelper(psp, targetDao, setupV1, repoUUPS));
-        await installHelper(psp, targetDao, setupV1, repoUUPS); // This reverts, because permissions cannot be regranted.
+        } = await installHelper(psp, targetDao, setupUV1, repoU));
+        await installHelper(psp, targetDao, setupUV1, repoU); // This reverts, because permissions cannot be regranted.
 
         await uninstallHelper(
           psp,
           targetDao,
           proxy,
           helpersV1,
-          setupV1,
-          repoUUPS
+          setupUV1,
+          repoU
         ); // Uninstalling it the first time works but the second would not function anymore since its `permissionsV1` are revoked already.
         await uninstallHelper(
           psp,
           targetDao,
           proxy,
           helpersV1,
-          setupV1,
-          repoUUPS
+          setupUV1,
+          repoU
         ); // This would revert, because permissions cannot be re-revoked.
       });
     });
@@ -821,7 +821,7 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await installHelper(psp, targetDao, setupV1, repoUUPS));
+        } = await installHelper(psp, targetDao, setupUV1, repoU));
       });
 
       it('reverts if plugin does not support `IPlugin` interface', async () => {
@@ -829,7 +829,7 @@ describe('Plugin Setup Processor', function () {
         const plugin = AddressZero;
         let pluginUpdateParams = {
           plugin: plugin,
-          oldPluginSetup: setupV1.address,
+          oldPluginSetup: setupUV1.address,
           pluginSetupRepo: pluginSetupRepoAddr,
           currentPluginSetup: AddressZero,
           newPluginSetup: AddressZero,
@@ -868,13 +868,13 @@ describe('Plugin Setup Processor', function () {
           plugin: pluginCloneable,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await installHelper(psp, targetDao2, setupC1, repoClones));
+        } = await installHelper(psp, targetDao2, setupCV1, repoC));
 
         let pluginUpdateParams = {
           plugin: pluginCloneable,
-          pluginSetupRepo: repoClones.address,
-          currentPluginSetup: setupC1.address,
-          newPluginSetup: setupC2.address,
+          pluginSetupRepo: repoC.address,
+          currentPluginSetup: setupCV1.address,
+          newPluginSetup: setupCV2.address,
         };
 
         await expect(
@@ -893,8 +893,8 @@ describe('Plugin Setup Processor', function () {
         const {plugin, helpers} = await prepareInstallation(
           psp,
           targetDao.address,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           EMPTY_DATA
         );
 
@@ -902,8 +902,8 @@ describe('Plugin Setup Processor', function () {
         const pluginUpdateParams = {
           plugin: plugin,
           pluginSetupRepo: pluginSetupRepoAddr,
-          currentPluginSetup: setupV1.address,
-          newPluginSetup: setupV2.address,
+          currentPluginSetup: setupUV1.address,
+          newPluginSetup: setupUV2.address,
         };
 
         await expect(
@@ -920,16 +920,16 @@ describe('Plugin Setup Processor', function () {
         const {plugin, helpers} = await prepareInstallation(
           psp,
           targetDao.address,
-          setupV1.address,
-          repoUUPS.address,
+          setupUV1.address,
+          repoU.address,
           EMPTY_DATA
         );
 
         const pluginUpdateParams = {
           plugin: plugin,
-          pluginSetupRepo: repoUUPS.address,
-          currentPluginSetup: setupV1.address,
-          newPluginSetup: setupV2.address,
+          pluginSetupRepo: repoU.address,
+          currentPluginSetup: setupUV1.address,
+          newPluginSetup: setupUV2.address,
         };
 
         await expect(
@@ -945,9 +945,9 @@ describe('Plugin Setup Processor', function () {
       it('revert if helpers passed do not match', async () => {
         const pluginUpdateParams = {
           plugin: proxy,
-          pluginSetupRepo: repoUUPS.address,
-          currentPluginSetup: setupV1.address,
-          newPluginSetup: setupV2.address,
+          pluginSetupRepo: repoU.address,
+          currentPluginSetup: setupUV1.address,
+          newPluginSetup: setupUV2.address,
         };
 
         await expect(
@@ -963,9 +963,9 @@ describe('Plugin Setup Processor', function () {
       it('returns permissions and initData correctly', async () => {
         const pluginUpdateParams = {
           plugin: proxy,
-          pluginSetupRepo: repoUUPS.address,
-          currentPluginSetup: setupV1.address,
-          newPluginSetup: setupV2.address,
+          pluginSetupRepo: repoU.address,
+          currentPluginSetup: setupUV1.address,
+          newPluginSetup: setupUV2.address,
         };
 
         const result = await psp.callStatic.prepareUpdate(
@@ -992,9 +992,9 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao.address,
             proxy,
-            setupV1.address,
-            setupV2.address,
-            repoUUPS.address,
+            setupUV1.address,
+            setupUV2.address,
+            repoU.address,
             helpersV1,
             EMPTY_DATA
           )
@@ -1012,7 +1012,7 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await installHelper(psp, targetDao, setupV1, repoUUPS));
+        } = await installHelper(psp, targetDao, setupUV1, repoU));
       });
 
       it('reverts if caller does not have `APPLY_UPDATE_PERMISSION` permission', async () => {
@@ -1053,9 +1053,9 @@ describe('Plugin Setup Processor', function () {
 
         const pluginUpdateParams = {
           plugin: proxy,
-          pluginSetupRepo: repoUUPS.address,
-          currentPluginSetup: setupV1.address,
-          newPluginSetup: setupV2.address,
+          pluginSetupRepo: repoU.address,
+          currentPluginSetup: setupUV1.address,
+          newPluginSetup: setupUV2.address,
         };
         const prepareUpdateTx = await psp.prepareUpdate(
           targetDao.address,
@@ -1076,8 +1076,8 @@ describe('Plugin Setup Processor', function () {
           psp.applyUpdate(
             targetDao.address,
             proxy,
-            setupV2.address,
-            repoUUPS.address,
+            setupUV2.address,
+            repoU.address,
             initDataV2,
             permissionsV2
           )
@@ -1095,9 +1095,9 @@ describe('Plugin Setup Processor', function () {
       it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
         const pluginUpdateParams = {
           plugin: proxy,
-          pluginSetupRepo: repoUUPS.address,
-          currentPluginSetup: setupV1.address,
-          newPluginSetup: setupV2.address,
+          pluginSetupRepo: repoU.address,
+          currentPluginSetup: setupUV1.address,
+          newPluginSetup: setupUV2.address,
         };
         const prepareUpdateTx = await psp.prepareUpdate(
           targetDao.address,
@@ -1118,8 +1118,8 @@ describe('Plugin Setup Processor', function () {
           psp.applyUpdate(
             targetDao.address,
             proxy,
-            setupV2.address,
-            repoUUPS.address,
+            setupUV2.address,
+            repoU.address,
             initDataV2,
             permissionsV2
           )
@@ -1127,7 +1127,7 @@ describe('Plugin Setup Processor', function () {
           customError(
             'PluginProxyUpgradeFailed',
             proxy,
-            await setupV2.callStatic.getImplementationAddress(),
+            await setupUV2.callStatic.getImplementationAddress(),
             initDataV2
           )
         );
@@ -1175,17 +1175,17 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV1,
           permissions: permissionsV1,
-        } = await installHelper(psp, targetDao, setupV1, repoUUPS));
+        } = await installHelper(psp, targetDao, setupUV1, repoU));
       });
 
       it('points to the V1 implementation', async () => {
         expect(
-          await PluginV1.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupV1.callStatic.getImplementationAddress());
+          await PluginUV1.attach(proxy).callStatic.getImplementationAddress()
+        ).to.equal(await setupUV1.callStatic.getImplementationAddress());
       });
 
       it('initializes the members', async () => {
-        expect(await PluginV1.attach(proxy).state1()).to.equal(1);
+        expect(await PluginUV1.attach(proxy).state1()).to.equal(1);
       });
 
       it('sets the V1 helpers', async () => {
@@ -1205,10 +1205,10 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao,
           proxy,
-          repoUUPS,
+          repoU,
           helpersV1,
-          setupV1,
-          setupV2
+          setupUV1,
+          setupUV2
         );
       });
 
@@ -1217,10 +1217,10 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao,
           proxy,
-          repoUUPS,
+          repoU,
           helpersV1,
-          setupV1,
-          setupV3
+          setupUV1,
+          setupUV3
         );
       });
 
@@ -1230,10 +1230,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV1,
-            setupV1,
-            setupV1
+            setupUV1,
+            setupUV1
           )
         ).to.be.reverted;
       });
@@ -1252,10 +1252,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV1,
-            setupV1,
-            setupV2
+            setupUV1,
+            setupUV2
           ));
         });
 
@@ -1265,23 +1265,23 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV2,
-              setupV2,
-              setupV2
+              setupUV2,
+              setupUV2
             )
           ).to.be.reverted;
         });
 
         it('points to the V2 implementation', async () => {
           expect(
-            await PluginV2.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupV2.callStatic.getImplementationAddress());
+            await PluginUV2.attach(proxy).callStatic.getImplementationAddress()
+          ).to.equal(await setupUV2.callStatic.getImplementationAddress());
         });
 
         it('initializes the members', async () => {
-          expect(await PluginV2.attach(proxy).state1()).to.equal(1);
-          expect(await PluginV2.attach(proxy).state2()).to.equal(2);
+          expect(await PluginUV2.attach(proxy).state1()).to.equal(1);
+          expect(await PluginUV2.attach(proxy).state2()).to.equal(2);
         });
 
         it('sets the V2 helpers', async () => {
@@ -1301,10 +1301,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV2,
-            setupV2,
-            setupV3
+            setupUV2,
+            setupUV3
           );
         });
 
@@ -1314,10 +1314,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV2,
-              setupV2,
-              setupV1
+              setupUV2,
+              setupUV1
             )
           ).to.be.reverted;
         });
@@ -1328,10 +1328,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV2,
-              setupV2,
-              setupV2
+              setupUV2,
+              setupUV2
             )
           ).to.be.reverted;
         });
@@ -1350,23 +1350,25 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV2,
-              setupV2,
-              setupV3
+              setupUV2,
+              setupUV3
             ));
           });
 
           it('points to the V3 implementation', async () => {
             expect(
-              await PluginV3.attach(proxy).callStatic.getImplementationAddress()
-            ).to.equal(await setupV3.callStatic.getImplementationAddress());
+              await PluginUV3.attach(
+                proxy
+              ).callStatic.getImplementationAddress()
+            ).to.equal(await setupUV3.callStatic.getImplementationAddress());
           });
 
           it('initializes the members', async () => {
-            expect(await PluginV3.attach(proxy).state1()).to.equal(1);
-            expect(await PluginV3.attach(proxy).state2()).to.equal(2);
-            expect(await PluginV3.attach(proxy).state3()).to.equal(3);
+            expect(await PluginUV3.attach(proxy).state1()).to.equal(1);
+            expect(await PluginUV3.attach(proxy).state2()).to.equal(2);
+            expect(await PluginUV3.attach(proxy).state3()).to.equal(3);
           });
 
           it('sets the V3 helpers', async () => {
@@ -1387,10 +1389,10 @@ describe('Plugin Setup Processor', function () {
                 psp,
                 targetDao,
                 proxy,
-                repoUUPS,
+                repoU,
                 helpersV3,
-                setupV3,
-                setupV1
+                setupUV3,
+                setupUV1
               )
             ).to.be.reverted;
           });
@@ -1401,10 +1403,10 @@ describe('Plugin Setup Processor', function () {
                 psp,
                 targetDao,
                 proxy,
-                repoUUPS,
+                repoU,
                 helpersV3,
-                setupV3,
-                setupV2
+                setupUV3,
+                setupUV2
               )
             ).to.be.reverted;
           });
@@ -1415,10 +1417,10 @@ describe('Plugin Setup Processor', function () {
                 psp,
                 targetDao,
                 proxy,
-                repoUUPS,
+                repoU,
                 helpersV3,
-                setupV3,
-                setupV3
+                setupUV3,
+                setupUV3
               )
             ).to.be.reverted;
           });
@@ -1438,23 +1440,23 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV1,
-            setupV1,
-            setupV3
+            setupUV1,
+            setupUV3
           ));
         });
 
         it('points to the V3 implementation', async () => {
           expect(
-            await PluginV3.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupV3.callStatic.getImplementationAddress());
+            await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
+          ).to.equal(await setupUV3.callStatic.getImplementationAddress());
         });
 
         it('initializes the members', async () => {
-          expect(await PluginV3.attach(proxy).state1()).to.equal(1);
-          expect(await PluginV3.attach(proxy).state2()).to.equal(2);
-          expect(await PluginV3.attach(proxy).state3()).to.equal(3);
+          expect(await PluginUV3.attach(proxy).state1()).to.equal(1);
+          expect(await PluginUV3.attach(proxy).state2()).to.equal(2);
+          expect(await PluginUV3.attach(proxy).state3()).to.equal(3);
         });
 
         it('sets the V3 helpers', async () => {
@@ -1475,10 +1477,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV3,
-              setupV3,
-              setupV1
+              setupUV3,
+              setupUV1
             )
           ).to.be.reverted;
         });
@@ -1489,10 +1491,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV3,
-              setupV3,
-              setupV2
+              setupUV3,
+              setupUV2
             )
           ).to.be.reverted;
         });
@@ -1503,10 +1505,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV3,
-              setupV3,
-              setupV3
+              setupUV3,
+              setupUV3
             )
           ).to.be.reverted;
         });
@@ -1523,18 +1525,18 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV2,
           permissions: permissionsV2,
-        } = await installHelper(psp, targetDao, setupV2, repoUUPS));
+        } = await installHelper(psp, targetDao, setupUV2, repoU));
       });
 
       it('points to the V2 implementation', async () => {
         expect(
-          await PluginV2.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupV2.callStatic.getImplementationAddress());
+          await PluginUV2.attach(proxy).callStatic.getImplementationAddress()
+        ).to.equal(await setupUV2.callStatic.getImplementationAddress());
       });
 
       it('initializes the members', async () => {
-        expect(await PluginV2.attach(proxy).state1()).to.equal(1);
-        expect(await PluginV2.attach(proxy).state2()).to.equal(2);
+        expect(await PluginUV2.attach(proxy).state1()).to.equal(1);
+        expect(await PluginUV2.attach(proxy).state2()).to.equal(2);
       });
 
       it('sets the V2 helpers', async () => {
@@ -1554,10 +1556,10 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao,
           proxy,
-          repoUUPS,
+          repoU,
           helpersV2,
-          setupV2,
-          setupV3
+          setupUV2,
+          setupUV3
         );
       });
 
@@ -1567,10 +1569,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV2,
-            setupV2,
-            setupV1
+            setupUV2,
+            setupUV1
           )
         ).to.be.reverted;
       });
@@ -1581,10 +1583,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV2,
-            setupV2,
-            setupV2
+            setupUV2,
+            setupUV2
           )
         ).to.be.reverted;
       });
@@ -1603,23 +1605,23 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV2,
-            setupV2,
-            setupV3
+            setupUV2,
+            setupUV3
           ));
         });
 
         it('points to the V3 implementation', async () => {
           expect(
-            await PluginV3.attach(proxy).callStatic.getImplementationAddress()
-          ).to.equal(await setupV3.callStatic.getImplementationAddress());
+            await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
+          ).to.equal(await setupUV3.callStatic.getImplementationAddress());
         });
 
         it('initializes the members', async () => {
-          expect(await PluginV3.attach(proxy).state1()).to.equal(1);
-          expect(await PluginV3.attach(proxy).state2()).to.equal(2);
-          expect(await PluginV3.attach(proxy).state3()).to.equal(3);
+          expect(await PluginUV3.attach(proxy).state1()).to.equal(1);
+          expect(await PluginUV3.attach(proxy).state2()).to.equal(2);
+          expect(await PluginUV3.attach(proxy).state3()).to.equal(3);
         });
 
         it('sets the V3 helpers', async () => {
@@ -1640,10 +1642,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV3,
-              setupV3,
-              setupV3
+              setupUV3,
+              setupUV3
             )
           ).to.be.reverted;
         });
@@ -1654,10 +1656,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV3,
-              setupV3,
-              setupV1
+              setupUV3,
+              setupUV1
             )
           ).to.be.reverted;
         });
@@ -1668,10 +1670,10 @@ describe('Plugin Setup Processor', function () {
               psp,
               targetDao,
               proxy,
-              repoUUPS,
+              repoU,
               helpersV3,
-              setupV3,
-              setupV2
+              setupUV3,
+              setupUV2
             )
           ).to.be.reverted;
         });
@@ -1688,19 +1690,19 @@ describe('Plugin Setup Processor', function () {
           plugin: proxy,
           helpers: helpersV3,
           permissions: permissionsV3,
-        } = await installHelper(psp, targetDao, setupV3, repoUUPS));
+        } = await installHelper(psp, targetDao, setupUV3, repoU));
       });
 
       it('points to the V3 implementation', async () => {
         expect(
-          await PluginV3.attach(proxy).callStatic.getImplementationAddress()
-        ).to.equal(await setupV3.callStatic.getImplementationAddress());
+          await PluginUV3.attach(proxy).callStatic.getImplementationAddress()
+        ).to.equal(await setupUV3.callStatic.getImplementationAddress());
       });
 
       it('initializes the members', async () => {
-        expect(await PluginV3.attach(proxy).state1()).to.equal(1);
-        expect(await PluginV3.attach(proxy).state2()).to.equal(2);
-        expect(await PluginV3.attach(proxy).state3()).to.equal(3);
+        expect(await PluginUV3.attach(proxy).state1()).to.equal(1);
+        expect(await PluginUV3.attach(proxy).state2()).to.equal(2);
+        expect(await PluginUV3.attach(proxy).state3()).to.equal(3);
       });
 
       it('sets the V3 helpers', async () => {
@@ -1721,10 +1723,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV3,
-            setupV3,
-            setupV3
+            setupUV3,
+            setupUV3
           )
         ).to.be.reverted;
       });
@@ -1735,10 +1737,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV3,
-            setupV3,
-            setupV1
+            setupUV3,
+            setupUV1
           )
         ).to.be.reverted;
       });
@@ -1749,10 +1751,10 @@ describe('Plugin Setup Processor', function () {
             psp,
             targetDao,
             proxy,
-            repoUUPS,
+            repoU,
             helpersV3,
-            setupV3,
-            setupV2
+            setupUV3,
+            setupUV2
           )
         ).to.be.reverted;
       });
