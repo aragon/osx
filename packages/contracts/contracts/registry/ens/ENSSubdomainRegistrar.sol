@@ -31,11 +31,6 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The address of the ENS resolver resolving the names to an address.
     address public resolver;
 
-    /// @notice Thrown if the registrar is not authorized and is neither the domain node owner nor an approved operator of the domain node owner.
-    /// @param nodeOwner The node owner.
-    /// @param here The address of this registry.
-    error UnauthorizedRegistrar(address nodeOwner, address here);
-
     /// @notice Thrown if the subnode is already registered.
     /// @param subnode The subnode namehash.
     /// @param nodeOwner The node owner address.
@@ -54,13 +49,6 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
         ENS _ens,
         bytes32 _node
     ) external initializer {
-        address nodeOwner = _ens.owner(_node); // The `initializer` modifier acts as a re-entrancy guard so doing an external calls early is ok.
-
-        // This contract must either be the domain node owner or an approved operator of the node owner.
-        if (nodeOwner != address(this) && !_ens.isApprovedForAll(nodeOwner, address(this))) {
-            revert UnauthorizedRegistrar({nodeOwner: nodeOwner, here: address(this)});
-        }
-
         __DaoAuthorizableUpgradeable_init(_managingDao);
 
         ens = _ens;
@@ -78,6 +66,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     {}
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
+    /// @dev TODO:
     /// @param _label The labelhash of the subdomain name.
     /// @param _targetAddress The address to which the subdomain resolves.
     function registerSubnode(bytes32 _label, address _targetAddress)

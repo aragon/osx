@@ -230,52 +230,52 @@ describe('ENSSubdomainRegistrar', function () {
     });
   });
 
-  describe('Registrar is not the domain owner and is not approved but has permission', () => {
-    beforeEach(async () => {
-      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
-      await managingDao.grant(
-        registrar.address,
-        await signers[1].getAddress(),
-        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
-      );
-    });
+  // describe('Registrar is not the domain owner and is not approved but has permission', () => {
+  //   beforeEach(async () => {
+  //     // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
+  //     await managingDao.grant(
+  //       registrar.address,
+  //       await signers[1].getAddress(),
+  //       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+  //     );
+  //   });
 
-    it('reverts during initialization, even for the ENS owner', async () => {
-      // This is also the case for signers[0] who owns the ENS registries
-      await expect(
-        registrar
-          .connect(signers[0])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
+  //   it('reverts during initialization, even for the ENS owner', async () => {
+  //     // This is also the case for signers[0] who owns the ENS registries
+  //     await expect(
+  //       registrar
+  //         .connect(signers[0])
+  //         .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+  //     ).to.be.revertedWith(
+  //       customError(
+  //         'UnauthorizedRegistrar',
+  //         ethers.constants.AddressZero,
+  //         registrar.address
+  //       )
+  //     );
+  //   });
 
-    expectedUnauthorizedRegistrarReverts();
-  });
+  //   expectedUnauthorizedRegistrarReverts();
+  // });
 
   describe('Random signer with no permissions at all', () => {
     expectedUnauthorizedRegistrarReverts();
   });
 
   function expectedUnauthorizedRegistrarReverts() {
-    it('reverts during initialization', async () => {
-      await expect(
-        registrar
-          .connect(signers[1])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
+    // it('reverts during initialization', async () => {
+    //   await expect(
+    //     registrar
+    //       .connect(signers[1])
+    //       .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+    //   ).to.be.revertedWith(
+    //     customError(
+    //       'UnauthorizedRegistrar',
+    //       ethers.constants.AddressZero,
+    //       registrar.address
+    //     )
+    //   );
+    // });
 
     it('reverts on attempted subnode registration', async () => {
       // signers[1] can register subdomain
