@@ -2,24 +2,36 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AllowlistVoting, DAO} from '../../typechain';
+import {DAO} from '../../typechain';
 import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {getMergedABI} from '../../utils/abi';
 import {VoteOption, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('AllowlistVoting', function () {
   let signers: SignerWithAddress[];
-  let voting: AllowlistVoting;
+  let voting: any;
   let dao: DAO;
   let ownerAddress: string;
   let user1: string;
   let dummyActions: any;
   let dummyMetadata: string;
 
+  let mergedAbi: any;
+  let allowlistVotingFactoryBytecode: any;
+
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
     user1 = await signers[1].getAddress();
+
+    ({abi: mergedAbi, bytecode: allowlistVotingFactoryBytecode} =
+      await getMergedABI(
+        // @ts-ignore
+        hre,
+        'AllowlistVoting',
+        ['DAO']
+      ));
 
     dummyActions = [
       {
@@ -38,8 +50,13 @@ describe('AllowlistVoting', function () {
   });
 
   beforeEach(async () => {
-    const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
-    voting = await AllowlistVoting.deploy();
+    const AllowlistVotingFactory = new ethers.ContractFactory(
+      mergedAbi,
+      allowlistVotingFactoryBytecode,
+      signers[0]
+    );
+    voting = await AllowlistVotingFactory.deploy();
+
     dao.grant(
       dao.address,
       voting.address,

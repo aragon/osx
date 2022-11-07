@@ -3,8 +3,9 @@ import {ethers, waffle} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
-import {ERC20Voting, DAO} from '../../typechain';
+import {DAO} from '../../typechain';
 import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {getMergedABI} from '../../utils/abi';
 import {VoteOption, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
@@ -12,16 +13,27 @@ const {deployMockContract} = waffle;
 
 describe('ERC20Voting', function () {
   let signers: SignerWithAddress[];
-  let voting: ERC20Voting;
+  let voting: any;
   let dao: DAO;
   let erc20VoteMock: any;
   let ownerAddress: string;
   let dummyActions: any;
   let dummyMetadata: string;
 
+  let mergedAbi: any;
+  let erc20VotingFactoryBytecode: any;
+
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
+
+    ({abi: mergedAbi, bytecode: erc20VotingFactoryBytecode} =
+      await getMergedABI(
+        // @ts-ignore
+        hre,
+        'ERC20Voting',
+        ['DAO']
+      ));
 
     dummyActions = [
       {
@@ -43,8 +55,12 @@ describe('ERC20Voting', function () {
   beforeEach(async () => {
     erc20VoteMock = await deployMockContract(signers[0], ERC20Governance.abi);
 
-    const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
-    voting = await ERC20Voting.deploy();
+    const ERC20VotingFactory = new ethers.ContractFactory(
+      mergedAbi,
+      erc20VotingFactoryBytecode,
+      signers[0]
+    );
+    voting = await ERC20VotingFactory.deploy();
 
     dao.grant(
       dao.address,
@@ -60,6 +76,7 @@ describe('ERC20Voting', function () {
   ) {
     return voting.initialize(
       dao.address,
+
       participationRequired,
       supportRequired,
       minDuration,
@@ -350,7 +367,6 @@ describe('ERC20Voting', function () {
 
       // supports and should execute right away.
       let tx = await voting.vote(id, VoteOption.Yes, true);
-      let rc = await tx.wait();
 
       // check for the `Executed` event in the DAO
       {
