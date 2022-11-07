@@ -264,10 +264,10 @@ describe('Plugin Setup Processor', function () {
             pluginSetupRepoAddr,
             data
           )
-        ).to.be.revertedWith(customError('EmptyPluginRepo'));
+        ).to.be.revertedWith(customError('PluginRepoNonexistent'));
       });
 
-      it('reverts if installation already prepared', async () => {
+      it('reverts if installation is already prepared', async () => {
         const pluginSetupBad = setupUV1Bad.address;
 
         const data1 = ethers.utils.defaultAbiCoder.encode(
@@ -432,14 +432,14 @@ describe('Plugin Setup Processor', function () {
         const {plugin, permissions: permissions} = await prepareInstallation(
           psp,
           targetDao.address,
-          pluginSetupBad,
+          setupUV1Bad.address,
           repoU.address,
           dataUser1
         );
 
         await psp.applyInstallation(
           targetDao.address,
-          pluginSetupBad,
+          setupUV1Bad.address,
           repoU.address,
           plugin,
           permissions
@@ -454,7 +454,7 @@ describe('Plugin Setup Processor', function () {
         const secondPreparation = await prepareInstallation(
           psp,
           targetDao.address,
-          pluginSetupBad,
+          setupUV1Bad.address,
           repoU.address,
           dataUser2
         );
@@ -462,7 +462,7 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.applyInstallation(
             targetDao.address,
-            pluginSetupBad,
+            setupUV1Bad.address,
             repoU.address,
             secondPreparation.plugin,
             secondPreparation.permissions
@@ -470,13 +470,39 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyApplied'));
       });
 
-      it('applies a prepared installation', async () => {
-        const pluginSetup = setupUV1.address;
+      it('reverts if bad permissions are passed', async () => {
+        let plugin;
+        let helpers;
+        let permissions;
+        ({
+          plugin: plugin,
+          helpers: helpers,
+          permissions: permissions,
+        } = await prepareInstallation(
+          psp,
+          targetDao.address,
+          setupUV1Bad.address,
+          repoU.address,
+          EMPTY_DATA
+        ));
 
+        let badPermissions: PermissionOperation[] = [];
+        await expect(
+          psp.applyInstallation(
+            targetDao.address,
+            setupUV1Bad.address,
+            repoU.address,
+            plugin,
+            badPermissions
+          )
+        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
+      });
+
+      it('applies a prepared installation', async () => {
         const {plugin, permissions: permissions} = await prepareInstallation(
           psp,
           targetDao.address,
-          pluginSetup,
+          setupUV1.address,
           repoU.address,
           EMPTY_DATA
         );
@@ -484,7 +510,7 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.applyInstallation(
             targetDao.address,
-            pluginSetup,
+            setupUV1.address,
             repoU.address,
             plugin,
             permissions
@@ -536,7 +562,7 @@ describe('Plugin Setup Processor', function () {
             [AddressZero],
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('EmptyPluginRepo'));
+        ).to.be.revertedWith(customError('PluginRepoNonexistent'));
       });
 
       it('reverts if plugin is not applied yet', async () => {
@@ -764,15 +790,23 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
-      it('revert bad permissions is passed', async () => {
-        await psp.callStatic.prepareUninstallation(
+      it('reverts if bad permissions are passed', async () => {
+        let returnedPluginAddress;
+        let returnedHelpers;
+        let uninstallPermissionsV1;
+        ({
+          returnedPluginAddress: returnedPluginAddress,
+          returnedHelpers: returnedHelpers,
+          permissions: uninstallPermissionsV1,
+        } = await prepareUninstallation(
+          psp,
           targetDao.address,
           proxy,
           setupUV1.address,
           repoU.address,
           helpersUV1,
           EMPTY_DATA
-        );
+        ));
 
         let badPermissions: PermissionOperation[] = [];
         await expect(
@@ -922,7 +956,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('EmptyPluginRepo'));
+        ).to.be.revertedWith(customError('PluginRepoNonexistent'));
       });
 
       it('revert if plugin is not applied', async () => {
