@@ -320,7 +320,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert SetupNotApplied();
         }
 
-        // Avoid stack too deep compiler error by putting the code into curly braces.
         {
             // Check if the helpers to be updated match with those announced in the previous setup step.
             // This implicitly checks if plugin was installed in the first place.
@@ -339,7 +338,22 @@ contract PluginSetupProcessor is DaoAuthorizable {
             delete helpersHashes[oldSetupId];
         }
 
-        uint16[3] memory oldVersion = _checkUpdateValidity(_updateParams);
+        // `getVersionByPluginSetup` will revert if `currentPluginSetup` is not part of `pluginSetupRepo`.
+        (uint16[3] memory oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+            _updateParams.currentPluginSetup
+        );
+
+        {
+            // `getVersionByPluginSetup` will revert if `newPluginSetup` is not part of `pluginSetupRepo`.
+            (uint16[3] memory newVersion, , ) = _updateParams
+                .pluginSetupRepo
+                .getVersionByPluginSetup(_updateParams.newPluginSetup);
+
+            // Assert that the version bump valid
+            if (!isValidBumpLoose(oldVersion, newVersion)) {
+                revert BumpInvalid({currentVersion: oldVersion, nextVersion: newVersion});
+            }
+        }
 
         // Prepare the update.
         (
@@ -354,7 +368,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 _data
             );
 
-        // Avoid stack too deep compiler error by putting the code into curly braces.
         {
             // Add new helpers for the future update checks
             bytes32 newSetupId = _getSetupId(
@@ -611,28 +624,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 caller: msg.sender,
                 permissionId: _permissionId
             });
-        }
-    }
-
-    /// @notice Checks if the update is valid by assuring that the semantic version bump is correct.
-    /// @param _updateParams The parameters of the update.
-    /// @return oldVersion The old semantic version number being needed in the context for further usage.
-    function _checkUpdateValidity(PluginUpdateParams calldata _updateParams)
-        internal
-        view
-        returns (uint16[3] memory oldVersion)
-    {
-        // `getVersionByPluginSetup` will revert if `currentPluginSetup` or `newPluginSetup` are not part of `pluginSetupRepo`.
-        (oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
-            _updateParams.currentPluginSetup
-        );
-        (uint16[3] memory newVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
-            _updateParams.newPluginSetup
-        );
-
-        // Assert that the version bump valid
-        if (!isValidBumpLoose(oldVersion, newVersion)) {
-            revert BumpInvalid({currentVersion: oldVersion, nextVersion: newVersion});
         }
     }
 }
