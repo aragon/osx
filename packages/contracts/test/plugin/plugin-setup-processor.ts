@@ -498,6 +498,34 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('PermissionsHashMismatch'));
       });
 
+      it('reverts if the installation was not prepared', async () => {
+        let unpreparedPlugin;
+        let unpreparedHelpers;
+        let unPreparedPermissions;
+
+        // We use `callStatic` so that the installation is not prepared
+        ({
+          plugin: unpreparedPlugin,
+          helpers: unpreparedHelpers,
+          permissions: unPreparedPermissions,
+        } = await psp.callStatic.prepareInstallation(
+          targetDao.address,
+          setupUV1.address,
+          repoU.address,
+          EMPTY_DATA
+        ));
+
+        await expect(
+          psp.applyInstallation(
+            targetDao.address,
+            setupUV1.address,
+            repoU.address,
+            unpreparedPlugin,
+            unPreparedPermissions
+          )
+        ).to.be.revertedWith(customError('SetupNotPrepared'));
+      });
+
       it('applies a prepared installation', async () => {
         const {plugin, permissions: permissions} = await prepareInstallation(
           psp,
@@ -785,10 +813,10 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.applyUninstallation(
             targetDao.address,
-            proxy,
+            returnedPluginAddress,
             setupUV1.address,
             repoU.address,
-            helpersUV1,
+            returnedHelpers,
             badPermissions
           )
         ).to.be.revertedWith(customError('PermissionsHashMismatch'));
@@ -1174,7 +1202,7 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.applyUpdate(
             targetDao.address,
-            proxy,
+            returnedPluginAddress,
             setupUV1.address,
             repoU.address,
             initData,
