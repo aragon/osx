@@ -470,7 +470,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyApplied'));
       });
 
-      it('reverts if bad permissions are passed', async () => {
+      it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
         let plugin;
         let helpers;
         let permissions;
@@ -481,7 +481,7 @@ describe('Plugin Setup Processor', function () {
         } = await prepareInstallation(
           psp,
           targetDao.address,
-          setupUV1Bad.address,
+          setupUV1.address,
           repoU.address,
           EMPTY_DATA
         ));
@@ -490,7 +490,7 @@ describe('Plugin Setup Processor', function () {
         await expect(
           psp.applyInstallation(
             targetDao.address,
-            setupUV1Bad.address,
+            setupUV1.address,
             repoU.address,
             plugin,
             badPermissions
@@ -790,7 +790,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('HelpersHashMismatch'));
       });
 
-      it('reverts if bad permissions are passed', async () => {
+      it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
         let returnedPluginAddress;
         let returnedHelpers;
         let uninstallPermissionsV1;
@@ -1177,16 +1177,35 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
-        const permissions: any[] = [];
+        let returnedPluginAddress;
+        let updatedHelpers;
+        let permissions;
+        let initData;
+        ({
+          returnedPluginAddress: returnedPluginAddress,
+          updatedHelpers: updatedHelpers,
+          permissions: permissions,
+          initData: initData,
+        } = await prepareUpdate(
+          psp,
+          targetDao.address,
+          proxy,
+          setupUV1.address,
+          setupUV2.address,
+          repoU.address,
+          helpersUV1,
+          EMPTY_DATA
+        ));
 
+        let badPermissions: PermissionOperation[] = [];
         await expect(
           psp.applyUpdate(
             targetDao.address,
-            AddressZero,
-            AddressZero,
-            AddressZero,
-            EMPTY_DATA,
-            permissions
+            proxy,
+            setupUV1.address,
+            repoU.address,
+            initData,
+            badPermissions
           )
         ).to.be.revertedWith(customError('PermissionsHashMismatch'));
       });
