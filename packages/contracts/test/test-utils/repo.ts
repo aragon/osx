@@ -1,10 +1,15 @@
 import {ethers} from 'hardhat';
 
-import {PluginRepoRegistry, PluginSetupV1Mock} from '../../typechain';
+import {
+  PluginRepoRegistry,
+  PluginUUPSUpgradeableSetupV1Mock,
+} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
 
-export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
-  const PluginSetupMock = await ethers.getContractFactory('PluginSetupV1Mock');
+export async function deployMockPluginSetup(): Promise<PluginUUPSUpgradeableSetupV1Mock> {
+  const PluginSetupMock = await ethers.getContractFactory(
+    'PluginUUPSUpgradeableSetupV1Mock'
+  );
   const pluginSetupMockContract = await PluginSetupMock.deploy();
 
   return pluginSetupMockContract;

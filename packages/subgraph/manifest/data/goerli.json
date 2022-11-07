@@ -1,20 +1,21 @@
 {
   "info": "# Do not edit subgraph.yaml,this is a generated file. \n# Instead, edit subgraph.placeholder.yaml and run: yarn manifest",
   "network": "goerli",
-  "dataSources": {},
-  "DAORegistry": {
-    "name": "DAORegistry",
-    "address": "0xF9514f4Eac328F53d94c87B76c407B9a67E1441A",
-    "startBlock": 7879081
-  },
-  "PluginRepoRegistry": {
-    "name": "PluginRepoRegistry",
-    "address": "0x22C8AEA0Ad1c1872E60bD43b3FaF20471F7CC43f",
-    "startBlock": 7879085
-  },
-  "PluginSetupProcessor": {
-    "name": "PluginSetupProcessor",
-    "address": "0xf7777b97EBEec7EaFCFD28aabE31EDd8F9b46A08",
-    "startBlock": 7879087
+  "dataSources": {
+    "DAORegistry": {
+      "name": "DAORegistry",
+      "address": "0xF9514f4Eac328F53d94c87B76c407B9a67E1441A",
+      "startBlock": 7879081
+    },
+    "PluginRepoRegistry": {
+      "name": "PluginRepoRegistry",
+      "address": "0x22C8AEA0Ad1c1872E60bD43b3FaF20471F7CC43f",
+      "startBlock": 7879085
+    },
+    "PluginSetupProcessor": {
+      "name": "PluginSetupProcessor",
+      "address": "0xf7777b97EBEec7EaFCFD28aabE31EDd8F9b46A08",
+      "startBlock": 7879087
+    }
   }
 }
