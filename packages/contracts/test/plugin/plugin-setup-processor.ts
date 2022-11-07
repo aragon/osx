@@ -299,12 +299,12 @@ describe('Plugin Setup Processor', function () {
 
       it('prepares an UUPS upgradeable plugin installation', async () => {
         let plugin;
-        let helpersV1;
-        let permissionsV1;
+        let helpersUV1;
+        let permissionsUV1;
         ({
           plugin: plugin,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersUV1,
+          permissions: permissionsUV1,
         } = await prepareInstallation(
           psp,
           targetDao.address,
@@ -314,8 +314,8 @@ describe('Plugin Setup Processor', function () {
         ));
 
         expect(plugin).to.not.equal(AddressZero);
-        expect(helpersV1).to.deep.equal(mockHelpers(1));
-        expect(permissionsV1).to.deep.equal(
+        expect(helpersUV1).to.deep.equal(mockHelpers(1));
+        expect(permissionsUV1).to.deep.equal(
           mockPermissionsOperations(0, 1, Operation.Grant).map(perm =>
             Object.values(perm)
           )
@@ -324,12 +324,12 @@ describe('Plugin Setup Processor', function () {
 
       it('prepares a cloneable plugin installation', async () => {
         let plugin;
-        let helpersV1;
-        let permissionsV1;
+        let helpersCV1;
+        let permissionsCV1;
         ({
           plugin: plugin,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersCV1,
+          permissions: permissionsCV1,
         } = await prepareInstallation(
           psp,
           targetDao.address,
@@ -339,8 +339,8 @@ describe('Plugin Setup Processor', function () {
         ));
 
         expect(plugin).to.not.equal(AddressZero);
-        expect(helpersV1).to.deep.equal(mockHelpers(1));
-        expect(permissionsV1).to.deep.equal(
+        expect(helpersCV1).to.deep.equal(mockHelpers(1));
+        expect(permissionsCV1).to.deep.equal(
           mockPermissionsOperations(5, 6, Operation.Grant).map(perm =>
             Object.values(perm)
           )
@@ -503,8 +503,8 @@ describe('Plugin Setup Processor', function () {
 
   describe('Uninstallation', function () {
     let proxy: string;
-    let helpersV1: string[];
-    let permissionsV1: PermissionOperation[];
+    let helpersUV1: string[];
+    let permissionsUV1: PermissionOperation[];
 
     beforeEach(async () => {
       await targetDao.grant(
@@ -520,8 +520,8 @@ describe('Plugin Setup Processor', function () {
 
       ({
         plugin: proxy,
-        helpers: helpersV1,
-        permissions: permissionsV1,
+        helpers: helpersUV1,
+        permissions: permissionsUV1,
       } = await installHelper(psp, targetDao, setupUV1, repoU));
     });
 
@@ -568,7 +568,7 @@ describe('Plugin Setup Processor', function () {
           proxy,
           setupUV1.address,
           repoU.address,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         );
 
@@ -580,7 +580,7 @@ describe('Plugin Setup Processor', function () {
             proxy,
             setupUV1.address,
             repoU.address,
-            helpersV1,
+            helpersUV1,
             EMPTY_DATA
           )
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
@@ -600,12 +600,12 @@ describe('Plugin Setup Processor', function () {
           proxy,
           setupUV1.address,
           repoU.address,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         ));
 
         expect(returnedPluginAddress).to.equal(proxy);
-        expect(returnedHelpers).to.deep.equal(helpersV1);
+        expect(returnedHelpers).to.deep.equal(helpersUV1);
         expect(uninstallPermissionsV1).to.deep.equal(
           mockPermissionsOperations(0, 1, Operation.Revoke).map(perm =>
             Object.values(perm)
@@ -627,7 +627,7 @@ describe('Plugin Setup Processor', function () {
           proxy,
           setupUV1.address,
           repoU.address,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         ));
 
@@ -642,13 +642,13 @@ describe('Plugin Setup Processor', function () {
 
       it('prepares a cloneable plugin uninstallation', async () => {
         let clone;
-        let helpersC1;
-        let permissionsC1;
+        let helpersCV1;
+        let permissionsCV1;
 
         ({
           plugin: clone,
-          helpers: helpersC1,
-          permissions: permissionsC1,
+          helpers: helpersCV1,
+          permissions: permissionsCV1,
         } = await installHelper(psp, targetDao, setupCV1, repoC));
 
         let returnedPlugin;
@@ -664,7 +664,7 @@ describe('Plugin Setup Processor', function () {
           clone,
           setupCV1.address,
           repoC.address,
-          helpersC1,
+          helpersCV1,
           EMPTY_DATA
         ));
 
@@ -694,8 +694,8 @@ describe('Plugin Setup Processor', function () {
             proxy,
             setupUV1.address,
             repoU.address,
-            helpersV1,
-            permissionsV1
+            helpersUV1,
+            permissionsUV1
           )
         ).to.be.revertedWith(
           customError(
@@ -727,7 +727,7 @@ describe('Plugin Setup Processor', function () {
           proxy,
           setupUV1.address,
           repoU.address,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         ));
 
@@ -737,7 +737,7 @@ describe('Plugin Setup Processor', function () {
             proxy,
             setupUV1.address,
             repoU.address,
-            helpersV1,
+            helpersUV1,
             uninstallPermissionsV1
           )
         ).to.be.revertedWith(
@@ -770,7 +770,7 @@ describe('Plugin Setup Processor', function () {
           proxy,
           setupUV1.address,
           repoU.address,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         );
 
@@ -781,7 +781,7 @@ describe('Plugin Setup Processor', function () {
             proxy,
             setupUV1.address,
             repoU.address,
-            helpersV1,
+            helpersUV1,
             badPermissions
           )
         ).to.be.revertedWith(customError('PermissionsHashMismatch'));
@@ -789,15 +789,15 @@ describe('Plugin Setup Processor', function () {
 
       it('applies a prepared uninstallation', async () => {
         await expect(
-          uninstallHelper(psp, targetDao, proxy, helpersV1, setupUV1, repoU)
+          uninstallHelper(psp, targetDao, proxy, helpersUV1, setupUV1, repoU)
         ).to.not.be.reverted;
       });
 
       it.skip('applies multiple prepared uninstallations of the same plugin', async () => {
         ({
           plugin: proxy,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersUV1,
+          permissions: permissionsUV1,
         } = await installHelper(psp, targetDao, setupUV1, repoU));
         await installHelper(psp, targetDao, setupUV1, repoU); // This reverts, because permissions cannot be regranted.
 
@@ -805,15 +805,15 @@ describe('Plugin Setup Processor', function () {
           psp,
           targetDao,
           proxy,
-          helpersV1,
+          helpersUV1,
           setupUV1,
           repoU
-        ); // Uninstalling it the first time works but the second would not function anymore since its `permissionsV1` are revoked already.
+        ); // Uninstalling it the first time works but the second would not function anymore since its `permissionsUV1` are revoked already.
         await uninstallHelper(
           psp,
           targetDao,
           proxy,
-          helpersV1,
+          helpersUV1,
           setupUV1,
           repoU
         ); // This would revert, because permissions cannot be re-revoked.
@@ -838,14 +838,14 @@ describe('Plugin Setup Processor', function () {
 
     describe('prepareUpdate', function () {
       let proxy: string;
-      let helpersV1: string[];
-      let permissionsV1: PermissionOperation[];
+      let helpersUV1: string[];
+      let permissionsUV1: PermissionOperation[];
 
       beforeEach(async () => {
         ({
           plugin: proxy,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersUV1,
+          permissions: permissionsUV1,
         } = await installHelper(psp, targetDao, setupUV1, repoU));
       });
 
@@ -875,8 +875,8 @@ describe('Plugin Setup Processor', function () {
         let pluginCloneable;
         ({
           plugin: pluginCloneable,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersUV1,
+          permissions: permissionsUV1,
         } = await installHelper(psp, targetDao, setupCV1, repoC));
 
         let pluginUpdateParams = {
@@ -890,7 +890,7 @@ describe('Plugin Setup Processor', function () {
           psp.prepareUpdate(
             targetDao.address,
             pluginUpdateParams,
-            helpersV1,
+            helpersUV1,
             EMPTY_DATA
           )
         ).to.be.revertedWith(
@@ -980,7 +980,7 @@ describe('Plugin Setup Processor', function () {
         const result = await psp.callStatic.prepareUpdate(
           targetDao.address,
           pluginUpdateParams,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         );
 
@@ -1004,7 +1004,7 @@ describe('Plugin Setup Processor', function () {
             setupUV1.address,
             setupUV2.address,
             repoU.address,
-            helpersV1,
+            helpersUV1,
             EMPTY_DATA
           )
         ).to.not.be.reverted;
@@ -1013,14 +1013,14 @@ describe('Plugin Setup Processor', function () {
 
     describe('applyUpdate', function () {
       let proxy: string;
-      let helpersV1: string[];
-      let permissionsV1: PermissionOperation[];
+      let helpersUV1: string[];
+      let permissionsUV1: PermissionOperation[];
 
       beforeEach(async () => {
         ({
           plugin: proxy,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersUV1,
+          permissions: permissionsUV1,
         } = await installHelper(psp, targetDao, setupUV1, repoU));
       });
 
@@ -1069,7 +1069,7 @@ describe('Plugin Setup Processor', function () {
         const prepareUpdateTx = await psp.prepareUpdate(
           targetDao.address,
           pluginUpdateParams,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         );
 
@@ -1111,7 +1111,7 @@ describe('Plugin Setup Processor', function () {
         const prepareUpdateTx = await psp.prepareUpdate(
           targetDao.address,
           pluginUpdateParams,
-          helpersV1,
+          helpersUV1,
           EMPTY_DATA
         );
 
@@ -1176,14 +1176,14 @@ describe('Plugin Setup Processor', function () {
 
     context(`V1 was installed`, function () {
       let proxy: string;
-      let helpersV1: string[];
-      let permissionsV1: PermissionOperation[];
+      let helpersUV1: string[];
+      let permissionsUV1: PermissionOperation[];
 
       beforeEach(async () => {
         ({
           plugin: proxy,
-          helpers: helpersV1,
-          permissions: permissionsV1,
+          helpers: helpersUV1,
+          permissions: permissionsUV1,
         } = await installHelper(psp, targetDao, setupUV1, repoU));
       });
 
@@ -1198,11 +1198,11 @@ describe('Plugin Setup Processor', function () {
       });
 
       it('sets the V1 helpers', async () => {
-        expect(helpersV1).to.deep.equal(mockHelpers(1));
+        expect(helpersUV1).to.deep.equal(mockHelpers(1));
       });
 
       it('sets the V1 permissions', async () => {
-        expect(permissionsV1).to.deep.equal(
+        expect(permissionsUV1).to.deep.equal(
           mockPermissionsOperations(0, 1, Operation.Grant).map(perm =>
             Object.values(perm)
           )
@@ -1215,7 +1215,7 @@ describe('Plugin Setup Processor', function () {
           targetDao,
           proxy,
           repoU,
-          helpersV1,
+          helpersUV1,
           setupUV1,
           setupUV2
         );
@@ -1227,7 +1227,7 @@ describe('Plugin Setup Processor', function () {
           targetDao,
           proxy,
           repoU,
-          helpersV1,
+          helpersUV1,
           setupUV1,
           setupUV3
         );
@@ -1240,7 +1240,7 @@ describe('Plugin Setup Processor', function () {
             targetDao,
             proxy,
             repoU,
-            helpersV1,
+            helpersUV1,
             setupUV1,
             setupUV1
           )
@@ -1249,20 +1249,20 @@ describe('Plugin Setup Processor', function () {
 
       context(`and updated to V2`, function () {
         let helpersV2: string[];
-        let permissionsV1V2: PermissionOperation[];
+        let permissionsUV1V2: PermissionOperation[];
         let initDataV1V2: BytesLike;
 
         beforeEach(async () => {
           ({
             updatedHelpers: helpersV2,
-            permissions: permissionsV1V2,
+            permissions: permissionsUV1V2,
             initData: initDataV1V2,
           } = await updateHelper(
             psp,
             targetDao,
             proxy,
             repoU,
-            helpersV1,
+            helpersUV1,
             setupUV1,
             setupUV2
           ));
@@ -1298,7 +1298,7 @@ describe('Plugin Setup Processor', function () {
         });
 
         it('sets the V1 to V2 permissions', async () => {
-          expect(permissionsV1V2).to.deep.equal(
+          expect(permissionsUV1V2).to.deep.equal(
             mockPermissionsOperations(1, 2, Operation.Grant).map(perm =>
               Object.values(perm)
             )
@@ -1437,20 +1437,20 @@ describe('Plugin Setup Processor', function () {
       });
       context(`and updated to V3`, function () {
         let helpersV3: string[];
-        let permissionsV1V3: PermissionOperation[];
+        let permissionsUV1V3: PermissionOperation[];
         let initDataV1V3: BytesLike;
 
         beforeEach(async () => {
           ({
             updatedHelpers: helpersV3,
-            permissions: permissionsV1V3,
+            permissions: permissionsUV1V3,
             initData: initDataV1V3,
           } = await updateHelper(
             psp,
             targetDao,
             proxy,
             repoU,
-            helpersV1,
+            helpersUV1,
             setupUV1,
             setupUV3
           ));
@@ -1473,7 +1473,7 @@ describe('Plugin Setup Processor', function () {
         });
 
         it('sets the V1 to V3 permissions', async () => {
-          expect(permissionsV1V3).to.deep.equal(
+          expect(permissionsUV1V3).to.deep.equal(
             mockPermissionsOperations(1, 3, Operation.Grant).map(perm =>
               Object.values(perm)
             )
