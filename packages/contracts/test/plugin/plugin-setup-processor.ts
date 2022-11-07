@@ -297,7 +297,7 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('prepares a UUPS upgradeable plugin installation', async () => {
+      it('prepares an UUPS upgradeable plugin installation', async () => {
         let plugin;
         let helpersV1;
         let permissionsV1;
@@ -613,18 +613,31 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
-      it('prepares a UUPS upgradeable plugin uninstallation', async () => {
-        await expect(
-          prepareUninstallation(
-            psp,
-            targetDao.address,
-            proxy,
-            setupUV1.address,
-            repoU.address,
-            helpersV1,
-            EMPTY_DATA
+      it('prepares an UUPS upgradeable plugin uninstallation', async () => {
+        let returnedPlugin;
+        let returnedHelpersV1;
+        let uninstallPermissionsV1;
+        ({
+          returnedPluginAddress: returnedPlugin,
+          returnedHelpers: returnedHelpersV1,
+          permissions: uninstallPermissionsV1,
+        } = await prepareUninstallation(
+          psp,
+          targetDao.address,
+          proxy,
+          setupUV1.address,
+          repoU.address,
+          helpersV1,
+          EMPTY_DATA
+        ));
+
+        expect(returnedPlugin).to.not.equal(AddressZero);
+        expect(returnedHelpersV1).to.deep.equal(mockHelpers(1));
+        expect(uninstallPermissionsV1).to.deep.equal(
+          mockPermissionsOperations(0, 1, Operation.Revoke).map(perm =>
+            Object.values(perm)
           )
-        ).to.not.be.reverted;
+        );
       });
 
       it('prepares a cloneable plugin uninstallation', async () => {
@@ -638,17 +651,30 @@ describe('Plugin Setup Processor', function () {
           permissions: permissionsC1,
         } = await installHelper(psp, targetDao, setupCV1, repoC));
 
-        await expect(
-          prepareUninstallation(
-            psp,
-            targetDao.address,
-            clone,
-            setupCV1.address,
-            repoC.address,
-            helpersC1,
-            EMPTY_DATA
+        let returnedPlugin;
+        let returnedHelpersV1;
+        let uninstallPermissionsV1;
+        ({
+          returnedPluginAddress: returnedPlugin,
+          returnedHelpers: returnedHelpersV1,
+          permissions: uninstallPermissionsV1,
+        } = await prepareUninstallation(
+          psp,
+          targetDao.address,
+          clone,
+          setupCV1.address,
+          repoC.address,
+          helpersC1,
+          EMPTY_DATA
+        ));
+
+        expect(returnedPlugin).to.not.equal(AddressZero);
+        expect(returnedHelpersV1).to.deep.equal(mockHelpers(1));
+        expect(uninstallPermissionsV1).to.deep.equal(
+          mockPermissionsOperations(5, 6, Operation.Revoke).map(perm =>
+            Object.values(perm)
           )
-        ).to.not.be.reverted;
+        );
       });
     });
 
