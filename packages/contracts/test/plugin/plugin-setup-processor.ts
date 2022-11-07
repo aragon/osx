@@ -612,33 +612,6 @@ describe('Plugin Setup Processor', function () {
         ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
       });
 
-      it('returns the plugin, helpers, and permissions', async () => {
-        let returnedPluginAddress;
-        let returnedHelpers;
-        let uninstallPermissionsV1: PermissionOperation[];
-        ({
-          returnedPluginAddress: returnedPluginAddress,
-          returnedHelpers: returnedHelpers,
-          permissions: uninstallPermissionsV1,
-        } = await prepareUninstallation(
-          psp,
-          targetDao.address,
-          proxy,
-          setupUV1.address,
-          repoU.address,
-          helpersUV1,
-          EMPTY_DATA
-        ));
-
-        expect(returnedPluginAddress).to.equal(proxy);
-        expect(returnedHelpers).to.deep.equal(helpersUV1);
-        expect(uninstallPermissionsV1).to.deep.equal(
-          mockPermissionsOperations(0, 1, Operation.Revoke).map(perm =>
-            Object.values(perm)
-          )
-        );
-      });
-
       it('prepares an UUPS upgradeable plugin uninstallation', async () => {
         let returnedPlugin;
         let returnedHelpersV1;
