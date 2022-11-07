@@ -16,6 +16,9 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ENS subdomain registrar registering the DAO names.
     ENSSubdomainRegistrar private subdomainRegistrar;
 
+    /// @notice The namehash of the domain on which subdomains are registered.
+    bytes32 public node;
+
     // @notice Thrown if the plugin repository name is empty.
     error EmptyDaoName();
 
@@ -27,12 +30,15 @@ contract DAORegistry is InterfaceBasedRegistry {
 
     /// @notice Initializes the contract.
     /// @param _managingDao the managing DAO address.
-    function initialize(IDAO _managingDao, ENSSubdomainRegistrar _subdomainRegistrar)
-        public
-        initializer
-    {
+    /// TODO: add missing natspecs
+    function initialize(
+        IDAO _managingDao,
+        ENSSubdomainRegistrar _subdomainRegistrar,
+        bytes32 _node
+    ) public initializer {
         __InterfaceBasedRegistry_init(_managingDao, type(IDAO).interfaceId);
         subdomainRegistrar = _subdomainRegistrar;
+        node = _node;
     }
 
     /// @notice Registers a DAO by its address.
@@ -50,16 +56,16 @@ contract DAORegistry is InterfaceBasedRegistry {
         if (!(bytes(_name).length > 0)) {
             revert EmptyDaoName();
         }
-        
+
         _register(daoAddr);
 
         bytes32 labelhash = keccak256(bytes(_name));
 
-        subdomainRegistrar.registerSubnode(labelhash, daoAddr);
+        subdomainRegistrar.registerSubnode(node, labelhash, daoAddr);
 
         emit DAORegistered(daoAddr, _creator, _name);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[49] private __gap;
+    uint256[48] private __gap;
 }
