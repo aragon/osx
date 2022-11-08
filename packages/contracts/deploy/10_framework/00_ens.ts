@@ -53,15 +53,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     `Using domain of "${daoDomain}", that it is owned by the deployer ${deployer}.`
   );
 
-  // Approving future `ENSSubdomainRegistrar` address
-  // by using index 2, because the next deploy will be the logic address.
-  const futureAddress = await detemineDeployerNextAddress(2, deployer);
-  const approveTx = await ensRegistryContract.setApprovalForAll(
-    futureAddress,
-    true
-  );
-  await approveTx.wait();
-
   await deploy('DAO_ENSSubdomainRegistrar', {
     contract: 'ENSSubdomainRegistrar',
     from: deployer,
@@ -79,6 +70,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       },
     },
   });
+
+  // Get DAO's `ENSSubdomainRegistrar` contract.
+  const ensSubdomainRegistrarAddress = await getContractAddress(
+    'DAO_ENSSubdomainRegistrar',
+    hre
+  );
+
+  // Approving `DAO_ENSSubdomainRegistrar` address as operator of the subdoamin
+  const approveTx = await ensRegistryContract.setApprovalForAll(
+    ensSubdomainRegistrarAddress,
+    true
+  );
+  await approveTx.wait();
 
   //////////////////////// Plugin ENS //////////////////////////
   const pluginDomain =
@@ -120,13 +124,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     `Using domain of "${pluginDomain}", that it is owned by the deployer ${deployer}.`
   );
 
-  const pluginFutureAddress = await detemineDeployerNextAddress(2, deployer);
-  const pluginApproveTx = await ensRegistryContract.setApprovalForAll(
-    pluginFutureAddress,
-    true
-  );
-  await pluginApproveTx.wait();
-
   await deploy('Plugin_ENSSubdomainRegistrar', {
     contract: 'ENSSubdomainRegistrar',
     from: deployer,
@@ -144,6 +141,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       },
     },
   });
+
+  // Get PluginRepoRegistry's `ENSSubdomainRegistrar` contract.
+  const pluginSubdomainRegistrarAddress = await getContractAddress(
+    'Plugin_ENSSubdomainRegistrar',
+    hre
+  );
+
+  // Approving `Plugin_ENSSubdomainRegistrar` address as operator of the subdoamin
+  const pluginApproveTx = await ensRegistryContract.setApprovalForAll(
+    pluginSubdomainRegistrarAddress,
+    true
+  );
+  await pluginApproveTx.wait();
 };
 export default func;
 func.tags = ['ENSSubdomainRegistrar'];
