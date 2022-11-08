@@ -302,7 +302,7 @@ describe('ERC20Voting', function () {
       expect((await voting.getVote(id)).abstain).to.equal(1);
     });
 
-    it('can execute early if support is large enough', async () => {
+    it('can execute early if total support is large enough', async () => {
       // vote with 50 yes votes, which is NOT enough to make vote executable as relative support
       // must be larger than relativeSupportThresholdPct = 50
       await erc20VoteMock.mock.getPastVotes.returns(50);
@@ -318,7 +318,7 @@ describe('ERC20Voting', function () {
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('can execute if enough yes votes are given depending on yes+no+abstain total', async () => {
+    it('can execute normally if total support is large enough', async () => {
       // vote with 50 yes votes
       await erc20VoteMock.mock.getPastVotes.returns(50);
       await voting.vote(id, VoteOption.Yes, false);
@@ -338,7 +338,7 @@ describe('ERC20Voting', function () {
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it("cannot execute if enough yes isn't given depending on yes + no + abstain total", async () => {
+    it('cannot execute normally if total support is too low', async () => {
       // vote with 10 yes votes
       await erc20VoteMock.mock.getPastVotes.returns(10);
       await voting.vote(id, VoteOption.Yes, false);
@@ -354,7 +354,7 @@ describe('ERC20Voting', function () {
       // closes the vote
       await advanceTime(voteDuration + 10);
 
-      //The vote is not executable because the total support with 20% is still too low, despite a support of 66% and the voting period being over
+      //The vote is not executable because the total support with 20% is still too low, despite a relative support of 66% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
     });
 
@@ -397,7 +397,7 @@ describe('ERC20Voting', function () {
       );
     });
 
-    it('reverts if vote is executed while enough yes is not given ', async () => {
+    it('reverts if vote is not decided yet', async () => {
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('VoteExecutionForbidden', id)
       );

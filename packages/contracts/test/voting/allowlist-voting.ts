@@ -325,7 +325,7 @@ describe('AllowlistVoting', function () {
       expect((await voting.getVote(id)).abstain).to.equal(1);
     });
 
-    it('becomes executable if enough yes is given from voting power', async () => {
+    it('can execute early if total support is large enough', async () => {
       // Since voting power is set to 29%, and
       // allowlist is 10 addresses, voting yes
       // from 3 addresses should be enough to
@@ -335,13 +335,13 @@ describe('AllowlistVoting', function () {
 
       // // only 2 voted, not enough for 30%
       expect(await voting.canExecute(id)).to.equal(false);
-      // // 3rd votes, enough.
+      // // 3rd vote, enough.
       await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
 
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('becomes executable if enough yes is given depending on yes + no total', async () => {
+    it('can execute normally if total support is large enough', async () => {
       // 2 supports
       await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
@@ -404,7 +404,7 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    it('reverts if vote is executed while enough yes is not given ', async () => {
+    it('reverts if vote is not decided yet', async () => {
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('VoteExecutionForbidden', id)
       );
