@@ -27,6 +27,7 @@ contract DAORegistry is InterfaceBasedRegistry {
 
     /// @notice Initializes the contract.
     /// @param _managingDao the managing DAO address.
+    /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
     function initialize(IDAO _managingDao, ENSSubdomainRegistrar _subdomainRegistrar)
         public
         initializer
@@ -50,7 +51,7 @@ contract DAORegistry is InterfaceBasedRegistry {
         if (!(bytes(_name).length > 0)) {
             revert EmptyDaoName();
         }
-        
+
         _register(daoAddr);
 
         bytes32 labelhash = keccak256(bytes(_name));
