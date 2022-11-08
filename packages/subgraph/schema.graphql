@@ -236,7 +236,7 @@ type AllowlistProposal implements Proposal @entity {
   endDate: BigInt!
   snapshotBlock: BigInt!
   relativeSupportThresholdPct: BigInt!
-  participationRequired: BigInt!
+  totalSupportThresholdPct: BigInt!
   plenum: BigInt!
   yes: BigInt
   no: BigInt

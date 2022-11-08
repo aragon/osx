@@ -52,7 +52,7 @@ export function _handleVoteCreated(
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
     proposalEntity.relativeSupportThresholdPct = vote.value.value5;
-    proposalEntity.participationRequired = vote.value.value6;
+    proposalEntity.totalSupportThresholdPct = vote.value.value6;
     proposalEntity.plenum = vote.value.value7;
 
     // actions
@@ -122,8 +122,8 @@ export function handleVoteCast(event: VoteCast): void {
 
       // check if the current vote results meet
       // the conditions for the proposal to pass:
-      // - Minimum participation => => (totalVotes / plenum) >= minParticipation
-      // - Minimum suport => (yes / totalVotes) >= minSupport
+      // - total support    :  N_yes / N_total >= total support threshold
+      // - relative support :  N_yes / (N_yes + N_no) >= relative support threshold
 
       // expect a number between 0 and 100
       // where 0.35 => 35
@@ -136,7 +136,7 @@ export function handleVoteCast(event: VoteCast): void {
       // set the executable param
       proposalEntity.executable =
         currentParticipation.ge(
-          proposalEntity.participationRequired.div(
+          proposalEntity.totalSupportThresholdPct.div(
             BigInt.fromString(TEN_POWER_16)
           )
         ) &&

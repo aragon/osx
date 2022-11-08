@@ -49,8 +49,8 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _totalSupportThresholdPct The minimal required participation in percent.
-    /// @param _relativeSupportThresholdPct The minimal required support in percent.
+    /// @param _totalSupportThresholdPct The total support threshold in percent.
+    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
     /// @param _allowed The allowed addresses.
     function initialize(

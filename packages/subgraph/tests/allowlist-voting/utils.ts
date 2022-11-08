@@ -236,7 +236,7 @@ export function createAllowlistProposalEntityState(
   allowlistProposal.relativeSupportThresholdPct = BigInt.fromString(
     relativeSupportThresholdPct
   );
-  allowlistProposal.participationRequired = BigInt.fromString(
+  allowlistProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
   allowlistProposal.plenum = BigInt.fromString(plenum);

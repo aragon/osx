@@ -13,10 +13,9 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting components.
-/// We use the following definitions
-/// $relative support = \frac{N_{yes}}{N_{yes}+N_{no}}$
-/// $total support = \frac{N_{yes}}{N_{total}}$
+/// @notice The abstract implementation of majority voting components. We use the following definitions:
+///     Relative support: `N_yes / (N_yes + N_no)`
+///     Total support   : `N_yes/ N_total`
 /// @dev This component implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
@@ -43,15 +42,10 @@ abstract contract MajorityVotingBase is
     uint64 public minDuration;
     uint256 public votesLength;
 
-    /// @notice Thrown if the maximal possible support is exceeded.
+    /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.
     /// @param actual The actual value.
-    error VoteSupportExceeded(uint64 limit, uint64 actual);
-
-    /// @notice Thrown if the maximal possible participation is exceeded.
-    /// @param limit The maximal value.
-    /// @param actual The actual value.
-    error VoteParticipationExceeded(uint64 limit, uint64 actual);
+    error PercentageExceeds100(uint64 limit, uint64 actual);
 
     /// @notice Thrown if the selected vote times are not allowed.
     /// @param current The maximal value.
@@ -77,8 +71,8 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _totalSupportThresholdPct The minimal required participation in percent.
-    /// @param _relativeSupportThresholdPct The minimal required support in percent.
+    /// @param _totalSupportThresholdPct The total support threshold in percent.
+    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
@@ -223,10 +217,10 @@ abstract contract MajorityVotingBase is
         emit VoteExecuted(_voteId, execResults);
     }
 
-    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @notice Internal function to check if a voter can vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
-    /// @param _voter the address of the voter to check.
-    /// @return True if the given voter can participate a certain vote, false otherwise.
+    /// @param _voter The address of the voter to check.
+    /// @return True if the given voter can vote on a certain vote, false otherwise.
     function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
@@ -245,7 +239,9 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        // Early execution after the vote start but before the vote duration has passed: // TODO the before vote start check is missing
+        // TODO the before vote start check is missing
+
+        // Early execution after the vote start but before the vote duration has passed:
         // The total support must greater than the relative support threshold.
         uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.plenum);
         if (
@@ -305,11 +301,11 @@ abstract contract MajorityVotingBase is
         uint64 _minDuration
     ) internal virtual {
         if (_relativeSupportThresholdPct > PCT_BASE) {
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _relativeSupportThresholdPct});
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _relativeSupportThresholdPct});
         }
 
         if (_totalSupportThresholdPct > PCT_BASE) {
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _totalSupportThresholdPct});
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _totalSupportThresholdPct});
         }
 
         if (_minDuration == 0) {

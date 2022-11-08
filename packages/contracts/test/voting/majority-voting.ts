@@ -35,13 +35,13 @@ describe('MajorityVotingMock', function () {
   });
 
   function initializeMock(
-    participationRequired: any,
+    totalSupportThresholdPct: any,
     supportRequired: any,
     minDuration: any
   ) {
     return votingBase.initializeMock(
       dao.address,
-      participationRequired,
+      totalSupportThresholdPct,
       supportRequired,
       minDuration
     );
@@ -71,13 +71,13 @@ describe('MajorityVotingMock', function () {
       await expect(
         votingBase.setConfiguration(1, pct16(1000), 3)
       ).to.be.revertedWith(
-        customError('VoteSupportExceeded', pct16(100), pct16(1000))
+        customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
 
       await expect(
         votingBase.setConfiguration(pct16(1000), 2, 3)
       ).to.be.revertedWith(
-        customError('VoteParticipationExceeded', pct16(100), pct16(1000))
+        customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
 
       await expect(votingBase.setConfiguration(1, 2, 0)).to.be.revertedWith(

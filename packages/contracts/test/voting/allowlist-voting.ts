@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {DAO} from '../../typechain';
 import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {VoteOption, pct16} from '../test-utils/voting';
+import {VoteOption, pct16, advanceTime} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('AllowlistVoting', function () {
@@ -70,14 +70,14 @@ describe('AllowlistVoting', function () {
   });
 
   function initializeVoting(
-    participationRequired: any,
+    totalSupportThresholdPct: any,
     relativeSupportThresholdPct: any,
     minDuration: any,
     allowed: Array<string>
   ) {
     return voting.initialize(
       dao.address,
-      participationRequired,
+      totalSupportThresholdPct,
       relativeSupportThresholdPct,
       minDuration,
       allowed
@@ -446,56 +446,53 @@ describe('AllowlistVoting', function () {
         );
       });
 
-      it('does not execute if support is high enough but participation and approval (absolute support) are too low', async () => {
+      it('does not execute if support is high enough but total support is too low', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 10% | 100%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // Reason: approval and participation are too low
+        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > relative support threshold (50%) == false
 
-        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
-        await ethers.provider.send('evm_mine', []);
+        await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 10% | 100%
         //  ✓  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
+        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > total support threshold (25%) == false
       });
 
-      it('does not execute if participation is high enough but support is too low', async () => {
+      it('does not execute if total support is high enough but relative support is too low', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 30% | 33%
         //  𐄂  |  ✓  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // approval too low, duration and support criterium are not met
+        expect(await voting.canExecute(id)).to.equal(false); // total support (30%) > relative support threshold (50%) == false
 
-        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
-        await ethers.provider.send('evm_mine', []);
+        await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 33%
         //  ✓  |  ✓  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
+        expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
       });
 
-      it('executes after the duration if total and relative support criteria are met', async () => {
+      it('executes after the duration if total and relative support thresholds are met', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 30% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // Reason: duration criterium is not met
+        expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
 
-        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
-        await ethers.provider.send('evm_mine', []);
+        await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 100%
         //  ✓  |  ✓  |  ✓
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
-      it('executes early if the approval (absolute support) exceeds the required support (assuming the latter is > 50%)', async () => {
+      it('executes early if the total support exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
@@ -504,13 +501,13 @@ describe('AllowlistVoting', function () {
         // dur | tot | rel
         //  0  | 50% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // Reason: app > supReq == false
+        expect(await voting.canExecute(id)).to.equal(false); // total support (50%) > relative support threshold (50%) == false
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // Correct because more voting doesn't change the outcome
+        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
 
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
@@ -519,7 +516,7 @@ describe('AllowlistVoting', function () {
         // dur | tot | rel
         //  0  | 60% | 60%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // The outcome did not change
+        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
       });
     });
 
@@ -562,19 +559,19 @@ describe('AllowlistVoting', function () {
         // dur | tot | rel
         //  0  | 20% | 100%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false); // total support (20%) > relative support threshold (59%) == false
 
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 40% | 100%
         //  𐄂  |  𐄂  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59%) == false
 
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true);
+        expect(await voting.canExecute(id)).to.equal(true); // total support (50%) > relative support threshold (59%) == true
       });
 
       it('should not execute with only 2 yes votes', async () => {
@@ -583,16 +580,15 @@ describe('AllowlistVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 40% | 67%
-        //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false);
+        //  𐄂  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59%) == false
 
         // Wait until the voting period is over.
-        await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
-        await ethers.provider.send('evm_mine', []);
+        await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 40% | 67%
-        //  ✓  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false);
+        //  ✓  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > total support threshold (59%) == false
       });
     });
   });
