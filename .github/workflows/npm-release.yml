@@ -7,16 +7,12 @@ on:
     branches:
       - develop
       - main
-    paths:
-      - 'packages/contracts-ethers/**'
-      - '.github/workflows/npm-release.yml'
-      - '.github/workflows/npm-release-reusable.yml'
 
 jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      run: ${{ steps.checkSrc.outputs.run }}
+      run: ${{ steps.checkSrc.outputs.run }}${{ steps.checkLabel.outputs.run }}
     steps:
       - uses: actions/checkout@v2
       - uses: dorny/paths-filter@v2
@@ -28,6 +24,9 @@ jobs:
               - '.github/workflows/contracts-deploy.yml'
       - if: steps.changes.outputs.src == 'false'
         id: checkSrc
+        run: echo "run=true" >> $GITHUB_OUTPUT
+      - if: contains(toJson(github.event.pull_request.labels.*.name), 'release:') && steps.checkSrc.outputs.run != true
+        id: checkLabel
         run: echo "run=true" >> $GITHUB_OUTPUT
   npmDeploy:
     needs: ['check']
