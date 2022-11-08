@@ -18,8 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
@@ -50,8 +51,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
@@ -82,7 +84,7 @@ jobs:
   conclude:
     runs-on: ubuntu-latest
     outputs:
-      commitid: ${{ steps.changes.outputs.commitid }}
+      commitid: ${{ steps.commit.outputs.commitid }}
     needs: ['build-deploy']
     steps:
       - uses: actions/checkout@v2
@@ -109,7 +111,7 @@ jobs:
           git add ./packages/subgraph/	
           git commit -am "Updates files with deployed contract addresses"
           git push
-          echo "::set-output name=commitid::$(git rev-parse HEAD)"
+          echo "commitid=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   #call-create-daos-workflow:
   #  needs: ['conclude']
   #  uses: './.github/workflows/create-dummy-dao.yml'

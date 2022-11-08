@@ -25,15 +25,15 @@ jobs:
       - name: Is patch
         id: patch
         if: contains( github.event.pull_request.labels.*.name, 'release:patch')
-        run: echo "::set-output name=bump::patch"
+        run: echo "bump=patch" >> $GITHUB_OUTPUT
       - name: Is minor
         id: minor
         if: contains( github.event.pull_request.labels.*.name, 'release:minor')
-        run: echo "::set-output name=bump::minor"
+        run: echo "bump=minor" >> $GITHUB_OUTPUT
       - name: Is major
         id: major
         if: contains( github.event.pull_request.labels.*.name, 'release:major')
-        run: echo "::set-output name=bump::major"
+        run: echo "bump=major" >> $GITHUB_OUTPUT
   build_deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
@@ -50,8 +50,9 @@ jobs:
       - uses: actions/checkout@v2
         if: ${{ inputs.ref == '' }}
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
           registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies
@@ -80,7 +81,7 @@ jobs:
       - name: updates changelog.md
         run:
           VERSION=$(cat package.json | jq -r .version)
-          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./CHANGELOG.md"
+          sed -i "s/^\#\# \[UPCOMING\]/## [UPCOMING]\n\n\## $VERSION\nOn $(date +'%Y-%m-%d %H:%M:%S')/" "./packages/${{ matrix.package }}/CHANGELOG.md"
       - uses: actions/upload-artifact@v2
         with:
           name: ${{matrix.package}}

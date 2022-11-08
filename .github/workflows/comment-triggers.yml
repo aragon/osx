@@ -41,7 +41,7 @@ jobs:
         id: mode
         run: |
           mode=$(echo "$BODY" | sed "s|/mythx partial ||" | sed "s/ //")
-          echo "::set-output name=mode::$mode"
+          echo "mode=$mode" >> $GITHUB_OUTPUT
         env:
           BODY: ${{ github.event.comment.body }}
   mythx_partial_run:
@@ -73,7 +73,7 @@ jobs:
         id: mode
         run: |
           mode=$(echo "$BODY" | sed "s|/mythx full ||" | sed "s/ //")
-          echo "::set-output name=mode::$mode"
+          echo "mode=$mode" >> $GITHUB_OUTPUT
         env:
           BODY: ${{ github.event.comment.body }}
   mythx_full_run:
@@ -103,7 +103,7 @@ jobs:
         id: type
         run: |
           type=$(echo "$BODY" | sed "s|/release ||" | sed "s/ //")
-          echo "::set-output name=type::$type"
+          echo "type=$type" >> $GITHUB_OUTPUT
         env:
           BODY: ${{ github.event.comment.body }}
       - name: add label
@@ -129,7 +129,7 @@ jobs:
         id: type
         run: |
           type=$(echo "$BODY" | sed "s|/subgraph ||" | sed "s/ //")
-          echo "::set-output name=type::$type"
+          echo "type=$type" >> $GITHUB_OUTPUT
         env:
           BODY: ${{ github.event.comment.body }}
       - name: add label
