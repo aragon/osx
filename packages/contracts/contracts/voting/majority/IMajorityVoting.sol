@@ -20,12 +20,12 @@ interface IMajorityVoting {
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
-        uint64 supportRequiredPct;
-        uint64 participationRequiredPct;
+        uint64 relativeSupportThresholdPct; // previously: relativeSupportThresholdPct
+        uint64 totalSupportThresholdPct; // previously: quorum = totalSupportThresholdPct
         uint256 yes;
         uint256 no;
         uint256 abstain;
-        uint256 votingPower;
+        uint256 plenum;
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
     }
@@ -49,22 +49,22 @@ interface IMajorityVoting {
     event VoteExecuted(uint256 indexed voteId, bytes[] execResults);
 
     /// @notice Emitted when the vote configuration is updated.
-    /// @param participationRequiredPct The required participation in percent.
-    /// @param supportRequiredPct The required support in percent.
+    /// @param totalSupportThresholdPct The required participation in percent.
+    /// @param supportThresholdPct The required support in percent.
     /// @param minDuration The minimal duration of a vote.
     event ConfigUpdated(
-        uint64 participationRequiredPct,
-        uint64 supportRequiredPct,
+        uint64 totalSupportThresholdPct,
+        uint64 supportThresholdPct,
         uint64 minDuration
     );
 
     /// @notice Sets the vote configuration.
-    /// @param _participationRequiredPct The required participation in percent.
-    /// @param _supportRequiredPct The required support in percent.
+    /// @param _totalSupportThresholdPct The required participation in percent.
+    /// @param _supportThresholdPct The required support in percent.
     /// @param _minDuration The minimal duration of a vote.
     function setConfiguration(
-        uint64 _participationRequiredPct,
-        uint64 _supportRequiredPct,
+        uint64 _totalSupportThresholdPct,
+        uint64 _supportThresholdPct,
         uint64 _minDuration
     ) external;
 
@@ -115,8 +115,8 @@ interface IMajorityVoting {
     /// @return VoteOption of the requested voter for a certain vote.
     function getVoteOption(uint256 _voteId, address _voter) external view returns (VoteOption);
 
-    /// @param participationRequiredPct The required participation in percent.
-    /// @param supportRequiredPct The required support in percent.
+    /// @param totalSupportThresholdPct The required participation in percent.
+    /// @param supportThresholdPct The required support in percent.
     /// @param minDuration The minimal duration of a vote.
 
     /// @notice Returns all information for a vote by its ID.
@@ -128,7 +128,7 @@ interface IMajorityVoting {
     /// @return snapshotBlock The block number of the snapshot taken for this vote.
     /// @return supportRequired The support required.
     /// @return participationRequired The required participation.
-    /// @return votingPower The voting power participating in the vote.
+    /// @return plenum The voting power participating in the vote.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.
@@ -144,7 +144,7 @@ interface IMajorityVoting {
             uint64 snapshotBlock,
             uint64 supportRequired,
             uint64 participationRequired,
-            uint256 votingPower,
+            uint256 plenum,
             uint256 yes,
             uint256 no,
             uint256 abstain,

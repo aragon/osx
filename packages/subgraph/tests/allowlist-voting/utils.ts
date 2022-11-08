@@ -120,8 +120,8 @@ export function createNewVoteExecutedEvent(
 }
 
 export function createNewConfigUpdatedEvent(
-  participationRequiredPct: string,
-  supportRequiredPct: string,
+  totalSupportThresholdPct: string,
+  relativeSupportThresholdPct: string,
   minDuration: string,
   contractAddress: string
 ): ConfigUpdated {
@@ -130,21 +130,23 @@ export function createNewConfigUpdatedEvent(
   newConfigUpdatedEvent.address = Address.fromString(contractAddress);
   newConfigUpdatedEvent.parameters = [];
 
-  let participationRequiredPctParam = new ethereum.EventParam(
-    'participationRequiredPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequiredPct))
+  let totalSupportThresholdPctParam = new ethereum.EventParam(
+    'totalSupportThresholdPct',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(totalSupportThresholdPct))
   );
-  let supportRequiredPctParam = new ethereum.EventParam(
-    'supportRequiredPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequiredPct))
+  let relativeSupportThresholdPctParam = new ethereum.EventParam(
+    'relativeSupportThresholdPct',
+    ethereum.Value.fromSignedBigInt(
+      BigInt.fromString(relativeSupportThresholdPct)
+    )
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newConfigUpdatedEvent.parameters.push(participationRequiredPctParam);
-  newConfigUpdatedEvent.parameters.push(supportRequiredPctParam);
+  newConfigUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
+  newConfigUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
   newConfigUpdatedEvent.parameters.push(minDurationParam);
 
   return newConfigUpdatedEvent;
@@ -214,9 +216,9 @@ export function createAllowlistProposalEntityState(
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  supportRequiredPct: string = MIN_SUPPORT,
-  participationRequiredPct: string = MIN_TURNOUT,
-  votingPower: string = VOTING_POWER,
+  relativeSupportThresholdPct: string = MIN_SUPPORT,
+  totalSupportThresholdPct: string = MIN_TURNOUT,
+  plenum: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
   executable: boolean = false,
@@ -231,11 +233,13 @@ export function createAllowlistProposalEntityState(
   allowlistProposal.startDate = BigInt.fromString(startDate);
   allowlistProposal.endDate = BigInt.fromString(endDate);
   allowlistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  allowlistProposal.supportRequiredPct = BigInt.fromString(supportRequiredPct);
-  allowlistProposal.participationRequired = BigInt.fromString(
-    participationRequiredPct
+  allowlistProposal.relativeSupportThresholdPct = BigInt.fromString(
+    relativeSupportThresholdPct
   );
-  allowlistProposal.votingPower = BigInt.fromString(votingPower);
+  allowlistProposal.participationRequired = BigInt.fromString(
+    totalSupportThresholdPct
+  );
+  allowlistProposal.plenum = BigInt.fromString(plenum);
   allowlistProposal.open = open;
   allowlistProposal.executable = executable;
   allowlistProposal.executed = executed;

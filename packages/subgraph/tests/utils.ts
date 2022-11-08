@@ -59,7 +59,7 @@ export function createGetVoteCall(
   snapshotBlock: string,
   supportRequired: string,
   participationRequired: string,
-  votingPower: string,
+  plenum: string,
   yes: string,
   no: string,
   abstain: string,
@@ -81,7 +81,7 @@ export function createGetVoteCall(
       ethereum.Value.fromUnsignedBigInt(
         BigInt.fromString(participationRequired)
       ),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingPower)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(plenum)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yes)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(no)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(abstain)),

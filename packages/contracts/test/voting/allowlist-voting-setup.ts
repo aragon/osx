@@ -73,7 +73,7 @@ describe('AllowlistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, address[] allowed)';
+        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)';
 
       expect(await allowlistVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -152,14 +152,19 @@ describe('AllowlistVotingSetup', function () {
 
     it('correctly sets up the plugin', async () => {
       const daoAddress = targetDao.address;
-      const participationRequiredPct = 1;
-      const supportRequiredPct = 2;
+      const totalSupportThresholdPct = 1;
+      const relativeSupportThresholdPct = 2;
       const minDuration = 3;
       const allowed = [ownerAddress];
 
       const data = abiCoder.encode(
         ['uint64', 'uint64', 'uint64', 'address[]'],
-        [participationRequiredPct, supportRequiredPct, minDuration, allowed]
+        [
+          totalSupportThresholdPct,
+          relativeSupportThresholdPct,
+          minDuration,
+          allowed,
+        ]
       );
 
       const nonce = await ethers.provider.getTransactionCount(
@@ -178,11 +183,11 @@ describe('AllowlistVotingSetup', function () {
 
       expect(await allowlistVotingContract.getDAO()).to.be.equal(daoAddress);
       expect(
-        await allowlistVotingContract.participationRequiredPct()
-      ).to.be.equal(participationRequiredPct);
-      expect(await allowlistVotingContract.supportRequiredPct()).to.be.equal(
-        supportRequiredPct
-      );
+        await allowlistVotingContract.totalSupportThresholdPct()
+      ).to.be.equal(totalSupportThresholdPct);
+      expect(
+        await allowlistVotingContract.relativeSupportThresholdPct()
+      ).to.be.equal(relativeSupportThresholdPct);
       expect(await allowlistVotingContract.minDuration()).to.be.equal(
         minDuration
       );
