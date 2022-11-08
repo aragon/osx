@@ -304,7 +304,7 @@ test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
     'totalSupportThresholdPct',
     '2'
   );
-  assert.fieldEquals('ERC20VotingPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('ERC20VotingPackage', entityID, 'voteDuration', '3600');
 
   clearStore();
 });

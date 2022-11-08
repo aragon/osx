@@ -72,14 +72,14 @@ describe('AllowlistVoting', function () {
   function initializeVoting(
     totalSupportThresholdPct: any,
     relativeSupportThresholdPct: any,
-    minDuration: any,
+    voteDuration: any,
     allowed: Array<string>
   ) {
     return voting.initialize(
       dao.address,
       totalSupportThresholdPct,
       relativeSupportThresholdPct,
-      minDuration,
+      voteDuration,
       allowed
     );
   }
@@ -140,7 +140,7 @@ describe('AllowlistVoting', function () {
   });
 
   describe('StartVote', async () => {
-    let minDuration = 3;
+    let voteDuration = 3;
 
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, [ownerAddress]);
@@ -156,11 +156,11 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    it('reverts if vote duration is less than minDuration', async () => {
+    it('reverts if vote duration is less than voteDuration', async () => {
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
       const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const endDate = startDate + (voteDuration - 1);
       await expect(
         voting.createVote(
           dummyMetadata,
@@ -176,7 +176,7 @@ describe('AllowlistVoting', function () {
           current + 1, // TODO hacky
           startDate,
           endDate,
-          minDuration
+          voteDuration
         )
       );
     });
@@ -208,7 +208,7 @@ describe('AllowlistVoting', function () {
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
-      expect(vote.startDate.add(minDuration)).to.equal(vote.endDate);
+      expect(vote.startDate.add(voteDuration)).to.equal(vote.endDate);
 
       expect(await voting.canVote(id, ownerAddress)).to.equal(true);
       expect(await voting.canVote(id, user1)).to.equal(false);
@@ -252,7 +252,7 @@ describe('AllowlistVoting', function () {
   });
 
   describe('Vote + Execute:', async () => {
-    let minDuration = 500;
+    let voteDuration = 500;
     let relativeSupportThresholdPct = pct16(29);
     let totalSupportThresholdPct = pct16(19);
     const id = 0; // voteId
@@ -270,7 +270,7 @@ describe('AllowlistVoting', function () {
       await initializeVoting(
         totalSupportThresholdPct,
         relativeSupportThresholdPct,
-        minDuration,
+        voteDuration,
         addresses
       );
 
@@ -357,7 +357,7 @@ describe('AllowlistVoting', function () {
       expect(await voting.canExecute(id)).to.equal(false);
 
       // closes the vote.
-      await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
+      await ethers.provider.send('evm_increaseTime', [voteDuration + 10]);
       await ethers.provider.send('evm_mine', []);
 
       // 2 voted yes, 2 voted no. 2 voted abstain.
@@ -415,7 +415,7 @@ describe('AllowlistVoting', function () {
     const id = 0; // voteId
 
     describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
-      let minDuration = 500;
+      let voteDuration = 500;
       let relativeSupportThresholdPct = pct16(50);
       let totalSupportThresholdPct = pct16(25);
 
@@ -432,7 +432,7 @@ describe('AllowlistVoting', function () {
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
-          minDuration,
+          voteDuration,
           addresses
         );
 
@@ -453,7 +453,7 @@ describe('AllowlistVoting', function () {
         //  𐄂  |  𐄂  |  ✓
         expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > relative support threshold (50%) == false
 
-        await advanceTime(minDuration + 10);
+        await advanceTime(voteDuration + 10);
         // dur | tot | rel
         // 510 | 10% | 100%
         //  ✓  |  𐄂  |  ✓
@@ -469,7 +469,7 @@ describe('AllowlistVoting', function () {
         //  𐄂  |  ✓  |  𐄂
         expect(await voting.canExecute(id)).to.equal(false); // total support (30%) > relative support threshold (50%) == false
 
-        await advanceTime(minDuration + 10);
+        await advanceTime(voteDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 33%
         //  ✓  |  ✓  |  𐄂
@@ -485,7 +485,7 @@ describe('AllowlistVoting', function () {
         //  𐄂  |  ✓  |  ✓
         expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
 
-        await advanceTime(minDuration + 10);
+        await advanceTime(voteDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 100%
         //  ✓  |  ✓  |  ✓
@@ -521,7 +521,7 @@ describe('AllowlistVoting', function () {
     });
 
     describe('A 3/5 multi-sig', async () => {
-      let minDuration = 500;
+      let voteDuration = 500;
 
       // pay attention to decrement the required percentage value by one because the compared value has to be larger
       let relativeSupportThresholdPct = pct16(60).sub(ethers.BigNumber.from(1));
@@ -540,7 +540,7 @@ describe('AllowlistVoting', function () {
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
-          minDuration,
+          voteDuration,
           addresses
         );
 
@@ -584,7 +584,7 @@ describe('AllowlistVoting', function () {
         expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59%) == false
 
         // Wait until the voting period is over.
-        await advanceTime(minDuration + 10);
+        await advanceTime(voteDuration + 10);
         // dur | tot | rel
         // 510 | 40% | 67%
         //  ✓  |  𐄂  |  ✓

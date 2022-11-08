@@ -73,7 +73,7 @@ describe('AllowlistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)';
+        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 voteDuration, address[] allowed)';
 
       expect(await allowlistVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -154,7 +154,7 @@ describe('AllowlistVotingSetup', function () {
       const daoAddress = targetDao.address;
       const totalSupportThresholdPct = 1;
       const relativeSupportThresholdPct = 2;
-      const minDuration = 3;
+      const voteDuration = 3;
       const allowed = [ownerAddress];
 
       const data = abiCoder.encode(
@@ -162,7 +162,7 @@ describe('AllowlistVotingSetup', function () {
         [
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
-          minDuration,
+          voteDuration,
           allowed,
         ]
       );
@@ -188,8 +188,8 @@ describe('AllowlistVotingSetup', function () {
       expect(
         await allowlistVotingContract.relativeSupportThresholdPct()
       ).to.be.equal(relativeSupportThresholdPct);
-      expect(await allowlistVotingContract.minDuration()).to.be.equal(
-        minDuration
+      expect(await allowlistVotingContract.voteDuration()).to.be.equal(
+        voteDuration
       );
 
       await ethers.provider.send('evm_mine', []);

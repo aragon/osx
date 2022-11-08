@@ -432,8 +432,8 @@ export function getParticipationRequiredPct(
 export function getMinDuration(contractAddress: string, returns: BigInt): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'minDuration',
-    'minDuration():(uint64)'
+    'voteDuration',
+    'voteDuration():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

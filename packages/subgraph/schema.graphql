@@ -145,7 +145,7 @@ type ERC20VotingPackage implements Package @entity {
   proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
   relativeSupportThresholdPct: BigInt
   totalSupportThresholdPct: BigInt
-  minDuration: BigInt
+  voteDuration: BigInt
   votesLength: BigInt
   token: ERC20Token
   members: [ERC20VotingVoter!]! @derivedFrom(field: "pkg")
@@ -202,7 +202,7 @@ type AllowlistPackage implements Package @entity {
   proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
   relativeSupportThresholdPct: BigInt
   totalSupportThresholdPct: BigInt
-  minDuration: BigInt
+  voteDuration: BigInt
   votesLength: BigInt
   members: [AllowlistVoter!]! @derivedFrom(field: "pkg")
 }

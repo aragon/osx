@@ -26,7 +26,7 @@ contract AllowlistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)";
+            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 voteDuration, address[] allowed)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -44,7 +44,7 @@ contract AllowlistVotingSetup is PluginSetup {
         (
             uint64 totalSupportThresholdPct,
             uint64 relativeSupportThresholdPct,
-            uint64 minDuration,
+            uint64 voteDuration,
             address[] memory allowed
         ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
 
@@ -56,7 +56,7 @@ contract AllowlistVotingSetup is PluginSetup {
                 dao,
                 totalSupportThresholdPct,
                 relativeSupportThresholdPct,
-                minDuration,
+                voteDuration,
                 allowed
             )
         );

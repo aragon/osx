@@ -72,14 +72,14 @@ describe('ERC20Voting', function () {
   function initializeVoting(
     _totalSupportThresholdPct: any,
     _relativeSupportThresholdPct: any,
-    minDuration: any
+    voteDuration: any
   ) {
     return voting.initialize(
       dao.address,
 
       _totalSupportThresholdPct,
       _relativeSupportThresholdPct,
-      minDuration,
+      voteDuration,
       erc20VoteMock.address
     );
   }
@@ -101,9 +101,9 @@ describe('ERC20Voting', function () {
   });
 
   describe('StartVote', async () => {
-    let minDuration = 3;
+    let voteDuration = 3;
     beforeEach(async () => {
-      await initializeVoting(1, 2, minDuration);
+      await initializeVoting(1, 2, voteDuration);
     });
 
     it('reverts total token supply while creating a vote is 0', async () => {
@@ -113,12 +113,12 @@ describe('ERC20Voting', function () {
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
-    it('reverts if vote duration is less than minDuration', async () => {
+    it('reverts if vote duration is less than voteDuration', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
       const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const endDate = startDate + (voteDuration - 1);
       await expect(
         voting.createVote(
           dummyMetadata,
@@ -134,7 +134,7 @@ describe('ERC20Voting', function () {
           current + 1, // TODO hacky
           startDate,
           endDate,
-          minDuration
+          voteDuration
         )
       );
     });
@@ -170,7 +170,7 @@ describe('ERC20Voting', function () {
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
-      expect(vote.startDate.add(minDuration)).to.equal(vote.endDate);
+      expect(vote.startDate.add(voteDuration)).to.equal(vote.endDate);
 
       expect(await voting.canVote(1, ownerAddress)).to.equal(false);
 
@@ -217,7 +217,7 @@ describe('ERC20Voting', function () {
   });
 
   describe('Vote + Execute:', async () => {
-    let minDuration = 500;
+    let voteDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
     let plenum = 100;
@@ -227,7 +227,7 @@ describe('ERC20Voting', function () {
       await initializeVoting(
         totalSupportThresholdPct,
         relativeSupportThresholdPct,
-        minDuration
+        voteDuration
       );
 
       // set voting power to 100
@@ -332,7 +332,7 @@ describe('ERC20Voting', function () {
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
-      await advanceTime(minDuration + 10);
+      await advanceTime(voteDuration + 10);
 
       //The vote is executable as relative support > 50%, total support > 20%, and the voting period is over
       expect(await voting.canExecute(id)).to.equal(true);
@@ -352,7 +352,7 @@ describe('ERC20Voting', function () {
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
-      await advanceTime(minDuration + 10);
+      await advanceTime(voteDuration + 10);
 
       //The vote is not executable because the total support with 20% is still too low, despite a support of 66% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
@@ -408,7 +408,7 @@ describe('ERC20Voting', function () {
     const id = 0; // voteId
 
     describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
-      let minDuration = 500;
+      let voteDuration = 500;
       let relativeSupportThresholdPct = pct16(50);
       let totalSupportThresholdPct = pct16(25);
       let plenum = 100;
@@ -417,7 +417,7 @@ describe('ERC20Voting', function () {
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
-          minDuration
+          voteDuration
         );
 
         // set voting power to 100
@@ -440,7 +440,7 @@ describe('ERC20Voting', function () {
         //  𐄂  |  𐄂  |  ✓
         expect(await voting.canExecute(id)).to.equal(false); //  tot
 
-        await advanceTime(minDuration + 10);
+        await advanceTime(voteDuration + 10);
         // dur | tot | rel
         // 510 | 10% | 100%
         //  ✓  |  𐄂  |  ✓
@@ -458,7 +458,7 @@ describe('ERC20Voting', function () {
         //  𐄂  |  ✓  |  𐄂
         expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
 
-        await advanceTime(minDuration + 10); // waiting until the vote end doesn't change this
+        await advanceTime(voteDuration + 10); // waiting until the vote end doesn't change this
         // dur | tot | rel
         // 510 | 30% | 33%
         //  ✓  |  ✓  |  𐄂
@@ -473,7 +473,7 @@ describe('ERC20Voting', function () {
         //  𐄂  |  ✓  |  ✓
         expect(await voting.canExecute(id)).to.equal(false); // total support (30%) > relative support threshold (50%) == false, duration is not over
 
-        await advanceTime(minDuration + 10);
+        await advanceTime(voteDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 100%
         //  ✓  |  ✓  |  ✓

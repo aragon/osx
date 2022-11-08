@@ -91,7 +91,7 @@ contract ERC20VotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 voteDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -110,7 +110,7 @@ contract ERC20VotingSetup is PluginSetup {
         (
             uint64 totalSupportThresholdPct,
             uint64 relativeSupportThresholdPct,
-            uint64 minDuration,
+            uint64 voteDuration,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
@@ -188,7 +188,7 @@ contract ERC20VotingSetup is PluginSetup {
                 dao,
                 totalSupportThresholdPct,
                 relativeSupportThresholdPct,
-                minDuration,
+                voteDuration,
                 token
             )
         );

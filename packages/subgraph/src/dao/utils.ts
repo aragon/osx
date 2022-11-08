@@ -92,7 +92,7 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
     let contract = ERC20VotingContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
-    let minDuration = contract.try_minDuration();
+    let voteDuration = contract.try_voteDuration();
     let token = contract.try_getVotingToken();
 
     packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
@@ -101,7 +101,9 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
     packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
       ? null
       : totalSupportThresholdPct.value;
-    packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
+    packageEntity.voteDuration = voteDuration.reverted
+      ? null
+      : voteDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
 
@@ -121,7 +123,7 @@ function createAllowlistVotingPackage(who: Address, daoId: string): void {
     let contract = AllowlistVotingContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
-    let minDuration = contract.try_minDuration();
+    let voteDuration = contract.try_voteDuration();
 
     packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
       ? null
@@ -129,7 +131,9 @@ function createAllowlistVotingPackage(who: Address, daoId: string): void {
     packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
       ? null
       : totalSupportThresholdPct.value;
-    packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
+    packageEntity.voteDuration = voteDuration.reverted
+      ? null
+      : voteDuration.value;
 
     // Create template
     let context = new DataSourceContext();

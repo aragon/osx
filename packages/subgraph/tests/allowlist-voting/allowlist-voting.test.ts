@@ -261,7 +261,7 @@ test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () =
     'relativeSupportThresholdPct',
     '1'
   );
-  assert.fieldEquals('AllowlistPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('AllowlistPackage', entityID, 'voteDuration', '3600');
 
   clearStore();
 });
