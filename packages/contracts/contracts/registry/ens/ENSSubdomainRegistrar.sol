@@ -36,6 +36,11 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @param nodeOwner The node owner address.
     error AlreadyRegistered(bytes32 subnode, address nodeOwner);
 
+    /// @notice Thrown if node's resolver is invalid.
+    /// @param node The node namehash.
+    /// @param resolver The node resolver address.
+    error InvalidResolver(bytes32 node, address resolver);
+
     /// @notice Initializes the component by
     /// - checking that the contract is the domain node owner or an approved operator
     /// - initializing the underlying component
@@ -53,7 +58,14 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
 
         ens = _ens;
         node = _node;
-        resolver = ens.resolver(_node);
+
+        address nodeResolver = ens.resolver(_node);
+
+        if (nodeResolver == address(0)) {
+            revert InvalidResolver({node: _node, resolver: nodeResolver});
+        }
+
+        resolver = nodeResolver;
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
@@ -66,7 +78,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     {}
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
-    /// @dev TODO:
+    /// @dev It revertes with no message if this contract is not the node owner, the node owner did not approve this contract as an operator or revoked the approval as operator from this contract.
     /// @param _label The labelhash of the subdomain name.
     /// @param _targetAddress The address to which the subdomain resolves.
     function registerSubnode(bytes32 _label, address _targetAddress)
@@ -87,11 +99,15 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
 
     /// @notice Sets the default resolver contract address that the subdomains being registered will use.
     /// @param _resolver The resolver contract to be used.
-    function setDefaultResolver(Resolver _resolver)
+    function setDefaultResolver(address _resolver)
         external
         auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID)
     {
-        resolver = address(_resolver);
+        if (_resolver == address(0)) {
+            revert InvalidResolver({node: node, resolver: _resolver});
+        }
+
+        resolver = _resolver;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
