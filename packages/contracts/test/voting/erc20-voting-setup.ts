@@ -36,7 +36,7 @@ const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
 
 const totalSupportThresholdPct = 1;
 const relativeSupportThresholdPct = 2;
-const voteDuration = 3;
+const minDuration = 3;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
 const merkleMintToAddressArray = [ethers.Wallet.createRandom().address];
@@ -80,7 +80,7 @@ describe('ERC20VotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _voteDuration, address _token)',
+      'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
     ]);
 
     expect(
@@ -92,7 +92,7 @@ describe('ERC20VotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 voteDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await erc20VotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -378,7 +378,7 @@ describe('ERC20VotingSetup', function () {
       const data = abiCoder.encode(prepareInstallDataTypes, [
         totalSupportThresholdPct,
         relativeSupportThresholdPct,
-        voteDuration,
+        minDuration,
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],
       ]);
@@ -410,9 +410,7 @@ describe('ERC20VotingSetup', function () {
       expect(
         await erc20VotingContract.relativeSupportThresholdPct()
       ).to.be.equal(relativeSupportThresholdPct);
-      expect(await erc20VotingContract.voteDuration()).to.be.equal(
-        voteDuration
-      );
+      expect(await erc20VotingContract.minDuration()).to.be.equal(minDuration);
       expect(await erc20VotingContract.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
       );

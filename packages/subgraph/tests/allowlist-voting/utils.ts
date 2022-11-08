@@ -122,7 +122,7 @@ export function createNewVoteExecutedEvent(
 export function createNewConfigUpdatedEvent(
   totalSupportThresholdPct: string,
   relativeSupportThresholdPct: string,
-  voteDuration: string,
+  minDuration: string,
   contractAddress: string
 ): ConfigUpdated {
   let newConfigUpdatedEvent = changetype<ConfigUpdated>(newMockEvent());
@@ -140,14 +140,14 @@ export function createNewConfigUpdatedEvent(
       BigInt.fromString(relativeSupportThresholdPct)
     )
   );
-  let voteDurationParam = new ethereum.EventParam(
-    'voteDuration',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteDuration))
+  let minDurationParam = new ethereum.EventParam(
+    'minDuration',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
   newConfigUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
   newConfigUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
-  newConfigUpdatedEvent.parameters.push(voteDurationParam);
+  newConfigUpdatedEvent.parameters.push(minDurationParam);
 
   return newConfigUpdatedEvent;
 }

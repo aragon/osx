@@ -53,28 +53,28 @@ interface IMajorityVoting {
     /// @notice Emitted when the vote configuration is updated.
     /// @param relativeSupportThresholdPct The relative support threshold in percent.
     /// @param totalSupportThresholdPct The total support threshold in percent.
-    /// @param voteDuration The duration of a vote.
+    /// @param minDuration The minimal duration of a vote.
     event ConfigUpdated(
         uint64 totalSupportThresholdPct,
         uint64 relativeSupportThresholdPct,
-        uint64 voteDuration
+        uint64 minDuration
     );
 
     /// @notice Sets the vote configuration.
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
-    /// @param _voteDuration The duration of a vote.
+    /// @param _minDuration The minimal duration of a vote.
     function setConfiguration(
         uint64 _relativeSupportThresholdPct,
         uint64 _totalSupportThresholdPct,
-        uint64 _voteDuration
+        uint64 _minDuration
     ) external;
 
     /// @notice Creates a new vote.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed after vote passes.
     /// @param _startDate The start date of the vote. If 0, uses current timestamp.
-    /// @param _endDate The end date of the vote. If 0, uses `_start` + `voteDuration`.
+    /// @param _endDate The end date of the vote. If 0, uses `_start` + `minDuration`.
     /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
     /// @param _choice The vote choice to cast on creation.
     /// @return voteId The ID of the vote.

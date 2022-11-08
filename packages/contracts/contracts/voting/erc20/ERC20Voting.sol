@@ -28,20 +28,20 @@ contract ERC20Voting is MajorityVotingBase {
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
-    /// @param _voteDuration The duration of a vote.
+    /// @param _minDuration The minimal duration of a vote.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
-        uint64 _voteDuration,
+        uint64 _minDuration,
         ERC20VotesUpgradeable _token
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
             _totalSupportThresholdPct,
             _relativeSupportThresholdPct,
-            _voteDuration
+            _minDuration
         );
 
         votingToken = _token;
@@ -81,14 +81,14 @@ contract ERC20Voting is MajorityVotingBase {
         uint64 currentTimestamp = getTimestamp64();
 
         if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + voteDuration;
+        if (_endDate == 0) _endDate = _startDate + minDuration;
 
-        if (_endDate - _startDate < voteDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
             revert VoteTimesInvalid({
                 current: currentTimestamp,
                 start: _startDate,
                 end: _endDate,
-                voteDuration: voteDuration
+                minDuration: minDuration
             });
 
         // Create the vote

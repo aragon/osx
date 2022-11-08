@@ -188,7 +188,7 @@ export function handleConfigUpdated(event: ConfigUpdated): void {
       event.params.totalSupportThresholdPct;
     packageEntity.relativeSupportThresholdPct =
       event.params.relativeSupportThresholdPct;
-    packageEntity.voteDuration = event.params.voteDuration;
+    packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }
 }

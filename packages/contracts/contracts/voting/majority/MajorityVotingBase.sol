@@ -39,7 +39,7 @@ abstract contract MajorityVotingBase is
 
     uint64 public relativeSupportThresholdPct;
     uint64 public totalSupportThresholdPct;
-    uint64 public voteDuration;
+    uint64 public minDuration;
     uint256 public votesLength;
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
@@ -51,8 +51,8 @@ abstract contract MajorityVotingBase is
     /// @param current The maximal value.
     /// @param start The start date of the vote as a unix timestamp.
     /// @param end The end date of the vote as a unix timestamp.
-    /// @param voteDuration The duration of the vote in seconds.
-    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 voteDuration);
+    /// @param minDuration The minimal duration of the vote in seconds.
+    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero(); ///TODO  remove
@@ -73,22 +73,22 @@ abstract contract MajorityVotingBase is
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
-    /// @param _voteDuration The duration of a vote
+    /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
-        uint64 _voteDuration
+        uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
 
         _validateAndSetSettings(
             _totalSupportThresholdPct,
             _relativeSupportThresholdPct,
-            _voteDuration
+            _minDuration
         );
 
-        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _voteDuration);
+        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -108,15 +108,15 @@ abstract contract MajorityVotingBase is
     function setConfiguration(
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
-        uint64 _voteDuration
+        uint64 _minDuration
     ) external auth(SET_CONFIGURATION_PERMISSION_ID) {
         _validateAndSetSettings(
             _totalSupportThresholdPct,
             _relativeSupportThresholdPct,
-            _voteDuration
+            _minDuration
         );
 
-        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _voteDuration);
+        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -298,7 +298,7 @@ abstract contract MajorityVotingBase is
     function _validateAndSetSettings(
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
-        uint64 _voteDuration
+        uint64 _minDuration
     ) internal virtual {
         if (_relativeSupportThresholdPct > PCT_BASE) {
             revert PercentageExceeds100({limit: PCT_BASE, actual: _relativeSupportThresholdPct});
@@ -308,13 +308,13 @@ abstract contract MajorityVotingBase is
             revert PercentageExceeds100({limit: PCT_BASE, actual: _totalSupportThresholdPct});
         }
 
-        if (_voteDuration == 0) {
+        if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 
         totalSupportThresholdPct = _totalSupportThresholdPct;
         relativeSupportThresholdPct = _relativeSupportThresholdPct;
-        voteDuration = _voteDuration;
+        minDuration = _minDuration;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
