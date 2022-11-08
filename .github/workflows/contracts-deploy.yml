@@ -82,7 +82,7 @@ jobs:
   conclude:
     runs-on: ubuntu-latest
     outputs:
-      commitid: ${{ steps.changes.outputs.commitid }}
+      commitid: ${{ steps.commit.outputs.commitid }}
     needs: ['build-deploy']
     steps:
       - uses: actions/checkout@v2
