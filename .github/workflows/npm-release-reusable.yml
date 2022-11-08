@@ -50,8 +50,9 @@ jobs:
       - uses: actions/checkout@v2
         if: ${{ inputs.ref == '' }}
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
           registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies

@@ -43,8 +43,9 @@ jobs:
         with:
           ref: ${{ inputs.last_commit }}
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile

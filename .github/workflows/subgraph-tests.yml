@@ -31,8 +31,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
       - name: Install dependencies
         run: yarn install --pure-lockfile
@@ -49,11 +50,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
-      - name: Install yarn
-        run: npm i -G yarn
       - name: Install dependencies
         run: yarn
       - name: Build contracts

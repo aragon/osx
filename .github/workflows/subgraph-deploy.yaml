@@ -92,8 +92,9 @@ jobs:
         with:
           ref: ${{ github.base_ref || github.ref }}
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
       - name: Install dependencies
         run: yarn install --pure-lockfile

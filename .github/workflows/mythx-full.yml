@@ -45,8 +45,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
       - uses: actions/setup-python@v4
       - name: Install mythx-cli
