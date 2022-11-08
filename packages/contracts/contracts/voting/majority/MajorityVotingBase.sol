@@ -14,10 +14,9 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting components.
-/// TODO    We use the following definitions
-/// TODO    $relative support = \frac{N_{yes}}{N_{yes}+N_{no}}$
-/// TODO    $total support = \frac{N_{yes}}{N_{total}}$
-/// TODO    $participation = \frac{N_{yes}+N_{no}+N_{abstain}}{N_{total}}$
+/// We use the following definitions
+/// $relative support = \frac{N_{yes}}{N_{yes}+N_{no}}$
+/// $total support = \frac{N_{yes}}{N_{total}}$
 /// @dev This component implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
