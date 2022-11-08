@@ -28,7 +28,7 @@ jobs:
               - '.github/workflows/contracts-deploy.yml'
       - if: steps.changes.outputs.src == 'false'
         id: checkSrc
-        run: echo "::set-output name=run::true"
+        run: echo "run=true" >> $GITHUB_OUTPUT
   npmDeploy:
     needs: ['check']
     if: needs.check.outputs.run != true

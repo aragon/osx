@@ -25,15 +25,15 @@ jobs:
       - name: Is patch
         id: patch
         if: contains( github.event.pull_request.labels.*.name, 'release:patch')
-        run: echo "::set-output name=bump::patch"
+        run: echo "bump=patch" >> $GITHUB_OUTPUT
       - name: Is minor
         id: minor
         if: contains( github.event.pull_request.labels.*.name, 'release:minor')
-        run: echo "::set-output name=bump::minor"
+        run: echo "bump=minor" >> $GITHUB_OUTPUT
       - name: Is major
         id: major
         if: contains( github.event.pull_request.labels.*.name, 'release:major')
-        run: echo "::set-output name=bump::major"
+        run: echo "bump=major" >> $GITHUB_OUTPUT
   build_deploy:
     runs-on: ubuntu-latest
     needs: [prepare]
