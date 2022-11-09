@@ -57,7 +57,7 @@ export function createGetVoteCall(
   startDate: string,
   endDate: string,
   snapshotBlock: string,
-  supportRequired: string,
+  relativeSupportThresholdPct: string,
   totalSupportThresholdPct: string,
   plenum: string,
   yes: string,
@@ -77,7 +77,9 @@ export function createGetVoteCall(
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportRequired)),
+      ethereum.Value.fromUnsignedBigInt(
+        BigInt.fromString(relativeSupportThresholdPct)
+      ),
       ethereum.Value.fromUnsignedBigInt(
         BigInt.fromString(totalSupportThresholdPct)
       ),
