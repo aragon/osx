@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Fixed and clarified the execution logic of `MajorityVoting`.
 - Refactored mocks for `PluginUUPSUpgradeable` and `PluginCloneable` and the respective setups.
 - Moved `event.ts` from `/test/test-utils/` to `/utils/`.
 
