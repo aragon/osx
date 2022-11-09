@@ -145,14 +145,15 @@ describe('AllowlistVoting', function () {
     });
   });
 
-  describe('StartVote', async () => {
-    let minDuration = 3;
-
-    beforeEach(async () => {
-      await initializeVoting(1, 2, 3, [ownerAddress]);
-    });
+  describe('Vote creation', async () => {
+    let minDuration = 500;
+    let relativeSupportThresholdPct = pct16(50);
+    let totalSupportThresholdPct = pct16(20);
+    const id = 0; // voteId
 
     it('reverts if user is not allowed to create a vote', async () => {
+      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+
       await expect(
         voting
           .connect(signers[1])
@@ -163,6 +164,8 @@ describe('AllowlistVoting', function () {
     });
 
     it('reverts if vote duration is less than the minimal duration', async () => {
+      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
       const startDate = block.timestamp;
@@ -188,6 +191,8 @@ describe('AllowlistVoting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
+      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+
       const id = 0; // voteId
 
       expect(
@@ -227,6 +232,8 @@ describe('AllowlistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
+      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+
       const id = 0; // voteId
 
       expect(
@@ -254,6 +261,32 @@ describe('AllowlistVoting', function () {
 
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
+    });
+
+    it('reverts creation when voting before the start date', async () => {
+      const startOffset = 9;
+      let startDate = (await getTime()) + startOffset;
+      let endDate = startDate + minDuration;
+
+      await initializeVoting(
+        totalSupportThresholdPct,
+        relativeSupportThresholdPct,
+        minDuration,
+        [ownerAddress]
+      );
+
+      expect(await getTime()).to.be.lessThan(startDate);
+
+      await expect(
+        voting.createVote(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          false,
+          VoteOption.Yes
+        )
+      ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
     });
   });
 

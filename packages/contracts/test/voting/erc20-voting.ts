@@ -106,13 +106,16 @@ describe('ERC20Voting', function () {
     });
   });
 
-  describe('StartVote', async () => {
-    let minDuration = 3;
-    beforeEach(async () => {
-      await initializeVoting(1, 2, minDuration);
-    });
+  describe('Vote creation', async () => {
+    let minDuration = 500;
+    let relativeSupportThresholdPct = pct16(50);
+    let totalSupportThresholdPct = pct16(20);
+    let plenum = 100;
+    const id = 0; // voteId
 
     it('reverts total token supply while creating a vote is 0', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
         voting.createVote(dummyMetadata, [], 0, 0, false, VoteOption.None)
@@ -120,6 +123,8 @@ describe('ERC20Voting', function () {
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
@@ -146,6 +151,8 @@ describe('ERC20Voting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       const id = 0; // voteId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
@@ -187,6 +194,8 @@ describe('ERC20Voting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       const id = 0; // voteId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
@@ -220,6 +229,36 @@ describe('ERC20Voting', function () {
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(0);
     });
+
+    it('reverts creation when voting before the start date', async () => {
+      const startOffset = 9;
+      let startDate = (await getTime()) + startOffset;
+      let endDate = startDate + minDuration;
+
+      await initializeVoting(
+        totalSupportThresholdPct,
+        relativeSupportThresholdPct,
+        minDuration
+      );
+
+      // set voting power to 100
+      await erc20VoteMock.mock.getPastTotalSupply.returns(plenum);
+
+      expect(await getTime()).to.be.lessThan(startDate);
+
+      await erc20VoteMock.mock.getPastVotes.returns(51);
+
+      await expect(
+        voting.createVote(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          false,
+          VoteOption.Yes
+        )
+      ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
+    });
   });
 
   describe('Vote + Execute:', async () => {
@@ -244,14 +283,15 @@ describe('ERC20Voting', function () {
 
       // set voting power to 100
       await erc20VoteMock.mock.getPastTotalSupply.returns(plenum);
+      await erc20VoteMock.mock.getPastVotes.returns(0);
 
       expect(
         (
           await voting.createVote(
             dummyMetadata,
             dummyActions,
-            0,
-            0,
+            startDate,
+            endDate,
             false,
             VoteOption.None
           )
@@ -464,6 +504,7 @@ describe('ERC20Voting', function () {
 
         // set voting power to 100
         await erc20VoteMock.mock.getPastTotalSupply.returns(plenum);
+        await erc20VoteMock.mock.getPastVotes.returns(0);
 
         await voting.createVote(
           dummyMetadata,

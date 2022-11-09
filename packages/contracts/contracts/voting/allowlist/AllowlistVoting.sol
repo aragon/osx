@@ -154,9 +154,7 @@ contract AllowlistVoting is MajorityVotingBase {
 
         emit VoteCreated(voteId, _msgSender(), _proposalMetadata);
 
-        if (_choice != VoteOption.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, VoteOption.Yes, _msgSender(), _executeIfDecided);
-        }
+        vote(voteId, _choice, _executeIfDecided);
     }
 
     /// @inheritdoc MajorityVotingBase

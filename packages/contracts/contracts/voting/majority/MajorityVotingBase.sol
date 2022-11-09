@@ -139,9 +139,10 @@ abstract contract MajorityVotingBase is
         uint256 _voteId,
         VoteOption _choice,
         bool _executesIfDecided
-    ) external {
-        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender()))
+    ) public {
+        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender())) {
             revert VoteCastForbidden(_voteId, _msgSender());
+        }
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
@@ -248,9 +249,8 @@ abstract contract MajorityVotingBase is
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
         // The total support must greater than the relative support threshold.
-
         if (
-            totalSupportPct > vote_.relativeSupportThresholdPct //&& relativeSupportThresholdPct > uint64(50) * PCT_BASE // optional
+            _isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct //&& relativeSupportThresholdPct > _calculatePct(50,100)  // optional
         ) {
             return true;
         }
