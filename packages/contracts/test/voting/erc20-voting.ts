@@ -6,7 +6,13 @@ import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.so
 import {DAO} from '../../typechain';
 import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {VoteOption, pct16, advanceTime} from '../test-utils/voting';
+import {
+  VoteOption,
+  pct16,
+  getTime,
+  advanceTime,
+  advanceTimeTo,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 const {deployMockContract} = waffle;
@@ -222,8 +228,14 @@ describe('ERC20Voting', function () {
     let totalSupportThresholdPct = pct16(20);
     let plenum = 100;
     const id = 0; // voteId
+    const startOffset = 9;
+    let startDate: number;
+    let endDate: number;
 
     beforeEach(async () => {
+      startDate = (await getTime()) + startOffset;
+      endDate = startDate + minDuration;
+
       await initializeVoting(
         totalSupportThresholdPct,
         relativeSupportThresholdPct,
@@ -233,17 +245,33 @@ describe('ERC20Voting', function () {
       // set voting power to 100
       await erc20VoteMock.mock.getPastTotalSupply.returns(plenum);
 
-      await voting.createVote(
-        dummyMetadata,
-        dummyActions,
-        0,
-        0,
-        false,
-        VoteOption.None
+      expect(
+        (
+          await voting.createVote(
+            dummyMetadata,
+            dummyActions,
+            0,
+            0,
+            false,
+            VoteOption.None
+          )
+        ).value
+      ).to.equal(id);
+    });
+
+    it('does not allow voting, when the vote has not started yet', async () => {
+      expect(await getTime()).to.be.lessThan(startDate);
+
+      await erc20VoteMock.mock.getPastVotes.returns(0);
+
+      await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+        customError('VoteCastForbidden', id, ownerAddress)
       );
     });
 
     it('should not be able to vote if user has 0 token', async () => {
+      await advanceTimeTo(startDate);
+
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
@@ -252,6 +280,8 @@ describe('ERC20Voting', function () {
     });
 
     it('increases the yes, no, abstain votes and emit correct events', async () => {
+      await advanceTimeTo(startDate);
+
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       expect(await voting.vote(id, VoteOption.Yes, false))
@@ -283,6 +313,8 @@ describe('ERC20Voting', function () {
     });
 
     it('should not double-count votes by the same address', async () => {
+      await advanceTimeTo(startDate);
+
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       // yes still ends up to be 1 here even after voting
@@ -303,6 +335,8 @@ describe('ERC20Voting', function () {
     });
 
     it('can execute early if total support is large enough', async () => {
+      await advanceTimeTo(startDate);
+
       // vote with 50 yes votes, which is NOT enough to make vote executable as relative support
       // must be larger than relativeSupportThresholdPct = 50
       await erc20VoteMock.mock.getPastVotes.returns(50);
@@ -319,6 +353,8 @@ describe('ERC20Voting', function () {
     });
 
     it('can execute normally if total support is large enough', async () => {
+      await advanceTimeTo(startDate);
+
       // vote with 50 yes votes
       await erc20VoteMock.mock.getPastVotes.returns(50);
       await voting.vote(id, VoteOption.Yes, false);
@@ -339,6 +375,8 @@ describe('ERC20Voting', function () {
     });
 
     it('cannot execute normally if total support is too low', async () => {
+      await advanceTimeTo(startDate);
+
       // vote with 10 yes votes
       await erc20VoteMock.mock.getPastVotes.returns(10);
       await voting.vote(id, VoteOption.Yes, false);
@@ -359,6 +397,8 @@ describe('ERC20Voting', function () {
     });
 
     it('executes the vote immediately while final yes is given', async () => {
+      await advanceTimeTo(startDate);
+
       // vote with _relativeSupportThresholdPct staking, so
       // it immediatelly executes the vote
       await erc20VoteMock.mock.getPastVotes.returns(51);
@@ -398,6 +438,8 @@ describe('ERC20Voting', function () {
     });
 
     it('reverts if vote is not decided yet', async () => {
+      await advanceTimeTo(startDate);
+
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('VoteExecutionForbidden', id)
       );
