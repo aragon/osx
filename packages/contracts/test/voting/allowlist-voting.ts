@@ -641,19 +641,19 @@ describe('AllowlistVoting', function () {
         // dur | tot | rel
         //  0  | 20% | 100%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (20%) > relative support threshold (59%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // total support (20%) > relative support threshold (59.99...%) == false
 
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 40% | 100%
         //  𐄂  |  𐄂  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59.99...%) == false
 
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // total support (50%) > relative support threshold (59%) == true
+        expect(await voting.canExecute(id)).to.equal(true); // total support (50%) > relative support threshold (59.99...%) == true
       });
 
       it('should not execute with only 2 yes votes', async () => {
@@ -663,14 +663,14 @@ describe('AllowlistVoting', function () {
         // dur | tot | rel
         //  0  | 40% | 67%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59.99...%) == false
 
         // Wait until the voting period is over.
         await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 40% | 67%
         //  ✓  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > total support threshold (59%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > total support threshold (59.99...%) == false
       });
     });
   });
