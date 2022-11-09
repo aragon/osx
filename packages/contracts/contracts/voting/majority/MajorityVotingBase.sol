@@ -248,7 +248,7 @@ abstract contract MajorityVotingBase is
         uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.plenum);
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
-        // The total support must greater than the relative support threshold.
+        // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
         if (_isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct) {
             return true;
         }
@@ -256,23 +256,23 @@ abstract contract MajorityVotingBase is
         // NORMAL EXECUTION (after the vote duration has passed)
         // Both, the total and relative support must be met.
 
-        // Verify that the vote has ended.
+        // Criterium 1: The vote has ended.
         if (_isVoteOpen(vote_)) {
             return false;
         }
 
-        // Check that the total support is greater than the total support threshold
+        // Criterium 2: The total support is greater than the total support threshold
         if (totalSupportPct <= vote_.totalSupportThresholdPct) {
             return false;
         }
 
-        // Check that the relative support is greater than the relative support threshold
+        // Criterium 3: The relative support is greater than the relative support threshold
         uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no);
         if (relativeSupportPct <= vote_.relativeSupportThresholdPct) {
             return false;
         }
 
-        // The criteria above are met and the vote can execute.
+        // The criteria 1-3 above are met and the vote can execute.
         return true;
     }
 
