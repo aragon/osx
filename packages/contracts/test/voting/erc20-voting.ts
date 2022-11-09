@@ -248,6 +248,7 @@ describe('ERC20Voting', function () {
 
       await erc20VoteMock.mock.getPastVotes.returns(51);
 
+      // Reverts if the vote option is not 'None'
       await expect(
         voting.createVote(
           dummyMetadata,
@@ -258,6 +259,20 @@ describe('ERC20Voting', function () {
           VoteOption.Yes
         )
       ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
+
+      // Works if the vote option is 'None'
+      expect(
+        (
+          await voting.createVote(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            false,
+            VoteOption.None
+          )
+        ).value
+      ).to.equal(id);
     });
   });
 

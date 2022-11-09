@@ -277,6 +277,7 @@ describe('AllowlistVoting', function () {
 
       expect(await getTime()).to.be.lessThan(startDate);
 
+      // Reverts if the vote option is not 'None'
       await expect(
         voting.createVote(
           dummyMetadata,
@@ -287,6 +288,20 @@ describe('AllowlistVoting', function () {
           VoteOption.Yes
         )
       ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
+
+      // Works if the vote option is 'None'
+      expect(
+        (
+          await voting.createVote(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            false,
+            VoteOption.None
+          )
+        ).value
+      ).to.equal(id);
     });
   });
 
