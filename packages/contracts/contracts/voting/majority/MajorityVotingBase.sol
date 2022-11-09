@@ -249,9 +249,7 @@ abstract contract MajorityVotingBase is
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
         // The total support must greater than the relative support threshold.
-        if (
-            _isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct //&& relativeSupportThresholdPct > _calculatePct(50,100)  // optional
-        ) {
+        if (_isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct) {
             return true;
         }
 
