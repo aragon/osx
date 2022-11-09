@@ -15,8 +15,12 @@ async function main(ref) {
     }
   }
 
-  await fs.appendFile(process.env.GITHUB_OUTPUT, `environment=${isTestnet ? 'staging' : 'production'}`)
-  await fs.appendFile(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}`)
+  await fs.appendFile(
+    process.env.GITHUB_OUTPUT,
+    `environment=${
+      isTestnet ? 'staging' : 'production'
+    }\nmatrix=${JSON.stringify(matrix)}\n`
+  );
 }
 
 main(process.argv[2]);
