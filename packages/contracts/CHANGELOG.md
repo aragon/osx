@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `resolver` check in initialize function and `setDefaultResolver` of `ENSSubdomainRegistrar.sol`.
+- Added test related to `resolver` in `ens-subdomain-registry.ts`.
 - Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
 - Added more tests for the `PluginSetupProcessor`.
 
@@ -18,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved `event.ts` from `/test/test-utils/` to `/utils/`.
 
 ### Removed
+
+- Removed `isApprovedForAll` check from initialize function of `ENSSubdomainRegistrar.sol`.
+- Removed test related to `isApprovedForAll` in `ens-subdomain-registry.ts`.
 
 ## v0.3.0-alpha
 
