@@ -60,12 +60,17 @@ abstract contract MajorityVotingBase is
     /// @notice Thrown if zero is not allowed as a value
     error ZeroValueNotAllowed();
 
-    /// @notice Thrown if a voter is not allowed to cast a vote.
+    /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
+    /// - has not started,
+    /// - has ended,
+    /// - was executed, or
+    /// - the voter doesn't have voting powers.
     /// @param voteId The ID of the vote.
     /// @param sender The address of the voter.
     error VoteCastForbidden(uint256 voteId, address sender);
 
-    /// @notice Thrown if the vote execution is forbidden
+    /// @notice Thrown if the vote execution is forbidden.
+    /// @param voteId The ID of the vote.
     error VoteExecutionForbidden(uint256 voteId);
 
     /// @notice Initializes the component to be used by inheriting contracts.
@@ -239,18 +244,18 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        // TODO the before vote start check is missing
-
-        // Early execution after the vote start but before the vote duration has passed:
-        // The total support must greater than the relative support threshold.
         uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.plenum);
+
+        // EARLY EXECUTION (after the vote start but before the vote duration has passed)
+        // The total support must greater than the relative support threshold.
+
         if (
             totalSupportPct > vote_.relativeSupportThresholdPct //&& relativeSupportThresholdPct > uint64(50) * PCT_BASE // optional
         ) {
             return true;
         }
 
-        // Normal execution after the vote start but before the vote duration has passed:
+        // NORMAL EXECUTION (after the vote duration has passed)
         // Both, the total and relative support must be met.
 
         // Verify that the vote has ended.
