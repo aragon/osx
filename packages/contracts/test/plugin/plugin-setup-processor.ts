@@ -1999,7 +1999,6 @@ async function updateHelper(
   const currentImpl = await currentVersionSetup.getImplementationAddress();
   const newImpl = await newVersionSetup.getImplementationAddress();
   
-  // TODO: we could find a better way to include interface in the merged abi..
   const upgradedEvent = await findEvent(applyUpdateTx, EVENTS.Upgraded)
   if (currentImpl == newImpl) {
     expect(upgradedEvent).to.equal(undefined);
