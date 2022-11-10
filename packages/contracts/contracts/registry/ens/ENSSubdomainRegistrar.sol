@@ -78,7 +78,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     {}
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
-    /// @dev It revertes with no message if this contract is not the node owner, the node owner did not approve this contract as an operator or the node owner revoked the approval as operator from this contract.
+    /// @dev It reverts with no message if this contract isn't the owner nor an approved operator for the given node.
     /// @param _label The labelhash of the subdomain name.
     /// @param _targetAddress The address to which the subdomain resolves.
     function registerSubnode(bytes32 _label, address _targetAddress)
