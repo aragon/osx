@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import hre, {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20} from '../../typechain';
+import {DAO, DAO__factory, GovernanceERC20} from '../../typechain';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
@@ -54,6 +54,7 @@ describe('DAO', function () {
     ownerAddress = await signers[0].getAddress();
 
     const DAO = await ethers.getContractFactory('DAO');
+
     dao = await DAO.deploy();
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
@@ -467,38 +468,51 @@ describe('DAO', function () {
   });
 
   describe('ERC1967', async () => {
-    it.skip('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
+    it('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+      const initData = iface.encodeFunctionData('initialize', [
+        dummyMetadata1,
+        ownerAddress,
+        dummyAddress1,
+      ]);
+
       const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
-
-      const initData = abiCoder.encode(
-        ['bytes', 'address', 'address'],
-        [dummyMetadata1, ownerAddress, dummyAddress1]
-      );
-
       const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
 
-      await expect(
-        dao.attach(erc1967Proxy.address).upgradeTo(dao.address)
-      ).to.be.revertedWith(customError('Unauthorized'));
-    });
+      const daoProxyContract = dao.attach(erc1967Proxy.address);
 
-    it.skip('successfuly updates DAO contract', async () => {
-      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
-
-      const initData = abiCoder.encode(
-        ['bytes', 'address', 'address'],
-        [dummyMetadata1, ownerAddress, dummyAddress1]
-      );
-
-      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
-
-      await dao
-        .attach(erc1967Proxy.address)
-        .grant(
-          dao.address,
+      await expect(daoProxyContract.upgradeTo(dao.address)).to.be.revertedWith(
+        customError(
+          'Unauthorized',
+          daoProxyContract.address,
+          daoProxyContract.address,
           ownerAddress,
           PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-        );
+        )
+      );
+    });
+
+    it('successfuly updates DAO contract', async () => {
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+      const initData = iface.encodeFunctionData('initialize', [
+        dummyMetadata1,
+        ownerAddress,
+        dummyAddress1,
+      ]);
+
+      // function start here
+      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
+      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
+
+      const daoProxyContract = dao.attach(erc1967Proxy.address);
+
+      await daoProxyContract.grant(
+        daoProxyContract.address,
+        ownerAddress,
+        PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
+      );
+
+      await dao.attach(erc1967Proxy.address).upgradeTo(dao.address);
 
       await expect(dao.attach(erc1967Proxy.address).upgradeTo(dao.address)).to
         .not.be.reverted;
