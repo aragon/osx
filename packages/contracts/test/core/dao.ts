@@ -8,6 +8,8 @@ import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 
+const abiCoder = ethers.utils.defaultAbiCoder;
+
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
@@ -216,10 +218,53 @@ describe('DAO', function () {
       expect(actions[0].data).to.equal(dummyActions[0].data);
       expect(execResults).to.deep.equal(expectedDummyResults);
     });
+
+    it('reverts if one of the actions failed', async () => {
+      const ActionExecuteFactory = await smock.mock('ActionExecute');
+      const actionExecute = await ActionExecuteFactory.deploy();
+
+      await expect(
+        dao.execute(0, [
+          {
+            to: actionExecute.address,
+            data: '0x0000',
+            value: 0,
+          },
+        ])
+      ).to.be.revertedWith(customError('ActionFailed'));
+    });
   });
 
   describe('deposit:', async () => {
     const amount = ethers.utils.parseEther('1.23');
+
+    it('reverts if amount is zero', async () => {
+      await expect(
+        dao.deposit(ethers.constants.AddressZero, 0, 'ref')
+      ).to.be.revertedWith(customError('ZeroAmount'));
+    });
+
+    it('reverts if passed amount do not match natve amount value', async () => {
+      const options = {value: amount};
+      const passedAmount = ethers.utils.parseEther('1.22');
+
+      await expect(
+        dao.deposit(ethers.constants.AddressZero, passedAmount, 'ref', options)
+      ).to.be.revertedWith(
+        customError('NativeTokenDepositAmountMismatch', passedAmount, amount)
+      );
+    });
+
+    it('reverts if ERC20 and native tokens are deposited at the same time', async () => {
+      const options = {value: amount};
+      await token.mint(ownerAddress, amount);
+
+      await expect(
+        dao.deposit(token.address, amount, 'ref', options)
+      ).to.be.revertedWith(
+        customError('NativeTokenDepositAmountMismatch', 0, amount)
+      );
+    });
 
     it('deposits native tokens into the DAO', async () => {
       const options = {value: amount};
@@ -250,17 +295,6 @@ describe('DAO', function () {
 
       // holds amount now
       expect(await token.balanceOf(dao.address)).to.equal(amount);
-    });
-
-    it('throws an error if ERC20 and native tokens are deposited at the same time', async () => {
-      const options = {value: amount};
-      await token.mint(ownerAddress, amount);
-
-      await expect(
-        dao.deposit(token.address, amount, 'ref', options)
-      ).to.be.revertedWith(
-        customError('NativeTokenDepositAmountMismatch', 0, amount)
-      );
     });
   });
 
@@ -429,6 +463,45 @@ describe('DAO', function () {
       expect(
         await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
       ).to.be.eq('0x41424344');
+    });
+  });
+
+  describe('ERC1967', async () => {
+    it.skip('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
+      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
+
+      const initData = abiCoder.encode(
+        ['bytes', 'address', 'address'],
+        [dummyMetadata1, ownerAddress, dummyAddress1]
+      );
+
+      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
+
+      await expect(
+        dao.attach(erc1967Proxy.address).upgradeTo(dao.address)
+      ).to.be.revertedWith(customError('Unauthorized'));
+    });
+
+    it.skip('successfuly updates DAO contract', async () => {
+      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
+
+      const initData = abiCoder.encode(
+        ['bytes', 'address', 'address'],
+        [dummyMetadata1, ownerAddress, dummyAddress1]
+      );
+
+      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
+
+      await dao
+        .attach(erc1967Proxy.address)
+        .grant(
+          dao.address,
+          ownerAddress,
+          PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
+        );
+
+      await expect(dao.attach(erc1967Proxy.address).upgradeTo(dao.address)).to
+        .not.be.reverted;
     });
   });
 });
