@@ -54,10 +54,9 @@ Using **authorization modifiers** is how we make functions permissioned. Permiss
 
 For example, one can only withdraw funds from a DAO when the address making the call has been granted the `WITHDRAW_PERMISSION_ID` permission.
 
-```solidity
-function withdraw(uint256 value) external auth(WITHDRAW_PERMISSION_ID) {
-    ...
-}
+```solidity title="contracts/core/permission/PermissionManager.sol"
+function withdraw(uint256 value) external auth(WITHDRAW_PERMISSION_ID);
+
 ```
 
 ### Managing Permissions
@@ -71,10 +70,11 @@ Both receive the `_permissionId` identifier of the permission and the `_where` a
 
 ```solidity title="contracts/core/permission/PermissionManager.sol"
 function grant(
-    address _where,
-    address _who,
-    bytes32 _permissionId
-) external auth(_where, ROOT_PERMISSION_ID)
+  address _where,
+  address _who,
+  bytes32 _permissionId
+) external auth(_where, ROOT_PERMISSION_ID);
+
 ```
 
 To prevent these functions from being called by any address, they are themselves permissioned via the `auth` modifier and require the caller to have the `ROOT_PERMISSION_ID` permission in order to call them.
@@ -130,10 +130,31 @@ or off-chain data being made available through third-party oracle services (e.g.
 
 Typically, oracles are written specifically for and installed together with [plugins](../01-the-core-contracts/03-plugins.md).
 
+#### The `ANY_ADDR` flag
+
+In combination with oracles, the arguments `_where` and `_who` can also be set to the `ANY_ADDR` flag.
+Granting a permission with `_who: ANY_ADDR` has the effect that any address can now call the function so that it behaves as if the `auth` modifier is not present.
+Imagine, for example, you wrote a decentralized service
+
+```solidity
+contract Service {
+  function use() external auth(USE_PERMISSION_ID);
+}
+
+```
+
+Calling the `use()` function inside requires the caller to have the `USE_PERMISSION_ID` permission. Now, you want to make this service available to every user without uploading a new contract or requiring every user to ask for the permission.
+By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to an oracle, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
+
+Granting a permission with `_where: ANY_ADDR` to an oracle has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
+Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
+
+However, some restrictions apply. For security reasons, aragonOS does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
+
 #### Freezing Permissions
 
 Permissions on a target contract `where` can also be permanently frozen by using the `freeze` function.
-**Freezing** means that permissions involving this target contract can not be granted or revoked anymore. This can be useful when we want to secure certain permissions so that they can never by changed (by a contract owning the `ROOT_PERMISSION_ID` permission).
+**Freezing** means that permissions involving this target contract can not be granted or revoked anymore. This can be useful when we want to secure certain permissions so that they can never change (by a contract owning the `ROOT_PERMISSION_ID` permission).
 
 ### Permissions Native to the `DAO` Contract
 
