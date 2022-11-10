@@ -1,9 +1,8 @@
 import { Interface } from "ethers/lib/utils";
 
-export async function findEvent(tx: any, eventNameOrId: string) {
+export async function findEvent(tx: any, eventName: string) {
   const {events} = await tx.wait();
-
-  const event = events.find((event:any)=> event.event === eventNameOrId || event.topics[0] == eventNameOrId);
+  const event = events.find(({event}: {event: any}) => event === eventName);
 
   return event;
 }

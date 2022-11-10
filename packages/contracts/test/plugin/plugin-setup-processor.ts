@@ -2000,15 +2000,12 @@ async function updateHelper(
   const newImpl = await newVersionSetup.getImplementationAddress();
   
   // TODO: we could find a better way to include interface in the merged abi..
-  const upgradedEvent = await findEvent(applyUpdateTx, ethers.utils.id("Upgraded(address)"))
+  const upgradedEvent = await findEvent(applyUpdateTx, EVENTS.Upgraded)
   if (currentImpl == newImpl) {
     expect(upgradedEvent).to.equal(undefined);
   } else {
-    let intrfcace = new ethers.utils.Interface(["event Upgraded(address indexed implementation)"])
-    // @ts-ignore
-    let parsed = intrfcace.parseLog(upgradedEvent)
     expect(upgradedEvent).to.not.equal(undefined);
-    expect(newImpl).to.equal(parsed.args.implementation);
+    expect(newImpl).to.equal(upgradedEvent.args.implementation);
   }
 
   return {updatedHelpers, permissions, initData};
