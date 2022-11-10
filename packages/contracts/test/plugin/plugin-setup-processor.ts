@@ -1993,9 +1993,10 @@ async function updateHelper(
   expect(appliedUpdateEvent).to.not.equal(undefined);
 
   // If the base contracts don't change from current and new plugin setups,
-  // PluginSetupProcessor shouldn't call `upgradeTo` or `upgradeToAndCall` on the plugin.
-  // The below check for this still is not 100% ensuring, As function `upgradeTo` might be called
-  // but event `Upgraded` not thrown(OZ changed the logic or name) which will trick the test to pass..
+  // PluginSetupProcessor shouldn't call `upgradeTo` or `upgradeToAndCall` 
+  // on the plugin. The below check for this still is not 100% ensuring, 
+  // As function `upgradeTo` might be called but event `Upgraded` 
+  // not thrown(OZ changed the logic or name) which will trick the test to pass..
   const currentImpl = await currentVersionSetup.getImplementationAddress();
   const newImpl = await newVersionSetup.getImplementationAddress();
   
