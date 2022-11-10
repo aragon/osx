@@ -418,7 +418,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PermissionsHashMismatch();
         }
 
-        _upgradeProxy(_plugin, PluginSetup(_pluginSetup).getImplementationAddress(), _initData);
+        address currentImplementation = PluginUUPSUpgradeable(_plugin).getImplementationAddress();
+        address newImplementation = PluginSetup(_pluginSetup).getImplementationAddress();
+
+        if (currentImplementation != newImplementation) {
+            _upgradeProxy(_plugin, newImplementation, _initData);
+        }
 
         DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
 
