@@ -13,10 +13,14 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting components. We use the following definitions:
-///     Relative support: `N_yes / (N_yes + N_no)`
-///     Total support   : `N_yes/ N_total`
-/// @dev This component implements the `IMajorityVoting` interface.
+/// @notice The abstract implementation of majority voting plugin. We use the following definitions:
+/// - Relative support: `N_yes / (N_yes + N_no)`
+/// - Total support   : `N_yes/ N_total`
+/// Additionally, the following assumptions apply to the threshold paramters related to the above mentioned quantities:
+/// - `relativeSupportThresholdPct` >= 50 %
+/// - `totalSupportThresholdPct` <= `relativeSupportThresholdPct`
+/// These constraints are not enforeced by contract code and developers can make unsafe configurations. Instead, the frontend will warn about wrong parameter settings.
+/// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
@@ -267,7 +271,7 @@ abstract contract MajorityVotingBase is
         }
 
         // Criterium 3: The relative support is greater than the relative support threshold
-        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no);
+        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no + vote_.abstain);
         if (relativeSupportPct <= vote_.relativeSupportThresholdPct) {
             return false;
         }
