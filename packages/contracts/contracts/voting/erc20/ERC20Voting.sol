@@ -121,30 +121,30 @@ contract ERC20Voting is MajorityVotingBase {
         Vote storage vote_ = votes[_voteId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 voterStake = votingToken.getPastVotes(_voter, vote_.snapshotBlock);
+        uint256 votingPower = votingToken.getPastVotes(_voter, vote_.snapshotBlock);
         VoteOption state = vote_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoteOption.Yes) {
-            vote_.yes = vote_.yes - voterStake;
+            vote_.yes = vote_.yes - votingPower;
         } else if (state == VoteOption.No) {
-            vote_.no = vote_.no - voterStake;
+            vote_.no = vote_.no - votingPower;
         } else if (state == VoteOption.Abstain) {
-            vote_.abstain = vote_.abstain - voterStake;
+            vote_.abstain = vote_.abstain - votingPower;
         }
 
         // write the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            vote_.yes = vote_.yes + voterStake;
+            vote_.yes = vote_.yes + votingPower;
         } else if (_choice == VoteOption.No) {
-            vote_.no = vote_.no + voterStake;
+            vote_.no = vote_.no + votingPower;
         } else if (_choice == VoteOption.Abstain) {
-            vote_.abstain = vote_.abstain + voterStake;
+            vote_.abstain = vote_.abstain + votingPower;
         }
 
         vote_.voters[_voter] = _choice;
 
-        emit VoteCast(_voteId, _voter, uint8(_choice), voterStake);
+        emit VoteCast(_voteId, _voter, uint8(_choice), votingPower);
 
         if (_executesIfDecided && _canExecute(_voteId)) {
             _execute(_voteId);
