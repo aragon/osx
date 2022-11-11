@@ -11,13 +11,20 @@ async function main(ref) {
   const matrix = {network: []};
 
   for (const manifest of manifests) {
-    if (manifest.name.endsWith('.json') && !manifest.name.includes('localhost')) {
+    if (
+      manifest.name.endsWith('.json') &&
+      !manifest.name.includes('localhost')
+    ) {
       matrix.network.push(manifest.name.split('.')[0]);
     }
   }
 
-  await fs.appendFile(process.env.GITHUB_OUTPUT, `environment=${isTestnet ? 'staging' : 'production'}`)
-  await fs.appendFile(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}`)
+  await fs.appendFile(
+    process.env.GITHUB_OUTPUT,
+    `environment=${
+      isTestnet ? 'staging' : 'production'
+    }\nmatrix=${JSON.stringify(matrix)}\n`
+  );
 }
 
 main(process.argv[2]);

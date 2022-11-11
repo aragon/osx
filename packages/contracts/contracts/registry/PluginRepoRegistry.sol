@@ -12,8 +12,9 @@ import {IPluginRepo} from "../plugin/IPluginRepo.sol";
 /// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
-    bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID = keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
-    
+    bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
+        keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
+
     /// @notice The ENS subdomain registrar registering the PluginRepo names.
     ENSSubdomainRegistrar public subdomainRegistrar;
 
@@ -24,6 +25,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
 
     /// @notice Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
     /// @param _dao The address of the managing DAO.
+    /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
     function initialize(IDAO _dao, ENSSubdomainRegistrar _subdomainRegistrar) public initializer {
         bytes4 pluginRepoInterfaceId = type(IPluginRepo).interfaceId;
         __InterfaceBasedRegistry_init(_dao, pluginRepoInterfaceId);
@@ -33,8 +35,8 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
 
     /// @notice Registers a plugin repository with a name and address.
     /// @param name The name of the PluginRepo.
-    /// @param registrant The address of the PluginRepo contract.
-    function registerPluginRepo(string calldata name, address registrant)
+    /// @param pluginRepo The address of the PluginRepo contract.
+    function registerPluginRepo(string calldata name, address pluginRepo)
         external
         auth(REGISTER_PLUGIN_REPO_PERMISSION_ID)
     {
@@ -42,11 +44,11 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
         // if the name is empty and reverts.
 
         bytes32 labelhash = keccak256(bytes(name));
-        subdomainRegistrar.registerSubnode(labelhash, registrant);
+        subdomainRegistrar.registerSubnode(labelhash, pluginRepo);
 
-        _register(registrant);
+        _register(pluginRepo);
 
-        emit PluginRepoRegistered(name, registrant);
+        emit PluginRepoRegistered(name, pluginRepo);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
