@@ -8,7 +8,7 @@ import "../../core/IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice The interface for majority voting contracts. We use the following definitions:
 ///     Relative support: `N_yes / (N_yes + N_no)`
-///     Total support   : `N_yes/ N_total`
+///     Total support   : `N_yes / N_total`
 interface IMajorityVoting {
     enum VoteOption {
         None,

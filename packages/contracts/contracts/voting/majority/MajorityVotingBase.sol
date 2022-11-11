@@ -15,7 +15,7 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting plugin. We use the following definitions:
 /// - Relative support: `N_yes / (N_yes + N_no)`
-/// - Total support   : `N_yes/ N_total`
+/// - Total support   : `N_yes / N_total`
 /// Additionally, the following assumptions apply to the threshold paramters related to the above mentioned quantities:
 /// - `relativeSupportThresholdPct` >= 50 %
 /// - `totalSupportThresholdPct` <= `relativeSupportThresholdPct`
