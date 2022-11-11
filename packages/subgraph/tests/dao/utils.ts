@@ -345,7 +345,9 @@ export function createStandardCallbackRegisteredEvent(
 
   let callbackSelectorParam = new ethereum.EventParam(
     'callbackSelector',
-    ethereum.Value.fromFixedBytes(Bytes.fromHexString(callbackSelector) as Bytes)
+    ethereum.Value.fromFixedBytes(
+      Bytes.fromHexString(callbackSelector) as Bytes
+    )
   );
 
   let magicNumberParam = new ethereum.EventParam(
@@ -407,8 +409,8 @@ export function getSupportRequiredPct(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'supportRequiredPct',
-    'supportRequiredPct():(uint64)'
+    'relativeSupportThresholdPct',
+    'relativeSupportThresholdPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -420,8 +422,8 @@ export function getParticipationRequiredPct(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'participationRequiredPct',
-    'participationRequiredPct():(uint64)'
+    'totalSupportThresholdPct',
+    'totalSupportThresholdPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

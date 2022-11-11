@@ -26,13 +26,16 @@ const prepareInstallDataTypes = [
 ];
 
 // minimum bytes for `prepareInstallation` data param.
-const MINIMUM_DATA = abiCoder.encode(
-  prepareInstallDataTypes,
-  [1, 1, 1, [AddressZero, '', ''], [[], []]]
-);
+const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
+  1,
+  1,
+  1,
+  [AddressZero, '', ''],
+  [[], []],
+]);
 
-const participationRequiredPct = 1;
-const supportRequiredPct = 2;
+const totalSupportThresholdPct = 1;
+const relativeSupportThresholdPct = 2;
 const minDuration = 3;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
@@ -77,7 +80,7 @@ describe('ERC20VotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _participationRequiredPct, uint64 _supportRequiredPct, uint64 _minDuration, address _token)',
+      'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
     ]);
 
     expect(
@@ -89,7 +92,7 @@ describe('ERC20VotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await erc20VotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -114,10 +117,13 @@ describe('ERC20VotingSetup', function () {
     });
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [1, 1, 1, [AddressZero, '', ''], [[AddressZero], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [AddressZero, '', ''],
+        [[AddressZero], []],
+      ]);
 
       await expect(
         erc20VotingSetup.prepareInstallation(targetDao.address, data)
@@ -126,10 +132,13 @@ describe('ERC20VotingSetup', function () {
 
     it('fails if passed token address is not a contract', async () => {
       const tokenAddress = ownerAddress;
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [1, 1, 1, [tokenAddress, '', ''], [[], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [tokenAddress, '', ''],
+        [[], []],
+      ]);
 
       await expect(
         erc20VotingSetup.prepareInstallation(targetDao.address, data)
@@ -138,10 +147,13 @@ describe('ERC20VotingSetup', function () {
 
     it('fails if passed token address is not ERC20', async () => {
       const tokenAddress = implementationAddress;
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [1, 1, 1, [tokenAddress, '', ''], [[], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [tokenAddress, '', ''],
+        [[], []],
+      ]);
 
       await expect(
         erc20VotingSetup.prepareInstallation(targetDao.address, data)
@@ -161,16 +173,13 @@ describe('ERC20VotingSetup', function () {
         nonce: nonce + 1,
       });
 
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [
-          1,
-          1,
-          1,
-          [erc20TokenContract.address, tokenName, tokenSymbol],
-          [[], []],
-        ]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [erc20TokenContract.address, tokenName, tokenSymbol],
+        [[], []],
+      ]);
 
       const {plugin, helpers, permissions} =
         await erc20VotingSetup.callStatic.prepareInstallation(
@@ -216,16 +225,13 @@ describe('ERC20VotingSetup', function () {
         nonce: nonce,
       });
 
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [
-          1,
-          1,
-          1,
-          [erc20TokenContract.address, tokenName, tokenSymbol],
-          [[], []],
-        ]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [erc20TokenContract.address, tokenName, tokenSymbol],
+        [[], []],
+      ]);
 
       await erc20VotingSetup.prepareInstallation(targetDao.address, data);
 
@@ -255,7 +261,7 @@ describe('ERC20VotingSetup', function () {
         targetDao.address,
         'name',
         'symbol',
-        { receivers: [], amounts: []}
+        {receivers: [], amounts: []}
       );
 
       const nonce = await ethers.provider.getTransactionCount(
@@ -267,10 +273,13 @@ describe('ERC20VotingSetup', function () {
         nonce: nonce,
       });
 
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [1, 1, 1, [governanceERC20.address, '', ''], [[], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [governanceERC20.address, '', ''],
+        [[], []],
+      ]);
 
       const {plugin, helpers, permissions} =
         await erc20VotingSetup.callStatic.prepareInstallation(
@@ -315,7 +324,7 @@ describe('ERC20VotingSetup', function () {
         from: erc20VotingSetup.address,
         nonce: nonce,
       });
-      
+
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
         from: erc20VotingSetup.address,
         nonce: nonce + 1,
@@ -329,9 +338,7 @@ describe('ERC20VotingSetup', function () {
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
-      expect(helpers).to.be.deep.equal([
-        anticipatedTokenAddress
-      ]);
+      expect(helpers).to.be.deep.equal([anticipatedTokenAddress]);
       expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
@@ -361,23 +368,20 @@ describe('ERC20VotingSetup', function () {
           targetDao.address,
           AddressZero,
           MINT_PERMISSION_ID,
-        ]
+        ],
       ]);
     });
 
     it('correctly sets up the plugin and helpers, when a token address is not passed', async () => {
       const daoAddress = targetDao.address;
 
-      const data = abiCoder.encode(
-        prepareInstallDataTypes,
-        [
-          participationRequiredPct,
-          supportRequiredPct,
-          minDuration,
-          [AddressZero, tokenName, tokenSymbol],
-          [merkleMintToAddressArray, merkleMintToAmountArray],
-        ]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        totalSupportThresholdPct,
+        relativeSupportThresholdPct,
+        minDuration,
+        [AddressZero, tokenName, tokenSymbol],
+        [merkleMintToAddressArray, merkleMintToAmountArray],
+      ]);
 
       const nonce = await ethers.provider.getTransactionCount(
         erc20VotingSetup.address
@@ -400,12 +404,12 @@ describe('ERC20VotingSetup', function () {
       );
 
       expect(await erc20VotingContract.getDAO()).to.be.equal(daoAddress);
-      expect(await erc20VotingContract.participationRequiredPct()).to.be.equal(
-        participationRequiredPct
+      expect(await erc20VotingContract.totalSupportThresholdPct()).to.be.equal(
+        totalSupportThresholdPct
       );
-      expect(await erc20VotingContract.supportRequiredPct()).to.be.equal(
-        supportRequiredPct
-      );
+      expect(
+        await erc20VotingContract.relativeSupportThresholdPct()
+      ).to.be.equal(relativeSupportThresholdPct);
       expect(await erc20VotingContract.minDuration()).to.be.equal(minDuration);
       expect(await erc20VotingContract.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
@@ -469,7 +473,7 @@ describe('ERC20VotingSetup', function () {
         targetDao.address,
         tokenName,
         tokenSymbol,
-        {receivers: [], amounts:[]}
+        {receivers: [], amounts: []}
       );
 
       const governanceWrappedERC20 = await GovernanceWrappedERC20.deploy(
@@ -477,7 +481,7 @@ describe('ERC20VotingSetup', function () {
         tokenName,
         tokenSymbol
       );
-      
+
       // When the helpers contain governanceWrappedERC20 token
       const permissions1 =
         await erc20VotingSetup.callStatic.prepareUninstallation(

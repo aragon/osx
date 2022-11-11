@@ -143,8 +143,8 @@ type ERC20VotingPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
   proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
-  supportRequiredPct: BigInt
-  participationRequiredPct: BigInt
+  relativeSupportThresholdPct: BigInt
+  totalSupportThresholdPct: BigInt
   minDuration: BigInt
   votesLength: BigInt
   token: ERC20Token
@@ -180,13 +180,13 @@ type ERC20VotingProposal implements Proposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
-  supportRequiredPct: BigInt!
-  participationRequiredPct: BigInt!
+  relativeSupportThresholdPct: BigInt!
+  totalSupportThresholdPct: BigInt!
   yes: BigInt
   no: BigInt
   abstain: BigInt
   voteCount: BigInt
-  votingPower: BigInt!
+  census: BigInt!
   voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
@@ -200,8 +200,8 @@ type AllowlistPackage implements Package @entity {
   id: ID!
   daos: [DaoPackage!] @derivedFrom(field: "pkg")
   proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
-  supportRequiredPct: BigInt
-  participationRequiredPct: BigInt
+  relativeSupportThresholdPct: BigInt
+  totalSupportThresholdPct: BigInt
   minDuration: BigInt
   votesLength: BigInt
   members: [AllowlistVoter!]! @derivedFrom(field: "pkg")
@@ -235,9 +235,9 @@ type AllowlistProposal implements Proposal @entity {
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
-  supportRequiredPct: BigInt!
-  participationRequired: BigInt!
-  votingPower: BigInt!
+  relativeSupportThresholdPct: BigInt!
+  totalSupportThresholdPct: BigInt!
+  census: BigInt!
   yes: BigInt
   no: BigInt
   abstain: BigInt

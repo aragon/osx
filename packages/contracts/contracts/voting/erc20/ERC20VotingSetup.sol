@@ -91,7 +91,7 @@ contract ERC20VotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -108,8 +108,8 @@ contract ERC20VotingSetup is PluginSetup {
         // Decode `_data` to extract the params needed for deploying and initializing `ERC20Voting` plugin,
         // and the required helpers
         (
-            uint64 participationRequiredPct,
-            uint64 supportRequiredPct,
+            uint64 totalSupportThresholdPct,
+            uint64 relativeSupportThresholdPct,
             uint64 minDuration,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
@@ -186,8 +186,8 @@ contract ERC20VotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 ERC20Voting.initialize.selector,
                 dao,
-                participationRequiredPct,
-                supportRequiredPct,
+                totalSupportThresholdPct,
+                relativeSupportThresholdPct,
                 minDuration,
                 token
             )
@@ -250,18 +250,18 @@ contract ERC20VotingSetup is PluginSetup {
     ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions.
         uint256 helperLength = _helpers.length;
-        if(helperLength != 1) {
+        if (helperLength != 1) {
             revert WrongHelpersArrayLength({length: helperLength});
         }
-        
-        // NOTE: No need to fully validate _helpers[0] as we're sure 
+
+        // NOTE: No need to fully validate _helpers[0] as we're sure
         // it's either GovernanceWrappedERC20 or GovernanceERC20
         // which is ensured by PluginSetupProcessor that it can NOT pass helper
         // that wasn't deployed by the prepareInstall in this plugin setup.
         address token = _helpers[0];
 
         bool[] memory supportedIds = _getTokenInterfaceIds(token);
-        
+
         // If it's IERC20Upgradeable, IVotesUpgradeable and not IGovernanceWrappedERC20
         // Then it's GovernanceERC20.
         bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
@@ -298,7 +298,7 @@ contract ERC20VotingSetup is PluginSetup {
         // TODO: depending on the decision if we don't revert on revokes when plugin setup processor
         // calls dao for the permissions, we might decide to include the below always as it will be
         // more gas less than checking isGovernanceERC20..
-        if(isGovernanceERC20) {
+        if (isGovernanceERC20) {
             permissions[3] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
                 token,
