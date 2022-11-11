@@ -144,7 +144,7 @@ contract AllowlistVoting is MajorityVotingBase {
         vote_.snapshotBlock = snapshotBlock;
         vote_.relativeSupportThresholdPct = relativeSupportThresholdPct;
         vote_.totalSupportThresholdPct = totalSupportThresholdPct;
-        vote_.plenum = allowedUserCount(snapshotBlock);
+        vote_.census = allowedUserCount(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {

@@ -72,8 +72,8 @@ contract ERC20Voting is MajorityVotingBase {
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        uint256 plenum = votingToken.getPastTotalSupply(snapshotBlock);
-        if (plenum == 0) revert NoVotingPower();
+        uint256 census = votingToken.getPastTotalSupply(snapshotBlock);
+        if (census == 0) revert NoVotingPower();
 
         voteId = votesLength++;
 
@@ -97,7 +97,7 @@ contract ERC20Voting is MajorityVotingBase {
         vote_.endDate = _endDate;
         vote_.relativeSupportThresholdPct = relativeSupportThresholdPct;
         vote_.totalSupportThresholdPct = totalSupportThresholdPct;
-        vote_.plenum = plenum;
+        vote_.census = census;
         vote_.snapshotBlock = snapshotBlock;
 
         unchecked {

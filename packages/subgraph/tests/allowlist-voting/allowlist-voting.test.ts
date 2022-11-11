@@ -44,7 +44,7 @@ let endDate = '1644852000';
 let snapshotBlock = '100';
 let relativeSupportThresholdPct = '1000';
 let totalSupportThresholdPct = '500';
-let plenum = '1000';
+let census = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => {
@@ -66,7 +66,7 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
     snapshotBlock,
     relativeSupportThresholdPct,
     totalSupportThresholdPct,
-    plenum,
+    census,
     '0',
     '0',
     '0',
@@ -110,7 +110,7 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
     'relativeSupportThresholdPct',
     relativeSupportThresholdPct
   );
-  // assert.fieldEquals('AllowlistProposal', entityID, 'plenum', plenum);
+  // assert.fieldEquals('AllowlistProposal', entityID, 'census', census);
   assert.fieldEquals('AllowlistProposal', entityID, 'executed', 'false');
 
   // chack AllowlistPackage

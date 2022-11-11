@@ -218,7 +218,7 @@ export function createAllowlistProposalEntityState(
   snapshotBlock: string = SNAPSHOT_BLOCK,
   relativeSupportThresholdPct: string = MIN_SUPPORT,
   totalSupportThresholdPct: string = MIN_TURNOUT,
-  plenum: string = VOTING_POWER,
+  census: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
   executable: boolean = false,
@@ -239,7 +239,7 @@ export function createAllowlistProposalEntityState(
   allowlistProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
-  allowlistProposal.plenum = BigInt.fromString(plenum);
+  allowlistProposal.census = BigInt.fromString(census);
   allowlistProposal.open = open;
   allowlistProposal.executable = executable;
   allowlistProposal.executed = executed;

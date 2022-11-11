@@ -326,7 +326,7 @@ describe('AllowlistVoting', function () {
       }
 
       // voting will be initialized with 10 allowed addresses
-      // Which means plenum = 10 at this point.
+      // Which means census = 10 at this point.
       await initializeVoting(
         totalSupportThresholdPct,
         relativeSupportThresholdPct,
@@ -510,7 +510,7 @@ describe('AllowlistVoting', function () {
         }
 
         // voting will be initialized with 10 allowed addresses
-        // Which means plenum = 10 at this point.
+        // Which means census = 10 at this point.
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
@@ -618,7 +618,7 @@ describe('AllowlistVoting', function () {
         }
 
         // voting will be initialized with 5 allowed addresses
-        // Which means plenum = 5 at this point.
+        // Which means census = 5 at this point.
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,

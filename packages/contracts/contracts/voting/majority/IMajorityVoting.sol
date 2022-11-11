@@ -27,7 +27,7 @@ interface IMajorityVoting {
         uint256 yes;
         uint256 no;
         uint256 abstain;
-        uint256 plenum;
+        uint256 census;
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
     }
@@ -131,7 +131,7 @@ interface IMajorityVoting {
     /// @return snapshotBlock The block number of the snapshot taken for this vote.
     /// @return relativeSupportThresholdPct The relative support threshold in percent.
     /// @return totalSupportThresholdPct The total support threshold in percent.
-    /// @return plenum The voting power participating in the vote.
+    /// @return census The total number of eligible votes that can be casted.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.
@@ -147,7 +147,7 @@ interface IMajorityVoting {
             uint64 snapshotBlock,
             uint64 relativeSupportThresholdPct,
             uint64 totalSupportThresholdPct,
-            uint256 plenum,
+            uint256 census,
             uint256 yes,
             uint256 no,
             uint256 abstain,

@@ -52,7 +52,7 @@ export function _handleVoteCreated(
     proposalEntity.snapshotBlock = vote.value.value4;
     proposalEntity.relativeSupportThresholdPct = vote.value.value5;
     proposalEntity.totalSupportThresholdPct = vote.value.value6;
-    proposalEntity.plenum = vote.value.value7;
+    proposalEntity.census = vote.value.value7;
 
     // actions
     let actions = vote.value.value11;
@@ -140,7 +140,7 @@ export function handleVoteCast(event: VoteCast): void {
       // where 0.35 => 35
       let currentParticipation = voteCount
         .times(BigInt.fromI32(100))
-        .div(proposalEntity.plenum);
+        .div(proposalEntity.census);
       // expect a number between 0 and 100
       // where 0.35 => 35
       let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);

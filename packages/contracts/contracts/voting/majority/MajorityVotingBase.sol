@@ -179,7 +179,7 @@ abstract contract MajorityVotingBase is
             uint64 snapshotBlock,
             uint64 _relativeSupportThresholdPct,
             uint64 _totalSupportThresholdPct,
-            uint256 plenum,
+            uint256 census,
             uint256 yes,
             uint256 no,
             uint256 abstain,
@@ -195,7 +195,7 @@ abstract contract MajorityVotingBase is
         snapshotBlock = vote_.snapshotBlock;
         _relativeSupportThresholdPct = vote_.relativeSupportThresholdPct;
         _totalSupportThresholdPct = vote_.totalSupportThresholdPct;
-        plenum = vote_.plenum;
+        census = vote_.census;
         yes = vote_.yes;
         no = vote_.no;
         abstain = vote_.abstain;
@@ -234,7 +234,7 @@ abstract contract MajorityVotingBase is
     /// @return True if the given vote can be executed, false otherwise.
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the total `plenum` (the plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
+    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `census` (the total number of eligible votes that can be casted a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
     /// @param _voteId The ID of the vote.
     /// @return True if the given vote can be executed, false otherwise.
     function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
@@ -245,7 +245,7 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.plenum);
+        uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.census);
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
         // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
