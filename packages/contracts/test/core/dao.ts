@@ -1,8 +1,9 @@
 import {expect} from 'chai';
-import hre, {ethers} from 'hardhat';
+import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO, GovernanceERC20} from '../../typechain';
+import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
@@ -56,7 +57,10 @@ describe('DAO', function () {
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
-    token = await Token.deploy(dao.address, 'GOV', 'GOV');
+    token = await Token.deploy(dao.address, 'GOV', 'GOV', {
+      receivers: [],
+      amounts: [],
+    });
 
     // Grant permissions
     await Promise.all([
@@ -201,17 +205,15 @@ describe('DAO', function () {
       let tx = await dao.execute(0, dummyActions);
       let rc = await tx.wait();
 
-      const {actor, callId, actions, execResults} = dao.interface.parseLog(
-        rc.logs[0]
-      ).args;
+      const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-      expect(actor).to.equal(ownerAddress);
-      expect(callId).to.equal(0);
-      expect(actions.length).to.equal(1);
-      expect(actions[0].to).to.equal(dummyActions[0].to);
-      expect(actions[0].value).to.equal(dummyActions[0].value);
-      expect(actions[0].data).to.equal(dummyActions[0].data);
-      expect(execResults).to.deep.equal(expectedDummyResults);
+      expect(event.args.actor).to.equal(ownerAddress);
+      expect(event.args.callId).to.equal(0);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.execResults).to.deep.equal(expectedDummyResults);
     });
   });
 

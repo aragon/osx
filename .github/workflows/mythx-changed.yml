@@ -43,8 +43,9 @@ jobs:
           fetch-depth: 0
           ref: refs/pull/${{ inputs.pr_number }}/merge
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
       - uses: actions/setup-python@v4
       - name: Install mythx-cli
@@ -67,8 +68,7 @@ jobs:
         run: |
           id=$(cat id | head -1)
           group_id=$(mythx --format=json --api-key ${{ secrets.MYTHX_API_KEY }} analysis status $id | jq -r .group_id)
-          echo "::set-output name=group_id::$group_id"
-
+          echo "group_id=$group_id" >> $GITHUB_OUTPUT
   comment:
     runs-on: ubuntu-latest
     permissions:

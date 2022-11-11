@@ -15,8 +15,27 @@
     "TokenFactory": "0x9DE8341f7369DcEC25Fd085dC55F5BbD8e279891"
   },
   "goerli": {
-    "DAOFactory": "0x8B4Ca38524fCeCbD5acA39C7cd2f3B762B1d91Bf",
+    "DAOFactory": "0xd52CA6BbfC11627aF9aC3496CAb975ae20E70A81",
     "Registry": "0x2B8C4DD137104d1E869105cd0106e7D9EF955BfE",
-    "TokenFactory": "0xE0b582144d9347e849Ab91780f904d4002c55E05"
+    "TokenFactory": "0xE0b582144d9347e849Ab91780f904d4002c55E05",
+    "AllowlistVotingSetup": "0xD39cE95D1e29d4EA9F4E8813d73E68F2F720377a",
+    "DAO": "0xe0C6B6f2078bbC38Bf71af47C286766689D3BaaF",
+    "DAORegistry": "0xF9514f4Eac328F53d94c87B76c407B9a67E1441A",
+    "DAORegistry_Implementation": "0xe4F9e25894E864f9D0142375F8A6a3D3E463c5B5",
+    "DAORegistry_Proxy": "0xF9514f4Eac328F53d94c87B76c407B9a67E1441A",
+    "DAO_ENSSubdomainRegistrar": "0x99C7D164fcd6a6F11E0C11fC7e932D285b7F08aB",
+    "DAO_ENSSubdomainRegistrar_Implementation": "0x92ABB80D541c0Ea5C4C0CeB8c8EAA7c264470c77",
+    "DAO_ENSSubdomainRegistrar_Proxy": "0x99C7D164fcd6a6F11E0C11fC7e932D285b7F08aB",
+    "DAO_Implementation": "0xDA18018D87836394bae8e48beF910f7984ff7333",
+    "DAO_Proxy": "0xe0C6B6f2078bbC38Bf71af47C286766689D3BaaF",
+    "ERC20VotingSetup": "0xE75B0C19495CbA675e45Cb662D60429dee4de344",
+    "PluginRepoFactory": "0x4717226b5Ab973482d2C372f47aaAb46db5caE8C",
+    "PluginRepoRegistry": "0x22C8AEA0Ad1c1872E60bD43b3FaF20471F7CC43f",
+    "PluginRepoRegistry_Implementation": "0xDA3948CD0f78574393AA3a797e4Cd5615f4a30f3",
+    "PluginRepoRegistry_Proxy": "0x22C8AEA0Ad1c1872E60bD43b3FaF20471F7CC43f",
+    "PluginSetupProcessor": "0xf7777b97EBEec7EaFCFD28aabE31EDd8F9b46A08",
+    "Plugin_ENSSubdomainRegistrar": "0x03d529D600eb5bf30FFa4A644F88F4bC3Bc0fD7c",
+    "Plugin_ENSSubdomainRegistrar_Implementation": "0xC234cb557F7a45207FFCC3575FD4eE1C165055B1",
+    "Plugin_ENSSubdomainRegistrar_Proxy": "0x03d529D600eb5bf30FFa4A644F88F4bC3Bc0fD7c"
   }
 }

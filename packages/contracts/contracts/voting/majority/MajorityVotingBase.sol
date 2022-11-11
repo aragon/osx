@@ -13,8 +13,14 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting components.
-/// @dev This component implements the `IMajorityVoting` interface.
+/// @notice The abstract implementation of majority voting plugin. We use the following definitions:
+/// - Relative support: `N_yes / (N_yes + N_no)`
+/// - Total support   : `N_yes / N_total`
+/// Additionally, the following assumptions apply to the threshold paramters related to the above mentioned quantities:
+/// - `relativeSupportThresholdPct` >= 50 %
+/// - `totalSupportThresholdPct` <= `relativeSupportThresholdPct`
+/// These constraints are not enforeced by contract code and developers can make unsafe configurations. Instead, the frontend will warn about wrong parameter settings.
+/// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
@@ -35,20 +41,15 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between vote IDs and vote information.
     mapping(uint256 => Vote) internal votes;
 
-    uint64 public supportRequiredPct;
-    uint64 public participationRequiredPct;
+    uint64 public relativeSupportThresholdPct;
+    uint64 public totalSupportThresholdPct;
     uint64 public minDuration;
     uint256 public votesLength;
 
-    /// @notice Thrown if the maximal possible support is exceeded.
+    /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.
     /// @param actual The actual value.
-    error VoteSupportExceeded(uint64 limit, uint64 actual);
-
-    /// @notice Thrown if the maximal possible participation is exceeded.
-    /// @param limit The maximal value.
-    /// @param actual The actual value.
-    error VoteParticipationExceeded(uint64 limit, uint64 actual);
+    error PercentageExceeds100(uint64 limit, uint64 actual);
 
     /// @notice Thrown if the selected vote times are not allowed.
     /// @param current The maximal value.
@@ -58,33 +59,45 @@ abstract contract MajorityVotingBase is
     error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
-    error VoteDurationZero();
+    error VoteDurationZero(); ///TODO  remove
 
-    /// @notice Thrown if a voter is not allowed to cast a vote.
+    /// @notice Thrown if zero is not allowed as a value
+    error ZeroValueNotAllowed();
+
+    /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
+    /// - has not started,
+    /// - has ended,
+    /// - was executed, or
+    /// - the voter doesn't have voting powers.
     /// @param voteId The ID of the vote.
     /// @param sender The address of the voter.
-    error VoteCastingForbidden(uint256 voteId, address sender);
+    error VoteCastForbidden(uint256 voteId, address sender);
 
-    /// @notice Thrown if the vote execution is forbidden
+    /// @notice Thrown if the vote execution is forbidden.
+    /// @param voteId The ID of the vote.
     error VoteExecutionForbidden(uint256 voteId);
 
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _participationRequiredPct The minimal required participation in percent.
-    /// @param _supportRequiredPct The minimal required support in percent.
+    /// @param _totalSupportThresholdPct The total support threshold in percent.
+    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
-        uint64 _participationRequiredPct,
-        uint64 _supportRequiredPct,
+        uint64 _totalSupportThresholdPct,
+        uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
 
-        _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        _validateAndSetSettings(
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
+            _minDuration
+        );
 
-        emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -102,13 +115,17 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function setConfiguration(
-        uint64 _participationRequiredPct,
-        uint64 _supportRequiredPct,
+        uint64 _totalSupportThresholdPct,
+        uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
     ) external auth(SET_CONFIGURATION_PERMISSION_ID) {
-        _validateAndSetSettings(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        _validateAndSetSettings(
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
+            _minDuration
+        );
 
-        emit ConfigUpdated(_participationRequiredPct, _supportRequiredPct, _minDuration);
+        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -126,9 +143,10 @@ abstract contract MajorityVotingBase is
         uint256 _voteId,
         VoteOption _choice,
         bool _executesIfDecided
-    ) external {
-        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender()))
-            revert VoteCastingForbidden(_voteId, _msgSender());
+    ) public {
+        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender())) {
+            revert VoteCastForbidden(_voteId, _msgSender());
+        }
         _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
     }
 
@@ -163,9 +181,9 @@ abstract contract MajorityVotingBase is
             uint64 startDate,
             uint64 endDate,
             uint64 snapshotBlock,
-            uint64 supportRequired,
-            uint64 participationRequired,
-            uint256 votingPower,
+            uint64 _relativeSupportThresholdPct,
+            uint64 _totalSupportThresholdPct,
+            uint256 census,
             uint256 yes,
             uint256 no,
             uint256 abstain,
@@ -179,9 +197,9 @@ abstract contract MajorityVotingBase is
         startDate = vote_.startDate;
         endDate = vote_.endDate;
         snapshotBlock = vote_.snapshotBlock;
-        supportRequired = vote_.supportRequiredPct;
-        participationRequired = vote_.participationRequiredPct;
-        votingPower = vote_.votingPower;
+        _relativeSupportThresholdPct = vote_.relativeSupportThresholdPct;
+        _totalSupportThresholdPct = vote_.totalSupportThresholdPct;
+        census = vote_.census;
         yes = vote_.yes;
         no = vote_.no;
         abstain = vote_.abstain;
@@ -203,56 +221,62 @@ abstract contract MajorityVotingBase is
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
         votes[_voteId].executed = true;
-        
+
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         emit VoteExecuted(_voteId, execResults);
     }
 
-    /// @notice Internal function to check if a voter can participate on a vote. It assumes the queried vote exists.
+    /// @notice Internal function to check if a voter can vote. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
-    /// @param _voter the address of the voter to check.
-    /// @return True if the given voter can participate a certain vote, false otherwise.
+    /// @param _voter The address of the voter to check.
+    /// @return True if the given voter can vote on a certain vote, false otherwise.
     function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _voteId The ID of the vote.
     /// @return True if the given vote can be executed, false otherwise.
+
+    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
+    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `census` (the total number of eligible votes that can be casted a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
+    /// @param _voteId The ID of the vote.
+    /// @return True if the given vote can be executed, false otherwise.
     function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
         Vote storage vote_ = votes[_voteId];
 
+        // Verify that the vote has not been executed already.
         if (vote_.executed) {
             return false;
         }
 
-        // Voting is already decided
-        if (_isValuePct(vote_.yes, vote_.votingPower, vote_.supportRequiredPct)) {
+        uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.census);
+
+        // EARLY EXECUTION (after the vote start but before the vote duration has passed)
+        // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
+        if (_isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct) {
             return true;
         }
 
-        // Vote ended?
+        // NORMAL EXECUTION (after the vote duration has passed)
+        // Both, the total and relative support must be met.
+
+        // Criterium 1: The vote has ended.
         if (_isVoteOpen(vote_)) {
             return false;
         }
 
-        uint256 totalVotes = vote_.yes + vote_.no;
-
-        // Have enough people's stakes participated ? then proceed.
-        if (
-            !_isValuePct(
-                totalVotes + vote_.abstain,
-                vote_.votingPower,
-                vote_.participationRequiredPct
-            )
-        ) {
+        // Criterium 2: The total support is greater than the total support threshold
+        if (totalSupportPct <= vote_.totalSupportThresholdPct) {
             return false;
         }
 
-        // Has enough support?
-        if (!_isValuePct(vote_.yes, totalVotes, vote_.supportRequiredPct)) {
+        // Criterium 3: The relative support is greater than the relative support threshold
+        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no + vote_.abstain);
+        if (relativeSupportPct <= vote_.relativeSupportThresholdPct) {
             return false;
         }
 
+        // The criteria 1-3 above are met and the vote can execute.
         return true;
     }
 
@@ -266,43 +290,37 @@ abstract contract MajorityVotingBase is
             !vote_.executed;
     }
 
-    /// @notice Calculates whether `_value` is more than a percentage `_pct` of `_total`.
-    /// @param _value the current value.
-    /// @param _total the total value.
-    /// @param _pct the required support percentage.
-    /// @return returns if the _value is _pct or more percentage of _total.
-    function _isValuePct(
-        uint256 _value,
-        uint256 _total,
-        uint256 _pct
-    ) internal pure returns (bool) {
+    /// @notice Calculates the relative of value with respect to a total as a percentage.
+    /// @param _value The value.
+    /// @param _total The total.
+    /// @return returns The relative value as a percentage.
+    function _calculatePct(uint256 _value, uint256 _total) internal pure returns (uint256) {
         if (_total == 0) {
-            return false;
+            revert ZeroValueNotAllowed();
         }
 
-        uint256 computedPct = (_value * PCT_BASE) / _total;
-        return computedPct > _pct;
+        return (_value * PCT_BASE) / _total;
     }
 
     function _validateAndSetSettings(
-        uint64 _participationRequiredPct,
-        uint64 _supportRequiredPct,
+        uint64 _totalSupportThresholdPct,
+        uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
     ) internal virtual {
-        if (_supportRequiredPct > PCT_BASE) {
-            revert VoteSupportExceeded({limit: PCT_BASE, actual: _supportRequiredPct});
+        if (_relativeSupportThresholdPct > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _relativeSupportThresholdPct});
         }
 
-        if (_participationRequiredPct > PCT_BASE) {
-            revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
+        if (_totalSupportThresholdPct > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _totalSupportThresholdPct});
         }
 
         if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 
-        participationRequiredPct = _participationRequiredPct;
-        supportRequiredPct = _supportRequiredPct;
+        totalSupportThresholdPct = _totalSupportThresholdPct;
+        relativeSupportThresholdPct = _relativeSupportThresholdPct;
         minDuration = _minDuration;
     }
 

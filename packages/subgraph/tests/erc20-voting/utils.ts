@@ -118,8 +118,8 @@ export function createNewVoteExecutedEvent(
 }
 
 export function createNewConfigUpdatedEvent(
-  supportRequiredPct: string,
-  participationRequiredPct: string,
+  relativeSupportThresholdPct: string,
+  totalSupportThresholdPct: string,
   minDuration: string,
   contractAddress: string
 ): ConfigUpdated {
@@ -128,21 +128,23 @@ export function createNewConfigUpdatedEvent(
   newConfigUpdatedEvent.address = Address.fromString(contractAddress);
   newConfigUpdatedEvent.parameters = [];
 
-  let participationRequiredPctParam = new ethereum.EventParam(
-    'participationRequiredPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(participationRequiredPct))
+  let totalSupportThresholdPctParam = new ethereum.EventParam(
+    'totalSupportThresholdPct',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(totalSupportThresholdPct))
   );
-  let supportRequiredPctParam = new ethereum.EventParam(
-    'supportRequiredPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportRequiredPct))
+  let relativeSupportThresholdPctParam = new ethereum.EventParam(
+    'relativeSupportThresholdPct',
+    ethereum.Value.fromSignedBigInt(
+      BigInt.fromString(relativeSupportThresholdPct)
+    )
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newConfigUpdatedEvent.parameters.push(participationRequiredPctParam);
-  newConfigUpdatedEvent.parameters.push(supportRequiredPctParam);
+  newConfigUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
+  newConfigUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
   newConfigUpdatedEvent.parameters.push(minDurationParam);
 
   return newConfigUpdatedEvent;
@@ -174,9 +176,9 @@ export function createERC20VotingProposalEntityState(
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  supportRequiredPct: string = MIN_SUPPORT,
-  participationRequiredPct: string = MIN_TURNOUT,
-  votingPower: string = VOTING_POWER,
+  relativeSupportThresholdPct: string = MIN_SUPPORT,
+  totalSupportThresholdPct: string = MIN_TURNOUT,
+  census: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
   executable: boolean = false,
@@ -191,13 +193,13 @@ export function createERC20VotingProposalEntityState(
   erc20VotingProposal.startDate = BigInt.fromString(startDate);
   erc20VotingProposal.endDate = BigInt.fromString(endDate);
   erc20VotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  erc20VotingProposal.supportRequiredPct = BigInt.fromString(
-    supportRequiredPct
+  erc20VotingProposal.relativeSupportThresholdPct = BigInt.fromString(
+    relativeSupportThresholdPct
   );
-  erc20VotingProposal.participationRequiredPct = BigInt.fromString(
-    participationRequiredPct
+  erc20VotingProposal.totalSupportThresholdPct = BigInt.fromString(
+    totalSupportThresholdPct
   );
-  erc20VotingProposal.votingPower = BigInt.fromString(votingPower);
+  erc20VotingProposal.census = BigInt.fromString(census);
   erc20VotingProposal.open = open;
   erc20VotingProposal.executable = executable;
   erc20VotingProposal.executed = executed;

@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
+  to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
+- Added `resolver` check in initialize function and `setDefaultResolver` of `ENSSubdomainRegistrar.sol`.
+- Added test related to `resolver` in `ens-subdomain-registry.ts`.
+- Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
+- Added more tests for the `PluginSetupProcessor`.
+
+### Changed
+
+- Fixed and clarified the execution logic of `MajorityVoting` by replacing participation with total support and emitted an error if the vote creator tries to vote before the start date.
+- Refactored mocks for `PluginUUPSUpgradeable` and `PluginCloneable` and the respective setups.
+- Moved `event.ts` from `/test/test-utils/` to `/utils/`.
+
+### Removed
+
+- Removed `isApprovedForAll` check from initialize function of `ENSSubdomainRegistrar.sol`.
+- Removed test related to `isApprovedForAll` in `ens-subdomain-registry.ts`.
+
+## v0.3.0-alpha
+
+### Added
+
+- Added `00_create-plugins-repo.ts` for creating and registering plugin repo for plugins.
+- Added `00_allowlist_voting_setup.ts` and `10_erc20_voting_setup.ts` for deploying plugin setup.
+- Added `getMergedAbi()` function to `abi.ts`.
+- Transferred the core docs from aragon/builders-portal to this repository.
 - Added `AllowlistVotingSetup` and `ERC20VotingSetup`.
 - Added utility functions (`deployPluginRepoRegistry`, `deployPluginSetupProcessor`, `deployPluginRepoFactory`, and `filterEvents`) to the test suite.
 - Added `DaoAuthorizableBase` class.
@@ -35,10 +61,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an abstract `ERC165RegistryBase` `Component` to register contracts by their address based on their ERC165 interface ID.
 - Added a concrete `ERC165Registry` implementation.
 - Added ENS support for `PluginRepoRegistry`.
-- Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
-to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
+- Added minting functionality to the `initialize` function of `GovernanceERC20`.
+
 ### Changed
 
+- Updated `Verify.ts` for verifying new contracts.
+- Split `permissions.ts` into three files corresponding to `00_ens-permissions.ts`, `10_dao-registry-permissions.ts` and `20_plugin-registrty-permissions.ts`.
+- Refactored `setupENS` function.
 - Renamed `UPGRADE_PERMISSION` to be more specific to `UPGRADE_DAO_PERMISSION`, `UPGRADE_PLUGIN_PERMISSION`, etc.
 - Refactored `DAOFactory`to use`PluginSetupProcessor`.
 - Refactored NatSpec comments and names for the contracts related to the `Plugin` and `PluginSetup`.
@@ -65,7 +94,11 @@ to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is
 - Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
 - Renamed `createProxy` function to `createERC1967Proxy`.
 - Replaces custom ERC1271 interface with Openzeppelins interface.
-- Switched order of where and who for the events in `PermissionManager`.
+  <<<<<<< HEAD
+- # Switched order of where and who for the events in `PermissionManager`.
+- Extends `VersionCreated` event with `PluginSetup` and `contentURI`
+- Markes parameters of `InstallationApplied` as `indexed`
+  > > > > > > > develop
 
 ### Removed
 
@@ -75,6 +108,7 @@ to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is
 - Removed `deepEqual` overwrite of `equal` property in Chai Assertion used for testing of emitted events.
 - Removed `ERC165Registry`.
 - Removed `Component` and `MetaTxComponent`.
+- Removed `MerkleMinter` deployment from `ERC20VotingSetup`.
 
 ## v0.2.0-alpha
 

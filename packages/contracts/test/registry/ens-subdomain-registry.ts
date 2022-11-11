@@ -9,34 +9,15 @@ import {
   ENSRegistry,
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash} from '../../utils/ens';
+
+import {setupResolver} from '../test-utils/ens';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
 const DUMMY_METADATA = '0x';
-
-async function setupResolver(
-  ens: ENSRegistry,
-  resolver: PublicResolver,
-  owner: SignerWithAddress
-) {
-  await ens
-    .connect(owner)
-    .setSubnodeOwner(
-      ensDomainHash(''),
-      ensLabelHash('resolver'),
-      await owner.getAddress()
-    );
-
-  const resolverNode = ensDomainHash('resolver');
-
-  await ens.connect(owner).setResolver(resolverNode, resolver.address);
-  await resolver
-    .connect(owner)
-    ['setAddr(bytes32,address)'](resolverNode, resolver.address);
-}
 
 // Setup ENS with signers[0] owning the the ENS root node (''), the resolver node ('resolver'), the managing DAO, and the subdomain registrar
 async function setupENS(
@@ -153,6 +134,32 @@ describe('ENSSubdomainRegistrar', function () {
 
     postInitializationTests();
 
+    it('reverts if the registrar do not have the ownership of the domain node', async () => {
+      // Register the parent domain 'test2' through signers[0] who owns the ENS root node ('') and make the subdomain registrar the owner
+      registerSubdomainHelper('test2', '', signers[0], signers[0].address);
+
+      // Initialize the registrar with the 'test' domain
+      registrar.initialize(
+        managingDao.address,
+        ens.address,
+        ensDomainHash('test2')
+      );
+
+      // Grant signers[1] the `REGISTER_ENS_SUBDOMAIN_PERMISSION_ID` permission
+      await managingDao.grant(
+        registrar.address,
+        await signers[1].getAddress(),
+        REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+      );
+
+      // signers[0] can't register subdomains
+      await expect(
+        registrar
+          .connect(signers[1])
+          .registerSubnode(ensLabelHash('my1'), await signers[1].getAddress())
+      ).to.be.reverted;
+    });
+
     it('reverts if the ownership of the domain node is removed from the registrar', async () => {
       // Initialize the registrar with the 'test' domain
       registrar.initialize(
@@ -259,39 +266,24 @@ describe('ENSSubdomainRegistrar', function () {
       );
     });
 
-    it('reverts during initialization, even for the ENS owner', async () => {
-      // This is also the case for signers[0] who owns the ENS registries
-      await expect(
-        registrar
-          .connect(signers[0])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
-      ).to.be.revertedWith(
-        customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
-        )
-      );
-    });
-
-    expectedUnauthorizedRegistrarReverts();
+    expectedReverts();
   });
 
   describe('Random signer with no permissions at all', () => {
-    expectedUnauthorizedRegistrarReverts();
+    expectedReverts();
   });
 
-  function expectedUnauthorizedRegistrarReverts() {
-    it('reverts during initialization', async () => {
+  function expectedReverts() {
+    it('reverts during initialization if node does not have a valid resolver', async () => {
       await expect(
         registrar
           .connect(signers[1])
-          .initialize(managingDao.address, ens.address, ensDomainHash('test'))
+          .initialize(managingDao.address, ens.address, ensDomainHash('test2'))
       ).to.be.revertedWith(
         customError(
-          'UnauthorizedRegistrar',
-          ethers.constants.AddressZero,
-          registrar.address
+          'InvalidResolver',
+          ensDomainHash('test2'),
+          ethers.constants.AddressZero
         )
       );
     });
@@ -458,8 +450,22 @@ describe('ENSSubdomainRegistrar', function () {
           );
         });
 
-        it('sets the resolver correctly', async () => {
+        it('revert if invalid resolver is set', async () => {
           const newResolverAddr = ethers.constants.AddressZero;
+
+          await expect(
+            registrar.connect(signers[1]).setDefaultResolver(newResolverAddr)
+          ).to.be.revertedWith(
+            customError(
+              'InvalidResolver',
+              ensDomainHash('test'),
+              newResolverAddr
+            )
+          );
+        });
+
+        it('sets the resolver correctly', async () => {
+          const newResolverAddr = await signers[8].getAddress();
           let tx = await registrar
             .connect(signers[1])
             .setDefaultResolver(newResolverAddr);

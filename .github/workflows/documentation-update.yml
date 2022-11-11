@@ -13,8 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: "yarn"
           node-version: 14
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -28,21 +29,23 @@ jobs:
           ref: staging
           path: builders-portal
           token: ${{ secrets.ARABOT_PAT }}
-      - name: Copy docs
-        run: cp -R packages/contracts/docs/generated/* $GITHUB_WORKSPACE/builders-portal/docs/smart-contracts/
+      - name: Remove the docs/core folder in the builders-portal
+        run: rm -rf $GITHUB_WORKSPACE/builders-portal/docs/core
+      - name: Copy the docs/core folder to the builders-portal
+        run: cp -R packages/contracts/docs/core $GITHUB_WORKSPACE/builders-portal/docs/core
       - name: Get short commit hash
         id: hash
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.ARABOT_PAT }}
           path: builders-portal
-          commit-message: "Update smart-contract docs by commit ${{ steps.hash.outputs.sha_short }}"
-          committer: "Arabot <arabot-1@users.noreply.github.com>"
-          branch: patch/smart-contracts-docs
+          commit-message: 'Update core docs by commit ${{ steps.hash.outputs.sha_short }}'
+          committer: 'Arabot <arabot-1@users.noreply.github.com>'
+          branch: patch/core-docs
           delete-branch: true
           title: Updates docs for smart contracts
-          body: "Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))"
+          body: 'Automated update by Github actions (Run: [${{ github.run_id }}](https://github.com/aragon/core/actions/runs/${{ github.run_id }}))'
           reviewers: ${{ github.actor }}
           team-reviewers: devrel

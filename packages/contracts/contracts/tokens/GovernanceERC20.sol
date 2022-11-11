@@ -26,29 +26,47 @@ contract GovernanceERC20 is
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
     
+    struct MintSettings {
+        address[] receivers;
+        uint256[] amounts;
+    }
+
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
+    /// @param _mintSettings The initial mint settings
     constructor(
         IDAO _dao,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        MintSettings memory _mintSettings
     ) {
-        initialize(_dao, _name, _symbol);
+        initialize(_dao, _name, _symbol, _mintSettings);
     }
 
     /// @notice Initializes the GovernanceERC20.
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
+    /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
+    /// @dev The lengths of `receivers` and `amounts` must match.
     function initialize(
         IDAO _dao,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        MintSettings memory _mintSettings
     ) public initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
+
+        for(uint256 i = 0; i < _mintSettings.receivers.length;) {
+            _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
+            
+            unchecked {
+                i++;
+            }
+        }
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.

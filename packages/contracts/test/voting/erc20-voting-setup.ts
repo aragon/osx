@@ -17,20 +17,25 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-// minimum bytes for `prepareInstallation` data param.
-const MINIMUM_DATA = abiCoder.encode(
-  [
-    'uint64',
-    'uint64',
-    'uint64',
-    'tuple(address,string,string)',
-    'tuple(address[],uint256[])',
-  ],
-  [1, 1, 1, [AddressZero, '', ''], [[], []]]
-);
+const prepareInstallDataTypes = [
+  'uint64',
+  'uint64',
+  'uint64',
+  'tuple(address,string,string)',
+  'tuple(address[],uint256[])',
+];
 
-const participationRequiredPct = 1;
-const supportRequiredPct = 2;
+// minimum bytes for `prepareInstallation` data param.
+const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
+  1,
+  1,
+  1,
+  [AddressZero, '', ''],
+  [[], []],
+]);
+
+const totalSupportThresholdPct = 1;
+const relativeSupportThresholdPct = 2;
 const minDuration = 3;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
@@ -44,7 +49,6 @@ const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
-const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 
 describe('ERC20VotingSetup', function () {
   let ownerAddress: string;
@@ -76,7 +80,7 @@ describe('ERC20VotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _participationRequiredPct, uint64 _supportRequiredPct, uint64 _minDuration, address _token)',
+      'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
     ]);
 
     expect(
@@ -88,7 +92,7 @@ describe('ERC20VotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await erc20VotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -113,16 +117,13 @@ describe('ERC20VotingSetup', function () {
     });
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [1, 1, 1, [AddressZero, '', ''], [[AddressZero], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [AddressZero, '', ''],
+        [[AddressZero], []],
+      ]);
 
       await expect(
         erc20VotingSetup.prepareInstallation(targetDao.address, data)
@@ -131,16 +132,13 @@ describe('ERC20VotingSetup', function () {
 
     it('fails if passed token address is not a contract', async () => {
       const tokenAddress = ownerAddress;
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [1, 1, 1, [tokenAddress, '', ''], [[], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [tokenAddress, '', ''],
+        [[], []],
+      ]);
 
       await expect(
         erc20VotingSetup.prepareInstallation(targetDao.address, data)
@@ -149,16 +147,13 @@ describe('ERC20VotingSetup', function () {
 
     it('fails if passed token address is not ERC20', async () => {
       const tokenAddress = implementationAddress;
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [1, 1, 1, [tokenAddress, '', ''], [[], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [tokenAddress, '', ''],
+        [[], []],
+      ]);
 
       await expect(
         erc20VotingSetup.prepareInstallation(targetDao.address, data)
@@ -178,22 +173,13 @@ describe('ERC20VotingSetup', function () {
         nonce: nonce + 1,
       });
 
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [
-          1,
-          1,
-          1,
-          [erc20TokenContract.address, tokenName, tokenSymbol],
-          [[], []],
-        ]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [erc20TokenContract.address, tokenName, tokenSymbol],
+        [[], []],
+      ]);
 
       const {plugin, helpers, permissions} =
         await erc20VotingSetup.callStatic.prepareInstallation(
@@ -239,22 +225,13 @@ describe('ERC20VotingSetup', function () {
         nonce: nonce,
       });
 
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [
-          1,
-          1,
-          1,
-          [erc20TokenContract.address, tokenName, tokenSymbol],
-          [[], []],
-        ]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [erc20TokenContract.address, tokenName, tokenSymbol],
+        [[], []],
+      ]);
 
       await erc20VotingSetup.prepareInstallation(targetDao.address, data);
 
@@ -283,7 +260,8 @@ describe('ERC20VotingSetup', function () {
       const governanceERC20 = await GovernanceERC20.deploy(
         targetDao.address,
         'name',
-        'symbol'
+        'symbol',
+        {receivers: [], amounts: []}
       );
 
       const nonce = await ethers.provider.getTransactionCount(
@@ -295,16 +273,13 @@ describe('ERC20VotingSetup', function () {
         nonce: nonce,
       });
 
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [1, 1, 1, [governanceERC20.address, '', ''], [[], []]]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        1,
+        1,
+        1,
+        [governanceERC20.address, '', ''],
+        [[], []],
+      ]);
 
       const {plugin, helpers, permissions} =
         await erc20VotingSetup.callStatic.prepareInstallation(
@@ -349,13 +324,10 @@ describe('ERC20VotingSetup', function () {
         from: erc20VotingSetup.address,
         nonce: nonce,
       });
-      const anticipatedMerkleMinterAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
-        nonce: nonce + 1,
-      });
+
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
         from: erc20VotingSetup.address,
-        nonce: nonce + 2,
+        nonce: nonce + 1,
       });
 
       const {plugin, helpers, permissions} =
@@ -365,12 +337,9 @@ describe('ERC20VotingSetup', function () {
         );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
-      expect(helpers.length).to.be.equal(2);
-      expect(helpers).to.be.deep.equal([
-        anticipatedTokenAddress,
-        anticipatedMerkleMinterAddress,
-      ]);
-      expect(permissions.length).to.be.equal(7);
+      expect(helpers.length).to.be.equal(1);
+      expect(helpers).to.be.deep.equal([anticipatedTokenAddress]);
+      expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
           Op.Grant,
@@ -400,49 +369,19 @@ describe('ERC20VotingSetup', function () {
           AddressZero,
           MINT_PERMISSION_ID,
         ],
-        [
-          Op.Grant,
-          anticipatedTokenAddress,
-          anticipatedMerkleMinterAddress,
-          AddressZero,
-          MINT_PERMISSION_ID,
-        ],
-        [
-          Op.Grant,
-          anticipatedMerkleMinterAddress,
-          targetDao.address,
-          AddressZero,
-          MERKLE_MINT_PERMISSION_ID,
-        ],
-        [
-          Op.Grant,
-          anticipatedMerkleMinterAddress,
-          targetDao.address,
-          AddressZero,
-          UPGRADE_PERMISSION_ID,
-        ],
       ]);
     });
 
     it('correctly sets up the plugin and helpers, when a token address is not passed', async () => {
       const daoAddress = targetDao.address;
 
-      const data = abiCoder.encode(
-        [
-          'uint64',
-          'uint64',
-          'uint64',
-          'tuple(address,string,string)',
-          'tuple(address[],uint256[])',
-        ],
-        [
-          participationRequiredPct,
-          supportRequiredPct,
-          minDuration,
-          [AddressZero, tokenName, tokenSymbol],
-          [merkleMintToAddressArray, merkleMintToAmountArray],
-        ]
-      );
+      const data = abiCoder.encode(prepareInstallDataTypes, [
+        totalSupportThresholdPct,
+        relativeSupportThresholdPct,
+        minDuration,
+        [AddressZero, tokenName, tokenSymbol],
+        [merkleMintToAddressArray, merkleMintToAmountArray],
+      ]);
 
       const nonce = await ethers.provider.getTransactionCount(
         erc20VotingSetup.address
@@ -451,13 +390,9 @@ describe('ERC20VotingSetup', function () {
         from: erc20VotingSetup.address,
         nonce: nonce,
       });
-      const anticipatedMerkleMinterAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
-        nonce: nonce + 1,
-      });
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
         from: erc20VotingSetup.address,
-        nonce: nonce + 2,
+        nonce: nonce + 1,
       });
 
       await erc20VotingSetup.prepareInstallation(daoAddress, data);
@@ -469,12 +404,12 @@ describe('ERC20VotingSetup', function () {
       );
 
       expect(await erc20VotingContract.getDAO()).to.be.equal(daoAddress);
-      expect(await erc20VotingContract.participationRequiredPct()).to.be.equal(
-        participationRequiredPct
+      expect(await erc20VotingContract.totalSupportThresholdPct()).to.be.equal(
+        totalSupportThresholdPct
       );
-      expect(await erc20VotingContract.supportRequiredPct()).to.be.equal(
-        supportRequiredPct
-      );
+      expect(
+        await erc20VotingContract.relativeSupportThresholdPct()
+      ).to.be.equal(relativeSupportThresholdPct);
       expect(await erc20VotingContract.minDuration()).to.be.equal(minDuration);
       expect(await erc20VotingContract.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
@@ -491,21 +426,6 @@ describe('ERC20VotingSetup', function () {
       expect(await governanceTokenContract.getDAO()).to.be.equal(daoAddress);
       expect(await governanceTokenContract.name()).to.be.equal(tokenName);
       expect(await governanceTokenContract.symbol()).to.be.equal(tokenSymbol);
-
-      const MerkleMinterFactory = await ethers.getContractFactory(
-        'MerkleMinter'
-      );
-      const merkleMinterContract = MerkleMinterFactory.attach(
-        anticipatedMerkleMinterAddress
-      );
-
-      expect(await merkleMinterContract.getDAO()).to.be.equal(daoAddress);
-      expect(await merkleMinterContract.token()).to.be.equal(
-        anticipatedTokenAddress
-      );
-      expect(await merkleMinterContract.distributorBase()).to.be.equal(
-        await erc20VotingSetup.distributorBase()
-      );
     });
   });
 
@@ -543,29 +463,31 @@ describe('ERC20VotingSetup', function () {
 
     it('correctly returns permissions, when the required number of helpers is supplied', async () => {
       const plugin = ethers.Wallet.createRandom().address;
-      const GovernanceTokenFactory = await ethers.getContractFactory(
+      const GovernanceERC20 = await ethers.getContractFactory(
         'GovernanceERC20'
       );
-      const token = await GovernanceTokenFactory.deploy(
+      const GovernanceWrappedERC20 = await ethers.getContractFactory(
+        'GovernanceWrappedERC20'
+      );
+      const governanceERC20 = await GovernanceERC20.deploy(
         targetDao.address,
+        tokenName,
+        tokenSymbol,
+        {receivers: [], amounts: []}
+      );
+
+      const governanceWrappedERC20 = await GovernanceWrappedERC20.deploy(
+        governanceERC20.address,
         tokenName,
         tokenSymbol
       );
-      const MerkleMinterFactory = await ethers.getContractFactory(
-        'MerkleMinter'
-      );
-      const merkleMinter = await MerkleMinterFactory.deploy();
-      await merkleMinter.initialize(
-        targetDao.address,
-        token.address,
-        AddressZero
-      );
 
+      // When the helpers contain governanceWrappedERC20 token
       const permissions1 =
         await erc20VotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
           plugin,
-          [token.address],
+          [governanceWrappedERC20.address],
           EMPTY_DATA
         );
 
@@ -600,40 +522,19 @@ describe('ERC20VotingSetup', function () {
         await erc20VotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
           plugin,
-          [token.address, merkleMinter.address],
+          [governanceERC20.address],
           EMPTY_DATA
         );
 
-      expect(permissions2.length).to.be.equal(7);
+      expect(permissions2.length).to.be.equal(4);
       expect(permissions2).to.deep.equal([
         ...essentialPermissions,
         [
           Op.Revoke,
-          token.address,
+          governanceERC20.address,
           targetDao.address,
           AddressZero,
           MINT_PERMISSION_ID,
-        ],
-        [
-          Op.Revoke,
-          token.address,
-          merkleMinter.address,
-          AddressZero,
-          MINT_PERMISSION_ID,
-        ],
-        [
-          Op.Revoke,
-          merkleMinter.address,
-          targetDao.address,
-          AddressZero,
-          MERKLE_MINT_PERMISSION_ID,
-        ],
-        [
-          Op.Revoke,
-          merkleMinter.address,
-          targetDao.address,
-          AddressZero,
-          UPGRADE_PERMISSION_ID,
         ],
       ]);
     });

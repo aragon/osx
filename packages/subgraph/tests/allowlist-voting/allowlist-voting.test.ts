@@ -26,7 +26,7 @@ import {
   MIN_TURNOUT,
   VOTING_POWER
 } from '../constants';
-import {createDummyAcctions, createGetVoteCall} from '../utils';
+import {createDummyActions, createGetVoteCall} from '../utils';
 import {
   createNewUsersAddedEvent,
   createNewVoteCastEvent,
@@ -42,10 +42,10 @@ let voteId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
-let supportRequiredPct = '1000';
-let participationRequiredPct = '500';
-let votingPower = '1000';
-let actions = createDummyAcctions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
+let relativeSupportThresholdPct = '1000';
+let totalSupportThresholdPct = '500';
+let census = '1000';
+let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
@@ -64,9 +64,9 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
     startDate,
     endDate,
     snapshotBlock,
-    supportRequiredPct,
-    participationRequiredPct,
-    votingPower,
+    relativeSupportThresholdPct,
+    totalSupportThresholdPct,
+    census,
     '0',
     '0',
     '0',
@@ -107,10 +107,10 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
   assert.fieldEquals(
     'AllowlistProposal',
     entityID,
-    'supportRequiredPct',
-    supportRequiredPct
+    'relativeSupportThresholdPct',
+    relativeSupportThresholdPct
   );
-  // assert.fieldEquals('AllowlistProposal', entityID, 'votingPower', votingPower);
+  // assert.fieldEquals('AllowlistProposal', entityID, 'census', census);
   assert.fieldEquals('AllowlistProposal', entityID, 'executed', 'false');
 
   // chack AllowlistPackage
@@ -252,10 +252,15 @@ test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () =
   assert.fieldEquals(
     'AllowlistPackage',
     entityID,
-    'participationRequiredPct',
+    'totalSupportThresholdPct',
     '2'
   );
-  assert.fieldEquals('AllowlistPackage', entityID, 'supportRequiredPct', '1');
+  assert.fieldEquals(
+    'AllowlistPackage',
+    entityID,
+    'relativeSupportThresholdPct',
+    '1'
+  );
   assert.fieldEquals('AllowlistPackage', entityID, 'minDuration', '3600');
 
   clearStore();

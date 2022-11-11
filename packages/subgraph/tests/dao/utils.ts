@@ -9,7 +9,11 @@ import {
   Granted,
   Revoked,
   Frozen,
-  Executed
+  Executed,
+  Withdrawn,
+  TrustedForwarderSet,
+  SignatureValidatorSet,
+  StandardCallbackRegistered
 } from '../../generated/templates/DaoTemplate/DAO';
 
 // events
@@ -31,6 +35,48 @@ export function createNewMetadataSetEvent(
   newMetadataSetEvent.parameters.push(metadataParam);
 
   return newMetadataSetEvent;
+}
+
+export function createTrustedForwarderSetEvent(
+  trustedForwarder: string,
+  contractAddress: string
+): TrustedForwarderSet {
+  let newTrustedForwarderSetEvent = changetype<TrustedForwarderSet>(
+    newMockEvent()
+  );
+
+  newTrustedForwarderSetEvent.address = Address.fromString(contractAddress);
+  newTrustedForwarderSetEvent.parameters = [];
+
+  let trustedForwarderParam = new ethereum.EventParam(
+    'trustedForwarder',
+    ethereum.Value.fromAddress(Address.fromString(trustedForwarder))
+  );
+
+  newTrustedForwarderSetEvent.parameters.push(trustedForwarderParam);
+
+  return newTrustedForwarderSetEvent;
+}
+
+export function createSignatureValidatorSetEvent(
+  signatureValidator: string,
+  contractAddress: string
+): SignatureValidatorSet {
+  let newSignatureValidatorSetEvent = changetype<SignatureValidatorSet>(
+    newMockEvent()
+  );
+
+  newSignatureValidatorSetEvent.address = Address.fromString(contractAddress);
+  newSignatureValidatorSetEvent.parameters = [];
+
+  let trustedForwarderParam = new ethereum.EventParam(
+    'signatureValidator',
+    ethereum.Value.fromAddress(Address.fromString(signatureValidator))
+  );
+
+  newSignatureValidatorSetEvent.parameters.push(trustedForwarderParam);
+
+  return newSignatureValidatorSetEvent;
 }
 
 export function createNewNativeTokenDepositedEvent(
@@ -89,6 +135,42 @@ export function createNewDepositedEvent(
 
   newEvent.parameters.push(senderParam);
   newEvent.parameters.push(tokenParam);
+  newEvent.parameters.push(amountParam);
+  newEvent.parameters.push(referenceParam);
+
+  return newEvent;
+}
+
+export function createNewWithdrawnEvent(
+  token: string,
+  to: string,
+  amount: string,
+  reference: string,
+  contractAddress: string
+): Withdrawn {
+  let newEvent = changetype<Withdrawn>(newMockEvent());
+  newEvent.address = Address.fromString(contractAddress);
+  newEvent.parameters = [];
+
+  let tokenParam = new ethereum.EventParam(
+    'token',
+    ethereum.Value.fromAddress(Address.fromString(token))
+  );
+  let toParam = new ethereum.EventParam(
+    'to',
+    ethereum.Value.fromAddress(Address.fromString(to))
+  );
+  let amountParam = new ethereum.EventParam(
+    'amount',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(amount))
+  );
+  let referenceParam = new ethereum.EventParam(
+    '_reference',
+    ethereum.Value.fromString(reference)
+  );
+
+  newEvent.parameters.push(tokenParam);
+  newEvent.parameters.push(toParam);
   newEvent.parameters.push(amountParam);
   newEvent.parameters.push(referenceParam);
 
@@ -243,6 +325,43 @@ export function createNewExecutedEvent(
   return newExecutedEvent;
 }
 
+export function createStandardCallbackRegisteredEvent(
+  interfaceId: string,
+  callbackSelector: string,
+  magicNumber: string,
+  contractAddress: string
+): StandardCallbackRegistered {
+  let newStandardCallbackEvent = changetype<StandardCallbackRegistered>(
+    newMockEvent()
+  );
+
+  newStandardCallbackEvent.address = Address.fromString(contractAddress);
+  newStandardCallbackEvent.parameters = [];
+
+  let interfaceIdParam = new ethereum.EventParam(
+    'interfaceId',
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
+  );
+
+  let callbackSelectorParam = new ethereum.EventParam(
+    'callbackSelector',
+    ethereum.Value.fromFixedBytes(
+      Bytes.fromHexString(callbackSelector) as Bytes
+    )
+  );
+
+  let magicNumberParam = new ethereum.EventParam(
+    'magicNumber',
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(magicNumber) as Bytes)
+  );
+
+  newStandardCallbackEvent.parameters.push(interfaceIdParam);
+  newStandardCallbackEvent.parameters.push(callbackSelectorParam);
+  newStandardCallbackEvent.parameters.push(magicNumberParam);
+
+  return newStandardCallbackEvent;
+}
+
 // calls
 
 export function getBalanceOf(
@@ -290,8 +409,8 @@ export function getSupportRequiredPct(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'supportRequiredPct',
-    'supportRequiredPct():(uint64)'
+    'relativeSupportThresholdPct',
+    'relativeSupportThresholdPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -303,8 +422,8 @@ export function getParticipationRequiredPct(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'participationRequiredPct',
-    'participationRequiredPct():(uint64)'
+    'totalSupportThresholdPct',
+    'totalSupportThresholdPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

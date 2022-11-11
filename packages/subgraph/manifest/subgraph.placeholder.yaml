@@ -26,7 +26,59 @@ dataSources:
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
-      file: ./src/registry.ts
+      file: ./src/registries/daoRegistry.ts
+  - kind: ethereum/contract
+    name: PluginRepoRegistry
+    network: {{network}}
+    source:
+      abi: PluginRepoRegistry
+      address: '{{dataSources.PluginRepoRegistry.address}}'
+      startBlock: {{dataSources.PluginRepoRegistry.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - PluginRepo
+      abis:        
+        - name: PluginRepoRegistry
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json
+      eventHandlers:
+        - event: PluginRepoRegistered(string,address)
+          handler: handlePluginRepoRegistered
+      file: ./src/registries/pluginRepoRegistry.ts
+  - kind: ethereum/contract
+    name: PluginSetupProcessor
+    network: {{network}}
+    source:
+      abi: PluginSetupProcessor
+      address: '{{dataSources.PluginSetupProcessor.address}}'
+      startBlock: {{dataSources.PluginSetupProcessor.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Plugin
+        - PluginContractPermissionId
+        - PluginGrantedPermission
+      abis:        
+        - name: PluginSetupProcessor
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginSetupProcessor.sol/PluginSetupProcessor.json
+      eventHandlers:
+        - event: InstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+          handler: handleInstallationPrepared
+        - event: InstallationApplied(indexed address,indexed address)
+          handler: handleInstallationApplied
+        - event: UpdatePrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[],bytes)
+          handler: handleUpdatePrepared
+        - event: UpdateApplied(indexed address,indexed address)
+          handler: handleUpdateApplied
+        - event: UninstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+          handler: handleUninstallationPrepared
+        - event: UninstallationApplied(indexed address,indexed address)
+          handler: handleUninstallationApplied
+      file: ./src/plugin/pluginSetupProcessor.ts
 # templates
 templates:
   # DAO
@@ -68,6 +120,14 @@ templates:
           handler: handleRevoked
         - event: Frozen(indexed bytes32,indexed address,address)
           handler: handleFrozen
+        - event: Withdrawn(indexed address,indexed address,uint256,string)
+          handler: handleWithdrawn
+        - event: TrustedForwarderSet(address)
+          handler: handleTrustedForwarderSet
+        - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
+          handler: handleStandardCallbackRegistered(address)
+        - event: SignatureValidatorSet(address)
+          handler: handleSignatureValidatorSet
   # ERC20Voting (package)
   - name: ERC20Voting
     kind: ethereum/contract
@@ -122,3 +182,22 @@ templates:
           handler: handleUsersAdded
         - event: UsersRemoved(address[])
           handler: handleUsersRemoved
+  # PluginRepo
+  - name: PluginRepoTemplate
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: PluginRepo
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/plugin/pluginRepo.ts
+      entities:
+        - PluginRepo
+      abis:
+        - name: PluginRepo
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginRepo.sol/PluginRepo.json
+      eventHandlers:
+        - event: VersionCreated(uint256,uint16[3],indexed address,bytes)
+          handler: handleVersionCreated
