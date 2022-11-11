@@ -26,7 +26,7 @@ contract AllowlistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 participationRequiredPct, uint64 supportRequiredPct, uint64 minDuration, address[] allowed)";
+            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -42,8 +42,8 @@ contract AllowlistVotingSetup is PluginSetup {
 
         // Decode `_data` to extract the params needed for deploying and initializing `AllowlistVoting` plugin.
         (
-            uint64 participationRequiredPct,
-            uint64 supportRequiredPct,
+            uint64 totalSupportThresholdPct,
+            uint64 relativeSupportThresholdPct,
             uint64 minDuration,
             address[] memory allowed
         ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
@@ -54,8 +54,8 @@ contract AllowlistVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 AllowlistVoting.initialize.selector,
                 dao,
-                participationRequiredPct,
-                supportRequiredPct,
+                totalSupportThresholdPct,
+                relativeSupportThresholdPct,
                 minDuration,
                 allowed
             )

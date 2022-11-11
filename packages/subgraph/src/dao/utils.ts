@@ -90,17 +90,17 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new ERC20VotingPackage(who.toHexString());
     let contract = ERC20VotingContract.bind(who);
-    let supportRequiredPct = contract.try_supportRequiredPct();
-    let participationRequiredPct = contract.try_participationRequiredPct();
+    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
+    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
-    packageEntity.supportRequiredPct = supportRequiredPct.reverted
+    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
       ? null
-      : supportRequiredPct.value;
-    packageEntity.participationRequiredPct = participationRequiredPct.reverted
+      : relativeSupportThresholdPct.value;
+    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
       ? null
-      : participationRequiredPct.value;
+      : totalSupportThresholdPct.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
@@ -119,16 +119,16 @@ function createAllowlistVotingPackage(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new AllowlistPackage(who.toHexString());
     let contract = AllowlistVotingContract.bind(who);
-    let supportRequiredPct = contract.try_supportRequiredPct();
-    let participationRequiredPct = contract.try_participationRequiredPct();
+    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
+    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
     let minDuration = contract.try_minDuration();
 
-    packageEntity.supportRequiredPct = supportRequiredPct.reverted
+    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
       ? null
-      : supportRequiredPct.value;
-    packageEntity.participationRequiredPct = participationRequiredPct.reverted
+      : relativeSupportThresholdPct.value;
+    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
       ? null
-      : participationRequiredPct.value;
+      : totalSupportThresholdPct.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     // Create template

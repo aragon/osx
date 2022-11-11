@@ -49,21 +49,21 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _participationRequiredPct The minimal required participation in percent.
-    /// @param _supportRequiredPct The minimal required support in percent.
+    /// @param _totalSupportThresholdPct The total support threshold in percent.
+    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
     /// @param _allowed The allowed addresses.
     function initialize(
         IDAO _dao,
-        uint64 _participationRequiredPct,
-        uint64 _supportRequiredPct,
+        uint64 _totalSupportThresholdPct,
+        uint64 _relativeSupportThresholdPct,
         uint64 _minDuration,
         address[] calldata _allowed
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
-            _participationRequiredPct,
-            _supportRequiredPct,
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
             _minDuration
         );
 
@@ -142,9 +142,9 @@ contract AllowlistVoting is MajorityVotingBase {
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
         vote_.snapshotBlock = snapshotBlock;
-        vote_.supportRequiredPct = supportRequiredPct;
-        vote_.participationRequiredPct = participationRequiredPct;
-        vote_.votingPower = allowedUserCount(snapshotBlock);
+        vote_.relativeSupportThresholdPct = relativeSupportThresholdPct;
+        vote_.totalSupportThresholdPct = totalSupportThresholdPct;
+        vote_.census = allowedUserCount(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -154,9 +154,7 @@ contract AllowlistVoting is MajorityVotingBase {
 
         emit VoteCreated(voteId, _msgSender(), _proposalMetadata);
 
-        if (_choice != VoteOption.None && canVote(voteId, _msgSender())) {
-            _vote(voteId, VoteOption.Yes, _msgSender(), _executeIfDecided);
-        }
+        vote(voteId, _choice, _executeIfDecided);
     }
 
     /// @inheritdoc MajorityVotingBase

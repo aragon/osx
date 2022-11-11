@@ -50,9 +50,9 @@ export function _handleVoteCreated(
     proposalEntity.startDate = vote.value.value2;
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.supportRequiredPct = vote.value.value5;
-    proposalEntity.participationRequiredPct = vote.value.value6;
-    proposalEntity.votingPower = vote.value.value7;
+    proposalEntity.relativeSupportThresholdPct = vote.value.value5;
+    proposalEntity.totalSupportThresholdPct = vote.value.value6;
+    proposalEntity.census = vote.value.value7;
 
     // actions
     let actions = vote.value.value11;
@@ -133,26 +133,28 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.voteCount = voteCount;
       // check if the current vote results meet
       // the conditions for the proposal to pass:
-      // - Minimum participation => => (totalVotes / votingPower) >= minParticipation
-      // - Minimum suport => (yes / totalVotes) >= minSupport
+      // - total support    :  N_yes / N_total >= total support threshold
+      // - relative support :  N_yes / (N_yes + N_no) >= relative support threshold
 
       // expect a number between 0 and 100
       // where 0.35 => 35
       let currentParticipation = voteCount
         .times(BigInt.fromI32(100))
-        .div(proposalEntity.votingPower);
+        .div(proposalEntity.census);
       // expect a number between 0 and 100
       // where 0.35 => 35
       let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
       // set the executable param
       proposalEntity.executable =
         currentParticipation.ge(
-          proposalEntity.participationRequiredPct.div(
+          proposalEntity.totalSupportThresholdPct.div(
             BigInt.fromString(TEN_POWER_16)
           )
         ) &&
         currentSupport.ge(
-          proposalEntity.supportRequiredPct.div(BigInt.fromString(TEN_POWER_16))
+          proposalEntity.relativeSupportThresholdPct.div(
+            BigInt.fromString(TEN_POWER_16)
+          )
         );
       proposalEntity.save();
     }
@@ -193,9 +195,10 @@ export function handleVoteExecuted(event: VoteExecuted): void {
 export function handleConfigUpdated(event: ConfigUpdated): void {
   let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.supportRequiredPct = event.params.supportRequiredPct;
-    packageEntity.participationRequiredPct =
-      event.params.participationRequiredPct;
+    packageEntity.relativeSupportThresholdPct =
+      event.params.relativeSupportThresholdPct;
+    packageEntity.totalSupportThresholdPct =
+      event.params.totalSupportThresholdPct;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }

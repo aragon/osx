@@ -3,23 +3,43 @@ import {ethers, waffle} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
-import {ERC20Voting, DAOMock} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {DAO} from '../../typechain';
+import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {getMergedABI} from '../../utils/abi';
+import {
+  VoteOption,
+  pct16,
+  getTime,
+  advanceTime,
+  advanceTimeTo,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 const {deployMockContract} = waffle;
 
 describe('ERC20Voting', function () {
   let signers: SignerWithAddress[];
-  let voting: ERC20Voting;
-  let daoMock: DAOMock;
+  let voting: any;
+  let dao: DAO;
   let erc20VoteMock: any;
   let ownerAddress: string;
   let dummyActions: any;
+  let dummyMetadata: string;
+
+  let mergedAbi: any;
+  let erc20VotingFactoryBytecode: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
+
+    ({abi: mergedAbi, bytecode: erc20VotingFactoryBytecode} =
+      await getMergedABI(
+        // @ts-ignore
+        hre,
+        'ERC20Voting',
+        ['DAO']
+      ));
 
     dummyActions = [
       {
@@ -29,26 +49,42 @@ describe('ERC20Voting', function () {
       },
     ];
 
-    const DAOMock = await ethers.getContractFactory('DAOMock');
-    daoMock = await DAOMock.deploy(ownerAddress);
+    dummyMetadata = ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('0x123456789')
+    );
+
+    const DAO = await ethers.getContractFactory('DAO');
+    dao = await DAO.deploy();
+    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
   });
 
   beforeEach(async () => {
     erc20VoteMock = await deployMockContract(signers[0], ERC20Governance.abi);
 
-    const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
-    voting = await ERC20Voting.deploy();
+    const ERC20VotingFactory = new ethers.ContractFactory(
+      mergedAbi,
+      erc20VotingFactoryBytecode,
+      signers[0]
+    );
+    voting = await ERC20VotingFactory.deploy();
+
+    dao.grant(
+      dao.address,
+      voting.address,
+      ethers.utils.id('EXECUTE_PERMISSION')
+    );
   });
 
   function initializeVoting(
-    participationRequired: any,
-    supportRequired: any,
+    _totalSupportThresholdPct: any,
+    _relativeSupportThresholdPct: any,
     minDuration: any
   ) {
     return voting.initialize(
-      daoMock.address,
-      participationRequired,
-      supportRequired,
+      dao.address,
+
+      _totalSupportThresholdPct,
+      _relativeSupportThresholdPct,
       minDuration,
       erc20VoteMock.address
     );
@@ -70,20 +106,25 @@ describe('ERC20Voting', function () {
     });
   });
 
-  describe('StartVote', async () => {
-    let minDuration = 3;
-    beforeEach(async () => {
-      await initializeVoting(1, 2, minDuration);
-    });
+  describe('Vote creation', async () => {
+    let minDuration = 500;
+    let relativeSupportThresholdPct = pct16(50);
+    let totalSupportThresholdPct = pct16(20);
+    let census = 100;
+    const id = 0; // voteId
 
     it('reverts total token supply while creating a vote is 0', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.createVote('0x00', [], 0, 0, false, VoteOption.None)
+        voting.createVote(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
@@ -91,7 +132,7 @@ describe('ERC20Voting', function () {
       const endDate = startDate + (minDuration - 1);
       await expect(
         voting.createVote(
-          '0x00',
+          dummyMetadata,
           [],
           startDate,
           endDate,
@@ -110,6 +151,8 @@ describe('ERC20Voting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       const id = 0; // voteId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
@@ -117,7 +160,7 @@ describe('ERC20Voting', function () {
 
       expect(
         await voting.createVote(
-          '0x00',
+          dummyMetadata,
           dummyActions,
           0,
           0,
@@ -126,17 +169,17 @@ describe('ERC20Voting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
-        .withArgs(id, ownerAddress, '0x00');
+        .withArgs(id, ownerAddress, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
 
       const vote = await voting.getVote(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote.supportRequired).to.equal(2);
-      expect(vote.participationRequired).to.equal(1);
+      expect(vote._relativeSupportThresholdPct).to.equal(2);
+      expect(vote._totalSupportThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote.votingPower).to.equal(1);
+      expect(vote.census).to.equal(1);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
@@ -150,7 +193,9 @@ describe('ERC20Voting', function () {
       expect(vote.actions[0].data).to.equal(dummyActions[0].data);
     });
 
-    it('should create a vote and cast a vote immediatelly', async () => {
+    it('should create a vote and cast a vote immediately', async () => {
+      await initializeVoting(1, 2, minDuration);
+
       const id = 0; // voteId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
@@ -158,7 +203,7 @@ describe('ERC20Voting', function () {
 
       expect(
         await voting.createVote(
-          '0x00',
+          dummyMetadata,
           dummyActions,
           0,
           0,
@@ -167,7 +212,7 @@ describe('ERC20Voting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
-        .withArgs(id, ownerAddress, '0x00')
+        .withArgs(id, ownerAddress, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
@@ -176,48 +221,122 @@ describe('ERC20Voting', function () {
       const vote = await voting.getVote(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote.supportRequired).to.equal(2);
-      expect(vote.participationRequired).to.equal(1);
+      expect(vote._relativeSupportThresholdPct).to.equal(2);
+      expect(vote._totalSupportThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote.votingPower).to.equal(1);
+      expect(vote.census).to.equal(1);
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(0);
+    });
+
+    it('reverts creation when voting before the start date', async () => {
+      const startOffset = 9;
+      let startDate = (await getTime()) + startOffset;
+      let endDate = startDate + minDuration;
+
+      await initializeVoting(
+        totalSupportThresholdPct,
+        relativeSupportThresholdPct,
+        minDuration
+      );
+
+      // set voting power to 100
+      await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+
+      expect(await getTime()).to.be.lessThan(startDate);
+
+      await erc20VoteMock.mock.getPastVotes.returns(51);
+
+      // Reverts if the vote option is not 'None'
+      await expect(
+        voting.createVote(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          false,
+          VoteOption.Yes
+        )
+      ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
+
+      // Works if the vote option is 'None'
+      expect(
+        (
+          await voting.createVote(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            false,
+            VoteOption.None
+          )
+        ).value
+      ).to.equal(id);
     });
   });
 
   describe('Vote + Execute:', async () => {
     let minDuration = 500;
-    let supportRequired = pct16(50);
-    let minimumQuorom = pct16(20);
-    let votingPower = 100;
+    let relativeSupportThresholdPct = pct16(50);
+    let totalSupportThresholdPct = pct16(20);
+    let census = 100;
     const id = 0; // voteId
+    const startOffset = 9;
+    let startDate: number;
+    let endDate: number;
 
     beforeEach(async () => {
-      await initializeVoting(minimumQuorom, supportRequired, minDuration);
+      startDate = (await getTime()) + startOffset;
+      endDate = startDate + minDuration;
+
+      await initializeVoting(
+        totalSupportThresholdPct,
+        relativeSupportThresholdPct,
+        minDuration
+      );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(votingPower);
+      await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+      await erc20VoteMock.mock.getPastVotes.returns(0);
 
-      await voting.createVote(
-        '0x00',
-        dummyActions,
-        0,
-        0,
-        false,
-        VoteOption.None
+      expect(
+        (
+          await voting.createVote(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            false,
+            VoteOption.None
+          )
+        ).value
+      ).to.equal(id);
+    });
+
+    it('does not allow voting, when the vote has not started yet', async () => {
+      expect(await getTime()).to.be.lessThan(startDate);
+
+      await erc20VoteMock.mock.getPastVotes.returns(0);
+
+      await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+        customError('VoteCastForbidden', id, ownerAddress)
       );
     });
 
     it('should not be able to vote if user has 0 token', async () => {
+      await advanceTimeTo(startDate);
+
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastingForbidden', id, ownerAddress)
+        customError('VoteCastForbidden', id, ownerAddress)
       );
     });
 
     it('increases the yes, no, abstain votes and emit correct events', async () => {
+      await advanceTimeTo(startDate);
+
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       expect(await voting.vote(id, VoteOption.Yes, false))
@@ -226,125 +345,133 @@ describe('ERC20Voting', function () {
 
       let vote = await voting.getVote(id);
       expect(vote.yes).to.equal(1);
+      expect(vote.no).to.equal(0);
+      expect(vote.abstain).to.equal(0);
 
       expect(await voting.vote(id, VoteOption.No, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.No, 1);
 
       vote = await voting.getVote(0);
+      expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(1);
+      expect(vote.abstain).to.equal(0);
 
       expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
 
       vote = await voting.getVote(id);
+      expect(vote.yes).to.equal(0);
+      expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(1);
     });
 
-    it('voting multiple times should not increase yes,no or abstain multiple times', async () => {
+    it('should not double-count votes by the same address', async () => {
+      await advanceTimeTo(startDate);
+
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       // yes still ends up to be 1 here even after voting
       // 2 times from the same wallet.
       await voting.vote(id, VoteOption.Yes, false);
       await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getVote(0)).yes).to.equal(1);
+      expect((await voting.getVote(id)).yes).to.equal(1);
 
       // yes gets removed, no ends up as 1.
       await voting.vote(id, VoteOption.No, false);
       await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getVote(0)).no).to.equal(1);
+      expect((await voting.getVote(id)).no).to.equal(1);
 
       // no gets removed, abstain ends up as 1.
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getVote(0)).abstain).to.equal(1);
+      expect((await voting.getVote(id)).abstain).to.equal(1);
     });
 
-    it('makes executable if enough yes is given from voting power', async () => {
-      // vote with yes as 50 voting stake, which is still
-      // not enough to make vote executable as support required percentage
-      // is set to supportRequired = 51.
+    it('can execute early if total support is large enough', async () => {
+      await advanceTimeTo(startDate);
+
+      // vote with 50 yes votes, which is NOT enough to make vote executable as relative support
+      // must be larger than relativeSupportThresholdPct = 50
       await erc20VoteMock.mock.getPastVotes.returns(50);
 
       await voting.vote(id, VoteOption.Yes, false);
       expect(await voting.canExecute(id)).to.equal(false);
 
-      // vote with yes as 1 voting stake from another wallet,
-      // which becomes 51 total and enough
+      // vote with 1 yes vote from another wallet, so that yes votes amount to 51 in total, which is
+      // enough to make vote executable as relativeSupportThresholdPct = 50
       await erc20VoteMock.mock.getPastVotes.returns(1);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('returns executable if enough yes is given depending on yes+no+abstain total', async () => {
-      // vote with yes as 50 voting stake, which is still enough
-      // to make vote executable even if the vote is closed due to
-      // its duration length.
+    it('can execute normally if total support is large enough', async () => {
+      await advanceTimeTo(startDate);
+
+      // vote with 50 yes votes
       await erc20VoteMock.mock.getPastVotes.returns(50);
       await voting.vote(id, VoteOption.Yes, false);
 
-      // vote with no with 30 voting stake.
+      // vote 30 voting no votes
       await erc20VoteMock.mock.getPastVotes.returns(30);
       await voting.connect(signers[1]).vote(id, VoteOption.No, false);
 
-      // vote as abstain with 10 voting stake.
+      // vote with 10 abstain votes
       await erc20VoteMock.mock.getPastVotes.returns(10);
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
-      // makes the voting closed.
-      await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
-      await ethers.provider.send('evm_mine', []);
+      // closes the vote
+      await advanceTime(minDuration + 10);
 
+      //The vote is executable as relative support > 50%, total support > 20%, and the voting period is over
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it("makes NON-executable if enough yes isn't given depending on yes + no + abstain total", async () => {
-      // vote with yes as 20 voting stake, which is still not enough
-      // to make vote executable while vote is open or even after it's closed.
-      // supports
-      await erc20VoteMock.mock.getPastVotes.returns(10);
-      await voting.vote(0, VoteOption.Yes, false);
+    it('cannot execute normally if total support is too low', async () => {
+      await advanceTimeTo(startDate);
 
-      // vote with no with 5 voting stake as non-support
+      // vote with 10 yes votes
+      await erc20VoteMock.mock.getPastVotes.returns(10);
+      await voting.vote(id, VoteOption.Yes, false);
+
+      // vote with 5 no votes
       await erc20VoteMock.mock.getPastVotes.returns(5);
       await voting.connect(signers[1]).vote(id, VoteOption.No, false);
 
-      // vote with 5 voting stake as abstain to vote
+      // vote with 5 abstain votes
       await erc20VoteMock.mock.getPastVotes.returns(5);
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
-      // makes the voting closed.
-      await ethers.provider.send('evm_increaseTime', [minDuration + 10]);
-      await ethers.provider.send('evm_mine', []);
+      // closes the vote
+      await advanceTime(minDuration + 10);
 
+      //The vote is not executable because the total support with 20% is still too low, despite a relative support of 66% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
     });
 
     it('executes the vote immediately while final yes is given', async () => {
-      // vote with supportRequired staking, so
+      await advanceTimeTo(startDate);
+
+      // vote with _relativeSupportThresholdPct staking, so
       // it immediatelly executes the vote
       await erc20VoteMock.mock.getPastVotes.returns(51);
 
       // supports and should execute right away.
       let tx = await voting.vote(id, VoteOption.Yes, true);
-      let rc = await tx.wait();
 
       // check for the `Executed` event in the DAO
       {
-        let {actor, callId, actions, execResults} = daoMock.interface.parseLog(
-          rc.logs[1]
-        ).args;
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-        expect(actor).to.equal(voting.address);
-        expect(callId).to.equal(0);
-        expect(actions.length).to.equal(1);
-        expect(actions[0].to).to.equal(dummyActions[0].to);
-        expect(actions[0].value).to.equal(dummyActions[0].value);
-        expect(actions[0].data).to.equal(dummyActions[0].data);
-        expect(execResults).to.deep.equal([]);
+        expect(event.args.actor).to.equal(voting.address);
+        expect(event.args.callId).to.equal(id);
+        expect(event.args.actions.length).to.equal(1);
+        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+        expect(event.args.execResults).to.deep.equal(['0x']);
 
         const vote = await voting.getVote(id);
 
@@ -353,11 +480,10 @@ describe('ERC20Voting', function () {
 
       // check for the `VoteExecuted` event in the voting contract
       {
-        const {voteId, execResults} = voting.interface.parseLog(
-          rc.logs[2]
-        ).args;
-        expect(voteId).to.equal(id);
-        expect(execResults).to.deep.equal([]);
+        const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
+
+        expect(event.args.voteId).to.equal(id);
+        expect(event.args.execResults).to.deep.equal(['0x']);
       }
 
       // calling execute again should fail
@@ -366,10 +492,114 @@ describe('ERC20Voting', function () {
       );
     });
 
-    it('reverts if vote is executed while enough yes is not given ', async () => {
+    it('reverts if vote is not decided yet', async () => {
+      await advanceTimeTo(startDate);
+
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('VoteExecutionForbidden', id)
       );
+    });
+  });
+
+  describe('Configurations for different use cases', async () => {
+    const id = 0; // voteId
+
+    describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
+      let minDuration = 500;
+      let relativeSupportThresholdPct = pct16(50);
+      let totalSupportThresholdPct = pct16(25);
+      let census = 100;
+
+      beforeEach(async () => {
+        await initializeVoting(
+          totalSupportThresholdPct,
+          relativeSupportThresholdPct,
+          minDuration
+        );
+
+        // set voting power to 100
+        await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+        await erc20VoteMock.mock.getPastVotes.returns(0);
+
+        await voting.createVote(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          false,
+          VoteOption.None
+        );
+      });
+
+      it('does not execute if support is high enough but relative and total support are too low', async () => {
+        await erc20VoteMock.mock.getPastVotes.returns(10);
+        // dur | tot | rel
+        //  0  | 10% | 100%
+        //  𐄂  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); //  tot
+
+        await advanceTime(minDuration + 10);
+        // dur | tot | rel
+        // 510 | 10% | 100%
+        //  ✓  |  𐄂  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
+      });
+
+      it('does not execute if total support is high enough but relative support is too low', async () => {
+        await erc20VoteMock.mock.getPastVotes.returns(10);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        await erc20VoteMock.mock.getPastVotes.returns(20);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+        // dur | tot | rel
+        //  0  | 30% | 33%
+        //  𐄂  |  ✓  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
+
+        await advanceTime(minDuration + 10); // waiting until the vote end doesn't change this
+        // dur | tot | rel
+        // 510 | 30% | 33%
+        //  ✓  |  ✓  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
+      });
+
+      it('executes after the duration if total and relative support are met', async () => {
+        await erc20VoteMock.mock.getPastVotes.returns(30);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // dur | tot | rel
+        //  0  | 30% | 100%
+        //  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // total support (30%) > relative support threshold (50%) == false, duration is not over
+
+        await advanceTime(minDuration + 10);
+        // dur | tot | rel
+        // 510 | 30% | 100%
+        //  ✓  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
+      });
+
+      it('executes early if the total support exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
+        await erc20VoteMock.mock.getPastVotes.returns(50);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // dur | tot | rel
+        //  0  | 50% | 100%
+        //  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // total support > relative support threshold == false
+
+        await erc20VoteMock.mock.getPastVotes.returns(10);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        // dur | tot | rel
+        //  0  | 60% | 100%
+        //  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
+
+        await erc20VoteMock.mock.getPastVotes.returns(40);
+        await voting.connect(signers[2]).vote(id, VoteOption.No, false);
+        // dur | tot | rel
+        //  0  | 60% | 60%
+        //  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // The remaining voter voting against it does not change the outcome
+      });
     });
   });
 });
