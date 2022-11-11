@@ -267,6 +267,18 @@ describe('DAO', function () {
       );
     });
 
+    it('reverts when tries to deposit ERC20 token while sender does not have token amount', async () => {
+      await expect(dao.deposit(token.address, amount, 'ref')).to.be.reverted;
+    });
+
+    it('reverts when tries to deposit ERC20 token while sender does not have approved token transfer', async () => {
+      await token.mint(ownerAddress, amount);
+
+      await expect(
+        dao.deposit(token.address, amount, 'ref')
+      ).to.be.revertedWith('ERC20: insufficient allowance');
+    });
+
     it('deposits native tokens into the DAO', async () => {
       const options = {value: amount};
 
