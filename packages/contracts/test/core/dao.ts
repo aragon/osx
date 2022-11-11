@@ -254,7 +254,7 @@ describe('DAO', function () {
       ).to.be.revertedWith(customError('ZeroAmount'));
     });
 
-    it('reverts if passed amount do not match natve amount value', async () => {
+    it('reverts if passed amount does not match native amount value', async () => {
       const options = {value: amount};
       const passedAmount = ethers.utils.parseEther('1.22');
 
