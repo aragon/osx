@@ -42,29 +42,6 @@ describe('CallbackHandler', function () {
     callbackHandlerMockHelper = await CallbackHandlerHelper.deploy(dao.address);
   });
 
-  it('reverts if `REGISTER_STANDARD_CALLBACK_PERMISSION` is not granted or revoked', async () => {
-    await dao.revoke(
-      dao.address,
-      owner,
-      REGISTER_STANDARD_CALLBACK_PERMISSION_ID
-    );
-
-    await expect(
-      dao.registerStandardCallback(
-        beefInterfaceId,
-        callbackSelector,
-        magicNumber
-      )
-    ).to.be.revertedWith(
-      customError(
-        'Unauthorized',
-        dao.address,
-        dao.address,
-        owner,
-        REGISTER_STANDARD_CALLBACK_PERMISSION_ID
-      )
-    );
-  });
 
   it('reverts for an unknown callback function signature', async () => {
     // we don't register `callbackSelector` here
