@@ -636,7 +636,7 @@ describe('AllowlistVoting', function () {
         );
       });
 
-      it('early execution is possible', async () => {
+      it('executes if early execution is possible', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 20% | 100%
@@ -653,7 +653,7 @@ describe('AllowlistVoting', function () {
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // total support (50%) > relative support threshold (59.99...%) == true
+        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (59.99...%) == true
       });
 
       it('should not execute with only 2 yes votes', async () => {
