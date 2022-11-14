@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
+  to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
 - Added `resolver` check in initialize function and `setDefaultResolver` of `ENSSubdomainRegistrar.sol`.
 - Added test related to `resolver` in `ens-subdomain-registry.ts`.
 - Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
@@ -92,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `TestComponent`, `TestSharedComponent` to `TestPlugin`, `TestPluginComponent`.
 - Renamed `createProxy` function to `createERC1967Proxy`.
 - Replaces custom ERC1271 interface with Openzeppelins interface.
+- Switched order of where and who for the events in `PermissionManager`.
 - Extends `VersionCreated` event with `PluginSetup` and `contentURI`
 - Markes parameters of `InstallationApplied` as `indexed`
 

@@ -114,9 +114,9 @@ templates:
           handler: handleNativeTokenDeposited
         - event: Executed(indexed address,uint256,(address,uint256,bytes)[],bytes[])
           handler: handleExecuted
-        - event: Granted(indexed bytes32,indexed address,indexed address,address,address)
+        - event: Granted(indexed bytes32,indexed address,address,indexed address,address)
           handler: handleGranted
-        - event: Revoked(indexed bytes32,indexed address,indexed address,address)
+        - event: Revoked(indexed bytes32,indexed address,address,indexed address)
           handler: handleRevoked
         - event: Frozen(indexed bytes32,indexed address,address)
           handler: handleFrozen

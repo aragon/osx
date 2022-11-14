@@ -46,8 +46,8 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   let grantedEvent = createNewGrantedEvent(
     contractPermissionId,
     ADDRESS_ONE,
-    VOTING_ADDRESS,
     DAO_ADDRESS,
+    VOTING_ADDRESS,
     ADDRESS_TWO,
     DAO_ADDRESS
   );
@@ -177,8 +177,8 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   let grantedEvent = createNewGrantedEvent(
     contractPermissionId,
     ADDRESS_ONE,
-    VOTING_ADDRESS,
     DAO_ADDRESS,
+    VOTING_ADDRESS,
     ADDRESS_TWO,
     DAO_ADDRESS
   );
@@ -258,8 +258,8 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   let revokedEvent = createNewRevokedEvent(
     contractPermissionId,
     ADDRESS_ONE,
-    VOTING_ADDRESS,
     DAO_ADDRESS,
+    VOTING_ADDRESS,
     DAO_ADDRESS
   );
 

@@ -180,8 +180,8 @@ export function createNewWithdrawnEvent(
 export function createNewGrantedEvent(
   contractPermissionId: Bytes,
   actor: string,
-  who: string,
   where: string,
+  who: string,
   oracle: string,
   contractAddress: string
 ): Granted {
@@ -198,13 +198,13 @@ export function createNewGrantedEvent(
     'actor',
     ethereum.Value.fromAddress(Address.fromString(actor))
   );
-  let whoParam = new ethereum.EventParam(
-    'who',
-    ethereum.Value.fromAddress(Address.fromString(who))
-  );
   let whereParam = new ethereum.EventParam(
     'where',
     ethereum.Value.fromAddress(Address.fromString(where))
+  );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
   );
   let oracleParam = new ethereum.EventParam(
     'oracle',
@@ -213,8 +213,8 @@ export function createNewGrantedEvent(
 
   newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
-  newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
+  newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(oracleParam);
 
   return newGrantedEvent;
@@ -223,8 +223,8 @@ export function createNewGrantedEvent(
 export function createNewRevokedEvent(
   contractPermissionId: Bytes,
   actor: string,
-  who: string,
   where: string,
+  who: string,
   contractAddress: string
 ): Revoked {
   let newGrantedEvent = changetype<Revoked>(newMockEvent());
@@ -240,19 +240,19 @@ export function createNewRevokedEvent(
     'actor',
     ethereum.Value.fromAddress(Address.fromString(actor))
   );
-  let whoParam = new ethereum.EventParam(
-    'who',
-    ethereum.Value.fromAddress(Address.fromString(who))
-  );
   let whereParam = new ethereum.EventParam(
     'where',
     ethereum.Value.fromAddress(Address.fromString(where))
   );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
+  );
 
   newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
-  newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
+  newGrantedEvent.parameters.push(whoParam);
 
   return newGrantedEvent;
 }

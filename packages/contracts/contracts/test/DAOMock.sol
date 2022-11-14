@@ -23,7 +23,7 @@ contract DAOMock is IDAO, PermissionManager {
     ) public pure override returns (bool) {
         return true;
     }
-        
+    
     function getTrustedForwarder() public pure override returns (address) {
         return address(0);
     }
