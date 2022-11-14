@@ -48,6 +48,5 @@ contract PluginUUPSUpgradeableV3Mock is PluginUUPSUpgradeable {
 
     function initializeV2toV3() external reinitializer(3) {
         state3 = 3;
-    }
-    
+    }   
 }
