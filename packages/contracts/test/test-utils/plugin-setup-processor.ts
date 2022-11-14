@@ -1,5 +1,6 @@
 import {ethers} from 'hardhat';
 import {findEvent} from '../../utils/event';
+import { getMergedABI } from '../../utils/abi'
 import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
 import {BytesLike, utils, constants} from 'ethers';
 
@@ -9,14 +10,23 @@ export async function deployPluginSetupProcessor(
 ): Promise<PluginSetupProcessor> {
   let psp: PluginSetupProcessor;
 
-  // PluginSetupProcessor
-  const PluginSetupProcessor = await ethers.getContractFactory(
-    'PluginSetupProcessor'
+  const {abi, bytecode} = await getMergedABI(
+    // @ts-ignore
+    hre,
+    'PluginSetupProcessor',
+    ['ERC1967Upgrade']
   );
+
+  const PluginSetupProcessor = new ethers.ContractFactory(
+    abi,
+    bytecode,
+    (await ethers.getSigners())[0]
+  )
+
   psp = await PluginSetupProcessor.deploy(
     managingDao.address,
     pluginRepoRegistry.address
-  );
+  ) as PluginSetupProcessor;
 
   return psp;
 }

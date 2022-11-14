@@ -11,6 +11,7 @@ import {
   PluginUUPSUpgradeableSetupV1MockBad,
   PluginUUPSUpgradeableSetupV2Mock,
   PluginUUPSUpgradeableSetupV3Mock,
+  PluginUUPSUpgradeableSetupV4Mock,
   PluginCloneableSetupV1Mock,
   PluginCloneableSetupV2Mock,
   PluginRepoFactory,
@@ -45,6 +46,7 @@ const EVENTS = {
   InstallationApplied: 'InstallationApplied',
   UpdatePrepared: 'UpdatePrepared',
   UpdateApplied: 'UpdateApplied',
+  Upgraded: 'Upgraded',
   UninstallationPrepared: 'UninstallationPrepared',
   UninstallationApplied: 'UninstallationApplied',
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -86,6 +88,7 @@ describe('Plugin Setup Processor', function () {
   let setupUV1: PluginUUPSUpgradeableSetupV1Mock;
   let setupUV2: PluginUUPSUpgradeableSetupV2Mock;
   let setupUV3: PluginUUPSUpgradeableSetupV3Mock;
+  let setupUV4: PluginUUPSUpgradeableSetupV4Mock;
   let setupUV1Bad: PluginUUPSUpgradeableSetupV1MockBad;
   let repoC: PluginRepo;
   let setupCV1: PluginCloneableSetupV1Mock;
@@ -102,7 +105,7 @@ describe('Plugin Setup Processor', function () {
 
     PluginUV1 = await ethers.getContractFactory('PluginUUPSUpgradeableV1Mock');
     PluginUV2 = await ethers.getContractFactory('PluginUUPSUpgradeableV2Mock');
-    PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
+    PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock')
 
     // Deploy PluginUUPSUpgradeableSetupMock
     const SetupV1 = await ethers.getContractFactory(
@@ -119,6 +122,11 @@ describe('Plugin Setup Processor', function () {
       'PluginUUPSUpgradeableSetupV3Mock'
     );
     setupUV3 = await SetupV3.deploy();
+
+    const SetupV4 = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV4Mock'
+    );
+    setupUV4 = await SetupV4.deploy(await setupUV3.getImplementationAddress());
 
     // Deploy PluginCloneableSetupMock
     const SetupC1 = await ethers.getContractFactory(
@@ -174,7 +182,7 @@ describe('Plugin Setup Processor', function () {
 
     // Plugin Setup Processor
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
-
+    
     // Create and register a plugin on the PluginRepoRegistry
     let tx = await pluginRepoFactory.createPluginRepoWithVersion(
       `PluginUUPSUpgradeableMock`,
@@ -191,6 +199,7 @@ describe('Plugin Setup Processor', function () {
     await repoU.createVersion([1, 1, 0], setupUV2.address, EMPTY_DATA);
     await repoU.createVersion([1, 2, 0], setupUV3.address, EMPTY_DATA);
     await repoU.createVersion([1, 3, 0], setupUV1Bad.address, EMPTY_DATA);
+    await repoU.createVersion([1, 4, 0], setupUV4.address, EMPTY_DATA);
 
     tx = await pluginRepoFactory.createPluginRepoWithVersion(
       `PluginCloneableMock`,
@@ -1286,7 +1295,7 @@ describe('Plugin Setup Processor', function () {
           setupUV3
         );
       });
-
+      
       it('cannot update again to V1', async () => {
         await expect(
           updateHelper(
@@ -1320,20 +1329,6 @@ describe('Plugin Setup Processor', function () {
             setupUV1,
             setupUV2
           ));
-        });
-
-        it('cannot update to V2 again', async () => {
-          await expect(
-            updateHelper(
-              psp,
-              targetDao,
-              proxy,
-              repoU,
-              helpersV2,
-              setupUV2,
-              setupUV2
-            )
-          ).to.be.reverted;
         });
 
         it('points to the V2 implementation', async () => {
@@ -1445,7 +1440,7 @@ describe('Plugin Setup Processor', function () {
               )
             );
           });
-
+        
           it('cannot update back to V1', async () => {
             await expect(
               updateHelper(
@@ -1780,6 +1775,19 @@ describe('Plugin Setup Processor', function () {
         );
       });
 
+      // Special case where implementations from old and new setups don't change.
+      it('updates to v4', async () => {
+        await updateHelper(
+            psp,
+            targetDao,
+            proxy,
+            repoU,
+            helpersV3,
+            setupUV3,
+            setupUV4
+        )
+      });
+
       it('cannot update again to V3', async () => {
         await expect(
           updateHelper(
@@ -1983,6 +1991,22 @@ async function updateHelper(
     EVENTS.UpdateApplied
   );
   expect(appliedUpdateEvent).to.not.equal(undefined);
+
+  // If the base contracts don't change from current and new plugin setups,
+  // PluginSetupProcessor shouldn't call `upgradeTo` or `upgradeToAndCall` 
+  // on the plugin. The below check for this still is not 100% ensuring, 
+  // As function `upgradeTo` might be called but event `Upgraded` 
+  // not thrown(OZ changed the logic or name) which will trick the test to pass..
+  const currentImpl = await currentVersionSetup.getImplementationAddress();
+  const newImpl = await newVersionSetup.getImplementationAddress();
+  
+  const upgradedEvent = await findEvent(applyUpdateTx, EVENTS.Upgraded)
+  if (currentImpl == newImpl) {
+    expect(upgradedEvent).to.equal(undefined);
+  } else {
+    expect(upgradedEvent).to.not.equal(undefined);
+    expect(newImpl).to.equal(upgradedEvent.args.implementation);
+  }
 
   return {updatedHelpers, permissions, initData};
 }
