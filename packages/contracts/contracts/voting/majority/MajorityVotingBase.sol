@@ -271,7 +271,7 @@ abstract contract MajorityVotingBase is
         }
 
         // Criterium 3: The relative support is greater than the relative support threshold
-        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no + vote_.abstain);
+        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no);
         if (relativeSupportPct <= vote_.relativeSupportThresholdPct) {
             return false;
         }
