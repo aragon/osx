@@ -11,7 +11,7 @@ import {
 } from '../../../generated/templates/AllowlistVoting/AllowlistVoting';
 import {
   Action,
-  AllowlistPackage,
+  AllowlistPlugin,
   AllowlistProposal,
   AllowlistVoter,
   AllowlistVote
@@ -36,7 +36,7 @@ export function _handleVoteCreated(
 
   let proposalEntity = new AllowlistProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.pkg = event.address.toHexString();
+  proposalEntity.plugin = event.address.toHexString();
   proposalEntity.voteId = event.params.voteId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
@@ -80,7 +80,7 @@ export function _handleVoteCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AllowlistPackage.load(event.address.toHexString());
+  let packageEntity = AllowlistPlugin.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_votesLength();
     if (!voteLength.reverted) {
@@ -182,7 +182,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
 }
 
 export function handleConfigUpdated(event: ConfigUpdated): void {
-  let packageEntity = AllowlistPackage.load(event.address.toHexString());
+  let packageEntity = AllowlistPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.totalSupportThresholdPct =
       event.params.totalSupportThresholdPct;
@@ -201,7 +201,7 @@ export function handleUsersAdded(event: UsersAdded): void {
     if (!voterEntity) {
       voterEntity = new AllowlistVoter(user.toHexString());
       voterEntity.address = user.toHexString();
-      voterEntity.pkg = event.address.toHexString();
+      voterEntity.plugin = event.address.toHexString();
       voterEntity.save();
     }
   }

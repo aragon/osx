@@ -132,29 +132,24 @@ function testPackages(supportsErc20VotingInterface: boolean): void {
   );
 
   // governance
-  let daoPackageEntityID =
+  let daoPluginEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
     Address.fromString(VOTING_ADDRESS).toHexString();
 
-  assert.fieldEquals(
-    'DaoPackage',
-    daoPackageEntityID,
-    'id',
-    daoPackageEntityID
-  );
+  assert.fieldEquals('DaoPlugin', daoPluginEntityID, 'id', daoPluginEntityID);
 
   // packages
   if (supportsErc20VotingInterface) {
     assert.fieldEquals(
-      'ERC20VotingPackage',
+      'ERC20VotingPlugin',
       Address.fromString(VOTING_ADDRESS).toHexString(),
       'id',
       Address.fromString(VOTING_ADDRESS).toHexString()
     );
   } else {
     assert.fieldEquals(
-      'AllowlistPackage',
+      'AllowlistPlugin',
       Address.fromString(VOTING_ADDRESS).toHexString(),
       'id',
       Address.fromString(VOTING_ADDRESS).toHexString()
@@ -204,12 +199,12 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   );
 
   // governance
-  let daoPackageEntityID =
+  let daoPluginEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
     Address.fromString(VOTING_ADDRESS).toHexString();
 
-  assert.notInStore('DaoPackage', daoPackageEntityID);
+  assert.notInStore('DaoPlugin', daoPluginEntityID);
 
   clearStore();
 });

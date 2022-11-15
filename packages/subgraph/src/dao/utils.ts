@@ -13,9 +13,9 @@ import {AllowlistVoting as AllowlistVotingContract} from '../../generated/templa
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
 import {ERC20Voting, AllowlistVoting} from '../../generated/templates';
 import {
-  DaoPackage,
-  ERC20VotingPackage,
-  AllowlistPackage
+  DaoPlugin,
+  ERC20VotingPlugin,
+  AllowlistPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
@@ -86,9 +86,9 @@ export function decodeWithdrawParams(data: ByteArray): WithdrawParams {
 }
 
 function createErc20VotingPackage(who: Address, daoId: string): void {
-  let packageEntity = ERC20VotingPackage.load(who.toHexString());
+  let packageEntity = ERC20VotingPlugin.load(who.toHexString());
   if (!packageEntity) {
-    packageEntity = new ERC20VotingPackage(who.toHexString());
+    packageEntity = new ERC20VotingPlugin(who.toHexString());
     let contract = ERC20VotingContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
@@ -115,9 +115,9 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
 }
 
 function createAllowlistVotingPackage(who: Address, daoId: string): void {
-  let packageEntity = AllowlistPackage.load(who.toHexString());
+  let packageEntity = AllowlistPlugin.load(who.toHexString());
   if (!packageEntity) {
-    packageEntity = new AllowlistPackage(who.toHexString());
+    packageEntity = new AllowlistPlugin(who.toHexString());
     let contract = AllowlistVotingContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
@@ -161,18 +161,18 @@ export function addPackage(daoId: string, who: Address): void {
   }
 
   if (ERC20VotingInterfaceSuppoted || allowlistInterfaceSuppoted) {
-    let daoPackageEntityId = daoId + '_' + who.toHexString();
-    let daoPackageEntity = new DaoPackage(daoPackageEntityId);
-    daoPackageEntity.pkg = who.toHexString();
-    daoPackageEntity.dao = daoId;
-    daoPackageEntity.save();
+    let daoPluginEntityId = daoId + '_' + who.toHexString();
+    let daoPluginEntity = new DaoPlugin(daoPluginEntityId);
+    daoPluginEntity.plugin = who.toHexString();
+    daoPluginEntity.dao = daoId;
+    daoPluginEntity.save();
   }
 }
 
 export function removePackage(daoId: string, who: string): void {
-  let daoPackageEntityId = daoId + '_' + who;
-  let daoPackageEntity = DaoPackage.load(daoPackageEntityId);
-  if (daoPackageEntity) {
-    store.remove('DaoPackage', daoPackageEntityId);
+  let daoPluginEntityId = daoId + '_' + who;
+  let daoPluginEntity = DaoPlugin.load(daoPluginEntityId);
+  if (daoPluginEntity) {
+    store.remove('DaoPlugin', daoPluginEntityId);
   }
 }

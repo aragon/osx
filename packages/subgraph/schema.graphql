@@ -95,162 +95,18 @@ type Dao @entity {
   balances: [Balance!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  packages: [DaoPackage!] @derivedFrom(field: "dao")
+  plugins: [DaoPlugin!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
-  plugins: [Plugin!] @derivedFrom(field: "dao")
+  # plugins: [Plugin!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
 }
 
-# Packages
-
-type DaoPackage @entity {
-  id: ID! # Dao + Package
-  pkg: Package!
-  dao: Dao!
-}
-
-interface Package {
-  id: ID! # address
-  daos: [DaoPackage!] @derivedFrom(field: "pkg")
-}
-
-# Proposal
-
-interface Proposal {
-  id: ID! # package + voteId
-  dao: Dao!
-  creator: Bytes!
-  metadata: String
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  executed: Boolean!
-  createdAt: BigInt!
-}
-
-# Voting
-
-enum VoteOption {
-  None
-  Abstain
-  Yes
-  No
-}
-
-# ERC20Voting
-
-type ERC20VotingPackage implements Package @entity {
-  id: ID!
-  daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
-  relativeSupportThresholdPct: BigInt
-  totalSupportThresholdPct: BigInt
-  minDuration: BigInt
-  votesLength: BigInt
-  token: ERC20Token
-  members: [ERC20VotingVoter!]! @derivedFrom(field: "pkg")
-}
-
-type ERC20VotingVoter @entity {
-  id: ID! # address
-  address: String # address as string to facilitate filtering by address on the UI
-  proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
-  pkg: ERC20VotingPackage!
-  lastUpdated: BigInt
-}
-
-type ERC20Vote @entity {
-  "VoterProposal for Many-to-Many"
-  id: ID! # voter + proposal
-  voter: ERC20VotingVoter!
-  proposal: ERC20VotingProposal!
-  vote: VoteOption!
-  weight: BigInt!
-  createdAt: BigInt!
-}
-
-type ERC20VotingProposal implements Proposal @entity {
-  id: ID! # package + voteId
-  dao: Dao!
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: ERC20VotingPackage!
-  voteId: BigInt!
-  creator: Bytes!
-  metadata: String
-  startDate: BigInt!
-  endDate: BigInt!
-  snapshotBlock: BigInt!
-  relativeSupportThresholdPct: BigInt!
-  totalSupportThresholdPct: BigInt!
-  yes: BigInt
-  no: BigInt
-  abstain: BigInt
-  voteCount: BigInt
-  census: BigInt!
-  voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
-  open: Boolean!
-  executed: Boolean!
-  createdAt: BigInt!
-  executable: Boolean
-}
-
-# AllowlistVoting
-
-type AllowlistPackage implements Package @entity {
-  id: ID!
-  daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
-  relativeSupportThresholdPct: BigInt
-  totalSupportThresholdPct: BigInt
-  minDuration: BigInt
-  votesLength: BigInt
-  members: [AllowlistVoter!]! @derivedFrom(field: "pkg")
-}
-
-type AllowlistVoter @entity {
-  id: ID! # address
-  address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AllowlistVote!]! @derivedFrom(field: "voter")
-  pkg: AllowlistPackage!
-}
-
-type AllowlistVote @entity {
-  "VoterProposal for Many-to-Many"
-  id: ID! # voter + proposal
-  voter: AllowlistVoter!
-  proposal: AllowlistProposal!
-  vote: VoteOption!
-  weight: BigInt!
-  createdAt: BigInt!
-}
-
-type AllowlistProposal implements Proposal @entity {
-  id: ID! # package + voteId
-  dao: Dao!
-  actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: AllowlistPackage!
-  voteId: BigInt!
-  creator: Bytes!
-  metadata: String
-  startDate: BigInt!
-  endDate: BigInt!
-  snapshotBlock: BigInt!
-  relativeSupportThresholdPct: BigInt!
-  totalSupportThresholdPct: BigInt!
-  census: BigInt!
-  yes: BigInt
-  no: BigInt
-  abstain: BigInt
-  voteCount: BigInt
-  voters: [AllowlistVote!]! @derivedFrom(field: "proposal")
-  open: Boolean!
-  executed: Boolean!
-  createdAt: BigInt!
-  executable: Boolean
-}
+# Plugins
 
 type PluginSetup @entity(immutable: true) {
-  id: ID!
+  id: ID! # contract address
   versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
   installations: [Plugin!]! @derivedFrom(field: "pluginSetup")
 }
@@ -290,4 +146,148 @@ enum PluginState {
   UpdatePrepared
   UninstallPrepared
   Uninstalled
+}
+
+type DaoPlugin @entity {
+  id: ID! # Dao + Plugin
+  plugin: Plugin!
+  dao: Dao!
+}
+
+# interface Package {
+#   id: ID! # address
+#   daos: [DaoPlugin!] @derivedFrom(field: "pkg")
+# }
+
+# Proposal
+
+interface Proposal {
+  id: ID! # package + voteId
+  dao: Dao!
+  creator: Bytes!
+  metadata: String
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  executed: Boolean!
+  createdAt: BigInt!
+}
+
+# Voting
+
+enum VoteOption {
+  None
+  Abstain
+  Yes
+  No
+}
+
+# ERC20Voting
+
+type ERC20VotingPlugin implements Plugin @entity {
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposals: [ERC20VotingProposal!]! @derivedFrom(field: "plugin")
+  relativeSupportThresholdPct: BigInt
+  totalSupportThresholdPct: BigInt
+  minDuration: BigInt
+  votesLength: BigInt
+  token: ERC20Token
+  members: [ERC20VotingVoter!]! @derivedFrom(field: "plugin")
+}
+
+type ERC20VotingVoter @entity {
+  id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
+  plugin: ERC20VotingPlugin!
+  lastUpdated: BigInt
+}
+
+type ERC20Vote @entity {
+  "VoterProposal for Many-to-Many"
+  id: ID! # voter + proposal
+  voter: ERC20VotingVoter!
+  proposal: ERC20VotingProposal!
+  vote: VoteOption!
+  weight: BigInt!
+  createdAt: BigInt!
+}
+
+type ERC20VotingProposal implements Proposal @entity {
+  id: ID! # package + voteId
+  dao: Dao!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  plugin: ERC20VotingPlugin!
+  voteId: BigInt!
+  creator: Bytes!
+  metadata: String
+  startDate: BigInt!
+  endDate: BigInt!
+  snapshotBlock: BigInt!
+  relativeSupportThresholdPct: BigInt!
+  totalSupportThresholdPct: BigInt!
+  yes: BigInt
+  no: BigInt
+  abstain: BigInt
+  voteCount: BigInt
+  census: BigInt!
+  voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
+  open: Boolean!
+  executed: Boolean!
+  createdAt: BigInt!
+  executable: Boolean
+}
+
+# AllowlistVoting
+
+type AllowlistPlugin implements Plugin @entity {
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposals: [AllowlistProposal!]! @derivedFrom(field: "plugin")
+  relativeSupportThresholdPct: BigInt
+  totalSupportThresholdPct: BigInt
+  minDuration: BigInt
+  votesLength: BigInt
+  members: [AllowlistVoter!]! @derivedFrom(field: "plugin")
+}
+
+type AllowlistVoter @entity {
+  id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [AllowlistVote!]! @derivedFrom(field: "voter")
+  plugin: AllowlistPlugin!
+}
+
+type AllowlistVote @entity {
+  "VoterProposal for Many-to-Many"
+  id: ID! # voter + proposal
+  voter: AllowlistVoter!
+  proposal: AllowlistProposal!
+  vote: VoteOption!
+  weight: BigInt!
+  createdAt: BigInt!
+}
+
+type AllowlistProposal implements Proposal @entity {
+  id: ID! # package + voteId
+  dao: Dao!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  plugin: AllowlistPlugin!
+  voteId: BigInt!
+  creator: Bytes!
+  metadata: String
+  startDate: BigInt!
+  endDate: BigInt!
+  snapshotBlock: BigInt!
+  relativeSupportThresholdPct: BigInt!
+  totalSupportThresholdPct: BigInt!
+  census: BigInt!
+  yes: BigInt
+  no: BigInt
+  abstain: BigInt
+  voteCount: BigInt
+  voters: [AllowlistVote!]! @derivedFrom(field: "proposal")
+  open: Boolean!
+  executed: Boolean!
+  createdAt: BigInt!
+  executable: Boolean
 }

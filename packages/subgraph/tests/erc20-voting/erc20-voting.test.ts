@@ -7,7 +7,7 @@ import {
   handleConfigUpdated,
   _handleVoteCreated
 } from '../../src/packages/erc20/erc20-voting';
-import {ERC20VotingPackage} from '../../generated/schema';
+import {ERC20VotingPlugin} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -44,7 +44,7 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
-  let erc20VotingPackage = new ERC20VotingPackage(
+  let erc20VotingPackage = new ERC20VotingPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
   erc20VotingPackage.save();
@@ -88,7 +88,7 @@ test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   // checks
   assert.fieldEquals('ERC20VotingProposal', entityID, 'id', entityID);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'dao', DAO_ADDRESS);
-  assert.fieldEquals('ERC20VotingProposal', entityID, 'pkg', packageId);
+  assert.fieldEquals('ERC20VotingProposal', entityID, 'plugin', packageId);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'voteId', voteId);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'metadata', STRING_DATA);
@@ -120,9 +120,9 @@ test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   assert.fieldEquals('ERC20VotingProposal', entityID, 'census', census);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'executed', 'false');
 
-  // chack ERC20VotingPackage
+  // chack ERC20VotingPlugin
   assert.fieldEquals(
-    'ERC20VotingPackage',
+    'ERC20VotingPlugin',
     Address.fromString(VOTING_ADDRESS).toHexString(),
     'votesLength',
     '1'
@@ -173,7 +173,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'ERC20VotingVoter',
     ADDRESS_ONE,
-    'pkg',
+    'plugin',
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
   assert.fieldEquals(
@@ -281,7 +281,7 @@ test('Run ERC Voting (handleVoteExecuted) mappings with mock event', () => {
 test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPackage = new ERC20VotingPackage(entityID);
+  let erc20VotingPackage = new ERC20VotingPlugin(entityID);
   erc20VotingPackage.save();
 
   // create event
@@ -291,20 +291,20 @@ test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
   handleConfigUpdated(event);
 
   // checks
-  assert.fieldEquals('ERC20VotingPackage', entityID, 'id', entityID);
+  assert.fieldEquals('ERC20VotingPlugin', entityID, 'id', entityID);
   assert.fieldEquals(
-    'ERC20VotingPackage',
+    'ERC20VotingPlugin',
     entityID,
     'relativeSupportThresholdPct',
     '1'
   );
   assert.fieldEquals(
-    'ERC20VotingPackage',
+    'ERC20VotingPlugin',
     entityID,
     'totalSupportThresholdPct',
     '2'
   );
-  assert.fieldEquals('ERC20VotingPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('ERC20VotingPlugin', entityID, 'minDuration', '3600');
 
   clearStore();
 });

@@ -226,7 +226,7 @@ export function createAllowlistProposalEntityState(
 ): AllowlistProposal {
   let allowlistProposal = new AllowlistProposal(entityID);
   allowlistProposal.dao = Address.fromString(dao).toHexString();
-  allowlistProposal.pkg = Address.fromString(pkg).toHexString();
+  allowlistProposal.plugin = Address.fromString(pkg).toHexString();
   allowlistProposal.voteId = BigInt.fromString(voteId);
   allowlistProposal.creator = Address.fromString(creator);
 

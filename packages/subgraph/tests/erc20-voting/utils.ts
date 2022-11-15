@@ -186,7 +186,7 @@ export function createERC20VotingProposalEntityState(
 ): ERC20VotingProposal {
   let erc20VotingProposal = new ERC20VotingProposal(entityID);
   erc20VotingProposal.dao = Address.fromString(dao).toHexString();
-  erc20VotingProposal.pkg = Address.fromString(pkg).toHexString();
+  erc20VotingProposal.plugin = Address.fromString(pkg).toHexString();
   erc20VotingProposal.voteId = BigInt.fromString(voteId);
   erc20VotingProposal.creator = Address.fromString(creator);
 
