@@ -48,10 +48,10 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
-  let erc20VotingPackage = new AddresslistPlugin(
+  let erc20VotingPlugin = new AddresslistPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
-  erc20VotingPackage.save();
+  erc20VotingPlugin.save();
 
   // create calls
   getVotesLengthCall(VOTING_ADDRESS, '1');
@@ -237,8 +237,8 @@ test('Run Addresslist Voting (handleVoteExecuted) mappings with mock event', () 
 test('Run Addresslist Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPackage = new AddresslistPlugin(entityID);
-  erc20VotingPackage.save();
+  let erc20VotingPlugin = new AddresslistPlugin(entityID);
+  erc20VotingPlugin.save();
 
   // create event
   let event = createNewConfigUpdatedEvent('2', '1', '3600', VOTING_ADDRESS);

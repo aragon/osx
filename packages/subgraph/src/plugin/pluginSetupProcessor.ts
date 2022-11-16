@@ -8,7 +8,7 @@ import {
   UpdatePrepared
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 import {Plugin, PluginHelper} from '../../generated/schema';
-import {addPackage} from './utils';
+import {addPlugin} from './utils';
 
 export function handleInstallationPrepared(event: InstallationPrepared): void {
   let pluginId = event.params.plugin.toHexString();
@@ -33,7 +33,7 @@ export function handleInstallationApplied(event: InstallationApplied): void {
     pluginEntity.save();
 
     // TODO: to be removed once the we seperate plugin from core
-    addPackage(event.params.dao.toHexString(), event.params.plugin);
+    addPlugin(event.params.dao.toHexString(), event.params.plugin);
   } else {
     log.warning(
       'InstallationApplied event happened without being prepared, for DAO: {}, plugin: {}',

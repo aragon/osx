@@ -43,10 +43,10 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
-  let erc20VotingPackage = new ERC20VotingPlugin(
+  let erc20VotingPlugin = new ERC20VotingPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
-  erc20VotingPackage.save();
+  erc20VotingPlugin.save();
 
   // create calls
   getVotesLengthCall(VOTING_ADDRESS, '1');
@@ -280,8 +280,8 @@ test('Run ERC Voting (handleVoteExecuted) mappings with mock event', () => {
 test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPackage = new ERC20VotingPlugin(entityID);
-  erc20VotingPackage.save();
+  let erc20VotingPlugin = new ERC20VotingPlugin(entityID);
+  erc20VotingPlugin.save();
 
   // create event
   let event = createNewConfigUpdatedEvent('1', '2', '3600', VOTING_ADDRESS);

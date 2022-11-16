@@ -16,7 +16,7 @@ import {
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
-function createErc20VotingPackage(who: Address, daoId: string): void {
+function createErc20VotingPlugin(who: Address, daoId: string): void {
   let packageEntity = ERC20VotingPlugin.load(who.toHexString());
   if (!packageEntity) {
     packageEntity = new ERC20VotingPlugin(who.toHexString());
@@ -45,7 +45,7 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
   }
 }
 
-function createAddresslistPackage(who: Address, daoId: string): void {
+function createAddresslistPlugin(who: Address, daoId: string): void {
   let packageEntity = AddresslistPlugin.load(who.toHexString());
   if (!packageEntity) {
     packageEntity = new AddresslistPlugin(who.toHexString());
@@ -71,7 +71,7 @@ function createAddresslistPackage(who: Address, daoId: string): void {
   }
 }
 
-export function addPackage(daoId: string, who: Address): void {
+export function addPlugin(daoId: string, who: Address): void {
   // package
   // TODO: rethink this once the market place is ready
   let contract = ERC165Contract.bind(who);
@@ -86,9 +86,9 @@ export function addPackage(daoId: string, who: Address): void {
   );
 
   if (ERC20VotingInterfaceSuppoted) {
-    createErc20VotingPackage(who, daoId);
+    createErc20VotingPlugin(who, daoId);
   } else if (addresslistInterfaceSuppoted) {
-    createAddresslistPackage(who, daoId);
+    createAddresslistPlugin(who, daoId);
   }
 
   if (ERC20VotingInterfaceSuppoted || addresslistInterfaceSuppoted) {
@@ -100,7 +100,7 @@ export function addPackage(daoId: string, who: Address): void {
   }
 }
 
-export function removePackage(daoId: string, who: string): void {
+export function removePlugin(daoId: string, who: string): void {
   let daoPluginEntityId = daoId + '_' + who;
   let daoPluginEntity = DaoPlugin.load(daoPluginEntityId);
   if (daoPluginEntity) {
