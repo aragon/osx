@@ -241,7 +241,7 @@ type ERC20VotingProposal implements Proposal @entity {
   executable: Boolean
 }
 
-# AllowlistVoting
+# Addresslist
 
 type AllowlistPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"

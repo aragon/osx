@@ -7,8 +7,8 @@ import {
   ConfigUpdated,
   UsersAdded,
   UsersRemoved,
-  AllowlistVoting
-} from '../../../generated/templates/AllowlistVoting/AllowlistVoting';
+  Addresslist
+} from '../../../generated/templates/Addresslist/Addresslist';
 import {
   Action,
   AllowlistPlugin,
@@ -42,7 +42,7 @@ export function _handleVoteCreated(
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
 
-  let contract = AllowlistVoting.bind(event.address);
+  let contract = Addresslist.bind(event.address);
   let vote = contract.try_getVote(event.params.voteId);
 
   if (!vote.reverted) {
@@ -108,7 +108,7 @@ export function handleVoteCast(event: VoteCast): void {
   // update count
   let proposalEntity = AllowlistProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = AllowlistVoting.bind(event.address);
+    let contract = Addresslist.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
     if (!vote.reverted) {
       let voteCount = vote.value.value8.plus(
@@ -160,7 +160,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
   }
 
   // update actions
-  let contract = AllowlistVoting.bind(event.address);
+  let contract = Addresslist.bind(event.address);
   let vote = contract.try_getVote(event.params.voteId);
   if (!vote.reverted) {
     let actions = vote.value.value10;

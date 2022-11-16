@@ -9,7 +9,7 @@ import {
   ConfigUpdated,
   UsersAdded,
   UsersRemoved
-} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
+} from '../../generated/templates/Addresslist/Addresslist';
 import {
   ADDRESS_ONE,
   CREATED_AT,

@@ -46,7 +46,7 @@ let totalSupportThresholdPct = '500';
 let census = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
-test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => {
+test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
   let erc20VotingPackage = new AllowlistPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -123,7 +123,7 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
   clearStore();
 });
 
-test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
+test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   // create state
   let proposal = createAllowlistProposalEntityState();
 
@@ -211,7 +211,7 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () => {
+test('Run Addresslist Voting (handleVoteExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
   createAllowlistProposalEntityState(
@@ -234,7 +234,7 @@ test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () =>
   clearStore();
 });
 
-test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () => {
+test('Run Addresslist Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
   let erc20VotingPackage = new AllowlistPlugin(entityID);
@@ -265,7 +265,7 @@ test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () =
   clearStore();
 });
 
-test('Run Allowlist Voting (handleUsersAdded) mappings with mock event', () => {
+test('Run Addresslist Voting (handleUsersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
@@ -300,7 +300,7 @@ test('Run Allowlist Voting (handleUsersAdded) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
+test('Run Addresslist Voting (UsersRemoved) mappings with mock event', () => {
   // create state
   let userArray = [
     Address.fromString(ADDRESS_ONE),

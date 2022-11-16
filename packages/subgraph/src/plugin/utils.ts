@@ -1,9 +1,9 @@
 import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
-import {AllowlistVoting as AllowlistVotingContract} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
+import {Addresslist as AddresslistContract} from '../../generated/templates/Addresslist/Addresslist';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {ERC20Voting, AllowlistVoting} from '../../generated/templates';
+import {ERC20Voting, Addresslist} from '../../generated/templates';
 import {
   DaoPlugin,
   ERC20VotingPlugin,
@@ -45,11 +45,11 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
   }
 }
 
-function createAllowlistVotingPackage(who: Address, daoId: string): void {
+function createAddresslistPackage(who: Address, daoId: string): void {
   let packageEntity = AllowlistPlugin.load(who.toHexString());
   if (!packageEntity) {
     packageEntity = new AllowlistPlugin(who.toHexString());
-    let contract = AllowlistVotingContract.bind(who);
+    let contract = AddresslistContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
     let minDuration = contract.try_minDuration();
@@ -65,7 +65,7 @@ function createAllowlistVotingPackage(who: Address, daoId: string): void {
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    AllowlistVoting.createWithContext(who, context);
+    Addresslist.createWithContext(who, context);
 
     packageEntity.save();
   }
@@ -88,7 +88,7 @@ export function addPackage(daoId: string, who: Address): void {
   if (ERC20VotingInterfaceSuppoted) {
     createErc20VotingPackage(who, daoId);
   } else if (allowlistInterfaceSuppoted) {
-    createAllowlistVotingPackage(who, daoId);
+    createAddresslistPackage(who, daoId);
   }
 
   if (ERC20VotingInterfaceSuppoted || allowlistInterfaceSuppoted) {
