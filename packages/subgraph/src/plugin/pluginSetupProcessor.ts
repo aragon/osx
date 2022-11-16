@@ -1,4 +1,4 @@
-import {Address, Bytes} from '@graphprotocol/graph-ts';
+import {Address, Bytes, log} from '@graphprotocol/graph-ts';
 import {
   InstallationApplied,
   InstallationPrepared,
@@ -8,6 +8,7 @@ import {
   UpdatePrepared
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 import {Plugin, PluginHelper} from '../../generated/schema';
+import {addPackage} from './utils';
 
 export function handleInstallationPrepared(event: InstallationPrepared): void {
   let pluginId = event.params.plugin.toHexString();
@@ -25,43 +26,56 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
 
 export function handleInstallationApplied(event: InstallationApplied): void {
   let pluginId = event.params.plugin.toHexString();
+
   let pluginEntity = Plugin.load(pluginId);
-  if (!pluginEntity) {
-    pluginEntity = createEmptyPlugin(pluginId);
-    pluginEntity.dao = event.params.dao.toHexString();
+  if (pluginEntity) {
+    pluginEntity.state = 'Installed';
+    pluginEntity.save();
+
+    // TODO: to be removed once the we seperate plugin from core
+    addPackage(event.params.dao.toHexString(), event.params.plugin);
+  } else {
+    log.warning(
+      'InstallationApplied event happened without being prepared, for DAO: {}, plugin: {}',
+      [event.params.dao.toHexString(), pluginId]
+    );
   }
-  pluginEntity.state = 'Installed';
-  pluginEntity.save();
 }
 
 export function handleUpdatePrepared(event: UpdatePrepared): void {
   let pluginId = event.params.plugin.toHexString();
 
   let pluginEntity = Plugin.load(pluginId);
-  if (!pluginEntity) {
-    pluginEntity = createEmptyPlugin(pluginId);
-  }
-  pluginEntity.sender = event.params.sender.toHexString();
-  pluginEntity.dao = event.params.dao.toHexString();
-  pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
-  pluginEntity.data = event.params.data;
-  pluginEntity.state = 'UpdatePrepared';
-  pluginEntity.save();
+  if (pluginEntity) {
+    pluginEntity.sender = event.params.sender.toHexString();
+    pluginEntity.dao = event.params.dao.toHexString();
+    pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
+    pluginEntity.data = event.params.data;
+    pluginEntity.state = 'UpdatePrepared';
+    pluginEntity.save();
 
-  handleHelperIds(event.params.updatedHelpers, pluginId);
+    handleHelperIds(event.params.updatedHelpers, pluginId);
+  } else {
+    log.warning(
+      'UpdatePrepared event happened without being installed, for DAO: {}, plugin: {}',
+      [event.params.dao.toHexString(), pluginId]
+    );
+  }
 }
 
 export function handleUpdateApplied(event: UpdateApplied): void {
   let pluginId = event.params.plugin.toHexString();
 
   let pluginEntity = Plugin.load(pluginId);
-  if (!pluginEntity) {
-    pluginEntity = createEmptyPlugin(pluginId);
-    pluginEntity.dao = event.params.dao.toHexString();
+  if (pluginEntity) {
+    pluginEntity.state = 'Installed';
+    pluginEntity.save();
+  } else {
+    log.warning(
+      'UpdateApplied event happened without being prepared, for DAO: {}, plugin: {}',
+      [event.params.dao.toHexString(), pluginId]
+    );
   }
-
-  pluginEntity.state = 'Installed';
-  pluginEntity.save();
 }
 
 export function handleUninstallationPrepared(
@@ -70,18 +84,21 @@ export function handleUninstallationPrepared(
   let pluginId = event.params.plugin.toHexString();
 
   let pluginEntity = Plugin.load(pluginId);
-  if (!pluginEntity) {
-    pluginEntity = createEmptyPlugin(pluginId);
+  if (pluginEntity) {
+    pluginEntity.sender = event.params.sender.toHexString();
+    pluginEntity.dao = event.params.dao.toHexString();
+    pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
+    pluginEntity.data = event.params.data;
+    pluginEntity.state = 'UninstallPrepared';
+    pluginEntity.save();
+
+    handleHelperIds(event.params.currentHelpers, pluginId);
+  } else {
+    log.warning(
+      'UninstallationPrepared event happened without being installed, for DAO: {}, plugin: {}',
+      [event.params.dao.toHexString(), pluginId]
+    );
   }
-
-  pluginEntity.sender = event.params.sender.toHexString();
-  pluginEntity.dao = event.params.dao.toHexString();
-  pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
-  pluginEntity.data = event.params.data;
-  pluginEntity.state = 'UninstallPrepared';
-  pluginEntity.save();
-
-  handleHelperIds(event.params.currentHelpers, pluginId);
 }
 
 export function handleUninstallationApplied(
@@ -90,13 +107,15 @@ export function handleUninstallationApplied(
   let pluginId = event.params.plugin.toHexString();
 
   let pluginEntity = Plugin.load(pluginId);
-  if (!pluginEntity) {
-    pluginEntity = createEmptyPlugin(pluginId);
-    pluginEntity.dao = event.params.dao.toHexString();
+  if (pluginEntity) {
+    pluginEntity.state = 'Uninstalled';
+    pluginEntity.save();
+  } else {
+    log.warning(
+      'UninstallationApplied event happened without being prepared, for DAO: {}, plugin: {}',
+      [event.params.dao.toHexString(), pluginId]
+    );
   }
-
-  pluginEntity.state = 'Uninstalled';
-  pluginEntity.save();
 }
 
 export function handleHelperIds(helperIds: Address[], plugin: string): void {
@@ -109,13 +128,4 @@ export function handleHelperIds(helperIds: Address[], plugin: string): void {
       helper.save();
     }
   }
-}
-
-function createEmptyPlugin(pluginId: string): Plugin {
-  let pluginEntity = new Plugin(pluginId) as Plugin;
-  pluginEntity.sender = '0x0000000000000000000000000000000000000000';
-  pluginEntity.dao = '0x0000000000000000000000000000000000000000';
-  pluginEntity.pluginSetup = '0x0000000000000000000000000000000000000000';
-  pluginEntity.data = Bytes.fromHexString('0x00');
-  return pluginEntity;
 }

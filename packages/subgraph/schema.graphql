@@ -97,7 +97,8 @@ type Dao @entity {
   permissions: [Permission!]! @derivedFrom(field: "dao")
   plugins: [DaoPlugin!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
-  # plugins: [Plugin!] @derivedFrom(field: "dao")
+  "TODO: remove or rename to `plugins` once plugins are seperated from the core"
+  corePlugins: [Plugin!] @derivedFrom(field: "dao")
   trustedForwarder: Bytes
   signatureValidator: Bytes
   standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
@@ -131,6 +132,7 @@ type PluginHelper @entity(immutable: true) {
 }
 
 type Plugin @entity {
+  "TODO: should do `implements IPlugin` once plugin is seperated from core"
   id: ID! # address
   dao: Dao!
   pluginSetup: PluginSetup!
@@ -150,15 +152,16 @@ enum PluginState {
 
 type DaoPlugin @entity {
   id: ID! # Dao + Plugin
-  plugin: Plugin!
+  plugin: IPlugin!
   dao: Dao!
 }
 
-# interface Package {
-#   id: ID! # address
-#   daos: [DaoPlugin!] @derivedFrom(field: "pkg")
-# }
+interface IPlugin {
+  id: ID! # address
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+}
 
+### Entities below should move to there respective subgraph once plugin is seperated from core
 # Proposal
 
 interface Proposal {
@@ -182,7 +185,8 @@ enum VoteOption {
 
 # ERC20Voting
 
-type ERC20VotingPlugin implements Plugin @entity {
+type ERC20VotingPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugins once plugin is seperated from core"
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [ERC20VotingProposal!]! @derivedFrom(field: "plugin")
@@ -239,7 +243,8 @@ type ERC20VotingProposal implements Proposal @entity {
 
 # AllowlistVoting
 
-type AllowlistPlugin implements Plugin @entity {
+type AllowlistPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AllowlistProposal!]! @derivedFrom(field: "plugin")

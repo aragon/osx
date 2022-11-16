@@ -23,8 +23,9 @@ import {
 } from '../../generated/schema';
 
 import {ADDRESS_ZERO} from '../utils/constants';
+import {addPackage, removePackage} from '../plugin/utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
-import {addPackage, decodeWithdrawParams, removePackage} from './utils';
+import {decodeWithdrawParams} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -221,17 +222,6 @@ export function handleGranted(event: Granted): void {
   permissionEntity.actor = event.params.here;
   permissionEntity.oracle = event.params.oracle;
   permissionEntity.save();
-
-  // Package
-  let daoContract = DAOContract.bind(event.address);
-  // TODO: perhaps hardcoding exec contractPermissionId will be more efficient.
-  let executionContractPermissionId = daoContract.try_EXECUTE_PERMISSION_ID();
-  if (
-    !executionContractPermissionId.reverted &&
-    event.params.permissionId == executionContractPermissionId.value
-  ) {
-    addPackage(daoId, event.params.who);
-  }
 }
 
 export function handleRevoked(event: Revoked): void {
@@ -245,18 +235,6 @@ export function handleRevoked(event: Revoked): void {
   let permissionEntity = Permission.load(permissionId);
   if (permissionEntity) {
     store.remove('Permission', permissionId);
-  }
-
-  // Package
-  // TODO: rethink this once the market place is ready
-  let daoId = event.address.toHexString();
-  let daoContract = DAOContract.bind(event.address);
-  let executionContractPermissionId = daoContract.try_EXECUTE_PERMISSION_ID();
-  if (
-    !executionContractPermissionId.reverted &&
-    event.params.permissionId == executionContractPermissionId.value
-  ) {
-    removePackage(daoId, event.params.who.toHexString());
   }
 }
 
