@@ -37,7 +37,7 @@ import {
   getVotingToken
 } from '../dao/utils';
 import {
-  ALLOWLIST_VOTING_INTERFACE,
+  ADDRESSLIST_VOTING_INTERFACE,
   ERC20_VOTING_INTERFACE
 } from '../../src/utils/constants';
 import {createTokenCalls} from '../utils';
@@ -102,7 +102,7 @@ test('InstallationApplied event (existent plugin)', function() {
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getVotingToken(pluginId, DAO_TOKEN_ADDRESS);
   getSupportsInterface(pluginId, ERC20_VOTING_INTERFACE, true);
-  getSupportsInterface(pluginId, ALLOWLIST_VOTING_INTERFACE, false);
+  getSupportsInterface(pluginId, ADDRESSLIST_VOTING_INTERFACE, false);
 
   // handle
   handleInstallationApplied(appliedEvent);

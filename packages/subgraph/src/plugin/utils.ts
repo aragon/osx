@@ -12,7 +12,7 @@ import {
 import {handleERC20Token} from '../utils/tokens';
 import {
   ERC20_VOTING_INTERFACE,
-  ALLOWLIST_VOTING_INTERFACE
+  ADDRESSLIST_VOTING_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
@@ -82,7 +82,7 @@ export function addPackage(daoId: string, who: Address): void {
   );
   let addresslistInterfaceSuppoted = supportsInterface(
     contract,
-    ALLOWLIST_VOTING_INTERFACE
+    ADDRESSLIST_VOTING_INTERFACE
   );
 
   if (ERC20VotingInterfaceSuppoted) {
