@@ -11,10 +11,10 @@ import {
 } from '../../../generated/templates/Addresslist/Addresslist';
 import {
   Action,
-  AllowlistPlugin,
-  AllowlistProposal,
-  AllowlistVoter,
-  AllowlistVote
+  AddresslistPlugin,
+  AddresslistProposal,
+  AddresslistVoter,
+  AddresslistVote
 } from '../../../generated/schema';
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
 
@@ -34,7 +34,7 @@ export function _handleVoteCreated(
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
 
-  let proposalEntity = new AllowlistProposal(proposalId);
+  let proposalEntity = new AddresslistProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
   proposalEntity.voteId = event.params.voteId;
@@ -80,7 +80,7 @@ export function _handleVoteCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AllowlistPlugin.load(event.address.toHexString());
+  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_votesLength();
     if (!voteLength.reverted) {
@@ -94,9 +94,9 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = AllowlistVote.load(voterProposalId);
+  let voterProposalEntity = AddresslistVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new AllowlistVote(voterProposalId);
+    voterProposalEntity = new AddresslistVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
@@ -106,7 +106,7 @@ export function handleVoteCast(event: VoteCast): void {
   voterProposalEntity.save();
 
   // update count
-  let proposalEntity = AllowlistProposal.load(proposalId);
+  let proposalEntity = AddresslistProposal.load(proposalId);
   if (proposalEntity) {
     let contract = Addresslist.bind(event.address);
     let vote = contract.try_getVote(event.params.voteId);
@@ -153,7 +153,7 @@ export function handleVoteCast(event: VoteCast): void {
 export function handleVoteExecuted(event: VoteExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
-  let proposalEntity = AllowlistProposal.load(proposalId);
+  let proposalEntity = AddresslistProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
     proposalEntity.save();
@@ -182,7 +182,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
 }
 
 export function handleConfigUpdated(event: ConfigUpdated): void {
-  let packageEntity = AllowlistPlugin.load(event.address.toHexString());
+  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.totalSupportThresholdPct =
       event.params.totalSupportThresholdPct;
@@ -197,9 +197,9 @@ export function handleUsersAdded(event: UsersAdded): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
-    let voterEntity = AllowlistVoter.load(user.toHexString());
+    let voterEntity = AddresslistVoter.load(user.toHexString());
     if (!voterEntity) {
-      voterEntity = new AllowlistVoter(user.toHexString());
+      voterEntity = new AddresslistVoter(user.toHexString());
       voterEntity.address = user.toHexString();
       voterEntity.plugin = event.address.toHexString();
       voterEntity.save();
@@ -211,9 +211,9 @@ export function handleUsersRemoved(event: UsersRemoved): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
-    let voterEntity = AllowlistVoter.load(user.toHexString());
+    let voterEntity = AddresslistVoter.load(user.toHexString());
     if (voterEntity) {
-      store.remove('AllowlistVoter', user.toHexString());
+      store.remove('AddresslistVoter', user.toHexString());
     }
   }
 }

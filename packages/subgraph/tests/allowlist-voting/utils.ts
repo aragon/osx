@@ -1,6 +1,6 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
-import {AllowlistProposal} from '../../generated/schema';
+import {AddresslistProposal} from '../../generated/schema';
 
 import {
   VoteCreated,
@@ -207,7 +207,7 @@ export function getVotesLengthCall(
 
 // state
 
-export function createAllowlistProposalEntityState(
+export function createAddresslistProposalEntityState(
   entityID: string = PROPOSAL_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
@@ -223,28 +223,28 @@ export function createAllowlistProposalEntityState(
   open: boolean = true,
   executable: boolean = false,
   executed: boolean = false
-): AllowlistProposal {
-  let allowlistProposal = new AllowlistProposal(entityID);
-  allowlistProposal.dao = Address.fromString(dao).toHexString();
-  allowlistProposal.plugin = Address.fromString(pkg).toHexString();
-  allowlistProposal.voteId = BigInt.fromString(voteId);
-  allowlistProposal.creator = Address.fromString(creator);
+): AddresslistProposal {
+  let addresslistProposal = new AddresslistProposal(entityID);
+  addresslistProposal.dao = Address.fromString(dao).toHexString();
+  addresslistProposal.plugin = Address.fromString(pkg).toHexString();
+  addresslistProposal.voteId = BigInt.fromString(voteId);
+  addresslistProposal.creator = Address.fromString(creator);
 
-  allowlistProposal.startDate = BigInt.fromString(startDate);
-  allowlistProposal.endDate = BigInt.fromString(endDate);
-  allowlistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  allowlistProposal.relativeSupportThresholdPct = BigInt.fromString(
+  addresslistProposal.startDate = BigInt.fromString(startDate);
+  addresslistProposal.endDate = BigInt.fromString(endDate);
+  addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  addresslistProposal.relativeSupportThresholdPct = BigInt.fromString(
     relativeSupportThresholdPct
   );
-  allowlistProposal.totalSupportThresholdPct = BigInt.fromString(
+  addresslistProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
-  allowlistProposal.census = BigInt.fromString(census);
-  allowlistProposal.open = open;
-  allowlistProposal.executable = executable;
-  allowlistProposal.executed = executed;
-  allowlistProposal.createdAt = BigInt.fromString(createdAt);
-  allowlistProposal.save();
+  addresslistProposal.census = BigInt.fromString(census);
+  addresslistProposal.open = open;
+  addresslistProposal.executable = executable;
+  addresslistProposal.executed = executed;
+  addresslistProposal.createdAt = BigInt.fromString(createdAt);
+  addresslistProposal.save();
 
-  return allowlistProposal;
+  return addresslistProposal;
 }

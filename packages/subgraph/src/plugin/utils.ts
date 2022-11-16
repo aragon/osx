@@ -7,7 +7,7 @@ import {ERC20Voting, Addresslist} from '../../generated/templates';
 import {
   DaoPlugin,
   ERC20VotingPlugin,
-  AllowlistPlugin
+  AddresslistPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
@@ -46,9 +46,9 @@ function createErc20VotingPackage(who: Address, daoId: string): void {
 }
 
 function createAddresslistPackage(who: Address, daoId: string): void {
-  let packageEntity = AllowlistPlugin.load(who.toHexString());
+  let packageEntity = AddresslistPlugin.load(who.toHexString());
   if (!packageEntity) {
-    packageEntity = new AllowlistPlugin(who.toHexString());
+    packageEntity = new AddresslistPlugin(who.toHexString());
     let contract = AddresslistContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
@@ -80,18 +80,18 @@ export function addPackage(daoId: string, who: Address): void {
     contract,
     ERC20_VOTING_INTERFACE
   );
-  let allowlistInterfaceSuppoted = supportsInterface(
+  let addresslistInterfaceSuppoted = supportsInterface(
     contract,
     ALLOWLIST_VOTING_INTERFACE
   );
 
   if (ERC20VotingInterfaceSuppoted) {
     createErc20VotingPackage(who, daoId);
-  } else if (allowlistInterfaceSuppoted) {
+  } else if (addresslistInterfaceSuppoted) {
     createAddresslistPackage(who, daoId);
   }
 
-  if (ERC20VotingInterfaceSuppoted || allowlistInterfaceSuppoted) {
+  if (ERC20VotingInterfaceSuppoted || addresslistInterfaceSuppoted) {
     let daoPluginEntityId = daoId + '_' + who.toHexString();
     let daoPluginEntity = new DaoPlugin(daoPluginEntityId);
     daoPluginEntity.plugin = who.toHexString();

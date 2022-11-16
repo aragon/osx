@@ -171,7 +171,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/allowlist/allowlist-voting.ts
+      file: ./src/packages/addresslist/addresslist-voting.ts
       entities:
         - Dao
       abis:
