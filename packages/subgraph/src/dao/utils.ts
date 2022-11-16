@@ -3,27 +3,10 @@ import {
   BigInt,
   ByteArray,
   Bytes,
-  DataSourceContext,
-  ethereum,
-  store
+  ethereum
 } from '@graphprotocol/graph-ts';
 
-import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
-import {AllowlistVoting as AllowlistVotingContract} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
-import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {ERC20Voting, AllowlistVoting} from '../../generated/templates';
-import {
-  DaoPlugin,
-  ERC20VotingPlugin,
-  AllowlistPlugin
-} from '../../generated/schema';
-import {handleERC20Token} from '../utils/tokens';
-import {
-  ADDRESS_ZERO,
-  ERC20_VOTING_INTERFACE,
-  ALLOWLIST_VOTING_INTERFACE
-} from '../utils/constants';
-import {supportsInterface} from '../utils/erc165';
+import {ADDRESS_ZERO} from '../utils/constants';
 
 class WithdrawParams {
   token: Address = Address.fromString(ADDRESS_ZERO);

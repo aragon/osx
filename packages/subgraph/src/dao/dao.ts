@@ -1,7 +1,6 @@
 import {Address, Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
-  DAO as DAOContract,
   MetadataSet,
   Executed,
   Deposited,
@@ -23,7 +22,6 @@ import {
 } from '../../generated/schema';
 
 import {ADDRESS_ZERO} from '../utils/constants';
-import {addPackage, removePackage} from '../plugin/utils';
 import {handleERC20Token, updateBalance} from '../utils/tokens';
 import {decodeWithdrawParams} from './utils';
 

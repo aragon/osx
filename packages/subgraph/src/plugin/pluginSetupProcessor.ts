@@ -1,4 +1,4 @@
-import {Address, Bytes, log} from '@graphprotocol/graph-ts';
+import {Address, log} from '@graphprotocol/graph-ts';
 import {
   InstallationApplied,
   InstallationPrepared,

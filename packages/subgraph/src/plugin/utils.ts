@@ -1,12 +1,4 @@
-import {
-  Address,
-  BigInt,
-  ByteArray,
-  Bytes,
-  DataSourceContext,
-  ethereum,
-  store
-} from '@graphprotocol/graph-ts';
+import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
 import {AllowlistVoting as AllowlistVotingContract} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
@@ -19,7 +11,6 @@ import {
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
-  ADDRESS_ZERO,
   ERC20_VOTING_INTERFACE,
   ALLOWLIST_VOTING_INTERFACE
 } from '../utils/constants';
