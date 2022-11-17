@@ -23,7 +23,7 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
         address _dao,
         address _plugin,
         address[] memory _currentHelpers,
-        uint16[3] calldata _oldVersion,
+        uint16 _currentBuildId,
         bytes memory _data
     )
         external

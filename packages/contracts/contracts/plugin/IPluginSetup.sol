@@ -17,7 +17,6 @@ interface IPluginSetup {
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
     function prepareInstallation(address _dao, bytes memory _data)
         external
-    
         returns (
             address plugin,
             address[] memory helpers,
@@ -33,7 +32,7 @@ interface IPluginSetup {
     /// @param _dao The address of the updating DAO.
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param _oldVersion The semantic version of the plugin to update from.
+    /// @param _currentBuildId The build id of the plugin to update from.
     /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the `prepareUpdateDataABI()` function.
     /// @return updatedHelpers The address array of helpers (contracts or EOAs) associated with the plugin after the update.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
@@ -43,11 +42,10 @@ interface IPluginSetup {
         address _dao,
         address _plugin,
         address[] memory _currentHelpers,
-        uint16[3] calldata _oldVersion,
+        uint16 _currentBuildId,
         bytes memory _data
     )
         external
-    
         returns (
             address[] memory updatedHelpers,
             bytes memory initData,

@@ -211,7 +211,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Reverts if pluginSetup doesn't exist on the repo...
-        _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
+        _pluginSetupRepo.latestVersionByPluginSetup(_pluginSetup);
 
         // Prepare the installation
         (plugin, helpers, permissions) = PluginSetup(_pluginSetup).prepareInstallation(_dao, _data);
@@ -301,100 +301,99 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address[] calldata _currentHelpers,
         bytes memory _data
     ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
-        // Check that plugin is `PluginUUPSUpgradable`.
-        if (!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
-            revert IPluginNotSupported({plugin: _updateParams.plugin});
-        }
-        if (IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
-            revert PluginNonupgradeable({plugin: _updateParams.plugin});
-        }
+        // // Check that plugin is `PluginUUPSUpgradable`.
+        // if (!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+        //     revert IPluginNotSupported({plugin: _updateParams.plugin});
+        // }
+        // if (IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+        //     revert PluginNonupgradeable({plugin: _updateParams.plugin});
+        // }
 
-        // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.
-        // ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(_updateParams.pluginSetupRepo))) {
-            revert PluginRepoNonexistent();
-        }
+        // // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.
+        // // ensure repo for plugin manager exists
+        // if (!repoRegistry.entries(address(_updateParams.pluginSetupRepo))) {
+        //     revert PluginRepoNonexistent();
+        // }
 
-        // Check if plugin is applied
-        if (!isInstallationApplied[_getAppliedId(_dao, _updateParams.plugin)]) {
-            revert SetupNotApplied();
-        }
+        // // Check if plugin is applied
+        // if (!isInstallationApplied[_getAppliedId(_dao, _updateParams.plugin)]) {
+        //     revert SetupNotApplied();
+        // }
 
-        {
-            // Check if the helpers to be updated match with those announced in the previous setup step.
-            // This implicitly checks if plugin was installed in the first place.
-            bytes32 oldSetupId = _getSetupId(
-                _dao,
-                _updateParams.currentPluginSetup,
-                address(_updateParams.pluginSetupRepo),
-                _updateParams.plugin
-            );
+        // {
+        //     // Check if the helpers to be updated match with those announced in the previous setup step.
+        //     // This implicitly checks if plugin was installed in the first place.
+        //     bytes32 oldSetupId = _getSetupId(
+        //         _dao,
+        //         _updateParams.currentPluginSetup,
+        //         address(_updateParams.pluginSetupRepo),
+        //         _updateParams.plugin
+        //     );
 
-            if (helpersHashes[oldSetupId] != _getHelpersHash(_currentHelpers)) {
-                revert HelpersHashMismatch();
-            }
+        //     if (helpersHashes[oldSetupId] != _getHelpersHash(_currentHelpers)) {
+        //         revert HelpersHashMismatch();
+        //     }
 
-            // Free up space by deleting the helpers hash being not needed anymore.
-            delete helpersHashes[oldSetupId];
-        }
+        //     // Free up space by deleting the helpers hash being not needed anymore.
+        //     delete helpersHashes[oldSetupId];
+        // }
 
-        // `getVersionByPluginSetup` will revert if `currentPluginSetup` is not part of `pluginSetupRepo`.
-        (uint16[3] memory oldVersion, , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
-            _updateParams.currentPluginSetup
-        );
+        // // `getVersionByPluginSetup` will revert if `currentPluginSetup` is not part of `pluginSetupRepo`.
+        // (uint256 memory currentReleaseId, uint currentVersionId, , , ) = _updateParams.pluginSetupRepo.getVersionByPluginSetup(
+        //     _updateParams.currentPluginSetup
+        // );
 
-        {
-            // `getVersionByPluginSetup` will revert if `newPluginSetup` is not part of `pluginSetupRepo`.
-            (uint16[3] memory newVersion, , ) = _updateParams
-                .pluginSetupRepo
-                .getVersionByPluginSetup(_updateParams.newPluginSetup);
+        // {
+        //     // `getVersionByPluginSetup` will revert if `newPluginSetup` is not part of `pluginSetupRepo`.
+        //     (uint256 memory newReleaseId, uint newVersionId, , , ) = _updateParams
+        //         .pluginSetupRepo
+        //         .getVersionByPluginSetup(_updateParams.newPluginSetup);
 
-            // Assert that the version bump valid
-            if (!isValidBumpLoose(oldVersion, newVersion)) {
-                revert BumpInvalid({currentVersion: oldVersion, nextVersion: newVersion});
-            }
-        }
+        //     if(currentReleaseId != newReleaseId) {
+        //         // revert not allowed
+        //     }
+        // }
 
-        // Prepare the update.
-        (
-            address[] memory updatedHelpers,
-            bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        ) = PluginSetup(_updateParams.newPluginSetup).prepareUpdate(
-                _dao,
-                _updateParams.plugin,
-                _currentHelpers,
-                oldVersion,
-                _data
-            );
+        // // Prepare the update.
+        // (
+        //     address[] memory updatedHelpers,
+        //     bytes memory initData,
+        //     PermissionLib.ItemMultiTarget[] memory permissions
+        // ) = PluginSetup(_updateParams.newPluginSetup).prepareUpdate(
+        //         _dao,
+        //         _updateParams.plugin,
+        //         _currentHelpers,
+        //         oldVersion,
+        //         _data
+        //     );
 
-        {
-            // Add new helpers for the future update checks
-            bytes32 newSetupId = _getSetupId(
-                _dao,
-                _updateParams.newPluginSetup,
-                address(_updateParams.pluginSetupRepo),
-                _updateParams.plugin
-            );
+        // {
+        //     // Add new helpers for the future update checks
+        //     bytes32 newSetupId = _getSetupId(
+        //         _dao,
+        //         _updateParams.newPluginSetup,
+        //         address(_updateParams.pluginSetupRepo),
+        //         _updateParams.plugin
+        //     );
 
-            helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
+        //     helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
 
-            // Set new update permission hashes.
-            updatePermissionHashes[newSetupId] = _getPermissionsHash(permissions);
-        }
+        //     // Set new update permission hashes.
+        //     updatePermissionHashes[newSetupId] = _getPermissionsHash(permissions);
+        // }
 
-        emit UpdatePrepared({
-            sender: msg.sender,
-            dao: _dao,
-            pluginSetup: _updateParams.newPluginSetup,
-            data: _data,
-            plugin: _updateParams.plugin,
-            updatedHelpers: updatedHelpers,
-            permissions: permissions,
-            initData: initData
-        });
+        // emit UpdatePrepared({
+        //     sender: msg.sender,
+        //     dao: _dao,
+        //     pluginSetup: _updateParams.newPluginSetup,
+        //     data: _data,
+        //     plugin: _updateParams.plugin,
+        //     updatedHelpers: updatedHelpers,
+        //     permissions: permissions,
+        //     initData: initData
+        // });
 
-        return (permissions, initData);
+        // return (permissions, initData);
     }
 
     /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
@@ -456,7 +455,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Reverts if pluginSetup doesn't exist on the repo...
-        _pluginSetupRepo.getVersionByPluginSetup(_pluginSetup);
+        _pluginSetupRepo.latestVersionByPluginSetup(_pluginSetup);
 
         // check if plugin is applied.
         bytes32 appliedId = _getAppliedId(_dao, _plugin);

@@ -101,7 +101,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         address _dao,
         address _plugin,
         address[] memory _helpers,
-        uint16[3] calldata _oldVersion,
+        uint16 _currentBuildId,
         bytes calldata
     )
         public
@@ -114,7 +114,8 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         )
     {
         // Update from V1
-        if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
+        if(_currentBuildId == 1) {
+        // if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) { // TODO:GIORGI
             (_dao, _plugin, _helpers);
             currentHelpers = mockHelpers(2);
             initData = abi.encodeWithSelector(
@@ -150,7 +151,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         address _dao,
         address _plugin,
         address[] memory _helpers,
-        uint16[3] calldata _oldVersion,
+        uint16 _currentBuildId,
         bytes calldata
     )
         public
@@ -165,7 +166,8 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         (_dao, _plugin, _helpers);
 
         // Update from V1
-        if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) {
+        if(_currentBuildId == 1) {
+        // if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) { // TODO:GIORGI
             (_dao, _plugin, _helpers);
             currentHelpers = mockHelpers(3);
             initData = abi.encodeWithSelector(
@@ -175,7 +177,8 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         }
 
         // Update from V2
-        if (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0) {
+        if(_currentBuildId == 2) {
+        // if (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0) { // TODO:GIORGI
             (_dao, _plugin, _helpers);
             currentHelpers = mockHelpers(3);
             initData = abi.encodeWithSelector(
@@ -216,7 +219,7 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         address _dao,
         address _plugin,
         address[] memory _helpers,
-        uint16[3] calldata _oldVersion,
+        uint16 _currentBuildId,
         bytes calldata _data
     )
         public
@@ -236,7 +239,8 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         // don't change Which means this update should only include returning 
         // the desired updated permissions. PluginSetupProcessor will take care of 
         // not calling `upgradeTo` on the plugin in such cases.
-        if (_oldVersion[0] == 1 && _oldVersion[1] == 2 && _oldVersion[2] == 0) {
+        // if (_oldVersion[0] == 1 && _oldVersion[1] == 2 && _oldVersion[2] == 0) {
+        if(_currentBuildId == 3) {
             permissions = mockPermissions(3, 4, PermissionLib.Operation.Grant);
         }
         // If the update happens from the previous's previous plugin setups
@@ -244,14 +248,16 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         // to call initialize for the upgrade call. Logic below is just a test 
         // but dev is free to do what he wishes.
         else if (
-            (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) ||
-            (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0)
+            // (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) ||
+            // (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0)
+            _currentBuildId == 1 ||
+            _currentBuildId == 2
         ) {
             (currentHelpers, initData, ) = super.prepareUpdate(
                 _dao,
                 _plugin,
                 _helpers,
-                _oldVersion,
+                _currentBuildId,
                 _data
             );
             // Even for this case, dev might decide to modify the permissions..

@@ -112,7 +112,7 @@ contract CounterV2PluginSetup is PluginSetup {
         address _dao,
         address _plugin, // proxy
         address[] memory _helpers,
-        uint16[3] calldata _oldVersion,
+        uint16 _currentBuildId,
         bytes memory _data
     )
         external
@@ -125,8 +125,9 @@ contract CounterV2PluginSetup is PluginSetup {
         )
     {
         uint256 _newVariable;
-
-        if (_oldVersion[0] == 1 && _oldVersion[1] == 0) {
+        
+        // if (_oldVersion[0] == 1 && _oldVersion[1] == 0) { // TODO:GIORGI
+        if(_currentBuildId == 1) {
             (_newVariable) = abi.decode(_data, (uint256));
             initData = abi.encodeWithSelector(
                 bytes4(keccak256("setNewVariable(uint256)")),
