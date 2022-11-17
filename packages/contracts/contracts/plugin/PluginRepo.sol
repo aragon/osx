@@ -42,10 +42,11 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
-    /// @notice Current latest release id
+    /// @notice Current latest release id(there can be maximum uint8 = 255 possibility).
     uint256 public latestReleaseId;
 
     /// @notice increasing build ids per release
+    /// @dev keys can only be uint8 even though uint256 is specified to reduce gas cost.
     mapping(uint256 => uint256) internal buildIdsPerRelease;
 
     /// @notice The mapping between version hash and its corresponding Version information.
@@ -96,8 +97,8 @@ contract PluginRepo is
     /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
     /// @param pluginSetup the plugin setup address.
     event VersionCreated(
-        uint256 releaseId,
-        uint256 buildId,
+        uint8 releaseId,
+        uint16 buildId,
         address indexed pluginSetup,
         bytes contentURI,
         bool verified
@@ -190,13 +191,16 @@ contract PluginRepo is
             );
         }
 
-        uint256 nextVersionId = buildIdsPerRelease[_releaseId]++;
+        uint16 nextVersionId;
+        unchecked {
+            nextVersionId = uint16(buildIdsPerRelease[_releaseId]++);
+        }
 
         bytes32 _versionHash = versionHash(_releaseId, nextVersionId);
 
         versions[_versionHash] = Version(
             _releaseId,
-            uint16(nextVersionId),
+            nextVersionId,
             _pluginSetup,
             false,
             _contentURI
@@ -210,8 +214,8 @@ contract PluginRepo is
     /// @notice get the latest version in the `_releaseId`.
     /// @param _releaseId the release id
     /// @return Version the latest version which is returned from the _releaseId's build sequence.
-    function latestVersionPerRelease(uint256 _releaseId) public view returns (Version memory) {
-        uint256 latestBuildId = buildIdsPerRelease[_releaseId];
+    function latestVersionPerRelease(uint8 _releaseId) public view returns (Version memory) {
+        uint16 latestBuildId = uint16(buildIdsPerRelease[_releaseId]);
         return versionByVersionHash(versionHash(_releaseId, latestBuildId));
     }
 
@@ -226,7 +230,7 @@ contract PluginRepo is
     /// @param _releaseId the release id
     /// @param _buildId the build id in _releaseId
     /// @return Version the version which is binded to the hash of (_releaseId, _buildId)
-    function versionByReleaseAndBuildId(uint256 _releaseId, uint256 _buildId)
+    function versionByReleaseAndBuildId(uint8 _releaseId, uint16 _buildId)
         public
         view
         returns (Version memory)
@@ -252,8 +256,9 @@ contract PluginRepo is
     }
 
     /// @notice Gets the total number of published versions.
-    /// @return uint256 The number of published versions.
-    function getVersionCountPerRelease(uint256 _releaseId) public view returns (uint256) {
+    /// @param _releaseId release id.
+    /// @return The number of published versions.
+    function getVersionCountPerRelease(uint8 _releaseId) public view returns (uint256) {
         return buildIdsPerRelease[_releaseId];
     }
     
@@ -261,7 +266,7 @@ contract PluginRepo is
     /// @param _releaseId the release id
     /// @param _buildId the build id in _releaseId
     /// @return bytes32 the keccak hash of abi encoded _releaseId and _buildId
-    function versionHash(uint256 _releaseId, uint256 _buildId) internal pure returns (bytes32) {
+    function versionHash(uint8 _releaseId, uint16 _buildId) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_releaseId, _buildId));
     }
 
