@@ -54,7 +54,7 @@ Using **authorization modifiers** is how we make functions permissioned. Permiss
 
 For example, one can only withdraw funds from a DAO when the address making the call has been granted the `WITHDRAW_PERMISSION_ID` permission.
 
-```solidity title="contracts/core/permission/PermissionManager.sol"
+```solidity title="contracts/core/DAO.sol"
 function withdraw(uint256 value) external auth(WITHDRAW_PERMISSION_ID);
 
 ```
@@ -130,9 +130,9 @@ or off-chain data being made available through third-party oracle services (e.g.
 
 Typically, oracles are written specifically for and installed together with [plugins](../01-the-core-contracts/03-plugins.md).
 
-#### The `ANY_ADDR` flag
+#### Granting Permission to `ANY_ADDR`
 
-In combination with oracles, the arguments `_where` and `_who` can also be set to the `ANY_ADDR` flag.
+In combination with oracles, the arguments `_where` and `_who` can be set to `ANY_ADDR = address(type(uint160).max)`.
 Granting a permission with `_who: ANY_ADDR` has the effect that any address can now call the function so that it behaves as if the `auth` modifier is not present.
 Imagine, for example, you wrote a decentralized service
 
@@ -155,6 +155,7 @@ However, some restrictions apply. For security reasons, aragonOS does not allow 
 
 Permissions on a target contract `where` can also be permanently frozen by using the `freeze` function.
 **Freezing** means that permissions involving this target contract can not be granted or revoked anymore. This can be useful when we want to secure certain permissions so that they can never change (by a contract owning the `ROOT_PERMISSION_ID` permission).
+Freezing permissions with `_where: ANY_ADDR` is not allowed.
 
 ### Permissions Native to the `DAO` Contract
 
