@@ -27,7 +27,7 @@ contract PluginRepo is
     PermissionManager
 {
     using Address for address;
-
+    
     struct Version {
         uint8 releaseId;
         uint16 buildId;
@@ -89,6 +89,12 @@ contract PluginRepo is
         address pluginSetup
     );
 
+    /// @notice Thrown if the same plugin setup exists in previous releases.
+    /// @param releaseId the release id
+    /// @param buildId the build id
+    /// @param pluginSetup The address of the plugin setup contract.
+    /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
+    /// @param pluginSetup the plugin setup address.
     event VersionCreated(
         uint256 releaseId,
         uint256 buildId,
@@ -110,33 +116,7 @@ contract PluginRepo is
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
 
-    // // If there's a breaking change in implementation, you increase first digit
-    // // If there's a normal change in implementation, you increase 2nd digit
-
-    // // if there's plugin setup change, you increase 2nd digit
-    // // if there's UI change, you increase 3rd digit
-
-    // 1.0.0
-    // 1.1.0
-    // 1.2.0
-    // 1.2.1
-    // 1.2.2
-
-    // 2.0.0
-    // 2.1.0
-    // 2.1.1
-    // 2.2.0
-
-    // 1.1
-    // 1.2
-    // 1.3
-    // 1.4
-
-    // 2.1
-    // 2.2
-    // 2.3
-    // 2.4
-
+    // How it looks:
     // Release 1
     // //  1 => {
     //         pluginSetup: 0x12  (implementation: 0x55)
@@ -164,6 +144,7 @@ contract PluginRepo is
     //         contentURI: cid12
     // //  },
 
+    /// @inheritdoc IPluginRepo
     function createVersion(
         uint8 _releaseId,
         address _pluginSetup,
