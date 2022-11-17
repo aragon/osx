@@ -85,8 +85,8 @@ contract PluginRepo is
     /// @param buildId the build id of the release id in which pluginSetup is found.
     /// @param pluginSetup the plugin setup address.
     error PluginSetupExistsInAnotherRelease(
-        uint256 releaseId,
-        uint256 buildId,
+        uint8 releaseId,
+        uint16 buildId,
         address pluginSetup
     );
 
