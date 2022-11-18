@@ -195,23 +195,6 @@ test('UpdatePrepared event (non existent plugin)', function() {
   handleUpdatePrepared(event);
 
   assert.notInStore('Plugin', pluginId);
-  // assert.fieldEquals(
-  //   'Plugin',
-  //   pluginId,
-  //   'dao',
-  //   Address.fromHexString(DAO_ADDRESS).toHexString()
-  // );
-  // assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  // assert.fieldEquals('Plugin', pluginId, 'state', 'UpdatePrepared');
-
-  // Plugin Entity exists. previous tests would have failed if not
-  // let pluginEntity = Plugin.load(pluginId) as Plugin;
-  // assert.bytesEquals(pluginEntity.data, Bytes.fromHexString('0x00'));
-
-  // // check if helpers exists
-  // for (let i = 0; i < helperIds.length; i++) {
-  //   assert.fieldEquals('PluginHelper', helperIds[i], 'plugin', pluginId);
-  // }
 
   clearStore();
 });
@@ -252,13 +235,6 @@ test('UpdateApplied event (non existent plugin)', function() {
   handleUpdateApplied(event);
 
   assert.notInStore('Plugin', pluginId);
-  // assert.fieldEquals(
-  //   'Plugin',
-  //   pluginId,
-  //   'dao',
-  //   Address.fromHexString(DAO_ADDRESS).toHexString()
-  // );
-  // assert.fieldEquals('Plugin', pluginId, 'state', 'Installed');
 
   clearStore();
 });
@@ -324,23 +300,6 @@ test('UninstallationPrepared event (non existent plugin)', function() {
   handleUninstallationPrepared(event);
 
   assert.notInStore('Plugin', pluginId);
-  // assert.fieldEquals(
-  //   'Plugin',
-  //   pluginId,
-  //   'dao',
-  //   Address.fromHexString(DAO_ADDRESS).toHexString()
-  // );
-  // assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  // assert.fieldEquals('Plugin', pluginId, 'state', 'UninstallPrepared');
-
-  // Plugin Entity exists. previous tests would have failed if not
-  // let pluginEntity = Plugin.load(pluginId) as Plugin;
-  // assert.bytesEquals(pluginEntity.data, Bytes.fromHexString('0x00'));
-
-  // // check if helpers exists
-  // for (let i = 0; i < helperIds.length; i++) {
-  //   assert.fieldEquals('PluginHelper', helperIds[i], 'plugin', pluginId);
-  // }
 
   clearStore();
 });
@@ -381,13 +340,6 @@ test('UninstallationApplied event (non existent plugin)', function() {
   handleUninstallationApplied(event);
 
   assert.notInStore('Plugin', pluginId);
-  // assert.fieldEquals(
-  //   'Plugin',
-  //   pluginId,
-  //   'dao',
-  //   Address.fromHexString(DAO_ADDRESS).toHexString()
-  // );
-  // assert.fieldEquals('Plugin', pluginId, 'state', 'Uninstalled');
 
   clearStore();
 });

@@ -48,10 +48,10 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
-  let erc20VotingPlugin = new AddresslistPlugin(
+  let addresslistPlugin = new AddresslistPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
-  erc20VotingPlugin.save();
+  addresslistPlugin.save();
 
   // create calls
   getVotesLengthCall(VOTING_ADDRESS, '1');
@@ -109,7 +109,6 @@ test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () =
     'relativeSupportThresholdPct',
     relativeSupportThresholdPct
   );
-  // assert.fieldEquals('AddresslistProposal', entityID, 'census', census);
   assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'false');
 
   // chack AddresslistPlugin
@@ -237,8 +236,8 @@ test('Run Addresslist Voting (handleVoteExecuted) mappings with mock event', () 
 test('Run Addresslist Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPlugin = new AddresslistPlugin(entityID);
-  erc20VotingPlugin.save();
+  let addresslistPlugin = new AddresslistPlugin(entityID);
+  addresslistPlugin.save();
 
   // create event
   let event = createNewConfigUpdatedEvent('2', '1', '3600', VOTING_ADDRESS);
