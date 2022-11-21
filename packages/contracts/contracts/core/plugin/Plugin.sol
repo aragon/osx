@@ -11,13 +11,13 @@ import {IPlugin} from "./IPlugin.sol";
 /// @title Plugin
 /// @author Aragon Association - 2022
 /// @notice An abstract, non-upgradeable inherit from when creating a plugin being deployed via the `new` keyword.
-abstract contract Plugin is ERC165, IPlugin, DaoAuthorizable {
+abstract contract Plugin is IPlugin, DaoAuthorizable, ERC165 {
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     constructor(IDAO _dao) DaoAuthorizable(_dao) {}
-    
+
     /// @inheritdoc IPlugin
-    function pluginType() public pure override returns(PluginType) {
+    function pluginType() public pure override returns (PluginType) {
         return PluginType.Constructable;
     }
 
