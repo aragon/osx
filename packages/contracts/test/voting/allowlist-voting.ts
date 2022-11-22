@@ -24,14 +24,14 @@ describe('AllowlistVoting', function () {
   let dummyMetadata: string;
 
   let mergedAbi: any;
-  let allowlistVotingFactoryBytecode: any;
+  let addresslistVotingFactoryBytecode: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
     user1 = await signers[1].getAddress();
 
-    ({abi: mergedAbi, bytecode: allowlistVotingFactoryBytecode} =
+    ({abi: mergedAbi, bytecode: addresslistVotingFactoryBytecode} =
       await getMergedABI(
         // @ts-ignore
         hre,
@@ -58,7 +58,7 @@ describe('AllowlistVoting', function () {
   beforeEach(async () => {
     const AllowlistVotingFactory = new ethers.ContractFactory(
       mergedAbi,
-      allowlistVotingFactoryBytecode,
+      addresslistVotingFactoryBytecode,
       signers[0]
     );
     voting = await AllowlistVotingFactory.deploy();
@@ -112,7 +112,7 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    it('should add new users in the whitelist', async () => {
+    it('should add new users in the address list', async () => {
       await voting.addAllowedUsers([ownerAddress, user1]);
 
       const block = await ethers.provider.getBlock('latest');
@@ -124,7 +124,7 @@ describe('AllowlistVoting', function () {
       expect(await voting.isAllowed(user1, 0)).to.equal(true);
     });
 
-    it('should remove users from the whitelist', async () => {
+    it('should remove users from the address list', async () => {
       await voting.addAllowedUsers([ownerAddress]);
 
       const block1 = await ethers.provider.getBlock('latest');
@@ -404,7 +404,7 @@ describe('AllowlistVoting', function () {
       await advanceTimeTo(startDate);
 
       // Since voting power is set to 29%, and
-      // allowlist is 10 addresses, voting yes
+      // addresslist is 10 addresses, voting yes
       // from 3 addresses should be enough to
       // make vote executable
       await voting.vote(id, VoteOption.Yes, false);
