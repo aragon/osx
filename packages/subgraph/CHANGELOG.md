@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - improved test recompiliation
 - marks some entity as immutable
+- fixes calcuation crash in erc20 voting, when no votes were cast
 
 ## 0.4.0-alpha
 
