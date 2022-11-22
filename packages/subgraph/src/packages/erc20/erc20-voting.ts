@@ -143,7 +143,10 @@ export function handleVoteCast(event: VoteCast): void {
         .div(proposalEntity.census);
       // expect a number between 0 and 100
       // where 0.35 => 35
-      let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+      let currentSupport = new BigInt(0);
+      if(voteCount.gt(new BigInt(0))) {
+        currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+      }
       // set the executable param
       proposalEntity.executable =
         currentParticipation.ge(
