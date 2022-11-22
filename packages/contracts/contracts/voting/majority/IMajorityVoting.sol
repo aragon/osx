@@ -7,8 +7,8 @@ import "../../core/IDAO.sol";
 /// @title IMajorityVoting
 /// @author Aragon Association - 2022
 /// @notice The interface for majority voting contracts. We use the following definitions:
-///     Relative support: `N_yes / (N_yes + N_no)`
-///     Total support   : `N_yes / N_total`
+/// - Support      : `N_yes / (N_yes + N_no)`
+/// - Participation: `(N_yes + N_abstain + N_no) / N_total`
 interface IMajorityVoting {
     enum VoteOption {
         None,
@@ -23,7 +23,7 @@ interface IMajorityVoting {
         uint64 endDate;
         uint64 snapshotBlock;
         uint64 relativeSupportThresholdPct;
-        uint64 totalSupportThresholdPct;
+        uint64 participationThresholdPct;
         uint256 yes;
         uint256 no;
         uint256 abstain;
@@ -56,22 +56,22 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
-    /// @param relativeSupportThresholdPct The support threshold in percent.
-    /// @param totalSupportThresholdPct The total support threshold in percent.
+    /// @param relativeSupportThresholdPct The relative support threshold in percent.
+    /// @param participationThresholdPct The participation threshold in percent.
     /// @param minDuration The minimal duration of a vote.
     event VoteSettingsUpdated(
-        uint64 totalSupportThresholdPct,
+        uint64 participationThresholdPct,
         uint64 relativeSupportThresholdPct,
         uint64 minDuration
     );
 
     /// @notice Changes the vote settings.
-    /// @param _totalSupportThresholdPct The total support threshold in percent.
+    /// @param _participationThresholdPct The participation threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
     function changeVoteSettings(
         uint64 _relativeSupportThresholdPct,
-        uint64 _totalSupportThresholdPct,
+        uint64 _participationThresholdPct,
         uint64 _minDuration
     ) external;
 
@@ -136,8 +136,8 @@ interface IMajorityVoting {
     /// @return endDate The end date of the proposal vote.
     /// @return snapshotBlock The block number of the snapshot taken for this proposal.
     /// @return relativeSupportThresholdPct The relative support threshold in percent.
-    /// @return totalSupportThresholdPct The total support threshold in percent.
-    /// @return totalVotingPower The total number of eligible votes that can be cast.
+    /// @return participationThresholdPct The participation threshold in percent.
+    /// @return totalVotingPower The total number of eligible votes that can be casted.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.
@@ -152,7 +152,7 @@ interface IMajorityVoting {
             uint64 endDate,
             uint64 snapshotBlock,
             uint64 relativeSupportThresholdPct,
-            uint64 totalSupportThresholdPct,
+            uint64 participationThresholdPct,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,

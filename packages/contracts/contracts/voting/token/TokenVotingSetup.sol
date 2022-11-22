@@ -91,7 +91,7 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(uint64 participationThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -108,7 +108,7 @@ contract TokenVotingSetup is PluginSetup {
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
-            uint64 totalSupportThresholdPct,
+            uint64 participationThresholdPct,
             uint64 relativeSupportThresholdPct,
             uint64 minDuration,
             TokenSettings memory tokenSettings,
@@ -186,7 +186,7 @@ contract TokenVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 TokenVoting.initialize.selector,
                 dao,
-                totalSupportThresholdPct,
+                participationThresholdPct,
                 relativeSupportThresholdPct,
                 minDuration,
                 token

@@ -34,7 +34,7 @@ const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
   [[], []],
 ]);
 
-const totalSupportThresholdPct = 1;
+const participationThresholdPct = 1;
 const relativeSupportThresholdPct = 2;
 const minDuration = 3;
 const tokenName = 'name';
@@ -80,7 +80,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
+      'function initialize(address _dao, uint64 _participationThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -92,7 +92,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 participationThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -376,7 +376,7 @@ describe('TokenVotingSetup', function () {
       const daoAddress = targetDao.address;
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        totalSupportThresholdPct,
+        participationThresholdPct,
         relativeSupportThresholdPct,
         minDuration,
         [AddressZero, tokenName, tokenSymbol],
@@ -402,8 +402,8 @@ describe('TokenVotingSetup', function () {
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
-      expect(await tokenVoting.totalSupportThresholdPct()).to.be.equal(
-        totalSupportThresholdPct
+      expect(await tokenVoting.participationThresholdPct()).to.be.equal(
+        participationThresholdPct
       );
       expect(await tokenVoting.relativeSupportThresholdPct()).to.be.equal(
         relativeSupportThresholdPct

@@ -76,14 +76,14 @@ describe('AddresslistVoting', function () {
   });
 
   function initializeVoting(
-    totalSupportThresholdPct: any,
+    participationThresholdPct: any,
     relativeSupportThresholdPct: any,
     minDuration: any,
     allowed: Array<string>
   ) {
     return voting.initialize(
       dao.address,
-      totalSupportThresholdPct,
+      participationThresholdPct,
       relativeSupportThresholdPct,
       minDuration,
       allowed
@@ -146,7 +146,7 @@ describe('AddresslistVoting', function () {
   describe('Proposal creation', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
-    let totalSupportThresholdPct = pct16(20);
+    let participationThresholdPct = pct16(20);
     const id = 0; // proposalId
 
     it('reverts if user is not allowed to create a vote', async () => {
@@ -213,7 +213,7 @@ describe('AddresslistVoting', function () {
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote._totalSupportThresholdPct).to.equal(1);
+      expect(vote._participationThresholdPct).to.equal(1);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
@@ -255,7 +255,7 @@ describe('AddresslistVoting', function () {
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote._totalSupportThresholdPct).to.equal(1);
+      expect(vote._participationThresholdPct).to.equal(1);
 
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
@@ -267,7 +267,7 @@ describe('AddresslistVoting', function () {
       let endDate = startDate + minDuration;
 
       await initializeVoting(
-        totalSupportThresholdPct,
+        participationThresholdPct,
         relativeSupportThresholdPct,
         minDuration,
         [ownerAddress]
@@ -306,7 +306,7 @@ describe('AddresslistVoting', function () {
   describe('Proposal + Execute:', async () => {
     const minDuration = 500;
     const relativeSupportThresholdPct = pct16(29);
-    const totalSupportThresholdPct = pct16(19);
+    const participationThresholdPct = pct16(19);
     const id = 0; // proposalId
     const startOffset = 9;
     let startDate: number;
@@ -326,7 +326,7 @@ describe('AddresslistVoting', function () {
       // voting will be initialized with 10 allowed addresses
       // Which means totalVotingPower = 10 at this point.
       await initializeVoting(
-        totalSupportThresholdPct,
+        participationThresholdPct,
         relativeSupportThresholdPct,
         minDuration,
         addresses
@@ -398,7 +398,7 @@ describe('AddresslistVoting', function () {
       expect((await voting.getProposal(id)).abstain).to.equal(1);
     });
 
-    it('can execute early if total support is large enough', async () => {
+    it('can execute early if participation is large enough', async () => {
       await advanceTimeTo(startDate);
 
       // Since voting power is set to 29%, and
@@ -416,7 +416,7 @@ describe('AddresslistVoting', function () {
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
-    it('can execute normally if total support is large enough', async () => {
+    it('can execute normally if participation is large enough', async () => {
       await advanceTimeTo(startDate);
 
       // 2 supports
@@ -494,10 +494,10 @@ describe('AddresslistVoting', function () {
   describe('Parameters can satisfy different use cases:', async () => {
     const id = 0; // proposalId
 
-    describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
+    describe('A simple majority vote with >50% relative support and >25% participation required', async () => {
       let minDuration = 500;
       let relativeSupportThresholdPct = pct16(50);
-      let totalSupportThresholdPct = pct16(25);
+      let participationThresholdPct = pct16(25);
 
       beforeEach(async () => {
         const addresses = [];
@@ -510,7 +510,7 @@ describe('AddresslistVoting', function () {
         // voting will be initialized with 10 allowed addresses
         // Which means totalVotingPower = 10 at this point.
         await initializeVoting(
-          totalSupportThresholdPct,
+          participationThresholdPct,
           relativeSupportThresholdPct,
           minDuration,
           addresses
@@ -526,28 +526,28 @@ describe('AddresslistVoting', function () {
         );
       });
 
-      it('does not execute if support is high enough but total support is too low', async () => {
+      it('does not execute if support is high enough but participation is too low', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 10% | 100%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > relative support threshold (50%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (10%) > relative support threshold (50%) == false
 
         await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 10% | 100%
         //  ✓  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > total support threshold (25%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (10%) > participation threshold (25%) == false
       });
 
-      it('does not execute if total support is high enough but relative support is too low', async () => {
+      it('does not execute if participation is high enough but relative support is too low', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 30% | 33%
         //  𐄂  |  ✓  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // total support (30%) > relative support threshold (50%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > relative support threshold (50%) == false
 
         await advanceTime(minDuration + 10);
         // dur | tot | rel
@@ -572,7 +572,7 @@ describe('AddresslistVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
-      it('executes early if the total support exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
+      it('executes early if the participation exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
@@ -581,13 +581,13 @@ describe('AddresslistVoting', function () {
         // dur | tot | rel
         //  0  | 50% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (50%) > relative support threshold (50%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (50%) > relative support threshold (50%) == false
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
+        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > relative support threshold (50%) == true
 
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
@@ -596,7 +596,7 @@ describe('AddresslistVoting', function () {
         // dur | tot | rel
         //  0  | 60% | 60%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
+        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > relative support threshold (50%) == true
       });
     });
 
@@ -605,7 +605,7 @@ describe('AddresslistVoting', function () {
 
       // pay attention to decrement the required percentage value by one because the compared value has to be larger
       let relativeSupportThresholdPct = pct16(60).sub(ethers.BigNumber.from(1));
-      let totalSupportThresholdPct = relativeSupportThresholdPct;
+      let participationThresholdPct = relativeSupportThresholdPct;
 
       beforeEach(async () => {
         const addresses = [];
@@ -618,7 +618,7 @@ describe('AddresslistVoting', function () {
         // voting will be initialized with 5 allowed addresses
         // Which means totalVotingPower = 5 at this point.
         await initializeVoting(
-          totalSupportThresholdPct,
+          participationThresholdPct,
           relativeSupportThresholdPct,
           minDuration,
           addresses
@@ -639,19 +639,19 @@ describe('AddresslistVoting', function () {
         // dur | tot | rel
         //  0  | 20% | 100%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (20%) > relative support threshold (59.99...%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (20%) > relative support threshold (59.99...%) == false
 
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 40% | 100%
         //  𐄂  |  𐄂  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59.99...%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (40%) > relative support threshold (59.99...%) == false
 
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (59.99...%) == true
+        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > relative support threshold (59.99...%) == true
       });
 
       it('should not execute with only 2 yes votes', async () => {
@@ -661,14 +661,14 @@ describe('AddresslistVoting', function () {
         // dur | tot | rel
         //  0  | 40% | 67%
         //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > relative support threshold (59.99...%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (40%) > relative support threshold (59.99...%) == false
 
         // Wait until the voting period is over.
         await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 40% | 67%
         //  ✓  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // total support (40%) > total support threshold (59.99...%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation (40%) > participation threshold (59.99...%) == false
       });
     });
   });

@@ -73,7 +73,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)';
+        '(uint64 participationThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -155,7 +155,7 @@ describe('AddresslistVotingSetup', function () {
 
     it('correctly sets up the plugin', async () => {
       const daoAddress = targetDao.address;
-      const totalSupportThresholdPct = 1;
+      const participationThresholdPct = 1;
       const relativeSupportThresholdPct = 2;
       const minDuration = 3;
       const allowed = [ownerAddress];
@@ -163,7 +163,7 @@ describe('AddresslistVotingSetup', function () {
       const data = abiCoder.encode(
         ['uint64', 'uint64', 'uint64', 'address[]'],
         [
-          totalSupportThresholdPct,
+          participationThresholdPct,
           relativeSupportThresholdPct,
           minDuration,
           allowed,
@@ -188,8 +188,8 @@ describe('AddresslistVotingSetup', function () {
 
       expect(await addresslistVotingContract.getDAO()).to.be.equal(daoAddress);
       expect(
-        await addresslistVotingContract.totalSupportThresholdPct()
-      ).to.be.equal(totalSupportThresholdPct);
+        await addresslistVotingContract.participationThresholdPct()
+      ).to.be.equal(participationThresholdPct);
       expect(
         await addresslistVotingContract.relativeSupportThresholdPct()
       ).to.be.equal(relativeSupportThresholdPct);

@@ -5,7 +5,7 @@ import {
   VoteSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  ProposalExecuted,
+  ProposalExecuted
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {TokenVotingProposal} from '../../generated/schema';
 import {
@@ -20,7 +20,7 @@ import {
   MIN_TURNOUT,
   SNAPSHOT_BLOCK,
   START_DATE,
-  VOTING_POWER,
+  VOTING_POWER
 } from '../constants';
 
 // events
@@ -121,7 +121,7 @@ export function createNewProposalExecutedEvent(
 
 export function createNewVoteSettingsUpdatedEvent(
   relativeSupportThresholdPct: string,
-  totalSupportThresholdPct: string,
+  participationThresholdPct: string,
   minDuration: string,
   contractAddress: string
 ): VoteSettingsUpdated {
@@ -132,9 +132,11 @@ export function createNewVoteSettingsUpdatedEvent(
   newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVoteSettingsUpdatedEvent.parameters = [];
 
-  let totalSupportThresholdPctParam = new ethereum.EventParam(
-    'totalSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(totalSupportThresholdPct))
+  let participationThresholdPctParam = new ethereum.EventParam(
+    'participationThresholdPct',
+    ethereum.Value.fromSignedBigInt(
+      BigInt.fromString(participationThresholdPct)
+    )
   );
   let relativeSupportThresholdPctParam = new ethereum.EventParam(
     'relativeSupportThresholdPct',
@@ -147,7 +149,7 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newVoteSettingsUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(participationThresholdPctParam);
   newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
@@ -181,7 +183,7 @@ export function createTokenVotingProposalEntityState(
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
   relativeSupportThresholdPct: string = MIN_SUPPORT,
-  totalSupportThresholdPct: string = MIN_TURNOUT,
+  participationThresholdPct: string = MIN_TURNOUT,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
@@ -200,8 +202,8 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.relativeSupportThresholdPct = BigInt.fromString(
     relativeSupportThresholdPct
   );
-  tokenVotingProposal.totalSupportThresholdPct = BigInt.fromString(
-    totalSupportThresholdPct
+  tokenVotingProposal.participationThresholdPct = BigInt.fromString(
+    participationThresholdPct
   );
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   tokenVotingProposal.open = open;

@@ -422,8 +422,8 @@ export function getParticipationRequiredPct(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'totalSupportThresholdPct',
-    'totalSupportThresholdPct():(uint64)'
+    'participationThresholdPct',
+    'participationThresholdPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

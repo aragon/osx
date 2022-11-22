@@ -204,7 +204,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
   relativeSupportThresholdPct: BigInt
-  totalSupportThresholdPct: BigInt
+  participationThresholdPct: BigInt
   minDuration: BigInt
   proposalCount: BigInt
   token: Token
@@ -241,7 +241,7 @@ type TokenVotingProposal implements Proposal @entity {
   endDate: BigInt!
   snapshotBlock: BigInt!
   relativeSupportThresholdPct: BigInt!
-  totalSupportThresholdPct: BigInt!
+  participationThresholdPct: BigInt!
   yes: BigInt
   no: BigInt
   abstain: BigInt
@@ -262,7 +262,7 @@ type AddresslistPlugin implements IPlugin @entity {
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AddresslistProposal!]! @derivedFrom(field: "plugin")
   relativeSupportThresholdPct: BigInt
-  totalSupportThresholdPct: BigInt
+  participationThresholdPct: BigInt
   minDuration: BigInt
   proposalCount: BigInt
   members: [AddresslistVoter!]! @derivedFrom(field: "plugin")
@@ -297,7 +297,7 @@ type AddresslistProposal implements Proposal @entity {
   endDate: BigInt!
   snapshotBlock: BigInt!
   relativeSupportThresholdPct: BigInt!
-  totalSupportThresholdPct: BigInt!
+  participationThresholdPct: BigInt!
   totalVotingPower: BigInt!
   yes: BigInt
   no: BigInt

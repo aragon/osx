@@ -22,16 +22,16 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
-    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
+    let participationThresholdPct = contract.try_participationThresholdPct();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
     packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
       ? null
       : relativeSupportThresholdPct.value;
-    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
+    packageEntity.participationThresholdPct = participationThresholdPct.reverted
       ? null
-      : totalSupportThresholdPct.value;
+      : participationThresholdPct.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
@@ -51,15 +51,15 @@ function createAddresslistPlugin(who: Address, daoId: string): void {
     packageEntity = new AddresslistPlugin(who.toHexString());
     let contract = AddresslistContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
-    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
+    let participationThresholdPct = contract.try_participationThresholdPct();
     let minDuration = contract.try_minDuration();
 
     packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
       ? null
       : relativeSupportThresholdPct.value;
-    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
+    packageEntity.participationThresholdPct = participationThresholdPct.reverted
       ? null
-      : totalSupportThresholdPct.value;
+      : participationThresholdPct.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     // Create template

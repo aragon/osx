@@ -14,11 +14,10 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
 /// @notice The abstract implementation of majority voting plugin. We use the following definitions:
-/// - Relative support: `N_yes / (N_yes + N_no)`
-/// - Total support   : `N_yes / N_total`
+/// - Support      : `N_yes / (N_yes + N_no)`
+/// - Participation: `(N_yes + N_abstain + N_no) / N_total`
 /// Additionally, the following assumptions apply to the threshold paramters related to the above mentioned quantities:
-/// - `relativeSupportThresholdPct` >= 50 %
-/// - `totalSupportThresholdPct` <= `relativeSupportThresholdPct`
+/// - `supportThresholdPct` >= 50 %
 /// These constraints are not enforeced by contract code and developers can make unsafe configurations. Instead, the frontend will warn about wrong parameter settings.
 /// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
@@ -43,7 +42,7 @@ abstract contract MajorityVotingBase is
 
     //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
     uint64 public relativeSupportThresholdPct;
-    uint64 public totalSupportThresholdPct;
+    uint64 public participationThresholdPct;
     uint64 public minDuration;
 
     uint256 public proposalCount;
@@ -82,25 +81,25 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _totalSupportThresholdPct The total support threshold in percent.
+    /// @param _participationThresholdPct The participation threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
-        uint64 _totalSupportThresholdPct,
+        uint64 _participationThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
 
         _validateAndSetSettings(
-            _totalSupportThresholdPct,
+            _participationThresholdPct,
             _relativeSupportThresholdPct,
             _minDuration
         );
 
         emit VoteSettingsUpdated(
-            _totalSupportThresholdPct,
+            _participationThresholdPct,
             _relativeSupportThresholdPct,
             _minDuration
         );
@@ -121,18 +120,18 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function changeVoteSettings(
-        uint64 _totalSupportThresholdPct,
+        uint64 _participationThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
     ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
         _validateAndSetSettings(
-            _totalSupportThresholdPct,
+            _participationThresholdPct,
             _relativeSupportThresholdPct,
             _minDuration
         );
 
         emit VoteSettingsUpdated(
-            _totalSupportThresholdPct,
+            _participationThresholdPct,
             _relativeSupportThresholdPct,
             _minDuration
         );
@@ -192,7 +191,7 @@ abstract contract MajorityVotingBase is
             uint64 endDate,
             uint64 snapshotBlock,
             uint64 _relativeSupportThresholdPct,
-            uint64 _totalSupportThresholdPct,
+            uint64 _participationThresholdPct,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,
@@ -208,7 +207,7 @@ abstract contract MajorityVotingBase is
         endDate = proposal_.endDate;
         snapshotBlock = proposal_.snapshotBlock;
         _relativeSupportThresholdPct = proposal_.relativeSupportThresholdPct;
-        _totalSupportThresholdPct = proposal_.totalSupportThresholdPct;
+        _participationThresholdPct = proposal_.participationThresholdPct;
         totalVotingPower = proposal_.totalVotingPower;
         yes = proposal_.yes;
         no = proposal_.no;
@@ -259,11 +258,11 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        uint256 totalSupportPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
+        uint256 participationPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
-        // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
-        if (_isVoteOpen(proposal_) && totalSupportPct > proposal_.relativeSupportThresholdPct) {
+        // The participation must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= participationThresholdPct`).
+        if (_isVoteOpen(proposal_) && participationPct > proposal_.relativeSupportThresholdPct) {
             return true;
         }
 
@@ -275,8 +274,8 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        // Criterium 2: The total support is greater than the total support threshold
-        if (totalSupportPct <= proposal_.totalSupportThresholdPct) {
+        // Criterium 2: The participation is greater than the participation threshold
+        if (participationPct <= proposal_.participationThresholdPct) {
             return false;
         }
 
@@ -313,7 +312,7 @@ abstract contract MajorityVotingBase is
     }
 
     function _validateAndSetSettings(
-        uint64 _totalSupportThresholdPct,
+        uint64 _participationThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
     ) internal virtual {
@@ -321,15 +320,15 @@ abstract contract MajorityVotingBase is
             revert PercentageExceeds100({limit: PCT_BASE, actual: _relativeSupportThresholdPct});
         }
 
-        if (_totalSupportThresholdPct > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _totalSupportThresholdPct});
+        if (_participationThresholdPct > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _participationThresholdPct});
         }
 
         if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 
-        totalSupportThresholdPct = _totalSupportThresholdPct;
+        participationThresholdPct = _participationThresholdPct;
         relativeSupportThresholdPct = _relativeSupportThresholdPct;
         minDuration = _minDuration;
     }

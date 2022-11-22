@@ -35,13 +35,13 @@ describe('MajorityVotingMock', function () {
   });
 
   function initializeMock(
-    totalSupportThresholdPct: any,
+    participationThresholdPct: any,
     relativeSupportThresholdPct: any,
     minDuration: any
   ) {
     return votingBase.initializeMock(
       dao.address,
-      totalSupportThresholdPct,
+      participationThresholdPct,
       relativeSupportThresholdPct,
       minDuration
     );
