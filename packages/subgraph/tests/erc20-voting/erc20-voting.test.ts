@@ -38,7 +38,7 @@ let endDate = '1644852000';
 let snapshotBlock = '100';
 let relativeSupportThresholdPct = '1000';
 let totalSupportThresholdPct = '500';
-let census = '1000';
+let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
@@ -60,7 +60,7 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
     snapshotBlock,
     relativeSupportThresholdPct,
     totalSupportThresholdPct,
-    census,
+    totalVotingPower,
     '0',
     '0',
     '0',
@@ -116,7 +116,12 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
     'totalSupportThresholdPct',
     totalSupportThresholdPct
   );
-  assert.fieldEquals('ERC20VotingProposal', entityID, 'census', census);
+  assert.fieldEquals(
+    'ERC20VotingProposal',
+    entityID,
+    'totalVotingPower',
+    totalVotingPower
+  );
   assert.fieldEquals('ERC20VotingProposal', entityID, 'executed', 'false');
 
   // chack ERC20VotingPlugin
@@ -257,7 +262,7 @@ test('Run ERC Voting (handleVoteExecuted) mappings with mock event', () => {
     snapshotBlock,
     relativeSupportThresholdPct,
     totalSupportThresholdPct,
-    census,
+    totalVotingPower,
     '1',
     '0',
     '0',

@@ -220,7 +220,7 @@ export function createAddresslistProposalEntityState(
   snapshotBlock: string = SNAPSHOT_BLOCK,
   relativeSupportThresholdPct: string = MIN_SUPPORT,
   totalSupportThresholdPct: string = MIN_TURNOUT,
-  census: string = VOTING_POWER,
+  totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
   executable: boolean = false,
@@ -241,7 +241,7 @@ export function createAddresslistProposalEntityState(
   addresslistProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
-  addresslistProposal.census = BigInt.fromString(census);
+  addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   addresslistProposal.open = open;
   addresslistProposal.executable = executable;
   addresslistProposal.executed = executed;

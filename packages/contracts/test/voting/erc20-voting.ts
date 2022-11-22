@@ -110,7 +110,7 @@ describe('ERC20Voting', function () {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
-    let census = 100;
+    let totalVotingPower = 100;
     const id = 0; // voteId
 
     it('reverts total token supply while creating a vote is 0', async () => {
@@ -179,7 +179,7 @@ describe('ERC20Voting', function () {
       expect(vote._relativeSupportThresholdPct).to.equal(2);
       expect(vote._totalSupportThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote.census).to.equal(1);
+      expect(vote.totalVotingPower).to.equal(1);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
@@ -224,7 +224,7 @@ describe('ERC20Voting', function () {
       expect(vote._relativeSupportThresholdPct).to.equal(2);
       expect(vote._totalSupportThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote.census).to.equal(1);
+      expect(vote.totalVotingPower).to.equal(1);
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(0);
@@ -242,7 +242,7 @@ describe('ERC20Voting', function () {
       );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+      await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
 
       expect(await getTime()).to.be.lessThan(startDate);
 
@@ -280,7 +280,7 @@ describe('ERC20Voting', function () {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
-    let census = 100;
+    let totalVotingPower = 100;
     const id = 0; // voteId
     const startOffset = 9;
     let startDate: number;
@@ -297,7 +297,7 @@ describe('ERC20Voting', function () {
       );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+      await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       expect(
@@ -508,7 +508,7 @@ describe('ERC20Voting', function () {
       let minDuration = 500;
       let relativeSupportThresholdPct = pct16(50);
       let totalSupportThresholdPct = pct16(25);
-      let census = 100;
+      let totalVotingPower = 100;
 
       beforeEach(async () => {
         await initializeVoting(
@@ -518,7 +518,7 @@ describe('ERC20Voting', function () {
         );
 
         // set voting power to 100
-        await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+        await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
         await erc20VoteMock.mock.getPastVotes.returns(0);
 
         await voting.createProposal(

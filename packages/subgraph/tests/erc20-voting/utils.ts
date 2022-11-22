@@ -180,7 +180,7 @@ export function createERC20VotingProposalEntityState(
   snapshotBlock: string = SNAPSHOT_BLOCK,
   relativeSupportThresholdPct: string = MIN_SUPPORT,
   totalSupportThresholdPct: string = MIN_TURNOUT,
-  census: string = VOTING_POWER,
+  totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
   executable: boolean = false,
@@ -201,7 +201,7 @@ export function createERC20VotingProposalEntityState(
   erc20VotingProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
-  erc20VotingProposal.census = BigInt.fromString(census);
+  erc20VotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   erc20VotingProposal.open = open;
   erc20VotingProposal.executable = executable;
   erc20VotingProposal.executed = executed;
