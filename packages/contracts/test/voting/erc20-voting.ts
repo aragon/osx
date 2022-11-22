@@ -118,7 +118,7 @@ describe('ERC20Voting', function () {
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.createVote(dummyMetadata, [], 0, 0, false, VoteOption.None)
+        voting.createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
@@ -131,7 +131,7 @@ describe('ERC20Voting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.createVote(
+        voting.createProposal(
           dummyMetadata,
           [],
           startDate,
@@ -159,7 +159,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       expect(
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -202,7 +202,7 @@ describe('ERC20Voting', function () {
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       expect(
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -250,7 +250,7 @@ describe('ERC20Voting', function () {
 
       // Reverts if the vote option is not 'None'
       await expect(
-        voting.createVote(
+        voting.createProposal(
           dummyMetadata,
           dummyActions,
           startDate,
@@ -263,7 +263,7 @@ describe('ERC20Voting', function () {
       // Works if the vote option is 'None'
       expect(
         (
-          await voting.createVote(
+          await voting.createProposal(
             dummyMetadata,
             dummyActions,
             startDate,
@@ -302,7 +302,7 @@ describe('ERC20Voting', function () {
 
       expect(
         (
-          await voting.createVote(
+          await voting.createProposal(
             dummyMetadata,
             dummyActions,
             startDate,
@@ -521,7 +521,7 @@ describe('ERC20Voting', function () {
         await erc20VoteMock.mock.getPastTotalSupply.returns(census);
         await erc20VoteMock.mock.getPastVotes.returns(0);
 
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,

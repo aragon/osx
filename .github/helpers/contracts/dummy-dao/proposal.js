@@ -101,7 +101,7 @@ async function proposal() {
     );
   }
 
-  let proposalTx = await VotingContract.createVote(
+  let proposalTx = await VotingContract.createProposal(
     metadata,
     actions,
     0,

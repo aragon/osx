@@ -63,10 +63,10 @@ export function createNewVoteCastEvent(
   voteWeight: string,
   contractAddress: string
 ): VoteCast {
-  let createVoteCastEvent = changetype<VoteCast>(newMockEvent());
+  let createProposalCastEvent = changetype<VoteCast>(newMockEvent());
 
-  createVoteCastEvent.address = Address.fromString(contractAddress);
-  createVoteCastEvent.parameters = [];
+  createProposalCastEvent.address = Address.fromString(contractAddress);
+  createProposalCastEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -85,22 +85,22 @@ export function createNewVoteCastEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(voteWeight))
   );
 
-  createVoteCastEvent.parameters.push(voteIdParam);
-  createVoteCastEvent.parameters.push(voterParam);
-  createVoteCastEvent.parameters.push(choiceParam);
-  createVoteCastEvent.parameters.push(stakeParam);
+  createProposalCastEvent.parameters.push(voteIdParam);
+  createProposalCastEvent.parameters.push(voterParam);
+  createProposalCastEvent.parameters.push(choiceParam);
+  createProposalCastEvent.parameters.push(stakeParam);
 
-  return createVoteCastEvent;
+  return createProposalCastEvent;
 }
 
 export function createNewVoteExecutedEvent(
   voteId: string,
   contractAddress: string
 ): VoteExecuted {
-  let createVoteExecutedEvent = changetype<VoteExecuted>(newMockEvent());
+  let createProposalExecutedEvent = changetype<VoteExecuted>(newMockEvent());
 
-  createVoteExecutedEvent.address = Address.fromString(contractAddress);
-  createVoteExecutedEvent.parameters = [];
+  createProposalExecutedEvent.address = Address.fromString(contractAddress);
+  createProposalExecutedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -111,10 +111,10 @@ export function createNewVoteExecutedEvent(
     ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
   );
 
-  createVoteExecutedEvent.parameters.push(voteIdParam);
-  createVoteExecutedEvent.parameters.push(execResultsParam);
+  createProposalExecutedEvent.parameters.push(voteIdParam);
+  createProposalExecutedEvent.parameters.push(execResultsParam);
 
-  return createVoteExecutedEvent;
+  return createProposalExecutedEvent;
 }
 
 export function createNewVoteSettingsUpdatedEvent(
