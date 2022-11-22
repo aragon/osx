@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- renamed *package to *plugin
+- renamed Allowlist to addresslist
 - improved test recompiliation
 - marks some entity as immutable
 
@@ -30,6 +32,7 @@ On 2022-10-07 15:20:00
 On 2022-10-03 10:38:36
 
 ### Added
+
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
 - added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.

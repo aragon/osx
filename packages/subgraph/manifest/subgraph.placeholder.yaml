@@ -65,6 +65,14 @@ dataSources:
       abis:        
         - name: PluginSetupProcessor
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginSetupProcessor.sol/PluginSetupProcessor.json
+        - name: ERC20
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: ERC165
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
+        - name: ERC20Voting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
+        - name: Addresslist
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
           handler: handleInstallationPrepared
@@ -101,7 +109,7 @@ templates:
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
-        - name: AllowlistVoting
+        - name: Addresslist
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
         - name: DAO
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
@@ -153,21 +161,21 @@ templates:
           handler: handleVoteCreated
         - event: ConfigUpdated(uint64,uint64,uint64)
           handler: handleConfigUpdated
-  # AllowlistVoting (package)
-  - name: AllowlistVoting
+  # Addresslist (package)
+  - name: Addresslist
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: AllowlistVoting
+      abi: Addresslist
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/allowlist/allowlist-voting.ts
+      file: ./src/packages/addresslist/addresslist-voting.ts
       entities:
         - Dao
       abis:
-        - name: AllowlistVoting
+        - name: Addresslist
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)

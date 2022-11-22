@@ -8,8 +8,8 @@ import {
   handleUsersRemoved,
   handleConfigUpdated,
   _handleVoteCreated
-} from '../../src/packages/allowlist/allowlist-voting';
-import {AllowlistPackage, AllowlistVoter} from '../../generated/schema';
+} from '../../src/packages/addresslist/addresslist-voting';
+import {AddresslistPlugin, AddresslistVoter} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -17,7 +17,6 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   ADDRESS_TWO,
-  ADDRESS_ZERO,
   VOTE_ID,
   START_DATE,
   END_DATE,
@@ -35,7 +34,7 @@ import {
   createNewVoteCreatedEvent,
   createNewConfigUpdatedEvent,
   getVotesLengthCall,
-  createAllowlistProposalEntityState
+  createAddresslistProposalEntityState
 } from './utils';
 
 let voteId = '0';
@@ -47,12 +46,12 @@ let totalSupportThresholdPct = '500';
 let census = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
-test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => {
+test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () => {
   // create state
-  let erc20VotingPackage = new AllowlistPackage(
+  let addresslistPlugin = new AddresslistPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
-  erc20VotingPackage.save();
+  addresslistPlugin.save();
 
   // create calls
   getVotesLengthCall(VOTING_ADDRESS, '1');
@@ -91,31 +90,30 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
   let packageId = Address.fromString(VOTING_ADDRESS).toHexString();
 
   // checks
-  assert.fieldEquals('AllowlistProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AllowlistProposal', entityID, 'dao', DAO_ADDRESS);
-  assert.fieldEquals('AllowlistProposal', entityID, 'pkg', packageId);
-  assert.fieldEquals('AllowlistProposal', entityID, 'voteId', voteId);
-  assert.fieldEquals('AllowlistProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals('AllowlistProposal', entityID, 'metadata', STRING_DATA);
+  assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
+  assert.fieldEquals('AddresslistProposal', entityID, 'dao', DAO_ADDRESS);
+  assert.fieldEquals('AddresslistProposal', entityID, 'plugin', packageId);
+  assert.fieldEquals('AddresslistProposal', entityID, 'voteId', voteId);
+  assert.fieldEquals('AddresslistProposal', entityID, 'creator', ADDRESS_ONE);
+  assert.fieldEquals('AddresslistProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
-    'AllowlistProposal',
+    'AddresslistProposal',
     entityID,
     'createdAt',
     event.block.timestamp.toString()
   );
-  assert.fieldEquals('AllowlistProposal', entityID, 'startDate', startDate);
+  assert.fieldEquals('AddresslistProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
-    'AllowlistProposal',
+    'AddresslistProposal',
     entityID,
     'relativeSupportThresholdPct',
     relativeSupportThresholdPct
   );
-  // assert.fieldEquals('AllowlistProposal', entityID, 'census', census);
-  assert.fieldEquals('AllowlistProposal', entityID, 'executed', 'false');
+  assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'false');
 
-  // chack AllowlistPackage
+  // chack AddresslistPlugin
   assert.fieldEquals(
-    'AllowlistPackage',
+    'AddresslistPlugin',
     Address.fromString(VOTING_ADDRESS).toHexString(),
     'votesLength',
     '1'
@@ -124,9 +122,9 @@ test('Run Allowlist Voting (handleVoteCreated) mappings with mock event', () => 
   clearStore();
 });
 
-test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
+test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   // create state
-  let proposal = createAllowlistProposalEntityState();
+  let proposal = createAddresslistProposalEntityState();
 
   // create calls
   createGetVoteCall(
@@ -159,19 +157,19 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('AllowlistVote', entityID, 'id', entityID);
+  assert.fieldEquals('AddresslistVote', entityID, 'id', entityID);
 
   // check proposal
-  assert.fieldEquals('AllowlistProposal', proposal.id, 'yes', '1');
+  assert.fieldEquals('AddresslistProposal', proposal.id, 'yes', '1');
   // check executable
   // the total voting power is 3, currently total votes = 1
   // the min participation is 0.5; 0.33 <= 0.5 => false
   // currently yes = 1
   // the min support is 0.5; 1 >= 0.5 => true
   // is not executable
-  assert.fieldEquals('AllowlistProposal', proposal.id, 'executable', 'false');
+  assert.fieldEquals('AddresslistProposal', proposal.id, 'executable', 'false');
   // check vote count
-  assert.fieldEquals('AllowlistProposal', proposal.id, 'voteCount', '1');
+  assert.fieldEquals('AddresslistProposal', proposal.id, 'voteCount', '1');
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
@@ -205,17 +203,17 @@ test('Run Allowlist Voting (handleVoteCast) mappings with mock event', () => {
   // currently yes = 1, abstain = 1
   // the min support is 0.5; 0.5 >= 0.5 => true
   // is executable
-  assert.fieldEquals('AllowlistProposal', proposal.id, 'executable', 'true');
+  assert.fieldEquals('AddresslistProposal', proposal.id, 'executable', 'true');
 
-  assert.fieldEquals('AllowlistProposal', proposal.id, 'voteCount', '2');
+  assert.fieldEquals('AddresslistProposal', proposal.id, 'voteCount', '2');
 
   clearStore();
 });
 
-test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () => {
+test('Run Addresslist Voting (handleVoteExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
-  createAllowlistProposalEntityState(
+  createAddresslistProposalEntityState(
     entityID,
     DAO_ADDRESS,
     VOTING_ADDRESS,
@@ -229,17 +227,17 @@ test('Run Allowlist Voting (handleVoteExecuted) mappings with mock event', () =>
   handleVoteExecuted(event);
 
   // checks
-  assert.fieldEquals('AllowlistProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AllowlistProposal', entityID, 'executed', 'true');
+  assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
+  assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'true');
 
   clearStore();
 });
 
-test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () => {
+test('Run Addresslist Voting (handleConfigUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
-  let erc20VotingPackage = new AllowlistPackage(entityID);
-  erc20VotingPackage.save();
+  let addresslistPlugin = new AddresslistPlugin(entityID);
+  addresslistPlugin.save();
 
   // create event
   let event = createNewConfigUpdatedEvent('2', '1', '3600', VOTING_ADDRESS);
@@ -248,25 +246,25 @@ test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () =
   handleConfigUpdated(event);
 
   // checks
-  assert.fieldEquals('AllowlistPackage', entityID, 'id', entityID);
+  assert.fieldEquals('AddresslistPlugin', entityID, 'id', entityID);
   assert.fieldEquals(
-    'AllowlistPackage',
+    'AddresslistPlugin',
     entityID,
     'totalSupportThresholdPct',
     '2'
   );
   assert.fieldEquals(
-    'AllowlistPackage',
+    'AddresslistPlugin',
     entityID,
     'relativeSupportThresholdPct',
     '1'
   );
-  assert.fieldEquals('AllowlistPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('AddresslistPlugin', entityID, 'minDuration', '3600');
 
   clearStore();
 });
 
-test('Run Allowlist Voting (handleUsersAdded) mappings with mock event', () => {
+test('Run Addresslist Voting (handleUsersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
@@ -280,28 +278,28 @@ test('Run Allowlist Voting (handleUsersAdded) mappings with mock event', () => {
 
   // checks
   assert.fieldEquals(
-    'AllowlistVoter',
+    'AddresslistVoter',
     userArray[0].toHexString(),
     'id',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
-    'AllowlistVoter',
+    'AddresslistVoter',
     userArray[0].toHexString(),
     'address',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
-    'AllowlistVoter',
+    'AddresslistVoter',
     userArray[0].toHexString(),
-    'pkg',
+    'plugin',
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
 
   clearStore();
 });
 
-test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
+test('Run Addresslist Voting (UsersRemoved) mappings with mock event', () => {
   // create state
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -310,8 +308,8 @@ test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
 
   for (let index = 0; index < userArray.length; index++) {
     const user = userArray[index];
-    let userEntity = new AllowlistVoter(user.toHexString());
-    userEntity.pkg = Address.fromString(VOTING_ADDRESS).toHexString();
+    let userEntity = new AddresslistVoter(user.toHexString());
+    userEntity.plugin = Address.fromString(VOTING_ADDRESS).toHexString();
     userEntity.save();
   }
 
@@ -323,12 +321,12 @@ test('Run Allowlist Voting (UsersRemoved) mappings with mock event', () => {
 
   // checks
   assert.fieldEquals(
-    'AllowlistVoter',
+    'AddresslistVoter',
     userArray[0].toHexString(),
     'id',
     userArray[0].toHexString()
   );
-  assert.notInStore('AllowlistVoter', userArray[1].toHexString());
+  assert.notInStore('AddresslistVoter', userArray[1].toHexString());
 
   clearStore();
 });

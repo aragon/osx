@@ -9,7 +9,7 @@ import {
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
 import {
   Action,
-  ERC20VotingPackage,
+  ERC20VotingPlugin,
   ERC20VotingProposal,
   ERC20VotingVoter,
   ERC20Vote
@@ -35,7 +35,7 @@ export function _handleVoteCreated(
 
   let proposalEntity = new ERC20VotingProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.pkg = event.address.toHexString();
+  proposalEntity.plugin = event.address.toHexString();
   proposalEntity.voteId = event.params.voteId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
@@ -79,7 +79,7 @@ export function _handleVoteCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
+  let packageEntity = ERC20VotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_votesLength();
     if (!voteLength.reverted) {
@@ -109,7 +109,7 @@ export function handleVoteCast(event: VoteCast): void {
   if (!voterEntity) {
     voterEntity = new ERC20VotingVoter(event.params.voter.toHexString());
     voterEntity.address = event.params.voter.toHexString();
-    voterEntity.pkg = event.address.toHexString();
+    voterEntity.plugin = event.address.toHexString();
     voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
   } else {
@@ -193,7 +193,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
 }
 
 export function handleConfigUpdated(event: ConfigUpdated): void {
-  let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
+  let packageEntity = ERC20VotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.relativeSupportThresholdPct =
       event.params.relativeSupportThresholdPct;
