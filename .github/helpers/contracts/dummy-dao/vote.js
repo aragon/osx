@@ -6,7 +6,7 @@ const {ethers} = require('ethers');
 
 const networks = require('../../../../packages/contracts/networks.json');
 const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json');
-const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
+const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 
@@ -22,11 +22,11 @@ async function vote() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].address;
   const votingAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].voting;
 
   let overrides = await gas.setGasOverride(provider);
@@ -64,15 +64,15 @@ async function vote() {
 
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].additionalVote
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].additionalVote = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
   ].additionalVote = resultObj;
 
   //write file

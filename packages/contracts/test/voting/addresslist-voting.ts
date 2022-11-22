@@ -14,7 +14,7 @@ import {
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
-describe('AllowlistVoting', function () {
+describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;
@@ -35,7 +35,7 @@ describe('AllowlistVoting', function () {
       await getMergedABI(
         // @ts-ignore
         hre,
-        'AllowlistVoting',
+        'AddresslistVoting',
         ['DAO']
       ));
 
@@ -56,12 +56,12 @@ describe('AllowlistVoting', function () {
   });
 
   beforeEach(async () => {
-    const AllowlistVotingFactory = new ethers.ContractFactory(
+    const AddresslistVotingFactory = new ethers.ContractFactory(
       mergedAbi,
       addresslistVotingFactoryBytecode,
       signers[0]
     );
-    voting = await AllowlistVotingFactory.deploy();
+    voting = await AddresslistVotingFactory.deploy();
 
     dao.grant(
       dao.address,
@@ -71,7 +71,7 @@ describe('AllowlistVoting', function () {
     dao.grant(
       voting.address,
       ownerAddress,
-      ethers.utils.id('MODIFY_ALLOWLIST_PERMISSION')
+      ethers.utils.id('MODIFY_ADDRESSLIST_PERMISSION')
     );
   });
 
@@ -100,7 +100,7 @@ describe('AllowlistVoting', function () {
     });
   });
 
-  describe('Allowlisting users: ', async () => {
+  describe('Addresslisting users: ', async () => {
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, []);
     });

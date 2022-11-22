@@ -72,7 +72,7 @@ dataSources:
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
         - name: Addresslist
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
           handler: handleInstallationPrepared
@@ -110,7 +110,7 @@ templates:
         - name: ERC20Voting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
         - name: Addresslist
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
       eventHandlers:
@@ -176,7 +176,7 @@ templates:
         - Dao
       abis:
         - name: Addresslist
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast

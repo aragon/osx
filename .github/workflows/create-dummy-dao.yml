@@ -45,7 +45,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: "yarn"
+          cache: 'yarn'
           node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
@@ -53,15 +53,15 @@ jobs:
         run: cd packages/contracts && yarn run build
       - name: create Dummy DAOs erc20
         run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: create Dummy DAOs allowlist
+      - name: create Dummy DAOs addresslist
         run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - name: Deposit to Erc20 DAO
         run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: Deposit to Allowlist DAO
+      - name: Deposit to Addresslist DAO
         run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - name: Proposal of Erc20
         run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: Proposal of Allowlist
+      - name: Proposal of Addresslist
         run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - uses: actions/upload-artifact@v2
         with:

@@ -10,39 +10,39 @@ import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
-/// @title AllowlistVoting
+/// @title AddresslistVoting
 /// @author Aragon Association - 2021-2022.
 /// @notice The majority voting implementation using an list of allowed addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract AllowlistVoting is MajorityVotingBase {
+contract AddresslistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ALLOWLIST_VOTING_INTERFACE_ID =
+    bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
         this.addAllowedUsers.selector ^
             this.removeAllowedUsers.selector ^
             this.isAllowed.selector ^
             this.allowedUserCount.selector;
 
     /// @notice The ID of the permission required to call the `addAllowedUsers` and `removeAllowedUsers` function.
-    bytes32 public constant MODIFY_ALLOWLIST_PERMISSION_ID =
-        keccak256("MODIFY_ALLOWLIST_PERMISSION");
+    bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
+        keccak256("MODIFY_ADDRESSLIST_PERMISSION");
 
     /// @notice The mapping containing the checkpointed history of addresses being allowed.
     mapping(address => Checkpoints.History) private _allowedAddressesCheckpoints;
 
-    /// @notice The checkpointed history of the length of the allowlist.
-    Checkpoints.History private _allowlistLengthCheckpoints;
+    /// @notice The checkpointed history of the length of the addresslist.
+    Checkpoints.History private _addresslistLengthCheckpoints;
 
     /// @notice Thrown when a sender is not allowed to create a vote.
     /// @param sender The sender address.
     error VoteCreationForbidden(address sender);
 
-    /// @notice Emitted when new users are added to the allowlist.
+    /// @notice Emitted when new users are added to the addresslist.
     /// @param users The array of user addresses to be added.
     event UsersAdded(address[] users);
 
-    /// @notice Emitted when users are removed from the allowlist.
+    /// @notice Emitted when users are removed from the addresslist.
     /// @param users The array of user addresses to be removed.
     event UsersRemoved(address[] users);
 
@@ -71,23 +71,24 @@ contract AllowlistVoting is MajorityVotingBase {
         _addAllowedUsers(_allowed);
     }
 
-    /// @notice adds a IERC165 to check whether contract supports ALLOWLIST_VOTING_INTERFACE_ID or not.
+    /// @notice adds a IERC165 to check whether contract supports ADDRESSLIST_VOTING_INTERFACE_ID or not.
     /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or ALLOWLIST_VOTING_INTERFACE_ID
+    /// @return bool whether it supports the IERC165 or ADDRESSLIST_VOTING_INTERFACE_ID
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == ALLOWLIST_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
+        return
+            interfaceId == ADDRESSLIST_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
-    /// @notice Adds new users to the allowlist.
+    /// @notice Adds new users to the addresslist.
     /// @param _users The addresses of the users to be added.
     function addAllowedUsers(address[] calldata _users)
         external
-        auth(MODIFY_ALLOWLIST_PERMISSION_ID)
+        auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
         _addAllowedUsers(_users);
     }
 
-    /// @notice Internal function to add new users to the allowlist.
+    /// @notice Internal function to add new users to the addresslist.
     /// @param _users The addresses of users to be added.
     function _addAllowedUsers(address[] calldata _users) internal {
         _updateAllowedUsers(_users, true);
@@ -95,11 +96,11 @@ contract AllowlistVoting is MajorityVotingBase {
         emit UsersAdded(_users);
     }
 
-    /// @notice Removes users from the allowlist.
+    /// @notice Removes users from the addresslist.
     /// @param _users The addresses of the users to be removed.
     function removeAllowedUsers(address[] calldata _users)
         external
-        auth(MODIFY_ALLOWLIST_PERMISSION_ID)
+        auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
         _updateAllowedUsers(_users, false);
 
@@ -210,7 +211,7 @@ contract AllowlistVoting is MajorityVotingBase {
     function allowedUserCount(uint256 blockNumber) public view returns (uint256) {
         if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
 
-        return _allowlistLengthCheckpoints.getAtBlock(blockNumber);
+        return _addresslistLengthCheckpoints.getAtBlock(blockNumber);
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -219,11 +220,11 @@ contract AllowlistVoting is MajorityVotingBase {
         return _isVoteOpen(vote_) && isAllowed(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Updates the allowlist by adding or removing users.
+    /// @notice Updates the addresslist by adding or removing users.
     /// @param _users The user addresses.
-    /// @param _enabled Whether to add or remove users from the allowlist.
+    /// @param _enabled Whether to add or remove users from the addresslist.
     function _updateAllowedUsers(address[] calldata _users, bool _enabled) internal {
-        _allowlistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
+        _addresslistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 
         for (uint256 i = 0; i < _users.length; i++) {
             _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
