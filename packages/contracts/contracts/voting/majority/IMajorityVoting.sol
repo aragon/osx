@@ -50,21 +50,21 @@ interface IMajorityVoting {
     /// @param execResults The bytes array resulting from the vote execution in the associated DAO.
     event VoteExecuted(uint256 indexed voteId, bytes[] execResults);
 
-    /// @notice Emitted when the vote configuration is updated.
+    /// @notice Emitted when the vote settings are updated.
     /// @param relativeSupportThresholdPct The relative support threshold in percent.
     /// @param totalSupportThresholdPct The total support threshold in percent.
     /// @param minDuration The minimal duration of a vote.
-    event ConfigUpdated(
+    event VoteSettingsUpdated(
         uint64 totalSupportThresholdPct,
         uint64 relativeSupportThresholdPct,
         uint64 minDuration
     );
 
-    /// @notice Sets the vote configuration.
+    /// @notice Changes the vote settings.
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
-    function setConfiguration(
+    function changeVoteSettings(
         uint64 _relativeSupportThresholdPct,
         uint64 _totalSupportThresholdPct,
         uint64 _minDuration

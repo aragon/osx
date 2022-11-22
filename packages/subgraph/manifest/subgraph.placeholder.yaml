@@ -159,8 +159,8 @@ templates:
           handler: handleVoteExecuted
         - event: VoteCreated(indexed uint256,indexed address,bytes)
           handler: handleVoteCreated
-        - event: ConfigUpdated(uint64,uint64,uint64)
-          handler: handleConfigUpdated
+        - event: VoteSettingsUpdated(uint64,uint64,uint64)
+          handler: handleVoteSettingsUpdated
   # Addresslist (package)
   - name: Addresslist
     kind: ethereum/contract
@@ -184,8 +184,8 @@ templates:
           handler: handleVoteExecuted
         - event: VoteCreated(indexed uint256,indexed address,bytes)
           handler: handleVoteCreated
-        - event: ConfigUpdated(uint64,uint64,uint64)
-          handler: handleConfigUpdated
+        - event: VoteSettingsUpdated(uint64,uint64,uint64)
+          handler: handleVoteSettingsUpdated
         - event: UsersAdded(address[])
           handler: handleUsersAdded
         - event: UsersRemoved(address[])

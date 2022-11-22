@@ -30,7 +30,7 @@ describe('MajorityVotingMock', function () {
     dao.grant(
       votingBase.address,
       ownerAddress,
-      ethers.utils.id('SET_CONFIGURATION_PERMISSION')
+      ethers.utils.id('CHANGE_VOTE_SETTINGS_PERMISSION')
     );
   });
 
@@ -67,26 +67,26 @@ describe('MajorityVotingMock', function () {
     beforeEach(async () => {
       await initializeMock(1, 2, 3);
     });
-    it('reverts if wrong config is set', async () => {
+    it('reverts if settings are invalid', async () => {
       await expect(
-        votingBase.setConfiguration(1, pct16(1000), 3)
+        votingBase.changeVoteSettings(1, pct16(1000), 3)
       ).to.be.revertedWith(
         customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
 
       await expect(
-        votingBase.setConfiguration(pct16(1000), 2, 3)
+        votingBase.changeVoteSettings(pct16(1000), 2, 3)
       ).to.be.revertedWith(
         customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
 
-      await expect(votingBase.setConfiguration(1, 2, 0)).to.be.revertedWith(
+      await expect(votingBase.changeVoteSettings(1, 2, 0)).to.be.revertedWith(
         customError('VoteDurationZero')
       );
     });
 
-    it('should change config successfully', async () => {
-      expect(await votingBase.setConfiguration(2, 4, 8))
+    it('should change the settings successfully', async () => {
+      expect(await votingBase.changeVoteSettings(2, 4, 8))
         .to.emit(votingBase, VOTING_EVENTS.CONFIG_UPDATED)
         .withArgs(2, 4, 8);
     });

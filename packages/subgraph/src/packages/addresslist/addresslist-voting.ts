@@ -4,7 +4,7 @@ import {
   VoteCast,
   VoteCreated,
   VoteExecuted,
-  ConfigUpdated,
+  VoteSettingsUpdated,
   UsersAdded,
   UsersRemoved,
   Addresslist
@@ -181,7 +181,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
   }
 }
 
-export function handleConfigUpdated(event: ConfigUpdated): void {
+export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.totalSupportThresholdPct =

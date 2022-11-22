@@ -203,7 +203,7 @@ contract ERC20VotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            erc20VotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -274,7 +274,7 @@ contract ERC20VotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            erc20VotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(

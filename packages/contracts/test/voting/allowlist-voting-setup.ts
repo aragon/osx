@@ -26,8 +26,8 @@ const MINIMUM_DATA = abiCoder.encode(
 const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
   'MODIFY_ALLOWLIST_PERMISSION'
 );
-const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
-  'SET_CONFIGURATION_PERMISSION'
+const CHANGE_VOTE_SETTINGS_PERMISSION_ID = ethers.utils.id(
+  'CHANGE_VOTE_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
@@ -131,7 +131,7 @@ describe('AllowlistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Grant,
@@ -238,7 +238,7 @@ describe('AllowlistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Revoke,

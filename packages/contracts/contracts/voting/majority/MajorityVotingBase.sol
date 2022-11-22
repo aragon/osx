@@ -31,9 +31,9 @@ abstract contract MajorityVotingBase is
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required to call the `setConfiguration` function.
-    bytes32 public constant SET_CONFIGURATION_PERMISSION_ID =
-        keccak256("SET_CONFIGURATION_PERMISSION");
+    /// @notice The ID of the permission required to call the `changeVoteSettings` function.
+    bytes32 public constant CHANGE_VOTE_SETTINGS_PERMISSION_ID =
+        keccak256("CHANGE_VOTE_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
@@ -41,9 +41,11 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between vote IDs and vote information.
     mapping(uint256 => Vote) internal votes;
 
+    //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
     uint64 public relativeSupportThresholdPct;
     uint64 public totalSupportThresholdPct;
     uint64 public minDuration;
+
     uint256 public votesLength;
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
@@ -97,7 +99,11 @@ abstract contract MajorityVotingBase is
             _minDuration
         );
 
-        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
+        emit VoteSettingsUpdated(
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
+            _minDuration
+        );
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -114,18 +120,22 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function setConfiguration(
+    function changeVoteSettings(
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
-    ) external auth(SET_CONFIGURATION_PERMISSION_ID) {
+    ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
         _validateAndSetSettings(
             _totalSupportThresholdPct,
             _relativeSupportThresholdPct,
             _minDuration
         );
 
-        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
+        emit VoteSettingsUpdated(
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
+            _minDuration
+        );
     }
 
     /// @inheritdoc IMajorityVoting

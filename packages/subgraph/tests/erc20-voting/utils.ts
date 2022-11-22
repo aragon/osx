@@ -2,7 +2,7 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  ConfigUpdated,
+  VoteSettingsUpdated,
   VoteCast,
   VoteCreated,
   VoteExecuted
@@ -117,16 +117,18 @@ export function createNewVoteExecutedEvent(
   return createVoteExecutedEvent;
 }
 
-export function createNewConfigUpdatedEvent(
+export function createNewVoteSettingsUpdatedEvent(
   relativeSupportThresholdPct: string,
   totalSupportThresholdPct: string,
   minDuration: string,
   contractAddress: string
-): ConfigUpdated {
-  let newConfigUpdatedEvent = changetype<ConfigUpdated>(newMockEvent());
+): VoteSettingsUpdated {
+  let newVoteSettingsUpdatedEvent = changetype<VoteSettingsUpdated>(
+    newMockEvent()
+  );
 
-  newConfigUpdatedEvent.address = Address.fromString(contractAddress);
-  newConfigUpdatedEvent.parameters = [];
+  newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newVoteSettingsUpdatedEvent.parameters = [];
 
   let totalSupportThresholdPctParam = new ethereum.EventParam(
     'totalSupportThresholdPct',
@@ -143,11 +145,11 @@ export function createNewConfigUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newConfigUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
-  newConfigUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
-  newConfigUpdatedEvent.parameters.push(minDurationParam);
+  newVoteSettingsUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
-  return newConfigUpdatedEvent;
+  return newVoteSettingsUpdatedEvent;
 }
 
 // calls

@@ -4,7 +4,7 @@ import {
   VoteCast,
   VoteCreated,
   VoteExecuted,
-  ConfigUpdated,
+  VoteSettingsUpdated,
   ERC20Voting
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
 import {
@@ -144,7 +144,7 @@ export function handleVoteCast(event: VoteCast): void {
       // expect a number between 0 and 100
       // where 0.35 => 35
       let currentSupport = new BigInt(0);
-      if(voteCount.gt(new BigInt(0))) {
+      if (voteCount.gt(new BigInt(0))) {
         currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
       }
       // set the executable param
@@ -195,7 +195,7 @@ export function handleVoteExecuted(event: VoteExecuted): void {
   }
 }
 
-export function handleConfigUpdated(event: ConfigUpdated): void {
+export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = ERC20VotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.relativeSupportThresholdPct =

@@ -82,7 +82,7 @@ contract AllowlistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            allowlistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -132,7 +132,7 @@ contract AllowlistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            allowlistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
