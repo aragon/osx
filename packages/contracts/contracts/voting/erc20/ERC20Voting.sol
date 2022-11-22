@@ -106,7 +106,7 @@ contract ERC20Voting is MajorityVotingBase {
             }
         }
 
-        emit VoteCreated(voteId, _msgSender(), _proposalMetadata);
+        emit ProposalCreated(voteId, _msgSender(), _proposalMetadata);
 
         vote(voteId, _choice, _executeIfDecided);
     }

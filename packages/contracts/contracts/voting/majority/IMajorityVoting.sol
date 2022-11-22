@@ -36,7 +36,7 @@ interface IMajorityVoting {
     /// @param voteId  The ID of the vote.
     /// @param creator  The creator of the vote.
     /// @param metadata The IPFS hash pointing to the proposal metadata.
-    event VoteCreated(uint256 indexed voteId, address indexed creator, bytes metadata);
+    event ProposalCreated(uint256 indexed voteId, address indexed creator, bytes metadata);
 
     /// @notice Emitted when a vote is casted by a voter.
     /// @param voteId The ID of the vote.

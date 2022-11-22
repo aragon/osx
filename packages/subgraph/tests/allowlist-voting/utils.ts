@@ -3,7 +3,7 @@ import {createMockedFunction, newMockEvent} from 'matchstick-as';
 import {AddresslistProposal} from '../../generated/schema';
 
 import {
-  VoteCreated,
+  ProposalCreated,
   VoteCast,
   VoteExecuted,
   VoteSettingsUpdated,
@@ -27,16 +27,16 @@ import {
 
 // events
 
-export function createNewVoteCreatedEvent(
+export function createNewProposalCreatedEvent(
   voteId: string,
   creator: string,
   description: string,
   contractAddress: string
-): VoteCreated {
-  let createVoteCreatedEvent = changetype<VoteCreated>(newMockEvent());
+): ProposalCreated {
+  let createProposalCreatedEvent = changetype<ProposalCreated>(newMockEvent());
 
-  createVoteCreatedEvent.address = Address.fromString(contractAddress);
-  createVoteCreatedEvent.parameters = [];
+  createProposalCreatedEvent.address = Address.fromString(contractAddress);
+  createProposalCreatedEvent.parameters = [];
 
   let voteIdParam = new ethereum.EventParam(
     'voteId',
@@ -51,11 +51,11 @@ export function createNewVoteCreatedEvent(
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
 
-  createVoteCreatedEvent.parameters.push(voteIdParam);
-  createVoteCreatedEvent.parameters.push(creatorParam);
-  createVoteCreatedEvent.parameters.push(descriptionParam);
+  createProposalCreatedEvent.parameters.push(voteIdParam);
+  createProposalCreatedEvent.parameters.push(creatorParam);
+  createProposalCreatedEvent.parameters.push(descriptionParam);
 
-  return createVoteCreatedEvent;
+  return createProposalCreatedEvent;
 }
 
 export function createNewVoteCastEvent(

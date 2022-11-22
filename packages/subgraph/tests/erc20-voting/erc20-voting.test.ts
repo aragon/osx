@@ -5,7 +5,7 @@ import {
   handleVoteCast,
   handleVoteExecuted,
   handleVoteSettingsUpdated,
-  _handleVoteCreated
+  _handleProposalCreated
 } from '../../src/packages/erc20/erc20-voting';
 import {ERC20VotingPlugin} from '../../generated/schema';
 import {
@@ -26,7 +26,7 @@ import {createDummyActions, createGetVoteCall} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
-  createNewVoteCreatedEvent,
+  createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
   getVotesLengthCall,
   createERC20VotingProposalEntityState
@@ -41,7 +41,7 @@ let totalSupportThresholdPct = '500';
 let census = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
-test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
+test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
   // create state
   let erc20VotingPlugin = new ERC20VotingPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -68,7 +68,7 @@ test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewVoteCreatedEvent(
+  let event = createNewProposalCreatedEvent(
     voteId,
     ADDRESS_ONE,
     STRING_DATA,
@@ -76,7 +76,7 @@ test('Run ERC Voting (handleVoteCreated) mappings with mock event', () => {
   );
 
   // handle event
-  _handleVoteCreated(event, DAO_ADDRESS, STRING_DATA);
+  _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +

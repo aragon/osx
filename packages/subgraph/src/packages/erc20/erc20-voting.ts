@@ -2,7 +2,7 @@ import {BigInt, dataSource} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
-  VoteCreated,
+  ProposalCreated,
   VoteExecuted,
   VoteSettingsUpdated,
   ERC20Voting
@@ -17,16 +17,16 @@ import {
 
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
 
-export function handleVoteCreated(event: VoteCreated): void {
+export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
   let metadata = event.params.metadata.toString();
-  _handleVoteCreated(event, daoId, metadata);
+  _handleProposalCreated(event, daoId, metadata);
 }
 
 // work around: to bypass context and ipfs for testing, as they are not yet supported by matchstick
-export function _handleVoteCreated(
-  event: VoteCreated,
+export function _handleProposalCreated(
+  event: ProposalCreated,
   daoId: string,
   metadata: string
 ): void {

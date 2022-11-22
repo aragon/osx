@@ -157,8 +157,8 @@ templates:
           handler: handleVoteCast
         - event: VoteExecuted(indexed uint256,bytes[])
           handler: handleVoteExecuted
-        - event: VoteCreated(indexed uint256,indexed address,bytes)
-          handler: handleVoteCreated
+        - event: ProposalCreated(indexed uint256,indexed address,bytes)
+          handler: handleProposalCreated
         - event: VoteSettingsUpdated(uint64,uint64,uint64)
           handler: handleVoteSettingsUpdated
   # Addresslist (package)
@@ -182,8 +182,8 @@ templates:
           handler: handleVoteCast
         - event: VoteExecuted(indexed uint256,bytes[])
           handler: handleVoteExecuted
-        - event: VoteCreated(indexed uint256,indexed address,bytes)
-          handler: handleVoteCreated
+        - event: ProposalCreated(indexed uint256,indexed address,bytes)
+          handler: handleProposalCreated
         - event: VoteSettingsUpdated(uint64,uint64,uint64)
           handler: handleVoteSettingsUpdated
         - event: UsersAdded(address[])

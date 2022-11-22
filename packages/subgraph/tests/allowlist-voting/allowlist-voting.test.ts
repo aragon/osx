@@ -7,7 +7,7 @@ import {
   handleVoteExecuted,
   handleUsersRemoved,
   handleVoteSettingsUpdated,
-  _handleVoteCreated
+  _handleProposalCreated
 } from '../../src/packages/addresslist/addresslist-voting';
 import {AddresslistPlugin, AddresslistVoter} from '../../generated/schema';
 import {
@@ -31,7 +31,7 @@ import {
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
   createNewUsersRemovedEvent,
-  createNewVoteCreatedEvent,
+  createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
   getVotesLengthCall,
   createAddresslistProposalEntityState
@@ -46,7 +46,7 @@ let totalSupportThresholdPct = '500';
 let census = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
-test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () => {
+test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', () => {
   // create state
   let addresslistPlugin = new AddresslistPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -73,7 +73,7 @@ test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () =
   );
 
   // create event
-  let event = createNewVoteCreatedEvent(
+  let event = createNewProposalCreatedEvent(
     voteId,
     ADDRESS_ONE,
     STRING_DATA,
@@ -81,7 +81,7 @@ test('Run Addresslist Voting (handleVoteCreated) mappings with mock event', () =
   );
 
   // handle event
-  _handleVoteCreated(event, DAO_ADDRESS, STRING_DATA);
+  _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +
