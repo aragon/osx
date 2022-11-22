@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `AllowlistVoting` to `AddresslistVoting`.
 - Refactored the names of events, functions, and parameters in `MajorityVoting`.
 - Fixed inheritance incompatibility with OZ contracts for `Plugin`, `PluginCloneable`, and `PluginUUPSUpgradeable`.
 - Fixed and clarified the execution logic of `MajorityVoting` by replacing participation with total support and emitted an error if the vote creator tries to vote before the start date.

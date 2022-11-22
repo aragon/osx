@@ -5,8 +5,8 @@ import {
   ProposalCreated,
   VoteExecuted,
   VoteSettingsUpdated,
-  UsersAdded,
-  UsersRemoved,
+  AddressesAdded,
+  AddressesRemoved,
   Addresslist
 } from '../../../generated/templates/Addresslist/Addresslist';
 import {
@@ -193,7 +193,7 @@ export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   }
 }
 
-export function handleUsersAdded(event: UsersAdded): void {
+export function handleAddressesAdded(event: AddressesAdded): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];
@@ -207,7 +207,7 @@ export function handleUsersAdded(event: UsersAdded): void {
   }
 }
 
-export function handleUsersRemoved(event: UsersRemoved): void {
+export function handleAddressesRemoved(event: AddressesRemoved): void {
   let users = event.params.users;
   for (let index = 0; index < users.length; index++) {
     const user = users[index];

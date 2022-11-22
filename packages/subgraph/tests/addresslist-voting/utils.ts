@@ -7,8 +7,8 @@ import {
   VoteCast,
   VoteExecuted,
   VoteSettingsUpdated,
-  UsersAdded,
-  UsersRemoved
+  AddressesAdded,
+  AddressesRemoved
 } from '../../generated/templates/Addresslist/Addresslist';
 import {
   ADDRESS_ONE,
@@ -154,42 +154,42 @@ export function createNewVoteSettingsUpdatedEvent(
   return newVoteSettingsUpdatedEvent;
 }
 
-export function createNewUsersAddedEvent(
+export function createNewAddressesAddedEvent(
   addresses: Address[],
   contractAddress: string
-): UsersAdded {
-  let newUsersAddedEvent = changetype<UsersAdded>(newMockEvent());
+): AddressesAdded {
+  let newAddressesAddedEvent = changetype<AddressesAdded>(newMockEvent());
 
-  newUsersAddedEvent.address = Address.fromString(contractAddress);
-  newUsersAddedEvent.parameters = [];
+  newAddressesAddedEvent.address = Address.fromString(contractAddress);
+  newAddressesAddedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newUsersAddedEvent.parameters.push(usersParam);
+  newAddressesAddedEvent.parameters.push(usersParam);
 
-  return newUsersAddedEvent;
+  return newAddressesAddedEvent;
 }
 
-export function createNewUsersRemovedEvent(
+export function createNewAddressesRemovedEvent(
   addresses: Address[],
   contractAddress: string
-): UsersRemoved {
-  let newUsersRemovedEvent = changetype<UsersRemoved>(newMockEvent());
+): AddressesRemoved {
+  let newAddressesRemovedEvent = changetype<AddressesRemoved>(newMockEvent());
 
-  newUsersRemovedEvent.address = Address.fromString(contractAddress);
-  newUsersRemovedEvent.parameters = [];
+  newAddressesRemovedEvent.address = Address.fromString(contractAddress);
+  newAddressesRemovedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newUsersRemovedEvent.parameters.push(usersParam);
+  newAddressesRemovedEvent.parameters.push(usersParam);
 
-  return newUsersRemovedEvent;
+  return newAddressesRemovedEvent;
 }
 
 // calls

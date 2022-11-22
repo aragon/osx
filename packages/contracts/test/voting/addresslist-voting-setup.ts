@@ -58,10 +58,10 @@ describe('AddresslistVotingSetup', function () {
     const addresslistVotingContract = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
-      'function addAllowedUsers(address[]  _users)',
-      'function removeAllowedUsers(address[] _users)',
-      'function isAllowed(address account, uint256 blockNumber) returns (bool)',
-      'function allowedUserCount(uint256 blockNumber) returns (uint256)',
+      'function addAddresses(address[]  _voters)',
+      'function removeAddresses(address[] _voters)',
+      'function isListed(address account, uint256 blockNumber) returns (bool)',
+      'function addresslistLength(uint256 blockNumber) returns (uint256)',
     ]);
 
     expect(
@@ -200,13 +200,10 @@ describe('AddresslistVotingSetup', function () {
       await ethers.provider.send('evm_mine', []);
 
       expect(
-        await addresslistVotingContract.allowedUserCount(latestBlock.number)
+        await addresslistVotingContract.addresslistLength(latestBlock.number)
       ).to.be.equal(allowed.length);
       expect(
-        await addresslistVotingContract.isAllowed(
-          allowed[0],
-          latestBlock.number
-        )
+        await addresslistVotingContract.isListed(allowed[0], latestBlock.number)
       ).to.be.equal(true);
     });
   });

@@ -2,10 +2,10 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
-  handleUsersAdded,
+  handleAddressesAdded,
   handleVoteCast,
   handleVoteExecuted,
-  handleUsersRemoved,
+  handleAddressesRemoved,
   handleVoteSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/addresslist/addresslist-voting';
@@ -27,10 +27,10 @@ import {
 } from '../constants';
 import {createDummyActions, createGetVoteCall} from '../utils';
 import {
-  createNewUsersAddedEvent,
+  createNewAddressesAddedEvent,
   createNewVoteCastEvent,
   createNewVoteExecutedEvent,
-  createNewUsersRemovedEvent,
+  createNewAddressesRemovedEvent,
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
   getVotesLengthCall,
@@ -270,17 +270,17 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
   clearStore();
 });
 
-test('Run Addresslist Voting (handleUsersAdded) mappings with mock event', () => {
+test('Run Addresslist Voting (handleAddressesAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewUsersAddedEvent(userArray, VOTING_ADDRESS);
+  let event = createNewAddressesAddedEvent(userArray, VOTING_ADDRESS);
 
   // handle event
-  handleUsersAdded(event);
+  handleAddressesAdded(event);
 
   // checks
   assert.fieldEquals(
@@ -305,7 +305,7 @@ test('Run Addresslist Voting (handleUsersAdded) mappings with mock event', () =>
   clearStore();
 });
 
-test('Run Addresslist Voting (UsersRemoved) mappings with mock event', () => {
+test('Run Addresslist Voting (AddressesRemoved) mappings with mock event', () => {
   // create state
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -320,10 +320,10 @@ test('Run Addresslist Voting (UsersRemoved) mappings with mock event', () => {
   }
 
   // create event
-  let event = createNewUsersRemovedEvent([userArray[1]], VOTING_ADDRESS);
+  let event = createNewAddressesRemovedEvent([userArray[1]], VOTING_ADDRESS);
 
   // handle event
-  handleUsersRemoved(event);
+  handleAddressesRemoved(event);
 
   // checks
   assert.fieldEquals(

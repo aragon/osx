@@ -107,41 +107,39 @@ describe('AddresslistVoting', function () {
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isAllowed(ownerAddress, block1.number)).to.equal(
+      expect(await voting.isListed(ownerAddress, block1.number)).to.equal(
         false
       );
     });
 
     it('should add new users in the address list', async () => {
-      await voting.addAllowedUsers([ownerAddress, user1]);
+      await voting.addAddresses([ownerAddress, user1]);
 
       const block = await ethers.provider.getBlock('latest');
 
       await ethers.provider.send('evm_mine', []);
 
-      expect(await voting.isAllowed(ownerAddress, block.number)).to.equal(true);
-      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(true);
-      expect(await voting.isAllowed(user1, 0)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, block.number)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isListed(user1, 0)).to.equal(true);
     });
 
     it('should remove users from the address list', async () => {
-      await voting.addAllowedUsers([ownerAddress]);
+      await voting.addAddresses([ownerAddress]);
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isAllowed(ownerAddress, block1.number)).to.equal(
-        true
-      );
-      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, block1.number)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, 0)).to.equal(true);
 
-      await voting.removeAllowedUsers([ownerAddress]);
+      await voting.removeAddresses([ownerAddress]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isAllowed(ownerAddress, block2.number)).to.equal(
+      expect(await voting.isListed(ownerAddress, block2.number)).to.equal(
         false
       );
-      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(false);
+      expect(await voting.isListed(ownerAddress, 0)).to.equal(false);
     });
   });
 

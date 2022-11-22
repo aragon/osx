@@ -186,10 +186,10 @@ templates:
           handler: handleProposalCreated
         - event: VoteSettingsUpdated(uint64,uint64,uint64)
           handler: handleVoteSettingsUpdated
-        - event: UsersAdded(address[])
-          handler: handleUsersAdded
-        - event: UsersRemoved(address[])
-          handler: handleUsersRemoved
+        - event: AddressesAdded(address[])
+          handler: handleAddressesAdded
+        - event: AddressesRemoved(address[])
+          handler: handleAddressesRemoved
   # PluginRepo
   - name: PluginRepoTemplate
     kind: ethereum/contract

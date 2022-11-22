@@ -19,17 +19,17 @@ contract AddresslistVoting is MajorityVotingBase {
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
-        this.addAllowedUsers.selector ^
-            this.removeAllowedUsers.selector ^
-            this.isAllowed.selector ^
-            this.allowedUserCount.selector;
+        this.addAddresses.selector ^
+            this.removeAddresses.selector ^
+            this.isListed.selector ^
+            this.addresslistLength.selector;
 
-    /// @notice The ID of the permission required to call the `addAllowedUsers` and `removeAllowedUsers` function.
+    /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` function.
     bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
         keccak256("MODIFY_ADDRESSLIST_PERMISSION");
 
     /// @notice The mapping containing the checkpointed history of addresses being allowed.
-    mapping(address => Checkpoints.History) private _allowedAddressesCheckpoints;
+    mapping(address => Checkpoints.History) private _addresslistCheckpoints;
 
     /// @notice The checkpointed history of the length of the addresslist.
     Checkpoints.History private _addresslistLengthCheckpoints;
@@ -38,13 +38,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param sender The sender address.
     error VoteCreationForbidden(address sender);
 
-    /// @notice Emitted when new users are added to the addresslist.
+    /// @notice Emitted when new users are added to the address list.
     /// @param users The array of user addresses to be added.
-    event UsersAdded(address[] users);
+    event AddressesAdded(address[] users);
 
-    /// @notice Emitted when users are removed from the addresslist.
+    /// @notice Emitted when users are removed from the address list.
     /// @param users The array of user addresses to be removed.
-    event UsersRemoved(address[] users);
+    event AddressesRemoved(address[] users);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -52,13 +52,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
-    /// @param _allowed The allowed addresses.
+    /// @param _addresses The initial addresses to be listed.
     function initialize(
         IDAO _dao,
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration,
-        address[] calldata _allowed
+        address[] calldata _addresses
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
@@ -67,44 +67,45 @@ contract AddresslistVoting is MajorityVotingBase {
             _minDuration
         );
 
-        // add allowed users
-        _addAllowedUsers(_allowed);
+        // add voters to the address list
+        _addAddresses(_addresses);
     }
 
-    /// @notice adds a IERC165 to check whether contract supports ADDRESSLIST_VOTING_INTERFACE_ID or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or ADDRESSLIST_VOTING_INTERFACE_ID
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
-            interfaceId == ADDRESSLIST_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
+            _interfaceId == ADDRESSLIST_VOTING_INTERFACE_ID ||
+            super.supportsInterface(_interfaceId);
     }
 
-    /// @notice Adds new users to the addresslist.
-    /// @param _users The addresses of the users to be added.
-    function addAllowedUsers(address[] calldata _users)
+    /// @notice Adds new voters to the address list.
+    /// @param _voters The addresses of the voters to be added.
+    function addAddresses(address[] calldata _voters)
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _addAllowedUsers(_users);
+        _addAddresses(_voters);
     }
 
     /// @notice Internal function to add new users to the addresslist.
-    /// @param _users The addresses of users to be added.
-    function _addAllowedUsers(address[] calldata _users) internal {
-        _updateAllowedUsers(_users, true);
+    /// @param _voters The addresses of users to be added.
+    function _addAddresses(address[] calldata _voters) internal {
+        _updateAddresslist(_voters, true);
 
-        emit UsersAdded(_users);
+        emit AddressesAdded(_voters);
     }
 
-    /// @notice Removes users from the addresslist.
-    /// @param _users The addresses of the users to be removed.
-    function removeAllowedUsers(address[] calldata _users)
+    /// @notice Removes voters from the address list.
+    /// @param _voters The addresses of the voters to be removed.
+    function removeAddresses(address[] calldata _voters)
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _updateAllowedUsers(_users, false);
+        _updateAddresslist(_voters, false);
 
-        emit UsersRemoved(_users);
+        emit AddressesRemoved(_voters);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -118,7 +119,7 @@ contract AddresslistVoting is MajorityVotingBase {
     ) external override returns (uint256 voteId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isAllowed(_msgSender(), snapshotBlock)) {
+        if (!isListed(_msgSender(), snapshotBlock)) {
             revert VoteCreationForbidden(_msgSender());
         }
 
@@ -145,7 +146,7 @@ contract AddresslistVoting is MajorityVotingBase {
         vote_.snapshotBlock = snapshotBlock;
         vote_.relativeSupportThresholdPct = relativeSupportThresholdPct;
         vote_.totalSupportThresholdPct = totalSupportThresholdPct;
-        vote_.totalVotingPower = allowedUserCount(snapshotBlock);
+        vote_.totalVotingPower = addresslistLength(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -196,38 +197,41 @@ contract AddresslistVoting is MajorityVotingBase {
         }
     }
 
-    /// @notice Checks if a user is allowed at given block number.
-    /// @param account The user address that is checked.
-    /// @param blockNumber The block number.
-    function isAllowed(address account, uint256 blockNumber) public view returns (bool) {
-        if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+    /// @notice Checks if a voter is on the address list at given block number.
+    /// @param _voter The voter address that is checked.
+    /// @param _blockNumber The block number.
+    function isListed(address _voter, uint256 _blockNumber) public view returns (bool) {
+        if (_blockNumber == 0) _blockNumber = getBlockNumber64() - 1;
 
-        return _allowedAddressesCheckpoints[account].getAtBlock(blockNumber) == 1;
+        return _addresslistCheckpoints[_voter].getAtBlock(_blockNumber) == 1;
     }
 
-    /// @notice Returns total count of users that are allowed at given block number.
-    /// @param blockNumber The specific block to get the count from.
-    /// @return The count of users that were allowed at the specified block number.
-    function allowedUserCount(uint256 blockNumber) public view returns (uint256) {
-        if (blockNumber == 0) blockNumber = getBlockNumber64() - 1;
+    /// @notice Returns the length of the address list at a specific block number.
+    /// @param _blockNumber The specific block to get the count from.
+    /// @return The address list length at the specified block number.
+    function addresslistLength(uint256 _blockNumber) public view returns (uint256) {
+        if (_blockNumber == 0) _blockNumber = getBlockNumber64() - 1;
 
-        return _addresslistLengthCheckpoints.getAtBlock(blockNumber);
+        return _addresslistLengthCheckpoints.getAtBlock(_blockNumber);
     }
 
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
         Vote storage vote_ = votes[_voteId];
-        return _isVoteOpen(vote_) && isAllowed(_voter, vote_.snapshotBlock);
+        return _isVoteOpen(vote_) && isListed(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Updates the addresslist by adding or removing users.
-    /// @param _users The user addresses.
+    /// @notice Updates the address list by adding or removing voters.
+    /// @param _voters The user addresses.
     /// @param _enabled Whether to add or remove users from the addresslist.
-    function _updateAllowedUsers(address[] calldata _users, bool _enabled) internal {
-        _addresslistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
+    function _updateAddresslist(address[] calldata _voters, bool _enabled) internal {
+        _addresslistLengthCheckpoints.push(
+            _enabled ? _uncheckedAdd : _uncheckedSub,
+            _voters.length
+        );
 
-        for (uint256 i = 0; i < _users.length; i++) {
-            _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
+        for (uint256 i = 0; i < _voters.length; i++) {
+            _addresslistCheckpoints[_voters[i]].push(_enabled ? 1 : 0);
         }
     }
 

@@ -47,11 +47,11 @@ contract ERC20Voting is MajorityVotingBase {
         votingToken = _token;
     }
 
-    /// @notice adds a IERC165 to check whether contract supports ERC20_VOTING_INTERFACE_ID or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or ERC20_VOTING_INTERFACE_ID
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == ERC20_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param _interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
+        return _interfaceId == ERC20_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
     /// @notice getter function for the voting token.
