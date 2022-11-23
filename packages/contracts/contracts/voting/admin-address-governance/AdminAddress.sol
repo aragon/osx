@@ -30,7 +30,7 @@ contract AdminAddress is PluginCloneable {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Initializes the contract.
-    /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
+    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
     function initialize(IDAO _dao) public initializer {
         __PluginCloneable_init(_dao);
