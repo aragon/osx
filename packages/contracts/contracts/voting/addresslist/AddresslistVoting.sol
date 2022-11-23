@@ -12,7 +12,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title AddresslistVoting
 /// @author Aragon Association - 2021-2022.
-/// @notice The majority voting implementation using an list of voter addresses.
+/// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
@@ -38,13 +38,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param sender The sender address.
     error VoteCreationForbidden(address sender);
 
-    /// @notice Emitted when new users are added to the address list.
-    /// @param users The array of user addresses to be added.
-    event AddressesAdded(address[] users);
+    /// @notice Emitted when new members are added to the address list.
+    /// @param members The array of member addresses to be added.
+    event AddressesAdded(address[] members);
 
-    /// @notice Emitted when users are removed from the address list.
-    /// @param users The array of user addresses to be removed.
-    event AddressesRemoved(address[] users);
+    /// @notice Emitted when members are removed from the address list.
+    /// @param members The array of member addresses to be removed.
+    event AddressesRemoved(address[] members);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -52,13 +52,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
-    /// @param _voters The initial voter addresses to be listed.
+    /// @param _members The initial member addresses to be listed.
     function initialize(
         IDAO _dao,
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration,
-        address[] calldata _voters
+        address[] calldata _members
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
@@ -67,8 +67,8 @@ contract AddresslistVoting is MajorityVotingBase {
             _minDuration
         );
 
-        // add voter addresses to the address list
-        _addAddresses(_voters);
+        // add member addresses to the address list
+        _addAddresses(_members);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -80,33 +80,33 @@ contract AddresslistVoting is MajorityVotingBase {
             super.supportsInterface(_interfaceId);
     }
 
-    /// @notice Adds new voters to the address list.
-    /// @param _voters The addresses of the voters to be added.
-    function addAddresses(address[] calldata _voters)
+    /// @notice Adds new members to the address list.
+    /// @param _members The addresses of the members to be added.
+    function addAddresses(address[] calldata _members)
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _addAddresses(_voters);
+        _addAddresses(_members);
     }
 
-    /// @notice Internal function to add new voters to the address list.
-    /// @param _voters The addresses of voters to be added.
+    /// @notice Internal function to add new members to the address list.
+    /// @param _members The addresses of members to be added.
     /// @dev This functin is used during the plugin initialization.
-    function _addAddresses(address[] calldata _voters) internal {
-        _updateAddresslist(_voters, true);
+    function _addAddresses(address[] calldata _members) internal {
+        _updateAddresslist(_members, true);
 
-        emit AddressesAdded(_voters);
+        emit AddressesAdded(_members);
     }
 
-    /// @notice Removes voters from the address list.
-    /// @param _voters The addresses of the voters to be removed.
-    function removeAddresses(address[] calldata _voters)
+    /// @notice Removes members from the address list.
+    /// @param _members The addresses of the members to be removed.
+    function removeAddresses(address[] calldata _members)
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _updateAddresslist(_voters, false);
+        _updateAddresslist(_members, false);
 
-        emit AddressesRemoved(_voters);
+        emit AddressesRemoved(_members);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -171,7 +171,7 @@ contract AddresslistVoting is MajorityVotingBase {
 
         VoteOption state = vote_.voters[_voter];
 
-        // If voter had previously voted, decrease count
+        // Remove the previous vote.
         if (state == VoteOption.Yes) {
             vote_.yes = vote_.yes - 1;
         } else if (state == VoteOption.No) {
@@ -180,9 +180,9 @@ contract AddresslistVoting is MajorityVotingBase {
             vote_.abstain = vote_.abstain - 1;
         }
 
-        // write the updated/new vote for the voter.
+        // Store the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            vote_.yes = vote_.yes + 1;
+            ++vote_.yes;
         } else if (_choice == VoteOption.No) {
             vote_.no = vote_.no + 1;
         } else if (_choice == VoteOption.Abstain) {
@@ -223,17 +223,17 @@ contract AddresslistVoting is MajorityVotingBase {
         return _isVoteOpen(vote_) && isListed(_voter, vote_.snapshotBlock);
     }
 
-    /// @notice Updates the address list by adding or removing voters.
-    /// @param _voters The voter addresses to be updated.
-    /// @param _enabled Whether to add or remove voters from the address list.
-    function _updateAddresslist(address[] calldata _voters, bool _enabled) internal {
+    /// @notice Updates the address list by adding or removing members.
+    /// @param _members The member addresses to be updated.
+    /// @param _enabled Whether to add or remove members from the address list.
+    function _updateAddresslist(address[] calldata _members, bool _enabled) internal {
         _addresslistLengthCheckpoints.push(
             _enabled ? _uncheckedAdd : _uncheckedSub,
-            _voters.length
+            _members.length
         );
 
-        for (uint256 i = 0; i < _voters.length; i++) {
-            _addresslistCheckpoints[_voters[i]].push(_enabled ? 1 : 0);
+        for (uint256 i = 0; i < _members.length; i++) {
+            _addresslistCheckpoints[_members[i]].push(_enabled ? 1 : 0);
         }
     }
 
