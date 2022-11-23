@@ -194,13 +194,13 @@ export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
 }
 
 export function handleAddressesAdded(event: AddressesAdded): void {
-  let users = event.params.users;
-  for (let index = 0; index < users.length; index++) {
-    const user = users[index];
-    let voterEntity = AddresslistVoter.load(user.toHexString());
+  let members = event.params.members;
+  for (let index = 0; index < members.length; index++) {
+    const member = members[index];
+    let voterEntity = AddresslistVoter.load(member.toHexString());
     if (!voterEntity) {
-      voterEntity = new AddresslistVoter(user.toHexString());
-      voterEntity.address = user.toHexString();
+      voterEntity = new AddresslistVoter(member.toHexString());
+      voterEntity.address = member.toHexString();
       voterEntity.plugin = event.address.toHexString();
       voterEntity.save();
     }
@@ -208,12 +208,12 @@ export function handleAddressesAdded(event: AddressesAdded): void {
 }
 
 export function handleAddressesRemoved(event: AddressesRemoved): void {
-  let users = event.params.users;
-  for (let index = 0; index < users.length; index++) {
-    const user = users[index];
-    let voterEntity = AddresslistVoter.load(user.toHexString());
+  let members = event.params.members;
+  for (let index = 0; index < members.length; index++) {
+    const member = members[index];
+    let voterEntity = AddresslistVoter.load(member.toHexString());
     if (voterEntity) {
-      store.remove('AddresslistVoter', user.toHexString());
+      store.remove('AddresslistVoter', member.toHexString());
     }
   }
 }
