@@ -47,7 +47,7 @@ contract AdminAddressSetup is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode `_data` to extract the params needed for deploying and initializing `AdminAddress` plugin.
+        // Decode `_data` to extract the params needed for cloning and initializing `AdminAddress` plugin.
         address admin = abi.decode(_data, (address));
 
         if (admin == address(0)) {
@@ -91,9 +91,9 @@ contract AdminAddressSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    /// @dev Currently there are not a relaiable mean to revoke plugin's permission such as `ADMIN_EXECUTE_PERMISSION_ID`
+    /// @dev Currently there is not a relaiable mean to revoke plugin's permissions such as `ADMIN_EXECUTE_PERMISSION_ID`
     /// that have been granted to addresses during the life cycle of the plugin.
-    /// or the ones that have been granted are not revoked yet already,
+    /// or the ones that have been granted are not revoked already,
     /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
     function prepareUninstallation(
         address _dao,
