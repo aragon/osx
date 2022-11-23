@@ -2,7 +2,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {AdminAddressSetup, DAO} from '../../typechain';
+import {AdminAddressSetup, DAO, IPlugin} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
@@ -88,7 +88,31 @@ describe('AdminAddress', function () {
     });
   });
 
-  describe('Execute Proposal: ', async () => {
+  describe('plugin interface: ', async () => {
+    it('supports plugin cloneable interface', async () => {
+      // @ts-ignore
+      const IPlugin = await hre.artifacts.readArtifact('IPlugin');
+
+      const iface = new ethers.utils.Interface(IPlugin.abi);
+
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+
+    it('supports admin address plugin interface', async () => {
+      const iface = new ethers.utils.Interface([
+        'function initialize(address  _dao)',
+        'function executeProposal(bytes _proposalMetadata, tuple(address,uint256,bytes)[] _actions)',
+      ]);
+
+      expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
+        true
+      );
+    });
+  });
+
+  describe('execute proposal: ', async () => {
     beforeEach(async () => {
       await initializePlugin();
     });
