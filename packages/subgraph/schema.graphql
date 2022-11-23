@@ -165,7 +165,7 @@ interface IPlugin {
 # Proposal
 
 interface Proposal {
-  id: ID! # package + voteId
+  id: ID! # package + proposalId
   dao: Dao!
   creator: Bytes!
   metadata: String
@@ -217,11 +217,11 @@ type ERC20Vote @entity {
 }
 
 type ERC20VotingProposal implements Proposal @entity {
-  id: ID! # package + voteId
+  id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: ERC20VotingPlugin!
-  voteId: BigInt!
+  proposalId: BigInt!
   creator: Bytes!
   metadata: String
   startDate: BigInt!
@@ -273,11 +273,11 @@ type AddresslistVote @entity {
 }
 
 type AddresslistProposal implements Proposal @entity {
-  id: ID! # package + voteId
+  id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: AddresslistPlugin!
-  voteId: BigInt!
+  proposalId: BigInt!
   creator: Bytes!
   metadata: String
   startDate: BigInt!

@@ -33,22 +33,27 @@ interface IMajorityVoting {
     }
 
     /// @notice Emitted when a vote is casted by a voter.
-    /// @param voteId The ID of the vote.
+    /// @param proposalId The ID of the proposal.
     /// @param voter The voter casting the vote.
     /// @param choice The vote option chosen.
     /// @param voteWeight The weight of the casted vote.
-    event VoteCast(uint256 indexed voteId, address indexed voter, uint8 choice, uint256 voteWeight);
+    event VoteCast(
+        uint256 indexed proposalId,
+        address indexed voter,
+        uint8 choice,
+        uint256 voteWeight
+    );
 
     /// @notice Emitted when a vote is created.
-    /// @param voteId  The ID of the vote.
+    /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the vote.
     /// @param metadata The IPFS hash pointing to the proposal metadata.
-    event ProposalCreated(uint256 indexed voteId, address indexed creator, bytes metadata);
+    event ProposalCreated(uint256 indexed proposalId, address indexed creator, bytes metadata);
 
     /// @notice Emitted when a proposal is executed.
-    /// @param voteId The ID of the vote.
+    /// @param proposalId The ID of the proposal.
     /// @param execResults The bytes array resulting from the vote execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed voteId, bytes[] execResults);
+    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
     /// @param relativeSupportThresholdPct The relative support threshold in percent.
@@ -77,7 +82,7 @@ interface IMajorityVoting {
     /// @param _endDate The end date of the vote. If 0, uses `_start` + `minDuration`.
     /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
     /// @param _choice The vote choice to cast on creation.
-    /// @return voteId The ID of the vote.
+    /// @return proposalId The ID of the proposal.
     function createProposal(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
@@ -85,15 +90,15 @@ interface IMajorityVoting {
         uint64 _endDate,
         bool _executeIfDecided,
         VoteOption _choice
-    ) external returns (uint256 voteId);
+    ) external returns (uint256 proposalId);
 
     /// @notice Votes for a vote option and optionally executes the vote.
     /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports].
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @param  _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided Whether the vote should execute its action if it becomes decided.
     function vote(
-        uint256 _voteId,
+        uint256 _proposalId,
         VoteOption _choice,
         bool _executesIfDecided
     ) external;
@@ -103,27 +108,27 @@ interface IMajorityVoting {
     /// - has ended,
     /// - was executed, or
     /// - the voter doesn't have voting powers.
-    /// @param _voteId The vote Id.
+    /// @param _proposalId The vote Id.
     /// @param _voter The address of the voter to check.
     /// @return bool Returns true if the voter is allowed to vote.
     ///@dev The function assumes the queried vote exists.
-    function canVote(uint256 _voteId, address _voter) external view returns (bool);
+    function canVote(uint256 _proposalId, address _voter) external view returns (bool);
 
     /// @notice Method to execute a vote if allowed to.
-    /// @param _voteId The ID of the vote to execute.
-    function execute(uint256 _voteId) external;
+    /// @param _proposalId The ID of the vote to execute.
+    function execute(uint256 _proposalId) external;
 
     /// @notice Checks if a vote is allowed to execute.
-    /// @param _voteId The ID of the vote to execute.
-    function canExecute(uint256 _voteId) external view returns (bool);
+    /// @param _proposalId The ID of the vote to execute.
+    function canExecute(uint256 _proposalId) external view returns (bool);
 
     /// @notice Returns the state of a voter for a given vote by its ID.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @return VoteOption of the requested voter for a certain vote.
-    function getVoteOption(uint256 _voteId, address _voter) external view returns (VoteOption);
+    function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
 
     /// @notice Returns all information for a vote by its ID.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the vote is open or not.
     /// @return executed Wheter the vote is executed or not.
     /// @return startDate The start date of the vote.
@@ -136,7 +141,7 @@ interface IMajorityVoting {
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.
     /// @return actions The actions to be executed in the associated DAO after the vote has passed.
-    function getVote(uint256 _voteId)
+    function getVote(uint256 _proposalId)
         external
         view
         returns (

@@ -20,7 +20,7 @@ import {
   PROPOSAL_ENTITY_ID,
   SNAPSHOT_BLOCK,
   START_DATE,
-  VOTE_ID,
+  PROPOSAL_ID,
   VOTING_ADDRESS,
   VOTING_POWER
 } from '../constants';
@@ -28,7 +28,7 @@ import {
 // events
 
 export function createNewProposalCreatedEvent(
-  voteId: string,
+  proposalId: string,
   creator: string,
   description: string,
   contractAddress: string
@@ -38,9 +38,9 @@ export function createNewProposalCreatedEvent(
   createProposalCreatedEvent.address = Address.fromString(contractAddress);
   createProposalCreatedEvent.parameters = [];
 
-  let voteIdParam = new ethereum.EventParam(
-    'voteId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
+  let proposalIdParam = new ethereum.EventParam(
+    'proposalId',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
   let creatorParam = new ethereum.EventParam(
     'creator',
@@ -51,7 +51,7 @@ export function createNewProposalCreatedEvent(
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
 
-  createProposalCreatedEvent.parameters.push(voteIdParam);
+  createProposalCreatedEvent.parameters.push(proposalIdParam);
   createProposalCreatedEvent.parameters.push(creatorParam);
   createProposalCreatedEvent.parameters.push(descriptionParam);
 
@@ -59,7 +59,7 @@ export function createNewProposalCreatedEvent(
 }
 
 export function createNewVoteCastEvent(
-  voteId: string,
+  proposalId: string,
   voter: string,
   creatorChoice: string,
   voteWeight: string,
@@ -70,9 +70,9 @@ export function createNewVoteCastEvent(
   createProposalCastEvent.address = Address.fromString(contractAddress);
   createProposalCastEvent.parameters = [];
 
-  let voteIdParam = new ethereum.EventParam(
-    'voteId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
+  let proposalIdParam = new ethereum.EventParam(
+    'proposalId',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
   let voterParam = new ethereum.EventParam(
     'voter',
@@ -87,7 +87,7 @@ export function createNewVoteCastEvent(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteWeight))
   );
 
-  createProposalCastEvent.parameters.push(voteIdParam);
+  createProposalCastEvent.parameters.push(proposalIdParam);
   createProposalCastEvent.parameters.push(voterParam);
   createProposalCastEvent.parameters.push(choiceParam);
   createProposalCastEvent.parameters.push(voteWeightParam);
@@ -96,7 +96,7 @@ export function createNewVoteCastEvent(
 }
 
 export function createNewProposalExecutedEvent(
-  voteId: string,
+  proposalId: string,
   contractAddress: string
 ): ProposalExecuted {
   let createProposalExecutedEvent = changetype<ProposalExecuted>(
@@ -106,16 +106,16 @@ export function createNewProposalExecutedEvent(
   createProposalExecutedEvent.address = Address.fromString(contractAddress);
   createProposalExecutedEvent.parameters = [];
 
-  let voteIdParam = new ethereum.EventParam(
-    'voteId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
+  let proposalIdParam = new ethereum.EventParam(
+    'proposalId',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
   let execResultsParam = new ethereum.EventParam(
     'execResults',
     ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
   );
 
-  createProposalExecutedEvent.parameters.push(voteIdParam);
+  createProposalExecutedEvent.parameters.push(proposalIdParam);
   createProposalExecutedEvent.parameters.push(execResultsParam);
 
   return createProposalExecutedEvent;
@@ -216,7 +216,7 @@ export function createAddresslistProposalEntityState(
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
   creator: string = ADDRESS_ONE,
-  voteId: string = VOTE_ID,
+  proposalId: string = PROPOSAL_ID,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
@@ -231,7 +231,7 @@ export function createAddresslistProposalEntityState(
   let addresslistProposal = new AddresslistProposal(entityID);
   addresslistProposal.dao = Address.fromString(dao).toHexString();
   addresslistProposal.plugin = Address.fromString(pkg).toHexString();
-  addresslistProposal.voteId = BigInt.fromString(voteId);
+  addresslistProposal.proposalId = BigInt.fromString(proposalId);
   addresslistProposal.creator = Address.fromString(creator);
 
   addresslistProposal.startDate = BigInt.fromString(startDate);

@@ -31,18 +31,18 @@ export function _handleProposalCreated(
   metadata: string
 ): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
   let proposalEntity = new ERC20VotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.voteId = event.params.voteId;
+  proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
 
   let contract = ERC20Voting.bind(event.address);
-  let vote = contract.try_getVote(event.params.voteId);
+  let vote = contract.try_getVote(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.open = vote.value.value0;
@@ -62,7 +62,7 @@ export function _handleProposalCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.voteId.toHexString() +
+        event.params.proposalId.toHexString() +
         '_' +
         index.toString();
 
@@ -91,7 +91,7 @@ export function _handleProposalCreated(
 
 export function handleVoteCast(event: VoteCast): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
   let voterProposalEntity = ERC20Vote.load(voterProposalId);
   if (!voterProposalEntity) {
@@ -121,7 +121,7 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalEntity = ERC20VotingProposal.load(proposalId);
   if (proposalEntity) {
     let contract = ERC20Voting.bind(event.address);
-    let vote = contract.try_getVote(event.params.voteId);
+    let vote = contract.try_getVote(event.params.proposalId);
     if (!vote.reverted) {
       let voteCount = vote.value.value8.plus(
         vote.value.value9.plus(vote.value.value10)
@@ -166,7 +166,7 @@ export function handleVoteCast(event: VoteCast): void {
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let proposalEntity = ERC20VotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
@@ -175,14 +175,14 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 
   // update actions
   let contract = ERC20Voting.bind(event.address);
-  let vote = contract.try_getVote(event.params.voteId);
+  let vote = contract.try_getVote(event.params.proposalId);
   if (!vote.reverted) {
     let actions = vote.value.value11;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.voteId.toHexString() +
+        event.params.proposalId.toHexString() +
         '_' +
         index.toString();
 

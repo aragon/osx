@@ -71,13 +71,13 @@ abstract contract MajorityVotingBase is
     /// - has ended,
     /// - was executed, or
     /// - the voter doesn't have voting powers.
-    /// @param voteId The ID of the vote.
+    /// @param proposalId The ID of the proposal.
     /// @param sender The address of the voter.
-    error VoteCastForbidden(uint256 voteId, address sender);
+    error VoteCastForbidden(uint256 proposalId, address sender);
 
     /// @notice Thrown if the vote execution is forbidden.
-    /// @param voteId The ID of the vote.
-    error VoteExecutionForbidden(uint256 voteId);
+    /// @param proposalId The ID of the proposal.
+    error VoteExecutionForbidden(uint256 proposalId);
 
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -146,43 +146,43 @@ abstract contract MajorityVotingBase is
         uint64 _endDate,
         bool _executeIfDecided,
         VoteOption _choice
-    ) external virtual returns (uint256 voteId);
+    ) external virtual returns (uint256 proposalId);
 
     /// @inheritdoc IMajorityVoting
     function vote(
-        uint256 _voteId,
+        uint256 _proposalId,
         VoteOption _choice,
         bool _executesIfDecided
     ) public {
-        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender())) {
-            revert VoteCastForbidden(_voteId, _msgSender());
+        if (_choice != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
+            revert VoteCastForbidden(_proposalId, _msgSender());
         }
-        _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
+        _vote(_proposalId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
-    function execute(uint256 _voteId) public {
-        if (!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
-        _execute(_voteId);
+    function execute(uint256 _proposalId) public {
+        if (!_canExecute(_proposalId)) revert VoteExecutionForbidden(_proposalId);
+        _execute(_proposalId);
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoteOption(uint256 _voteId, address _voter) public view returns (VoteOption) {
-        return votes[_voteId].voters[_voter];
+    function getVoteOption(uint256 _proposalId, address _voter) public view returns (VoteOption) {
+        return votes[_proposalId].voters[_voter];
     }
 
     /// @inheritdoc IMajorityVoting
-    function canVote(uint256 _voteId, address _voter) public view returns (bool) {
-        return _canVote(_voteId, _voter);
+    function canVote(uint256 _proposalId, address _voter) public view returns (bool) {
+        return _canVote(_proposalId, _voter);
     }
 
     /// @inheritdoc IMajorityVoting
-    function canExecute(uint256 _voteId) public view returns (bool) {
-        return _canExecute(_voteId);
+    function canExecute(uint256 _proposalId) public view returns (bool) {
+        return _canExecute(_proposalId);
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVote(uint256 _voteId)
+    function getVote(uint256 _proposalId)
         public
         view
         returns (
@@ -200,7 +200,7 @@ abstract contract MajorityVotingBase is
             IDAO.Action[] memory actions
         )
     {
-        Vote storage vote_ = votes[_voteId];
+        Vote storage vote_ = votes[_proposalId];
 
         open = _isVoteOpen(vote_);
         executed = vote_.executed;
@@ -217,42 +217,42 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @param _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
-        uint256 _voteId,
+        uint256 _proposalId,
         VoteOption _choice,
         address _voter,
         bool _executesIfDecided
     ) internal virtual;
 
     /// @notice Internal function to execute a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
-    function _execute(uint256 _voteId) internal virtual {
-        votes[_voteId].executed = true;
+    /// @param _proposalId The ID of the proposal.
+    function _execute(uint256 _proposalId) internal virtual {
+        votes[_proposalId].executed = true;
 
-        bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
+        bytes[] memory execResults = dao.execute(_proposalId, votes[_proposalId].actions);
 
-        emit ProposalExecuted(_voteId, execResults);
+        emit ProposalExecuted(_proposalId, execResults);
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
     /// @return True if the given voter can vote on a certain vote, false otherwise.
-    function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
+    function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @return True if the given vote can be executed, false otherwise.
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be casted a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @return True if the given vote can be executed, false otherwise.
-    function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
-        Vote storage vote_ = votes[_voteId];
+    function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
+        Vote storage vote_ = votes[_proposalId];
 
         // Verify that the vote has not been executed already.
         if (vote_.executed) {

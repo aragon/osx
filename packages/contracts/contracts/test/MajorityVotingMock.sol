@@ -26,19 +26,19 @@ contract MajorityVotingMock is MajorityVotingBase {
         uint64, /* _endDate */
         bool, /* _executeIfDecided */
         VoteOption /* _choice */
-    ) external pure override returns (uint256 voteId) {
+    ) external pure override returns (uint256 proposalId) {
         return 0;
     }
 
     function _vote(
-        uint256, /* _voteId */
+        uint256, /* _proposalId */
         VoteOption, /* _choice */
         address, /* _voter */
         bool /* _executesIfDecided */
     ) internal pure override {}
 
     function _canVote(
-        uint256, /* _voteId */
+        uint256, /* _proposalId */
         address /* _voter */
     ) internal pure override returns (bool) {
         return true;

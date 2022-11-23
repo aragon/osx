@@ -17,7 +17,7 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   ADDRESS_TWO,
-  VOTE_ID,
+  PROPOSAL_ID,
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
@@ -37,7 +37,7 @@ import {
   createAddresslistProposalEntityState
 } from './utils';
 
-let voteId = '0';
+let proposalId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
@@ -57,7 +57,7 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
   getVotesLengthCall(VOTING_ADDRESS, '1');
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    proposalId,
     true,
     false,
     startDate,
@@ -74,7 +74,7 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
 
   // create event
   let event = createNewProposalCreatedEvent(
-    voteId,
+    proposalId,
     ADDRESS_ONE,
     STRING_DATA,
     VOTING_ADDRESS
@@ -86,14 +86,14 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +
     '_' +
-    BigInt.fromString(voteId).toHexString();
+    BigInt.fromString(proposalId).toHexString();
   let packageId = Address.fromString(VOTING_ADDRESS).toHexString();
 
   // checks
   assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
   assert.fieldEquals('AddresslistProposal', entityID, 'dao', DAO_ADDRESS);
   assert.fieldEquals('AddresslistProposal', entityID, 'plugin', packageId);
-  assert.fieldEquals('AddresslistProposal', entityID, 'voteId', voteId);
+  assert.fieldEquals('AddresslistProposal', entityID, 'proposalId', proposalId);
   assert.fieldEquals('AddresslistProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('AddresslistProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
@@ -130,7 +130,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    VOTE_ID,
+    PROPOSAL_ID,
     true,
     false,
     START_DATE,
@@ -147,7 +147,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event = createNewVoteCastEvent(
-    VOTE_ID,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     '2',
     '1',
@@ -174,7 +174,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    VOTE_ID,
+    PROPOSAL_ID,
     true,
     false,
     START_DATE,
@@ -190,7 +190,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   );
   // create event
   let event2 = createNewVoteCastEvent(
-    VOTE_ID,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     '1', // abstain
     '1',

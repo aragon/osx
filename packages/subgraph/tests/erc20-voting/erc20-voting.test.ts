@@ -14,7 +14,7 @@ import {
   VOTING_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
-  VOTE_ID,
+  PROPOSAL_ID,
   END_DATE,
   MIN_SUPPORT,
   MIN_TURNOUT,
@@ -32,7 +32,7 @@ import {
   createERC20VotingProposalEntityState
 } from './utils';
 
-let voteId = '0';
+let proposalId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
@@ -52,7 +52,7 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
   getVotesLengthCall(VOTING_ADDRESS, '1');
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    proposalId,
     true,
     false,
     startDate,
@@ -69,7 +69,7 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
 
   // create event
   let event = createNewProposalCreatedEvent(
-    voteId,
+    proposalId,
     ADDRESS_ONE,
     STRING_DATA,
     VOTING_ADDRESS
@@ -81,14 +81,14 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
   let entityID =
     Address.fromString(VOTING_ADDRESS).toHexString() +
     '_' +
-    BigInt.fromString(voteId).toHexString();
+    BigInt.fromString(proposalId).toHexString();
   let packageId = Address.fromString(VOTING_ADDRESS).toHexString();
 
   // checks
   assert.fieldEquals('ERC20VotingProposal', entityID, 'id', entityID);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'dao', DAO_ADDRESS);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'plugin', packageId);
-  assert.fieldEquals('ERC20VotingProposal', entityID, 'voteId', voteId);
+  assert.fieldEquals('ERC20VotingProposal', entityID, 'proposalId', proposalId);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('ERC20VotingProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
@@ -141,7 +141,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    VOTE_ID,
+    PROPOSAL_ID,
     true,
     false,
     START_DATE,
@@ -158,7 +158,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
 
   // create event
   let event = createNewVoteCastEvent(
-    VOTE_ID,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     '2', // Yes
     '1',
@@ -202,7 +202,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    VOTE_ID,
+    PROPOSAL_ID,
     true,
     false,
     START_DATE,
@@ -218,7 +218,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   );
   // create event
   let event2 = createNewVoteCastEvent(
-    VOTE_ID,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     '1', // abstain
     '1',
@@ -254,7 +254,7 @@ test('Run ERC Voting (handleProposalExecuted) mappings with mock event', () => {
   // create calls
   createGetVoteCall(
     VOTING_ADDRESS,
-    voteId,
+    proposalId,
     true,
     true,
     startDate,

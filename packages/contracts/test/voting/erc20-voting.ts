@@ -111,7 +111,7 @@ describe('ERC20Voting', function () {
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
     let totalVotingPower = 100;
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     it('reverts total token supply while creating a vote is 0', async () => {
       await initializeVoting(1, 2, minDuration);
@@ -153,7 +153,7 @@ describe('ERC20Voting', function () {
     it('should create a vote successfully, but not vote', async () => {
       await initializeVoting(1, 2, minDuration);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(0);
@@ -196,7 +196,7 @@ describe('ERC20Voting', function () {
     it('should create a vote and cast a vote immediately', async () => {
       await initializeVoting(1, 2, minDuration);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(1);
@@ -281,7 +281,7 @@ describe('ERC20Voting', function () {
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
     let totalVotingPower = 100;
-    const id = 0; // voteId
+    const id = 0; // proposalId
     const startOffset = 9;
     let startDate: number;
     let endDate: number;
@@ -482,7 +482,7 @@ describe('ERC20Voting', function () {
       {
         const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
 
-        expect(event.args.voteId).to.equal(id);
+        expect(event.args.proposalId).to.equal(id);
         expect(event.args.execResults).to.deep.equal(['0x']);
       }
 
@@ -502,7 +502,7 @@ describe('ERC20Voting', function () {
   });
 
   describe('Configurations for different use cases', async () => {
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
       let minDuration = 500;

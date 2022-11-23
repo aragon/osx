@@ -147,7 +147,7 @@ describe('AddresslistVoting', function () {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     it('reverts if user is not allowed to create a vote', async () => {
       await initializeVoting(1, 2, minDuration, [ownerAddress]);
@@ -191,7 +191,7 @@ describe('AddresslistVoting', function () {
     it('should create a vote successfully, but not vote', async () => {
       await initializeVoting(1, 2, minDuration, [ownerAddress]);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       expect(
         await voting.createProposal(
@@ -232,7 +232,7 @@ describe('AddresslistVoting', function () {
     it('should create a vote and cast a vote immediately', async () => {
       await initializeVoting(1, 2, minDuration, [ownerAddress]);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       expect(
         await voting.createProposal(
@@ -307,7 +307,7 @@ describe('AddresslistVoting', function () {
     const minDuration = 500;
     const relativeSupportThresholdPct = pct16(29);
     const totalSupportThresholdPct = pct16(19);
-    const id = 0; // voteId
+    const id = 0; // proposalId
     const startOffset = 9;
     let startDate: number;
     let endDate: number;
@@ -472,7 +472,7 @@ describe('AddresslistVoting', function () {
       // check for the `ProposalExecuted` event in the voting contract
       {
         const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
-        expect(event.args.voteId).to.equal(id);
+        expect(event.args.proposalId).to.equal(id);
         expect(event.args.execResults).to.deep.equal(['0x']);
       }
 
@@ -492,7 +492,7 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Parameters can satisfy different use cases:', async () => {
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
       let minDuration = 500;

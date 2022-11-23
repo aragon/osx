@@ -117,7 +117,7 @@ contract AddresslistVoting is MajorityVotingBase {
         uint64 _endDate,
         bool _executeIfDecided,
         VoteOption _choice
-    ) external override returns (uint256 voteId) {
+    ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         if (!isListed(_msgSender(), snapshotBlock)) {
@@ -138,10 +138,10 @@ contract AddresslistVoting is MajorityVotingBase {
                 minDuration: minDuration
             });
 
-        voteId = votesLength++;
+        proposalId = votesLength++;
 
         // create a vote.
-        Vote storage vote_ = votes[voteId];
+        Vote storage vote_ = votes[proposalId];
         vote_.startDate = _startDate;
         vote_.endDate = _endDate;
         vote_.snapshotBlock = snapshotBlock;
@@ -155,19 +155,19 @@ contract AddresslistVoting is MajorityVotingBase {
             }
         }
 
-        emit ProposalCreated(voteId, _msgSender(), _proposalMetadata);
+        emit ProposalCreated(proposalId, _msgSender(), _proposalMetadata);
 
-        vote(voteId, _choice, _executeIfDecided);
+        vote(proposalId, _choice, _executeIfDecided);
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
-        uint256 _voteId,
+        uint256 _proposalId,
         VoteOption _choice,
         address _voter,
         bool _executesIfDecided
     ) internal override {
-        Vote storage vote_ = votes[_voteId];
+        Vote storage vote_ = votes[_proposalId];
 
         VoteOption state = vote_.voters[_voter];
 
@@ -191,10 +191,10 @@ contract AddresslistVoting is MajorityVotingBase {
 
         vote_.voters[_voter] = _choice;
 
-        emit VoteCast(_voteId, _voter, uint8(_choice), 1);
+        emit VoteCast(_proposalId, _voter, uint8(_choice), 1);
 
-        if (_executesIfDecided && _canExecute(_voteId)) {
-            _execute(_voteId);
+        if (_executesIfDecided && _canExecute(_proposalId)) {
+            _execute(_proposalId);
         }
     }
 
@@ -218,8 +218,8 @@ contract AddresslistVoting is MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _voteId, address _voter) internal view override returns (bool) {
-        Vote storage vote_ = votes[_voteId];
+    function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
+        Vote storage vote_ = votes[_proposalId];
         return _isVoteOpen(vote_) && isListed(_voter, vote_.snapshotBlock);
     }
 

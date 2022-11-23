@@ -51,7 +51,7 @@ export function createDummyActions(
 
 export function createGetVoteCall(
   contractAddress: string,
-  voteId: string,
+  proposalId: string,
   open: boolean,
   executed: boolean,
   startDate: string,
@@ -70,7 +70,9 @@ export function createGetVoteCall(
     'getVote',
     'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,uint256,(address,uint256,bytes)[])'
   )
-    .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteId))])
+    .withArgs([
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
+    ])
     .returns([
       ethereum.Value.fromBoolean(open),
       ethereum.Value.fromBoolean(executed),
