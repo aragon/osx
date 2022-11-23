@@ -286,53 +286,33 @@ abstract contract MajorityVotingBase is
 
         uint256 participationPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
 
-        //uint256 remainingVotes = proposal_.totalVotingPower - (proposal_.yes + proposal_.no + proposal_.abstain);
-        //uint256 worstCaseSupportPct = _calculatePct(
-        //    proposal_.yes,
-        //    proposal_.yes + (proposal_.no + remainingVotes)
-        //);
-
-        // calculate the worst case support that would happen if all remaining votes are casted with no
-        // `turnout = N_yes + N_abstain + N_no`
-        // `remaining votes = N_total - N_turnout = N_total - N_yes + N_abstain + N_no`
-        //
-
-        uint256 worstCaseSupportPct = _calculatePct(
-            proposal_.yes,
-            proposal_.totalVotingPower - proposal_.abstain
-        );
-
-        // EARLY EXECUTION (after the vote start but before the vote duration has passed)
-        // The participation must be met and the remaining number of castable no-votes should not be able to change the support threshold.
-        if (
-            _isVoteOpen(proposal_) &&
-            participationPct > proposal_.participationThresholdPct &&
-            worstCaseSupportPct > proposal_.relativeSupportThresholdPct
-        ) {
-            return true;
-        }
-
-        // NORMAL EXECUTION (after the vote duration has passed)
-        // Both, the total and relative support must be met.
-
-        // Criterium 1: The vote has ended.
         if (_isVoteOpen(proposal_)) {
-            return false;
+            // Early execution
+
+            uint256 worstCaseSupport = _calculatePct(
+                proposal_.yes,
+                proposal_.totalVotingPower - proposal_.abstain
+            );
+            if (
+                worstCaseSupport > proposal_.relativeSupportThresholdPct &&
+                participationPct > proposal_.participationThresholdPct
+            ) {
+                return true;
+            }
+        } else {
+            // Normal execution
+
+            uint256 supportPct = _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+
+            if (
+                supportPct > proposal_.relativeSupportThresholdPct &&
+                participationPct > proposal_.participationThresholdPct
+            ) {
+                return true;
+            }
         }
 
-        // Criterium 2: The participation is greater than the participation threshold
-        if (participationPct <= proposal_.participationThresholdPct) {
-            return false;
-        }
-
-        // Criterium 3: The relative support is greater than the relative support threshold
-        uint256 relativeSupportPct = _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
-        if (relativeSupportPct <= proposal_.relativeSupportThresholdPct) {
-            return false;
-        }
-
-        // The criteria 1-3 above are met and the vote can execute.
-        return true;
+        return false;
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
