@@ -13,6 +13,10 @@ import {IDAO} from "../../core/IDAO.sol";
 contract AdminAddress is PluginCloneable {
     using Counters for Counters.Counter;
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =
+        this.initialize.selector ^ this.executeProposal.selector;
+
     bytes32 public constant ADMIN_EXECUTE_PERMISSION_ID = keccak256("ADMIN_EXECUTE_PERMISSION");
 
     /// @notice The incrimental id for proposals and executions.
@@ -34,6 +38,13 @@ contract AdminAddress is PluginCloneable {
     /// @param _dao The associated DAO.
     function initialize(IDAO _dao) public initializer {
         __PluginCloneable_init(_dao);
+    }
+
+    /// @notice adds a IERC165 to check whether contract supports ALLOWLIST_VOTING_INTERFACE_ID or not.
+    /// @dev See {ERC165Upgradeable-supportsInterface}.
+    /// @return bool whether it supports the IERC165 or ALLOWLIST_VOTING_INTERFACE_ID
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == ADMIN_ADDRESS_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
     /// @notice Create and execute a new proposal.
