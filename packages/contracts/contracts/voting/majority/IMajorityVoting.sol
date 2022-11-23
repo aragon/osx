@@ -22,8 +22,8 @@ interface IMajorityVoting {
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
-        uint64 relativeSupportThresholdPct; // `N_yes/ N_total * 100`
-        uint64 totalSupportThresholdPct; // previously: quorum = totalSupportThresholdPct
+        uint64 relativeSupportThresholdPct;
+        uint64 totalSupportThresholdPct;
         uint256 yes;
         uint256 no;
         uint256 abstain;
