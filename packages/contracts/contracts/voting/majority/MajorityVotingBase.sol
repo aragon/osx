@@ -13,12 +13,38 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting plugin. We use the following definitions:
-/// - Support      : `N_yes / (N_yes + N_no)`
-/// - Participation: `(N_yes + N_abstain + N_no) / N_total`
-/// Additionally, the following assumptions apply to the threshold paramters related to the above mentioned quantities:
-/// - `supportThresholdPct` >= 50 %
-/// These constraints are not enforeced by contract code and developers can make unsafe configurations. Instead, the frontend will warn about wrong parameter settings.
+/// @notice The abstract implementation of majority voting plugin.
+///
+///  #### Parameterization
+///  We define two parameters
+///  $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$
+///  and
+///  $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$
+///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
+///  Majority voting implies that the support threshold is set with
+///  $$\texttt{supportThreshold} \ge 50\% .$$
+///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
+///
+///  #### Vote Replacement Execution
+///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
+///
+///  #### Early Execution
+///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.// TODO it should also fail early.
+///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
+///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
+///  $$\begin{align*}
+///    \texttt{worstCaseSupport}
+///    &= \frac{N_\text{yes}}{N_\text{yes}+(N_\text{no} + \texttt{remainingVotes})}
+///    \\[3mm]
+///    &= \frac{N_\text{yes}}{N_\text{yes}+N_\text{no} + N_\text{total}-(N_\text{yes}+N_\text{no}+N_\text{abstain})}
+///    \\[3mm]
+///    &= \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}
+///  \end{align*}$$
+///  Accordingly, early execution is possible when the vote is open and the two thresholds
+///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$
+///  and
+///  $$\texttt{participation} > \texttt{participationThreshold}$$
+///  are met.
 /// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
@@ -265,6 +291,11 @@ abstract contract MajorityVotingBase is
         //    proposal_.yes,
         //    proposal_.yes + (proposal_.no + remainingVotes)
         //);
+
+        // calculate the worst case support that would happen if all remaining votes are casted with no
+        // `turnout = N_yes + N_abstain + N_no`
+        // `remaining votes = N_total - N_turnout = N_total - N_yes + N_abstain + N_no`
+        //
 
         uint256 worstCaseSupportPct = _calculatePct(
             proposal_.yes,
