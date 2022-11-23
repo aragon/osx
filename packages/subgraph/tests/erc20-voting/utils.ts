@@ -11,7 +11,7 @@ import {ERC20VotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
-  PROPOSAL_ID,
+  PROPOSAL_ENTITY_ID,
   VOTE_ID,
   VOTING_ADDRESS,
   CREATED_AT,
@@ -172,7 +172,7 @@ export function getVotesLengthCall(
 // state
 
 export function createERC20VotingProposalEntityState(
-  entityID: string = PROPOSAL_ID,
+  entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
   creator: string = ADDRESS_ONE,

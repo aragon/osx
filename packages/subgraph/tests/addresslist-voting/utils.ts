@@ -17,7 +17,7 @@ import {
   END_DATE,
   MIN_SUPPORT,
   MIN_TURNOUT,
-  PROPOSAL_ID,
+  PROPOSAL_ENTITY_ID,
   SNAPSHOT_BLOCK,
   START_DATE,
   VOTE_ID,
@@ -212,7 +212,7 @@ export function getVotesLengthCall(
 // state
 
 export function createAddresslistProposalEntityState(
-  entityID: string = PROPOSAL_ID,
+  entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
   creator: string = ADDRESS_ONE,
