@@ -39,10 +39,11 @@ contract AdminAddress is PluginCloneable {
     /// @notice Create and execute a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed immediatly.
-    function createProposalAndExecute(
-        bytes calldata _proposalMetadata,
-        IDAO.Action[] calldata _actions
-    ) external auth(ADMIN_EXECUTE_PERMISSION_ID) returns (bytes[] memory) {
+    function executeProposal(bytes calldata _proposalMetadata, IDAO.Action[] calldata _actions)
+        external
+        auth(ADMIN_EXECUTE_PERMISSION_ID)
+        returns (bytes[] memory)
+    {
         // Create proposal
         emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata);
 
