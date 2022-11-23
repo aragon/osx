@@ -600,6 +600,170 @@ describe('AddresslistVoting', function () {
       });
     });
 
+    describe.only('A special majority vote with >50% relative support and >75% participation required', async () => {
+      let minDuration = 500;
+      let relativeSupportThresholdPct = pct16(50);
+      let participationThresholdPct = pct16(75);
+      const id = 0; // voteId
+      const startOffset = 2;
+      let startDate: number;
+      let endDate: number;
+
+      beforeEach(async () => {
+        startDate = (await getTime()) + startOffset;
+        endDate = startDate + minDuration;
+        const addresses = [];
+
+        for (let i = 0; i < 10; i++) {
+          const addr = await signers[i].getAddress();
+          addresses.push(addr);
+        }
+
+        // voting will be initialized with 10 allowed addresses
+        // Which means census = 10 at this point.
+        await initializeVoting(
+          participationThresholdPct,
+          relativeSupportThresholdPct,
+          minDuration,
+          addresses
+        );
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
+
+      it('does not execute if support is high enough but participation is too low', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // dur | tot | rel | par
+        //  0  | 10% | 100%| 10%
+        //  𐄂  |  𐄂  |  ✓  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > relative support threshold (50%) == false
+
+        await advanceTime(minDuration + 10);
+        // dur | tot | rel | par
+        // 510 | 10% | 100%| 10%
+        //  ✓  |  𐄂  |  ✓  | 𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > participation (75%) == false
+      });
+
+      it('does not execute if total support is high enough but relative support is too low', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.No, false);
+        // dur | tot | rel | par
+        //  0  | 10% | 33% | 30%
+        //  𐄂  |  ✓  |  𐄂  |
+        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > relative support threshold (50%) == false
+
+        await advanceTime(minDuration + 10);
+        // dur | tot | rel | par
+        // 510 | 10% | 33% | 30%
+        //  ✓  |  ✓  |  𐄂  |
+        expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
+      });
+
+      it('executes after the duration if pariticpation and relative support thresholds are met (but not total support)', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
+        await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
+        await voting.connect(signers[7]).vote(id, VoteOption.Abstain, false);
+        // dur | tot | rel | par
+        //  0  | 30% | 60% | 80%
+        //  𐄂  |  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
+
+        await advanceTime(minDuration + 10);
+        // dur | tot | rel | par
+        // 510 | 30% | 60% | 80%
+        //  𐄂  |  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
+      });
+
+      it.only('should not allow the vote to pass if the participation threshold is not reached', async () => {
+        expect(await getTime()).to.be.greaterThan(startDate);
+        expect(await getTime()).to.be.lessThan(endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+
+        // CHECK EARLY EXECTUION
+
+        // dur | tot | rel | par
+        //start| 60% | 100%| 60%
+        //  𐄂  |  ✓  |  ✓  |  𐄂
+
+        // participation(60%) < participationThreshold(75%) ---> the vote should not execute
+
+        expect(await getTime()).to.be.greaterThan(startDate);
+        expect(await getTime()).to.be.lessThan(endDate);
+        expect(await voting.canVote(id, signers[9].address)).to.equal(true); // vote is open
+
+        expect(await voting.canExecute(id)).to.equal(false); // fails because the early execution criterium total support (60%) > relative support threshold (50%) == true
+
+        // ADVANCE TO THE ENDDATE
+        await advanceTimeTo(endDate);
+        expect(await getTime()).to.be.greaterThanOrEqual(endDate);
+        expect(await voting.canVote(id, signers[9].address)).to.equal(false); // vote is closed
+
+        // CHECK NORMAL EXECTUION
+
+        // dur | tot | rel | par
+        // over| 60% | 100%| 60%
+        //  ✓  |  ✓  |  ✓  |  𐄂
+
+        //participation(60%) < participationThreshold(75%) ---> the vote should not execute
+
+        expect(await voting.canExecute(id)).to.equal(false); // fails because the early execution criterium total support (60%) > relative support threshold (50%) == true
+
+        // The `canExecute()` logic work as it should.
+        // However, shouldn't executions not be possible because participation(60%) < participation(75%) in both cases?
+      });
+
+      it('executes early if the total support exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        // dur | tot | rel | par
+        //  0  | 50% | 100%| 50%
+        //  𐄂  |  ✓  |  ✓  |  𐄂
+        expect(await voting.canExecute(id)).to.equal(false); // total support (50%) > relative support threshold (50%) == false
+
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        // dur | tot | rel
+        //  0  | 60% | 100%
+        //  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
+
+        await voting.connect(signers[6]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[7]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[8]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[9]).vote(id, VoteOption.No, false);
+        // dur | tot | rel
+        //  0  | 60% | 60%
+        //  𐄂  |  ✓  |  ✓
+        expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
+      });
+    });
+
     describe('A 3/5 multi-sig', async () => {
       let minDuration = 500;
 
