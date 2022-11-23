@@ -41,6 +41,10 @@ On 2022-10-03 10:38:36
 
 ### Changed
 
+- Renamed contracts, events, and parameters in `MajorityVoting`:
+  - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`
+  - `VoteCreated` and `VoteExecuted` to `ProposalCreated` and `ProposalExecuted`
+  - `voteId` to `proposalId`
 - Changed `users` to `members` in `AllowlistPackage`.
 - Adapted subgraph names according to the renaming of the contracts.
 - Updated `manifest`, `registry`, `registry.test`.
