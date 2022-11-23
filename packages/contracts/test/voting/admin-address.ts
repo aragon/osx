@@ -2,7 +2,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {AdminAddressSetup, DAO, IPlugin} from '../../typechain';
+import {DAO} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
@@ -13,15 +13,11 @@ const EVENTS = {
   ProposalExecuted: 'ProposalExecuted',
 };
 
-const abiCoder = ethers.utils.defaultAbiCoder;
-const AddressZero = ethers.constants.AddressZero;
-const EMPTY_DATA = '0x';
-
 // Permissions
 const ADMIN_EXECUTE_PERMISSION_ID = ethers.utils.id('ADMIN_EXECUTE_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('AdminAddress', function () {
+describe('AdminAddress plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: DAO;
