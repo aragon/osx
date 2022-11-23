@@ -13,10 +13,10 @@ export async function filterEvents(tx: any, eventName: string) {
 }
 
 export const VOTING_EVENTS = {
-  CONFIG_UPDATED: 'VoteSettingsUpdated',
-  VOTE_STARTED: 'ProposalCreated',
+  VOTE_SETTINGS_UPDATED: 'VoteSettingsUpdated',
   VOTE_CAST: 'VoteCast',
-  VOTE_EXECUTED: 'ProposalExecuted',
+  PROPOSAL_CREATED: 'ProposalCreated',
+  PROPOSAL_EXECUTED: 'ProposalExecuted',
 };
 
 export const DAO_EVENTS = {

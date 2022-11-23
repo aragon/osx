@@ -87,7 +87,7 @@ describe('MajorityVotingMock', function () {
 
     it('should change the settings successfully', async () => {
       expect(await votingBase.changeVoteSettings(2, 4, 8))
-        .to.emit(votingBase, VOTING_EVENTS.CONFIG_UPDATED)
+        .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
         .withArgs(2, 4, 8);
     });
   });

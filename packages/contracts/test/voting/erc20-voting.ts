@@ -168,7 +168,7 @@ describe('ERC20Voting', function () {
           VoteOption.None
         )
       )
-        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
+        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
         .withArgs(id, ownerAddress, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
@@ -211,7 +211,7 @@ describe('ERC20Voting', function () {
           VoteOption.Yes
         )
       )
-        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
+        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
         .withArgs(id, ownerAddress, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
@@ -480,7 +480,7 @@ describe('ERC20Voting', function () {
 
       // check for the `ProposalExecuted` event in the voting contract
       {
-        const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
+        const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
 
         expect(event.args.proposalId).to.equal(id);
         expect(event.args.execResults).to.deep.equal(['0x']);
