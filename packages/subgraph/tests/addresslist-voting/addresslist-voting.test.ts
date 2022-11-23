@@ -4,7 +4,7 @@ import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   handleAddressesAdded,
   handleVoteCast,
-  handleVoteExecuted,
+  handleProposalExecuted,
   handleAddressesRemoved,
   handleVoteSettingsUpdated,
   _handleProposalCreated
@@ -29,7 +29,7 @@ import {createDummyActions, createGetVoteCall} from '../utils';
 import {
   createNewAddressesAddedEvent,
   createNewVoteCastEvent,
-  createNewVoteExecutedEvent,
+  createNewProposalExecutedEvent,
   createNewAddressesRemovedEvent,
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
@@ -211,7 +211,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Addresslist Voting (handleVoteExecuted) mappings with mock event', () => {
+test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
   createAddresslistProposalEntityState(
@@ -222,10 +222,10 @@ test('Run Addresslist Voting (handleVoteExecuted) mappings with mock event', () 
   );
 
   // create event
-  let event = createNewVoteExecutedEvent('0', VOTING_ADDRESS);
+  let event = createNewProposalExecutedEvent('0', VOTING_ADDRESS);
 
   // handle event
-  handleVoteExecuted(event);
+  handleProposalExecuted(event);
 
   // checks
   assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);

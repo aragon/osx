@@ -5,7 +5,7 @@ import {
   VoteSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  VoteExecuted
+  ProposalExecuted
 } from '../../generated/templates/ERC20Voting/ERC20Voting';
 import {ERC20VotingProposal} from '../../generated/schema';
 import {
@@ -93,11 +93,13 @@ export function createNewVoteCastEvent(
   return createProposalCastEvent;
 }
 
-export function createNewVoteExecutedEvent(
+export function createNewProposalExecutedEvent(
   voteId: string,
   contractAddress: string
-): VoteExecuted {
-  let createProposalExecutedEvent = changetype<VoteExecuted>(newMockEvent());
+): ProposalExecuted {
+  let createProposalExecutedEvent = changetype<ProposalExecuted>(
+    newMockEvent()
+  );
 
   createProposalExecutedEvent.address = Address.fromString(contractAddress);
   createProposalExecutedEvent.parameters = [];

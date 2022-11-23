@@ -3,7 +3,7 @@ import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 import {
   VoteCast,
   ProposalCreated,
-  VoteExecuted,
+  ProposalExecuted,
   VoteSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
@@ -150,7 +150,7 @@ export function handleVoteCast(event: VoteCast): void {
   }
 }
 
-export function handleVoteExecuted(event: VoteExecuted): void {
+export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let proposalEntity = AddresslistProposal.load(proposalId);

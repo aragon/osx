@@ -32,12 +32,6 @@ interface IMajorityVoting {
         IDAO.Action[] actions;
     }
 
-    /// @notice Emitted when a vote is created.
-    /// @param voteId  The ID of the vote.
-    /// @param creator  The creator of the vote.
-    /// @param metadata The IPFS hash pointing to the proposal metadata.
-    event ProposalCreated(uint256 indexed voteId, address indexed creator, bytes metadata);
-
     /// @notice Emitted when a vote is casted by a voter.
     /// @param voteId The ID of the vote.
     /// @param voter The voter casting the vote.
@@ -45,10 +39,16 @@ interface IMajorityVoting {
     /// @param voteWeight The weight of the casted vote.
     event VoteCast(uint256 indexed voteId, address indexed voter, uint8 choice, uint256 voteWeight);
 
-    /// @notice Emitted when a vote is executed.
+    /// @notice Emitted when a vote is created.
+    /// @param voteId  The ID of the vote.
+    /// @param creator  The creator of the vote.
+    /// @param metadata The IPFS hash pointing to the proposal metadata.
+    event ProposalCreated(uint256 indexed voteId, address indexed creator, bytes metadata);
+
+    /// @notice Emitted when a proposal is executed.
     /// @param voteId The ID of the vote.
     /// @param execResults The bytes array resulting from the vote execution in the associated DAO.
-    event VoteExecuted(uint256 indexed voteId, bytes[] execResults);
+    event ProposalExecuted(uint256 indexed voteId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
     /// @param relativeSupportThresholdPct The relative support threshold in percent.

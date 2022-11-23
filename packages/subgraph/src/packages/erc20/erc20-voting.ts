@@ -3,7 +3,7 @@ import {BigInt, dataSource} from '@graphprotocol/graph-ts';
 import {
   VoteCast,
   ProposalCreated,
-  VoteExecuted,
+  ProposalExecuted,
   VoteSettingsUpdated,
   ERC20Voting
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
@@ -164,7 +164,7 @@ export function handleVoteCast(event: VoteCast): void {
   }
 }
 
-export function handleVoteExecuted(event: VoteExecuted): void {
+export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.voteId.toHexString();
   let proposalEntity = ERC20VotingProposal.load(proposalId);

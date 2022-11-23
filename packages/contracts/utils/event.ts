@@ -16,7 +16,7 @@ export const VOTING_EVENTS = {
   CONFIG_UPDATED: 'VoteSettingsUpdated',
   VOTE_STARTED: 'ProposalCreated',
   VOTE_CAST: 'VoteCast',
-  VOTE_EXECUTED: 'VoteExecuted',
+  VOTE_EXECUTED: 'ProposalExecuted',
 };
 
 export const DAO_EVENTS = {

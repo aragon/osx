@@ -5,7 +5,7 @@ import {AddresslistProposal} from '../../generated/schema';
 import {
   ProposalCreated,
   VoteCast,
-  VoteExecuted,
+  ProposalExecuted,
   VoteSettingsUpdated,
   AddressesAdded,
   AddressesRemoved
@@ -95,11 +95,13 @@ export function createNewVoteCastEvent(
   return createProposalCastEvent;
 }
 
-export function createNewVoteExecutedEvent(
+export function createNewProposalExecutedEvent(
   voteId: string,
   contractAddress: string
-): VoteExecuted {
-  let createProposalExecutedEvent = changetype<VoteExecuted>(newMockEvent());
+): ProposalExecuted {
+  let createProposalExecutedEvent = changetype<ProposalExecuted>(
+    newMockEvent()
+  );
 
   createProposalExecutedEvent.address = Address.fromString(contractAddress);
   createProposalExecutedEvent.parameters = [];

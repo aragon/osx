@@ -3,7 +3,7 @@ import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   handleVoteCast,
-  handleVoteExecuted,
+  handleProposalExecuted,
   handleVoteSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/erc20/erc20-voting';
@@ -25,7 +25,7 @@ import {
 import {createDummyActions, createGetVoteCall} from '../utils';
 import {
   createNewVoteCastEvent,
-  createNewVoteExecutedEvent,
+  createNewProposalExecutedEvent,
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
   getVotesLengthCall,
@@ -240,7 +240,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run ERC Voting (handleVoteExecuted) mappings with mock event', () => {
+test('Run ERC Voting (handleProposalExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
 
@@ -270,10 +270,10 @@ test('Run ERC Voting (handleVoteExecuted) mappings with mock event', () => {
   );
 
   // create event
-  let event = createNewVoteExecutedEvent('0', VOTING_ADDRESS);
+  let event = createNewProposalExecutedEvent('0', VOTING_ADDRESS);
 
   // handle event
-  handleVoteExecuted(event);
+  handleProposalExecuted(event);
 
   // checks
   assert.fieldEquals('ERC20VotingProposal', entityID, 'id', entityID);

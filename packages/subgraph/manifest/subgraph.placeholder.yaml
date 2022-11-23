@@ -155,8 +155,8 @@ templates:
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: VoteExecuted(indexed uint256,bytes[])
-          handler: handleVoteExecuted
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes)
           handler: handleProposalCreated
         - event: VoteSettingsUpdated(uint64,uint64,uint64)
@@ -180,8 +180,8 @@ templates:
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: VoteExecuted(indexed uint256,bytes[])
-          handler: handleVoteExecuted
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes)
           handler: handleProposalCreated
         - event: VoteSettingsUpdated(uint64,uint64,uint64)

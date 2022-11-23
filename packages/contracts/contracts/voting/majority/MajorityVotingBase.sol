@@ -234,7 +234,7 @@ abstract contract MajorityVotingBase is
 
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
-        emit VoteExecuted(_voteId, execResults);
+        emit ProposalExecuted(_voteId, execResults);
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried vote exists.

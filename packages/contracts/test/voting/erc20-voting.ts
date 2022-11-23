@@ -478,7 +478,7 @@ describe('ERC20Voting', function () {
         expect(vote.executed).to.equal(true);
       }
 
-      // check for the `VoteExecuted` event in the voting contract
+      // check for the `ProposalExecuted` event in the voting contract
       {
         const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
 
