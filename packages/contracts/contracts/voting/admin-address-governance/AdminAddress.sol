@@ -2,24 +2,21 @@
 
 pragma solidity 0.8.10;
 
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+/// @title AdminAddress
+/// @author Aragon Association - 2022.
+/// @notice The Admin address governance plugin, to serve as a DAO's primary full controller.
+contract AdminAddress is PluginCloneable {
+    using Counters for Counters.Counter;
 
-// TODO: not done yet.
-
-contract AdminAddressGovernance is PluginCloneable {
     bytes32 public constant ADMIN_EXECUTE_PERMISSION_ID = keccak256("ADMIN_EXECUTE_PERMISSION");
 
     /// @notice The incrimental id for proposals and executions.
-    uint256 internal proposalId;
-
-    address public admin;
-
-    bool internal executionLocked;
-
-    error ReentrancyIsNotAllowed();
+    Counters.Counter internal proposalId;
 
     /// @notice Emitted when a proposal is created.
     /// @param proposalId  The ID of the proposal.
@@ -35,9 +32,8 @@ contract AdminAddressGovernance is PluginCloneable {
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The associated DAO.
-    function initialize(IDAO _dao, address _admin) public initializer {
+    function initialize(IDAO _dao) public initializer {
         __PluginCloneable_init(_dao);
-        admin = _admin;
     }
 
     /// @notice Create and execute a new proposal.
@@ -48,27 +44,15 @@ contract AdminAddressGovernance is PluginCloneable {
         IDAO.Action[] calldata _actions
     ) external auth(ADMIN_EXECUTE_PERMISSION_ID) returns (bytes[] memory) {
         // Create proposal
-        emit ProposalCreated(proposalId, _msgSender(), _proposalMetadata);
-
-        // Check execution lock
-        if (executionLocked) {
-            revert ReentrancyIsNotAllowed();
-        }
-
-        // Lock execution
-        executionLocked = true;
+        emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata);
 
         // Execute
-        bytes[] memory execResults = dao.execute(proposalId, _actions);
+        bytes[] memory execResults = dao.execute(proposalId.current(), _actions);
 
-        // Unlock execution
-        executionLocked = false;
+        emit ProposalExecuted(proposalId.current(), execResults);
 
-        emit ProposalExecuted(proposalId, execResults);
-
-        unchecked {
-            ++proposalId;
-        }
+        // Increment proposalId
+        proposalId.increment();
 
         return execResults;
     }

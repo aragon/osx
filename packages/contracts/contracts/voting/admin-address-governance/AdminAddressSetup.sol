@@ -8,16 +8,16 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {AdminAddressGovernance} from "./AdminAddressGovernance.sol";
+import {AdminAddress} from "./AdminAddress.sol";
 
-/// @title AdminAddressGovernanceSetup
+/// @title AdminAddressSetup
 /// @author Aragon Association - 2022
-/// @notice The setup contract of the `AdminAddressGovernance` plugin.
-contract AdminAddressGovernanceSetup is PluginSetup {
+/// @notice The setup contract of the `AdminAddress` plugin.
+contract AdminAddressSetup is PluginSetup {
     using Clones for address;
 
-    /// @notice The address of `AdminAddressGovernance` plugin logic contract to be used in creating proxy contracts.
-    address private immutable adminAddressGovernanceBase;
+    /// @notice The address of `AdminAddress` plugin logic contract to be cloned.
+    address private immutable adminAddressBase;
 
     /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
@@ -26,9 +26,9 @@ contract AdminAddressGovernanceSetup is PluginSetup {
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
 
-    /// @notice The contract constructor, that deployes the `AdminAddressGovernance` plugin logic contract.
+    /// @notice The contract constructor, that deployes the `AdminAddress` plugin logic contract.
     constructor() {
-        adminAddressGovernanceBase = address(new AdminAddressGovernance());
+        adminAddressBase = address(new AdminAddress());
     }
 
     /// @inheritdoc IPluginSetup
@@ -47,7 +47,7 @@ contract AdminAddressGovernanceSetup is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode `_data` to extract the params needed for deploying and initializing `AdminAddressGovernance` plugin.
+        // Decode `_data` to extract the params needed for deploying and initializing `AdminAddress` plugin.
         address admin = abi.decode(_data, (address));
 
         if (admin == address(0)) {
@@ -55,18 +55,25 @@ contract AdminAddressGovernanceSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = adminAddressGovernanceBase.clone();
+        plugin = adminAddressBase.clone();
 
         // Initialize cloned plugin contract.
-        AdminAddressGovernance(plugin).initialize(dao, admin);
+        AdminAddress(plugin).initialize(dao);
 
         // Prepare helpers
         helpers = new address[](0);
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](1);
+        permissions = new PermissionLib.ItemMultiTarget[](2);
 
-        // TODO: not done yet.
+        // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the DAO.
+        permissions[0] = PermissionLib.ItemMultiTarget(
+            PermissionLib.Operation.Grant,
+            plugin,
+            _dao,
+            NO_ORACLE,
+            AdminAddress(plugin).ADMIN_EXECUTE_PERMISSION_ID()
+        );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -84,14 +91,16 @@ contract AdminAddressGovernanceSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
+    /// @dev Currently there are not a relaiable mean to revoke plugin's permission such as `ADMIN_EXECUTE_PERMISSION_ID`
+    /// that have been granted to addresses during the life cycle of the plugin.
+    /// or the ones that have been granted are not revoked yet already,
+    /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
     function prepareUninstallation(
         address _dao,
         address _plugin,
         address[] calldata,
         bytes calldata
     ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        // TODO: not done yet.
-
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](1);
 
@@ -106,6 +115,6 @@ contract AdminAddressGovernanceSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view returns (address) {
-        return adminAddressGovernanceBase;
+        return adminAddressBase;
     }
 }
