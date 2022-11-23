@@ -12,7 +12,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title AddresslistVoting
 /// @author Aragon Association - 2021-2022.
-/// @notice The majority voting implementation using an list of allowed addresses.
+/// @notice The majority voting implementation using an list of voter addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is MajorityVotingBase {
     using Checkpoints for Checkpoints.History;
@@ -24,14 +24,14 @@ contract AddresslistVoting is MajorityVotingBase {
             this.isListed.selector ^
             this.addresslistLength.selector;
 
-    /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` function.
+    /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
         keccak256("MODIFY_ADDRESSLIST_PERMISSION");
 
-    /// @notice The mapping containing the checkpointed history of addresses being allowed.
+    /// @notice The mapping containing the checkpointed history of the address list.
     mapping(address => Checkpoints.History) private _addresslistCheckpoints;
 
-    /// @notice The checkpointed history of the length of the addresslist.
+    /// @notice The checkpointed history of the length of the address list.
     Checkpoints.History private _addresslistLengthCheckpoints;
 
     /// @notice Thrown when a sender is not allowed to create a vote.
@@ -52,13 +52,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param _totalSupportThresholdPct The total support threshold in percent.
     /// @param _relativeSupportThresholdPct The relative support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
-    /// @param _addresses The initial addresses to be listed.
+    /// @param _voters The initial voter addresses to be listed.
     function initialize(
         IDAO _dao,
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration,
-        address[] calldata _addresses
+        address[] calldata _voters
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
@@ -67,8 +67,8 @@ contract AddresslistVoting is MajorityVotingBase {
             _minDuration
         );
 
-        // add voters to the address list
-        _addAddresses(_addresses);
+        // add voter addresses to the address list
+        _addAddresses(_voters);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -89,8 +89,9 @@ contract AddresslistVoting is MajorityVotingBase {
         _addAddresses(_voters);
     }
 
-    /// @notice Internal function to add new users to the addresslist.
-    /// @param _voters The addresses of users to be added.
+    /// @notice Internal function to add new voters to the address list.
+    /// @param _voters The addresses of voters to be added.
+    /// @dev This functin is used during the plugin initialization.
     function _addAddresses(address[] calldata _voters) internal {
         _updateAddresslist(_voters, true);
 
@@ -197,21 +198,22 @@ contract AddresslistVoting is MajorityVotingBase {
         }
     }
 
-    /// @notice Checks if a voter is on the address list at given block number.
-    /// @param _voter The voter address that is checked.
+    /// @notice Checks if an account is on the address list at given block number.
+    /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
-    function isListed(address _voter, uint256 _blockNumber) public view returns (bool) {
+    function isListed(address _account, uint256 _blockNumber) public view returns (bool) {
         if (_blockNumber == 0) _blockNumber = getBlockNumber64() - 1;
 
-        return _addresslistCheckpoints[_voter].getAtBlock(_blockNumber) == 1;
+        return _addresslistCheckpoints[_account].getAtBlock(_blockNumber) == 1;
     }
 
     /// @notice Returns the length of the address list at a specific block number.
     /// @param _blockNumber The specific block to get the count from.
     /// @return The address list length at the specified block number.
     function addresslistLength(uint256 _blockNumber) public view returns (uint256) {
-        if (_blockNumber == 0) _blockNumber = getBlockNumber64() - 1;
-
+        if (_blockNumber == 0) {
+            _blockNumber = getBlockNumber64() - 1;
+        }
         return _addresslistLengthCheckpoints.getAtBlock(_blockNumber);
     }
 
@@ -222,8 +224,8 @@ contract AddresslistVoting is MajorityVotingBase {
     }
 
     /// @notice Updates the address list by adding or removing voters.
-    /// @param _voters The user addresses.
-    /// @param _enabled Whether to add or remove users from the addresslist.
+    /// @param _voters The voter addresses to be updated.
+    /// @param _enabled Whether to add or remove voters from the address list.
     function _updateAddresslist(address[] calldata _voters, bool _enabled) internal {
         _addresslistLengthCheckpoints.push(
             _enabled ? _uncheckedAdd : _uncheckedSub,
