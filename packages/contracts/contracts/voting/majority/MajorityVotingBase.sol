@@ -260,9 +260,24 @@ abstract contract MajorityVotingBase is
 
         uint256 participationPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
 
+        //uint256 remainingVotes = proposal_.totalVotingPower - (proposal_.yes + proposal_.no + proposal_.abstain);
+        //uint256 worstCaseSupportPct = _calculatePct(
+        //    proposal_.yes,
+        //    proposal_.yes + (proposal_.no + remainingVotes)
+        //);
+
+        uint256 worstCaseSupportPct = _calculatePct(
+            proposal_.yes,
+            proposal_.totalVotingPower - proposal_.abstain
+        );
+
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
-        // The participation must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= participationThresholdPct`).
-        if (_isVoteOpen(proposal_) && participationPct > proposal_.relativeSupportThresholdPct) {
+        // The participation must be met and the remaining number of castable no-votes should not be able to change the support threshold.
+        if (
+            _isVoteOpen(proposal_) &&
+            participationPct > proposal_.participationThresholdPct &&
+            worstCaseSupportPct > proposal_.relativeSupportThresholdPct
+        ) {
             return true;
         }
 
