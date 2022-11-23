@@ -66,11 +66,11 @@ contract AdminAddressSetup is PluginSetup {
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](2);
 
-        // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the DAO.
+        // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
         permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             plugin,
-            _dao,
+            admin,
             NO_ORACLE,
             AdminAddress(plugin).ADMIN_EXECUTE_PERMISSION_ID()
         );
@@ -104,7 +104,7 @@ contract AdminAddressSetup is PluginSetup {
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](1);
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
