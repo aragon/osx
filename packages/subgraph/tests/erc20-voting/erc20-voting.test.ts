@@ -128,7 +128,7 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals(
     'ERC20VotingPlugin',
     Address.fromString(VOTING_ADDRESS).toHexString(),
-    'votesLength',
+    'proposalCount',
     '1'
   );
 

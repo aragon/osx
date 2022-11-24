@@ -116,7 +116,7 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
   assert.fieldEquals(
     'AddresslistPlugin',
     Address.fromString(VOTING_ADDRESS).toHexString(),
-    'votesLength',
+    'proposalCount',
     '1'
   );
 

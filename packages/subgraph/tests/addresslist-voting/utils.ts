@@ -202,8 +202,8 @@ export function getVotesLengthCall(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'votesLength',
-    'votesLength():(uint256)'
+    'proposalCount',
+    'proposalCount():(uint256)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);

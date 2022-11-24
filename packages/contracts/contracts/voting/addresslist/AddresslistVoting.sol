@@ -138,7 +138,7 @@ contract AddresslistVoting is MajorityVotingBase {
                 minDuration: minDuration
             });
 
-        proposalId = votesLength++;
+        proposalId = proposalCount++;
 
         // create a vote.
         Proposal storage proposal_ = proposals[proposalId];

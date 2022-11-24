@@ -193,7 +193,7 @@ type ERC20VotingPlugin implements IPlugin @entity {
   relativeSupportThresholdPct: BigInt
   totalSupportThresholdPct: BigInt
   minDuration: BigInt
-  votesLength: BigInt
+  proposalCount: BigInt
   token: ERC20Token
   members: [ERC20VotingVoter!]! @derivedFrom(field: "plugin")
 }
@@ -251,7 +251,7 @@ type AddresslistPlugin implements IPlugin @entity {
   relativeSupportThresholdPct: BigInt
   totalSupportThresholdPct: BigInt
   minDuration: BigInt
-  votesLength: BigInt
+  proposalCount: BigInt
   members: [AddresslistVoter!]! @derivedFrom(field: "plugin")
 }
 

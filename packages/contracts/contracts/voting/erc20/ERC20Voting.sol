@@ -75,7 +75,7 @@ contract ERC20Voting is MajorityVotingBase {
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        proposalId = votesLength++;
+        proposalId = proposalCount++;
 
         // Calculate the start and end time of the vote
         uint64 currentTimestamp = getTimestamp64();

@@ -46,7 +46,7 @@ abstract contract MajorityVotingBase is
     uint64 public totalSupportThresholdPct;
     uint64 public minDuration;
 
-    uint256 public votesLength;
+    uint256 public proposalCount;
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.

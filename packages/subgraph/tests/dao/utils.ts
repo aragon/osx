@@ -442,8 +442,8 @@ export function getMinDuration(contractAddress: string, returns: BigInt): void {
 export function getVotesLength(contractAddress: string, returns: BigInt): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'votesLength',
-    'votesLength():(uint256)'
+    'proposalCount',
+    'proposalCount():(uint256)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

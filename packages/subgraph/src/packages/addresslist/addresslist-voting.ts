@@ -82,9 +82,9 @@ export function _handleProposalCreated(
   // update vote length
   let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    let voteLength = contract.try_votesLength();
+    let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
-      packageEntity.votesLength = voteLength.value;
+      packageEntity.proposalCount = voteLength.value;
       packageEntity.save();
     }
   }
