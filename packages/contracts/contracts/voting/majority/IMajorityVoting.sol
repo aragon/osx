@@ -78,8 +78,8 @@ interface IMajorityVoting {
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed after the proposal passes.
-    /// @param _startDate The start date of the vote. If 0, uses current timestamp.
-    /// @param _endDate The end date of the vote. If 0, uses `_start` + `minDuration`.
+    /// @param _startDate The start date of the proposal vote. If 0, uses current timestamp.
+    /// @param _endDate The end date of the proposal vote. If 0, uses `_start` + `minDuration`.
     /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
     /// @param _choice The vote choice to cast on creation.
     /// @return proposalId The ID of the proposal.
@@ -114,11 +114,11 @@ interface IMajorityVoting {
     ///@dev The function assumes the queried proposal exists.
     function canVote(uint256 _proposalId, address _voter) external view returns (bool);
 
-    /// @notice Method to execute a proposal if allowed to.
+    /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
     function execute(uint256 _proposalId) external;
 
-    /// @notice Checks if a proposal is allowed to execute.
+    /// @notice Checks if a proposal can be executed.
     /// @param _proposalId The ID of the proposal to be checked.
     /// @return True if the proposal can be executed, false otherwise.
     function canExecute(uint256 _proposalId) external view returns (bool);
@@ -132,8 +132,8 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the proposal is open or not.
     /// @return executed Wheter the proposal is executed or not.
-    /// @return startDate The start date of the proposal.
-    /// @return endDate The end date of the proposal.
+    /// @return startDate The start date of the proposal vote.
+    /// @return endDate The end date of the proposal vote.
     /// @return snapshotBlock The block number of the snapshot taken for this proposal.
     /// @return relativeSupportThresholdPct The relative support threshold in percent.
     /// @return totalSupportThresholdPct The total support threshold in percent.
@@ -141,7 +141,7 @@ interface IMajorityVoting {
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.
-    /// @return actions The actions to be executed in the associated DAO after the vote has passed.
+    /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
         external
         view
