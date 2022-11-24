@@ -36,7 +36,7 @@ contract AddresslistVoting is MajorityVotingBase {
 
     /// @notice Thrown when a sender is not allowed to create a vote.
     /// @param sender The sender address.
-    error VoteCreationForbidden(address sender);
+    error ProposalCreationForbidden(address sender);
 
     /// @notice Emitted when new members are added to the address list.
     /// @param members The array of member addresses to be added.
@@ -121,7 +121,7 @@ contract AddresslistVoting is MajorityVotingBase {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         if (!isListed(_msgSender(), snapshotBlock)) {
-            revert VoteCreationForbidden(_msgSender());
+            revert ProposalCreationForbidden(_msgSender());
         }
 
         // calculate start and end time for the vote

@@ -75,9 +75,9 @@ abstract contract MajorityVotingBase is
     /// @param sender The address of the voter.
     error VoteCastForbidden(uint256 proposalId, address sender);
 
-    /// @notice Thrown if the vote execution is forbidden.
+    /// @notice Thrown if the proposal execution is forbidden.
     /// @param proposalId The ID of the proposal.
-    error VoteExecutionForbidden(uint256 proposalId);
+    error ProposalExecutionForbidden(uint256 proposalId);
 
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -162,7 +162,7 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function execute(uint256 _proposalId) public {
-        if (!_canExecute(_proposalId)) revert VoteExecutionForbidden(_proposalId);
+        if (!_canExecute(_proposalId)) revert ProposalExecutionForbidden(_proposalId);
         _execute(_proposalId);
     }
 

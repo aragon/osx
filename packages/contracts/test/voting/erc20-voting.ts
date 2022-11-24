@@ -488,7 +488,7 @@ describe('ERC20Voting', function () {
 
       // calling execute again should fail
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
 
@@ -496,7 +496,7 @@ describe('ERC20Voting', function () {
       await advanceTimeTo(startDate);
 
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
   });

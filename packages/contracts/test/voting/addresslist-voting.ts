@@ -157,7 +157,7 @@ describe('AddresslistVoting', function () {
           .connect(signers[1])
           .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(
-        customError('VoteCreationForbidden', signers[1].address)
+        customError('ProposalCreationForbidden', signers[1].address)
       );
     });
 
@@ -478,7 +478,7 @@ describe('AddresslistVoting', function () {
 
       // calling execute again should fail
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
 
@@ -486,7 +486,7 @@ describe('AddresslistVoting', function () {
       await advanceTimeTo(startDate);
 
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
   });
