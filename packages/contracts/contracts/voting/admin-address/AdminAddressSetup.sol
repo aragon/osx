@@ -75,7 +75,7 @@ contract AdminAddressSetup is PluginSetup {
             AdminAddress(plugin).ADMIN_EXECUTE_PERMISSION_ID()
         );
 
-        // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
+        // Grant `EXECUTE_PERMISSION` on the DAO to the plugin.
         permissions[1] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             _dao,

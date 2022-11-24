@@ -113,7 +113,7 @@ describe('AdminAddress plugin', function () {
       await initializePlugin();
     });
 
-    it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is revoked for the plugin address", async () => {
+    it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
       await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
 
       await expect(
@@ -129,7 +129,7 @@ describe('AdminAddress plugin', function () {
       );
     });
 
-    it('fails to call `executeProposal()` if `ADMIN_EXECUTE_PERMISSION` is revoked for the admin address', async () => {
+    it('fails to call `executeProposal()` if `ADMIN_EXECUTE_PERMISSION` is not granted for the admin address', async () => {
       await dao.revoke(
         plugin.address,
         ownerAddress,
@@ -150,7 +150,7 @@ describe('AdminAddress plugin', function () {
       );
     });
 
-    it('correctly emits ProposalCreated event', async () => {
+    it('correctly emits the ProposalCreated event', async () => {
       const currentExpectedProposalId = 0;
 
       await expect(await plugin.executeProposal(dummyMetadata, dummyActions))

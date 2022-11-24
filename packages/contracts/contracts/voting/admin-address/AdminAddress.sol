@@ -9,7 +9,7 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title AdminAddress
 /// @author Aragon Association - 2022.
-/// @notice The Admin address governance plugin, to serve as a DAO's primary full controller.
+/// @notice The admin address governance plugin giving execution permission on the DAO to a single address
 contract AdminAddress is PluginCloneable {
     using Counters for Counters.Counter;
 
@@ -17,7 +17,8 @@ contract AdminAddress is PluginCloneable {
     bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =
         this.initialize.selector ^ this.executeProposal.selector;
 
-    bytes32 public constant ADMIN_EXECUTE_PERMISSION_ID = keccak256("ADMIN_EXECUTE_PERMISSION");
+    /// @notice The ID of the permission required to call the `executeProposal` function.
+    bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID = keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
     /// @notice The incrimental id for proposals and executions.
     Counters.Counter internal proposalId;
@@ -40,16 +41,16 @@ contract AdminAddress is PluginCloneable {
         __PluginCloneable_init(_dao);
     }
 
-    /// @notice adds a IERC165 to check whether contract supports ALLOWLIST_VOTING_INTERFACE_ID or not.
-    /// @dev See {ERC165Upgradeable-supportsInterface}.
-    /// @return bool whether it supports the IERC165 or ALLOWLIST_VOTING_INTERFACE_ID
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == ADMIN_ADDRESS_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
-    /// @notice Create and execute a new proposal.
+    /// @notice Creates and executes a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
-    /// @param _actions The actions that will be executed immediatly.
+    /// @param _actions The actions to be executed.
     function executeProposal(bytes calldata _proposalMetadata, IDAO.Action[] calldata _actions)
         external
         auth(ADMIN_EXECUTE_PERMISSION_ID)
