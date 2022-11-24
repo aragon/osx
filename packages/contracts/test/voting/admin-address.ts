@@ -24,7 +24,6 @@ describe('AdminAddress plugin', function () {
   let plugin: any;
   let dao: DAO;
   let ownerAddress: string;
-  let user1: string;
   let dummyActions: any;
   let dummyMetadata: string;
 
@@ -34,7 +33,6 @@ describe('AdminAddress plugin', function () {
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
-    user1 = await signers[1].getAddress();
 
     ({abi: mergedAbi, bytecode: adminAddressFactoryBytecode} =
       await getMergedABI(
