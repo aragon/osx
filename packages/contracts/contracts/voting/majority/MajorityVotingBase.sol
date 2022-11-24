@@ -227,7 +227,7 @@ abstract contract MajorityVotingBase is
         bool _executesIfDecided
     ) internal virtual;
 
-    /// @notice Internal function to execute a vote. It assumes the queried vote exists.
+    /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     function _execute(uint256 _proposalId) internal virtual {
         proposals[_proposalId].executed = true;
@@ -237,20 +237,20 @@ abstract contract MajorityVotingBase is
         emit ProposalExecuted(_proposalId, execResults);
     }
 
-    /// @notice Internal function to check if a voter can vote. It assumes the queried vote exists.
+    /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
-    /// @return True if the given voter can vote on a certain vote, false otherwise.
+    /// @return True if the given voter can vote on a certain proposal, false otherwise.
     function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
     /// @return True if the given vote can be executed, false otherwise.
 
-    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
+    /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
     /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be cast a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
     /// @param _proposalId The ID of the proposal.
-    /// @return True if the given vote can be executed, false otherwise.
+    /// @return True if the proposal can be executed, false otherwise.
     function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
@@ -290,9 +290,9 @@ abstract contract MajorityVotingBase is
         return true;
     }
 
-    /// @notice Internal function to check if a vote is still open.
-    /// @param proposal_ the vote struct.
-    /// @return True if the given vote is open, false otherwise.
+    /// @notice Internal function to check if a proposal vote is still open.
+    /// @param proposal_ The proposal struct.
+    /// @return True if the proposal vote is open, false otherwise.
     function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
         return
             getTimestamp64() < proposal_.endDate &&

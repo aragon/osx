@@ -34,7 +34,7 @@ interface IMajorityVoting {
 
     /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
-    /// @param voter The voter casting the proposal.
+    /// @param voter The voter casting the vote.
     /// @param choice The vote option chosen.
     /// @param votingPower The voting power behind this vote.
     event VoteCast(
@@ -44,7 +44,7 @@ interface IMajorityVoting {
         uint256 votingPower
     );
 
-    /// @notice Emitted when a vote is created.
+    /// @notice Emitted when a proposal is created.
     /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the proposal.
     /// @param metadata The IPFS hash pointing to the proposal metadata.
@@ -77,7 +77,7 @@ interface IMajorityVoting {
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
-    /// @param _actions The actions that will be executed after vote passes.
+    /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the vote. If 0, uses current timestamp.
     /// @param _endDate The end date of the vote. If 0, uses `_start` + `minDuration`.
     /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
@@ -103,37 +103,38 @@ interface IMajorityVoting {
         bool _executesIfDecided
     ) external;
 
-    /// @notice Internal function to check if a voter can participate on a vote. This can be because the vote
+    /// @notice Internal function to check if a voter can participate on a proposal vote. This can be because the vote
     /// - has not started,
     /// - has ended,
     /// - was executed, or
     /// - the voter doesn't have voting powers.
-    /// @param _proposalId The vote Id.
+    /// @param _proposalId The proposal Id.
     /// @param _voter The address of the voter to check.
     /// @return bool Returns true if the voter is allowed to vote.
-    ///@dev The function assumes the queried vote exists.
+    ///@dev The function assumes the queried proposal exists.
     function canVote(uint256 _proposalId, address _voter) external view returns (bool);
 
-    /// @notice Method to execute a vote if allowed to.
-    /// @param _proposalId The ID of the vote to execute.
+    /// @notice Method to execute a proposal if allowed to.
+    /// @param _proposalId The ID of the proposal to be executed.
     function execute(uint256 _proposalId) external;
 
-    /// @notice Checks if a vote is allowed to execute.
-    /// @param _proposalId The ID of the vote to execute.
+    /// @notice Checks if a proposal is allowed to execute.
+    /// @param _proposalId The ID of the proposal to be checked.
+    /// @return True if the proposal can be executed, false otherwise.
     function canExecute(uint256 _proposalId) external view returns (bool);
 
     /// @notice Returns the state of a voter for a given vote by its ID.
     /// @param _proposalId The ID of the proposal.
-    /// @return VoteOption of the requested voter for a certain vote.
+    /// @return The vote option cast by a voter for a certain proposal.
     function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
 
     /// @notice Returns all information for a proposal by its ID.
     /// @param _proposalId The ID of the proposal.
-    /// @return open Wheter the vote is open or not.
-    /// @return executed Wheter the vote is executed or not.
-    /// @return startDate The start date of the vote.
-    /// @return endDate The end date of the vote.
-    /// @return snapshotBlock The block number of the snapshot taken for this vote.
+    /// @return open Wheter the proposal is open or not.
+    /// @return executed Wheter the proposal is executed or not.
+    /// @return startDate The start date of the proposal.
+    /// @return endDate The end date of the proposal.
+    /// @return snapshotBlock The block number of the snapshot taken for this proposal.
     /// @return relativeSupportThresholdPct The relative support threshold in percent.
     /// @return totalSupportThresholdPct The total support threshold in percent.
     /// @return totalVotingPower The total number of eligible votes that can be cast.

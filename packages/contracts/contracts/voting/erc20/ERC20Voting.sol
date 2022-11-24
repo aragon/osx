@@ -91,7 +91,7 @@ contract ERC20Voting is MajorityVotingBase {
                 minDuration: minDuration
             });
 
-        // Create the vote
+        // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
         proposal_.startDate = _startDate;
         proposal_.endDate = _endDate;
