@@ -22,13 +22,13 @@ import {
   START_DATE,
   VOTING_POWER
 } from '../constants';
-import {createDummyActions, createGetVoteCall} from '../utils';
+import {createDummyActions, createGetProposalCall} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewProposalExecutedEvent,
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
-  getVotesLengthCall,
+  getProposalCountCall,
   createERC20VotingProposalEntityState
 } from './utils';
 
@@ -49,8 +49,8 @@ test('Run ERC Voting (handleProposalCreated) mappings with mock event', () => {
   erc20VotingPlugin.save();
 
   // create calls
-  getVotesLengthCall(VOTING_ADDRESS, '1');
-  createGetVoteCall(
+  getProposalCountCall(VOTING_ADDRESS, '1');
+  createGetProposalCall(
     VOTING_ADDRESS,
     proposalId,
     true,
@@ -139,7 +139,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   let proposal = createERC20VotingProposalEntityState();
 
   // create calls
-  createGetVoteCall(
+  createGetProposalCall(
     VOTING_ADDRESS,
     PROPOSAL_ID,
     true,
@@ -200,7 +200,7 @@ test('Run ERC Voting (handleVoteCast) mappings with mock event', () => {
   // check vote count
   assert.fieldEquals('ERC20VotingProposal', proposal.id, 'voteCount', '1');
   // create calls
-  createGetVoteCall(
+  createGetProposalCall(
     VOTING_ADDRESS,
     PROPOSAL_ID,
     true,
@@ -252,7 +252,7 @@ test('Run ERC Voting (handleProposalExecuted) mappings with mock event', () => {
   );
 
   // create calls
-  createGetVoteCall(
+  createGetProposalCall(
     VOTING_ADDRESS,
     proposalId,
     true,

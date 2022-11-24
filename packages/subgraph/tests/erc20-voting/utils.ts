@@ -156,7 +156,7 @@ export function createNewVoteSettingsUpdatedEvent(
 
 // calls
 
-export function getVotesLengthCall(
+export function getProposalCountCall(
   contractAddress: string,
   returns: string
 ): void {

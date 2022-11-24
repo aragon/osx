@@ -42,7 +42,7 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
 
   let contract = ERC20Voting.bind(event.address);
-  let vote = contract.try_getVote(event.params.proposalId);
+  let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.open = vote.value.value0;
@@ -121,7 +121,7 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalEntity = ERC20VotingProposal.load(proposalId);
   if (proposalEntity) {
     let contract = ERC20Voting.bind(event.address);
-    let vote = contract.try_getVote(event.params.proposalId);
+    let vote = contract.try_getProposal(event.params.proposalId);
     if (!vote.reverted) {
       let voteCount = vote.value.value8.plus(
         vote.value.value9.plus(vote.value.value10)
@@ -175,7 +175,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 
   // update actions
   let contract = ERC20Voting.bind(event.address);
-  let vote = contract.try_getVote(event.params.proposalId);
+  let vote = contract.try_getProposal(event.params.proposalId);
   if (!vote.reverted) {
     let actions = vote.value.value11;
     for (let index = 0; index < actions.length; index++) {

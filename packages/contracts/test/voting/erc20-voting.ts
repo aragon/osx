@@ -173,7 +173,7 @@ describe('ERC20Voting', function () {
 
       const block = await ethers.provider.getBlock('latest');
 
-      const vote = await voting.getVote(id);
+      const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
@@ -218,7 +218,7 @@ describe('ERC20Voting', function () {
 
       const block = await ethers.provider.getBlock('latest');
 
-      const vote = await voting.getVote(id);
+      const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
@@ -343,7 +343,7 @@ describe('ERC20Voting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
-      let vote = await voting.getVote(id);
+      let vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(0);
@@ -352,7 +352,7 @@ describe('ERC20Voting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.No, 1);
 
-      vote = await voting.getVote(0);
+      vote = await voting.getProposal(0);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(1);
       expect(vote.abstain).to.equal(0);
@@ -361,7 +361,7 @@ describe('ERC20Voting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
 
-      vote = await voting.getVote(id);
+      vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(1);
@@ -376,17 +376,17 @@ describe('ERC20Voting', function () {
       // 2 times from the same wallet.
       await voting.vote(id, VoteOption.Yes, false);
       await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getVote(id)).yes).to.equal(1);
+      expect((await voting.getProposal(id)).yes).to.equal(1);
 
       // yes gets removed, no ends up as 1.
       await voting.vote(id, VoteOption.No, false);
       await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getVote(id)).no).to.equal(1);
+      expect((await voting.getProposal(id)).no).to.equal(1);
 
       // no gets removed, abstain ends up as 1.
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getVote(id)).abstain).to.equal(1);
+      expect((await voting.getProposal(id)).abstain).to.equal(1);
     });
 
     it('can execute early if total support is large enough', async () => {
@@ -473,7 +473,7 @@ describe('ERC20Voting', function () {
         expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
         expect(event.args.execResults).to.deep.equal(['0x']);
 
-        const vote = await voting.getVote(id);
+        const vote = await voting.getProposal(id);
 
         expect(vote.executed).to.equal(true);
       }

@@ -182,7 +182,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVote(uint256 _proposalId)
+    function getProposal(uint256 _proposalId)
         public
         view
         returns (

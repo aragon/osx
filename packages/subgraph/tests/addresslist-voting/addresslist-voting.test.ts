@@ -25,7 +25,7 @@ import {
   MIN_TURNOUT,
   VOTING_POWER
 } from '../constants';
-import {createDummyActions, createGetVoteCall} from '../utils';
+import {createDummyActions, createGetProposalCall} from '../utils';
 import {
   createNewAddressesAddedEvent,
   createNewVoteCastEvent,
@@ -33,7 +33,7 @@ import {
   createNewAddressesRemovedEvent,
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
-  getVotesLengthCall,
+  getProposalCountCall,
   createAddresslistProposalEntityState
 } from './utils';
 
@@ -54,8 +54,8 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
   addresslistPlugin.save();
 
   // create calls
-  getVotesLengthCall(VOTING_ADDRESS, '1');
-  createGetVoteCall(
+  getProposalCountCall(VOTING_ADDRESS, '1');
+  createGetProposalCall(
     VOTING_ADDRESS,
     proposalId,
     true,
@@ -128,7 +128,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   let proposal = createAddresslistProposalEntityState();
 
   // create calls
-  createGetVoteCall(
+  createGetProposalCall(
     VOTING_ADDRESS,
     PROPOSAL_ID,
     true,
@@ -172,7 +172,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   // check vote count
   assert.fieldEquals('AddresslistProposal', proposal.id, 'voteCount', '1');
   // create calls
-  createGetVoteCall(
+  createGetProposalCall(
     VOTING_ADDRESS,
     PROPOSAL_ID,
     true,

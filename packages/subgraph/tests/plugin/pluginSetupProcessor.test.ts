@@ -33,7 +33,7 @@ import {
   getParticipationRequiredPct,
   getSupportRequiredPct,
   getSupportsInterface,
-  getVotesLength,
+  getProposalCount,
   getVotingToken
 } from '../dao/utils';
 import {
@@ -98,7 +98,7 @@ test('InstallationApplied event (existent plugin)', function() {
   getSupportRequiredPct(pluginId, BigInt.fromString(ONE_ETH));
   getParticipationRequiredPct(pluginId, BigInt.fromString(ONE_ETH));
   getMinDuration(pluginId, BigInt.fromString(ONE_ETH));
-  getVotesLength(pluginId, BigInt.fromString(ONE_ETH));
+  getProposalCount(pluginId, BigInt.fromString(ONE_ETH));
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getVotingToken(pluginId, DAO_TOKEN_ADDRESS);
   getSupportsInterface(pluginId, ERC20_VOTING_INTERFACE, true);

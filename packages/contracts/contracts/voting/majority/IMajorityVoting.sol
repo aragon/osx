@@ -141,7 +141,7 @@ interface IMajorityVoting {
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.
     /// @return actions The actions to be executed in the associated DAO after the vote has passed.
-    function getVote(uint256 _proposalId)
+    function getProposal(uint256 _proposalId)
         external
         view
         returns (
