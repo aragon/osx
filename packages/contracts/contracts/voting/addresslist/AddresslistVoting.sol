@@ -127,16 +127,21 @@ contract AddresslistVoting is MajorityVotingBase {
         // calculate start and end time for the vote
         uint64 currentTimestamp = getTimestamp64();
 
-        if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + minDuration;
+        if (_startDate == 0) {
+            _startDate = currentTimestamp;
+        }
+        if (_endDate == 0) {
+            _endDate = _startDate + minDuration;
+        }
 
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp) {
             revert VotingPeriodInvalid({
                 current: currentTimestamp,
                 start: _startDate,
                 end: _endDate,
                 minDuration: minDuration
             });
+        }
 
         proposalId = proposalCount++;
 

@@ -80,16 +80,21 @@ contract TokenVoting is MajorityVotingBase {
         // Calculate the start and end time of the vote
         uint64 currentTimestamp = getTimestamp64();
 
-        if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + minDuration;
+        if (_startDate == 0) {
+            _startDate = currentTimestamp;
+        }
+        if (_endDate == 0) {
+            _endDate = _startDate + minDuration;
+        }
 
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp) {
             revert VotingPeriodInvalid({
                 current: currentTimestamp,
                 start: _startDate,
                 end: _endDate,
                 minDuration: minDuration
             });
+        }
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
