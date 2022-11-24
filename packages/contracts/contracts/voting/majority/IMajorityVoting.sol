@@ -34,7 +34,7 @@ interface IMajorityVoting {
 
     /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
-    /// @param voter The voter casting the vote.
+    /// @param voter The voter casting the proposal.
     /// @param choice The vote option chosen.
     /// @param votingPower The voting power behind this vote.
     event VoteCast(
@@ -46,17 +46,17 @@ interface IMajorityVoting {
 
     /// @notice Emitted when a vote is created.
     /// @param proposalId The ID of the proposal.
-    /// @param creator  The creator of the vote.
+    /// @param creator  The creator of the proposal.
     /// @param metadata The IPFS hash pointing to the proposal metadata.
     event ProposalCreated(uint256 indexed proposalId, address indexed creator, bytes metadata);
 
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId The ID of the proposal.
-    /// @param execResults The bytes array resulting from the vote execution in the associated DAO.
+    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
-    /// @param relativeSupportThresholdPct The relative support threshold in percent.
+    /// @param relativeSupportThresholdPct The support threshold in percent.
     /// @param totalSupportThresholdPct The total support threshold in percent.
     /// @param minDuration The minimal duration of a vote.
     event VoteSettingsUpdated(
@@ -92,11 +92,11 @@ interface IMajorityVoting {
         VoteOption _choice
     ) external returns (uint256 proposalId);
 
-    /// @notice Votes for a vote option and optionally executes the vote.
+    /// @notice Votes for a vote option and optionally executes the proposal.
     /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports].
     /// @param _proposalId The ID of the proposal.
     /// @param  _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided Whether the vote should execute its action if it becomes decided.
+    /// @param _executesIfDecided Whether the proposal actions should be executed if the vote outcome cannot change anymore.
     function vote(
         uint256 _proposalId,
         VoteOption _choice,
