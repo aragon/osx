@@ -92,17 +92,17 @@ contract ERC20Voting is MajorityVotingBase {
             });
 
         // Create the vote
-        Vote storage vote_ = votes[proposalId];
-        vote_.startDate = _startDate;
-        vote_.endDate = _endDate;
-        vote_.relativeSupportThresholdPct = relativeSupportThresholdPct;
-        vote_.totalSupportThresholdPct = totalSupportThresholdPct;
-        vote_.totalVotingPower = totalVotingPower;
-        vote_.snapshotBlock = snapshotBlock;
+        Proposal storage proposal_ = proposals[proposalId];
+        proposal_.startDate = _startDate;
+        proposal_.endDate = _endDate;
+        proposal_.relativeSupportThresholdPct = relativeSupportThresholdPct;
+        proposal_.totalSupportThresholdPct = totalSupportThresholdPct;
+        proposal_.totalVotingPower = totalVotingPower;
+        proposal_.snapshotBlock = snapshotBlock;
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
-                vote_.actions.push(_actions[i]);
+                proposal_.actions.push(_actions[i]);
             }
         }
 
@@ -118,31 +118,31 @@ contract ERC20Voting is MajorityVotingBase {
         address _voter,
         bool _executesIfDecided
     ) internal override {
-        Vote storage vote_ = votes[_proposalId];
+        Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(_voter, vote_.snapshotBlock);
-        VoteOption state = vote_.voters[_voter];
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.snapshotBlock);
+        VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoteOption.Yes) {
-            vote_.yes = vote_.yes - votingPower;
+            proposal_.yes = proposal_.yes - votingPower;
         } else if (state == VoteOption.No) {
-            vote_.no = vote_.no - votingPower;
+            proposal_.no = proposal_.no - votingPower;
         } else if (state == VoteOption.Abstain) {
-            vote_.abstain = vote_.abstain - votingPower;
+            proposal_.abstain = proposal_.abstain - votingPower;
         }
 
         // write the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            vote_.yes = vote_.yes + votingPower;
+            proposal_.yes = proposal_.yes + votingPower;
         } else if (_choice == VoteOption.No) {
-            vote_.no = vote_.no + votingPower;
+            proposal_.no = proposal_.no + votingPower;
         } else if (_choice == VoteOption.Abstain) {
-            vote_.abstain = vote_.abstain + votingPower;
+            proposal_.abstain = proposal_.abstain + votingPower;
         }
 
-        vote_.voters[_voter] = _choice;
+        proposal_.voters[_voter] = _choice;
 
         emit VoteCast(_proposalId, _voter, uint8(_choice), votingPower);
 
@@ -153,8 +153,9 @@ contract ERC20Voting is MajorityVotingBase {
 
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
-        Vote storage vote_ = votes[_proposalId];
-        return _isVoteOpen(vote_) && votingToken.getPastVotes(_voter, vote_.snapshotBlock) > 0;
+        Proposal storage proposal_ = proposals[_proposalId];
+        return
+            _isVoteOpen(proposal_) && votingToken.getPastVotes(_voter, proposal_.snapshotBlock) > 0;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

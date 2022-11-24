@@ -38,8 +38,8 @@ abstract contract MajorityVotingBase is
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
-    /// @notice A mapping between vote IDs and vote information.
-    mapping(uint256 => Vote) internal votes;
+    /// @notice A mapping between proposal IDs and proposal information.
+    mapping(uint256 => Proposal) internal proposals;
 
     //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
     uint64 public relativeSupportThresholdPct;
@@ -168,7 +168,7 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function getVoteOption(uint256 _proposalId, address _voter) public view returns (VoteOption) {
-        return votes[_proposalId].voters[_voter];
+        return proposals[_proposalId].voters[_voter];
     }
 
     /// @inheritdoc IMajorityVoting
@@ -200,20 +200,20 @@ abstract contract MajorityVotingBase is
             IDAO.Action[] memory actions
         )
     {
-        Vote storage vote_ = votes[_proposalId];
+        Proposal storage proposal_ = proposals[_proposalId];
 
-        open = _isVoteOpen(vote_);
-        executed = vote_.executed;
-        startDate = vote_.startDate;
-        endDate = vote_.endDate;
-        snapshotBlock = vote_.snapshotBlock;
-        _relativeSupportThresholdPct = vote_.relativeSupportThresholdPct;
-        _totalSupportThresholdPct = vote_.totalSupportThresholdPct;
-        totalVotingPower = vote_.totalVotingPower;
-        yes = vote_.yes;
-        no = vote_.no;
-        abstain = vote_.abstain;
-        actions = vote_.actions;
+        open = _isVoteOpen(proposal_);
+        executed = proposal_.executed;
+        startDate = proposal_.startDate;
+        endDate = proposal_.endDate;
+        snapshotBlock = proposal_.snapshotBlock;
+        _relativeSupportThresholdPct = proposal_.relativeSupportThresholdPct;
+        _totalSupportThresholdPct = proposal_.totalSupportThresholdPct;
+        totalVotingPower = proposal_.totalVotingPower;
+        yes = proposal_.yes;
+        no = proposal_.no;
+        abstain = proposal_.abstain;
+        actions = proposal_.actions;
     }
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
@@ -230,9 +230,9 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to execute a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
     function _execute(uint256 _proposalId) internal virtual {
-        votes[_proposalId].executed = true;
+        proposals[_proposalId].executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, votes[_proposalId].actions);
+        bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
 
         emit ProposalExecuted(_proposalId, execResults);
     }
@@ -252,18 +252,18 @@ abstract contract MajorityVotingBase is
     /// @param _proposalId The ID of the proposal.
     /// @return True if the given vote can be executed, false otherwise.
     function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
-        Vote storage vote_ = votes[_proposalId];
+        Proposal storage proposal_ = proposals[_proposalId];
 
         // Verify that the vote has not been executed already.
-        if (vote_.executed) {
+        if (proposal_.executed) {
             return false;
         }
 
-        uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.totalVotingPower);
+        uint256 totalSupportPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
         // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
-        if (_isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct) {
+        if (_isVoteOpen(proposal_) && totalSupportPct > proposal_.relativeSupportThresholdPct) {
             return true;
         }
 
@@ -271,18 +271,18 @@ abstract contract MajorityVotingBase is
         // Both, the total and relative support must be met.
 
         // Criterium 1: The vote has ended.
-        if (_isVoteOpen(vote_)) {
+        if (_isVoteOpen(proposal_)) {
             return false;
         }
 
         // Criterium 2: The total support is greater than the total support threshold
-        if (totalSupportPct <= vote_.totalSupportThresholdPct) {
+        if (totalSupportPct <= proposal_.totalSupportThresholdPct) {
             return false;
         }
 
         // Criterium 3: The relative support is greater than the relative support threshold
-        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no);
-        if (relativeSupportPct <= vote_.relativeSupportThresholdPct) {
+        uint256 relativeSupportPct = _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+        if (relativeSupportPct <= proposal_.relativeSupportThresholdPct) {
             return false;
         }
 
@@ -291,13 +291,13 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice Internal function to check if a vote is still open.
-    /// @param vote_ the vote struct.
+    /// @param proposal_ the vote struct.
     /// @return True if the given vote is open, false otherwise.
-    function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
+    function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
         return
-            getTimestamp64() < vote_.endDate &&
-            getTimestamp64() >= vote_.startDate &&
-            !vote_.executed;
+            getTimestamp64() < proposal_.endDate &&
+            getTimestamp64() >= proposal_.startDate &&
+            !proposal_.executed;
     }
 
     /// @notice Calculates the relative of value with respect to a total as a percentage.

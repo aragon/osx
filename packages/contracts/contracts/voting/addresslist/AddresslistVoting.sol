@@ -141,17 +141,17 @@ contract AddresslistVoting is MajorityVotingBase {
         proposalId = votesLength++;
 
         // create a vote.
-        Vote storage vote_ = votes[proposalId];
-        vote_.startDate = _startDate;
-        vote_.endDate = _endDate;
-        vote_.snapshotBlock = snapshotBlock;
-        vote_.relativeSupportThresholdPct = relativeSupportThresholdPct;
-        vote_.totalSupportThresholdPct = totalSupportThresholdPct;
-        vote_.totalVotingPower = addresslistLength(snapshotBlock);
+        Proposal storage proposal_ = proposals[proposalId];
+        proposal_.startDate = _startDate;
+        proposal_.endDate = _endDate;
+        proposal_.snapshotBlock = snapshotBlock;
+        proposal_.relativeSupportThresholdPct = relativeSupportThresholdPct;
+        proposal_.totalSupportThresholdPct = totalSupportThresholdPct;
+        proposal_.totalVotingPower = addresslistLength(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
-                vote_.actions.push(_actions[i]);
+                proposal_.actions.push(_actions[i]);
             }
         }
 
@@ -167,29 +167,29 @@ contract AddresslistVoting is MajorityVotingBase {
         address _voter,
         bool _executesIfDecided
     ) internal override {
-        Vote storage vote_ = votes[_proposalId];
+        Proposal storage proposal_ = proposals[_proposalId];
 
-        VoteOption state = vote_.voters[_voter];
+        VoteOption state = proposal_.voters[_voter];
 
         // Remove the previous vote.
         if (state == VoteOption.Yes) {
-            vote_.yes = vote_.yes - 1;
+            proposal_.yes = proposal_.yes - 1;
         } else if (state == VoteOption.No) {
-            vote_.no = vote_.no - 1;
+            proposal_.no = proposal_.no - 1;
         } else if (state == VoteOption.Abstain) {
-            vote_.abstain = vote_.abstain - 1;
+            proposal_.abstain = proposal_.abstain - 1;
         }
 
         // Store the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            ++vote_.yes;
+            ++proposal_.yes;
         } else if (_choice == VoteOption.No) {
-            vote_.no = vote_.no + 1;
+            proposal_.no = proposal_.no + 1;
         } else if (_choice == VoteOption.Abstain) {
-            vote_.abstain = vote_.abstain + 1;
+            proposal_.abstain = proposal_.abstain + 1;
         }
 
-        vote_.voters[_voter] = _choice;
+        proposal_.voters[_voter] = _choice;
 
         emit VoteCast(_proposalId, _voter, uint8(_choice), 1);
 
@@ -219,8 +219,8 @@ contract AddresslistVoting is MajorityVotingBase {
 
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
-        Vote storage vote_ = votes[_proposalId];
-        return _isVoteOpen(vote_) && isListed(_voter, vote_.snapshotBlock);
+        Proposal storage proposal_ = proposals[_proposalId];
+        return _isVoteOpen(proposal_) && isListed(_voter, proposal_.snapshotBlock);
     }
 
     /// @notice Updates the address list by adding or removing members.

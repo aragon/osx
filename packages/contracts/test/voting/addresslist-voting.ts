@@ -143,7 +143,7 @@ describe('AddresslistVoting', function () {
     });
   });
 
-  describe('Vote creation', async () => {
+  describe('Proposal creation', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
@@ -303,7 +303,7 @@ describe('AddresslistVoting', function () {
     });
   });
 
-  describe('Vote + Execute:', async () => {
+  describe('Proposal + Execute:', async () => {
     const minDuration = 500;
     const relativeSupportThresholdPct = pct16(29);
     const totalSupportThresholdPct = pct16(19);

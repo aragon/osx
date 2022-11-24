@@ -106,7 +106,7 @@ describe('ERC20Voting', function () {
     });
   });
 
-  describe('Vote creation', async () => {
+  describe('Proposal creation', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
@@ -276,7 +276,7 @@ describe('ERC20Voting', function () {
     });
   });
 
-  describe('Vote + Execute:', async () => {
+  describe('Proposal + Execute:', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);

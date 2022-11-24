@@ -17,7 +17,7 @@ interface IMajorityVoting {
         No
     }
 
-    struct Vote {
+    struct Proposal {
         bool executed;
         uint64 startDate;
         uint64 endDate;
@@ -75,7 +75,7 @@ interface IMajorityVoting {
         uint64 _minDuration
     ) external;
 
-    /// @notice Creates a new vote.
+    /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed after vote passes.
     /// @param _startDate The start date of the vote. If 0, uses current timestamp.
@@ -127,7 +127,7 @@ interface IMajorityVoting {
     /// @return VoteOption of the requested voter for a certain vote.
     function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
 
-    /// @notice Returns all information for a vote by its ID.
+    /// @notice Returns all information for a proposal by its ID.
     /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the vote is open or not.
     /// @return executed Wheter the vote is executed or not.
