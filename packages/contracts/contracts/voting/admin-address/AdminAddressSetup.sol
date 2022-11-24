@@ -17,7 +17,7 @@ contract AdminAddressSetup is PluginSetup {
     using Clones for address;
 
     /// @notice The address of `AdminAddress` plugin logic contract to be cloned.
-    address private immutable adminAddressBase;
+    address private immutable implementation;
 
     /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
@@ -28,7 +28,7 @@ contract AdminAddressSetup is PluginSetup {
 
     /// @notice The contract constructor, that deployes the `AdminAddress` plugin logic contract.
     constructor() {
-        adminAddressBase = address(new AdminAddress());
+        implementation = address(new AdminAddress());
     }
 
     /// @inheritdoc IPluginSetup
@@ -55,7 +55,7 @@ contract AdminAddressSetup is PluginSetup {
         }
 
         // Clone plugin contract.
-        plugin = adminAddressBase.clone();
+        plugin = implementation.clone();
 
         // Initialize cloned plugin contract.
         AdminAddress(plugin).initialize(dao);
@@ -72,7 +72,7 @@ contract AdminAddressSetup is PluginSetup {
             plugin,
             admin,
             NO_ORACLE,
-            AdminAddress(plugin).ADMIN_EXECUTE_PERMISSION_ID()
+            AdminAddress(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` on the DAO to the plugin.
@@ -115,6 +115,6 @@ contract AdminAddressSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view returns (address) {
-        return adminAddressBase;
+        return implementation;
     }
 }

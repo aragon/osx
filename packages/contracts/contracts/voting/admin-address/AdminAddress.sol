@@ -18,7 +18,8 @@ contract AdminAddress is PluginCloneable {
         this.initialize.selector ^ this.executeProposal.selector;
 
     /// @notice The ID of the permission required to call the `executeProposal` function.
-    bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID = keccak256("EXECUTE_PROPOSAL_PERMISSION");
+    bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID =
+        keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
     /// @notice The incrimental id for proposals and executions.
     Counters.Counter internal proposalId;
@@ -53,7 +54,7 @@ contract AdminAddress is PluginCloneable {
     /// @param _actions The actions to be executed.
     function executeProposal(bytes calldata _proposalMetadata, IDAO.Action[] calldata _actions)
         external
-        auth(ADMIN_EXECUTE_PERMISSION_ID)
+        auth(EXECUTE_PROPOSAL_PERMISSION_ID)
         returns (bytes[] memory)
     {
         // Create proposal

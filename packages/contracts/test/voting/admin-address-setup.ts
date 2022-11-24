@@ -5,20 +5,16 @@ import {AdminAddressSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-
-enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
+import {Operation} from '../test-utils/plugin-setup-processor';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
 // Permissions
-const ADMIN_EXECUTE_PERMISSION_ID = ethers.utils.id('ADMIN_EXECUTE_PERMISSION');
+const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
+  'EXECUTE_PROPOSAL_PERMISSION'
+);
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('AdminAddressSetup', function () {
@@ -112,14 +108,14 @@ describe('AdminAddressSetup', function () {
       expect(permissions.length).to.be.equal(2);
       expect(permissions).to.deep.equal([
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           ownerAddress,
           AddressZero,
-          ADMIN_EXECUTE_PERMISSION_ID,
+          EXECUTE_PROPOSAL_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           targetDao.address,
           plugin,
           AddressZero,
@@ -172,7 +168,7 @@ describe('AdminAddressSetup', function () {
       expect(permissions.length).to.be.equal(1);
       expect(permissions).to.deep.equal([
         [
-          Op.Revoke,
+          Operation.Revoke,
           targetDao.address,
           plugin,
           AddressZero,

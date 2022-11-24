@@ -14,7 +14,9 @@ const EVENTS = {
 };
 
 // Permissions
-const ADMIN_EXECUTE_PERMISSION_ID = ethers.utils.id('ADMIN_EXECUTE_PERMISSION');
+const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
+  'EXECUTE_PROPOSAL_PERMISSION'
+);
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('AdminAddress plugin', function () {
@@ -67,7 +69,11 @@ describe('AdminAddress plugin', function () {
     plugin = await AdminAddressFactory.deploy();
 
     await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
-    await dao.grant(plugin.address, ownerAddress, ADMIN_EXECUTE_PERMISSION_ID);
+    await dao.grant(
+      plugin.address,
+      ownerAddress,
+      EXECUTE_PROPOSAL_PERMISSION_ID
+    );
   });
 
   function initializePlugin() {
@@ -133,7 +139,7 @@ describe('AdminAddress plugin', function () {
       await dao.revoke(
         plugin.address,
         ownerAddress,
-        ADMIN_EXECUTE_PERMISSION_ID
+        EXECUTE_PROPOSAL_PERMISSION_ID
       );
 
       await expect(
@@ -145,7 +151,7 @@ describe('AdminAddress plugin', function () {
           plugin.address,
           plugin.address,
           ownerAddress,
-          ADMIN_EXECUTE_PERMISSION_ID
+          EXECUTE_PROPOSAL_PERMISSION_ID
         )
       );
     });
