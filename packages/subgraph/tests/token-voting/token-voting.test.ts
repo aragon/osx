@@ -36,7 +36,7 @@ let proposalId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
-let relativeSupportThresholdPct = '1000';
+let supportThresholdPct = '1000';
 let participationThresholdPct = '500';
 let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
@@ -58,7 +58,7 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     startDate,
     endDate,
     snapshotBlock,
-    relativeSupportThresholdPct,
+    supportThresholdPct,
     participationThresholdPct,
     totalVotingPower,
     '0',
@@ -107,8 +107,8 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
-    'relativeSupportThresholdPct',
-    relativeSupportThresholdPct
+    'supportThresholdPct',
+    supportThresholdPct
   );
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -260,7 +260,7 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
     startDate,
     endDate,
     snapshotBlock,
-    relativeSupportThresholdPct,
+    supportThresholdPct,
     participationThresholdPct,
     totalVotingPower,
     '1',
@@ -301,12 +301,7 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
 
   // checks
   assert.fieldEquals('TokenVotingPlugin', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'TokenVotingPlugin',
-    entityID,
-    'relativeSupportThresholdPct',
-    '1'
-  );
+  assert.fieldEquals('TokenVotingPlugin', entityID, 'supportThresholdPct', '1');
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,

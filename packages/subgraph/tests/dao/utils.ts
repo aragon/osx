@@ -409,8 +409,8 @@ export function getSupportRequiredPct(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'relativeSupportThresholdPct',
-    'relativeSupportThresholdPct():(uint64)'
+    'supportThresholdPct',
+    'supportThresholdPct():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

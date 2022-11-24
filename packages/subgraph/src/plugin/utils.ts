@@ -21,14 +21,14 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
-    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
+    let supportThresholdPct = contract.try_supportThresholdPct();
     let participationThresholdPct = contract.try_participationThresholdPct();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
-    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
+    packageEntity.supportThresholdPct = supportThresholdPct.reverted
       ? null
-      : relativeSupportThresholdPct.value;
+      : supportThresholdPct.value;
     packageEntity.participationThresholdPct = participationThresholdPct.reverted
       ? null
       : participationThresholdPct.value;
@@ -50,13 +50,13 @@ function createAddresslistPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new AddresslistPlugin(who.toHexString());
     let contract = AddresslistContract.bind(who);
-    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
+    let supportThresholdPct = contract.try_supportThresholdPct();
     let participationThresholdPct = contract.try_participationThresholdPct();
     let minDuration = contract.try_minDuration();
 
-    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
+    packageEntity.supportThresholdPct = supportThresholdPct.reverted
       ? null
-      : relativeSupportThresholdPct.value;
+      : supportThresholdPct.value;
     packageEntity.participationThresholdPct = participationThresholdPct.reverted
       ? null
       : participationThresholdPct.value;

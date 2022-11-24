@@ -57,7 +57,7 @@ export function createGetProposalCall(
   startDate: string,
   endDate: string,
   snapshotBlock: string,
-  relativeSupportThresholdPct: string,
+  supportThresholdPct: string,
   participationThresholdPct: string,
   totalVotingPower: string,
   yes: string,
@@ -79,9 +79,7 @@ export function createGetProposalCall(
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate)),
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock)),
-      ethereum.Value.fromUnsignedBigInt(
-        BigInt.fromString(relativeSupportThresholdPct)
-      ),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThresholdPct)),
       ethereum.Value.fromUnsignedBigInt(
         BigInt.fromString(participationThresholdPct)
       ),

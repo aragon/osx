@@ -120,7 +120,7 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVoteSettingsUpdatedEvent(
-  relativeSupportThresholdPct: string,
+  supportThresholdPct: string,
   participationThresholdPct: string,
   minDuration: string,
   contractAddress: string
@@ -138,11 +138,9 @@ export function createNewVoteSettingsUpdatedEvent(
       BigInt.fromString(participationThresholdPct)
     )
   );
-  let relativeSupportThresholdPctParam = new ethereum.EventParam(
-    'relativeSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(
-      BigInt.fromString(relativeSupportThresholdPct)
-    )
+  let supportThresholdPctParam = new ethereum.EventParam(
+    'supportThresholdPct',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportThresholdPct))
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
@@ -150,7 +148,7 @@ export function createNewVoteSettingsUpdatedEvent(
   );
 
   newVoteSettingsUpdatedEvent.parameters.push(participationThresholdPctParam);
-  newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(supportThresholdPctParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
   return newVoteSettingsUpdatedEvent;
@@ -182,7 +180,7 @@ export function createTokenVotingProposalEntityState(
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  relativeSupportThresholdPct: string = MIN_SUPPORT,
+  supportThresholdPct: string = MIN_SUPPORT,
   participationThresholdPct: string = MIN_TURNOUT,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
@@ -199,8 +197,8 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.startDate = BigInt.fromString(startDate);
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  tokenVotingProposal.relativeSupportThresholdPct = BigInt.fromString(
-    relativeSupportThresholdPct
+  tokenVotingProposal.supportThresholdPct = BigInt.fromString(
+    supportThresholdPct
   );
   tokenVotingProposal.participationThresholdPct = BigInt.fromString(
     participationThresholdPct

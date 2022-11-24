@@ -51,7 +51,7 @@ export function _handleProposalCreated(
     proposalEntity.startDate = vote.value.value2;
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.relativeSupportThresholdPct = vote.value.value5;
+    proposalEntity.supportThresholdPct = vote.value.value5;
     proposalEntity.participationThresholdPct = vote.value.value6;
     proposalEntity.totalVotingPower = vote.value.value7;
 
@@ -122,8 +122,8 @@ export function handleVoteCast(event: VoteCast): void {
 
       // check if the current vote results meet
       // the conditions for the proposal to pass:
-      // - participation    :  N_yes / N_total >= participation threshold
-      // - relative support :  N_yes / (N_yes + N_no) >= relative support threshold
+      // - participation    :  (N_yes + N_no + N_abstain)  / N_total >= participation threshold
+      // - support :  N_yes / (N_yes + N_no) >= support threshold
 
       // expect a number between 0 and 100
       // where 0.35 => 35
@@ -141,7 +141,7 @@ export function handleVoteCast(event: VoteCast): void {
           )
         ) &&
         currentSupport.ge(
-          proposalEntity.relativeSupportThresholdPct.div(
+          proposalEntity.supportThresholdPct.div(
             BigInt.fromString(TEN_POWER_16)
           )
         );
@@ -186,8 +186,7 @@ export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   if (packageEntity) {
     packageEntity.participationThresholdPct =
       event.params.participationThresholdPct;
-    packageEntity.relativeSupportThresholdPct =
-      event.params.relativeSupportThresholdPct;
+    packageEntity.supportThresholdPct = event.params.supportThresholdPct;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }

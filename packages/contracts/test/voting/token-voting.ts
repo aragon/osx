@@ -80,14 +80,14 @@ describe('TokenVoting', function () {
 
   function initializeVoting(
     _participationThresholdPct: any,
-    _relativeSupportThresholdPct: any,
+    _supportThresholdPct: any,
     minDuration: any
   ) {
     return voting.initialize(
       dao.address,
 
       _participationThresholdPct,
-      _relativeSupportThresholdPct,
+      _supportThresholdPct,
       minDuration,
       governanceErc20Mock.address
     );
@@ -111,7 +111,7 @@ describe('TokenVoting', function () {
 
   describe('Proposal creation', async () => {
     let minDuration = 500;
-    let relativeSupportThresholdPct = pct16(50);
+    let supportThresholdPct = pct16(50);
     let participationThresholdPct = pct16(20);
     let totalVotingPower = 100;
     const id = 0; // proposalId
@@ -179,7 +179,7 @@ describe('TokenVoting', function () {
       const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote._relativeSupportThresholdPct).to.equal(2);
+      expect(vote._supportThresholdPct).to.equal(2);
       expect(vote._participationThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.totalVotingPower).to.equal(1);
@@ -224,7 +224,7 @@ describe('TokenVoting', function () {
       const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote._relativeSupportThresholdPct).to.equal(2);
+      expect(vote._supportThresholdPct).to.equal(2);
       expect(vote._participationThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.totalVotingPower).to.equal(1);
@@ -240,7 +240,7 @@ describe('TokenVoting', function () {
 
       await initializeVoting(
         participationThresholdPct,
-        relativeSupportThresholdPct,
+        supportThresholdPct,
         minDuration
       );
 
@@ -283,7 +283,7 @@ describe('TokenVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     let minDuration = 500;
-    let relativeSupportThresholdPct = pct16(50);
+    let supportThresholdPct = pct16(50);
     let participationThresholdPct = pct16(20);
     let totalVotingPower = 100;
     const id = 0; // proposalId
@@ -297,7 +297,7 @@ describe('TokenVoting', function () {
 
       await initializeVoting(
         participationThresholdPct,
-        relativeSupportThresholdPct,
+        supportThresholdPct,
         minDuration
       );
 
@@ -399,15 +399,15 @@ describe('TokenVoting', function () {
     it('can execute early if participation is large enough', async () => {
       await advanceTimeTo(startDate);
 
-      // vote with 50 yes votes, which is NOT enough to make vote executable as relative support
-      // must be larger than relativeSupportThresholdPct = 50
+      // vote with 50 yes votes, which is NOT enough to make vote executable as support
+      // must be larger than supportThresholdPct = 50
       await governanceErc20Mock.mock.getPastVotes.returns(50);
 
       await voting.vote(id, VoteOption.Yes, false);
       expect(await voting.canExecute(id)).to.equal(false);
 
       // vote with 1 yes vote from another wallet, so that yes votes amount to 51 in total, which is
-      // enough to make vote executable as relativeSupportThresholdPct = 50
+      // enough to make vote executable as supportThresholdPct = 50
       await governanceErc20Mock.mock.getPastVotes.returns(1);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
@@ -432,7 +432,7 @@ describe('TokenVoting', function () {
       // closes the vote
       await advanceTime(minDuration + 10);
 
-      //The vote is executable as relative support > 50%, participation > 20%, and the voting period is over
+      //The vote is executable as support > 50%, participation > 20%, and the voting period is over
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
@@ -454,14 +454,14 @@ describe('TokenVoting', function () {
       // closes the vote
       await advanceTime(minDuration + 10);
 
-      //The vote is not executable because the participation with 20% is still too low, despite a relative support of 66% and the voting period being over
+      //The vote is not executable because the participation with 20% is still too low, despite a support of 66% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
     });
 
     it('executes the vote immediately while final yes is given', async () => {
       await advanceTimeTo(startDate);
 
-      // vote with _relativeSupportThresholdPct staking, so
+      // vote with _supportThresholdPct staking, so
       // it immediatelly executes the vote
       await governanceErc20Mock.mock.getPastVotes.returns(51);
 
@@ -511,16 +511,16 @@ describe('TokenVoting', function () {
   describe('Configurations for different use cases', async () => {
     const id = 0; // proposalId
 
-    describe('A simple majority vote with >50% relative support and >25% participation required', async () => {
+    describe('A simple majority vote with >50% support and >25% participation required', async () => {
       let minDuration = 500;
-      let relativeSupportThresholdPct = pct16(50);
+      let supportThresholdPct = pct16(50);
       let participationThresholdPct = pct16(25);
       let totalVotingPower = 100;
 
       beforeEach(async () => {
         await initializeVoting(
           participationThresholdPct,
-          relativeSupportThresholdPct,
+          supportThresholdPct,
           minDuration
         );
 
@@ -554,7 +554,7 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
       });
 
-      it('does not execute if participation is high enough but relative support is too low', async () => {
+      it('does not execute if participation is high enough but support is too low', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(10);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
@@ -563,22 +563,22 @@ describe('TokenVoting', function () {
         // dur | tot | rel
         //  0  | 30% | 33%
         //  𐄂  |  ✓  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
 
         await advanceTime(minDuration + 10); // waiting until the vote end doesn't change this
         // dur | tot | rel
         // 510 | 30% | 33%
         //  ✓  |  ✓  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // relative support (33%) > relative support threshold (50%) == false
+        expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
       });
 
-      it('executes after the duration if total and relative support are met', async () => {
+      it('executes after the duration if total and support are met', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(30);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 30% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > relative support threshold (50%) == false, duration is not over
+        expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > support threshold (50%) == false, duration is not over
 
         await advanceTime(minDuration + 10);
         // dur | tot | rel
@@ -587,20 +587,20 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
-      it('executes early if the participation exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
+      it('executes early if the participation exceeds the support threshold (assuming the latter is > 50%)', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(50);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 50% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation > relative support threshold == false
+        expect(await voting.canExecute(id)).to.equal(false); // participation > support threshold == false
 
         await governanceErc20Mock.mock.getPastVotes.returns(10);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > relative support threshold (50%) == true
+        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (50%) == true
 
         await governanceErc20Mock.mock.getPastVotes.returns(40);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);

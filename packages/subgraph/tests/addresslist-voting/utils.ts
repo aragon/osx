@@ -123,7 +123,7 @@ export function createNewProposalExecutedEvent(
 
 export function createNewVoteSettingsUpdatedEvent(
   participationThresholdPct: string,
-  relativeSupportThresholdPct: string,
+  supportThresholdPct: string,
   minDuration: string,
   contractAddress: string
 ): VoteSettingsUpdated {
@@ -140,11 +140,9 @@ export function createNewVoteSettingsUpdatedEvent(
       BigInt.fromString(participationThresholdPct)
     )
   );
-  let relativeSupportThresholdPctParam = new ethereum.EventParam(
-    'relativeSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(
-      BigInt.fromString(relativeSupportThresholdPct)
-    )
+  let supportThresholdPctParam = new ethereum.EventParam(
+    'supportThresholdPct',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportThresholdPct))
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
@@ -152,7 +150,7 @@ export function createNewVoteSettingsUpdatedEvent(
   );
 
   newVoteSettingsUpdatedEvent.parameters.push(participationThresholdPctParam);
-  newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(supportThresholdPctParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
   return newVoteSettingsUpdatedEvent;
@@ -222,7 +220,7 @@ export function createAddresslistProposalEntityState(
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  relativeSupportThresholdPct: string = MIN_SUPPORT,
+  supportThresholdPct: string = MIN_SUPPORT,
   participationThresholdPct: string = MIN_TURNOUT,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
@@ -239,8 +237,8 @@ export function createAddresslistProposalEntityState(
   addresslistProposal.startDate = BigInt.fromString(startDate);
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  addresslistProposal.relativeSupportThresholdPct = BigInt.fromString(
-    relativeSupportThresholdPct
+  addresslistProposal.supportThresholdPct = BigInt.fromString(
+    supportThresholdPct
   );
   addresslistProposal.participationThresholdPct = BigInt.fromString(
     participationThresholdPct

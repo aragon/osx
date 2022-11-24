@@ -8,13 +8,13 @@ contract MajorityVotingMock is MajorityVotingBase {
     function initializeMock(
         IDAO _dao,
         uint64 _participationThresholdPct,
-        uint64 _relativeSupportThresholdPct,
+        uint64 _supportThresholdPct,
         uint64 _minDuration
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
             _participationThresholdPct,
-            _relativeSupportThresholdPct,
+            _supportThresholdPct,
             _minDuration
         );
     }
