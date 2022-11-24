@@ -131,7 +131,7 @@ contract AddresslistVoting is MajorityVotingBase {
         if (_endDate == 0) _endDate = _startDate + minDuration;
 
         if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
-            revert VoteTimesInvalid({
+            revert VotingPeriodInvalid({
                 current: currentTimestamp,
                 start: _startDate,
                 end: _endDate,

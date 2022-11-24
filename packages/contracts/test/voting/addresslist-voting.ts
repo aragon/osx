@@ -179,7 +179,7 @@ describe('AddresslistVoting', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'VoteTimesInvalid',
+          'VotingPeriodInvalid',
           current + 1, // TODO hacky
           startDate,
           endDate,

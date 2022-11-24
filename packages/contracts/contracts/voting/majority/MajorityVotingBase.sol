@@ -58,7 +58,7 @@ abstract contract MajorityVotingBase is
     /// @param start The start date of the vote as a unix timestamp.
     /// @param end The end date of the vote as a unix timestamp.
     /// @param minDuration The minimal duration of the vote in seconds.
-    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    error VotingPeriodInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero(); ///TODO  remove
