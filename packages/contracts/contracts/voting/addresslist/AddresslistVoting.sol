@@ -182,7 +182,7 @@ contract AddresslistVoting is MajorityVotingBase {
 
         // Store the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            ++proposal_.yes;
+            proposal_.yes = proposal_.yes + 1;
         } else if (_choice == VoteOption.No) {
             proposal_.no = proposal_.no + 1;
         } else if (_choice == VoteOption.Abstain) {
