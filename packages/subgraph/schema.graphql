@@ -296,3 +296,32 @@ type AddresslistProposal implements Proposal @entity {
   createdAt: BigInt!
   executable: Boolean
 }
+
+# AdminAddress
+
+type AdminAddressPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposals: [AdminAddressProposal!]! @derivedFrom(field: "plugin")
+  members: [AdminAddressMember!]! @derivedFrom(field: "plugin")
+}
+
+type AdminAddressMember @entity {
+  id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [AdminAddressProposal!]! @derivedFrom(field: "creator")
+  plugin: AdminAddressPlugin!
+}
+
+type AdminAddressProposal implements Proposal @entity {
+  id: ID! # plugin + proposalId
+  dao: Dao!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  plugin: AdminAddressPlugin!
+  propsalId: BigInt!
+  creator: AdminAddressMember!
+  metadata: String!
+  executed: Boolean!
+  createdAt: BigInt!
+}
