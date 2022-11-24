@@ -62,7 +62,7 @@ export function createNewVoteCastEvent(
   proposalId: string,
   voter: string,
   creatorChoice: string,
-  voteWeight: string,
+  votingPower: string,
   contractAddress: string
 ): VoteCast {
   let createProposalCastEvent = changetype<VoteCast>(newMockEvent());
@@ -82,15 +82,15 @@ export function createNewVoteCastEvent(
     'choice',
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(creatorChoice))
   );
-  let voteWeightParam = new ethereum.EventParam(
+  let votingPowerParam = new ethereum.EventParam(
     'choice',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteWeight))
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingPower))
   );
 
   createProposalCastEvent.parameters.push(proposalIdParam);
   createProposalCastEvent.parameters.push(voterParam);
   createProposalCastEvent.parameters.push(choiceParam);
-  createProposalCastEvent.parameters.push(voteWeightParam);
+  createProposalCastEvent.parameters.push(votingPowerParam);
 
   return createProposalCastEvent;
 }

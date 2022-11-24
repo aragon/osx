@@ -101,7 +101,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalEntity.proposal = proposalId;
   }
   voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
-  voterProposalEntity.weight = event.params.voteWeight;
+  voterProposalEntity.weight = event.params.votingPower;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 

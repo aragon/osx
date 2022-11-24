@@ -32,16 +32,16 @@ interface IMajorityVoting {
         IDAO.Action[] actions;
     }
 
-    /// @notice Emitted when a vote is casted by a voter.
+    /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
     /// @param voter The voter casting the vote.
     /// @param choice The vote option chosen.
-    /// @param voteWeight The weight of the casted vote.
+    /// @param votingPower The voting power behind this vote.
     event VoteCast(
         uint256 indexed proposalId,
         address indexed voter,
         uint8 choice,
-        uint256 voteWeight
+        uint256 votingPower
     );
 
     /// @notice Emitted when a vote is created.
@@ -136,7 +136,7 @@ interface IMajorityVoting {
     /// @return snapshotBlock The block number of the snapshot taken for this vote.
     /// @return relativeSupportThresholdPct The relative support threshold in percent.
     /// @return totalSupportThresholdPct The total support threshold in percent.
-    /// @return totalVotingPower The total number of eligible votes that can be casted.
+    /// @return totalVotingPower The total number of eligible votes that can be cast.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
     /// @return abstain The number of `abstain` votes.

@@ -248,7 +248,7 @@ abstract contract MajorityVotingBase is
     /// @return True if the given vote can be executed, false otherwise.
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be casted a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
+    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be cast a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
     /// @param _proposalId The ID of the proposal.
     /// @return True if the given vote can be executed, false otherwise.
     function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
