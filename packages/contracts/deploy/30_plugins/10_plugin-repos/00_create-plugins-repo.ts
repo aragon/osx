@@ -19,11 +19,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     '0x'
   );
 
-  // ERC20VotingSetup
+  // TokenVotingSetup
   await createPluginRepo(
     hre,
-    'ERC20Voting',
-    'ERC20VotingSetup',
+    'TokenVoting',
+    'TokenVotingSetup',
     [1, 0, 0],
     '0x'
   );

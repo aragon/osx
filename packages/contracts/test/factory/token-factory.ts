@@ -119,11 +119,12 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const [wrappedToken, merkleMinter] = await tokenFactory.callStatic.createToken(
-        dao.address,
-        config,
-        mintConfig
-      );
+      const [wrappedToken, merkleMinter] =
+        await tokenFactory.callStatic.createToken(
+          dao.address,
+          config,
+          mintConfig
+        );
 
       expect(wrappedToken).not.to.be.eq(governanceWrappedBase.address);
     });
@@ -259,7 +260,7 @@ describe('Core: TokenFactory', () => {
         symbol: 'FT',
       };
 
-      const mintAddress = '0x0000000000000000000000000000000000000001'
+      const mintAddress = '0x0000000000000000000000000000000000000001';
 
       const mintConfig: MintConfig = {
         receivers: [mintAddress],

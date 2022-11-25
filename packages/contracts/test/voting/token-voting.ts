@@ -17,27 +17,27 @@ import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 const {deployMockContract} = waffle;
 
-describe('ERC20Voting', function () {
+describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;
-  let erc20VoteMock: any;
+  let governanceErc20Mock: any;
   let ownerAddress: string;
   let dummyActions: any;
   let dummyMetadata: string;
 
   let mergedAbi: any;
-  let erc20VotingFactoryBytecode: any;
+  let tokenVotingFactoryBytecode: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    ({abi: mergedAbi, bytecode: erc20VotingFactoryBytecode} =
+    ({abi: mergedAbi, bytecode: tokenVotingFactoryBytecode} =
       await getMergedABI(
         // @ts-ignore
         hre,
-        'ERC20Voting',
+        'TokenVoting',
         ['DAO']
       ));
 
@@ -59,14 +59,17 @@ describe('ERC20Voting', function () {
   });
 
   beforeEach(async () => {
-    erc20VoteMock = await deployMockContract(signers[0], ERC20Governance.abi);
+    governanceErc20Mock = await deployMockContract(
+      signers[0],
+      ERC20Governance.abi
+    );
 
-    const ERC20VotingFactory = new ethers.ContractFactory(
+    const TokenVotingFactory = new ethers.ContractFactory(
       mergedAbi,
-      erc20VotingFactoryBytecode,
+      tokenVotingFactoryBytecode,
       signers[0]
     );
-    voting = await ERC20VotingFactory.deploy();
+    voting = await TokenVotingFactory.deploy();
 
     dao.grant(
       dao.address,
@@ -86,7 +89,7 @@ describe('ERC20Voting', function () {
       _totalSupportThresholdPct,
       _relativeSupportThresholdPct,
       minDuration,
-      erc20VoteMock.address
+      governanceErc20Mock.address
     );
   }
 
@@ -116,7 +119,7 @@ describe('ERC20Voting', function () {
     it('reverts total token supply while creating a vote is 0', async () => {
       await initializeVoting(1, 2, minDuration);
 
-      await erc20VoteMock.mock.getPastTotalSupply.returns(0);
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(0);
       await expect(
         voting.createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(customError('NoVotingPower'));
@@ -125,7 +128,7 @@ describe('ERC20Voting', function () {
     it('reverts if vote duration is less than minDuration', async () => {
       await initializeVoting(1, 2, minDuration);
 
-      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
       const startDate = block.timestamp;
@@ -155,8 +158,8 @@ describe('ERC20Voting', function () {
 
       const id = 0; // proposalId
 
-      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
-      await erc20VoteMock.mock.getPastVotes.returns(0);
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       expect(
         await voting.createProposal(
@@ -198,8 +201,8 @@ describe('ERC20Voting', function () {
 
       const id = 0; // proposalId
 
-      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
-      await erc20VoteMock.mock.getPastVotes.returns(1);
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
 
       expect(
         await voting.createProposal(
@@ -242,11 +245,13 @@ describe('ERC20Voting', function () {
       );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(
+        totalVotingPower
+      );
 
       expect(await getTime()).to.be.lessThan(startDate);
 
-      await erc20VoteMock.mock.getPastVotes.returns(51);
+      await governanceErc20Mock.mock.getPastVotes.returns(51);
 
       // Reverts if the vote option is not 'None'
       await expect(
@@ -297,8 +302,10 @@ describe('ERC20Voting', function () {
       );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
-      await erc20VoteMock.mock.getPastVotes.returns(0);
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(
+        totalVotingPower
+      );
+      await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       expect(
         (
@@ -317,7 +324,7 @@ describe('ERC20Voting', function () {
     it('does not allow voting, when the vote has not started yet', async () => {
       expect(await getTime()).to.be.lessThan(startDate);
 
-      await erc20VoteMock.mock.getPastVotes.returns(0);
+      await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
         customError('VoteCastForbidden', id, ownerAddress)
@@ -327,7 +334,7 @@ describe('ERC20Voting', function () {
     it('should not be able to vote if user has 0 token', async () => {
       await advanceTimeTo(startDate);
 
-      await erc20VoteMock.mock.getPastVotes.returns(0);
+      await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
         customError('VoteCastForbidden', id, ownerAddress)
@@ -337,7 +344,7 @@ describe('ERC20Voting', function () {
     it('increases the yes, no, abstain votes and emit correct events', async () => {
       await advanceTimeTo(startDate);
 
-      await erc20VoteMock.mock.getPastVotes.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
 
       expect(await voting.vote(id, VoteOption.Yes, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
@@ -370,7 +377,7 @@ describe('ERC20Voting', function () {
     it('should not double-count votes by the same address', async () => {
       await advanceTimeTo(startDate);
 
-      await erc20VoteMock.mock.getPastVotes.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
 
       // yes still ends up to be 1 here even after voting
       // 2 times from the same wallet.
@@ -394,14 +401,14 @@ describe('ERC20Voting', function () {
 
       // vote with 50 yes votes, which is NOT enough to make vote executable as relative support
       // must be larger than relativeSupportThresholdPct = 50
-      await erc20VoteMock.mock.getPastVotes.returns(50);
+      await governanceErc20Mock.mock.getPastVotes.returns(50);
 
       await voting.vote(id, VoteOption.Yes, false);
       expect(await voting.canExecute(id)).to.equal(false);
 
       // vote with 1 yes vote from another wallet, so that yes votes amount to 51 in total, which is
       // enough to make vote executable as relativeSupportThresholdPct = 50
-      await erc20VoteMock.mock.getPastVotes.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
       expect(await voting.canExecute(id)).to.equal(true);
@@ -411,15 +418,15 @@ describe('ERC20Voting', function () {
       await advanceTimeTo(startDate);
 
       // vote with 50 yes votes
-      await erc20VoteMock.mock.getPastVotes.returns(50);
+      await governanceErc20Mock.mock.getPastVotes.returns(50);
       await voting.vote(id, VoteOption.Yes, false);
 
       // vote 30 voting no votes
-      await erc20VoteMock.mock.getPastVotes.returns(30);
+      await governanceErc20Mock.mock.getPastVotes.returns(30);
       await voting.connect(signers[1]).vote(id, VoteOption.No, false);
 
       // vote with 10 abstain votes
-      await erc20VoteMock.mock.getPastVotes.returns(10);
+      await governanceErc20Mock.mock.getPastVotes.returns(10);
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
@@ -433,15 +440,15 @@ describe('ERC20Voting', function () {
       await advanceTimeTo(startDate);
 
       // vote with 10 yes votes
-      await erc20VoteMock.mock.getPastVotes.returns(10);
+      await governanceErc20Mock.mock.getPastVotes.returns(10);
       await voting.vote(id, VoteOption.Yes, false);
 
       // vote with 5 no votes
-      await erc20VoteMock.mock.getPastVotes.returns(5);
+      await governanceErc20Mock.mock.getPastVotes.returns(5);
       await voting.connect(signers[1]).vote(id, VoteOption.No, false);
 
       // vote with 5 abstain votes
-      await erc20VoteMock.mock.getPastVotes.returns(5);
+      await governanceErc20Mock.mock.getPastVotes.returns(5);
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
@@ -456,7 +463,7 @@ describe('ERC20Voting', function () {
 
       // vote with _relativeSupportThresholdPct staking, so
       // it immediatelly executes the vote
-      await erc20VoteMock.mock.getPastVotes.returns(51);
+      await governanceErc20Mock.mock.getPastVotes.returns(51);
 
       // supports and should execute right away.
       let tx = await voting.vote(id, VoteOption.Yes, true);
@@ -518,8 +525,10 @@ describe('ERC20Voting', function () {
         );
 
         // set voting power to 100
-        await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
-        await erc20VoteMock.mock.getPastVotes.returns(0);
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(
+          totalVotingPower
+        );
+        await governanceErc20Mock.mock.getPastVotes.returns(0);
 
         await voting.createProposal(
           dummyMetadata,
@@ -532,7 +541,7 @@ describe('ERC20Voting', function () {
       });
 
       it('does not execute if support is high enough but relative and total support are too low', async () => {
-        await erc20VoteMock.mock.getPastVotes.returns(10);
+        await governanceErc20Mock.mock.getPastVotes.returns(10);
         // dur | tot | rel
         //  0  | 10% | 100%
         //  𐄂  |  𐄂  |  ✓
@@ -546,10 +555,10 @@ describe('ERC20Voting', function () {
       });
 
       it('does not execute if total support is high enough but relative support is too low', async () => {
-        await erc20VoteMock.mock.getPastVotes.returns(10);
+        await governanceErc20Mock.mock.getPastVotes.returns(10);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
-        await erc20VoteMock.mock.getPastVotes.returns(20);
+        await governanceErc20Mock.mock.getPastVotes.returns(20);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 30% | 33%
@@ -564,7 +573,7 @@ describe('ERC20Voting', function () {
       });
 
       it('executes after the duration if total and relative support are met', async () => {
-        await erc20VoteMock.mock.getPastVotes.returns(30);
+        await governanceErc20Mock.mock.getPastVotes.returns(30);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 30% | 100%
@@ -579,21 +588,21 @@ describe('ERC20Voting', function () {
       });
 
       it('executes early if the total support exceeds the relative support threshold (assuming the latter is > 50%)', async () => {
-        await erc20VoteMock.mock.getPastVotes.returns(50);
+        await governanceErc20Mock.mock.getPastVotes.returns(50);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 50% | 100%
         //  𐄂  |  ✓  |  ✓
         expect(await voting.canExecute(id)).to.equal(false); // total support > relative support threshold == false
 
-        await erc20VoteMock.mock.getPastVotes.returns(10);
+        await governanceErc20Mock.mock.getPastVotes.returns(10);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
         //  𐄂  |  ✓  |  ✓
         expect(await voting.canExecute(id)).to.equal(true); // total support (60%) > relative support threshold (50%) == true
 
-        await erc20VoteMock.mock.getPastVotes.returns(40);
+        await governanceErc20Mock.mock.getPastVotes.returns(40);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 60% | 60%

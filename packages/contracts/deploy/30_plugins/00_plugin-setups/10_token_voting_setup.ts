@@ -6,11 +6,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  await deploy('ERC20VotingSetup', {
+  await deploy('TokenVotingSetup', {
     from: deployer,
     args: [],
     log: true,
   });
 };
 export default func;
-func.tags = ['ERC20VotingSetup'];
+func.tags = ['TokenVotingSetup'];
