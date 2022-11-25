@@ -76,15 +76,15 @@ describe('AddresslistVoting', function () {
   });
 
   function initializeVoting(
-    participationThresholdPct: any,
-    supportThresholdPct: any,
+    participationThreshold: any,
+    supportThreshold: any,
     minDuration: any,
     allowed: Array<string>
   ) {
     return voting.initialize(
       dao.address,
-      participationThresholdPct,
-      supportThresholdPct,
+      participationThreshold,
+      supportThreshold,
       minDuration,
       allowed
     );
@@ -145,8 +145,8 @@ describe('AddresslistVoting', function () {
 
   describe('Proposal creation', async () => {
     let minDuration = 500;
-    let supportThresholdPct = pct16(50);
-    let participationThresholdPct = pct16(20);
+    let supportThreshold = pct16(50);
+    let participationThreshold = pct16(20);
     const id = 0; // proposalId
 
     it('reverts if user is not allowed to create a vote', async () => {
@@ -211,9 +211,9 @@ describe('AddresslistVoting', function () {
       const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote._supportThresholdPct).to.equal(2);
+      expect(vote._supportThreshold).to.equal(2);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote._participationThresholdPct).to.equal(1);
+      expect(vote._participationThreshold).to.equal(1);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
@@ -253,9 +253,9 @@ describe('AddresslistVoting', function () {
       const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote._supportThresholdPct).to.equal(2);
+      expect(vote._supportThreshold).to.equal(2);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote._participationThresholdPct).to.equal(1);
+      expect(vote._participationThreshold).to.equal(1);
 
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
@@ -267,8 +267,8 @@ describe('AddresslistVoting', function () {
       let endDate = startDate + minDuration;
 
       await initializeVoting(
-        participationThresholdPct,
-        supportThresholdPct,
+        participationThreshold,
+        supportThreshold,
         minDuration,
         [ownerAddress]
       );
@@ -305,8 +305,8 @@ describe('AddresslistVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     const minDuration = 500;
-    const supportThresholdPct = pct16(29);
-    const participationThresholdPct = pct16(19);
+    const supportThreshold = pct16(29);
+    const participationThreshold = pct16(19);
     const id = 0; // proposalId
     const startOffset = 9;
     let startDate: number;
@@ -326,8 +326,8 @@ describe('AddresslistVoting', function () {
       // voting will be initialized with 10 allowed addresses
       // Which means totalVotingPower = 10 at this point.
       await initializeVoting(
-        participationThresholdPct,
-        supportThresholdPct,
+        participationThreshold,
+        supportThreshold,
         minDuration,
         addresses
       );
@@ -496,8 +496,8 @@ describe('AddresslistVoting', function () {
 
     describe('A simple majority vote with >50% support and >25% participation required', async () => {
       let minDuration = 500;
-      let supportThresholdPct = pct16(50);
-      let participationThresholdPct = pct16(25);
+      let supportThreshold = pct16(50);
+      let participationThreshold = pct16(25);
 
       beforeEach(async () => {
         const addresses = [];
@@ -510,8 +510,8 @@ describe('AddresslistVoting', function () {
         // voting will be initialized with 10 allowed addresses
         // Which means totalVotingPower = 10 at this point.
         await initializeVoting(
-          participationThresholdPct,
-          supportThresholdPct,
+          participationThreshold,
+          supportThreshold,
           minDuration,
           addresses
         );
@@ -602,8 +602,8 @@ describe('AddresslistVoting', function () {
 
     describe('A special majority vote with >50% support and >75% participation required', async () => {
       let minDuration = 500;
-      let supportThresholdPct = pct16(50);
-      let participationThresholdPct = pct16(75);
+      let supportThreshold = pct16(50);
+      let participationThreshold = pct16(75);
       const id = 0; // voteId
       const startOffset = 2;
       let startDate: number;
@@ -622,8 +622,8 @@ describe('AddresslistVoting', function () {
         // voting will be initialized with 10 allowed addresses
         // Which means census = 10 at this point.
         await initializeVoting(
-          participationThresholdPct,
-          supportThresholdPct,
+          participationThreshold,
+          supportThreshold,
           minDuration,
           addresses
         );

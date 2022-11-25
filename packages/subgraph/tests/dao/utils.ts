@@ -403,27 +403,27 @@ export function getEXECUTE_PERMISSION_IDreverted(
     .reverts();
 }
 
-export function getSupportRequiredPct(
+export function getSupportThreshold(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'supportThresholdPct',
-    'supportThresholdPct():(uint64)'
+    'supportThreshold',
+    'supportThreshold():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getParticipationRequiredPct(
+export function getParticipationThreshold(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'participationThresholdPct',
-    'participationThresholdPct():(uint64)'
+    'participationThreshold',
+    'participationThreshold():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

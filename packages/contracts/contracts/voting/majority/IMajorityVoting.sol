@@ -22,8 +22,8 @@ interface IMajorityVoting {
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
-        uint64 supportThresholdPct;
-        uint64 participationThresholdPct;
+        uint64 supportThreshold;
+        uint64 participationThreshold;
         uint256 yes;
         uint256 no;
         uint256 abstain;
@@ -56,22 +56,22 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
-    /// @param supportThresholdPct The support threshold in percent.
-    /// @param participationThresholdPct The participation threshold in percent.
+    /// @param supportThreshold The support threshold in percent.
+    /// @param participationThreshold The participation threshold in percent.
     /// @param minDuration The minimal duration of a vote.
     event VoteSettingsUpdated(
-        uint64 participationThresholdPct,
-        uint64 supportThresholdPct,
+        uint64 participationThreshold,
+        uint64 supportThreshold,
         uint64 minDuration
     );
 
     /// @notice Changes the vote settings.
-    /// @param _participationThresholdPct The participation threshold in percent.
-    /// @param _supportThresholdPct The support threshold in percent.
+    /// @param _participationThreshold The participation threshold in percent.
+    /// @param _supportThreshold The support threshold in percent.
     /// @param _minDuration The minimal duration of a vote.
     function changeVoteSettings(
-        uint64 _supportThresholdPct,
-        uint64 _participationThresholdPct,
+        uint64 _supportThreshold,
+        uint64 _participationThreshold,
         uint64 _minDuration
     ) external;
 
@@ -135,8 +135,8 @@ interface IMajorityVoting {
     /// @return startDate The start date of the proposal vote.
     /// @return endDate The end date of the proposal vote.
     /// @return snapshotBlock The block number of the snapshot taken for this proposal.
-    /// @return supportThresholdPct The support threshold in percent.
-    /// @return participationThresholdPct The participation threshold in percent.
+    /// @return supportThreshold The support threshold in percent.
+    /// @return participationThreshold The participation threshold in percent.
     /// @return totalVotingPower The total number of eligible votes that can be casted.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
@@ -151,8 +151,8 @@ interface IMajorityVoting {
             uint64 startDate,
             uint64 endDate,
             uint64 snapshotBlock,
-            uint64 supportThresholdPct,
-            uint64 participationThresholdPct,
+            uint64 supportThreshold,
+            uint64 participationThreshold,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,

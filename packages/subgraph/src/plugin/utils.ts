@@ -21,17 +21,17 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
-    let supportThresholdPct = contract.try_supportThresholdPct();
-    let participationThresholdPct = contract.try_participationThresholdPct();
+    let supportThreshold = contract.try_supportThreshold();
+    let participationThreshold = contract.try_participationThreshold();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
-    packageEntity.supportThresholdPct = supportThresholdPct.reverted
+    packageEntity.supportThreshold = supportThreshold.reverted
       ? null
-      : supportThresholdPct.value;
-    packageEntity.participationThresholdPct = participationThresholdPct.reverted
+      : supportThreshold.value;
+    packageEntity.participationThreshold = participationThreshold.reverted
       ? null
-      : participationThresholdPct.value;
+      : participationThreshold.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
@@ -50,16 +50,16 @@ function createAddresslistPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new AddresslistPlugin(who.toHexString());
     let contract = AddresslistContract.bind(who);
-    let supportThresholdPct = contract.try_supportThresholdPct();
-    let participationThresholdPct = contract.try_participationThresholdPct();
+    let supportThreshold = contract.try_supportThreshold();
+    let participationThreshold = contract.try_participationThreshold();
     let minDuration = contract.try_minDuration();
 
-    packageEntity.supportThresholdPct = supportThresholdPct.reverted
+    packageEntity.supportThreshold = supportThreshold.reverted
       ? null
-      : supportThresholdPct.value;
-    packageEntity.participationThresholdPct = participationThresholdPct.reverted
+      : supportThreshold.value;
+    packageEntity.participationThreshold = participationThreshold.reverted
       ? null
-      : participationThresholdPct.value;
+      : participationThreshold.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     // Create template

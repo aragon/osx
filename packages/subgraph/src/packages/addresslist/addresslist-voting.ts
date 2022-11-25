@@ -51,8 +51,8 @@ export function _handleProposalCreated(
     proposalEntity.startDate = vote.value.value2;
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.supportThresholdPct = vote.value.value5;
-    proposalEntity.participationThresholdPct = vote.value.value6;
+    proposalEntity.supportThreshold = vote.value.value5;
+    proposalEntity.participationThreshold = vote.value.value6;
     proposalEntity.totalVotingPower = vote.value.value7;
 
     // actions
@@ -136,14 +136,12 @@ export function handleVoteCast(event: VoteCast): void {
       // set the executable param
       proposalEntity.executable =
         currentParticipation.ge(
-          proposalEntity.participationThresholdPct.div(
+          proposalEntity.participationThreshold.div(
             BigInt.fromString(TEN_POWER_16)
           )
         ) &&
         currentSupport.ge(
-          proposalEntity.supportThresholdPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+          proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
     }
@@ -184,9 +182,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.participationThresholdPct =
-      event.params.participationThresholdPct;
-    packageEntity.supportThresholdPct = event.params.supportThresholdPct;
+    packageEntity.participationThreshold = event.params.participationThreshold;
+    packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }

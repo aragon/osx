@@ -36,8 +36,8 @@ let proposalId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
-let supportThresholdPct = '1000';
-let participationThresholdPct = '500';
+let supportThreshold = '1000';
+let participationThreshold = '500';
 let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -58,8 +58,8 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     startDate,
     endDate,
     snapshotBlock,
-    supportThresholdPct,
-    participationThresholdPct,
+    supportThreshold,
+    participationThreshold,
     totalVotingPower,
     '0',
     '0',
@@ -107,14 +107,14 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
-    'supportThresholdPct',
-    supportThresholdPct
+    'supportThreshold',
+    supportThreshold
   );
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
-    'participationThresholdPct',
-    participationThresholdPct
+    'participationThreshold',
+    participationThreshold
   );
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -260,8 +260,8 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
     startDate,
     endDate,
     snapshotBlock,
-    supportThresholdPct,
-    participationThresholdPct,
+    supportThreshold,
+    participationThreshold,
     totalVotingPower,
     '1',
     '0',
@@ -301,11 +301,11 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
 
   // checks
   assert.fieldEquals('TokenVotingPlugin', entityID, 'id', entityID);
-  assert.fieldEquals('TokenVotingPlugin', entityID, 'supportThresholdPct', '1');
+  assert.fieldEquals('TokenVotingPlugin', entityID, 'supportThreshold', '1');
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,
-    'participationThresholdPct',
+    'participationThreshold',
     '2'
   );
   assert.fieldEquals('TokenVotingPlugin', entityID, 'minDuration', '3600');

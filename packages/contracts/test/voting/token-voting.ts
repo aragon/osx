@@ -79,15 +79,15 @@ describe('TokenVoting', function () {
   });
 
   function initializeVoting(
-    _participationThresholdPct: any,
-    _supportThresholdPct: any,
+    _participationThreshold: any,
+    _supportThreshold: any,
     minDuration: any
   ) {
     return voting.initialize(
       dao.address,
 
-      _participationThresholdPct,
-      _supportThresholdPct,
+      _participationThreshold,
+      _supportThreshold,
       minDuration,
       governanceErc20Mock.address
     );
@@ -111,8 +111,8 @@ describe('TokenVoting', function () {
 
   describe('Proposal creation', async () => {
     let minDuration = 500;
-    let supportThresholdPct = pct16(50);
-    let participationThresholdPct = pct16(20);
+    let supportThreshold = pct16(50);
+    let participationThreshold = pct16(20);
     let totalVotingPower = 100;
     const id = 0; // proposalId
 
@@ -179,8 +179,8 @@ describe('TokenVoting', function () {
       const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote._supportThresholdPct).to.equal(2);
-      expect(vote._participationThresholdPct).to.equal(1);
+      expect(vote._supportThreshold).to.equal(2);
+      expect(vote._participationThreshold).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.totalVotingPower).to.equal(1);
       expect(vote.yes).to.equal(0);
@@ -224,8 +224,8 @@ describe('TokenVoting', function () {
       const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
-      expect(vote._supportThresholdPct).to.equal(2);
-      expect(vote._participationThresholdPct).to.equal(1);
+      expect(vote._supportThreshold).to.equal(2);
+      expect(vote._participationThreshold).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
       expect(vote.totalVotingPower).to.equal(1);
       expect(vote.yes).to.equal(1);
@@ -239,8 +239,8 @@ describe('TokenVoting', function () {
       let endDate = startDate + minDuration;
 
       await initializeVoting(
-        participationThresholdPct,
-        supportThresholdPct,
+        participationThreshold,
+        supportThreshold,
         minDuration
       );
 
@@ -283,8 +283,8 @@ describe('TokenVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     let minDuration = 500;
-    let supportThresholdPct = pct16(50);
-    let participationThresholdPct = pct16(20);
+    let supportThreshold = pct16(50);
+    let participationThreshold = pct16(20);
     let totalVotingPower = 100;
     const id = 0; // proposalId
     const startOffset = 9;
@@ -296,8 +296,8 @@ describe('TokenVoting', function () {
       endDate = startDate + minDuration;
 
       await initializeVoting(
-        participationThresholdPct,
-        supportThresholdPct,
+        participationThreshold,
+        supportThreshold,
         minDuration
       );
 
@@ -400,14 +400,14 @@ describe('TokenVoting', function () {
       await advanceTimeTo(startDate);
 
       // vote with 50 yes votes, which is NOT enough to make vote executable as support
-      // must be larger than supportThresholdPct = 50
+      // must be larger than supportThreshold = 50
       await governanceErc20Mock.mock.getPastVotes.returns(50);
 
       await voting.vote(id, VoteOption.Yes, false);
       expect(await voting.canExecute(id)).to.equal(false);
 
       // vote with 1 yes vote from another wallet, so that yes votes amount to 51 in total, which is
-      // enough to make vote executable as supportThresholdPct = 50
+      // enough to make vote executable as supportThreshold = 50
       await governanceErc20Mock.mock.getPastVotes.returns(1);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
@@ -461,7 +461,7 @@ describe('TokenVoting', function () {
     it('executes the vote immediately while final yes is given', async () => {
       await advanceTimeTo(startDate);
 
-      // vote with _supportThresholdPct staking, so
+      // vote with _supportThreshold staking, so
       // it immediatelly executes the vote
       await governanceErc20Mock.mock.getPastVotes.returns(51);
 
@@ -513,14 +513,14 @@ describe('TokenVoting', function () {
 
     describe('A simple majority vote with >50% support and >25% participation required', async () => {
       let minDuration = 500;
-      let supportThresholdPct = pct16(50);
-      let participationThresholdPct = pct16(25);
+      let supportThreshold = pct16(50);
+      let participationThreshold = pct16(25);
       let totalVotingPower = 100;
 
       beforeEach(async () => {
         await initializeVoting(
-          participationThresholdPct,
-          supportThresholdPct,
+          participationThreshold,
+          supportThreshold,
           minDuration
         );
 

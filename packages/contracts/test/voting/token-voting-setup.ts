@@ -34,8 +34,8 @@ const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
   [[], []],
 ]);
 
-const participationThresholdPct = 1;
-const supportThresholdPct = 2;
+const participationThreshold = 1;
+const supportThreshold = 2;
 const minDuration = 3;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
@@ -74,13 +74,13 @@ describe('TokenVotingSetup', function () {
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
   });
 
-  it('creates token voting base with the correct interface', async () => {
+  it('creates erc20 voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('TokenVoting');
     const tokenVoting = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _participationThresholdPct, uint64 _supportThresholdPct, uint64 _minDuration, address _token)',
+      'function initialize(address _dao, uint64 _participationThreshold, uint64 _supportThreshold, uint64 _minDuration, address _token)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -92,7 +92,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationThresholdPct, uint64 supportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -376,8 +376,8 @@ describe('TokenVotingSetup', function () {
       const daoAddress = targetDao.address;
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThresholdPct,
-        supportThresholdPct,
+        participationThreshold,
+        supportThreshold,
         minDuration,
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],
@@ -402,11 +402,11 @@ describe('TokenVotingSetup', function () {
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
-      expect(await tokenVoting.participationThresholdPct()).to.be.equal(
-        participationThresholdPct
+      expect(await tokenVoting.participationThreshold()).to.be.equal(
+        participationThreshold
       );
-      expect(await tokenVoting.supportThresholdPct()).to.be.equal(
-        supportThresholdPct
+      expect(await tokenVoting.supportThreshold()).to.be.equal(
+        supportThreshold
       );
       expect(await tokenVoting.minDuration()).to.be.equal(minDuration);
       expect(await tokenVoting.getVotingToken()).to.be.equal(
