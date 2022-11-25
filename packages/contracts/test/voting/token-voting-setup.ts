@@ -76,16 +76,16 @@ describe('TokenVotingSetup', function () {
 
   it('creates token voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('TokenVoting');
-    const tokenVotingContract = factory.attach(implementationAddress);
+    const tokenVoting = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
       'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
     ]);
 
-    expect(
-      await tokenVotingContract.supportsInterface(getInterfaceID(iface))
-    ).to.be.eq(true);
+    expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
+      true
+    );
   });
 
   describe('prepareInstallation', async () => {
@@ -399,19 +399,17 @@ describe('TokenVotingSetup', function () {
 
       // check plugin
       const PluginFactory = await ethers.getContractFactory('TokenVoting');
-      const tokenVotingContract = PluginFactory.attach(
-        anticipatedPluginAddress
-      );
+      const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
-      expect(await tokenVotingContract.getDAO()).to.be.equal(daoAddress);
-      expect(await tokenVotingContract.totalSupportThresholdPct()).to.be.equal(
+      expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
+      expect(await tokenVoting.totalSupportThresholdPct()).to.be.equal(
         totalSupportThresholdPct
       );
-      expect(
-        await tokenVotingContract.relativeSupportThresholdPct()
-      ).to.be.equal(relativeSupportThresholdPct);
-      expect(await tokenVotingContract.minDuration()).to.be.equal(minDuration);
-      expect(await tokenVotingContract.getVotingToken()).to.be.equal(
+      expect(await tokenVoting.relativeSupportThresholdPct()).to.be.equal(
+        relativeSupportThresholdPct
+      );
+      expect(await tokenVoting.minDuration()).to.be.equal(minDuration);
+      expect(await tokenVoting.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
       );
 
