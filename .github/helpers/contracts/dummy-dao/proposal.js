@@ -18,7 +18,7 @@ async function proposal() {
   const args = process.argv.slice(2);
   const networkName = args[0];
   const privKey = args[1];
-  const isTokenVoting = args[2];
+  const isTokenVoting = args[2] === 'token';
   const provider = new ethers.providers.JsonRpcProvider(
     networks[networkName].url
   );
@@ -26,19 +26,18 @@ async function proposal() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].address;
   const votingAddress =
     dummyDaos[networkName].dao[
-      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].voting;
 
   // metadata
   const metadataObj = {
-    name:
-      isTokenVoting === 'token'
-        ? 'TokenVoting Dummy Proposal'
-        : 'AddresslistVoting Dummy Proposal',
+    name: isTokenVoting
+      ? 'TokenVoting Dummy Proposal'
+      : 'AddresslistVoting Dummy Proposal',
     description: 'Dummy withdraw proposal for QA and testing purposes...',
     links: [
       {label: 'link01', url: 'https://link.01'},
@@ -64,7 +63,7 @@ async function proposal() {
 
   const deposits =
     content[networkName].dao[
-      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].deposits;
 
   const deposit = deposits[getRandomInt(deposits.length)];
@@ -87,7 +86,7 @@ async function proposal() {
 
   // initiate Voting contract
   let VotingContract;
-  if (isTokenVoting === 'token') {
+  if (isTokenVoting) {
     VotingContract = new ethers.Contract(
       votingAddress,
       TokenVotingJson.abi,
@@ -124,15 +123,15 @@ async function proposal() {
   // edit or add property
   if (
     !content[networkName].dao[
-      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].proposal
   ) {
     content[networkName].dao[
-      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].proposal = {};
   }
   content[networkName].dao[
-    isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
+    isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
   ].proposal = resultObj;
 
   //write file
