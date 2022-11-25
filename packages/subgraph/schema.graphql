@@ -225,7 +225,7 @@ type TokenVote @entity {
   voter: TokenVotingVoter!
   proposal: TokenVotingProposal!
   vote: VoteOption!
-  weight: BigInt!
+  votingPower: BigInt!
   createdAt: BigInt!
 }
 
@@ -281,7 +281,7 @@ type AddresslistVote @entity {
   voter: AddresslistVoter!
   proposal: AddresslistProposal!
   vote: VoteOption!
-  weight: BigInt!
+  votingPower: BigInt!
   createdAt: BigInt!
 }
 
