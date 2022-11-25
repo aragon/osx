@@ -5,8 +5,8 @@ import {
   handleVoteCast,
   handleProposalExecuted,
   handleVoteSettingsUpdated,
-  _handleProposalCreated
-} from '../../src/packages/erc20/erc20-voting';
+  _handleProposalCreated,
+} from '../../src/packages/erc20/token-voting';
 import {ERC20VotingPlugin} from '../../generated/schema';
 import {
   ADDRESS_ONE,
@@ -20,7 +20,7 @@ import {
   MIN_TURNOUT,
   SNAPSHOT_BLOCK,
   START_DATE,
-  VOTING_POWER
+  VOTING_POWER,
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
@@ -29,7 +29,7 @@ import {
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
   getProposalCountCall,
-  createERC20VotingProposalEntityState
+  createERC20VotingProposalEntityState,
 } from './utils';
 
 let proposalId = '0';

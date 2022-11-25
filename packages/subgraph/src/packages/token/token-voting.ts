@@ -5,14 +5,14 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VoteSettingsUpdated,
-  ERC20Voting
+  ERC20Voting,
 } from '../../../generated/templates/ERC20Voting/ERC20Voting';
 import {
   Action,
   ERC20VotingPlugin,
   ERC20VotingProposal,
   ERC20VotingVoter,
-  ERC20Vote
+  ERC20Vote,
 } from '../../../generated/schema';
 
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
