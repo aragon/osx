@@ -42,6 +42,7 @@ On 2022-10-03 10:38:36
 ### Changed
 
 - Renamed contracts, events, and parameters in `MajorityVoting`:
+  - `ERC20Voting` to `TokenVoting`
   - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`
   - `VoteCreated` and `VoteExecuted` to `ProposalCreated` and `ProposalExecuted`
   - `voteId` to `proposalId`
