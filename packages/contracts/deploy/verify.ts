@@ -73,15 +73,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoBase = await DAOFactoryContract.daoBase();
   verifyObjArray.push({address: daoBase, args: []});
 
-  const AllowlistVotingSetupContract = await ethers.getContractAt(
-    'AllowlistVotingSetup',
+  const AddresslistVotingSetupContract = await ethers.getContractAt(
+    'AddresslistVotingSetup',
     (
-      await deployments.get('AllowlistVotingSetup')
+      await deployments.get('AddresslistVotingSetup')
     ).address
   );
-  const allowlistVotingBase =
-    await AllowlistVotingSetupContract.getImplementationAddress();
-  verifyObjArray.push({address: allowlistVotingBase, args: []});
+  const addresslistVotingBase =
+    await AddresslistVotingSetupContract.getImplementationAddress();
+  verifyObjArray.push({address: addresslistVotingBase, args: []});
 
   const ERC20VotingSetupContract = await ethers.getContractAt(
     'ERC20VotingSetup',

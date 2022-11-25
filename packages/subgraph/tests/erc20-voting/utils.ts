@@ -2,17 +2,17 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  ConfigUpdated,
+  VoteSettingsUpdated,
   VoteCast,
-  VoteCreated,
-  VoteExecuted
+  ProposalCreated,
+  ProposalExecuted
 } from '../../generated/templates/ERC20Voting/ERC20Voting';
 import {ERC20VotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
+  PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
-  VOTE_ID,
   VOTING_ADDRESS,
   CREATED_AT,
   END_DATE,
@@ -25,20 +25,20 @@ import {
 
 // events
 
-export function createNewVoteCreatedEvent(
-  voteId: string,
+export function createNewProposalCreatedEvent(
+  proposalId: string,
   creator: string,
   description: string,
   contractAddress: string
-): VoteCreated {
-  let createVoteCreatedEvent = changetype<VoteCreated>(newMockEvent());
+): ProposalCreated {
+  let createProposalCreatedEvent = changetype<ProposalCreated>(newMockEvent());
 
-  createVoteCreatedEvent.address = Address.fromString(contractAddress);
-  createVoteCreatedEvent.parameters = [];
+  createProposalCreatedEvent.address = Address.fromString(contractAddress);
+  createProposalCreatedEvent.parameters = [];
 
-  let voteIdParam = new ethereum.EventParam(
-    'voteId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
+  let proposalIdParam = new ethereum.EventParam(
+    'proposalId',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
   let creatorParam = new ethereum.EventParam(
     'creator',
@@ -49,28 +49,28 @@ export function createNewVoteCreatedEvent(
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
 
-  createVoteCreatedEvent.parameters.push(voteIdParam);
-  createVoteCreatedEvent.parameters.push(creatorParam);
-  createVoteCreatedEvent.parameters.push(descriptionParam);
+  createProposalCreatedEvent.parameters.push(proposalIdParam);
+  createProposalCreatedEvent.parameters.push(creatorParam);
+  createProposalCreatedEvent.parameters.push(descriptionParam);
 
-  return createVoteCreatedEvent;
+  return createProposalCreatedEvent;
 }
 
 export function createNewVoteCastEvent(
-  voteId: string,
+  proposalId: string,
   voter: string,
   choice: string,
-  voteWeight: string,
+  votingPower: string,
   contractAddress: string
 ): VoteCast {
-  let createVoteCastEvent = changetype<VoteCast>(newMockEvent());
+  let createProposalCastEvent = changetype<VoteCast>(newMockEvent());
 
-  createVoteCastEvent.address = Address.fromString(contractAddress);
-  createVoteCastEvent.parameters = [];
+  createProposalCastEvent.address = Address.fromString(contractAddress);
+  createProposalCastEvent.parameters = [];
 
-  let voteIdParam = new ethereum.EventParam(
-    'voteId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
+  let proposalIdParam = new ethereum.EventParam(
+    'proposalId',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
   let voterParam = new ethereum.EventParam(
     'voter',
@@ -81,52 +81,56 @@ export function createNewVoteCastEvent(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(choice))
   );
   let stakeParam = new ethereum.EventParam(
-    'voteWeight',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteWeight))
+    'votingPower',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower))
   );
 
-  createVoteCastEvent.parameters.push(voteIdParam);
-  createVoteCastEvent.parameters.push(voterParam);
-  createVoteCastEvent.parameters.push(choiceParam);
-  createVoteCastEvent.parameters.push(stakeParam);
+  createProposalCastEvent.parameters.push(proposalIdParam);
+  createProposalCastEvent.parameters.push(voterParam);
+  createProposalCastEvent.parameters.push(choiceParam);
+  createProposalCastEvent.parameters.push(stakeParam);
 
-  return createVoteCastEvent;
+  return createProposalCastEvent;
 }
 
-export function createNewVoteExecutedEvent(
-  voteId: string,
+export function createNewProposalExecutedEvent(
+  proposalId: string,
   contractAddress: string
-): VoteExecuted {
-  let createVoteExecutedEvent = changetype<VoteExecuted>(newMockEvent());
+): ProposalExecuted {
+  let createProposalExecutedEvent = changetype<ProposalExecuted>(
+    newMockEvent()
+  );
 
-  createVoteExecutedEvent.address = Address.fromString(contractAddress);
-  createVoteExecutedEvent.parameters = [];
+  createProposalExecutedEvent.address = Address.fromString(contractAddress);
+  createProposalExecutedEvent.parameters = [];
 
-  let voteIdParam = new ethereum.EventParam(
-    'voteId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteId))
+  let proposalIdParam = new ethereum.EventParam(
+    'proposalId',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
   );
   let execResultsParam = new ethereum.EventParam(
     'execResults',
     ethereum.Value.fromBytesArray([Bytes.fromUTF8('')])
   );
 
-  createVoteExecutedEvent.parameters.push(voteIdParam);
-  createVoteExecutedEvent.parameters.push(execResultsParam);
+  createProposalExecutedEvent.parameters.push(proposalIdParam);
+  createProposalExecutedEvent.parameters.push(execResultsParam);
 
-  return createVoteExecutedEvent;
+  return createProposalExecutedEvent;
 }
 
-export function createNewConfigUpdatedEvent(
+export function createNewVoteSettingsUpdatedEvent(
   relativeSupportThresholdPct: string,
   totalSupportThresholdPct: string,
   minDuration: string,
   contractAddress: string
-): ConfigUpdated {
-  let newConfigUpdatedEvent = changetype<ConfigUpdated>(newMockEvent());
+): VoteSettingsUpdated {
+  let newVoteSettingsUpdatedEvent = changetype<VoteSettingsUpdated>(
+    newMockEvent()
+  );
 
-  newConfigUpdatedEvent.address = Address.fromString(contractAddress);
-  newConfigUpdatedEvent.parameters = [];
+  newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newVoteSettingsUpdatedEvent.parameters = [];
 
   let totalSupportThresholdPctParam = new ethereum.EventParam(
     'totalSupportThresholdPct',
@@ -143,23 +147,23 @@ export function createNewConfigUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newConfigUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
-  newConfigUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
-  newConfigUpdatedEvent.parameters.push(minDurationParam);
+  newVoteSettingsUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
-  return newConfigUpdatedEvent;
+  return newVoteSettingsUpdatedEvent;
 }
 
 // calls
 
-export function getVotesLengthCall(
+export function getProposalCountCall(
   contractAddress: string,
   returns: string
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'votesLength',
-    'votesLength():(uint256)'
+    'proposalCount',
+    'proposalCount():(uint256)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(BigInt.fromString(returns))]);
@@ -168,17 +172,17 @@ export function getVotesLengthCall(
 // state
 
 export function createERC20VotingProposalEntityState(
-  entityID: string = PROPOSAL_ID,
+  entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
   creator: string = ADDRESS_ONE,
-  voteId: string = VOTE_ID,
+  proposalId: string = PROPOSAL_ID,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
   relativeSupportThresholdPct: string = MIN_SUPPORT,
   totalSupportThresholdPct: string = MIN_TURNOUT,
-  census: string = VOTING_POWER,
+  totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
   executable: boolean = false,
@@ -187,7 +191,7 @@ export function createERC20VotingProposalEntityState(
   let erc20VotingProposal = new ERC20VotingProposal(entityID);
   erc20VotingProposal.dao = Address.fromString(dao).toHexString();
   erc20VotingProposal.plugin = Address.fromString(pkg).toHexString();
-  erc20VotingProposal.voteId = BigInt.fromString(voteId);
+  erc20VotingProposal.proposalId = BigInt.fromString(proposalId);
   erc20VotingProposal.creator = Address.fromString(creator);
 
   erc20VotingProposal.startDate = BigInt.fromString(startDate);
@@ -199,7 +203,7 @@ export function createERC20VotingProposalEntityState(
   erc20VotingProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
-  erc20VotingProposal.census = BigInt.fromString(census);
+  erc20VotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   erc20VotingProposal.open = open;
   erc20VotingProposal.executable = executable;
   erc20VotingProposal.executed = executed;

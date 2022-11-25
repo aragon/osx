@@ -21,7 +21,7 @@ import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
 import {ERC20Voting} from "./ERC20Voting.sol";
 
-/// @title AllowlistVotingSetup
+/// @title ERC20VotingSetup
 /// @author Aragon Association - 2022
 /// @notice The setup contract of the `ERC20Voting` plugin.
 contract ERC20VotingSetup is PluginSetup {
@@ -203,7 +203,7 @@ contract ERC20VotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            erc20VotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -274,7 +274,7 @@ contract ERC20VotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            erc20VotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(

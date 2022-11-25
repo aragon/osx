@@ -10,11 +10,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
-  // AllowlistVoting
+  // AddresslistVoting
   await createPluginRepo(
     hre,
-    'AllowlistVoting',
-    'AllowlistVotingSetup',
+    'AddresslistVoting',
+    'AddresslistVotingSetup',
     [1, 0, 0],
     '0x'
   );

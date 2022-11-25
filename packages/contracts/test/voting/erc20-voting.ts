@@ -106,19 +106,19 @@ describe('ERC20Voting', function () {
     });
   });
 
-  describe('Vote creation', async () => {
+  describe('Proposal creation', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
-    let census = 100;
-    const id = 0; // voteId
+    let totalVotingPower = 100;
+    const id = 0; // proposalId
 
     it('reverts total token supply while creating a vote is 0', async () => {
       await initializeVoting(1, 2, minDuration);
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.createVote(dummyMetadata, [], 0, 0, false, VoteOption.None)
+        voting.createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
@@ -131,7 +131,7 @@ describe('ERC20Voting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.createVote(
+        voting.createProposal(
           dummyMetadata,
           [],
           startDate,
@@ -141,7 +141,7 @@ describe('ERC20Voting', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'VoteTimesInvalid',
+          'VotingPeriodInvalid',
           current + 1, // TODO hacky
           startDate,
           endDate,
@@ -153,13 +153,13 @@ describe('ERC20Voting', function () {
     it('should create a vote successfully, but not vote', async () => {
       await initializeVoting(1, 2, minDuration);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       expect(
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -168,18 +168,18 @@ describe('ERC20Voting', function () {
           VoteOption.None
         )
       )
-        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
+        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
         .withArgs(id, ownerAddress, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
 
-      const vote = await voting.getVote(id);
+      const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
       expect(vote._totalSupportThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote.census).to.equal(1);
+      expect(vote.totalVotingPower).to.equal(1);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
 
@@ -196,13 +196,13 @@ describe('ERC20Voting', function () {
     it('should create a vote and cast a vote immediately', async () => {
       await initializeVoting(1, 2, minDuration);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       await erc20VoteMock.mock.getPastVotes.returns(1);
 
       expect(
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -211,20 +211,20 @@ describe('ERC20Voting', function () {
           VoteOption.Yes
         )
       )
-        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
+        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
         .withArgs(id, ownerAddress, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
       const block = await ethers.provider.getBlock('latest');
 
-      const vote = await voting.getVote(id);
+      const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
       expect(vote._totalSupportThresholdPct).to.equal(1);
       expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote.census).to.equal(1);
+      expect(vote.totalVotingPower).to.equal(1);
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(0);
@@ -242,7 +242,7 @@ describe('ERC20Voting', function () {
       );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+      await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
 
       expect(await getTime()).to.be.lessThan(startDate);
 
@@ -250,7 +250,7 @@ describe('ERC20Voting', function () {
 
       // Reverts if the vote option is not 'None'
       await expect(
-        voting.createVote(
+        voting.createProposal(
           dummyMetadata,
           dummyActions,
           startDate,
@@ -263,7 +263,7 @@ describe('ERC20Voting', function () {
       // Works if the vote option is 'None'
       expect(
         (
-          await voting.createVote(
+          await voting.createProposal(
             dummyMetadata,
             dummyActions,
             startDate,
@@ -276,12 +276,12 @@ describe('ERC20Voting', function () {
     });
   });
 
-  describe('Vote + Execute:', async () => {
+  describe('Proposal + Execute:', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
-    let census = 100;
-    const id = 0; // voteId
+    let totalVotingPower = 100;
+    const id = 0; // proposalId
     const startOffset = 9;
     let startDate: number;
     let endDate: number;
@@ -297,12 +297,12 @@ describe('ERC20Voting', function () {
       );
 
       // set voting power to 100
-      await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+      await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
       await erc20VoteMock.mock.getPastVotes.returns(0);
 
       expect(
         (
-          await voting.createVote(
+          await voting.createProposal(
             dummyMetadata,
             dummyActions,
             startDate,
@@ -343,7 +343,7 @@ describe('ERC20Voting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
-      let vote = await voting.getVote(id);
+      let vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(1);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(0);
@@ -352,7 +352,7 @@ describe('ERC20Voting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.No, 1);
 
-      vote = await voting.getVote(0);
+      vote = await voting.getProposal(0);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(1);
       expect(vote.abstain).to.equal(0);
@@ -361,7 +361,7 @@ describe('ERC20Voting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
 
-      vote = await voting.getVote(id);
+      vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(0);
       expect(vote.no).to.equal(0);
       expect(vote.abstain).to.equal(1);
@@ -376,17 +376,17 @@ describe('ERC20Voting', function () {
       // 2 times from the same wallet.
       await voting.vote(id, VoteOption.Yes, false);
       await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getVote(id)).yes).to.equal(1);
+      expect((await voting.getProposal(id)).yes).to.equal(1);
 
       // yes gets removed, no ends up as 1.
       await voting.vote(id, VoteOption.No, false);
       await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getVote(id)).no).to.equal(1);
+      expect((await voting.getProposal(id)).no).to.equal(1);
 
       // no gets removed, abstain ends up as 1.
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getVote(id)).abstain).to.equal(1);
+      expect((await voting.getProposal(id)).abstain).to.equal(1);
     });
 
     it('can execute early if total support is large enough', async () => {
@@ -473,22 +473,22 @@ describe('ERC20Voting', function () {
         expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
         expect(event.args.execResults).to.deep.equal(['0x']);
 
-        const vote = await voting.getVote(id);
+        const vote = await voting.getProposal(id);
 
         expect(vote.executed).to.equal(true);
       }
 
-      // check for the `VoteExecuted` event in the voting contract
+      // check for the `ProposalExecuted` event in the voting contract
       {
-        const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
+        const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
 
-        expect(event.args.voteId).to.equal(id);
+        expect(event.args.proposalId).to.equal(id);
         expect(event.args.execResults).to.deep.equal(['0x']);
       }
 
       // calling execute again should fail
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
 
@@ -496,19 +496,19 @@ describe('ERC20Voting', function () {
       await advanceTimeTo(startDate);
 
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
   });
 
   describe('Configurations for different use cases', async () => {
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
       let minDuration = 500;
       let relativeSupportThresholdPct = pct16(50);
       let totalSupportThresholdPct = pct16(25);
-      let census = 100;
+      let totalVotingPower = 100;
 
       beforeEach(async () => {
         await initializeVoting(
@@ -518,10 +518,10 @@ describe('ERC20Voting', function () {
         );
 
         // set voting power to 100
-        await erc20VoteMock.mock.getPastTotalSupply.returns(census);
+        await erc20VoteMock.mock.getPastTotalSupply.returns(totalVotingPower);
         await erc20VoteMock.mock.getPastVotes.returns(0);
 
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,

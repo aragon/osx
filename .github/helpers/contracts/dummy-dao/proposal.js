@@ -6,7 +6,7 @@ const {ethers} = require('ethers');
 
 const networks = require('../../../../packages/contracts/networks.json');
 const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json');
-const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
+const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 
@@ -26,11 +26,11 @@ async function proposal() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].address;
   const votingAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].voting;
 
   // metadata
@@ -38,7 +38,7 @@ async function proposal() {
     name:
       isERC20Voting === 'erc20'
         ? 'ERC20Voting Dummy Proposal'
-        : 'AllowlistVoting Dummy Proposal',
+        : 'AddresslistVoting Dummy Proposal',
     description: 'Dummy withdraw proposal for QA and testing purposes...',
     links: [
       {label: 'link01', url: 'https://link.01'},
@@ -64,7 +64,7 @@ async function proposal() {
 
   const deposits =
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].deposits;
 
   const deposit = deposits[getRandomInt(deposits.length)];
@@ -101,7 +101,7 @@ async function proposal() {
     );
   }
 
-  let proposalTx = await VotingContract.createVote(
+  let proposalTx = await VotingContract.createProposal(
     metadata,
     actions,
     0,
@@ -124,15 +124,15 @@ async function proposal() {
   // edit or add property
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].proposal
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
     ].proposal = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
   ].proposal = resultObj;
 
   //write file
