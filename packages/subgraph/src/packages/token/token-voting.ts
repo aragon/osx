@@ -5,14 +5,14 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VoteSettingsUpdated,
-  TokenVoting,
+  TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
   Action,
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVoter,
-  ERC20Vote,
+  TokenVote
 } from '../../../generated/schema';
 
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
@@ -93,9 +93,9 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = ERC20Vote.load(voterProposalId);
+  let voterProposalEntity = TokenVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new ERC20Vote(voterProposalId);
+    voterProposalEntity = new TokenVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }

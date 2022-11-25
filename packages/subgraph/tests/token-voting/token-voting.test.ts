@@ -5,7 +5,7 @@ import {
   handleVoteCast,
   handleProposalExecuted,
   handleVoteSettingsUpdated,
-  _handleProposalCreated,
+  _handleProposalCreated
 } from '../../src/packages/token/token-voting';
 import {TokenVotingPlugin} from '../../generated/schema';
 import {
@@ -20,7 +20,7 @@ import {
   MIN_TURNOUT,
   SNAPSHOT_BLOCK,
   START_DATE,
-  VOTING_POWER,
+  VOTING_POWER
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
@@ -29,7 +29,7 @@ import {
   createNewProposalCreatedEvent,
   createNewVoteSettingsUpdatedEvent,
   getProposalCountCall,
-  createTokenVotingProposalEntityState,
+  createTokenVotingProposalEntityState
 } from './utils';
 
 let proposalId = '0';
@@ -169,7 +169,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('ERC20Vote', entityID, 'id', entityID);
+  assert.fieldEquals('TokenVote', entityID, 'id', entityID);
 
   // check voter
   assert.fieldEquals('TokenVotingVoter', ADDRESS_ONE, 'id', ADDRESS_ONE);

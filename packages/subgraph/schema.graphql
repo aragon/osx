@@ -2,11 +2,24 @@
 
 # Token
 
-type ERC20Token @entity(immutable: true) {
+interface Token {
+  id: ID! # use address as id
+  name: String
+  symbol: String
+}
+
+type ERC20Token implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
   decimals: BigInt
+}
+
+type ERC721Token implements Token @entity(immutable: true) {
+  id: ID! # use address as id
+  name: String
+  symbol: String
+  baseURI: String
 }
 
 type Balance @entity {
@@ -194,19 +207,19 @@ type TokenVotingPlugin implements IPlugin @entity {
   totalSupportThresholdPct: BigInt
   minDuration: BigInt
   proposalCount: BigInt
-  token: ERC20Token
+  token: Token
   members: [TokenVotingVoter!]! @derivedFrom(field: "plugin")
 }
 
 type TokenVotingVoter @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
+  proposals: [TokenVote!]! @derivedFrom(field: "voter")
   plugin: TokenVotingPlugin!
   lastUpdated: BigInt
 }
 
-type ERC20Vote @entity {
+type TokenVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
   voter: TokenVotingVoter!
@@ -234,7 +247,7 @@ type TokenVotingProposal implements Proposal @entity {
   abstain: BigInt
   voteCount: BigInt
   totalVotingPower: BigInt!
-  voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
+  voters: [TokenVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
