@@ -304,13 +304,20 @@ type AdminPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
-  members: [AdminMember!]! @derivedFrom(field: "plugin")
+  adminstrator: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
 }
 
-type AdminMember @entity {
+type Adminstrator @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
   proposals: [AdminProposal!]! @derivedFrom(field: "creator")
+  plugins: [AdminstratorAdminPlugin!]! @derivedFrom(field: "administrator")
+}
+
+type AdminstratorAdminPlugin @entity {
+  "for Many-to-Many"
+  id: ID! # Adminstrator + plugin
+  administrator: Adminstrator!
   plugin: AdminPlugin!
 }
 
@@ -320,7 +327,7 @@ type AdminProposal implements Proposal @entity {
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: AdminPlugin!
   proposalId: BigInt!
-  creator: AdminMember!
+  creator: Adminstrator!
   metadata: String!
   executed: Boolean!
   createdAt: BigInt!

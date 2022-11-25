@@ -4,7 +4,12 @@ import {
   ProposalCreated,
   ProposalExecuted
 } from '../../../generated/templates/Admin/AdminAddress';
-import {Action, AdminProposal} from '../../../generated/schema';
+import {
+  Action,
+  AdminstratorAdminPlugin,
+  AdminProposal,
+  Adminstrator
+} from '../../../generated/schema';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -22,13 +27,34 @@ export function _handleProposalCreated(
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
+  let pluginId = event.address.toHexString();
+
+  let adminstratorAddress = event.params.creator.toHexString();
+
   let proposalEntity = new AdminProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.plugin = event.address.toHexString();
+  proposalEntity.plugin = pluginId;
   proposalEntity.proposalId = event.params.proposalId;
-  proposalEntity.creator = event.params.creator.toHexString();
+  proposalEntity.creator = adminstratorAddress;
   proposalEntity.metadata = metadata;
+  proposalEntity.executed = false;
   proposalEntity.createdAt = event.block.timestamp;
+
+  // Adminstrator
+  let adminstratorId = adminstratorAddress + '_' + pluginId;
+  let adminMemberEntity = AdminstratorAdminPlugin.load(adminstratorId);
+  if (!adminMemberEntity) {
+    adminMemberEntity = new AdminstratorAdminPlugin(adminstratorId);
+    adminMemberEntity.administrator = adminstratorAddress;
+    adminMemberEntity.plugin = pluginId;
+    adminMemberEntity.save();
+  }
+  let adminstratorEntity = Adminstrator.load(adminstratorAddress);
+  if (!adminstratorEntity) {
+    adminstratorEntity = new Adminstrator(adminstratorAddress);
+    adminstratorEntity.address = adminstratorAddress;
+    adminstratorEntity.save();
+  }
 
   // actions
   let actions = event.params.actions;
