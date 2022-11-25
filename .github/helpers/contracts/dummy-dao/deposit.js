@@ -68,7 +68,7 @@ async function deposit() {
   for (let index = 0; index < tokens.length; index++) {
     const token = tokens[index];
     // approve
-    const tokenTokenContract = new ethers.Contract(
+    const erc20Token = new ethers.Contract(
       token.address,
       erc20Json.abi,
       signer
@@ -82,16 +82,12 @@ async function deposit() {
       '\n'
     );
 
-    const balance = await tokenTokenContract.balanceOf(signer.address);
+    const balance = await erc20Token.balanceOf(signer.address);
 
     console.log('balance:', balance.toString());
 
     if (balance.gt(ethers.BigNumber.from(0))) {
-      const approveTx = await tokenTokenContract.approve(
-        daoAddress,
-        amount,
-        overrides
-      );
+      const approveTx = await erc20Token.approve(daoAddress, amount, overrides);
       await approveTx.wait(1);
 
       // deposit
