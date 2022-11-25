@@ -9,4 +9,6 @@ export const VOTER_STATE = new Map<number, string>()
 
 export const ERC20_VOTING_INTERFACE = '0x72a13b7e';
 export const ADDRESSLIST_VOTING_INTERFACE = '0x8d8aae2d';
+export const ADMIN_INTERFACE = '0x9102c53e';
+
 export const TEN_POWER_16 = '10000000000000000';

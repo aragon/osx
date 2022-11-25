@@ -190,6 +190,27 @@ templates:
           handler: handleUsersAdded
         - event: UsersRemoved(address[])
           handler: handleUsersRemoved
+  # admin (package)
+  - name: Admin
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: AdminAddress
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/admin/admin.ts
+      entities:
+        - Dao
+      abis:
+        - name: AdminAddress
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin-address/AdminAddress.sol/AdminAddress.json
+      eventHandlers:
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
   # PluginRepo
   - name: PluginRepoTemplate
     kind: ethereum/contract

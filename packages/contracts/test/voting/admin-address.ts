@@ -4,6 +4,7 @@ import {ethers} from 'hardhat';
 
 import {DAO} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
+import {findEvent} from '../../utils/event';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
@@ -157,9 +158,21 @@ describe('AdminAddress plugin', function () {
     it('correctly emits the ProposalCreated event', async () => {
       const currentExpectedProposalId = 0;
 
-      await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
-        .to.emit(plugin, EVENTS.ProposalCreated)
-        .withArgs(currentExpectedProposalId, ownerAddress, dummyMetadata);
+      const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+
+      await expect(
+        await plugin.executeProposal(dummyMetadata, dummyActions)
+      ).to.emit(plugin, EVENTS.ProposalCreated);
+
+      const event = await findEvent(tx, EVENTS.ProposalCreated);
+
+      expect(event.args.proposalId).to.equal(currentExpectedProposalId);
+      expect(event.args.creator).to.equal(ownerAddress);
+      expect(event.args.metadata).to.equal(dummyMetadata);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
     });
 
     it('correctly emits ProposalExecuted event', async () => {
@@ -178,9 +191,13 @@ describe('AdminAddress plugin', function () {
 
       const nextExpectedProposalId = currentExpectedProposalId + 1;
 
-      await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
-        .to.emit(plugin, EVENTS.ProposalCreated)
-        .withArgs(nextExpectedProposalId, ownerAddress, dummyMetadata);
+      const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+
+      await expect(tx).to.emit(plugin, EVENTS.ProposalCreated);
+
+      const event = await findEvent(tx, EVENTS.ProposalCreated);
+
+      expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
   });
 });

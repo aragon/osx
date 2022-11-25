@@ -28,7 +28,12 @@ contract AdminAddress is PluginCloneable {
     /// @param proposalId  The ID of the proposal.
     /// @param creator  The creator of the proposal.
     /// @param metadata The IPFS hash pointing to the proposal metadata.
-    event ProposalCreated(uint256 indexed proposalId, address indexed creator, bytes metadata);
+    event ProposalCreated(
+        uint256 indexed proposalId,
+        address indexed creator,
+        bytes metadata,
+        IDAO.Action[] actions
+    );
 
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId  The ID of the proposal.
@@ -58,7 +63,7 @@ contract AdminAddress is PluginCloneable {
         returns (bytes[] memory)
     {
         // Create proposal
-        emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata);
+        emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata, _actions);
 
         // Execute
         bytes[] memory execResults = dao.execute(proposalId.current(), _actions);
