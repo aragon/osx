@@ -34,6 +34,7 @@ On 2022-10-03 10:38:36
 
 ### Added
 
+- Added an `ERC721Token` entity and `Token` interface to be used by `TokenVotingPlugin`.
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
 - added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
@@ -42,6 +43,7 @@ On 2022-10-03 10:38:36
 ### Changed
 
 - Renamed contracts, events, and parameters in `MajorityVoting`:
+  - `ERC20Voting` to `TokenVoting`
   - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`
   - `VoteCreated` and `VoteExecuted` to `ProposalCreated` and `ProposalExecuted`
   - `voteId` to `proposalId`

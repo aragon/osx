@@ -19,18 +19,18 @@ import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol"
 import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
 import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
-import {ERC20Voting} from "./ERC20Voting.sol";
+import {TokenVoting} from "./TokenVoting.sol";
 
-/// @title ERC20VotingSetup
+/// @title TokenVotingSetup
 /// @author Aragon Association - 2022
-/// @notice The setup contract of the `ERC20Voting` plugin.
-contract ERC20VotingSetup is PluginSetup {
+/// @notice The setup contract of the `TokenVoting` plugin.
+contract TokenVotingSetup is PluginSetup {
     using Address for address;
     using Clones for address;
     using ERC165Checker for address;
 
-    /// @notice The address of the `ERC20Voting` base contract.
-    ERC20Voting private immutable erc20VotingBase;
+    /// @notice The address of the `TokenVoting` base contract.
+    TokenVoting private immutable tokenVotingBase;
 
     /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
@@ -85,7 +85,7 @@ contract ERC20VotingSetup is PluginSetup {
             new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
         );
         merkleMinterBase = address(new MerkleMinter());
-        erc20VotingBase = new ERC20Voting();
+        tokenVotingBase = new TokenVoting();
     }
 
     /// @inheritdoc IPluginSetup
@@ -105,7 +105,7 @@ contract ERC20VotingSetup is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode `_data` to extract the params needed for deploying and initializing `ERC20Voting` plugin,
+        // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
             uint64 totalSupportThresholdPct,
@@ -182,9 +182,9 @@ contract ERC20VotingSetup is PluginSetup {
 
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
-            address(erc20VotingBase),
+            address(tokenVotingBase),
             abi.encodeWithSelector(
-                ERC20Voting.initialize.selector,
+                TokenVoting.initialize.selector,
                 dao,
                 totalSupportThresholdPct,
                 relativeSupportThresholdPct,
@@ -203,7 +203,7 @@ contract ERC20VotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -211,7 +211,7 @@ contract ERC20VotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -274,7 +274,7 @@ contract ERC20VotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -282,7 +282,7 @@ contract ERC20VotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            erc20VotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -311,7 +311,7 @@ contract ERC20VotingSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view virtual override returns (address) {
-        return address(erc20VotingBase);
+        return address(tokenVotingBase);
     }
 
     /// @notice gets the information which interface ids token supports.

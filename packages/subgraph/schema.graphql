@@ -2,11 +2,24 @@
 
 # Token
 
-type ERC20Token @entity(immutable: true) {
+interface Token {
+  id: ID! # use address as id
+  name: String
+  symbol: String
+}
+
+type ERC20Token implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
   decimals: BigInt
+}
+
+type ERC721Token implements Token @entity(immutable: true) {
+  id: ID! # use address as id
+  name: String
+  symbol: String
+  baseURI: String
 }
 
 type Balance @entity {
@@ -183,44 +196,44 @@ enum VoteOption {
   No
 }
 
-# ERC20Voting
+# TokenVoting
 
-type ERC20VotingPlugin implements IPlugin @entity {
+type TokenVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugins once plugin is seperated from core"
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
-  proposals: [ERC20VotingProposal!]! @derivedFrom(field: "plugin")
+  proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
   relativeSupportThresholdPct: BigInt
   totalSupportThresholdPct: BigInt
   minDuration: BigInt
   proposalCount: BigInt
-  token: ERC20Token
-  members: [ERC20VotingVoter!]! @derivedFrom(field: "plugin")
+  token: Token
+  members: [TokenVotingVoter!]! @derivedFrom(field: "plugin")
 }
 
-type ERC20VotingVoter @entity {
+type TokenVotingVoter @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
-  plugin: ERC20VotingPlugin!
+  proposals: [TokenVote!]! @derivedFrom(field: "voter")
+  plugin: TokenVotingPlugin!
   lastUpdated: BigInt
 }
 
-type ERC20Vote @entity {
+type TokenVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
-  voter: ERC20VotingVoter!
-  proposal: ERC20VotingProposal!
+  voter: TokenVotingVoter!
+  proposal: TokenVotingProposal!
   vote: VoteOption!
   weight: BigInt!
   createdAt: BigInt!
 }
 
-type ERC20VotingProposal implements Proposal @entity {
+type TokenVotingProposal implements Proposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  plugin: ERC20VotingPlugin!
+  plugin: TokenVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
   metadata: String
@@ -234,7 +247,7 @@ type ERC20VotingProposal implements Proposal @entity {
   abstain: BigInt
   voteCount: BigInt
   totalVotingPower: BigInt!
-  voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
+  voters: [TokenVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!

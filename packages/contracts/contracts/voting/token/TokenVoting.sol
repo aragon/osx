@@ -2,23 +2,23 @@
 
 pragma solidity 0.8.10;
 
-import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
-/// @title ERC20Voting
+/// @title TokenVoting
 /// @author Aragon Association - 2021-2022
-/// @notice The majority voting implementation using an ERC-20 token.
+/// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract ERC20Voting is MajorityVotingBase {
+contract TokenVoting is MajorityVotingBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ERC20_VOTING_INTERFACE_ID =
+    bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
         this.getVotingToken.selector ^ this.initialize.selector;
 
-    /// @notice An [ERC20Votes](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20Votes) compatible contract referencing the token being used for voting.
-    ERC20VotesUpgradeable private votingToken;
+    /// @notice An [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible contract referencing the token being used for voting.
+    IVotesUpgradeable private votingToken;
 
     /// @notice Thrown if the voting power is zero
     error NoVotingPower();
@@ -35,7 +35,7 @@ contract ERC20Voting is MajorityVotingBase {
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration,
-        ERC20VotesUpgradeable _token
+        IVotesUpgradeable _token
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
@@ -51,13 +51,13 @@ contract ERC20Voting is MajorityVotingBase {
     /// @param _interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == ERC20_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
+        return _interfaceId == TOKEN_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
     /// @notice getter function for the voting token.
     /// @dev public function also useful for registering interfaceId and for distinguishing from majority voting interface.
-    /// @return ERC20VotesUpgradeable the token used for voting.
-    function getVotingToken() public view returns (ERC20VotesUpgradeable) {
+    /// @return IVotesUpgradeable the token used for voting.
+    function getVotingToken() public view returns (IVotesUpgradeable) {
         return votingToken;
     }
 

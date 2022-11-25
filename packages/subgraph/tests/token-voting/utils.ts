@@ -5,9 +5,9 @@ import {
   VoteSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  ProposalExecuted
-} from '../../generated/templates/ERC20Voting/ERC20Voting';
-import {ERC20VotingProposal} from '../../generated/schema';
+  ProposalExecuted,
+} from '../../generated/templates/TokenVoting/TokenVoting';
+import {TokenVotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
@@ -20,7 +20,7 @@ import {
   MIN_TURNOUT,
   SNAPSHOT_BLOCK,
   START_DATE,
-  VOTING_POWER
+  VOTING_POWER,
 } from '../constants';
 
 // events
@@ -171,7 +171,7 @@ export function getProposalCountCall(
 
 // state
 
-export function createERC20VotingProposalEntityState(
+export function createTokenVotingProposalEntityState(
   entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
@@ -187,28 +187,28 @@ export function createERC20VotingProposalEntityState(
   open: boolean = true,
   executable: boolean = false,
   executed: boolean = false
-): ERC20VotingProposal {
-  let erc20VotingProposal = new ERC20VotingProposal(entityID);
-  erc20VotingProposal.dao = Address.fromString(dao).toHexString();
-  erc20VotingProposal.plugin = Address.fromString(pkg).toHexString();
-  erc20VotingProposal.proposalId = BigInt.fromString(proposalId);
-  erc20VotingProposal.creator = Address.fromString(creator);
+): TokenVotingProposal {
+  let tokenVotingProposal = new TokenVotingProposal(entityID);
+  tokenVotingProposal.dao = Address.fromString(dao).toHexString();
+  tokenVotingProposal.plugin = Address.fromString(pkg).toHexString();
+  tokenVotingProposal.proposalId = BigInt.fromString(proposalId);
+  tokenVotingProposal.creator = Address.fromString(creator);
 
-  erc20VotingProposal.startDate = BigInt.fromString(startDate);
-  erc20VotingProposal.endDate = BigInt.fromString(endDate);
-  erc20VotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  erc20VotingProposal.relativeSupportThresholdPct = BigInt.fromString(
+  tokenVotingProposal.startDate = BigInt.fromString(startDate);
+  tokenVotingProposal.endDate = BigInt.fromString(endDate);
+  tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
+  tokenVotingProposal.relativeSupportThresholdPct = BigInt.fromString(
     relativeSupportThresholdPct
   );
-  erc20VotingProposal.totalSupportThresholdPct = BigInt.fromString(
+  tokenVotingProposal.totalSupportThresholdPct = BigInt.fromString(
     totalSupportThresholdPct
   );
-  erc20VotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
-  erc20VotingProposal.open = open;
-  erc20VotingProposal.executable = executable;
-  erc20VotingProposal.executed = executed;
-  erc20VotingProposal.createdAt = BigInt.fromString(createdAt);
-  erc20VotingProposal.save();
+  tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
+  tokenVotingProposal.open = open;
+  tokenVotingProposal.executable = executable;
+  tokenVotingProposal.executed = executed;
+  tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
+  tokenVotingProposal.save();
 
-  return erc20VotingProposal;
+  return tokenVotingProposal;
 }

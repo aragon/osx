@@ -14,7 +14,7 @@ async function deposit() {
   const args = process.argv.slice(2);
   const networkName = args[0];
   const privKey = args[1];
-  const isERC20Voting = args[2];
+  const isTokenVoting = args[2];
   const provider = new ethers.providers.JsonRpcProvider(
     networks[networkName].url
   );
@@ -22,7 +22,7 @@ async function deposit() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].address;
   // initiate DAO contract
   const DaoContract = new ethers.Contract(daoAddress, daoJson.abi, signer);
@@ -68,7 +68,7 @@ async function deposit() {
   for (let index = 0; index < tokens.length; index++) {
     const token = tokens[index];
     // approve
-    const erc20TokenContract = new ethers.Contract(
+    const erc20Token = new ethers.Contract(
       token.address,
       erc20Json.abi,
       signer
@@ -82,16 +82,12 @@ async function deposit() {
       '\n'
     );
 
-    const balance = await erc20TokenContract.balanceOf(signer.address);
+    const balance = await erc20Token.balanceOf(signer.address);
 
     console.log('balance:', balance.toString());
 
     if (balance.gt(ethers.BigNumber.from(0))) {
-      const approveTx = await erc20TokenContract.approve(
-        daoAddress,
-        amount,
-        overrides
-      );
+      const approveTx = await erc20Token.approve(daoAddress, amount, overrides);
       await approveTx.wait(1);
 
       // deposit
@@ -138,15 +134,15 @@ async function deposit() {
   // edit or add property
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].deposits
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].deposits = [];
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AddresslistVoting'
+    isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
   ].deposits = results;
 
   //write file
