@@ -13,7 +13,7 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting plugin.
+/// @notice The abstract implementation of majority voting plugins.
 ///
 ///  #### Parameterization
 ///  We define two parameters
@@ -191,6 +191,31 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
+    function support(uint256 _proposalId) public view returns (uint256) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function worstCaseSupport(uint256 _proposalId) public view returns (uint256) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return _calculatePct(proposal_.yes, proposal_.totalVotingPower - proposal_.abstain);
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function participation(uint256 _proposalId) public view returns (uint256) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return
+            _calculatePct(
+                proposal_.yes + proposal_.no + proposal_.abstain,
+                proposal_.totalVotingPower
+            );
+    }
+
+    /// @inheritdoc IMajorityVoting
     function getProposal(uint256 _proposalId)
         public
         view
@@ -269,7 +294,10 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        uint256 participation = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
+        uint256 participation = _calculatePct(
+            proposal_.yes + proposal_.no + proposal_.abstain,
+            proposal_.totalVotingPower
+        );
 
         if (_isVoteOpen(proposal_)) {
             // Early execution

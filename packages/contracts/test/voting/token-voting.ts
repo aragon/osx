@@ -542,6 +542,7 @@ describe('TokenVoting', function () {
 
       it('does not execute if support is high enough but relative and participation are too low', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(10);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | sup | par
         //  0  | 10% | 100%
         //  x  |  x  |  o

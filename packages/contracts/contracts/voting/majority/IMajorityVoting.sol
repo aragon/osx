@@ -6,9 +6,38 @@ import "../../core/IDAO.sol";
 
 /// @title IMajorityVoting
 /// @author Aragon Association - 2022
-/// @notice The interface for majority voting contracts. We use the following definitions:
-/// - Support      : `N_yes / (N_yes + N_no)`
-/// - Participation: `(N_yes + N_abstain + N_no) / N_total`
+/// @notice The interface of majority voting plugin.
+///
+///  #### Parameterization
+///  We define two parameters
+///  $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$
+///  and
+///  $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$
+///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
+///  Majority voting implies that the support threshold is set with
+///  $$\texttt{supportThreshold} \ge 50\% .$$
+///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
+///
+///  #### Vote Replacement Execution
+///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
+///
+///  #### Early Execution
+///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.// TODO it should also fail early.
+///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
+///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
+///  $$\begin{align*}
+///    \texttt{worstCaseSupport}
+///    &= \frac{N_\text{yes}}{N_\text{yes}+(N_\text{no} + \texttt{remainingVotes})}
+///    \\[3mm]
+///    &= \frac{N_\text{yes}}{N_\text{yes}+N_\text{no} + N_\text{total}-(N_\text{yes}+N_\text{no}+N_\text{abstain})}
+///    \\[3mm]
+///    &= \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}
+///  \end{align*}$$
+///  Accordingly, early execution is possible when the vote is open and the two thresholds
+///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$
+///  and
+///  $$\texttt{participation} > \texttt{participationThreshold}$$
+///  are met.
 interface IMajorityVoting {
     enum VoteOption {
         None,
@@ -123,10 +152,25 @@ interface IMajorityVoting {
     /// @return True if the proposal can be executed, false otherwise.
     function canExecute(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Returns the state of a voter for a given vote by its ID.
+    /// @notice Returns the vote option stored for a voter for a proposal vote.
     /// @param _proposalId The ID of the proposal.
     /// @return The vote option cast by a voter for a certain proposal.
     function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
+
+    /// @notice Returns the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote.
+    /// @param _proposalId The ID of the proposal.
+    /// @return The support value.
+    function support(uint256 _proposalId) external view returns (uint256);
+
+    /// @notice Returns the participation value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote.
+    /// @param _proposalId The ID of the proposal.
+    /// @return The participation value.
+    function worstCaseSupport(uint256 _proposalId) external view returns (uint256);
+
+    /// @notice Returns the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote.
+    /// @param _proposalId The ID of the proposal.
+    /// @return The participation value.
+    function participation(uint256 _proposalId) external view returns (uint256);
 
     /// @notice Returns all information for a proposal by its ID.
     /// @param _proposalId The ID of the proposal.

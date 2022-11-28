@@ -609,8 +609,6 @@ describe('AddresslistVoting', function () {
         startDate = (await getTime()) + startOffset;
         endDate = startDate + minDuration;
 
-        // voting will be initialized with 10 allowed addresses
-        // Which means census = 10 at this point.
         await initializeVoting(
           participationThreshold,
           supportThreshold,
@@ -661,7 +659,7 @@ describe('AddresslistVoting', function () {
         expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
       });
 
-      it('executes after the duration if pariticpation and support thresholds are met (but not total support)', async () => {
+      it('executes after the duration if participation and support thresholds are met', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
@@ -670,16 +668,17 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
         await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
         await voting.connect(signers[7]).vote(id, VoteOption.Abstain, false);
-        // dur | sup | par
-        //  0  | 60% | 80%
-        //  x  |  o  |  o
-        expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
 
-        await advanceTime(minDuration + 10);
-        // dur | sup | par
-        // 510 | 60% | 80%
-        //  x  |  o  |  o
-        expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.eq(false);
+
+        await advanceTimeTo(endDate);
+        expect(await getTime()).to.be.gte(endDate);
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.support(id)).to.be.gt(supportThreshold);
+
+        expect(await voting.canExecute(id)).to.eq(true);
       });
 
       it('should not allow the vote to pass if the participation threshold is not reached', async () => {
