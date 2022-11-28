@@ -10,8 +10,8 @@ import {
   VoteOption,
   pct16,
   getTime,
-  advanceTime,
-  advanceTimeTo,
+  advanceIntoVoteTime,
+  advanceAfterVoteEnd,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
@@ -26,6 +26,8 @@ describe('TokenVoting', function () {
   let dummyMetadata: string;
   let startDate: number;
   let endDate: number;
+  let supportThreshold: BigNumber;
+  let participationThreshold: BigNumber;
   const totalVotingPower = 100;
   const startOffset = 10;
   const minDuration = 500;
@@ -112,8 +114,8 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal creation', async () => {
-    let supportThreshold = pct16(50);
-    let participationThreshold = pct16(20);
+    supportThreshold = pct16(50);
+    participationThreshold = pct16(20);
 
     it('reverts total token supply while creating a vote is 0', async () => {
       await voting.initialize(
@@ -344,7 +346,7 @@ describe('TokenVoting', function () {
     });
 
     it('should not be able to vote if user has 0 token', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       await governanceErc20Mock.mock.getPastVotes.returns(0);
 
@@ -354,7 +356,7 @@ describe('TokenVoting', function () {
     });
 
     it('increases the yes, no, abstain votes and emit correct events', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
@@ -387,7 +389,7 @@ describe('TokenVoting', function () {
     });
 
     it('should not double-count votes by the same address', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
@@ -409,7 +411,7 @@ describe('TokenVoting', function () {
     });
 
     it('can execute early if participation is large enough', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       // vote with 50 yes votes, which is NOT enough to make vote executable as support
       // must be larger than supportThreshold = 50
@@ -427,7 +429,7 @@ describe('TokenVoting', function () {
     });
 
     it('can execute normally if participation is large enough', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       // vote with 50 yes votes
       await governanceErc20Mock.mock.getPastVotes.returns(50);
@@ -442,14 +444,14 @@ describe('TokenVoting', function () {
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
-      await advanceTime(minDuration + 10);
+      await advanceAfterVoteEnd(endDate);
 
       //The vote is executable as support > 50%, participation > 20%, and the voting period is over
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
     it('cannot execute normally if participation is too low', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       // vote with 10 yes votes
       await governanceErc20Mock.mock.getPastVotes.returns(10);
@@ -464,14 +466,14 @@ describe('TokenVoting', function () {
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
-      await advanceTime(minDuration + 10);
+      await advanceAfterVoteEnd(endDate);
 
       //The vote is not executable because the participation with 20% is still too low, despite a support of 66% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
     });
 
     it('executes the vote immediately while final yes is given', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       // vote with _supportThreshold staking, so
       // it immediatelly executes the vote
@@ -512,7 +514,7 @@ describe('TokenVoting', function () {
     });
 
     it('reverts if vote is not decided yet', async () => {
-      await advanceTimeTo(startDate);
+      await advanceIntoVoteTime(startDate, endDate);
 
       await expect(voting.execute(id)).to.be.revertedWith(
         customError('ProposalExecutionForbidden', id)
@@ -558,7 +560,7 @@ describe('TokenVoting', function () {
         //  x  |  x  |  o
         expect(await voting.canExecute(id)).to.equal(false); //  tot
 
-        await advanceTime(minDuration + 10);
+        await advanceAfterVoteEnd(endDate);
         // dur | sup | par
         // 510 | 10% | 100%
         //  o  |  x  |  o
@@ -576,7 +578,7 @@ describe('TokenVoting', function () {
         //  x  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
 
-        await advanceTime(minDuration + 10); // waiting until the vote end doesn't change this
+        await advanceAfterVoteEnd(endDate); // waiting until the vote end doesn't change this
         // dur | sup | par
         // 510 | 30% | 33%
         //  o  |  o  |  x
@@ -591,7 +593,7 @@ describe('TokenVoting', function () {
         //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > support threshold (50%) == false, duration is not over
 
-        await advanceTime(minDuration + 10);
+        await advanceAfterVoteEnd(endDate);
         // dur | sup | par
         // 510 | 30% | 100%
         //  o  |  o  |  o
