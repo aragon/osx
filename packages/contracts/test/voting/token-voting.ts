@@ -24,7 +24,11 @@ describe('TokenVoting', function () {
   let governanceErc20Mock: any;
   let dummyActions: any;
   let dummyMetadata: string;
-
+  let startDate: number;
+  let endDate: number;
+  const totalVotingPower = 100;
+  const startOffset = 10;
+  const minDuration = 500;
   const id = 0;
 
   let mergedAbi: any;
@@ -75,6 +79,9 @@ describe('TokenVoting', function () {
     );
     voting = await TokenVotingFactory.deploy();
 
+    startDate = (await getTime()) + startOffset;
+    endDate = startDate + minDuration;
+
     dao.grant(
       dao.address,
       voting.address,
@@ -105,10 +112,8 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal creation', async () => {
-    let minDuration = 500;
     let supportThreshold = pct16(50);
     let participationThreshold = pct16(20);
-    let totalVotingPower = 100;
 
     it('reverts total token supply while creating a vote is 0', async () => {
       await voting.initialize(
@@ -248,10 +253,6 @@ describe('TokenVoting', function () {
     });
 
     it('reverts creation when voting before the start date', async () => {
-      const startOffset = 9;
-      let startDate = (await getTime()) + startOffset;
-      let endDate = startDate + minDuration;
-
       await voting.initialize(
         dao.address,
         participationThreshold,
@@ -300,19 +301,10 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    let minDuration = 500;
     let supportThreshold = pct16(50);
     let participationThreshold = pct16(20);
-    let totalVotingPower = 100;
-
-    const startOffset = 9;
-    let startDate: number;
-    let endDate: number;
 
     beforeEach(async () => {
-      startDate = (await getTime()) + startOffset;
-      endDate = startDate + minDuration;
-
       await voting.initialize(
         dao.address,
         participationThreshold,
@@ -530,10 +522,8 @@ describe('TokenVoting', function () {
 
   describe('Configurations for different use cases', async () => {
     describe('A simple majority vote with >50% support and >25% participation required', async () => {
-      let minDuration = 500;
       let supportThreshold = pct16(50);
       let participationThreshold = pct16(25);
-      let totalVotingPower = 100;
 
       beforeEach(async () => {
         await voting.initialize(

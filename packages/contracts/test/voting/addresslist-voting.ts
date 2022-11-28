@@ -20,10 +20,10 @@ describe('AddresslistVoting', function () {
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
-  const startOffset = 9;
-  const minDuration = 500;
   let startDate: number;
   let endDate: number;
+  const startOffset = 10;
+  const minDuration = 500;
   const id = 0;
 
   let mergedAbi: any;
@@ -169,25 +169,23 @@ describe('AddresslistVoting', function () {
     it('reverts if vote duration is less than the minimal duration', async () => {
       await voting.initialize(dao.address, 1, 2, minDuration, addresslist(1));
 
-      const block = await ethers.provider.getBlock('latest');
-      const current = block.timestamp;
-      const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const tooShortEndDate = endDate - 10;
+
       await expect(
         voting.createProposal(
           dummyMetadata,
           [],
           startDate,
-          endDate,
+          tooShortEndDate,
           false,
           VoteOption.None
         )
       ).to.be.revertedWith(
         customError(
           'VotingPeriodInvalid',
-          current + 1, // TODO hacky
+          (await getTime()) + 1,
           startDate,
-          endDate,
+          tooShortEndDate,
           minDuration
         )
       );
@@ -308,9 +306,6 @@ describe('AddresslistVoting', function () {
     const participationThreshold = pct16(19);
 
     beforeEach(async () => {
-      startDate = (await getTime()) + startOffset;
-      endDate = startDate + minDuration;
-
       await voting.initialize(
         dao.address,
         participationThreshold,
@@ -480,7 +475,6 @@ describe('AddresslistVoting', function () {
 
   describe('Parameters can satisfy different use cases:', async () => {
     describe('A simple majority vote with >50% support and >25% participation required', async () => {
-      let minDuration = 500;
       let supportThreshold = pct16(50);
       let participationThreshold = pct16(25);
 
@@ -583,9 +577,6 @@ describe('AddresslistVoting', function () {
       let participationThreshold = pct16(75);
 
       beforeEach(async () => {
-        startDate = (await getTime()) + startOffset;
-        endDate = startDate + minDuration;
-
         await voting.initialize(
           dao.address,
           participationThreshold,
