@@ -90,6 +90,16 @@ describe('AddresslistVoting', function () {
     );
   }
 
+  function addresslist(length: number): string[] {
+    let addresses: string[] = [];
+
+    for (let i = 0; i < length; i++) {
+      const addr = signers[i].address;
+      addresses.push(addr);
+    }
+    return addresses;
+  }
+
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
       await initializeVoting(1, 2, 3, []);
@@ -316,20 +326,13 @@ describe('AddresslistVoting', function () {
       startDate = (await getTime()) + startOffset;
       endDate = startDate + minDuration;
 
-      const addresses = [];
-
-      for (let i = 0; i < 10; i++) {
-        const addr = await signers[i].getAddress();
-        addresses.push(addr);
-      }
-
       // voting will be initialized with 10 allowed addresses
       // Which means totalVotingPower = 10 at this point.
       await initializeVoting(
         participationThreshold,
         supportThreshold,
         minDuration,
-        addresses
+        addresslist(10)
       );
 
       expect(
@@ -500,20 +503,13 @@ describe('AddresslistVoting', function () {
       let participationThreshold = pct16(25);
 
       beforeEach(async () => {
-        const addresses = [];
-
-        for (let i = 0; i < 10; i++) {
-          const addr = await signers[i].getAddress();
-          addresses.push(addr);
-        }
-
         // voting will be initialized with 10 allowed addresses
         // Which means totalVotingPower = 10 at this point.
         await initializeVoting(
           participationThreshold,
           supportThreshold,
           minDuration,
-          addresses
+          addresslist(10)
         );
 
         await voting.createProposal(
@@ -612,12 +608,6 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         startDate = (await getTime()) + startOffset;
         endDate = startDate + minDuration;
-        const addresses = [];
-
-        for (let i = 0; i < 10; i++) {
-          const addr = await signers[i].getAddress();
-          addresses.push(addr);
-        }
 
         // voting will be initialized with 10 allowed addresses
         // Which means census = 10 at this point.
@@ -625,7 +615,7 @@ describe('AddresslistVoting', function () {
           participationThreshold,
           supportThreshold,
           minDuration,
-          addresses
+          addresslist(10)
         );
         expect(
           (
