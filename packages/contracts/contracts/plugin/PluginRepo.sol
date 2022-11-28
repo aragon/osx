@@ -28,9 +28,13 @@ contract PluginRepo is
 {
     using Address for address;
     
+    struct Tag {
+        uint8 release;
+        uint16 build;
+    }
+
     struct Version {
-        uint8 releaseId;
-        uint16 buildId;
+        Tag tag;
         address pluginSetup;
         bool verified;
         bytes contentURI;
@@ -43,7 +47,7 @@ contract PluginRepo is
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
     /// @notice Current latest release id(there can be maximum uint8 = 255 possibility).
-    uint256 public latestReleaseId;
+    uint256 public latestRelease;
 
     /// @notice increasing build ids per release
     /// @dev keys can only be uint8 even though uint256 is specified to reduce gas cost.
@@ -54,7 +58,7 @@ contract PluginRepo is
     mapping(bytes32 => Version) internal versions;
 
     /// @notice The mapping between plugin setup address and its corresponding versionHash
-    mapping(address => bytes32) internal latestVersionHashForPluginSetup;
+    mapping(address => bytes32) internal latestTagHashForPluginSetup;
 
     /// @notice Thrown if version does not exist.
     /// @param versionHash The version Hash(releaseId + buildId)
@@ -147,7 +151,7 @@ contract PluginRepo is
 
     /// @inheritdoc IPluginRepo
     function createVersion(
-        uint8 _releaseId,
+        uint8 _release, // 1
         address _pluginSetup,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
@@ -168,106 +172,105 @@ contract PluginRepo is
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         }
 
-        if (_releaseId == 0) {
+        if (_release == 0) {
             revert ReleaseIdNull();
         }
 
         // Can't release 3 unless 2 is released.
-        if (_releaseId - latestReleaseId > 1) {
-            revert ReleaseIdTooBig(latestReleaseId, _releaseId);
+        if (_release - latestRelease > 1) {
+            revert ReleaseIdTooBig(latestRelease, _release);
         }
 
-        if (_releaseId > latestReleaseId) {
-            latestReleaseId = _releaseId;
+        if (_release > latestRelease) {
+            latestRelease = _release;
         }
 
-        // Make sure the same plugin setup doesn't exist in previous relase.
-        Version storage version = versions[latestVersionHashForPluginSetup[_pluginSetup]];
-        if (version.releaseId != 0 && _releaseId != version.releaseId) {
+        // Make sure the same plugin setup wasn't used in previous releases.
+        Version storage version = versions[latestTagHashForPluginSetup[_pluginSetup]];
+        if (version.tag.release != 0 && version.tag.release != _release) {
             revert PluginSetupExistsInAnotherRelease(
-                version.releaseId,
-                version.buildId,
+                version.tag.release,
+                version.tag.build,
                 _pluginSetup
             );
         }
 
-        uint16 nextVersionId;
+        uint16 build;
         unchecked {
-            nextVersionId = uint16(buildIdsPerRelease[_releaseId]++);
+            build = uint16(buildIdsPerRelease[_release]++);
         }
 
-        bytes32 _versionHash = versionHash(_releaseId, nextVersionId);
+        Tag memory tag = Tag(_release, build);
+        bytes32 _tagHash = tagHash(tag);
 
-        versions[_versionHash] = Version(
-            _releaseId,
-            nextVersionId,
+        versions[_tagHash] = Version(
+            tag,
             _pluginSetup,
             false,
             _contentURI
         );
 
-        latestVersionHashForPluginSetup[_pluginSetup] = _versionHash;
+        latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
-        emit VersionCreated(_releaseId, nextVersionId, _pluginSetup, _contentURI, false);
+        emit VersionCreated(_release, build, _pluginSetup, _contentURI, false);
     }
 
-    /// @notice get the latest version in the `_releaseId`.
-    /// @param _releaseId the release id
-    /// @return Version the latest version which is returned from the _releaseId's build sequence.
-    function latestVersionPerRelease(uint8 _releaseId) public view returns (Version memory) {
-        uint16 latestBuildId = uint16(buildIdsPerRelease[_releaseId]);
-        return versionByVersionHash(versionHash(_releaseId, latestBuildId));
+
+    /// @notice latest version in the release number.
+    /// @param _release the release number.
+    /// @return Version the latest version in the release number.
+    function getLatestVersion(uint8 _release) public view returns (Version memory) {
+        uint16 latestBuild = uint16(buildIdsPerRelease[_release]);
+        return getVersion(tagHash(Tag(_release, latestBuild)));
     }
 
     /// @notice get the latest version by plugin setup.
     /// @param _pluginSetup the plugin setup address
-    /// @return Version the version that is binded to the _pluginSetup
-    function latestVersionByPluginSetup(address _pluginSetup) public view returns (Version memory) {
-        return versionByVersionHash(latestVersionHashForPluginSetup[_pluginSetup]);
+    /// @return Version latest version that is binded to the _pluginSetup
+    function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
+        return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
 
-    /// @notice get the version by release id and build id.
-    /// @param _releaseId the release id
-    /// @param _buildId the build id in _releaseId
-    /// @return Version the version which is binded to the hash of (_releaseId, _buildId)
-    function versionByReleaseAndBuildId(uint8 _releaseId, uint16 _buildId)
+    /// @notice get the version by tag.
+    /// @param _tag the version tag.
+    /// @return the version which belongs to the _tag.
+    function getVersion(Tag calldata _tag)
         public
         view
         returns (Version memory)
     {
-        return versionByVersionHash(versionHash(_releaseId, _buildId));
+        return getVersion(tagHash(_tag));
     }
 
     /// @notice get the concrete version.
-    /// @param _releaseAndVersionHash the version hash of release Id and buildId.
+    /// @param _tagHash the tag hash.
     /// @return Version the concrete version by the exact hash.
-    function versionByVersionHash(bytes32 _releaseAndVersionHash)
+    function getVersion(bytes32 _tagHash)
         public
         view
         returns (Version memory)
     {
-        Version storage version = versions[_releaseAndVersionHash];
+        Version storage version = versions[_tagHash];
 
-        if (version.releaseId == 0) {
-            revert VersionHashDoesNotExist(_releaseAndVersionHash);
+        if (version.tag.release == 0) {
+            revert VersionHashDoesNotExist(_tagHash);
         }
 
         return version;
     }
 
-    /// @notice Gets the total number of published versions.
+    /// @notice Gets the total number of published versions per release.
     /// @param _releaseId release id.
-    /// @return The number of published versions.
-    function getVersionCountPerRelease(uint8 _releaseId) public view returns (uint256) {
+    /// @return The number of published versions in the release.
+    function versionCount(uint8 _releaseId) public view returns (uint256) {
         return buildIdsPerRelease[_releaseId];
     }
     
-    /// @notice get the version hash.
-    /// @param _releaseId the release id
-    /// @param _buildId the build id in _releaseId
+    /// @notice get the tag hash.
+    /// @param _tag the tag.
     /// @return bytes32 the keccak hash of abi encoded _releaseId and _buildId
-    function versionHash(uint8 _releaseId, uint16 _buildId) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_releaseId, _buildId));
+    function tagHash(Tag memory _tag) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_tag.release, _tag.build));
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).

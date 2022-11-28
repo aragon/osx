@@ -15,7 +15,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre,
     'AllowlistVoting',
     'AllowlistVotingSetup',
-    [1, 0, 0],
     '0x'
   );
 
@@ -24,7 +23,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre,
     'ERC20Voting',
     'ERC20VotingSetup',
-    [1, 0, 0],
     '0x'
   );
 };

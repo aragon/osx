@@ -159,14 +159,12 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
-    const initialSemanticVersion = [0, 0, 0];
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
     await expect(
-      pluginRepoFactory.createPluginRepoWithVersion(
+      pluginRepoFactory.createPluginRepoWithContractAndContentURI(
         pluginRepoName,
-        initialSemanticVersion,
         pluginSetupAddress,
         contentURI,
         ownerAddress
@@ -178,13 +176,11 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
-    const initialSemanticVersion = [1, 0, 0];
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
-    let tx = await pluginRepoFactory.createPluginRepoWithVersion(
+    let tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
       pluginRepoName,
-      initialSemanticVersion,
       pluginSetupAddress,
       contentURI,
       ownerAddress

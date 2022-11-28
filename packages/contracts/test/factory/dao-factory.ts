@@ -202,9 +202,8 @@ describe('DAOFactory: ', function () {
       'PluginUUPSUpgradeableSetupV1Mock'
     );
     pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
-    const tx = await pluginRepoFactory.createPluginRepoWithVersion(
+    const tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
       'PluginUUPSUpgradeableSetupV1Mock',
-      [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',
       ownerAddress

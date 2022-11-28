@@ -29,7 +29,7 @@ contract DAOFactory {
     }
 
     struct PluginSettings {
-        address pluginSetup; // The `PluginSetup` address of the plugin.
+        PluginRepo.Tag tag; // The `PluginSetup` address of the plugin.
         PluginRepo pluginSetupRepo; // The `PluginRepo` of the plugin.
         bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     }
@@ -89,16 +89,20 @@ contract DAOFactory {
                 PermissionLib.ItemMultiTarget[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
-                    _pluginSettings[i].pluginSetup,
-                    _pluginSettings[i].pluginSetupRepo,
+                    PluginSetupProcessor.PluginRepoRequest(
+                        _pluginSettings[i].tag,
+                        _pluginSettings[i].pluginSetupRepo
+                    ),
                     _pluginSettings[i].data
                 );
 
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
-                _pluginSettings[i].pluginSetup,
-                _pluginSettings[i].pluginSetupRepo,
+                PluginSetupProcessor.PluginRepoRequest(
+                    _pluginSettings[i].tag,
+                    _pluginSettings[i].pluginSetupRepo
+                ),
                 plugin,
                 permissions
             );

@@ -184,9 +184,8 @@ describe('Plugin Setup Processor', function () {
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
     
     // Create and register a plugin on the PluginRepoRegistry
-    let tx = await pluginRepoFactory.createPluginRepoWithVersion(
+    let tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
       `PluginUUPSUpgradeableMock`,
-      [1, 0, 0],
       setupUV1.address,
       '0x00',
       ownerAddress
@@ -196,21 +195,20 @@ describe('Plugin Setup Processor', function () {
     repoU = PluginRepo.attach(event.args.pluginRepo);
 
     // Add setups
-    await repoU.createVersion([1, 1, 0], setupUV2.address, EMPTY_DATA);
-    await repoU.createVersion([1, 2, 0], setupUV3.address, EMPTY_DATA);
-    await repoU.createVersion([1, 3, 0], setupUV1Bad.address, EMPTY_DATA);
-    await repoU.createVersion([1, 4, 0], setupUV4.address, EMPTY_DATA);
+    await repoU.createVersion(1, setupUV2.address, EMPTY_DATA);
+    await repoU.createVersion(1, setupUV3.address, EMPTY_DATA);
+    await repoU.createVersion(1, setupUV1Bad.address, EMPTY_DATA);
+    await repoU.createVersion(1, setupUV4.address, EMPTY_DATA);
 
-    tx = await pluginRepoFactory.createPluginRepoWithVersion(
+    tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
       `PluginCloneableMock`,
-      [1, 0, 0],
       setupCV1.address,
       '0x00',
       ownerAddress
     );
     event = await findEvent(tx, EVENTS.PluginRepoRegistered);
     repoC = PluginRepo.attach(event.args.pluginRepo);
-    await repoC.createVersion([1, 1, 0], setupCV2.address, EMPTY_DATA);
+    await repoC.createVersion(1, setupCV2.address, EMPTY_DATA);
   });
 
   beforeEach(async function () {
