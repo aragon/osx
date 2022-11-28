@@ -22,7 +22,6 @@ describe('TokenVoting', function () {
   let voting: any;
   let dao: DAO;
   let governanceErc20Mock: any;
-  let ownerAddress: string;
   let dummyActions: any;
   let dummyMetadata: string;
 
@@ -31,7 +30,6 @@ describe('TokenVoting', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    ownerAddress = await signers[0].getAddress();
 
     ({abi: mergedAbi, bytecode: tokenVotingFactoryBytecode} =
       await getMergedABI(
@@ -43,7 +41,7 @@ describe('TokenVoting', function () {
 
     dummyActions = [
       {
-        to: ownerAddress,
+        to: signers[0].address,
         data: '0x00000000',
         value: 0,
       },
@@ -55,7 +53,11 @@ describe('TokenVoting', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await DAO.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    await dao.initialize(
+      '0x',
+      signers[0].address,
+      ethers.constants.AddressZero
+    );
   });
 
   beforeEach(async () => {
@@ -172,7 +174,7 @@ describe('TokenVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, ownerAddress, dummyMetadata);
+        .withArgs(id, signers[0].address, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -188,7 +190,7 @@ describe('TokenVoting', function () {
 
       expect(vote.startDate.add(minDuration)).to.equal(vote.endDate);
 
-      expect(await voting.canVote(1, ownerAddress)).to.equal(false);
+      expect(await voting.canVote(1, signers[0].address)).to.equal(false);
 
       expect(vote.actions.length).to.equal(1);
       expect(vote.actions[0].to).to.equal(dummyActions[0].to);
@@ -215,9 +217,9 @@ describe('TokenVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, ownerAddress, dummyMetadata)
+        .withArgs(id, signers[0].address, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Yes, 1);
+        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -263,7 +265,9 @@ describe('TokenVoting', function () {
           false,
           VoteOption.Yes
         )
-      ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
+      ).to.be.revertedWith(
+        customError('VoteCastForbidden', id, signers[0].address)
+      );
 
       // Works if the vote option is 'None'
       expect(
@@ -327,7 +331,7 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastForbidden', id, ownerAddress)
+        customError('VoteCastForbidden', id, signers[0].address)
       );
     });
 
@@ -337,7 +341,7 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastForbidden', id, ownerAddress)
+        customError('VoteCastForbidden', id, signers[0].address)
       );
     });
 
@@ -348,7 +352,7 @@ describe('TokenVoting', function () {
 
       expect(await voting.vote(id, VoteOption.Yes, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Yes, 1);
+        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
       let vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(1);
@@ -357,7 +361,7 @@ describe('TokenVoting', function () {
 
       expect(await voting.vote(id, VoteOption.No, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.No, 1);
+        .withArgs(id, signers[0].address, VoteOption.No, 1);
 
       vote = await voting.getProposal(0);
       expect(vote.yes).to.equal(0);
@@ -366,7 +370,7 @@ describe('TokenVoting', function () {
 
       expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
+        .withArgs(id, signers[0].address, VoteOption.Abstain, 1);
 
       vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(0);

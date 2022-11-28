@@ -18,8 +18,6 @@ describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;
-  let ownerAddress: string;
-  let user1: string;
   let dummyActions: any;
   let dummyMetadata: string;
 
@@ -28,8 +26,6 @@ describe('AddresslistVoting', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    ownerAddress = await signers[0].getAddress();
-    user1 = await signers[1].getAddress();
 
     ({abi: mergedAbi, bytecode: addresslistVotingFactoryBytecode} =
       await getMergedABI(
@@ -41,7 +37,7 @@ describe('AddresslistVoting', function () {
 
     dummyActions = [
       {
-        to: ownerAddress,
+        to: signers[0].address,
         data: '0x00000000',
         value: 0,
       },
@@ -52,7 +48,11 @@ describe('AddresslistVoting', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await DAO.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    await dao.initialize(
+      '0x',
+      signers[0].address,
+      ethers.constants.AddressZero
+    );
   });
 
   beforeEach(async () => {
@@ -70,7 +70,7 @@ describe('AddresslistVoting', function () {
     );
     dao.grant(
       voting.address,
-      ownerAddress,
+      signers[0].address,
       ethers.utils.id('MODIFY_ADDRESSLIST_PERMISSION')
     );
   });
@@ -117,39 +117,43 @@ describe('AddresslistVoting', function () {
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(ownerAddress, block1.number)).to.equal(
+      expect(await voting.isListed(signers[0].address, block1.number)).to.equal(
         false
       );
     });
 
     it('should add new users in the address list', async () => {
-      await voting.addAddresses([ownerAddress, user1]);
+      await voting.addAddresses([signers[0].address, signers[1].address]);
 
       const block = await ethers.provider.getBlock('latest');
 
       await ethers.provider.send('evm_mine', []);
 
-      expect(await voting.isListed(ownerAddress, block.number)).to.equal(true);
-      expect(await voting.isListed(ownerAddress, 0)).to.equal(true);
-      expect(await voting.isListed(user1, 0)).to.equal(true);
+      expect(await voting.isListed(signers[0].address, block.number)).to.equal(
+        true
+      );
+      expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
+      expect(await voting.isListed(signers[1].address, 0)).to.equal(true);
     });
 
     it('should remove users from the address list', async () => {
-      await voting.addAddresses([ownerAddress]);
+      await voting.addAddresses([signers[0].address]);
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(ownerAddress, block1.number)).to.equal(true);
-      expect(await voting.isListed(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isListed(signers[0].address, block1.number)).to.equal(
+        true
+      );
+      expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
 
-      await voting.removeAddresses([ownerAddress]);
+      await voting.removeAddresses([signers[0].address]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(ownerAddress, block2.number)).to.equal(
+      expect(await voting.isListed(signers[0].address, block2.number)).to.equal(
         false
       );
-      expect(await voting.isListed(ownerAddress, 0)).to.equal(false);
+      expect(await voting.isListed(signers[0].address, 0)).to.equal(false);
     });
   });
 
@@ -160,7 +164,7 @@ describe('AddresslistVoting', function () {
     const id = 0; // proposalId
 
     it('reverts if user is not allowed to create a vote', async () => {
-      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+      await initializeVoting(1, 2, minDuration, [signers[0].address]);
 
       await expect(
         voting
@@ -172,7 +176,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if vote duration is less than the minimal duration', async () => {
-      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+      await initializeVoting(1, 2, minDuration, [signers[0].address]);
 
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
@@ -199,7 +203,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
-      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+      await initializeVoting(1, 2, minDuration, [signers[0].address]);
 
       const id = 0; // proposalId
 
@@ -214,7 +218,7 @@ describe('AddresslistVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, ownerAddress, dummyMetadata);
+        .withArgs(id, signers[0].address, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -229,9 +233,9 @@ describe('AddresslistVoting', function () {
 
       expect(vote.startDate.add(minDuration)).to.equal(vote.endDate);
 
-      expect(await voting.canVote(id, ownerAddress)).to.equal(true);
-      expect(await voting.canVote(id, user1)).to.equal(false);
-      expect(await voting.canVote(1, ownerAddress)).to.equal(false);
+      expect(await voting.canVote(id, signers[0].address)).to.equal(true);
+      expect(await voting.canVote(id, signers[1].address)).to.equal(false);
+      expect(await voting.canVote(1, signers[0].address)).to.equal(false);
 
       expect(vote.actions.length).to.equal(1);
       expect(vote.actions[0].to).to.equal(dummyActions[0].to);
@@ -240,7 +244,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
-      await initializeVoting(1, 2, minDuration, [ownerAddress]);
+      await initializeVoting(1, 2, minDuration, [signers[0].address]);
 
       const id = 0; // proposalId
 
@@ -255,9 +259,9 @@ describe('AddresslistVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, ownerAddress, dummyMetadata)
+        .withArgs(id, signers[0].address, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Yes, 1);
+        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
       const block = await ethers.provider.getBlock('latest');
       const vote = await voting.getProposal(id);
@@ -280,7 +284,7 @@ describe('AddresslistVoting', function () {
         participationThreshold,
         supportThreshold,
         minDuration,
-        [ownerAddress]
+        [signers[0].address]
       );
 
       expect(await getTime()).to.be.lessThan(startDate);
@@ -295,7 +299,9 @@ describe('AddresslistVoting', function () {
           false,
           VoteOption.Yes
         )
-      ).to.be.revertedWith(customError('VoteCastForbidden', id, ownerAddress));
+      ).to.be.revertedWith(
+        customError('VoteCastForbidden', id, signers[0].address)
+      );
 
       // Works if the vote option is 'None'
       expect(
@@ -352,7 +358,7 @@ describe('AddresslistVoting', function () {
     it('does not allow voting, when the vote has not started yet', async () => {
       expect(await getTime()).to.be.lessThan(startDate);
       await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastForbidden', id, ownerAddress)
+        customError('VoteCastForbidden', id, signers[0].address)
       );
     });
 
@@ -362,21 +368,21 @@ describe('AddresslistVoting', function () {
 
       expect(await voting.vote(id, VoteOption.Yes, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Yes, 1);
+        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
       let vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.No, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.No, 1);
+        .withArgs(id, signers[0].address, VoteOption.No, 1);
 
       vote = await voting.getProposal(id);
       expect(vote.no).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
+        .withArgs(id, signers[0].address, VoteOption.Abstain, 1);
 
       vote = await voting.getProposal(id);
       expect(vote.abstain).to.equal(1);
