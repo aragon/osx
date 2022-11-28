@@ -542,15 +542,15 @@ describe('TokenVoting', function () {
 
       it('does not execute if support is high enough but relative and participation are too low', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(10);
-        // dur | tot | rel
+        // dur | sup | par
         //  0  | 10% | 100%
-        //  𐄂  |  𐄂  |  ✓
+        //  x  |  x  |  o
         expect(await voting.canExecute(id)).to.equal(false); //  tot
 
         await advanceTime(minDuration + 10);
-        // dur | tot | rel
+        // dur | sup | par
         // 510 | 10% | 100%
-        //  ✓  |  𐄂  |  ✓
+        //  o  |  x  |  o
         expect(await voting.canExecute(id)).to.equal(false); // vote end does not help
       });
 
@@ -560,53 +560,53 @@ describe('TokenVoting', function () {
 
         await governanceErc20Mock.mock.getPastVotes.returns(20);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
-        // dur | tot | rel
+        // dur | sup | par
         //  0  | 30% | 33%
-        //  𐄂  |  ✓  |  𐄂
+        //  x  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
 
         await advanceTime(minDuration + 10); // waiting until the vote end doesn't change this
-        // dur | tot | rel
+        // dur | sup | par
         // 510 | 30% | 33%
-        //  ✓  |  ✓  |  𐄂
+        //  o  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
       });
 
       it('executes after the duration if total and support are met', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(30);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
+        // dur | sup | par
         //  0  | 30% | 100%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > support threshold (50%) == false, duration is not over
 
         await advanceTime(minDuration + 10);
-        // dur | tot | rel
+        // dur | sup | par
         // 510 | 30% | 100%
-        //  ✓  |  ✓  |  ✓
+        //  o  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
       it('executes early if the participation exceeds the support threshold (assuming the latter is > 50%)', async () => {
         await governanceErc20Mock.mock.getPastVotes.returns(50);
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
+        // dur | sup | par
         //  0  | 50% | 100%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(false); // participation > support threshold == false
 
         await governanceErc20Mock.mock.getPastVotes.returns(10);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
+        // dur | sup | par
         //  0  | 60% | 100%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (50%) == true
 
         await governanceErc20Mock.mock.getPastVotes.returns(40);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
-        // dur | tot | rel
+        // dur | sup | par
         //  0  | 60% | 60%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // The remaining voter voting against it does not change the outcome
       });
     });

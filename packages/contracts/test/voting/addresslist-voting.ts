@@ -546,13 +546,13 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 30% | 33%
-        //  𐄂  |  ✓  |  𐄂
+        //  x  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > support threshold (50%) == false
 
         await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 33%
-        //  ✓  |  ✓  |  𐄂
+        //  o  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
       });
 
@@ -562,13 +562,13 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 30% | 100%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
 
         await advanceTime(minDuration + 10);
         // dur | tot | rel
         // 510 | 30% | 100%
-        //  ✓  |  ✓  |  ✓
+        //  o  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
@@ -580,13 +580,13 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 50% | 100%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(false); // participation (50%) > support threshold (50%) == false
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
         // dur | tot | rel
         //  0  | 60% | 100%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (50%) == true
 
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
@@ -595,7 +595,7 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[9]).vote(id, VoteOption.No, false);
         // dur | tot | rel
         //  0  | 60% | 60%
-        //  𐄂  |  ✓  |  ✓
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (50%) == true
       });
     });
@@ -643,15 +643,15 @@ describe('AddresslistVoting', function () {
 
       it('does not execute if support is high enough but participation is too low', async () => {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel | par
-        //  0  | 10% | 100%| 10%
-        //  𐄂  |  𐄂  |  ✓  |  𐄂
+        // dur | sup | par
+        //  0  | 100%| 10%
+        //  x  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > support threshold (50%) == false
 
         await advanceTime(minDuration + 10);
-        // dur | tot | rel | par
-        // 510 | 10% | 100%| 10%
-        //  ✓  |  𐄂  |  ✓  | 𐄂
+        // dur | sup | par
+        // 510 | 100%| 10%
+        //  o  |  o  | x
         expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > participation (75%) == false
       });
 
@@ -659,15 +659,15 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
-        // dur | tot | rel | par
-        //  0  | 10% | 33% | 30%
-        //  𐄂  |  ✓  |  𐄂  |
+        // dur | sup | par
+        //  0  | 33% | 30%
+        //  x  |  x  |
         expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > support threshold (50%) == false
 
         await advanceTime(minDuration + 10);
-        // dur | tot | rel | par
-        // 510 | 10% | 33% | 30%
-        //  ✓  |  ✓  |  𐄂  |
+        // dur | sup | par
+        // 510 | 33% | 30%
+        //  o  |  x  |
         expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
       });
 
@@ -680,15 +680,15 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
         await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
         await voting.connect(signers[7]).vote(id, VoteOption.Abstain, false);
-        // dur | tot | rel | par
-        //  0  | 30% | 60% | 80%
-        //  𐄂  |  𐄂  |  ✓  |  ✓
+        // dur | sup | par
+        //  0  | 60% | 80%
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
 
         await advanceTime(minDuration + 10);
-        // dur | tot | rel | par
-        // 510 | 30% | 60% | 80%
-        //  𐄂  |  𐄂  |  ✓  |  ✓
+        // dur | sup | par
+        // 510 | 60% | 80%
+        //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
@@ -705,9 +705,9 @@ describe('AddresslistVoting', function () {
 
         // CHECK EARLY EXECTUION
 
-        // dur | tot | rel | par
-        //start| 60% | 100%| 60%
-        //  𐄂  |  ✓  |  ✓  |  𐄂
+        // dur | sup | par
+        //start| 100%| 60%
+        //  x  |  o  |  x
 
         // participation(60%) < participationThreshold(75%) ---> the vote should not execute
 
@@ -724,9 +724,9 @@ describe('AddresslistVoting', function () {
 
         // CHECK NORMAL EXECTUION
 
-        // dur | tot | rel | par
-        // over| 60% | 100%| 60%
-        //  ✓  |  ✓  |  ✓  |  𐄂
+        // dur | sup | par
+        // over| 100%| 60%
+        //  o  |  o  |  x
 
         //participation(60%) < participationThreshold(75%) ---> the vote should not execute
 
@@ -748,26 +748,26 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[5]).vote(id, VoteOption.No, false);
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
 
-        // dur | rel | par
+        // dur | sup | par
         //  0  | 57% | 70%
         //  x  |  o  |  x
         expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
-        // dur | rel | par
+        // dur | sup | par
         //  0  | 50% | 80%
         //  x  |  x  |  o
         expect(await voting.canExecute(id)).to.equal(false); // participation is met but not support
 
-        // let signer[7] switch vote from no to yes // ADAPT TEST IF VOTE REPLACEMENT AND EARLY EXECUTION ARE MADE MUTUALLY EXCLUSIVE
+        // let signer[7] switch vote from no to yes // TODO ADAPT TEST IF VOTE REPLACEMENT AND EARLY EXECUTION ARE MADE MUTUALLY EXCLUSIVE
         await voting.connect(signers[7]).vote(id, VoteOption.Yes, false);
-        // dur | rel | par
+        // dur | sup | par
         //  0  | 63% | 80%
         //  o  |  x  |  o
         expect(await voting.canExecute(id)).to.equal(false); // Still not sufficient for early execution because the support could still be <= 50 if the two remaining voters vote no
 
         await voting.connect(signers[8]).vote(id, VoteOption.Abstain, false);
-        // dur | rel | par
+        // dur | sup | par
         //  0  | 63% | 90%
         //  x  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true); // The vote` outcome cannot change anymore (5 yes, 3 no, 1 abstain)
@@ -777,82 +777,10 @@ describe('AddresslistVoting', function () {
 
         // this doesn't change after the vote is over
 
-        // dur | rel | par
+        // dur | sup | par
         //  0  | 63% | 90%
         //  o  |  o  |  o
         expect(await voting.canExecute(id)).to.equal(true);
-      });
-    });
-
-    describe('A 3/5 multi-sig', async () => {
-      let minDuration = 500;
-
-      // pay attention to decrement the required percentage value by one because the compared value has to be larger
-      let supportThresholdPct = pct16(60).sub(ethers.BigNumber.from(1));
-      let participationThresholdPct = supportThresholdPct;
-
-      beforeEach(async () => {
-        const addresses = [];
-
-        for (let i = 0; i < 5; i++) {
-          const addr = await signers[i].getAddress();
-          addresses.push(addr);
-        }
-
-        // voting will be initialized with 5 allowed addresses
-        // Which means totalVotingPower = 5 at this point.
-        await initializeVoting(
-          participationThresholdPct,
-          supportThresholdPct,
-          minDuration,
-          addresses
-        );
-
-        await voting.createProposal(
-          dummyMetadata,
-          dummyActions,
-          0,
-          0,
-          false,
-          VoteOption.None
-        );
-      });
-
-      it('executes if early execution is possible', async () => {
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 20% | 100%
-        //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation (20%) > support threshold (59.99...%) == false
-
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 40% | 100%
-        //  𐄂  |  𐄂  |  𐄂
-        expect(await voting.canExecute(id)).to.equal(false); // participation (40%) > support threshold (59.99...%) == false
-
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 60% | 100%
-        //  𐄂  |  ✓  |  ✓
-        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (59.99...%) == true
-      });
-
-      it('should not execute with only 2 yes votes', async () => {
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.No, false);
-        // dur | tot | rel
-        //  0  | 40% | 67%
-        //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation (40%) > support threshold (59.99...%) == false
-
-        // Wait until the voting period is over.
-        await advanceTime(minDuration + 10);
-        // dur | tot | rel
-        // 510 | 40% | 67%
-        //  ✓  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation (40%) > participation threshold (59.99...%) == false
       });
     });
   });
