@@ -79,14 +79,14 @@ describe('AddresslistVoting', function () {
     participationThreshold: any,
     supportThreshold: any,
     minDuration: any,
-    allowed: Array<string>
+    addresslist: Array<string>
   ) {
     return voting.initialize(
       dao.address,
       participationThreshold,
       supportThreshold,
       minDuration,
-      allowed
+      addresslist
     );
   }
 
