@@ -25,6 +25,8 @@ describe('TokenVoting', function () {
   let dummyActions: any;
   let dummyMetadata: string;
 
+  const id = 0;
+
   let mergedAbi: any;
   let tokenVotingFactoryBytecode: any;
 
@@ -80,34 +82,25 @@ describe('TokenVoting', function () {
     );
   });
 
-  function initializeVoting(
-    _participationThreshold: any,
-    _supportThreshold: any,
-    minDuration: any
-  ) {
-    return voting.initialize(
-      dao.address,
-
-      _participationThreshold,
-      _supportThreshold,
-      minDuration,
-      governanceErc20Mock.address
-    );
-  }
-
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeVoting(1, 2, 3);
-
-      await expect(initializeVoting(2, 1, 3)).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
+      await voting.initialize(
+        dao.address,
+        1,
+        2,
+        3,
+        governanceErc20Mock.address
       );
+
+      await expect(
+        voting.initialize(dao.address, 2, 1, 3, governanceErc20Mock.address)
+      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
 
     it('reverts if min duration is 0', async () => {
-      await expect(initializeVoting(1, 2, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
-      );
+      await expect(
+        voting.initialize(dao.address, 1, 2, 0, governanceErc20Mock.address)
+      ).to.be.revertedWith(customError('VoteDurationZero'));
     });
   });
 
@@ -116,10 +109,15 @@ describe('TokenVoting', function () {
     let supportThreshold = pct16(50);
     let participationThreshold = pct16(20);
     let totalVotingPower = 100;
-    const id = 0; // proposalId
 
     it('reverts total token supply while creating a vote is 0', async () => {
-      await initializeVoting(1, 2, minDuration);
+      await voting.initialize(
+        dao.address,
+        1,
+        2,
+        minDuration,
+        governanceErc20Mock.address
+      );
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(0);
       await expect(
@@ -128,7 +126,13 @@ describe('TokenVoting', function () {
     });
 
     it('reverts if vote duration is less than minDuration', async () => {
-      await initializeVoting(1, 2, minDuration);
+      await voting.initialize(
+        dao.address,
+        1,
+        2,
+        minDuration,
+        governanceErc20Mock.address
+      );
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
@@ -156,9 +160,13 @@ describe('TokenVoting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
-      await initializeVoting(1, 2, minDuration);
-
-      const id = 0; // proposalId
+      await voting.initialize(
+        dao.address,
+        1,
+        2,
+        minDuration,
+        governanceErc20Mock.address
+      );
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(0);
@@ -199,9 +207,13 @@ describe('TokenVoting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
-      await initializeVoting(1, 2, minDuration);
-
-      const id = 0; // proposalId
+      await voting.initialize(
+        dao.address,
+        1,
+        2,
+        minDuration,
+        governanceErc20Mock.address
+      );
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
@@ -240,10 +252,12 @@ describe('TokenVoting', function () {
       let startDate = (await getTime()) + startOffset;
       let endDate = startDate + minDuration;
 
-      await initializeVoting(
+      await voting.initialize(
+        dao.address,
         participationThreshold,
         supportThreshold,
-        minDuration
+        minDuration,
+        governanceErc20Mock.address
       );
 
       // set voting power to 100
@@ -290,7 +304,7 @@ describe('TokenVoting', function () {
     let supportThreshold = pct16(50);
     let participationThreshold = pct16(20);
     let totalVotingPower = 100;
-    const id = 0; // proposalId
+
     const startOffset = 9;
     let startDate: number;
     let endDate: number;
@@ -299,10 +313,12 @@ describe('TokenVoting', function () {
       startDate = (await getTime()) + startOffset;
       endDate = startDate + minDuration;
 
-      await initializeVoting(
+      await voting.initialize(
+        dao.address,
         participationThreshold,
         supportThreshold,
-        minDuration
+        minDuration,
+        governanceErc20Mock.address
       );
 
       // set voting power to 100
@@ -513,8 +529,6 @@ describe('TokenVoting', function () {
   });
 
   describe('Configurations for different use cases', async () => {
-    const id = 0; // proposalId
-
     describe('A simple majority vote with >50% support and >25% participation required', async () => {
       let minDuration = 500;
       let supportThreshold = pct16(50);
@@ -522,10 +536,12 @@ describe('TokenVoting', function () {
       let totalVotingPower = 100;
 
       beforeEach(async () => {
-        await initializeVoting(
+        await voting.initialize(
+          dao.address,
           participationThreshold,
           supportThreshold,
-          minDuration
+          minDuration,
+          governanceErc20Mock.address
         );
 
         // set voting power to 100

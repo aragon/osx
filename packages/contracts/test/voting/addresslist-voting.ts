@@ -83,21 +83,6 @@ describe('AddresslistVoting', function () {
     );
   });
 
-  function initializeVoting(
-    participationThreshold: any,
-    supportThreshold: any,
-    minDuration: any,
-    addresslist: Array<string>
-  ) {
-    return voting.initialize(
-      dao.address,
-      participationThreshold,
-      supportThreshold,
-      minDuration,
-      addresslist
-    );
-  }
-
   function addresslist(length: number): string[] {
     let addresses: string[] = [];
 
@@ -110,17 +95,17 @@ describe('AddresslistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeVoting(1, 2, 3, []);
+      await voting.initialize(dao.address, 1, 2, 3, []);
 
-      await expect(initializeVoting(1, 2, 3, [])).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
-      );
+      await expect(
+        voting.initialize(dao.address, 1, 2, 3, [])
+      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
-      await initializeVoting(1, 2, 3, []);
+      await voting.initialize(dao.address, 1, 2, 3, []);
     });
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
@@ -170,7 +155,7 @@ describe('AddresslistVoting', function () {
     let participationThreshold = pct16(20);
 
     it('reverts if user is not allowed to create a vote', async () => {
-      await initializeVoting(1, 2, minDuration, addresslist(1));
+      await voting.initialize(dao.address, 1, 2, minDuration, addresslist(1));
 
       await expect(
         voting
@@ -182,7 +167,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if vote duration is less than the minimal duration', async () => {
-      await initializeVoting(1, 2, minDuration, addresslist(1));
+      await voting.initialize(dao.address, 1, 2, minDuration, addresslist(1));
 
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
@@ -209,7 +194,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
-      await initializeVoting(1, 2, minDuration, addresslist(1));
+      await voting.initialize(dao.address, 1, 2, minDuration, addresslist(1));
 
       expect(
         await voting.createProposal(
@@ -248,7 +233,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
-      await initializeVoting(1, 2, minDuration, addresslist(1));
+      await voting.initialize(dao.address, 1, 2, minDuration, addresslist(1));
 
       expect(
         await voting.createProposal(
@@ -278,11 +263,8 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts creation when voting before the start date', async () => {
-      const startOffset = 9;
-      let startDate = (await getTime()) + startOffset;
-      let endDate = startDate + minDuration;
-
-      await initializeVoting(
+      await voting.initialize(
+        dao.address,
         participationThreshold,
         supportThreshold,
         minDuration,
@@ -329,7 +311,8 @@ describe('AddresslistVoting', function () {
       startDate = (await getTime()) + startOffset;
       endDate = startDate + minDuration;
 
-      await initializeVoting(
+      await voting.initialize(
+        dao.address,
         participationThreshold,
         supportThreshold,
         minDuration,
@@ -502,7 +485,8 @@ describe('AddresslistVoting', function () {
       let participationThreshold = pct16(25);
 
       beforeEach(async () => {
-        await initializeVoting(
+        await voting.initialize(
+          dao.address,
           participationThreshold,
           supportThreshold,
           minDuration,
@@ -597,15 +581,13 @@ describe('AddresslistVoting', function () {
       let minDuration = 500;
       let supportThreshold = pct16(50);
       let participationThreshold = pct16(75);
-      const startOffset = 2;
-      let startDate: number;
-      let endDate: number;
 
       beforeEach(async () => {
         startDate = (await getTime()) + startOffset;
         endDate = startDate + minDuration;
 
-        await initializeVoting(
+        await voting.initialize(
+          dao.address,
           participationThreshold,
           supportThreshold,
           minDuration,
@@ -626,6 +608,8 @@ describe('AddresslistVoting', function () {
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {
+        await advanceTimeTo(startDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         // dur | sup | par
         //  0  | 100%| 10%
@@ -640,6 +624,10 @@ describe('AddresslistVoting', function () {
       });
 
       it('does not execute if total support is high enough but support is too low', async () => {
+        await advanceTimeTo(startDate);
+        expect(await getTime()).to.be.greaterThanOrEqual(startDate);
+        expect(await getTime()).to.be.lessThan(endDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
@@ -656,6 +644,10 @@ describe('AddresslistVoting', function () {
       });
 
       it('executes after the duration if participation and support thresholds are met', async () => {
+        await advanceTimeTo(startDate);
+        expect(await getTime()).to.be.greaterThanOrEqual(startDate);
+        expect(await getTime()).to.be.lessThan(endDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
@@ -678,6 +670,7 @@ describe('AddresslistVoting', function () {
       });
 
       it('should not allow the vote to pass if the participation threshold is not reached', async () => {
+        await advanceTimeTo(startDate);
         expect(await getTime()).to.be.greaterThanOrEqual(startDate);
         expect(await getTime()).to.be.lessThan(endDate);
 
