@@ -20,6 +20,11 @@ describe('AddresslistVoting', function () {
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
+  const startOffset = 9;
+  const minDuration = 500;
+  let startDate: number;
+  let endDate: number;
+  const id = 0;
 
   let mergedAbi: any;
   let addresslistVotingFactoryBytecode: any;
@@ -62,6 +67,9 @@ describe('AddresslistVoting', function () {
       signers[0]
     );
     voting = await AddresslistVotingFactory.deploy();
+
+    startDate = (await getTime()) + startOffset;
+    endDate = startDate + minDuration;
 
     dao.grant(
       dao.address,
@@ -110,7 +118,7 @@ describe('AddresslistVoting', function () {
     });
   });
 
-  describe('Addresslisting users: ', async () => {
+  describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, []);
     });
@@ -137,7 +145,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should remove users from the address list', async () => {
-      await voting.addAddresses([signers[0].address]);
+      await voting.addAddresses(addresslist(1));
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -146,7 +154,7 @@ describe('AddresslistVoting', function () {
       );
       expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
 
-      await voting.removeAddresses([signers[0].address]);
+      await voting.removeAddresses(addresslist(1));
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -158,13 +166,11 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal creation', async () => {
-    let minDuration = 500;
     let supportThreshold = pct16(50);
     let participationThreshold = pct16(20);
-    const id = 0; // proposalId
 
     it('reverts if user is not allowed to create a vote', async () => {
-      await initializeVoting(1, 2, minDuration, [signers[0].address]);
+      await initializeVoting(1, 2, minDuration, addresslist(1));
 
       await expect(
         voting
@@ -176,7 +182,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if vote duration is less than the minimal duration', async () => {
-      await initializeVoting(1, 2, minDuration, [signers[0].address]);
+      await initializeVoting(1, 2, minDuration, addresslist(1));
 
       const block = await ethers.provider.getBlock('latest');
       const current = block.timestamp;
@@ -203,9 +209,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
-      await initializeVoting(1, 2, minDuration, [signers[0].address]);
-
-      const id = 0; // proposalId
+      await initializeVoting(1, 2, minDuration, addresslist(1));
 
       expect(
         await voting.createProposal(
@@ -244,9 +248,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
-      await initializeVoting(1, 2, minDuration, [signers[0].address]);
-
-      const id = 0; // proposalId
+      await initializeVoting(1, 2, minDuration, addresslist(1));
 
       expect(
         await voting.createProposal(
@@ -264,15 +266,15 @@ describe('AddresslistVoting', function () {
         .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
       const block = await ethers.provider.getBlock('latest');
-      const vote = await voting.getProposal(id);
-      expect(vote.open).to.equal(true);
-      expect(vote.executed).to.equal(false);
-      expect(vote._supportThreshold).to.equal(2);
-      expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote._participationThreshold).to.equal(1);
+      const proposal = await voting.getProposal(id);
+      expect(proposal.open).to.equal(true);
+      expect(proposal.executed).to.equal(false);
+      expect(proposal._supportThreshold).to.equal(2);
+      expect(proposal.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal._participationThreshold).to.equal(1);
 
-      expect(vote.yes).to.equal(1);
-      expect(vote.no).to.equal(0);
+      expect(proposal.yes).to.equal(1);
+      expect(proposal.no).to.equal(0);
     });
 
     it('reverts creation when voting before the start date', async () => {
@@ -284,7 +286,7 @@ describe('AddresslistVoting', function () {
         participationThreshold,
         supportThreshold,
         minDuration,
-        [signers[0].address]
+        addresslist(1)
       );
 
       expect(await getTime()).to.be.lessThan(startDate);
@@ -320,20 +322,13 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    const minDuration = 500;
     const supportThreshold = pct16(29);
     const participationThreshold = pct16(19);
-    const id = 0; // proposalId
-    const startOffset = 9;
-    let startDate: number;
-    let endDate: number;
 
     beforeEach(async () => {
       startDate = (await getTime()) + startOffset;
       endDate = startDate + minDuration;
 
-      // voting will be initialized with 10 allowed addresses
-      // Which means totalVotingPower = 10 at this point.
       await initializeVoting(
         participationThreshold,
         supportThreshold,
@@ -501,16 +496,12 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Parameters can satisfy different use cases:', async () => {
-    const id = 0; // proposalId
-
     describe('A simple majority vote with >50% support and >25% participation required', async () => {
       let minDuration = 500;
       let supportThreshold = pct16(50);
       let participationThreshold = pct16(25);
 
       beforeEach(async () => {
-        // voting will be initialized with 10 allowed addresses
-        // Which means totalVotingPower = 10 at this point.
         await initializeVoting(
           participationThreshold,
           supportThreshold,
@@ -606,7 +597,6 @@ describe('AddresslistVoting', function () {
       let minDuration = 500;
       let supportThreshold = pct16(50);
       let participationThreshold = pct16(75);
-      const id = 0; // voteId
       const startOffset = 2;
       let startDate: number;
       let endDate: number;
