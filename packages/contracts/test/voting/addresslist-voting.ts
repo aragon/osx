@@ -402,16 +402,19 @@ describe('AddresslistVoting', function () {
 
       await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
       await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-
       await voting.connect(signers[2]).vote(id, VoteOption.No, false);
       await voting.connect(signers[3]).vote(id, VoteOption.No, false);
-
       await voting.connect(signers[4]).vote(id, VoteOption.Abstain, false);
       await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
 
+      expect(await voting.participation(id)).to.be.gt(participationThreshold);
+      expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
       expect(await voting.canExecute(id)).to.equal(false);
 
       await advanceAfterVoteEnd(endDate);
+
+      expect(await voting.participation(id)).to.be.gt(participationThreshold);
+      expect(await voting.support(id)).to.be.gt(supportThreshold);
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
@@ -489,76 +492,88 @@ describe('AddresslistVoting', function () {
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 10% | 100%
-        //  𐄂  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation (10%) > support threshold (50%) == false
+
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
-        // dur | tot | rel
-        // 510 | 10% | 100%
-        //  ✓  |  𐄂  |  ✓
-        expect(await voting.canExecute(id)).to.equal(false); // participation (10%) > participation threshold (25%) == false
+
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
+        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
       it('does not execute if participation is high enough but support is too low', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
-        // dur | tot | rel
-        //  0  | 30% | 33%
-        //  x  |  o  |  x
-        expect(await voting.canExecute(id)).to.equal(false); // participation (30%) > support threshold (50%) == false
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
-        // dur | tot | rel
-        // 510 | 30% | 33%
-        //  o  |  o  |  x
-        expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.support(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
-      it('executes after the duration if total and support thresholds are met', async () => {
+      it('executes after the duration if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 30% | 100%
-        //  x  |  o  |  o
-        expect(await voting.canExecute(id)).to.equal(false); // vote duration is not over
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
-        // dur | tot | rel
-        // 510 | 30% | 100%
-        //  o  |  o  |  o
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.support(id)).to.be.gt(supportThreshold);
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
       it('executes early if the participation exceeds the support threshold (assuming the latter is > 50%)', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 50% | 100%
-        //  x  |  o  |  o
-        expect(await voting.canExecute(id)).to.equal(false); // participation (50%) > support threshold (50%) == false
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-        // dur | tot | rel
-        //  0  | 60% | 100%
-        //  x  |  o  |  o
-        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (50%) == true
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(true);
 
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
         await voting.connect(signers[8]).vote(id, VoteOption.No, false);
         await voting.connect(signers[9]).vote(id, VoteOption.No, false);
-        // dur | tot | rel
-        //  0  | 60% | 60%
-        //  x  |  o  |  o
-        expect(await voting.canExecute(id)).to.equal(true); // participation (60%) > support threshold (50%) == true
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(true);
       });
     });
 
@@ -592,34 +607,43 @@ describe('AddresslistVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        // dur | sup | par
-        //  0  | 100%| 10%
-        //  x  |  o  |  x
-        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > support threshold (50%) == false
+
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
-        // dur | sup | par
-        // 510 | 100%| 10%
-        //  o  |  o  | x
-        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > participation (75%) == false
+
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
+        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
-      it('does not execute if total support is high enough but support is too low', async () => {
+      it('does not execute if participation is high enough but support is too low', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
-        // dur | sup | par
-        //  0  | 33% | 30%
-        //  x  |  x  |
-        expect(await voting.canExecute(id)).to.equal(false); // total support (10%) > support threshold (50%) == false
+        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[6]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[7]).vote(id, VoteOption.No, false);
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
-        // dur | sup | par
-        // 510 | 33% | 30%
-        //  o  |  x  |
-        expect(await voting.canExecute(id)).to.equal(false); // support (33%) > support threshold (50%) == false
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.support(id)).to.be.lte(supportThreshold);
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
       it('executes after the duration if participation and support thresholds are met', async () => {
@@ -642,7 +666,6 @@ describe('AddresslistVoting', function () {
 
         expect(await voting.participation(id)).to.be.gt(participationThreshold);
         expect(await voting.support(id)).to.be.gt(supportThreshold);
-
         expect(await voting.canExecute(id)).to.eq(true);
       });
 
@@ -656,23 +679,23 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
 
-        expect(await getTime()).to.be.lessThan(endDate);
-
-        expect(await voting.canVote(id, signers[9].address)).to.equal(true); // vote is open
-
-        expect(await voting.participation(id)).to.be.lt(participationThreshold);
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
         expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
         expect(await voting.canExecute(id)).to.eq(false);
 
         await advanceAfterVoteEnd(endDate);
-        expect(await getTime()).to.be.greaterThanOrEqual(endDate);
 
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
-      it('executes early if the total support exceeds the support threshold (assuming the latter is > 50%)', async () => {
+      it('executes early if the participation exceeds the support threshold (assuming the latter is > 50%)', async () => {
         await advanceIntoVoteTime(startDate, endDate);
-        expect(await getTime()).to.be.lessThan(endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
@@ -682,37 +705,37 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[5]).vote(id, VoteOption.No, false);
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
 
-        // dur | sup | par
-        //  0  | 57% | 70%
-        //  x  |  o  |  x
+        expect(await voting.participation(id)).to.be.lte(
+          participationThreshold
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
         expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
-        // dur | sup | par
-        //  0  | 50% | 80%
-        //  x  |  x  |  o
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
         expect(await voting.canExecute(id)).to.equal(false); // participation is met but not support
 
         // let signer[7] switch vote from no to yes // TODO ADAPT TEST IF VOTE REPLACEMENT AND EARLY EXECUTION ARE MADE MUTUALLY EXCLUSIVE
         await voting.connect(signers[7]).vote(id, VoteOption.Yes, false);
-        // dur | sup | par
-        //  0  | 63% | 80%
-        //  o  |  x  |  o
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+
         expect(await voting.canExecute(id)).to.equal(false); // Still not sufficient for early execution because the support could still be <= 50 if the two remaining voters vote no
 
         await voting.connect(signers[8]).vote(id, VoteOption.Abstain, false);
-        // dur | sup | par
-        //  0  | 63% | 90%
-        //  x  |  o  |  o
+
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
         expect(await voting.canExecute(id)).to.equal(true); // The vote` outcome cannot change anymore (5 yes, 3 no, 1 abstain)
 
         await advanceAfterVoteEnd(endDate);
 
         // this doesn't change after the vote is over
-
-        // dur | sup | par
-        //  0  | 63% | 90%
-        //  o  |  o  |  o
+        expect(await voting.participation(id)).to.be.gt(participationThreshold);
+        expect(await voting.support(id)).to.be.gt(supportThreshold);
         expect(await voting.canExecute(id)).to.equal(true);
       });
     });
