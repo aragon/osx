@@ -32,16 +32,56 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 public constant APPLY_UNINSTALLATION_PERMISSION_ID =
         keccak256("APPLY_UNINSTALLATION_PERMISSION");
 
-    struct PluginRepoRequest {
-        PluginRepo.Tag versionTag; // The exact version of the plugin to use.
-        PluginRepo pluginSetupRepo; // The repository storing the `PluginSetup` contracts of all versions of a plugin.
-    } 
+    /// @notice the struct containing params for the prepare installation function.
+    struct PrepareInstallParams {
+        PluginRepo.Tag versionTag;
+        PluginRepo pluginSetupRepo;
+        bytes data;
+    }
 
-    struct PluginUpdateParams {
+    /// @notice the struct containing params for the apply installation function.
+    struct ApplyInstallParams {
+        PluginRepo.Tag versionTag;
+        PluginRepo pluginSetupRepo;
+        address plugin;
+        PermissionLib.ItemMultiTarget[] permissions;
+    }
+
+    /// @notice the struct containing params for the apply installation function.
+    struct PrepareUpdateParams {
         address plugin; // The address of the `Plugin` contract being currently active. This can be a proxy or a concrete instance.
         PluginRepo pluginSetupRepo; // The repository storing the `PluginSetup` contracts of all versions of a plugin.
         PluginRepo.Tag currentVersionTag; // The `current` version of the plugin being currently active and to be updated from.
         PluginRepo.Tag newVersionTag; // The `new` version of the plugin to be updated to.
+        address[] currentHelpers;
+        bytes data;
+    }
+
+    /// @notice the struct containing params for the apply installation function.
+    struct ApplyUpdateParams {
+        address plugin;
+        PluginRepo.Tag versionTag;
+        PluginRepo pluginSetupRepo;
+        bytes initData;
+        PermissionLib.ItemMultiTarget[] permissions;
+    }
+
+    /// @notice the struct containing params for the apply installation function.
+    struct PrepareUninstallParams {
+        address plugin;
+        PluginRepo.Tag versionTag;
+        PluginRepo pluginSetupRepo;
+        address[] currentHelpers;
+        bytes data;
+    }
+
+    /// @notice the struct containing params for the apply uninstall function.
+    struct ApplyUninstallParams {
+        address plugin;
+        PluginRepo.Tag versionTag;
+        PluginRepo pluginSetupRepo;
+        address[] currentHelpers;
+        PermissionLib.ItemMultiTarget[] permissions;
     }
 
     /// @notice A mapping between a plugin's installations `appliedId` (see [`getAppliedId`](#private-function-`getAppliedId`)) and a boolean expressing if it has been applied. This is used to guarantees that a plugin can only be installed once.
@@ -216,18 +256,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         repoRegistry = _repoRegistry;
     }
 
-    /// @notice Prepares the installation of a plugin.
-    /// @param _dao The address of the installing DAO.
-    /// @param _pluginRepoRequest The plugin request information including version tag and its location
-    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
-    /// @return plugin The prepared plugin contract address.
-    /// @return helpers The prepared list of helper contract addresses, that a plugin might require to operate.
-    /// @return permissions The prepared list of multi-targeted permission operations to be applied to the installing DAO.
-    function prepareInstallation(
-        address _dao,
-        PluginRepoRequest calldata _pluginRepoRequest,
-        bytes memory _data
-    )
+    function prepareInstallation(address _dao, PrepareInstallParams calldata params)
         external
         returns (
             address plugin,
@@ -236,21 +265,27 @@ contract PluginSetupProcessor is DaoAuthorizable {
         )
     {
         // Check that the plugin repository exists on the plugin repo registry.
-        if (!repoRegistry.entries(address(_pluginRepoRequest.pluginSetupRepo))) {
+        if (!repoRegistry.entries(address(params.pluginSetupRepo))) {
             revert PluginRepoNonexistent();
         }
 
-        PluginRepo.Version memory version = _pluginRepoRequest.pluginSetupRepo.getVersion(
-            _pluginRepoRequest.versionTag
-        );
+        PluginRepo.Version memory version = params.pluginSetupRepo.getVersion(params.versionTag);
 
         address pluginSetup = version.pluginSetup;
 
         // Prepare the installation
-        (plugin, helpers, permissions) = PluginSetup(pluginSetup).prepareInstallation(_dao, _data);
+        (plugin, helpers, permissions) = PluginSetup(pluginSetup).prepareInstallation(
+            _dao,
+            params.data
+        );
 
         // Important safety measure to include dao + plugin manager in the encoding.
-        bytes32 setupId = _getSetupId(_dao, _pluginRepoRequest.versionTag, address(_pluginRepoRequest.pluginSetupRepo), plugin);
+        bytes32 setupId = _getSetupId(
+            _dao,
+            params.versionTag,
+            address(params.pluginSetupRepo),
+            plugin
+        );
 
         // Check if the installation was prepared already.
         if (installPermissionHashes[setupId] != bytes32(0)) {
@@ -264,33 +299,31 @@ contract PluginSetupProcessor is DaoAuthorizable {
         emit InstallationPrepared({
             sender: msg.sender,
             dao: _dao,
-            pluginSetupRepo: _pluginRepoRequest.pluginSetupRepo,
-            versionTag: _pluginRepoRequest.versionTag,
-            data: _data,
+            pluginSetupRepo: params.pluginSetupRepo,
+            versionTag: params.versionTag,
+            data: params.data,
             plugin: plugin,
             helpers: helpers,
             permissions: permissions
         });
     }
 
-    /// @notice Applies the permissions of a prepared installation to a DAO.
-    /// @param _dao The address of the installing DAO.
-    /// @param _pluginRepoRequest The plugin request information including version tag and its location
-    /// @param _plugin The address of the `Plugin` contract.
-    /// @param _permissions The list of multi-targeted permission operations to apply to the installing DAO.
-    function applyInstallation(
-        address _dao,
-        PluginRepoRequest calldata _pluginRepoRequest,
-        address _plugin,
-        PermissionLib.ItemMultiTarget[] calldata _permissions
-    ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
+    function applyInstallation(address _dao, ApplyInstallParams calldata params)
+        external
+        canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID)
+    {
         // Check if the installation was applied already.
-        bytes32 appliedId = _getAppliedId(_dao, _plugin);
+        bytes32 appliedId = _getAppliedId(_dao, params.plugin);
         if (isInstallationApplied[appliedId]) {
             revert SetupAlreadyApplied();
         }
 
-        bytes32 setupId = _getSetupId(_dao, _pluginRepoRequest.versionTag, address(_pluginRepoRequest.pluginSetupRepo), _plugin);
+        bytes32 setupId = _getSetupId(
+            _dao,
+            params.versionTag,
+            address(params.pluginSetupRepo),
+            params.plugin
+        );
         bytes32 storedPermissionsHash = installPermissionHashes[setupId];
 
         // Check if the installation was prepared.
@@ -299,12 +332,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Check that the permissions match those announced in the preparation step.
-        if (storedPermissionsHash != _getPermissionsHash(_permissions)) {
+        if (storedPermissionsHash != _getPermissionsHash(params.permissions)) {
             revert PermissionsHashMismatch();
         }
 
         // Process the permission list.
-        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
+        DAO(payable(_dao)).bulkOnMultiTarget(params.permissions);
 
         // Mark this installation as applied.
         isInstallationApplied[appliedId] = true;
@@ -312,55 +345,42 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Emit the event to associate the installed plugin with the installing DAO.
         emit InstallationApplied({
             dao: _dao,
-            plugin: _plugin,
-            pluginSetupRepo: _pluginRepoRequest.pluginSetupRepo,
-            versionTag: _pluginRepoRequest.versionTag
+            plugin: params.plugin,
+            pluginSetupRepo: params.pluginSetupRepo,
+            versionTag: params.versionTag
         });
 
         // Free up space by deleting the permission hash being not needed anymore.
         delete installPermissionHashes[setupId];
     }
 
-    /* TODO: might we need to check when `prepareUpdate` gets called, if plugin actually was installed ?
-     * Though problematic, since this check only happens when plugin updates from 1.0 to 1.x
-     * and checking it always would cost more... shall we still check it and how ? */
-    /// @notice Prepares the update of an UUPS upgradeable plugin.
-    /// @param _dao The address of the installing DAO.
-    /// @param _updateParams The parameters of the update.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is prepared to be updated.
-    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the `prepareUpdateDataABI()` function in the `newPluginSetup` setup contract inside `_updateParams`.
-    /// @return permissions The list of multi-targeted permission operations to be applied to the updating DAO.
-    /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for.
-    function prepareUpdate(
-        address _dao,
-        PluginUpdateParams calldata _updateParams,
-        address[] calldata _currentHelpers,
-        bytes memory _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
+    function prepareUpdate(address _dao, PrepareUpdateParams calldata params)
+        external
+        returns (PermissionLib.ItemMultiTarget[] memory, bytes memory)
+    {
         if (
-            _updateParams.currentVersionTag.release != _updateParams.newVersionTag.release ||
-            _updateParams.currentVersionTag.build <= _updateParams.newVersionTag.build
+            params.currentVersionTag.release != params.newVersionTag.release ||
+            params.currentVersionTag.build <= params.newVersionTag.build
         ) {
             // revert release id must be the same + new build id must be bigger.
         }
 
         // Check that plugin is `PluginUUPSUpgradable`.
-        if (!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
-            revert IPluginNotSupported({plugin: _updateParams.plugin});
+        if (!params.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+            revert IPluginNotSupported({plugin: params.plugin});
         }
-        if (IPlugin(_updateParams.plugin).pluginType() != IPlugin.PluginType.UUPS) {
-            revert PluginNonupgradeable({plugin: _updateParams.plugin});
+        if (IPlugin(params.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+            revert PluginNonupgradeable({plugin: params.plugin});
         }
 
         // Implicitly confirms plugin setups are valid. // TODO Revisit this as this might not be true.
         // ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(_updateParams.pluginSetupRepo))) {
+        if (!repoRegistry.entries(address(params.pluginSetupRepo))) {
             revert PluginRepoNonexistent();
         }
 
         // Check if plugin is applied
-        if (!isInstallationApplied[_getAppliedId(_dao, _updateParams.plugin)]) {
+        if (!isInstallationApplied[_getAppliedId(_dao, params.plugin)]) {
             revert SetupNotApplied();
         }
 
@@ -374,12 +394,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
             // This implicitly checks if plugin was installed in the first place.
             bytes32 oldSetupId = _getSetupId(
                 _dao,
-                _updateParams.currentVersionTag,
-                address(_updateParams.pluginSetupRepo),
-                _updateParams.plugin
+                params.currentVersionTag,
+                address(params.pluginSetupRepo),
+                params.plugin
             );
 
-            if (helpersHashes[oldSetupId] != _getHelpersHash(_currentHelpers)) {
+            if (helpersHashes[oldSetupId] != _getHelpersHash(params.currentHelpers)) {
                 revert HelpersHashMismatch();
             }
 
@@ -389,12 +409,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
             // Grab the plugin setup that belongs to the new version tag
             // and validate that plugin setups are different otherwise it's pointless
             // to allow preparation.
-            PluginRepo.Version memory currentVersion = _updateParams.pluginSetupRepo.getVersion(
-                _updateParams.currentVersionTag
+            PluginRepo.Version memory currentVersion = params.pluginSetupRepo.getVersion(
+                params.currentVersionTag
             );
 
-            PluginRepo.Version memory newVersion = _updateParams.pluginSetupRepo.getVersion(
-                _updateParams.newVersionTag
+            PluginRepo.Version memory newVersion = params.pluginSetupRepo.getVersion(
+                params.newVersionTag
             );
 
             pluginSetup = newVersion.pluginSetup;
@@ -411,19 +431,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PermissionLib.ItemMultiTarget[] memory permissions
         ) = PluginSetup(pluginSetup).prepareUpdate(
                 _dao,
-                _updateParams.plugin,
-                _currentHelpers,
-                _updateParams.currentVersionTag.build,
-                _data
+                params.plugin,
+                params.currentHelpers,
+                params.currentVersionTag.build,
+                params.data
             );
 
         {
             // Add new helpers for the future update checks
             bytes32 newSetupId = _getSetupId(
                 _dao,
-                _updateParams.newVersionTag,
-                address(_updateParams.pluginSetupRepo),
-                _updateParams.plugin
+                params.newVersionTag,
+                address(params.pluginSetupRepo),
+                params.plugin
             );
 
             helpersHashes[newSetupId] = _getHelpersHash(updatedHelpers);
@@ -435,10 +455,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         emit UpdatePrepared({
             sender: msg.sender,
             dao: _dao,
-            pluginSetupRepo: _updateParams.pluginSetupRepo,
-            versionTag: _updateParams.newVersionTag,
-            data: _data,
-            plugin: _updateParams.plugin,
+            pluginSetupRepo: params.pluginSetupRepo,
+            versionTag: params.newVersionTag,
+            data: params.data,
+            plugin: params.plugin,
             updatedHelpers: updatedHelpers,
             permissions: permissions,
             initData: initData
@@ -447,73 +467,64 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return (permissions, initData);
     }
 
-    /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
-    /// @param _dao The address of the updating DAO.
-    /// @param _plugin The address of the `PluginUUPSUpgradeable` proxy contract.
-    /// @param _pluginRepoRequest The plugin request information including version tag and its location
-    /// @param _initData The initialization data to be passed to the upgradeable plugin contract via `upgradeToAndCall`. // revisit
-    /// @param _permissions The list of multi-targeted permission operations to apply to the updating DAO.
-    function applyUpdate(
-        address _dao,
-        address _plugin,
-        PluginRepoRequest calldata _pluginRepoRequest,
-        bytes memory _initData,
-        PermissionLib.ItemMultiTarget[] calldata _permissions
-    ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
-        bytes32 setupId = _getSetupId(_dao, _pluginRepoRequest.versionTag, address(_pluginRepoRequest.pluginSetupRepo), _plugin);
+    function applyUpdate(address _dao, ApplyUpdateParams calldata params)
+        external
+        canApply(_dao, APPLY_UPDATE_PERMISSION_ID)
+    {
+        bytes32 setupId = _getSetupId(
+            _dao,
+            params.versionTag,
+            address(params.pluginSetupRepo),
+            params.plugin
+        );
 
-        if (updatePermissionHashes[setupId] != _getPermissionsHash(_permissions)) {
+        if (updatePermissionHashes[setupId] != _getPermissionsHash(params.permissions)) {
             revert PermissionsHashMismatch();
         }
 
-        PluginRepo.Version memory version = _pluginRepoRequest.pluginSetupRepo.getVersion(_pluginRepoRequest.versionTag);
+        PluginRepo.Version memory version = params.pluginSetupRepo.getVersion(params.versionTag);
 
-        address currentImplementation = PluginUUPSUpgradeable(_plugin).getImplementationAddress();
+        address currentImplementation = PluginUUPSUpgradeable(params.plugin)
+            .getImplementationAddress();
         address newImplementation = PluginSetup(version.pluginSetup).getImplementationAddress();
 
         if (currentImplementation != newImplementation) {
-            _upgradeProxy(_plugin, newImplementation, _initData);
+            _upgradeProxy(params.plugin, newImplementation, params.initData);
         }
 
-        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
+        DAO(payable(_dao)).bulkOnMultiTarget(params.permissions);
 
         // Free up space by deleting the permission hash being not needed anymore.
         delete updatePermissionHashes[setupId];
 
         emit UpdateApplied({
             dao: _dao,
-            plugin: _plugin,
-            pluginSetupRepo: _pluginRepoRequest.pluginSetupRepo,
-            versionTag: _pluginRepoRequest.versionTag
+            plugin: params.plugin,
+            pluginSetupRepo: params.pluginSetupRepo,
+            versionTag: params.versionTag
         });
     }
 
-    /// @notice Prepares the uninstallation of a plugin.
-    /// @param _dao The address of the installing DAO.
-    /// @param _plugin The address of the `Plugin` contract.
-    /// @param _pluginRepoRequest The plugin request information including version tag and its location
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is prepared to be uninstalled.
-    /// @param _data The `bytes` encoded data containing the input parameters for the uninstallation as specified in the `prepareUninstallationDataABI()` function in the `pluginSetup` setup contract.
-    /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        PluginRepoRequest calldata _pluginRepoRequest,
-        address[] calldata _currentHelpers,
-        bytes calldata _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    function prepareUninstallation(address _dao, PrepareUninstallParams calldata params)
+        external
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+    {
         // Ensure repo for plugin manager exists
-        if (!repoRegistry.entries(address(_pluginRepoRequest.pluginSetupRepo))) {
+        if (!repoRegistry.entries(address(params.pluginSetupRepo))) {
             revert PluginRepoNonexistent();
         }
 
         // Check if plugin is installed in the first place.
-        if (!isInstallationApplied[_getAppliedId(_dao, _plugin)]) {
+        if (!isInstallationApplied[_getAppliedId(_dao, params.plugin)]) {
             revert SetupNotApplied();
         }
 
-        bytes32 setupId = _getSetupId(_dao, _pluginRepoRequest.versionTag, address(_pluginRepoRequest.pluginSetupRepo), _plugin);
+        bytes32 setupId = _getSetupId(
+            _dao,
+            params.versionTag,
+            address(params.pluginSetupRepo),
+            params.plugin
+        );
 
         // Check if this the very same plugin uninstallation is already prepared and revert if so.
         if (uninstallPermissionHashes[setupId] != bytes32(0)) {
@@ -522,21 +533,21 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Ensures that the same helpers are passed that were emitted on the last update of the plugin.
         // This is important to ensure that plugin developer gets the correct data for use.
-        if (helpersHashes[setupId] != _getHelpersHash(_currentHelpers)) {
+        if (helpersHashes[setupId] != _getHelpersHash(params.currentHelpers)) {
             revert HelpersHashMismatch();
         }
 
         // Reverts if not found.
-        PluginRepo.Version memory version = _pluginRepoRequest.pluginSetupRepo.getVersion(_pluginRepoRequest.versionTag);
+        PluginRepo.Version memory version = params.pluginSetupRepo.getVersion(params.versionTag);
 
         // Finally, After all the validation steps are run,
         // start preparing uninstallation and run
         // the developer's code for the uninstallation.
         permissions = PluginSetup(version.pluginSetup).prepareUninstallation(
             _dao,
-            _plugin,
-            _currentHelpers,
-            _data
+            params.plugin,
+            params.currentHelpers,
+            params.data
         );
 
         // set permission hashes.
@@ -544,46 +555,41 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         emit UninstallationPrepared({
             sender: msg.sender,
-            plugin: _plugin,
+            plugin: params.plugin,
             dao: _dao,
-            pluginSetupRepo: _pluginRepoRequest.pluginSetupRepo,
-            versionTag: _pluginRepoRequest.versionTag,
-            data: _data,
-            currentHelpers: _currentHelpers,
+            pluginSetupRepo: params.pluginSetupRepo,
+            versionTag: params.versionTag,
+            data: params.data,
+            currentHelpers: params.currentHelpers,
             permissions: permissions
         });
     }
 
-    /// @notice Applies the permissions of a prepared uninstallation to a DAO.
-    /// @param _dao The address of the DAO.
-    /// @param _pluginRepoRequest The plugin request information including version tag and its location
-    /// @param _plugin The address of the `Plugin` contract.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin that is uninstalled.
-    /// @param _permissions The list of multi-targeted permission operations to apply to the uninstalling DAO.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
-    function applyUninstallation(
-        address _dao,
-        address _plugin,
-        PluginRepoRequest calldata _pluginRepoRequest,
-        address[] calldata _currentHelpers, // TODO Isn't it sufficient to pass the helpers hash? Is this needed at all ?
-        PermissionLib.ItemMultiTarget[] calldata _permissions
-    ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
-        bytes32 setupId = _getSetupId(_dao, _pluginRepoRequest.versionTag, address(_pluginRepoRequest.pluginSetupRepo), _plugin);
+    function applyUninstallation(address _dao, ApplyUninstallParams calldata params)
+        external
+        canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID)
+    {
+        bytes32 setupId = _getSetupId(
+            _dao,
+            params.versionTag,
+            address(params.pluginSetupRepo),
+            params.plugin
+        );
 
         // Check if the helpers match with those announced in the preparation step.
-        if (helpersHashes[setupId] != _getHelpersHash(_currentHelpers)) {
+        if (helpersHashes[setupId] != _getHelpersHash(params.currentHelpers)) {
             revert HelpersHashMismatch();
         }
 
         bytes32 storedPermissionsHash = uninstallPermissionHashes[setupId];
-        bytes32 passedPermissionsHash = _getPermissionsHash(_permissions);
+        bytes32 passedPermissionsHash = _getPermissionsHash(params.permissions);
 
         // Check that the permissions match those announced in the preparation step.
         if (storedPermissionsHash != passedPermissionsHash) {
             revert PermissionsHashMismatch();
         }
 
-        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
+        DAO(payable(_dao)).bulkOnMultiTarget(params.permissions);
 
         // Free up space by deleting the helpers and permission hash being not needed anymore.
         delete helpersHashes[setupId];
@@ -591,9 +597,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         emit UninstallationApplied({
             dao: _dao,
-            plugin: _plugin,
-            pluginSetupRepo: _pluginRepoRequest.pluginSetupRepo,
-            versionTag: _pluginRepoRequest.versionTag
+            plugin: params.plugin,
+            pluginSetupRepo: params.pluginSetupRepo,
+            versionTag: params.versionTag
         });
     }
 
