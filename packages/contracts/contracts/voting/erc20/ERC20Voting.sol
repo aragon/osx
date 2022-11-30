@@ -100,9 +100,11 @@ contract ERC20Voting is MajorityVotingBase {
         vote_.votingPower = votingPower;
         vote_.snapshotBlock = snapshotBlock;
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                vote_.actions.push(_actions[i]);
+        for (uint256 i; i < _actions.length; ) {
+            vote_.actions.push(_actions[i]);
+
+            unchecked {
+                ++i;
             }
         }
 

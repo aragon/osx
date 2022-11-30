@@ -146,9 +146,11 @@ contract AllowlistVoting is MajorityVotingBase {
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = allowedUserCount(snapshotBlock);
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                vote_.actions.push(_actions[i]);
+        for (uint256 i; i < _actions.length; ) {
+            vote_.actions.push(_actions[i]);
+            
+            unchecked {
+                ++i;
             }
         }
 
@@ -227,8 +229,12 @@ contract AllowlistVoting is MajorityVotingBase {
     function _updateAllowedUsers(address[] calldata _users, bool _enabled) internal {
         _allowlistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 
-        for (uint256 i = 0; i < _users.length; i++) {
+        for (uint256 i; i < _users.length;) {
             _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
+            
+            unchecked {
+                ++i;
+            }
         }
     }
 

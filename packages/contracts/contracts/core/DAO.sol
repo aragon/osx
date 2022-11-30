@@ -146,7 +146,7 @@ contract DAO is
     {
         bytes[] memory execResults = new bytes[](_actions.length);
 
-        for (uint256 i = 0; i < _actions.length;) {
+        for (uint256 i; i < _actions.length;) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );
@@ -156,7 +156,7 @@ contract DAO is
             execResults[i] = response;
 
             unchecked {
-                i++;
+                ++i;
             }
         }
 
