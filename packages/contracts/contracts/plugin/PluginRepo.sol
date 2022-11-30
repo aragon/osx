@@ -134,7 +134,7 @@ contract PluginRepo is
         uint256 versionIndex = nextVersionIndex;
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
         versions[versionIndex] = Version(_newSemanticVersion, _pluginSetup, _contentURI);
-        versionIndexForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIndex;
+        versionIndexForSemantic[_semanticVersionHash(_newSemanticVersion)] = versionIndex;
         versionIndexForPluginSetup[_pluginSetup] = versionIndex;
 
         emit VersionCreated(versionIndex, _newSemanticVersion);
@@ -185,7 +185,7 @@ contract PluginRepo is
             bytes memory contentURI
         )
     {
-        return getVersionById(versionIndexForSemantic[semanticVersionHash(_semanticVersion)]);
+        return getVersionById(versionIndexForSemantic[_semanticVersionHash(_semanticVersion)]);
     }
 
     /// @notice Gets the version information associated with a version index.
@@ -243,7 +243,7 @@ contract PluginRepo is
     /// @notice Generates a hash from a semantic version number.
     /// @param semanticVersion The semantic version number.
     /// @return bytes32 The hash of the semantic version number.
-    function semanticVersionHash(uint16[3] memory semanticVersion) internal pure returns (bytes32) {
+    function _semanticVersionHash(uint16[3] memory semanticVersion) internal pure returns (bytes32) {
         return
             keccak256(abi.encodePacked(semanticVersion[0], semanticVersion[1], semanticVersion[2]));
     }
