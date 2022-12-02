@@ -8,6 +8,7 @@ import {
   DAO,
 } from '../../../../typechain';
 import {customError} from '../../../test-utils/custom-error-helper';
+import { deployNewDAO } from '../../../test-utils/dao';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
   'ID_GATED_ACTION_PERMISSION'
@@ -28,16 +29,9 @@ describe('SharedPlugin', function () {
 
     // Deploy the managing DAO and two other DAOs
     const DAO = await ethers.getContractFactory('DAO');
-    managingDAO = await DAO.deploy();
-    dao1 = await DAO.deploy();
-    dao2 = await DAO.deploy();
-    await managingDAO.initialize(
-      '0x',
-      ownerAddress,
-      ethers.constants.AddressZero
-    );
-    await dao1.initialize('0x', ownerAddress, ethers.constants.AddressZero);
-    await dao2.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    managingDAO = await deployNewDAO(ownerAddress);
+    dao1 = await deployNewDAO(ownerAddress);
+    dao2 = await deployNewDAO(ownerAddress);
 
     // Deploy the `TestSharedPlugin`
     const TestSharedPlugin = await ethers.getContractFactory(

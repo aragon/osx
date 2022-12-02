@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
@@ -12,6 +13,8 @@ import "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 //TODO Make this PluginUUPSUpgradeable
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
+    using AddressUpgradeable for address;
+
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_REGISTRY_PERMISSION_ID =
         keccak256("UPGRADE_REGISTRY_PERMISSION");
@@ -65,13 +68,13 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar.
     /// @param _registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract.
     function _register(address _registrant) internal {
-        if (!Address.isContract(_registrant)) {
+        if (!_registrant.isContract()) {
             revert ContractAddressInvalid({registrant: _registrant});
         }
 
         if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
 
-        try IERC165(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
+        try IERC165Upgradeable(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
             if (!result) revert ContractInterfaceInvalid(_registrant);
         } catch {
             revert ContractERC165SupportInvalid({registrant: _registrant});

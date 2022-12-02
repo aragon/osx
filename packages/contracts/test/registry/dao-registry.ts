@@ -7,6 +7,7 @@ import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {deployWithProxy} from '../test-utils/proxy';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -51,7 +52,9 @@ describe('DAORegistry', function () {
 
     // DAO Registry
     const Registry = await ethers.getContractFactory('DAORegistry');
-    daoRegistry = await Registry.deploy();
+    
+    daoRegistry = await deployWithProxy(Registry) as DAORegistry;
+
     await daoRegistry.initialize(
       managingDao.address,
       ensSubdomainRegistrar.address

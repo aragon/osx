@@ -23,6 +23,12 @@ contract ERC20Voting is MajorityVotingBase {
     /// @notice Thrown if the voting power is zero
     error NoVotingPower();
 
+    /// @dev Used to disallow initializing implementation contract by attacker for extra safety.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.

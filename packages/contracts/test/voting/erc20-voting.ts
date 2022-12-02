@@ -6,6 +6,7 @@ import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.so
 import {ERC20Voting, DAOMock} from '../../typechain';
 import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {deployWithProxy} from '../test-utils/proxy';
 
 const {deployMockContract} = waffle;
 
@@ -37,7 +38,8 @@ describe('ERC20Voting', function () {
     erc20VoteMock = await deployMockContract(signers[0], ERC20Governance.abi);
 
     const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
-    voting = await ERC20Voting.deploy();
+
+    voting = await deployWithProxy(ERC20Voting) as ERC20Voting;
   });
 
   function initializeVoting(

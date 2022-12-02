@@ -22,6 +22,11 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @param pluginRepo The address of the plugin repository.
     event PluginRepoRegistered(string name, address pluginRepo);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
     /// @param _dao The address of the managing DAO.
     function initialize(IDAO _dao, ENSSubdomainRegistrar _subdomainRegistrar) public initializer {

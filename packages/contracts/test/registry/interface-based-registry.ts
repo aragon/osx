@@ -1,9 +1,11 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {deployWithProxy} from '../test-utils/proxy';
 
 import {DAO, InterfaceBasedRegistryMock} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import {deployNewDAO} from '../test-utils/dao';
 
 const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
 
@@ -22,16 +24,17 @@ describe('InterfaceBasedRegistry', function () {
     ownerAddress = await signers[0].getAddress();
 
     // DAO
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
+    dao = await deployNewDAO(ownerAddress);
   });
 
   beforeEach(async () => {
     const InterfaceBasedRegistryMock = await ethers.getContractFactory(
       'InterfaceBasedRegistryMock'
     );
-    interfaceBasedRegistryMock = await InterfaceBasedRegistryMock.deploy();
+
+    interfaceBasedRegistryMock = (await deployWithProxy(
+      InterfaceBasedRegistryMock
+    )) as InterfaceBasedRegistryMock;
 
     // Let the interface registry register `DAO` contracts for testing purposes
     await interfaceBasedRegistryMock.initialize(dao.address);

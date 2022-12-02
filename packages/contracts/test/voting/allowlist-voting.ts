@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AllowlistVoting, DAOMock} from '../../typechain';
 import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('AllowlistVoting', function () {
   let signers: SignerWithAddress[];
@@ -33,7 +34,8 @@ describe('AllowlistVoting', function () {
 
   beforeEach(async () => {
     const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
-    voting = await AllowlistVoting.deploy();
+    
+    voting = await deployWithProxy(AllowlistVoting) as AllowlistVoting;
   });
 
   function initializeVoting(

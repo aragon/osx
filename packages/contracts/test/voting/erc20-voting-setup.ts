@@ -1,10 +1,11 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {ERC20, ERC20VotingSetup} from '../../typechain';
+import {ERC20, ERC20VotingSetup, MerkleMinter} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
+import { deployWithProxy } from '../test-utils/proxy';
 
 enum Op {
   Grant,
@@ -554,7 +555,7 @@ describe('ERC20VotingSetup', function () {
       const MerkleMinterFactory = await ethers.getContractFactory(
         'MerkleMinter'
       );
-      const merkleMinter = await MerkleMinterFactory.deploy();
+      const merkleMinter = await deployWithProxy(MerkleMinterFactory) as MerkleMinter;
       await merkleMinter.initialize(
         targetDao.address,
         token.address,

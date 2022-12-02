@@ -1,5 +1,6 @@
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import { deployWithProxy } from './proxy';
 
 import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
 import {
@@ -47,7 +48,7 @@ export async function deployENSSubdomainRegistrar(
   }
 
   // Deploy the ENS and approve the subdomain registrar
-  const ensSubdomainRegistrar = await ENSSubdomainRegistrar.deploy();
+  const ensSubdomainRegistrar = await deployWithProxy(ENSSubdomainRegistrar) as ENSSubdomainRegistrar;
   await ens
     .connect(owner)
     .setApprovalForAll(ensSubdomainRegistrar.address, true);

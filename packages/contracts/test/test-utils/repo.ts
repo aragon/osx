@@ -4,7 +4,9 @@ import {
   PluginRepoRegistry,
   PluginRepoFactory,
   PluginSetupV1Mock,
+  PluginRepo,
 } from '../../typechain';
+import {deployWithProxy} from './proxy';
 
 export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
   const PluginSetupMock = await ethers.getContractFactory('PluginSetupV1Mock');
@@ -13,9 +15,11 @@ export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
   return pluginSetupMockContract;
 }
 
-export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {
+export async function deployNewPluginRepo(
+  ownerAddress: any
+): Promise<PluginRepo> {
   const PluginRepo = await ethers.getContractFactory('PluginRepo');
-  const newPluginRepo = await PluginRepo.deploy();
+  const newPluginRepo = (await deployWithProxy(PluginRepo)) as PluginRepo;
   await newPluginRepo.initialize(ownerAddress);
 
   return newPluginRepo;
@@ -24,7 +28,7 @@ export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {
 export async function deployPluginRepoFactory(
   signers: any,
   pluginRepoRegistry: PluginRepoRegistry
-): Promise<any> {
+): Promise<PluginRepoFactory> {
   // @ts-ignore
   const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
     'PluginRepoRegistry'
@@ -52,9 +56,9 @@ export async function deployPluginRepoFactory(
     signers[0]
   );
 
-  const pluginRepoFactory = await PluginRepoFactory.deploy(
+  const pluginRepoFactory = (await PluginRepoFactory.deploy(
     pluginRepoRegistry.address
-  );
+  )) as PluginRepoFactory;
 
   return pluginRepoFactory;
 }
@@ -68,7 +72,11 @@ export async function deployPluginRepoRegistry(
   const PluginRepoRegistry = await ethers.getContractFactory(
     'PluginRepoRegistry'
   );
-  pluginRepoRegistry = await PluginRepoRegistry.deploy();
+
+  pluginRepoRegistry = (await deployWithProxy(
+    PluginRepoRegistry
+  )) as PluginRepoRegistry;
+
   await pluginRepoRegistry.initialize(
     managingDao.address,
     ensSubdomainRegistrar.address

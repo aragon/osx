@@ -46,6 +46,11 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @param users The array of user addresses to be removed.
     event UsersRemoved(address[] users);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -231,7 +236,7 @@ contract AllowlistVoting is MajorityVotingBase {
 
         for (uint256 i; i < _users.length;) {
             _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
-            
+
             unchecked {
                 ++i;
             }

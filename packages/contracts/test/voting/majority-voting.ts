@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {MajorityVotingMock, DAOMock} from '../../typechain';
 import {VOTING_EVENTS, pct16} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -24,7 +25,8 @@ describe('MajorityVotingMock', function () {
     const MajorityVotingBase = await ethers.getContractFactory(
       'MajorityVotingMock'
     );
-    votingBase = await MajorityVotingBase.deploy();
+
+    votingBase = await deployWithProxy(MajorityVotingBase) as MajorityVotingMock;
   });
 
   function initializeMock(
