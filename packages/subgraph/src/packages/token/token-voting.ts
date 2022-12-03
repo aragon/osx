@@ -123,13 +123,14 @@ export function handleVoteCast(event: VoteCast): void {
     let contract = TokenVoting.bind(event.address);
     let vote = contract.try_getProposal(event.params.proposalId);
     if (!vote.reverted) {
-      let voteCount = vote.value.value8.plus(
-        vote.value.value9.plus(vote.value.value10)
-      );
       let yes = vote.value.value8;
+      let no = vote.value.value9;
+      let abstain = vote.value.value10;
+      let voteCount = yes.plus(no.plus(abstain));
+
       proposalEntity.yes = yes;
-      proposalEntity.no = vote.value.value9;
-      proposalEntity.abstain = vote.value.value10;
+      proposalEntity.no = no;
+      proposalEntity.abstain = abstain;
       proposalEntity.voteCount = voteCount;
 
       // check if the current vote results meet the conditions for the proposal to pass:
@@ -143,11 +144,12 @@ export function handleVoteCast(event: VoteCast): void {
 
       let worstCaseSupport = yes
         .times(BigInt.fromI32(100))
-        .div(proposalEntity.totalVotingPower.minus(proposalEntity.abstain));
+        .div(proposalEntity.totalVotingPower.minus(abstain));
+
       /*
       let currentSupport = new BigInt(0);
       if (voteCount.gt(new BigInt(0))) {
-        currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+        currentSupport = yes.times(BigInt.fromI32(100)).div(yes.plus(no));
       }
       */
 
