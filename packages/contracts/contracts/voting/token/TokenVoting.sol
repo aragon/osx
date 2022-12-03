@@ -70,6 +70,10 @@ contract TokenVoting is MajorityVotingBase {
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
+        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) == 0) {
+            revert VoteCreationForbidden(_msgSender());
+        }
+
         proposalId = proposalCount++;
 
         // Calculate the start and end time of the vote

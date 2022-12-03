@@ -88,6 +88,10 @@ abstract contract MajorityVotingBase is
     /// @param minDuration The minimal duration of the vote in seconds.
     error VotingPeriodInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
+    /// @notice Thrown when a sender is not allowed to create a vote.
+    /// @param sender The sender address.
+    error VoteCreationForbidden(address sender);
+
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero(); ///TODO  remove
 
