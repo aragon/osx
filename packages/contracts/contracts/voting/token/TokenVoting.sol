@@ -29,15 +29,23 @@ contract TokenVoting is MajorityVotingBase {
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote in seconds.
+    /// @param _minProposalCreationVotingPower The minimal voting power needed to create a proposal.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
+        uint256 _minProposalCreationVotingPower,
         IVotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(_dao, _supportThreshold, _minParticipation, _minDuration);
+        __MajorityVotingBase_init(
+            _dao,
+            _supportThreshold,
+            _minParticipation,
+            _minDuration,
+            _minProposalCreationVotingPower
+        );
 
         votingToken = _token;
     }
@@ -70,7 +78,9 @@ contract TokenVoting is MajorityVotingBase {
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) == 0) {
+        if (
+            votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposalCreationVotingPower
+        ) {
             revert VoteCreationForbidden(_msgSender());
         }
 
@@ -110,7 +120,11 @@ contract TokenVoting is MajorityVotingBase {
             }
         }
 
-        emit ProposalCreated(proposalId, _msgSender(), _proposalMetadata);
+        emit ProposalCreated({
+            proposalId: proposalId,
+            creator: _msgSender(),
+            metadata: _proposalMetadata
+        });
 
         vote(proposalId, _choice, _executeIfDecided);
     }
@@ -148,7 +162,12 @@ contract TokenVoting is MajorityVotingBase {
 
         proposal_.voters[_voter] = _choice;
 
-        emit VoteCast(_proposalId, _voter, uint8(_choice), votingPower);
+        emit VoteCast({
+            proposalId: _proposalId,
+            voter: _voter,
+            choice: uint8(_choice),
+            votingPower: votingPower
+        });
 
         if (_executesIfDecided && _canExecute(_proposalId)) {
             _execute(_proposalId);

@@ -91,7 +91,7 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposalCreationVotingPower, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -111,12 +111,13 @@ contract TokenVotingSetup is PluginSetup {
             uint64 supportThreshold,
             uint64 minParticipation,
             uint64 minDuration,
+            uint256 minProposalCreationVotingPower,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
         ) = abi.decode(
                 _data,
-                (uint64, uint64, uint64, TokenSettings, GovernanceERC20.MintSettings)
+                (uint64, uint64, uint64, uint256, TokenSettings, GovernanceERC20.MintSettings)
             );
 
         // Check mint setting.
@@ -189,6 +190,7 @@ contract TokenVotingSetup is PluginSetup {
                 supportThreshold,
                 minParticipation,
                 minDuration,
+                minProposalCreationVotingPower,
                 token
             )
         );

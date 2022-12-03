@@ -37,58 +37,60 @@ describe('MajorityVotingMock', function () {
   function initializeMock(
     minParticipation: any,
     supportThreshold: any,
-    minDuration: any
+    minDuration: any,
+    minProposalCreationVotingPower: any
   ) {
     return votingBase.initializeMock(
       dao.address,
       minParticipation,
       supportThreshold,
-      minDuration
+      minDuration,
+      minProposalCreationVotingPower
     );
   }
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeMock(1, 2, 3);
+      await initializeMock(1, 2, 3, 0);
 
-      await expect(initializeMock(1, 2, 3)).to.be.revertedWith(
+      await expect(initializeMock(1, 2, 3, 0)).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
       );
     });
 
     it('reverts if min duration is 0', async () => {
-      await expect(initializeMock(1, 2, 0)).to.be.revertedWith(
+      await expect(initializeMock(1, 2, 0, 0)).to.be.revertedWith(
         customError('VoteDurationZero')
       );
     });
   });
 
-  describe('changeVoteConfig: ', async () => {
+  describe('changeVoteSettings: ', async () => {
     beforeEach(async () => {
-      await initializeMock(1, 2, 3);
+      await initializeMock(1, 2, 3, 0);
     });
     it('reverts if settings are invalid', async () => {
       await expect(
-        votingBase.changeVoteSettings(1, pct16(1000), 3)
+        votingBase.changeVoteSettings(1, pct16(1000), 3, 0)
       ).to.be.revertedWith(
         customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
 
       await expect(
-        votingBase.changeVoteSettings(pct16(1000), 2, 3)
+        votingBase.changeVoteSettings(pct16(1000), 2, 3, 0)
       ).to.be.revertedWith(
         customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
 
-      await expect(votingBase.changeVoteSettings(1, 2, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
-      );
+      await expect(
+        votingBase.changeVoteSettings(1, 2, 0, 0)
+      ).to.be.revertedWith(customError('VoteDurationZero'));
     });
 
     it('should change the settings successfully', async () => {
-      expect(await votingBase.changeVoteSettings(2, 4, 8))
+      expect(await votingBase.changeVoteSettings(2, 4, 8, 12))
         .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
-        .withArgs(2, 4, 8);
+        .withArgs(2, 4, 8, 12);
     });
   });
 });

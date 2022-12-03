@@ -9,9 +9,16 @@ contract MajorityVotingMock is MajorityVotingBase {
         IDAO _dao,
         uint64 _supportThreshold,
         uint64 _minParticipation,
-        uint64 _minDuration
+        uint64 _minDuration,
+        uint256 _minProposalCreationVotingPower
     ) public initializer {
-        __MajorityVotingBase_init(_dao, _supportThreshold, _minParticipation, _minDuration);
+        __MajorityVotingBase_init(
+            _dao,
+            _supportThreshold,
+            _minParticipation,
+            _minDuration,
+            _minProposalCreationVotingPower
+        );
     }
 
     function createProposal(

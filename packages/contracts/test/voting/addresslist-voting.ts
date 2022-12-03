@@ -28,6 +28,7 @@ describe('AddresslistVoting', function () {
   const startOffset = 10;
   const minDuration = 500;
   const id = 0;
+  let minProposalCreationVotingPower = 0;
 
   let mergedAbi: any;
   let addresslistVotingFactoryBytecode: any;
@@ -106,6 +107,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
+        minProposalCreationVotingPower,
         addresslist(0)
       );
 
@@ -115,6 +117,7 @@ describe('AddresslistVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
+          minProposalCreationVotingPower,
           addresslist(0)
         )
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
@@ -131,6 +134,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
+        minProposalCreationVotingPower,
         addresslist(0)
       );
     });
@@ -177,20 +181,21 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal creation', async () => {
-    beforeEach(async () => {
-      supportThreshold = pct16(50);
-      minParticipation = pct16(20);
+    supportThreshold = pct16(50);
+    minParticipation = pct16(20);
+
+    it('reverts if user is not allowed to create a vote', async () => {
+      minProposalCreationVotingPower = 1;
 
       await voting.initialize(
         dao.address,
         supportThreshold,
         minParticipation,
         minDuration,
+        minProposalCreationVotingPower,
         addresslist(1)
       );
-    });
 
-    it('reverts if user is not allowed to create a vote', async () => {
       await expect(
         voting
           .connect(signers[1])
@@ -201,6 +206,15 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if vote duration is less than the minimal duration', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposalCreationVotingPower,
+        addresslist(1)
+      );
+
       const tooShortEndDate = endDate - 10;
 
       await expect(
@@ -224,6 +238,15 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote successfully, but not vote', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposalCreationVotingPower,
+        addresslist(1)
+      );
+
       expect(
         await voting.createProposal(
           dummyMetadata,
@@ -261,6 +284,15 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a vote and cast a vote immediately', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposalCreationVotingPower,
+        addresslist(1)
+      );
+
       expect(
         await voting.createProposal(
           dummyMetadata,
@@ -289,6 +321,15 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts creation when voting before the start date', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposalCreationVotingPower,
+        addresslist(1)
+      );
+
       expect(await getTime()).to.be.lessThan(startDate);
 
       // Reverts if the vote option is not 'None'
@@ -331,6 +372,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
+        minProposalCreationVotingPower,
         addresslist(10)
       );
 
@@ -510,6 +552,7 @@ describe('AddresslistVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
+          minProposalCreationVotingPower,
           addresslist(10)
         );
 
@@ -615,6 +658,7 @@ describe('AddresslistVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
+          minProposalCreationVotingPower,
           addresslist(10)
         );
         expect(

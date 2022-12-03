@@ -92,16 +92,24 @@ interface IMajorityVoting {
     /// @param supportThreshold The support threshold in percent.
     /// @param minParticipation The minimum participation ratio in percent.
     /// @param minDuration The minimal duration of a vote in seconds.
-    event VoteSettingsUpdated(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration);
+    /// @param minProposalCreationVotingPower The minimal voting power needed to create a proposal.
+    event VoteSettingsUpdated(
+        uint64 supportThreshold,
+        uint64 minParticipation,
+        uint64 minDuration,
+        uint256 minProposalCreationVotingPower
+    );
 
     /// @notice Changes the vote settings.
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote in seconds.
+    /// @param _minProposalCreationVotingPower The minimal voting power needed to create a proposal.
     function changeVoteSettings(
         uint64 _supportThreshold,
         uint64 _minParticipation,
-        uint64 _minDuration
+        uint64 _minDuration,
+        uint256 _minProposalCreationVotingPower
     ) external;
 
     /// @notice Creates a new proposal.

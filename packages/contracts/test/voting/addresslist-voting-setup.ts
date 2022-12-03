@@ -20,12 +20,19 @@ const EMPTY_DATA = '0x';
 const supportThreshold = 50;
 const minParticipation = 25;
 const minDuration = 10;
+const minProposalCreationVotingPower = 1;
 let members: string[];
 
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(
-  ['uint64', 'uint64', 'uint64', 'address[]'],
-  [supportThreshold, minParticipation, minDuration, []]
+  ['uint64', 'uint64', 'uint64', 'uint256', 'address[]'],
+  [
+    supportThreshold,
+    minParticipation,
+    minDuration,
+    minProposalCreationVotingPower,
+    [],
+  ]
 );
 
 // Permissions
@@ -78,7 +85,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, address[] members)';
+        '(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposalCreationVotingPower, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -160,8 +167,14 @@ describe('AddresslistVotingSetup', function () {
 
     it('correctly sets up the plugin', async () => {
       const data = abiCoder.encode(
-        ['uint64', 'uint64', 'uint64', 'address[]'],
-        [supportThreshold, minParticipation, minDuration, members]
+        ['uint64', 'uint64', 'uint64', 'uint256', 'address[]'],
+        [
+          supportThreshold,
+          minParticipation,
+          minDuration,
+          minProposalCreationVotingPower,
+          members,
+        ]
       );
 
       const nonce = await ethers.provider.getTransactionCount(
@@ -192,6 +205,9 @@ describe('AddresslistVotingSetup', function () {
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
         minDuration
       );
+      expect(
+        await addresslistVotingContract.minProposalCreationVotingPower()
+      ).to.be.equal(minProposalCreationVotingPower);
 
       await ethers.provider.send('evm_mine', []);
 
