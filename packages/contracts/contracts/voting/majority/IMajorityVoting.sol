@@ -51,6 +51,8 @@ interface IMajorityVoting {
     }
 
     struct VoteSettings {
+        bool earlyExecution;
+        bool voteReplacment;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 minDuration;
@@ -96,11 +98,15 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
+    /// @param earlyExecution Wheter early execution is enabled or not.
+    /// @param voteReplacment Wheter vote replacement is enabled or not.
     /// @param supportThreshold The support threshold in percent.
     /// @param minParticipation The minimum participation ratio in percent.
     /// @param minDuration The minimal duration of a vote in seconds.
     /// @param minProposerVotingPower The minimal voting power needed to create a proposal.
     event VoteSettingsUpdated(
+        bool earlyExecution,
+        bool voteReplacment,
         uint64 supportThreshold,
         uint64 minParticipation,
         uint64 minDuration,

@@ -340,6 +340,8 @@ abstract contract MajorityVotingBase is
         }
 
         emit VoteSettingsUpdated({
+            earlyExecution: _voteSettings.earlyExecution,
+            voteReplacment: _voteSettings.voteReplacment,
             minParticipation: _voteSettings.minParticipation,
             supportThreshold: _voteSettings.supportThreshold,
             minDuration: _voteSettings.minDuration,
