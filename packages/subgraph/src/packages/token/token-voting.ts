@@ -131,30 +131,34 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.no = vote.value.value9;
       proposalEntity.abstain = vote.value.value10;
       proposalEntity.voteCount = voteCount;
-      // check if the current vote results meet
-      // the conditions for the proposal to pass:
-      // - participation    :  (N_yes + N_no + N_abstain)  / N_total >= participation threshold
-      // - support :  N_yes / (N_yes + N_no) >= support threshold
+
+      // check if the current vote results meet the conditions for the proposal to pass:
+      // - participation      :  (N_yes + N_no + N_abstain) / N_total > participation threshold
+      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
 
       // expect a number between 0 and 100
-      // where 0.35 => 35
       let currentParticipation = voteCount
         .times(BigInt.fromI32(100))
         .div(proposalEntity.totalVotingPower);
-      // expect a number between 0 and 100
-      // where 0.35 => 35
+
+      let worstCaseSupport = yes
+        .times(BigInt.fromI32(100))
+        .div(proposalEntity.totalVotingPower.minus(proposalEntity.abstain));
+      /*
       let currentSupport = new BigInt(0);
       if (voteCount.gt(new BigInt(0))) {
         currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
       }
+      */
+
       // set the executable param
       proposalEntity.executable =
-        currentParticipation.ge(
+        currentParticipation.gt(
           proposalEntity.participationThreshold.div(
             BigInt.fromString(TEN_POWER_16)
           )
         ) &&
-        currentSupport.ge(
+        worstCaseSupport.gt(
           proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
