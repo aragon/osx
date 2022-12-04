@@ -185,8 +185,8 @@ describe('AddresslistVotingSetup', function () {
         anticipatedPluginAddress
       );
       const latestBlock = await ethers.provider.getBlock('latest');
-
-      expect(await addresslistVotingContract.getDAO()).to.be.equal(daoAddress);
+        
+      expect(await addresslistVotingContract.dao()).to.be.equal(daoAddress);
       expect(
         await addresslistVotingContract.totalSupportThresholdPct()
       ).to.be.equal(totalSupportThresholdPct);
