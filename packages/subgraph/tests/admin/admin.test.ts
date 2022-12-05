@@ -93,14 +93,17 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
     '_' +
     BigInt.fromString(VOTE_ID).toHexString();
 
+  let adminstratorAddress = Address.fromString(ADDRESS_ONE);
+
   let adminProposal = new AdminProposal(entityID);
   adminProposal.dao = DAO_ADDRESS;
   adminProposal.plugin = pluginId;
   adminProposal.proposalId = BigInt.fromString(VOTE_ID);
-  adminProposal.creator = ADDRESS_ONE;
+  adminProposal.creator = adminstratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
   adminProposal.createdAt = BigInt.fromString(ONE_ETH);
+  adminProposal.adminstrator = adminstratorAddress.toHexString();
   adminProposal.save();
 
   const actionId = VOTING_ADDRESS + '_' + VOTE_ID + '_' + VOTE_ID;

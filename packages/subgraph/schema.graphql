@@ -310,7 +310,7 @@ type AdminPlugin implements IPlugin @entity {
 type Adminstrator @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AdminProposal!]! @derivedFrom(field: "creator")
+  proposals: [AdminProposal!]! @derivedFrom(field: "adminstrator")
   plugins: [AdminstratorAdminPlugin!]! @derivedFrom(field: "administrator")
 }
 
@@ -324,11 +324,12 @@ type AdminstratorAdminPlugin @entity {
 type AdminProposal implements Proposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
+  creator: Bytes! # Adminstrator address
+  metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
-  plugin: AdminPlugin!
-  proposalId: BigInt!
-  creator: Adminstrator!
-  metadata: String!
   executed: Boolean!
   createdAt: BigInt!
+  plugin: AdminPlugin!
+  proposalId: BigInt!
+  adminstrator: Adminstrator!
 }

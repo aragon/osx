@@ -29,7 +29,7 @@ export function _handleProposalCreated(
 
   let pluginId = event.address.toHexString();
 
-  let adminstratorAddress = event.params.creator.toHexString();
+  let adminstratorAddress = event.params.creator;
 
   let proposalEntity = new AdminProposal(proposalId);
   proposalEntity.dao = daoId;
@@ -39,20 +39,21 @@ export function _handleProposalCreated(
   proposalEntity.metadata = metadata;
   proposalEntity.executed = false;
   proposalEntity.createdAt = event.block.timestamp;
+  proposalEntity.adminstrator = adminstratorAddress.toHexString();
 
   // Adminstrator
-  let adminstratorId = adminstratorAddress + '_' + pluginId;
+  let adminstratorId = adminstratorAddress.toHexString() + '_' + pluginId;
   let adminMemberEntity = AdminstratorAdminPlugin.load(adminstratorId);
   if (!adminMemberEntity) {
     adminMemberEntity = new AdminstratorAdminPlugin(adminstratorId);
-    adminMemberEntity.administrator = adminstratorAddress;
+    adminMemberEntity.administrator = adminstratorAddress.toHexString();
     adminMemberEntity.plugin = pluginId;
     adminMemberEntity.save();
   }
-  let adminstratorEntity = Adminstrator.load(adminstratorAddress);
+  let adminstratorEntity = Adminstrator.load(adminstratorAddress.toHexString());
   if (!adminstratorEntity) {
-    adminstratorEntity = new Adminstrator(adminstratorAddress);
-    adminstratorEntity.address = adminstratorAddress;
+    adminstratorEntity = new Adminstrator(adminstratorAddress.toHexString());
+    adminstratorEntity.address = adminstratorAddress.toHexString();
     adminstratorEntity.save();
   }
 
