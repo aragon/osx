@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {ERC20, TokenVotingSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
@@ -25,18 +26,19 @@ const prepareInstallDataTypes = [
   'tuple(address[],uint256[])',
 ];
 
+const participationThreshold = 25;
+const supportThreshold = 50;
+const minDuration = 10;
+
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
-  1,
-  1,
-  1,
+  participationThreshold,
+  supportThreshold,
+  minDuration,
   [AddressZero, '', ''],
   [[], []],
 ]);
 
-const participationThreshold = 1;
-const supportThreshold = 2;
-const minDuration = 3;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
 const merkleMintToAddressArray = [ethers.Wallet.createRandom().address];
@@ -51,8 +53,7 @@ const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
 describe('TokenVotingSetup', function () {
-  let ownerAddress: string;
-  let signers: any;
+  let signers: SignerWithAddress[];
   let tokenVotingSetup: TokenVotingSetup;
   let implementationAddress: string;
   let targetDao: any;
@@ -60,8 +61,7 @@ describe('TokenVotingSetup', function () {
 
   before(async () => {
     signers = await ethers.getSigners();
-    ownerAddress = await signers[0].getAddress();
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0].address);
 
     const TokenVotingSetup = await ethers.getContractFactory(
       'TokenVotingSetup'
@@ -118,9 +118,9 @@ describe('TokenVotingSetup', function () {
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        1,
-        1,
-        1,
+        participationThreshold,
+        supportThreshold,
+        minDuration,
         [AddressZero, '', ''],
         [[AddressZero], []],
       ]);
@@ -131,11 +131,11 @@ describe('TokenVotingSetup', function () {
     });
 
     it('fails if passed token address is not a contract', async () => {
-      const tokenAddress = ownerAddress;
+      const tokenAddress = signers[0].address;
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        1,
-        1,
-        1,
+        participationThreshold,
+        supportThreshold,
+        minDuration,
         [tokenAddress, '', ''],
         [[], []],
       ]);
@@ -148,9 +148,9 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not ERC20', async () => {
       const tokenAddress = implementationAddress;
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        1,
-        1,
-        1,
+        participationThreshold,
+        supportThreshold,
+        minDuration,
         [tokenAddress, '', ''],
         [[], []],
       ]);
@@ -174,9 +174,9 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        1,
-        1,
-        1,
+        participationThreshold,
+        supportThreshold,
+        minDuration,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
       ]);
@@ -226,9 +226,9 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        1,
-        1,
-        1,
+        participationThreshold,
+        supportThreshold,
+        minDuration,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
       ]);
@@ -274,9 +274,9 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        1,
-        1,
-        1,
+        participationThreshold,
+        supportThreshold,
+        minDuration,
         [governanceERC20.address, '', ''],
         [[], []],
       ]);

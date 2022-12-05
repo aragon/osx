@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
@@ -16,10 +17,15 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
+const participationThreshold = 25;
+const supportThreshold = 50;
+const minDuration = 10;
+let members: string[];
+
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(
   ['uint64', 'uint64', 'uint64', 'address[]'],
-  [1, 1, 1, []]
+  [participationThreshold, supportThreshold, minDuration, []]
 );
 
 // Permissions
@@ -33,16 +39,15 @@ const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
 describe('AddresslistVotingSetup', function () {
-  let ownerAddress: string;
-  let signers: any;
+  let signers: SignerWithAddress[];
   let addresslistVotingSetup: AddresslistVotingSetup;
   let implementationAddress: string;
   let targetDao: any;
 
   before(async () => {
     signers = await ethers.getSigners();
-    ownerAddress = await signers[0].getAddress();
-    targetDao = await deployNewDAO(ownerAddress);
+    targetDao = await deployNewDAO(signers[0].address);
+    members = [signers[0].address];
 
     const AddresslistVotingSetup = await ethers.getContractFactory(
       'AddresslistVotingSetup'
@@ -73,7 +78,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, address[] allowed)';
+        '(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -154,15 +159,9 @@ describe('AddresslistVotingSetup', function () {
     });
 
     it('correctly sets up the plugin', async () => {
-      const daoAddress = targetDao.address;
-      const participationThreshold = 1;
-      const supportThreshold = 2;
-      const minDuration = 3;
-      const allowed = [ownerAddress];
-
       const data = abiCoder.encode(
         ['uint64', 'uint64', 'uint64', 'address[]'],
-        [participationThreshold, supportThreshold, minDuration, allowed]
+        [participationThreshold, supportThreshold, minDuration, members]
       );
 
       const nonce = await ethers.provider.getTransactionCount(
@@ -173,7 +172,7 @@ describe('AddresslistVotingSetup', function () {
         nonce,
       });
 
-      await addresslistVotingSetup.prepareInstallation(daoAddress, data);
+      await addresslistVotingSetup.prepareInstallation(targetDao.address, data);
 
       const factory = await ethers.getContractFactory('AddresslistVoting');
       const addresslistVotingContract = factory.attach(
@@ -181,7 +180,9 @@ describe('AddresslistVotingSetup', function () {
       );
       const latestBlock = await ethers.provider.getBlock('latest');
 
-      expect(await addresslistVotingContract.getDAO()).to.be.equal(daoAddress);
+      expect(await addresslistVotingContract.getDAO()).to.be.equal(
+        targetDao.address
+      );
       expect(
         await addresslistVotingContract.participationThreshold()
       ).to.be.equal(participationThreshold);
@@ -196,9 +197,9 @@ describe('AddresslistVotingSetup', function () {
 
       expect(
         await addresslistVotingContract.addresslistLength(latestBlock.number)
-      ).to.be.equal(allowed.length);
+      ).to.be.equal(members.length);
       expect(
-        await addresslistVotingContract.isListed(allowed[0], latestBlock.number)
+        await addresslistVotingContract.isListed(members[0], latestBlock.number)
       ).to.be.equal(true);
     });
   });

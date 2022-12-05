@@ -26,7 +26,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, address[] allowed)";
+            "(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -45,7 +45,7 @@ contract AddresslistVotingSetup is PluginSetup {
             uint64 participationThreshold,
             uint64 supportThreshold,
             uint64 minDuration,
-            address[] memory allowed
+            address[] memory members
         ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
 
         // Prepare and Deploy the plugin proxy.
@@ -57,7 +57,7 @@ contract AddresslistVotingSetup is PluginSetup {
                 participationThreshold,
                 supportThreshold,
                 minDuration,
-                allowed
+                members
             )
         );
 
