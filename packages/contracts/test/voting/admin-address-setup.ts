@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {AdminAddressSetup} from '../../typechain';
+import {AdminSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
@@ -17,10 +17,10 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('AdminAddressSetup', function () {
+describe('AdminSetup', function () {
   let ownerAddress: string;
   let signers: any;
-  let adminAddressSetup: AdminAddressSetup;
+  let adminSetup: AdminSetup;
   let implementationAddress: string;
   let targetDao: any;
   let minimum_data: any;
@@ -32,12 +32,10 @@ describe('AdminAddressSetup', function () {
 
     minimum_data = abiCoder.encode(['address'], [ownerAddress]);
 
-    const AdminAddressSetup = await ethers.getContractFactory(
-      'AdminAddressSetup'
-    );
-    adminAddressSetup = await AdminAddressSetup.deploy();
+    const AdminSetup = await ethers.getContractFactory('AdminSetup');
+    adminSetup = await AdminSetup.deploy();
 
-    implementationAddress = await adminAddressSetup.getImplementationAddress();
+    implementationAddress = await adminSetup.getImplementationAddress();
   });
 
   it('creates admin address base with the correct interface', async () => {
@@ -59,18 +57,16 @@ describe('AdminAddressSetup', function () {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI = '(address admin)';
 
-      expect(await adminAddressSetup.prepareInstallationDataABI()).to.be.eq(
-        dataHRABI
-      );
+      expect(await adminSetup.prepareInstallationDataABI()).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
-        adminAddressSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
+        adminSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
       ).to.be.reverted;
 
       await expect(
-        adminAddressSetup.prepareInstallation(
+        adminSetup.prepareInstallation(
           targetDao.address,
           minimum_data.substring(0, minimum_data.length - 1)
         )
@@ -81,24 +77,21 @@ describe('AdminAddressSetup', function () {
       const dataWithAddressZero = abiCoder.encode(['address'], [AddressZero]);
 
       await expect(
-        adminAddressSetup.prepareInstallation(
-          targetDao.address,
-          dataWithAddressZero
-        )
+        adminSetup.prepareInstallation(targetDao.address, dataWithAddressZero)
       ).to.be.revertedWith(customError('AdminAddressInvalid', AddressZero));
     });
 
     it('correctly returns plugin, helpers and permissions', async () => {
       const nonce = await ethers.provider.getTransactionCount(
-        adminAddressSetup.address
+        adminSetup.address
       );
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: adminAddressSetup.address,
+        from: adminSetup.address,
         nonce,
       });
 
       const {plugin, helpers, permissions} =
-        await adminAddressSetup.callStatic.prepareInstallation(
+        await adminSetup.callStatic.prepareInstallation(
           targetDao.address,
           minimum_data
         );
@@ -128,14 +121,14 @@ describe('AdminAddressSetup', function () {
       const daoAddress = targetDao.address;
 
       const nonce = await ethers.provider.getTransactionCount(
-        adminAddressSetup.address
+        adminSetup.address
       );
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: adminAddressSetup.address,
+        from: adminSetup.address,
         nonce,
       });
 
-      await adminAddressSetup.prepareInstallation(daoAddress, minimum_data);
+      await adminSetup.prepareInstallation(daoAddress, minimum_data);
 
       const factory = await ethers.getContractFactory('Admin');
       const adminAddressContract = factory.attach(anticipatedPluginAddress);
@@ -149,7 +142,7 @@ describe('AdminAddressSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(await adminAddressSetup.prepareUninstallationDataABI()).to.be.eq(
+      expect(await adminSetup.prepareUninstallationDataABI()).to.be.eq(
         dataHRABI
       );
     });
@@ -157,13 +150,12 @@ describe('AdminAddressSetup', function () {
     it('correctly returns permissions', async () => {
       const plugin = ethers.Wallet.createRandom().address;
 
-      const permissions =
-        await adminAddressSetup.callStatic.prepareUninstallation(
-          targetDao.address,
-          plugin,
-          [],
-          EMPTY_DATA
-        );
+      const permissions = await adminSetup.callStatic.prepareUninstallation(
+        targetDao.address,
+        plugin,
+        [],
+        EMPTY_DATA
+      );
 
       expect(permissions.length).to.be.equal(1);
       expect(permissions).to.deep.equal([

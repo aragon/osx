@@ -29,19 +29,18 @@ describe('Admin plugin', function () {
   let dummyMetadata: string;
 
   let mergedAbi: any;
-  let adminAddressFactoryBytecode: any;
+  let adminFactoryBytecode: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    ({abi: mergedAbi, bytecode: adminAddressFactoryBytecode} =
-      await getMergedABI(
-        // @ts-ignore
-        hre,
-        'Admin',
-        ['DAO']
-      ));
+    ({abi: mergedAbi, bytecode: adminFactoryBytecode} = await getMergedABI(
+      // @ts-ignore
+      hre,
+      'Admin',
+      ['DAO']
+    ));
 
     dummyActions = [
       {
@@ -60,12 +59,12 @@ describe('Admin plugin', function () {
   });
 
   beforeEach(async () => {
-    const AdminAddressFactory = new ethers.ContractFactory(
+    const AdminFactory = new ethers.ContractFactory(
       mergedAbi,
-      adminAddressFactoryBytecode,
+      adminFactoryBytecode,
       signers[0]
     );
-    plugin = await AdminAddressFactory.deploy();
+    plugin = await AdminFactory.deploy();
 
     await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
     await dao.grant(
