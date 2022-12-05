@@ -1,4 +1,4 @@
-import {dataSource} from '@graphprotocol/graph-ts';
+import {dataSource, log} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -90,8 +90,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.save();
 
     // update actions
-    let actions = proposalEntity.actions;
-    for (let index = 0; index < actions.length; index++) {
+    let actionsResultArray = event.params.execResults;
+    for (let index = 0; index < actionsResultArray.length; index++) {
+      // re-create action id
       let actionId =
         event.address.toHexString() +
         '_' +
