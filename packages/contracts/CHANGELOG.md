@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `Admin` plugin.
 - Added NFT compatibility by using OpenZepplin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
 - Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
   to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed initiating empty helpers array in `AddresslistVotingSetup`.
 - Removed the redundant base class `DaoAuthorizableBaseUpgradeable`.
 - Removed `isApprovedForAll` check from initialize function of `ENSSubdomainRegistrar.sol`.
 - Removed test related to `isApprovedForAll` in `ens-subdomain-registry.ts`.
