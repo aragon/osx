@@ -150,9 +150,9 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     SUPPORT_THRESHOLD,
     PARTICIPATION_THRESHOLD,
     VOTING_POWER,
-    '1',
-    '0',
-    '0',
+    '1', // yes
+    '0', // no
+    '0', // abstain
     actions
   );
 
@@ -190,12 +190,11 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
   // check proposal
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
 
-  // check executable
-  // the total voting power is 3, currently total votes = 1
-  // the min participation is 0.5; 0.33 <= 0.5 => false
-  // currently yes = 1
-  // the min support is 0.5; 1 >= 0.5 => true
-  // is not executable
+  // Check executable
+  // yes: 1, no: 0, abstain: 0
+  // support          : 100%
+  // worstCaseSupport :  33%
+  // participation    :  33%
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'false');
   // check vote count
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'voteCount', '1');
@@ -211,28 +210,27 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     SUPPORT_THRESHOLD,
     PARTICIPATION_THRESHOLD,
     VOTING_POWER,
-    '1',
+    '2',
     '0',
-    '1',
+    '0',
     actions
   );
   // create event
   let event2 = createNewVoteCastEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
-    '1', // abstain
+    '2', // yes
     '1',
     VOTING_ADDRESS
   );
 
   handleVoteCast(event2);
 
-  // check executable
-  // the total voting power is 3, currently total votes = 2
-  // the min participation is 0.5; 0.66 >= 0.5 => true
-  // currently yes = 1, abstain = 1
-  // the min support is 0.5; 0.5 >= 0.5 => true
-  // is executable
+  // Check executable
+  // yes: 2, no: 0, abstain: 0
+  // support          : 100%
+  // worstCaseSupport :  66%
+  // participation    :  66%
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'true');
 
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'voteCount', '2');
