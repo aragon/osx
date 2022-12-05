@@ -491,7 +491,7 @@ describe('TokenVoting', function () {
       // closes the vote
       await advanceAfterVoteEnd(endDate);
 
-      //The vote is not executable because the participation with 20% is still too low, despite a support of 66% and the voting period being over
+      //The vote is not executable because the participation with 20% is still too low, despite a support of 67% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
     });
 

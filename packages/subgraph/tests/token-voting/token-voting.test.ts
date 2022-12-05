@@ -229,8 +229,8 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
   // Check executable
   // yes: 2, no: 0, abstain: 0
   // support          : 100%
-  // worstCaseSupport :  66%
-  // participation    :  66%
+  // worstCaseSupport :  67%
+  // participation    :  67%
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'true');
 
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'voteCount', '2');
