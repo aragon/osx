@@ -22,7 +22,7 @@ import "../../core/IDAO.sol";
 ///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
 ///
 ///  #### Early Execution
-///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.// TODO it should also fail early.
+///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
 ///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
 ///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
 ///  $$\begin{align*}
@@ -122,7 +122,7 @@ interface IMajorityVoting {
     ) external returns (uint256 proposalId);
 
     /// @notice Votes for a vote option and optionally executes the proposal.
-    /// @dev `[outcome = 1 = abstain], [outcome = 2 = supports], [outcome = 3 = not supports].
+    /// @dev `_choice`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
     /// @param  _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided Whether the proposal actions should be executed if the vote outcome cannot change anymore.
