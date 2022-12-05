@@ -162,9 +162,9 @@ interface IMajorityVoting {
     /// @return The support value.
     function support(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the participation value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote.
+    /// @notice Returns the worst case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote.
     /// @param _proposalId The ID of the proposal.
-    /// @return The participation value.
+    /// @return The worst case support value.
     function worstCaseSupport(uint256 _proposalId) external view returns (uint256);
 
     /// @notice Returns the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote.

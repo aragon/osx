@@ -29,7 +29,7 @@ import {IDAO} from "../../core/IDAO.sol";
 ///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
 ///
 ///  #### Early Execution
-///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.// TODO it should also fail early.
+///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
 ///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
 ///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
 ///  $$\begin{align*}
@@ -277,13 +277,7 @@ abstract contract MajorityVotingBase is
     /// @return True if the given voter can vote on a certain proposal, false otherwise.
     function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
-    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// @param _proposalId The ID of the proposal.
-    /// @return True if the given vote can be executed, false otherwise.
-
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
-    //TODO
-    /// This function assumes vote configurations with `supportThreshold` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be casted a.k.a. plenum)) is larger than `supportThreshold`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
     /// @param _proposalId The ID of the proposal.
     /// @return True if the proposal can be executed, false otherwise.
     function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
@@ -294,32 +288,19 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        uint256 participation = _calculatePct(
-            proposal_.yes + proposal_.no + proposal_.abstain,
-            proposal_.totalVotingPower
-        );
-
         if (_isVoteOpen(proposal_)) {
             // Early execution
-
-            uint256 worstCaseSupport = _calculatePct(
-                proposal_.yes,
-                proposal_.totalVotingPower - proposal_.abstain
-            );
             if (
-                worstCaseSupport > proposal_.supportThreshold &&
-                participation > proposal_.participationThreshold
+                worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
+                participation(_proposalId) > proposal_.participationThreshold
             ) {
                 return true;
             }
         } else {
             // Normal execution
-
-            uint256 supportPct = _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
-
             if (
-                supportPct > proposal_.supportThreshold &&
-                participation > proposal_.participationThreshold
+                support(_proposalId) > proposal_.supportThreshold &&
+                participation(_proposalId) > proposal_.participationThreshold
             ) {
                 return true;
             }
