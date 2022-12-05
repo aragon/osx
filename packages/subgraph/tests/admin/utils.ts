@@ -4,7 +4,7 @@ import {newMockEvent} from 'matchstick-as';
 import {
   ProposalCreated,
   ProposalExecuted
-} from '../../generated/templates/Admin/AdminAddress';
+} from '../../generated/templates/Admin/Admin';
 
 // events
 

@@ -27,6 +27,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     [1, 0, 0],
     '0x'
   );
+
+  // AdminSetup
+  await createPluginRepo(hre, 'Admin', 'AdminSetup', [1, 0, 0], '0x');
 };
 export default func;
 func.tags = ['Create_Register_Plugins'];

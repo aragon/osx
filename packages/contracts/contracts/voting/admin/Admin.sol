@@ -7,10 +7,10 @@ import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
-/// @title AdminAddress
+/// @title Admin
 /// @author Aragon Association - 2022.
 /// @notice The admin address governance plugin giving execution permission on the DAO to a single address
-contract AdminAddress is PluginCloneable {
+contract Admin is PluginCloneable {
     using Counters for Counters.Counter;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.

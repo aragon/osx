@@ -8,15 +8,15 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {AdminAddress} from "./AdminAddress.sol";
+import {Admin} from "./Admin.sol";
 
 /// @title AdminAddressSetup
 /// @author Aragon Association - 2022
-/// @notice The setup contract of the `AdminAddress` plugin.
-contract AdminAddressSetup is PluginSetup {
+/// @notice The setup contract of the `Admin` plugin.
+contract AdminSetup is PluginSetup {
     using Clones for address;
 
-    /// @notice The address of `AdminAddress` plugin logic contract to be cloned.
+    /// @notice The address of `Admin` plugin logic contract to be cloned.
     address private immutable implementation;
 
     /// @notice The address zero to be used as oracle address for permissions.
@@ -26,9 +26,9 @@ contract AdminAddressSetup is PluginSetup {
     /// @param admin The admin address.
     error AdminAddressInvalid(address admin);
 
-    /// @notice The contract constructor, that deployes the `AdminAddress` plugin logic contract.
+    /// @notice The contract constructor, that deployes the `Admin` plugin logic contract.
     constructor() {
-        implementation = address(new AdminAddress());
+        implementation = address(new Admin());
     }
 
     /// @inheritdoc IPluginSetup
@@ -47,7 +47,7 @@ contract AdminAddressSetup is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode `_data` to extract the params needed for cloning and initializing `AdminAddress` plugin.
+        // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
         address admin = abi.decode(_data, (address));
 
         if (admin == address(0)) {
@@ -58,10 +58,10 @@ contract AdminAddressSetup is PluginSetup {
         plugin = implementation.clone();
 
         // Initialize cloned plugin contract.
-        AdminAddress(plugin).initialize(dao);
+        Admin(plugin).initialize(dao);
 
         // Prepare helpers
-        helpers = new address[](0);
+        (helpers); // silence the warning.
 
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](2);
@@ -72,7 +72,7 @@ contract AdminAddressSetup is PluginSetup {
             plugin,
             admin,
             NO_ORACLE,
-            AdminAddress(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
+            Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` on the DAO to the plugin.

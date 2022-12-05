@@ -20,7 +20,7 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('AdminAddress plugin', function () {
+describe('Admin plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: DAO;
@@ -39,7 +39,7 @@ describe('AdminAddress plugin', function () {
       await getMergedABI(
         // @ts-ignore
         hre,
-        'AdminAddress',
+        'Admin',
         ['DAO']
       ));
 

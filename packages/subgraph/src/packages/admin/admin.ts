@@ -3,7 +3,7 @@ import {dataSource} from '@graphprotocol/graph-ts';
 import {
   ProposalCreated,
   ProposalExecuted
-} from '../../../generated/templates/Admin/AdminAddress';
+} from '../../../generated/templates/Admin/Admin';
 import {
   Action,
   AdminstratorAdminPlugin,

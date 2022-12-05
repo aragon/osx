@@ -195,7 +195,7 @@ templates:
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: AdminAddress
+      abi: Admin
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -204,8 +204,8 @@ templates:
       entities:
         - Dao
       abis:
-        - name: AdminAddress
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin-address/AdminAddress.sol/AdminAddress.json
+        - name: Admin
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
       eventHandlers:
         - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated

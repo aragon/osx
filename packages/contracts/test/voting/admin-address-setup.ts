@@ -41,7 +41,7 @@ describe('AdminAddressSetup', function () {
   });
 
   it('creates admin address base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('AdminAddress');
+    const factory = await ethers.getContractFactory('Admin');
     const adminAddressContract = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
@@ -137,7 +137,7 @@ describe('AdminAddressSetup', function () {
 
       await adminAddressSetup.prepareInstallation(daoAddress, minimum_data);
 
-      const factory = await ethers.getContractFactory('AdminAddress');
+      const factory = await ethers.getContractFactory('Admin');
       const adminAddressContract = factory.attach(anticipatedPluginAddress);
 
       expect(await adminAddressContract.getDAO()).to.be.equal(daoAddress);
