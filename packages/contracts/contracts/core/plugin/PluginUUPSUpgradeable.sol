@@ -15,9 +15,9 @@ import {IPlugin} from "./IPlugin.sol";
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract PluginUUPSUpgradeable is
     IPlugin,
-    ERC165Upgradeable,
     UUPSUpgradeable,
-    DaoAuthorizableUpgradeable
+    DaoAuthorizableUpgradeable,
+    ERC165Upgradeable
 {
     // NOTE: When adding new state variables to the contract, the size of `_gap` has to be adapted below as well.
 

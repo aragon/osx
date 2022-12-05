@@ -8,13 +8,13 @@ const networks = require('../../../../packages/contracts/networks.json');
 const daoFacotryJson = require('../../../../packages/contracts/artifacts/contracts/factory/DAOFactory.sol/DAOFactory.json');
 const gas = require('./estimateGas');
 
-// call from root folder as : node .github/helpers/contracts/dummy-dao/createDao.js <network-name> <creator-wallet-priv-key> <erc20 for ERC20 DAOs & none for allowList DAOs>
+// call from root folder as : node .github/helpers/contracts/dummy-dao/createDao.js <network-name> <creator-wallet-priv-key> <token for TokenVoting DAOs & none for AddresslistVoting DAOs>
 
 async function createDao() {
   const args = process.argv.slice(2);
   const networkName = args[0];
   const privKey = args[1];
-  const isERC20Voting = args[2];
+  const isTokenVoting = args[2];
   const provider = new ethers.providers.JsonRpcProvider(
     networks[networkName].url
   );
@@ -29,9 +29,9 @@ async function createDao() {
     signer
   );
 
-  const votingTypes = ['ERC20', 'Allowlist'];
+  const votingTypes = ['Token', 'Addresslist'];
   let tx;
-  let name = 'DummyDAO_' + votingTypes[isERC20Voting === 'erc20' ? 0 : 1];
+  let name = 'DummyDAO_' + votingTypes[isTokenVoting === 'token' ? 0 : 1];
   const daoName = name + `_Voting_` + new Date().getTime();
 
   const metadataObj = {
@@ -61,7 +61,7 @@ async function createDao() {
   console.log('Setting fee data:', overrides);
   console.log('Calling Dao Factory at:', DAOFactoryContract.address);
 
-  if (isERC20Voting) {
+  if (isTokenVoting) {
     let tokenConfig = [
       '0x0000000000000000000000000000000000000000',
       name,
@@ -69,7 +69,7 @@ async function createDao() {
     ];
     let mintConfig = [[signer.address], ['10000000000000000000000']];
 
-    tx = await DAOFactoryContract.createERC20VotingDAO(
+    tx = await DAOFactoryContract.createTokenVotingDAO(
       daoConfig,
       votingSettings,
       tokenConfig,
@@ -78,7 +78,7 @@ async function createDao() {
       overrides
     );
   } else {
-    tx = await DAOFactoryContract.createAllowlistVotingDAO(
+    tx = await DAOFactoryContract.createAddresslistVotingDAO(
       daoConfig,
       votingSettings,
       [signer.address],
@@ -91,7 +91,7 @@ async function createDao() {
     'waiting createDao tx:',
     tx.hash,
     'is ERC20 Voitng',
-    isERC20Voting
+    isTokenVoting
   );
 
   const reciept = await tx.wait(1);
@@ -125,7 +125,7 @@ async function createDao() {
   let resultObj = {
     tx: tx.hash,
     name: daoName,
-    votingType: isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting',
+    votingType: isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting',
     address: daoAddress[0],
     token: daoToken[0],
     voting: daoVoting[0],
@@ -142,15 +142,15 @@ async function createDao() {
   if (!content[networkName].dao) content[networkName].dao = {};
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ]
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ] = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+    isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
   ] = resultObj;
 
   //write file

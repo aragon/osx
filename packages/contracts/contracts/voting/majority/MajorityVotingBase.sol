@@ -31,20 +31,22 @@ abstract contract MajorityVotingBase is
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required to call the `setConfiguration` function.
-    bytes32 public constant SET_CONFIGURATION_PERMISSION_ID =
-        keccak256("SET_CONFIGURATION_PERMISSION");
+    /// @notice The ID of the permission required to call the `changeVoteSettings` function.
+    bytes32 public constant CHANGE_VOTE_SETTINGS_PERMISSION_ID =
+        keccak256("CHANGE_VOTE_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
-    /// @notice A mapping between vote IDs and vote information.
-    mapping(uint256 => Vote) internal votes;
+    /// @notice A mapping between proposal IDs and proposal information.
+    mapping(uint256 => Proposal) internal proposals;
 
+    //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
     uint64 public relativeSupportThresholdPct;
     uint64 public totalSupportThresholdPct;
     uint64 public minDuration;
-    uint256 public votesLength;
+
+    uint256 public proposalCount;
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.
@@ -56,7 +58,7 @@ abstract contract MajorityVotingBase is
     /// @param start The start date of the vote as a unix timestamp.
     /// @param end The end date of the vote as a unix timestamp.
     /// @param minDuration The minimal duration of the vote in seconds.
-    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    error VotingPeriodInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero(); ///TODO  remove
@@ -69,13 +71,13 @@ abstract contract MajorityVotingBase is
     /// - has ended,
     /// - was executed, or
     /// - the voter doesn't have voting powers.
-    /// @param voteId The ID of the vote.
+    /// @param proposalId The ID of the proposal.
     /// @param sender The address of the voter.
-    error VoteCastForbidden(uint256 voteId, address sender);
+    error VoteCastForbidden(uint256 proposalId, address sender);
 
-    /// @notice Thrown if the vote execution is forbidden.
-    /// @param voteId The ID of the vote.
-    error VoteExecutionForbidden(uint256 voteId);
+    /// @notice Thrown if the proposal execution is forbidden.
+    /// @param proposalId The ID of the proposal.
+    error ProposalExecutionForbidden(uint256 proposalId);
 
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -97,7 +99,11 @@ abstract contract MajorityVotingBase is
             _minDuration
         );
 
-        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
+        emit VoteSettingsUpdated(
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
+            _minDuration
+        );
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -114,65 +120,69 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function setConfiguration(
+    function changeVoteSettings(
         uint64 _totalSupportThresholdPct,
         uint64 _relativeSupportThresholdPct,
         uint64 _minDuration
-    ) external auth(SET_CONFIGURATION_PERMISSION_ID) {
+    ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
         _validateAndSetSettings(
             _totalSupportThresholdPct,
             _relativeSupportThresholdPct,
             _minDuration
         );
 
-        emit ConfigUpdated(_totalSupportThresholdPct, _relativeSupportThresholdPct, _minDuration);
+        emit VoteSettingsUpdated(
+            _totalSupportThresholdPct,
+            _relativeSupportThresholdPct,
+            _minDuration
+        );
     }
 
     /// @inheritdoc IMajorityVoting
-    function createVote(
+    function createProposal(
         bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
         bool _executeIfDecided,
         VoteOption _choice
-    ) external virtual returns (uint256 voteId);
+    ) external virtual returns (uint256 proposalId);
 
     /// @inheritdoc IMajorityVoting
     function vote(
-        uint256 _voteId,
+        uint256 _proposalId,
         VoteOption _choice,
         bool _executesIfDecided
     ) public {
-        if (_choice != VoteOption.None && !_canVote(_voteId, _msgSender())) {
-            revert VoteCastForbidden(_voteId, _msgSender());
+        if (_choice != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
+            revert VoteCastForbidden(_proposalId, _msgSender());
         }
-        _vote(_voteId, _choice, _msgSender(), _executesIfDecided);
+        _vote(_proposalId, _choice, _msgSender(), _executesIfDecided);
     }
 
     /// @inheritdoc IMajorityVoting
-    function execute(uint256 _voteId) public {
-        if (!_canExecute(_voteId)) revert VoteExecutionForbidden(_voteId);
-        _execute(_voteId);
+    function execute(uint256 _proposalId) public {
+        if (!_canExecute(_proposalId)) revert ProposalExecutionForbidden(_proposalId);
+        _execute(_proposalId);
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoteOption(uint256 _voteId, address _voter) public view returns (VoteOption) {
-        return votes[_voteId].voters[_voter];
+    function getVoteOption(uint256 _proposalId, address _voter) public view returns (VoteOption) {
+        return proposals[_proposalId].voters[_voter];
     }
 
     /// @inheritdoc IMajorityVoting
-    function canVote(uint256 _voteId, address _voter) public view returns (bool) {
-        return _canVote(_voteId, _voter);
+    function canVote(uint256 _proposalId, address _voter) public view returns (bool) {
+        return _canVote(_proposalId, _voter);
     }
 
     /// @inheritdoc IMajorityVoting
-    function canExecute(uint256 _voteId) public view returns (bool) {
-        return _canExecute(_voteId);
+    function canExecute(uint256 _proposalId) public view returns (bool) {
+        return _canExecute(_proposalId);
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVote(uint256 _voteId)
+    function getProposal(uint256 _proposalId)
         public
         view
         returns (
@@ -183,77 +193,77 @@ abstract contract MajorityVotingBase is
             uint64 snapshotBlock,
             uint64 _relativeSupportThresholdPct,
             uint64 _totalSupportThresholdPct,
-            uint256 census,
+            uint256 totalVotingPower,
             uint256 yes,
             uint256 no,
             uint256 abstain,
             IDAO.Action[] memory actions
         )
     {
-        Vote storage vote_ = votes[_voteId];
+        Proposal storage proposal_ = proposals[_proposalId];
 
-        open = _isVoteOpen(vote_);
-        executed = vote_.executed;
-        startDate = vote_.startDate;
-        endDate = vote_.endDate;
-        snapshotBlock = vote_.snapshotBlock;
-        _relativeSupportThresholdPct = vote_.relativeSupportThresholdPct;
-        _totalSupportThresholdPct = vote_.totalSupportThresholdPct;
-        census = vote_.census;
-        yes = vote_.yes;
-        no = vote_.no;
-        abstain = vote_.abstain;
-        actions = vote_.actions;
+        open = _isVoteOpen(proposal_);
+        executed = proposal_.executed;
+        startDate = proposal_.startDate;
+        endDate = proposal_.endDate;
+        snapshotBlock = proposal_.snapshotBlock;
+        _relativeSupportThresholdPct = proposal_.relativeSupportThresholdPct;
+        _totalSupportThresholdPct = proposal_.totalSupportThresholdPct;
+        totalVotingPower = proposal_.totalVotingPower;
+        yes = proposal_.yes;
+        no = proposal_.no;
+        abstain = proposal_.abstain;
+        actions = proposal_.actions;
     }
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @param _choice Whether voter abstains, supports or not supports to vote.
     /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
     function _vote(
-        uint256 _voteId,
+        uint256 _proposalId,
         VoteOption _choice,
         address _voter,
         bool _executesIfDecided
     ) internal virtual;
 
-    /// @notice Internal function to execute a vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
-    function _execute(uint256 _voteId) internal virtual {
-        votes[_voteId].executed = true;
+    /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
+    /// @param _proposalId The ID of the proposal.
+    function _execute(uint256 _proposalId) internal virtual {
+        proposals[_proposalId].executed = true;
 
-        bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
+        bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
 
-        emit VoteExecuted(_voteId, execResults);
+        emit ProposalExecuted(_proposalId, execResults);
     }
 
-    /// @notice Internal function to check if a voter can vote. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
+    /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
+    /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
-    /// @return True if the given voter can vote on a certain vote, false otherwise.
-    function _canVote(uint256 _voteId, address _voter) internal view virtual returns (bool);
+    /// @return True if the given voter can vote on a certain proposal, false otherwise.
+    function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// @param _voteId The ID of the vote.
+    /// @param _proposalId The ID of the proposal.
     /// @return True if the given vote can be executed, false otherwise.
 
-    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `census` (the total number of eligible votes that can be casted a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
-    /// @param _voteId The ID of the vote.
-    /// @return True if the given vote can be executed, false otherwise.
-    function _canExecute(uint256 _voteId) internal view virtual returns (bool) {
-        Vote storage vote_ = votes[_voteId];
+    /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
+    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be cast a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
+    /// @param _proposalId The ID of the proposal.
+    /// @return True if the proposal can be executed, false otherwise.
+    function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
+        Proposal storage proposal_ = proposals[_proposalId];
 
         // Verify that the vote has not been executed already.
-        if (vote_.executed) {
+        if (proposal_.executed) {
             return false;
         }
 
-        uint256 totalSupportPct = _calculatePct(vote_.yes, vote_.census);
+        uint256 totalSupportPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
 
         // EARLY EXECUTION (after the vote start but before the vote duration has passed)
         // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
-        if (_isVoteOpen(vote_) && totalSupportPct > vote_.relativeSupportThresholdPct) {
+        if (_isVoteOpen(proposal_) && totalSupportPct > proposal_.relativeSupportThresholdPct) {
             return true;
         }
 
@@ -261,18 +271,18 @@ abstract contract MajorityVotingBase is
         // Both, the total and relative support must be met.
 
         // Criterium 1: The vote has ended.
-        if (_isVoteOpen(vote_)) {
+        if (_isVoteOpen(proposal_)) {
             return false;
         }
 
         // Criterium 2: The total support is greater than the total support threshold
-        if (totalSupportPct <= vote_.totalSupportThresholdPct) {
+        if (totalSupportPct <= proposal_.totalSupportThresholdPct) {
             return false;
         }
 
         // Criterium 3: The relative support is greater than the relative support threshold
-        uint256 relativeSupportPct = _calculatePct(vote_.yes, vote_.yes + vote_.no);
-        if (relativeSupportPct <= vote_.relativeSupportThresholdPct) {
+        uint256 relativeSupportPct = _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+        if (relativeSupportPct <= proposal_.relativeSupportThresholdPct) {
             return false;
         }
 
@@ -280,14 +290,14 @@ abstract contract MajorityVotingBase is
         return true;
     }
 
-    /// @notice Internal function to check if a vote is still open.
-    /// @param vote_ the vote struct.
-    /// @return True if the given vote is open, false otherwise.
-    function _isVoteOpen(Vote storage vote_) internal view virtual returns (bool) {
+    /// @notice Internal function to check if a proposal vote is still open.
+    /// @param proposal_ The proposal struct.
+    /// @return True if the proposal vote is open, false otherwise.
+    function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
         return
-            getTimestamp64() < vote_.endDate &&
-            getTimestamp64() >= vote_.startDate &&
-            !vote_.executed;
+            getTimestamp64() < proposal_.endDate &&
+            getTimestamp64() >= proposal_.startDate &&
+            !proposal_.executed;
     }
 
     /// @notice Calculates the relative of value with respect to a total as a percentage.

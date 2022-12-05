@@ -1,28 +1,28 @@
 import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
-import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
+import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
 import {Addresslist as AddresslistContract} from '../../generated/templates/Addresslist/Addresslist';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {ERC20Voting, Addresslist, Admin} from '../../generated/templates';
+import {TokenVoting, Addresslist, Admin} from '../../generated/templates';
 import {
   DaoPlugin,
-  ERC20VotingPlugin,
+  TokenVotingPlugin,
   AddresslistPlugin,
   AdminPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
-  ERC20_VOTING_INTERFACE,
+  TOKEN_VOTING_INTERFACE,
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
-function createErc20VotingPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = ERC20VotingPlugin.load(plugin.toHexString());
+function createTokenVotingPlugin(who: Address, daoId: string): void {
+  let packageEntity = TokenVotingPlugin.load(who.toHexString());
   if (!packageEntity) {
-    packageEntity = new ERC20VotingPlugin(plugin.toHexString());
-    let contract = ERC20VotingContract.bind(plugin);
+    packageEntity = new TokenVotingPlugin(who.toHexString());
+    let contract = TokenVotingContract.bind(who);
     let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
     let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
     let minDuration = contract.try_minDuration();
@@ -41,7 +41,7 @@ function createErc20VotingPlugin(plugin: Address, daoId: string): void {
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    ERC20Voting.createWithContext(plugin, context);
+    TokenVoting.createWithContext(who, context);
 
     packageEntity.save();
   }
@@ -92,9 +92,9 @@ export function addPlugin(daoId: string, plugin: Address): void {
   // TODO: rethink this once the market place is ready
   let contract = ERC165Contract.bind(plugin);
 
-  let ERC20VotingInterfaceSuppoted = supportsInterface(
+  let TokenVotingInterfaceSuppoted = supportsInterface(
     contract,
-    ERC20_VOTING_INTERFACE
+    TOKEN_VOTING_INTERFACE
   );
   let addresslistInterfaceSuppoted = supportsInterface(
     contract,
@@ -103,8 +103,8 @@ export function addPlugin(daoId: string, plugin: Address): void {
 
   let adminInterfaceSuppoted = supportsInterface(contract, ADMIN_INTERFACE);
 
-  if (ERC20VotingInterfaceSuppoted) {
-    createErc20VotingPlugin(plugin, daoId);
+  if (TokenVotingInterfaceSuppoted) {
+    createTokenVotingPlugin(plugin, daoId);
   } else if (addresslistInterfaceSuppoted) {
     createAddresslistPlugin(plugin, daoId);
   } else if (adminInterfaceSuppoted) {
@@ -112,7 +112,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
   }
 
   if (
-    ERC20VotingInterfaceSuppoted ||
+    TokenVotingInterfaceSuppoted ||
     addresslistInterfaceSuppoted ||
     adminInterfaceSuppoted
   ) {

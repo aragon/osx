@@ -14,7 +14,7 @@ import {
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
-describe('AllowlistVoting', function () {
+describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;
@@ -24,18 +24,18 @@ describe('AllowlistVoting', function () {
   let dummyMetadata: string;
 
   let mergedAbi: any;
-  let allowlistVotingFactoryBytecode: any;
+  let addresslistVotingFactoryBytecode: any;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
     user1 = await signers[1].getAddress();
 
-    ({abi: mergedAbi, bytecode: allowlistVotingFactoryBytecode} =
+    ({abi: mergedAbi, bytecode: addresslistVotingFactoryBytecode} =
       await getMergedABI(
         // @ts-ignore
         hre,
-        'AllowlistVoting',
+        'AddresslistVoting',
         ['DAO']
       ));
 
@@ -56,12 +56,12 @@ describe('AllowlistVoting', function () {
   });
 
   beforeEach(async () => {
-    const AllowlistVotingFactory = new ethers.ContractFactory(
+    const AddresslistVotingFactory = new ethers.ContractFactory(
       mergedAbi,
-      allowlistVotingFactoryBytecode,
+      addresslistVotingFactoryBytecode,
       signers[0]
     );
-    voting = await AllowlistVotingFactory.deploy();
+    voting = await AddresslistVotingFactory.deploy();
 
     dao.grant(
       dao.address,
@@ -71,7 +71,7 @@ describe('AllowlistVoting', function () {
     dao.grant(
       voting.address,
       ownerAddress,
-      ethers.utils.id('MODIFY_ALLOWLIST_PERMISSION')
+      ethers.utils.id('MODIFY_ADDRESSLIST_PERMISSION')
     );
   });
 
@@ -100,56 +100,54 @@ describe('AllowlistVoting', function () {
     });
   });
 
-  describe('Allowlisting users: ', async () => {
+  describe('Addresslisting users: ', async () => {
     beforeEach(async () => {
       await initializeVoting(1, 2, 3, []);
     });
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isAllowed(ownerAddress, block1.number)).to.equal(
+      expect(await voting.isListed(ownerAddress, block1.number)).to.equal(
         false
       );
     });
 
-    it('should add new users in the whitelist', async () => {
-      await voting.addAllowedUsers([ownerAddress, user1]);
+    it('should add new users in the address list', async () => {
+      await voting.addAddresses([ownerAddress, user1]);
 
       const block = await ethers.provider.getBlock('latest');
 
       await ethers.provider.send('evm_mine', []);
 
-      expect(await voting.isAllowed(ownerAddress, block.number)).to.equal(true);
-      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(true);
-      expect(await voting.isAllowed(user1, 0)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, block.number)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isListed(user1, 0)).to.equal(true);
     });
 
-    it('should remove users from the whitelist', async () => {
-      await voting.addAllowedUsers([ownerAddress]);
+    it('should remove users from the address list', async () => {
+      await voting.addAddresses([ownerAddress]);
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isAllowed(ownerAddress, block1.number)).to.equal(
-        true
-      );
-      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, block1.number)).to.equal(true);
+      expect(await voting.isListed(ownerAddress, 0)).to.equal(true);
 
-      await voting.removeAllowedUsers([ownerAddress]);
+      await voting.removeAddresses([ownerAddress]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isAllowed(ownerAddress, block2.number)).to.equal(
+      expect(await voting.isListed(ownerAddress, block2.number)).to.equal(
         false
       );
-      expect(await voting.isAllowed(ownerAddress, 0)).to.equal(false);
+      expect(await voting.isListed(ownerAddress, 0)).to.equal(false);
     });
   });
 
-  describe('Vote creation', async () => {
+  describe('Proposal creation', async () => {
     let minDuration = 500;
     let relativeSupportThresholdPct = pct16(50);
     let totalSupportThresholdPct = pct16(20);
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     it('reverts if user is not allowed to create a vote', async () => {
       await initializeVoting(1, 2, minDuration, [ownerAddress]);
@@ -157,9 +155,9 @@ describe('AllowlistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createVote(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
       ).to.be.revertedWith(
-        customError('VoteCreationForbidden', signers[1].address)
+        customError('ProposalCreationForbidden', signers[1].address)
       );
     });
 
@@ -171,7 +169,7 @@ describe('AllowlistVoting', function () {
       const startDate = block.timestamp;
       const endDate = startDate + (minDuration - 1);
       await expect(
-        voting.createVote(
+        voting.createProposal(
           dummyMetadata,
           [],
           startDate,
@@ -181,7 +179,7 @@ describe('AllowlistVoting', function () {
         )
       ).to.be.revertedWith(
         customError(
-          'VoteTimesInvalid',
+          'VotingPeriodInvalid',
           current + 1, // TODO hacky
           startDate,
           endDate,
@@ -193,10 +191,10 @@ describe('AllowlistVoting', function () {
     it('should create a vote successfully, but not vote', async () => {
       await initializeVoting(1, 2, minDuration, [ownerAddress]);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       expect(
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -205,12 +203,12 @@ describe('AllowlistVoting', function () {
           VoteOption.None
         )
       )
-        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
+        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
         .withArgs(id, ownerAddress, dummyMetadata);
 
       const block = await ethers.provider.getBlock('latest');
 
-      const vote = await voting.getVote(id);
+      const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
@@ -234,10 +232,10 @@ describe('AllowlistVoting', function () {
     it('should create a vote and cast a vote immediately', async () => {
       await initializeVoting(1, 2, minDuration, [ownerAddress]);
 
-      const id = 0; // voteId
+      const id = 0; // proposalId
 
       expect(
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -246,13 +244,13 @@ describe('AllowlistVoting', function () {
           VoteOption.Yes
         )
       )
-        .to.emit(voting, VOTING_EVENTS.VOTE_STARTED)
+        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
         .withArgs(id, ownerAddress, dummyMetadata)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
       const block = await ethers.provider.getBlock('latest');
-      const vote = await voting.getVote(id);
+      const vote = await voting.getProposal(id);
       expect(vote.open).to.equal(true);
       expect(vote.executed).to.equal(false);
       expect(vote._relativeSupportThresholdPct).to.equal(2);
@@ -279,7 +277,7 @@ describe('AllowlistVoting', function () {
 
       // Reverts if the vote option is not 'None'
       await expect(
-        voting.createVote(
+        voting.createProposal(
           dummyMetadata,
           dummyActions,
           startDate,
@@ -292,7 +290,7 @@ describe('AllowlistVoting', function () {
       // Works if the vote option is 'None'
       expect(
         (
-          await voting.createVote(
+          await voting.createProposal(
             dummyMetadata,
             dummyActions,
             startDate,
@@ -305,11 +303,11 @@ describe('AllowlistVoting', function () {
     });
   });
 
-  describe('Vote + Execute:', async () => {
+  describe('Proposal + Execute:', async () => {
     const minDuration = 500;
     const relativeSupportThresholdPct = pct16(29);
     const totalSupportThresholdPct = pct16(19);
-    const id = 0; // voteId
+    const id = 0; // proposalId
     const startOffset = 9;
     let startDate: number;
     let endDate: number;
@@ -326,7 +324,7 @@ describe('AllowlistVoting', function () {
       }
 
       // voting will be initialized with 10 allowed addresses
-      // Which means census = 10 at this point.
+      // Which means totalVotingPower = 10 at this point.
       await initializeVoting(
         totalSupportThresholdPct,
         relativeSupportThresholdPct,
@@ -336,7 +334,7 @@ describe('AllowlistVoting', function () {
 
       expect(
         (
-          await voting.createVote(
+          await voting.createProposal(
             dummyMetadata,
             dummyActions,
             startDate,
@@ -363,21 +361,21 @@ describe('AllowlistVoting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Yes, 1);
 
-      let vote = await voting.getVote(id);
+      let vote = await voting.getProposal(id);
       expect(vote.yes).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.No, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.No, 1);
 
-      vote = await voting.getVote(id);
+      vote = await voting.getProposal(id);
       expect(vote.no).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, ownerAddress, VoteOption.Abstain, 1);
 
-      vote = await voting.getVote(id);
+      vote = await voting.getProposal(id);
       expect(vote.abstain).to.equal(1);
     });
 
@@ -388,23 +386,23 @@ describe('AllowlistVoting', function () {
       // 2 times from the same wallet.
       await voting.vote(id, VoteOption.Yes, false);
       await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getVote(id)).yes).to.equal(1);
+      expect((await voting.getProposal(id)).yes).to.equal(1);
 
       // yes gets removed, no ends up as 1.
       await voting.vote(id, VoteOption.No, false);
       await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getVote(id)).no).to.equal(1);
+      expect((await voting.getProposal(id)).no).to.equal(1);
 
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getVote(id)).abstain).to.equal(1);
+      expect((await voting.getProposal(id)).abstain).to.equal(1);
     });
 
     it('can execute early if total support is large enough', async () => {
       await advanceTimeTo(startDate);
 
       // Since voting power is set to 29%, and
-      // allowlist is 10 addresses, voting yes
+      // addresslist is 10 addresses, voting yes
       // from 3 addresses should be enough to
       // make vote executable
       await voting.vote(id, VoteOption.Yes, false);
@@ -466,21 +464,21 @@ describe('AllowlistVoting', function () {
         expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
         expect(event.args.execResults).to.deep.equal(['0x']);
 
-        const vote = await voting.getVote(id);
+        const vote = await voting.getProposal(id);
 
         expect(vote.executed).to.equal(true);
       }
 
-      // check for the `VoteExecuted` event in the voting contract
+      // check for the `ProposalExecuted` event in the voting contract
       {
-        const event = await findEvent(tx, VOTING_EVENTS.VOTE_EXECUTED);
-        expect(event.args.voteId).to.equal(id);
+        const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+        expect(event.args.proposalId).to.equal(id);
         expect(event.args.execResults).to.deep.equal(['0x']);
       }
 
       // calling execute again should fail
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
 
@@ -488,13 +486,13 @@ describe('AllowlistVoting', function () {
       await advanceTimeTo(startDate);
 
       await expect(voting.execute(id)).to.be.revertedWith(
-        customError('VoteExecutionForbidden', id)
+        customError('ProposalExecutionForbidden', id)
       );
     });
   });
 
   describe('Parameters can satisfy different use cases:', async () => {
-    const id = 0; // voteId
+    const id = 0; // proposalId
 
     describe('A simple majority vote with >50% relative support and >25% total support required', async () => {
       let minDuration = 500;
@@ -510,7 +508,7 @@ describe('AllowlistVoting', function () {
         }
 
         // voting will be initialized with 10 allowed addresses
-        // Which means census = 10 at this point.
+        // Which means totalVotingPower = 10 at this point.
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
@@ -518,7 +516,7 @@ describe('AllowlistVoting', function () {
           addresses
         );
 
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,
@@ -618,7 +616,7 @@ describe('AllowlistVoting', function () {
         }
 
         // voting will be initialized with 5 allowed addresses
-        // Which means census = 5 at this point.
+        // Which means totalVotingPower = 5 at this point.
         await initializeVoting(
           totalSupportThresholdPct,
           relativeSupportThresholdPct,
@@ -626,7 +624,7 @@ describe('AllowlistVoting', function () {
           addresses
         );
 
-        await voting.createVote(
+        await voting.createProposal(
           dummyMetadata,
           dummyActions,
           0,

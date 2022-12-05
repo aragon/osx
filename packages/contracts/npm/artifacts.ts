@@ -20,8 +20,8 @@ import * as GovernanceERC20 from '../artifacts/contracts/tokens/GovernanceERC20.
 import * as GovernanceWrappedERC20 from '../artifacts/contracts/tokens/GovernanceWrappedERC20.sol/GovernanceWrappedERC20.json';
 
 // DAO Plugins
-import * as ERC20Voting from '../artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json';
-import * as AllowlistVoting from '../artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json';
+import * as TokenVoting from '../artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json';
+import * as AddresslistVoting from '../artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json';
 import * as MerkleDistributor from '../artifacts/contracts/tokens/MerkleDistributor.sol/MerkleDistributor.json';
 import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/MerkleMinter.json';
 
@@ -39,6 +39,6 @@ export default {
   GovernanceWrappedERC20,
   MerkleDistributor,
   MerkleMinter,
-  ERC20Voting,
-  AllowlistVoting,
+  TokenVoting,
+  AddresslistVoting,
 };

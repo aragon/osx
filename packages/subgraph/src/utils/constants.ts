@@ -7,7 +7,7 @@ export const VOTER_STATE = new Map<number, string>()
   .set(2, 'Yes')
   .set(3, 'No');
 
-export const ERC20_VOTING_INTERFACE = '0x72a13b7e';
+export const TOKEN_VOTING_INTERFACE = '0x72a13b7e';
 export const ADDRESSLIST_VOTING_INTERFACE = '0x8d8aae2d';
 export const ADMIN_INTERFACE = '0x9102c53e';
 
