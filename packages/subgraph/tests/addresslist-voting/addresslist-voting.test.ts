@@ -21,8 +21,8 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  MIN_SUPPORT,
-  MIN_TURNOUT,
+  SUPPORT_THRESHOLD,
+  PARTICIPATION_THRESHOLD,
   VOTING_POWER
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
@@ -136,8 +136,8 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
-    MIN_SUPPORT,
-    MIN_TURNOUT,
+    SUPPORT_THRESHOLD,
+    PARTICIPATION_THRESHOLD,
     VOTING_POWER,
     '1',
     '0',
@@ -180,8 +180,8 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
-    MIN_SUPPORT,
-    MIN_TURNOUT,
+    SUPPORT_THRESHOLD,
+    PARTICIPATION_THRESHOLD,
     VOTING_POWER,
     '1',
     '0',
