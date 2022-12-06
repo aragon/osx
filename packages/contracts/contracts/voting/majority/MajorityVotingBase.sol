@@ -191,21 +191,21 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function support(uint256 _proposalId) public view returns (uint256) {
+    function support(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
     }
 
     /// @inheritdoc IMajorityVoting
-    function worstCaseSupport(uint256 _proposalId) public view returns (uint256) {
+    function worstCaseSupport(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return _calculatePct(proposal_.yes, proposal_.totalVotingPower - proposal_.abstain);
     }
 
     /// @inheritdoc IMajorityVoting
-    function participation(uint256 _proposalId) public view returns (uint256) {
+    function participation(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return
