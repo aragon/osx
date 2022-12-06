@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers, waffle} from 'hardhat';
+import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
