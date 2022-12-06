@@ -4,7 +4,12 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import {ERC20Voting, DAOMock} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {
+  VoteOption,
+  VOTING_EVENTS,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployWithProxy} from '../test-utils/proxy';
 
@@ -39,7 +44,7 @@ describe('ERC20Voting', function () {
 
     const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
 
-    voting = await deployWithProxy(ERC20Voting) as ERC20Voting;
+    voting = (await deployWithProxy(ERC20Voting)) as ERC20Voting;
   });
 
   function initializeVoting(
@@ -58,22 +63,16 @@ describe('ERC20Voting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeVoting(1, 2, 3);
+      await initializeVoting(1, 2, ONE_HOUR);
 
-      await expect(initializeVoting(2, 1, 3)).to.be.revertedWith(
+      await expect(initializeVoting(2, 1, ONE_HOUR)).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
-      );
-    });
-
-    it('reverts if min duration is 0', async () => {
-      await expect(initializeVoting(1, 2, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
       );
     });
   });
 
   describe('StartVote', async () => {
-    let minDuration = 3;
+    let minDuration = ONE_HOUR;
     beforeEach(async () => {
       await initializeVoting(1, 2, minDuration);
     });
@@ -189,7 +188,7 @@ describe('ERC20Voting', function () {
   });
 
   describe('Vote + Execute:', async () => {
-    let minDuration = 500;
+    let minDuration = ONE_HOUR;
     let supportRequired = pct16(50);
     let minimumQuorom = pct16(20);
     let votingPower = 100;

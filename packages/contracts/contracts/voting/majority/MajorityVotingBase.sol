@@ -57,8 +57,10 @@ abstract contract MajorityVotingBase is
     /// @param minDuration The minimal duration of the vote in seconds.
     error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
 
-    /// @notice Thrown if the selected vote duration is zero
-    error VoteDurationZero();
+    /// @notice Thrown if the minimal duration value is out of bounds.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error MinDurationOutOfBounds(uint64 limit, uint64 actual);
 
     /// @notice Thrown if a voter is not allowed to cast a vote.
     /// @param voteId The ID of the vote.
@@ -203,7 +205,7 @@ abstract contract MajorityVotingBase is
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
         votes[_voteId].executed = true;
-        
+
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         emit VoteExecuted(_voteId, execResults);
@@ -297,8 +299,12 @@ abstract contract MajorityVotingBase is
             revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
         }
 
-        if (_minDuration == 0) {
-            revert VoteDurationZero();
+        if (_minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _minDuration});
+        }
+
+        if (_minDuration > 365 days) {
+            revert MinDurationOutOfBounds({limit: 365 days, actual: _minDuration});
         }
 
         participationRequiredPct = _participationRequiredPct;

@@ -3,7 +3,12 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AllowlistVoting, DAOMock} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {
+  VoteOption,
+  VOTING_EVENTS,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployWithProxy} from '../test-utils/proxy';
 
@@ -34,8 +39,8 @@ describe('AllowlistVoting', function () {
 
   beforeEach(async () => {
     const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
-    
-    voting = await deployWithProxy(AllowlistVoting) as AllowlistVoting;
+
+    voting = (await deployWithProxy(AllowlistVoting)) as AllowlistVoting;
   });
 
   function initializeVoting(
@@ -55,9 +60,9 @@ describe('AllowlistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeVoting(1, 2, 3, []);
+      await initializeVoting(1, 2, ONE_HOUR, []);
 
-      await expect(initializeVoting(1, 2, 3, [])).to.be.revertedWith(
+      await expect(initializeVoting(1, 2, ONE_HOUR, [])).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
       );
     });
@@ -65,7 +70,7 @@ describe('AllowlistVoting', function () {
 
   describe('AllowlistingUsers: ', async () => {
     beforeEach(async () => {
-      await initializeVoting(1, 2, 3, []);
+      await initializeVoting(1, 2, ONE_HOUR, []);
     });
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
@@ -109,10 +114,10 @@ describe('AllowlistVoting', function () {
   });
 
   describe('StartVote', async () => {
-    let minDuration = 3;
+    let minDuration = ONE_HOUR;
 
     beforeEach(async () => {
-      await initializeVoting(1, 2, 3, [ownerAddress]);
+      await initializeVoting(1, 2, ONE_HOUR, [ownerAddress]);
     });
 
     it('reverts if user is not allowed to create a vote', async () => {
@@ -221,7 +226,7 @@ describe('AllowlistVoting', function () {
   });
 
   describe('Vote + Execute:', async () => {
-    let minDuration = 500;
+    let minDuration = ONE_HOUR;
     let supportRequired = pct16(29);
     let minimumQuorom = pct16(19);
     const id = 0; // voteId

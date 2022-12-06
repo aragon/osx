@@ -33,6 +33,7 @@ import {
   createERC20VotingProposalEntityState
 } from './utils';
 
+const ONE_HOUR = '3600';
 let voteId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
@@ -290,7 +291,7 @@ test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
   erc20VotingPackage.save();
 
   // create event
-  let event = createNewConfigUpdatedEvent('1', '2', '3600', VOTING_ADDRESS);
+  let event = createNewConfigUpdatedEvent('1', '2', ONE_HOUR, VOTING_ADDRESS);
 
   // handle event
   handleConfigUpdated(event);
@@ -304,7 +305,7 @@ test('Run ERC Voting (handleConfigUpdated) mappings with mock event', () => {
     'participationRequiredPct',
     '2'
   );
-  assert.fieldEquals('ERC20VotingPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('ERC20VotingPackage', entityID, 'minDuration', ONE_HOUR);
 
   clearStore();
 });
