@@ -290,23 +290,15 @@ abstract contract MajorityVotingBase is
 
         if (_isVoteOpen(proposal_)) {
             // Early execution
-            if (
+            return
                 worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) > proposal_.participationThreshold
-            ) {
-                return true;
-            }
+                participation(_proposalId) > proposal_.participationThreshold;
         } else {
             // Normal execution
-            if (
+            return
                 support(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) > proposal_.participationThreshold
-            ) {
-                return true;
-            }
+                participation(_proposalId) > proposal_.participationThreshold;
         }
-
-        return false;
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
