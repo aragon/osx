@@ -331,7 +331,7 @@ abstract contract MajorityVotingBase is
                 revert DateOutOfBounds({limit: currentTimestamp, actual: startDate});
             }
         }
-        // Check if `startDate` is after the latest possible date so that `minDuration` would lead to an overvlow.
+        // Check if `startDate` is after the latest possible start date so that `minDuration` would lead to an overflow.
         uint64 latestStartDate = type(uint64).max - minDuration;
         if (latestStartDate < startDate) {
             revert DateOutOfBounds({limit: latestStartDate, actual: startDate});
