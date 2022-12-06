@@ -5,6 +5,17 @@ pragma solidity 0.8.10;
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 interface IPluginSetup {
+    struct PreparedDependency {
+        address[] helpers;
+        PermissionLib.ItemMultiTarget[] permissions;
+    }
+
+    struct SetupPayload {
+        address plugin;
+        address[] currentHelpers;
+        bytes data;
+    }
+
     /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.
     /// @return The ABI in string format.
     function prepareInstallationDataABI() external view returns (string memory);
@@ -17,11 +28,7 @@ interface IPluginSetup {
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
     function prepareInstallation(address _dao, bytes memory _data)
         external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        );
+        returns (address plugin, PreparedDependency memory preparedDependency);
 
     /// @notice The ABI required to decode the `bytes` data in `prepareUpdate()`.
     /// @return The ABI in string format.
@@ -40,17 +47,9 @@ interface IPluginSetup {
     /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUpdate(
         address _dao,
-        address _plugin,
-        address[] memory _currentHelpers,
         uint16 _currentBuildId,
-        bytes memory _data
-    )
-        external
-        returns (
-            address[] memory updatedHelpers,
-            bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        );
+        SetupPayload calldata _payload
+    ) external returns (bytes memory initData, PreparedDependency memory preparedDependency);
 
     /// @notice The ABI required to decode the `bytes` data in `prepareUninstallation()`.
     /// @return The ABI in string format.
@@ -63,12 +62,9 @@ interface IPluginSetup {
     /// @param _data The `bytes` encoded data containing the input parameters for the uninstalltion as specified in the `prepareUninstallationDataABI()` function.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata _currentHelpers,
-        bytes calldata _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory permissions);
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        returns (PermissionLib.ItemMultiTarget[] memory permissions);
 
     /// @notice Returns the plugin's base implementation.
     /// @return address The address of the plugin implementation contract.
