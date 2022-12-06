@@ -50,12 +50,10 @@ abstract contract MajorityVotingBase is
     /// @param actual The actual value.
     error VoteParticipationExceeded(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the selected vote times are not allowed.
-    /// @param current The maximal value.
-    /// @param start The start date of the vote as a unix timestamp.
-    /// @param end The end date of the vote as a unix timestamp.
-    /// @param minDuration The minimal duration of the vote in seconds.
-    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    /// @notice Thrown if a date is out of bounds.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error DateOutOfBounds(uint64 limit, uint64 actual);
 
     /// @notice Thrown if the minimal duration value is out of bounds.
     /// @param limit The limit value.
@@ -310,6 +308,46 @@ abstract contract MajorityVotingBase is
         participationRequiredPct = _participationRequiredPct;
         supportRequiredPct = _supportRequiredPct;
         minDuration = _minDuration;
+    }
+
+    /// @notice Validates and returns the proposal vote dates.
+    /// @param _start The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
+    /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
+    /// @return startDate The validated start date of the proposal vote.
+    /// @return endDate The validated end date of the proposal vote.
+    function _validateVoteDates(uint64 _start, uint64 _end)
+        internal
+        view
+        returns (uint64 startDate, uint64 endDate)
+    {
+        uint64 currentTimestamp = getTimestamp64();
+
+        if (_start == 0) {
+            startDate = currentTimestamp;
+        } else {
+            startDate = _start;
+
+            if (startDate < currentTimestamp) {
+                revert DateOutOfBounds({limit: currentTimestamp, actual: startDate});
+            }
+        }
+        // Check if `startDate` is after the latest possible date so that `minDuration` would lead to an overvlow.
+        uint64 latestStartDate = type(uint64).max - minDuration;
+        if (latestStartDate < startDate) {
+            revert DateOutOfBounds({limit: latestStartDate, actual: startDate});
+        }
+
+        uint64 earliestEndDate = startDate + minDuration;
+
+        if (_end == 0) {
+            endDate = earliestEndDate; // After the previous check, this can not overflow.
+        } else {
+            endDate = _end;
+
+            if (endDate < earliestEndDate) {
+                revert DateOutOfBounds({limit: earliestEndDate, actual: endDate});
+            }
+        }
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

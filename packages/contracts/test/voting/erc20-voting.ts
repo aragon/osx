@@ -9,6 +9,7 @@ import {
   VOTING_EVENTS,
   pct16,
   ONE_HOUR,
+  MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployWithProxy} from '../test-utils/proxy';
@@ -84,12 +85,12 @@ describe('ERC20Voting', function () {
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
-    it('reverts if vote duration is less than minDuration', async () => {
+    it('reverts if the start date is set smaller than the current date', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
-      const current = block.timestamp;
-      const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const currentDate = block.timestamp;
+      const startDate = currentDate - 1;
+      const endDate = 0; // startDate + minDuration
       await expect(
         voting.createVote(
           '0x00',
@@ -100,13 +101,47 @@ describe('ERC20Voting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError(
-          'VoteTimesInvalid',
-          current + 1, // TODO hacky
+        customError('DateOutOfBounds', currentDate + 1, startDate)
+      );
+    });
+
+    it('reverts if the start date is after the latest start date', async () => {
+      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
+      const latestStartDate = MAX_UINT64.sub(minDuration);
+      const startDate = latestStartDate.add(1);
+      const endDate = 0; // startDate + minDuration
+      await expect(
+        voting.createVote(
+          '0x00',
+          [],
           startDate,
           endDate,
-          minDuration
+          false,
+          VoteOption.None
         )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', latestStartDate, startDate)
+      );
+    });
+
+    it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
+      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
+      const block = await ethers.provider.getBlock('latest');
+      const currentTime = block.timestamp;
+      const startDate = currentTime + 1;
+      const earliestEndDate = startDate + minDuration;
+      const endDate = earliestEndDate - 1;
+      await expect(
+        voting.createVote(
+          '0x00',
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', earliestEndDate, endDate)
       );
     });
 
