@@ -122,8 +122,8 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.voteCount = voteCount;
 
       // check if the current vote results meet the conditions for the proposal to pass:
-      // - participation      :  (N_yes + N_no + N_abstain) / N_total > minimal participation
       // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
+      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimal participation
 
       // expect a number between 0 and 100
       let currentParticipation = voteCount
