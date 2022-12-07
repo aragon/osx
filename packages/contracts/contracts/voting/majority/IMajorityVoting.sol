@@ -33,11 +33,15 @@ import "../../core/IDAO.sol";
 ///    \\[3mm]
 ///    &= \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}
 ///  \end{align*}$$
-///  Accordingly, early execution is possible when the vote is open and the two thresholds
-///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$
-///  and
+///  Accordingly, early execution is possible when the vote is open, the support threshold
+///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$,
+///  and the minimal participation
 ///  $$\texttt{participation} \ge \texttt{minParticipation}$$
 ///  are met.
+///  #### Threshold vs. Minimum
+///  For threshold values, $>$ comparison is used. This **does not** include the threshold value. E.g., for $\texttt{supportThreshold} = 50\%$, the criterion is fulfilled if there is at least one more yes than no votes ($N_\text{yes} = N_\text{no}+1$).
+///  For minimal values, $\ge$ comparison is used. This **does** include the minimal participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
+/// @dev This contract implements the `IMajorityVoting` interface.
 interface IMajorityVoting {
     enum VoteOption {
         None,
