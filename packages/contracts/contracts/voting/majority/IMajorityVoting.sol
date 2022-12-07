@@ -36,7 +36,7 @@ import "../../core/IDAO.sol";
 ///  Accordingly, early execution is possible when the vote is open and the two thresholds
 ///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$
 ///  and
-///  $$\texttt{participation} > \texttt{minParticipation}$$
+///  $$\texttt{participation} \ge \texttt{minParticipation}$$
 ///  are met.
 interface IMajorityVoting {
     enum VoteOption {
