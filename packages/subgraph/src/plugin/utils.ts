@@ -22,16 +22,16 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
     let supportThreshold = contract.try_supportThreshold();
-    let participationThreshold = contract.try_participationThreshold();
+    let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
       : supportThreshold.value;
-    packageEntity.participationThreshold = participationThreshold.reverted
+    packageEntity.minParticipation = minParticipation.reverted
       ? null
-      : participationThreshold.value;
+      : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
@@ -51,15 +51,15 @@ function createAddresslistPlugin(who: Address, daoId: string): void {
     packageEntity = new AddresslistPlugin(who.toHexString());
     let contract = AddresslistContract.bind(who);
     let supportThreshold = contract.try_supportThreshold();
-    let participationThreshold = contract.try_participationThreshold();
+    let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
 
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
       : supportThreshold.value;
-    packageEntity.participationThreshold = participationThreshold.reverted
+    packageEntity.minParticipation = minParticipation.reverted
       ? null
-      : participationThreshold.value;
+      : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     // Create template

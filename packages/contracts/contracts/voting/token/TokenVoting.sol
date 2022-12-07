@@ -27,17 +27,17 @@ contract TokenVoting is MajorityVotingBase {
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _supportThreshold The support threshold in percent.
-    /// @param _participationThreshold The participation threshold in percent.
+    /// @param _minParticipation The minimal participation in percent.
     /// @param _minDuration The minimal duration of a vote.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
         uint64 _supportThreshold,
-        uint64 _participationThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration,
         IVotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(_dao, _supportThreshold, _participationThreshold, _minDuration);
+        __MajorityVotingBase_init(_dao, _supportThreshold, _minParticipation, _minDuration);
 
         votingToken = _token;
     }
@@ -96,7 +96,7 @@ contract TokenVoting is MajorityVotingBase {
         proposal_.startDate = _startDate;
         proposal_.endDate = _endDate;
         proposal_.supportThreshold = supportThreshold;
-        proposal_.participationThreshold = participationThreshold;
+        proposal_.minParticipation = minParticipation;
         proposal_.totalVotingPower = totalVotingPower;
         proposal_.snapshotBlock = snapshotBlock;
 

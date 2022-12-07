@@ -422,8 +422,8 @@ export function getParticipationThreshold(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'participationThreshold',
-    'participationThreshold():(uint64)'
+    'minParticipation',
+    'minParticipation():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

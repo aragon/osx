@@ -122,7 +122,7 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVoteSettingsUpdatedEvent(
-  participationThreshold: string,
+  minParticipation: string,
   supportThreshold: string,
   minDuration: string,
   contractAddress: string
@@ -134,9 +134,9 @@ export function createNewVoteSettingsUpdatedEvent(
   newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVoteSettingsUpdatedEvent.parameters = [];
 
-  let participationThresholdParam = new ethereum.EventParam(
-    'participationThreshold',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(participationThreshold))
+  let minParticipationParam = new ethereum.EventParam(
+    'minParticipation',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minParticipation))
   );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
@@ -147,7 +147,7 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newVoteSettingsUpdatedEvent.parameters.push(participationThresholdParam);
+  newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
@@ -219,7 +219,7 @@ export function createAddresslistProposalEntityState(
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
   supportThreshold: string = SUPPORT_THRESHOLD,
-  participationThreshold: string = PARTICIPATION_THRESHOLD,
+  minParticipation: string = PARTICIPATION_THRESHOLD,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
@@ -236,9 +236,7 @@ export function createAddresslistProposalEntityState(
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
-  addresslistProposal.participationThreshold = BigInt.fromString(
-    participationThreshold
-  );
+  addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   addresslistProposal.open = open;
   addresslistProposal.executable = executable;

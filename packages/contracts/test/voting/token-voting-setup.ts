@@ -26,13 +26,13 @@ const prepareInstallDataTypes = [
   'tuple(address[],uint256[])',
 ];
 
-const participationThreshold = 25;
+const minParticipation = 25;
 const supportThreshold = 50;
 const minDuration = 10;
 
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
-  participationThreshold,
+  minParticipation,
   supportThreshold,
   minDuration,
   [AddressZero, '', ''],
@@ -80,7 +80,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _participationThreshold, uint64 _supportThreshold, uint64 _minDuration, address _token)',
+      'function initialize(address _dao, uint64 _minParticipation, uint64 _supportThreshold, uint64 _minDuration, address _token)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -92,7 +92,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 supportThreshold, uint64 participationThreshold, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -119,7 +119,7 @@ describe('TokenVotingSetup', function () {
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [AddressZero, '', ''],
         [[AddressZero], []],
@@ -134,7 +134,7 @@ describe('TokenVotingSetup', function () {
       const tokenAddress = signers[0].address;
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [tokenAddress, '', ''],
         [[], []],
@@ -149,7 +149,7 @@ describe('TokenVotingSetup', function () {
       const tokenAddress = implementationAddress;
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [tokenAddress, '', ''],
         [[], []],
@@ -175,7 +175,7 @@ describe('TokenVotingSetup', function () {
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
@@ -227,7 +227,7 @@ describe('TokenVotingSetup', function () {
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
@@ -275,7 +275,7 @@ describe('TokenVotingSetup', function () {
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [governanceERC20.address, '', ''],
         [[], []],
@@ -377,7 +377,7 @@ describe('TokenVotingSetup', function () {
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
         supportThreshold,
-        participationThreshold,
+        minParticipation,
         minDuration,
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],
@@ -402,8 +402,8 @@ describe('TokenVotingSetup', function () {
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
-      expect(await tokenVoting.participationThreshold()).to.be.equal(
-        participationThreshold
+      expect(await tokenVoting.minParticipation()).to.be.equal(
+        minParticipation
       );
       expect(await tokenVoting.supportThreshold()).to.be.equal(
         supportThreshold

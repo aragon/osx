@@ -121,7 +121,7 @@ export function createNewProposalExecutedEvent(
 
 export function createNewVoteSettingsUpdatedEvent(
   supportThreshold: string,
-  participationThreshold: string,
+  minParticipation: string,
   minDuration: string,
   contractAddress: string
 ): VoteSettingsUpdated {
@@ -132,9 +132,9 @@ export function createNewVoteSettingsUpdatedEvent(
   newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVoteSettingsUpdatedEvent.parameters = [];
 
-  let participationThresholdParam = new ethereum.EventParam(
-    'participationThreshold',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(participationThreshold))
+  let minParticipationParam = new ethereum.EventParam(
+    'minParticipation',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minParticipation))
   );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
@@ -145,7 +145,7 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newVoteSettingsUpdatedEvent.parameters.push(participationThresholdParam);
+  newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
@@ -179,7 +179,7 @@ export function createTokenVotingProposalEntityState(
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
   supportThreshold: string = SUPPORT_THRESHOLD,
-  participationThreshold: string = PARTICIPATION_THRESHOLD,
+  minParticipation: string = PARTICIPATION_THRESHOLD,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,
@@ -196,9 +196,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
-  tokenVotingProposal.participationThreshold = BigInt.fromString(
-    participationThreshold
-  );
+  tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   tokenVotingProposal.open = open;
   tokenVotingProposal.executable = executable;

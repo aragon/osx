@@ -52,7 +52,7 @@ export function _handleProposalCreated(
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
     proposalEntity.supportThreshold = vote.value.value5;
-    proposalEntity.participationThreshold = vote.value.value6;
+    proposalEntity.minParticipation = vote.value.value6;
     proposalEntity.totalVotingPower = vote.value.value7;
 
     // actions
@@ -122,7 +122,7 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.voteCount = voteCount;
 
       // check if the current vote results meet the conditions for the proposal to pass:
-      // - participation      :  (N_yes + N_no + N_abstain) / N_total > participation threshold
+      // - participation      :  (N_yes + N_no + N_abstain) / N_total > minimal participation
       // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
 
       // expect a number between 0 and 100
@@ -143,13 +143,11 @@ export function handleVoteCast(event: VoteCast): void {
 
       // set the executable param
       proposalEntity.executable =
-        currentParticipation.gt(
-          proposalEntity.participationThreshold.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
-        ) &&
         worstCaseSupport.gt(
           proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
+        ) &&
+        currentParticipation.ge(
+          proposalEntity.minParticipation.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
     }
@@ -190,7 +188,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.participationThreshold = event.params.participationThreshold;
+    packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();

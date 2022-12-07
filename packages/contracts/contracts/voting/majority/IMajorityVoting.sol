@@ -36,7 +36,7 @@ import "../../core/IDAO.sol";
 ///  Accordingly, early execution is possible when the vote is open and the two thresholds
 ///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$
 ///  and
-///  $$\texttt{participation} > \texttt{participationThreshold}$$
+///  $$\texttt{participation} > \texttt{minParticipation}$$
 ///  are met.
 interface IMajorityVoting {
     enum VoteOption {
@@ -52,7 +52,7 @@ interface IMajorityVoting {
         uint64 endDate;
         uint64 snapshotBlock;
         uint64 supportThreshold;
-        uint64 participationThreshold;
+        uint64 minParticipation;
         uint256 yes;
         uint256 no;
         uint256 abstain;
@@ -86,21 +86,17 @@ interface IMajorityVoting {
 
     /// @notice Emitted when the vote settings are updated.
     /// @param supportThreshold The support threshold in percent.
-    /// @param participationThreshold The participation threshold in percent.
+    /// @param minParticipation The minimal participation in percent.
     /// @param minDuration The minimal duration of a vote.
-    event VoteSettingsUpdated(
-        uint64 supportThreshold,
-        uint64 participationThreshold,
-        uint64 minDuration
-    );
+    event VoteSettingsUpdated(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration);
 
     /// @notice Changes the vote settings.
     /// @param _supportThreshold The support threshold in percent.
-    /// @param _participationThreshold The participation threshold in percent.
+    /// @param _minParticipation The minimal participation in percent.
     /// @param _minDuration The minimal duration of a vote.
     function changeVoteSettings(
         uint64 _supportThreshold,
-        uint64 _participationThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) external;
 
@@ -180,7 +176,7 @@ interface IMajorityVoting {
     /// @return endDate The end date of the proposal vote.
     /// @return snapshotBlock The block number of the snapshot taken for this proposal.
     /// @return supportThreshold The support threshold in percent.
-    /// @return participationThreshold The participation threshold in percent.
+    /// @return minParticipation The minimal participation in percent.
     /// @return totalVotingPower The total number of eligible votes that can be casted.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.
@@ -196,7 +192,7 @@ interface IMajorityVoting {
             uint64 endDate,
             uint64 snapshotBlock,
             uint64 supportThreshold,
-            uint64 participationThreshold,
+            uint64 minParticipation,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,

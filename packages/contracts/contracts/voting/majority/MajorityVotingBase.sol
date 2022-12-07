@@ -43,7 +43,7 @@ import {IDAO} from "../../core/IDAO.sol";
 ///  Accordingly, early execution is possible when the vote is open and the two thresholds
 ///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$
 ///  and
-///  $$\texttt{participation} > \texttt{participationThreshold}$$
+///  $$\texttt{participation} > \texttt{minParticipation}$$
 ///  are met.
 /// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
@@ -68,7 +68,7 @@ abstract contract MajorityVotingBase is
 
     //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
     uint64 public supportThreshold;
-    uint64 public participationThreshold;
+    uint64 public minParticipation;
     uint64 public minDuration;
 
     uint256 public proposalCount;
@@ -108,19 +108,19 @@ abstract contract MajorityVotingBase is
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _supportThreshold The support threshold in percent.
-    /// @param _participationThreshold The participation threshold in percent.
+    /// @param _minParticipation The minimal participation in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
         uint64 _supportThreshold,
-        uint64 _participationThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
 
-        _validateAndSetSettings(_supportThreshold, _participationThreshold, _minDuration);
+        _validateAndSetSettings(_supportThreshold, _minParticipation, _minDuration);
 
-        emit VoteSettingsUpdated(_supportThreshold, _participationThreshold, _minDuration);
+        emit VoteSettingsUpdated(_supportThreshold, _minParticipation, _minDuration);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -139,12 +139,12 @@ abstract contract MajorityVotingBase is
     /// @inheritdoc IMajorityVoting
     function changeVoteSettings(
         uint64 _supportThreshold,
-        uint64 _participationThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
-        _validateAndSetSettings(_supportThreshold, _participationThreshold, _minDuration);
+        _validateAndSetSettings(_supportThreshold, _minParticipation, _minDuration);
 
-        emit VoteSettingsUpdated(_supportThreshold, _participationThreshold, _minDuration);
+        emit VoteSettingsUpdated(_supportThreshold, _minParticipation, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -226,7 +226,7 @@ abstract contract MajorityVotingBase is
             uint64 endDate,
             uint64 snapshotBlock,
             uint64 _supportThreshold,
-            uint64 _participationThreshold,
+            uint64 _minParticipation,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,
@@ -242,7 +242,7 @@ abstract contract MajorityVotingBase is
         endDate = proposal_.endDate;
         snapshotBlock = proposal_.snapshotBlock;
         _supportThreshold = proposal_.supportThreshold;
-        _participationThreshold = proposal_.participationThreshold;
+        _minParticipation = proposal_.minParticipation;
         totalVotingPower = proposal_.totalVotingPower;
         yes = proposal_.yes;
         no = proposal_.no;
@@ -292,12 +292,12 @@ abstract contract MajorityVotingBase is
             // Early execution
             return
                 worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) > proposal_.participationThreshold;
+                participation(_proposalId) > proposal_.minParticipation;
         } else {
             // Normal execution
             return
                 support(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) > proposal_.participationThreshold;
+                participation(_proposalId) > proposal_.minParticipation;
         }
     }
 
@@ -325,15 +325,15 @@ abstract contract MajorityVotingBase is
 
     function _validateAndSetSettings(
         uint64 _supportThreshold,
-        uint64 _participationThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) internal virtual {
         if (_supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({limit: PCT_BASE, actual: _supportThreshold});
         }
 
-        if (_participationThreshold > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _participationThreshold});
+        if (_minParticipation > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _minParticipation});
         }
 
         if (_minDuration == 0) {
@@ -341,7 +341,7 @@ abstract contract MajorityVotingBase is
         }
 
         supportThreshold = _supportThreshold;
-        participationThreshold = _participationThreshold;
+        minParticipation = _minParticipation;
         minDuration = _minDuration;
     }
 
