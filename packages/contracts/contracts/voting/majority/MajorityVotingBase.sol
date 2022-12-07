@@ -292,12 +292,12 @@ abstract contract MajorityVotingBase is
             // Early execution
             return
                 worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) > proposal_.minParticipation;
+                participation(_proposalId) >= proposal_.minParticipation;
         } else {
             // Normal execution
             return
                 support(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) > proposal_.minParticipation;
+                participation(_proposalId) >= proposal_.minParticipation;
         }
     }
 
