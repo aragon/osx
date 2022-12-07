@@ -74,7 +74,7 @@ describe('TokenVotingSetup', function () {
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
   });
 
-  it('creates erc20 voting base with the correct interface', async () => {
+  it('creates token voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('TokenVoting');
     const tokenVoting = factory.attach(implementationAddress);
 
