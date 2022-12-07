@@ -87,13 +87,13 @@ interface IMajorityVoting {
     /// @notice Emitted when the vote settings are updated.
     /// @param supportThreshold The support threshold in percent.
     /// @param minParticipation The minimal participation in percent.
-    /// @param minDuration The minimal duration of a vote.
+    /// @param minDuration The minimal duration of a vote in seconds.
     event VoteSettingsUpdated(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration);
 
     /// @notice Changes the vote settings.
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimal participation in percent.
-    /// @param _minDuration The minimal duration of a vote.
+    /// @param _minDuration The minimal duration of a vote in seconds.
     function changeVoteSettings(
         uint64 _supportThreshold,
         uint64 _minParticipation,

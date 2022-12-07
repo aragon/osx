@@ -51,7 +51,7 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimal participation in percent.
-    /// @param _minDuration The minimal duration of a vote.
+    /// @param _minDuration The minimal duration of a vote in seconds.
     /// @param _members The initial member addresses to be listed.
     function initialize(
         IDAO _dao,
