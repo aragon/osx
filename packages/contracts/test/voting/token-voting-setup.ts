@@ -32,8 +32,8 @@ const minDuration = 10;
 
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
-  minParticipation,
   supportThreshold,
+  minParticipation,
   minDuration,
   [AddressZero, '', ''],
   [[], []],
@@ -80,7 +80,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _minParticipation, uint64 _supportThreshold, uint64 _minDuration, address _token)',
+      'function initialize(address _dao, uint64 _supportThreshold, uint64 _minParticipation, uint64 _minDuration, address _token)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
