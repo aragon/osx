@@ -500,7 +500,7 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Parameters can satisfy different use cases:', async () => {
-    describe('A simple majority vote with >50% support and >25% participation required', async () => {
+    describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       supportThreshold = pct16(50);
       minParticipation = pct16(25);
 
