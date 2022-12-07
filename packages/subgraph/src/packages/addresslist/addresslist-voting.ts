@@ -134,13 +134,6 @@ export function handleVoteCast(event: VoteCast): void {
         .times(BigInt.fromI32(100))
         .div(proposalEntity.totalVotingPower.minus(abstain));
 
-      /*
-      let currentSupport = new BigInt(0);
-      if (voteCount.gt(new BigInt(0))) {
-        currentSupport = yes.times(BigInt.fromI32(100)).div(yes.plus(no));
-      }
-      */
-
       // set the executable param
       proposalEntity.executable =
         worstCaseSupport.gt(
