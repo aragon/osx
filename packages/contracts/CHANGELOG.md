@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
 - Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
 - Renamed the names of folders, files, contracts, events, functions, and parameters in `MajorityVoting` to match with the SDK and Subgraph naming:
   - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`

@@ -15,11 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- renamed *package to *plugin
-- renamed Allowlist to addresslist
-- improved test recompiliation
-- marks some entity as immutable
-- fixes calcuation crash in erc20 voting, when no votes were cast
+- Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
+- Renamed *package to *plugin.
+- Renamed Allowlist to Addresslist.
+- Improved test recompilation.
+- Marks some entity as immutable.
+- Fixes calcuation crash in erc20 voting, when no votes were cast
 
 ## 0.4.0-alpha
 
