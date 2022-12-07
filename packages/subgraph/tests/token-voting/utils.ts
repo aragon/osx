@@ -17,7 +17,7 @@ import {
   CREATED_AT,
   END_DATE,
   SUPPORT_THRESHOLD,
-  PARTICIPATION_THRESHOLD,
+  MIN_PARTICIPATION,
   SNAPSHOT_BLOCK,
   START_DATE,
   VOTING_POWER
@@ -179,7 +179,7 @@ export function createTokenVotingProposalEntityState(
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
   supportThreshold: string = SUPPORT_THRESHOLD,
-  minParticipation: string = PARTICIPATION_THRESHOLD,
+  minParticipation: string = MIN_PARTICIPATION,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
   open: boolean = true,

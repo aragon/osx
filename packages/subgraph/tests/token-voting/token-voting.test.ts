@@ -17,7 +17,7 @@ import {
   PROPOSAL_ID,
   END_DATE,
   SUPPORT_THRESHOLD,
-  PARTICIPATION_THRESHOLD,
+  MIN_PARTICIPATION,
   SNAPSHOT_BLOCK,
   START_DATE,
   VOTING_POWER
@@ -148,7 +148,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     END_DATE,
     SNAPSHOT_BLOCK,
     SUPPORT_THRESHOLD,
-    PARTICIPATION_THRESHOLD,
+    MIN_PARTICIPATION,
     VOTING_POWER,
     '1', // yes
     '0', // no
@@ -208,7 +208,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     END_DATE,
     SNAPSHOT_BLOCK,
     SUPPORT_THRESHOLD,
-    PARTICIPATION_THRESHOLD,
+    MIN_PARTICIPATION,
     VOTING_POWER,
     '2',
     '0',
