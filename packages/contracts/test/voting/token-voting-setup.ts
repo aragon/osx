@@ -92,7 +92,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 supportThreshold, uint64 participationThreshold, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -118,8 +118,8 @@ describe('TokenVotingSetup', function () {
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [AddressZero, '', ''],
         [[AddressZero], []],
@@ -133,8 +133,8 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not a contract', async () => {
       const tokenAddress = signers[0].address;
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [tokenAddress, '', ''],
         [[], []],
@@ -148,8 +148,8 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not ERC20', async () => {
       const tokenAddress = implementationAddress;
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [tokenAddress, '', ''],
         [[], []],
@@ -174,8 +174,8 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
@@ -226,8 +226,8 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
@@ -274,8 +274,8 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [governanceERC20.address, '', ''],
         [[], []],
@@ -376,8 +376,8 @@ describe('TokenVotingSetup', function () {
       const daoAddress = targetDao.address;
 
       const data = abiCoder.encode(prepareInstallDataTypes, [
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],

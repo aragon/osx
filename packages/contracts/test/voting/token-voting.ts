@@ -99,8 +99,8 @@ describe('TokenVoting', function () {
     it('reverts if trying to re-initialize', async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -108,8 +108,8 @@ describe('TokenVoting', function () {
       await expect(
         voting.initialize(
           dao.address,
-          participationThreshold,
           supportThreshold,
+          participationThreshold,
           minDuration,
           governanceErc20Mock.address
         )
@@ -120,8 +120,8 @@ describe('TokenVoting', function () {
       await expect(
         voting.initialize(
           dao.address,
-          participationThreshold,
           supportThreshold,
+          participationThreshold,
           0,
           governanceErc20Mock.address
         )
@@ -136,8 +136,8 @@ describe('TokenVoting', function () {
     it('reverts total token supply while creating a vote is 0', async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -151,8 +151,8 @@ describe('TokenVoting', function () {
     it('reverts if vote duration is less than minDuration', async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -185,8 +185,8 @@ describe('TokenVoting', function () {
     it('should create a vote successfully, but not vote', async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -232,8 +232,8 @@ describe('TokenVoting', function () {
     it('should create a vote and cast a vote immediately', async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -273,8 +273,8 @@ describe('TokenVoting', function () {
     it('reverts creation when voting before the start date', async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -325,8 +325,8 @@ describe('TokenVoting', function () {
     beforeEach(async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         governanceErc20Mock.address
       );
@@ -558,8 +558,8 @@ describe('TokenVoting', function () {
       beforeEach(async () => {
         await voting.initialize(
           dao.address,
-          participationThreshold,
           supportThreshold,
+          participationThreshold,
           minDuration,
           governanceErc20Mock.address
         );

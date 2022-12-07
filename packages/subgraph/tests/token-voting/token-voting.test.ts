@@ -288,8 +288,8 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
 
   // create event
   let event = createNewVoteSettingsUpdatedEvent(
-    '1',
     '2',
+    '1',
     '3600',
     VOTING_ADDRESS
   );

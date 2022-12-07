@@ -7,11 +7,11 @@ import "../voting/majority/MajorityVotingBase.sol";
 contract MajorityVotingMock is MajorityVotingBase {
     function initializeMock(
         IDAO _dao,
-        uint64 _participationThreshold,
         uint64 _supportThreshold,
+        uint64 _participationThreshold,
         uint64 _minDuration
     ) public initializer {
-        __MajorityVotingBase_init(_dao, _participationThreshold, _supportThreshold, _minDuration);
+        __MajorityVotingBase_init(_dao, _supportThreshold, _participationThreshold, _minDuration);
     }
 
     function createProposal(

@@ -103,8 +103,8 @@ describe('AddresslistVoting', function () {
 
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         addresslist(0)
       );
@@ -112,8 +112,8 @@ describe('AddresslistVoting', function () {
       await expect(
         voting.initialize(
           dao.address,
-          participationThreshold,
           supportThreshold,
+          participationThreshold,
           minDuration,
           addresslist(0)
         )
@@ -128,8 +128,8 @@ describe('AddresslistVoting', function () {
 
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         addresslist(0)
       );
@@ -183,8 +183,8 @@ describe('AddresslistVoting', function () {
 
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         addresslist(1)
       );
@@ -328,8 +328,8 @@ describe('AddresslistVoting', function () {
     beforeEach(async () => {
       await voting.initialize(
         dao.address,
-        participationThreshold,
         supportThreshold,
+        participationThreshold,
         minDuration,
         addresslist(10)
       );
@@ -507,8 +507,8 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         await voting.initialize(
           dao.address,
-          participationThreshold,
           supportThreshold,
+          participationThreshold,
           minDuration,
           addresslist(10)
         );
@@ -616,8 +616,8 @@ describe('AddresslistVoting', function () {
 
         await voting.initialize(
           dao.address,
-          participationThreshold,
           supportThreshold,
+          participationThreshold,
           minDuration,
           addresslist(10)
         );

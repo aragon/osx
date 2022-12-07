@@ -257,9 +257,9 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
     'AddresslistPlugin',
     entityID,
     'participationThreshold',
-    '2'
+    '1'
   );
-  assert.fieldEquals('AddresslistPlugin', entityID, 'supportThreshold', '1');
+  assert.fieldEquals('AddresslistPlugin', entityID, 'supportThreshold', '2');
   assert.fieldEquals('AddresslistPlugin', entityID, 'minDuration', '3600');
 
   clearStore();

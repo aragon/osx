@@ -107,20 +107,20 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _participationThreshold The participation threshold in percent.
     /// @param _supportThreshold The support threshold in percent.
+    /// @param _participationThreshold The participation threshold in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
-        uint64 _participationThreshold,
         uint64 _supportThreshold,
+        uint64 _participationThreshold,
         uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
 
-        _validateAndSetSettings(_participationThreshold, _supportThreshold, _minDuration);
+        _validateAndSetSettings(_supportThreshold, _participationThreshold, _minDuration);
 
-        emit VoteSettingsUpdated(_participationThreshold, _supportThreshold, _minDuration);
+        emit VoteSettingsUpdated(_supportThreshold, _participationThreshold, _minDuration);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -138,13 +138,13 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function changeVoteSettings(
-        uint64 _participationThreshold,
         uint64 _supportThreshold,
+        uint64 _participationThreshold,
         uint64 _minDuration
     ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
-        _validateAndSetSettings(_participationThreshold, _supportThreshold, _minDuration);
+        _validateAndSetSettings(_supportThreshold, _participationThreshold, _minDuration);
 
-        emit VoteSettingsUpdated(_participationThreshold, _supportThreshold, _minDuration);
+        emit VoteSettingsUpdated(_supportThreshold, _participationThreshold, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -324,8 +324,8 @@ abstract contract MajorityVotingBase is
     }
 
     function _validateAndSetSettings(
-        uint64 _participationThreshold,
         uint64 _supportThreshold,
+        uint64 _participationThreshold,
         uint64 _minDuration
     ) internal virtual {
         if (_supportThreshold > PCT_BASE) {
@@ -340,8 +340,8 @@ abstract contract MajorityVotingBase is
             revert VoteDurationZero();
         }
 
-        participationThreshold = _participationThreshold;
         supportThreshold = _supportThreshold;
+        participationThreshold = _participationThreshold;
         minDuration = _minDuration;
     }
 

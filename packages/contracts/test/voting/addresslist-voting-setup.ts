@@ -17,15 +17,15 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-const participationThreshold = 25;
 const supportThreshold = 50;
+const participationThreshold = 25;
 const minDuration = 10;
 let members: string[];
 
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(
   ['uint64', 'uint64', 'uint64', 'address[]'],
-  [participationThreshold, supportThreshold, minDuration, []]
+  [supportThreshold, participationThreshold, minDuration, []]
 );
 
 // Permissions
@@ -78,7 +78,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 participationThreshold, uint64 supportThreshold, uint64 minDuration, address[] members)';
+        '(uint64 supportThreshold, uint64 participationThreshold, uint64 minDuration, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -161,7 +161,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly sets up the plugin', async () => {
       const data = abiCoder.encode(
         ['uint64', 'uint64', 'uint64', 'address[]'],
-        [participationThreshold, supportThreshold, minDuration, members]
+        [supportThreshold, participationThreshold, minDuration, members]
       );
 
       const nonce = await ethers.provider.getTransactionCount(
