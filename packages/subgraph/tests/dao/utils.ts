@@ -416,7 +416,7 @@ export function getSupportThreshold(
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getParticipationThreshold(
+export function getMinimalParticipation(
   contractAddress: string,
   returns: BigInt
 ): void {

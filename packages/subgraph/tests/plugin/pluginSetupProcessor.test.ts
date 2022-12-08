@@ -30,7 +30,7 @@ import {Plugin} from '../../generated/schema';
 import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 import {
   getMinDuration,
-  getParticipationThreshold,
+  getMinimalParticipation,
   getSupportThreshold,
   getSupportsInterface,
   getProposalCount,
@@ -96,7 +96,7 @@ test('InstallationApplied event (existent plugin)', function() {
 
   // launch calls
   getSupportThreshold(pluginId, BigInt.fromString(ONE_ETH));
-  getParticipationThreshold(pluginId, BigInt.fromString(ONE_ETH));
+  getMinimalParticipation(pluginId, BigInt.fromString(ONE_ETH));
   getMinDuration(pluginId, BigInt.fromString(ONE_ETH));
   getProposalCount(pluginId, BigInt.fromString(ONE_ETH));
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
