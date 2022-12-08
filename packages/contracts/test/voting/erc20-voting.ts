@@ -120,7 +120,7 @@ describe('ERC20Voting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError('DateOutOfBounds', latestStartDate, startDate)
+        'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
       );
     });
 
