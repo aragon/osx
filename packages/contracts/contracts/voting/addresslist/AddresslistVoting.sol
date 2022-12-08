@@ -50,7 +50,7 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimal participation in percent.
+    /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote in seconds.
     /// @param _members The initial member addresses to be listed.
     function initialize(

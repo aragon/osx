@@ -42,12 +42,12 @@ import {IDAO} from "../../core/IDAO.sol";
 ///  \end{align*}$$
 ///  Accordingly, early execution is possible when the vote is open, the support threshold
 ///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$,
-///  and the minimal participation
+///  and the minimum participation
 ///  $$\texttt{participation} \ge \texttt{minParticipation}$$
 ///  are met.
 ///  #### Threshold vs. Minimum
 ///  For threshold values, $>$ comparison is used. This **does not** include the threshold value. E.g., for $\texttt{supportThreshold} = 50\%$, the criterion is fulfilled if there is at least one more yes than no votes ($N_\text{yes} = N_\text{no}+1$).
-///  For minimal values, $\ge$ comparison is used. This **does** include the minimal participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
+///  For minimal values, $\ge$ comparison is used. This **does** include the minimum participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
 /// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
@@ -111,7 +111,7 @@ abstract contract MajorityVotingBase is
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimal participation in percent.
+    /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,

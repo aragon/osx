@@ -35,12 +35,12 @@ import "../../core/IDAO.sol";
 ///  \end{align*}$$
 ///  Accordingly, early execution is possible when the vote is open, the support threshold
 ///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$,
-///  and the minimal participation
+///  and the minimum participation
 ///  $$\texttt{participation} \ge \texttt{minParticipation}$$
 ///  are met.
 ///  #### Threshold vs. Minimum
 ///  For threshold values, $>$ comparison is used. This **does not** include the threshold value. E.g., for $\texttt{supportThreshold} = 50\%$, the criterion is fulfilled if there is at least one more yes than no votes ($N_\text{yes} = N_\text{no}+1$).
-///  For minimal values, $\ge$ comparison is used. This **does** include the minimal participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
+///  For minimal values, $\ge$ comparison is used. This **does** include the minimum participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
 /// @dev This contract implements the `IMajorityVoting` interface.
 interface IMajorityVoting {
     enum VoteOption {
@@ -90,13 +90,13 @@ interface IMajorityVoting {
 
     /// @notice Emitted when the vote settings are updated.
     /// @param supportThreshold The support threshold in percent.
-    /// @param minParticipation The minimal participation in percent.
+    /// @param minParticipation The minimum participation ratio in percent.
     /// @param minDuration The minimal duration of a vote in seconds.
     event VoteSettingsUpdated(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration);
 
     /// @notice Changes the vote settings.
     /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimal participation in percent.
+    /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote in seconds.
     function changeVoteSettings(
         uint64 _supportThreshold,
@@ -180,7 +180,7 @@ interface IMajorityVoting {
     /// @return endDate The end date of the proposal vote.
     /// @return snapshotBlock The block number of the snapshot taken for this proposal.
     /// @return supportThreshold The support threshold in percent.
-    /// @return minParticipation The minimal participation in percent.
+    /// @return minParticipation The minimum participation ratio in percent.
     /// @return totalVotingPower The total number of eligible votes that can be casted.
     /// @return yes The number of `yes` votes.
     /// @return no The number of `no` votes.

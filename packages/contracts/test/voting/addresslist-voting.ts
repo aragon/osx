@@ -693,7 +693,7 @@ describe('AddresslistVoting', function () {
         expect(await voting.canExecute(id)).to.eq(true);
       });
 
-      it('should not allow the vote to pass if the minimal participation is not reached', async () => {
+      it('should not allow the vote to pass if the minimum participation is not reached', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);

@@ -135,7 +135,7 @@ export function handleVoteCast(event: VoteCast): void {
 
       // check if the current vote results meet the conditions for the proposal to pass:
       // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
-      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimal participation
+      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
       // expect a number between 0 and 100
       let currentParticipation = voteCount
