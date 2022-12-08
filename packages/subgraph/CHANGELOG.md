@@ -9,16 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
 - Adds support for `PluginRepo`, `PluginRegistry` and `PluginSetupProcessor`
 - Added `Withdrawn`, `TrustedForwarderSet`, `StandardCallbackRegistered` and `handleStandardCallbackRegistered` events handling to `DaoTemplate`
 
 ### Changed
 
-- renamed *package to *plugin
-- renamed Allowlist to addresslist
-- improved test recompiliation
-- marks some entity as immutable
-- fixes calcuation crash in erc20 voting, when no votes were cast
+- Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
+- Renamed *package to *plugin.
+- Renamed Allowlist to Addresslist.
+- Improved test recompilation.
+- Marks some entity as immutable.
+- Fixes calcuation crash in erc20 voting, when no votes were cast
 
 ## 0.4.0-alpha
 
@@ -37,8 +39,8 @@ On 2022-10-03 10:38:36
 - Added an `ERC721Token` entity and `Token` interface to be used by `TokenVotingPlugin`.
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
-- added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
-- addes type field to `VaultTransfer` to differntiate between deposits and withdraws
+- Added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
+- Added type field to `VaultTransfer` to differentiate between deposits and withdraws
 
 ### Changed
 

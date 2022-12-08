@@ -13,13 +13,41 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
-/// @notice The abstract implementation of majority voting plugin. We use the following definitions:
-/// - Relative support: `N_yes / (N_yes + N_no)`
-/// - Total support   : `N_yes / N_total`
-/// Additionally, the following assumptions apply to the threshold paramters related to the above mentioned quantities:
-/// - `relativeSupportThresholdPct` >= 50 %
-/// - `totalSupportThresholdPct` <= `relativeSupportThresholdPct`
-/// These constraints are not enforeced by contract code and developers can make unsafe configurations. Instead, the frontend will warn about wrong parameter settings.
+/// @notice The abstract implementation of majority voting plugins.
+///
+///  #### Parameterization
+///  We define two parameters
+///  $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$
+///  and
+///  $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$
+///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
+///  Majority voting implies that the support threshold is set with
+///  $$\texttt{supportThreshold} \ge 50\% .$$
+///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
+///
+///  #### Vote Replacement Execution
+///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
+///
+///  #### Early Execution
+///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
+///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
+///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
+///  $$\begin{align*}
+///    \texttt{worstCaseSupport}
+///    &= \frac{N_\text{yes}}{N_\text{yes}+(N_\text{no} + \texttt{remainingVotes})}
+///    \\[3mm]
+///    &= \frac{N_\text{yes}}{N_\text{yes}+N_\text{no} + N_\text{total}-(N_\text{yes}+N_\text{no}+N_\text{abstain})}
+///    \\[3mm]
+///    &= \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}
+///  \end{align*}$$
+///  Accordingly, early execution is possible when the vote is open, the support threshold
+///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$,
+///  and the minimum participation
+///  $$\texttt{participation} \ge \texttt{minParticipation}$$
+///  are met.
+///  #### Threshold vs. Minimum
+///  For threshold values, $>$ comparison is used. This **does not** include the threshold value. E.g., for $\texttt{supportThreshold} = 50\%$, the criterion is fulfilled if there is at least one more yes than no votes ($N_\text{yes} = N_\text{no}+1$).
+///  For minimal values, $\ge$ comparison is used. This **does** include the minimum participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
 /// @dev This contract implements the `IMajorityVoting` interface.
 abstract contract MajorityVotingBase is
     IMajorityVoting,
@@ -42,8 +70,8 @@ abstract contract MajorityVotingBase is
     mapping(uint256 => Proposal) internal proposals;
 
     //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
-    uint64 public relativeSupportThresholdPct;
-    uint64 public totalSupportThresholdPct;
+    uint64 public supportThreshold;
+    uint64 public minParticipation;
     uint64 public minDuration;
 
     uint256 public proposalCount;
@@ -82,28 +110,20 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _totalSupportThresholdPct The total support threshold in percent.
-    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
+    /// @param _supportThreshold The support threshold in percent.
+    /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote
     function __MajorityVotingBase_init(
         IDAO _dao,
-        uint64 _totalSupportThresholdPct,
-        uint64 _relativeSupportThresholdPct,
+        uint64 _supportThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
 
-        _validateAndSetSettings(
-            _totalSupportThresholdPct,
-            _relativeSupportThresholdPct,
-            _minDuration
-        );
+        _validateAndSetSettings(_supportThreshold, _minParticipation, _minDuration);
 
-        emit VoteSettingsUpdated(
-            _totalSupportThresholdPct,
-            _relativeSupportThresholdPct,
-            _minDuration
-        );
+        emit VoteSettingsUpdated(_supportThreshold, _minParticipation, _minDuration);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -121,21 +141,13 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function changeVoteSettings(
-        uint64 _totalSupportThresholdPct,
-        uint64 _relativeSupportThresholdPct,
+        uint64 _supportThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
-        _validateAndSetSettings(
-            _totalSupportThresholdPct,
-            _relativeSupportThresholdPct,
-            _minDuration
-        );
+        _validateAndSetSettings(_supportThreshold, _minParticipation, _minDuration);
 
-        emit VoteSettingsUpdated(
-            _totalSupportThresholdPct,
-            _relativeSupportThresholdPct,
-            _minDuration
-        );
+        emit VoteSettingsUpdated(_supportThreshold, _minParticipation, _minDuration);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -182,6 +194,31 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
+    function support(uint256 _proposalId) public view virtual returns (uint256) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function worstCaseSupport(uint256 _proposalId) public view virtual returns (uint256) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return _calculatePct(proposal_.yes, proposal_.totalVotingPower - proposal_.abstain);
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function participation(uint256 _proposalId) public view virtual returns (uint256) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return
+            _calculatePct(
+                proposal_.yes + proposal_.no + proposal_.abstain,
+                proposal_.totalVotingPower
+            );
+    }
+
+    /// @inheritdoc IMajorityVoting
     function getProposal(uint256 _proposalId)
         public
         view
@@ -191,8 +228,8 @@ abstract contract MajorityVotingBase is
             uint64 startDate,
             uint64 endDate,
             uint64 snapshotBlock,
-            uint64 _relativeSupportThresholdPct,
-            uint64 _totalSupportThresholdPct,
+            uint64 _supportThreshold,
+            uint64 _minParticipation,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,
@@ -207,8 +244,8 @@ abstract contract MajorityVotingBase is
         startDate = proposal_.startDate;
         endDate = proposal_.endDate;
         snapshotBlock = proposal_.snapshotBlock;
-        _relativeSupportThresholdPct = proposal_.relativeSupportThresholdPct;
-        _totalSupportThresholdPct = proposal_.totalSupportThresholdPct;
+        _supportThreshold = proposal_.supportThreshold;
+        _minParticipation = proposal_.minParticipation;
         totalVotingPower = proposal_.totalVotingPower;
         yes = proposal_.yes;
         no = proposal_.no;
@@ -243,14 +280,10 @@ abstract contract MajorityVotingBase is
     /// @return True if the given voter can vote on a certain proposal, false otherwise.
     function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
-    /// @notice Internal function to check if a vote can be executed. It assumes the queried vote exists.
-    /// @param _proposalId The ID of the proposal.
-    /// @return True if the given vote can be executed, false otherwise.
-
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
-    /// This function assumes vote configurations with `relativeSupportThresholdPct` values >= 50%. Under this assumption and if the total support (the number of yes votes relative to the `totalVotingPower` (the total number of eligible votes that can be cast a.k.a. plenum))  is larger than `relativeSupportThresholdPct`, the vote is already determined and can execute immediately, even if the voting period has not ended yet.
     /// @param _proposalId The ID of the proposal.
     /// @return True if the proposal can be executed, false otherwise.
+    /// @dev Threshold and minimal values are compared with `>` and `>=` comparators, respectively.
     function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
@@ -259,35 +292,17 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        uint256 totalSupportPct = _calculatePct(proposal_.yes, proposal_.totalVotingPower);
-
-        // EARLY EXECUTION (after the vote start but before the vote duration has passed)
-        // The total support must greater than the relative support threshold (assuming that `relativeSupportThresholdPct > 50 >= totalSupportThresholdPct`).
-        if (_isVoteOpen(proposal_) && totalSupportPct > proposal_.relativeSupportThresholdPct) {
-            return true;
-        }
-
-        // NORMAL EXECUTION (after the vote duration has passed)
-        // Both, the total and relative support must be met.
-
-        // Criterium 1: The vote has ended.
         if (_isVoteOpen(proposal_)) {
-            return false;
+            // Early execution
+            return
+                worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
+                participation(_proposalId) >= proposal_.minParticipation;
+        } else {
+            // Normal execution
+            return
+                support(_proposalId) > proposal_.supportThreshold &&
+                participation(_proposalId) >= proposal_.minParticipation;
         }
-
-        // Criterium 2: The total support is greater than the total support threshold
-        if (totalSupportPct <= proposal_.totalSupportThresholdPct) {
-            return false;
-        }
-
-        // Criterium 3: The relative support is greater than the relative support threshold
-        uint256 relativeSupportPct = _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
-        if (relativeSupportPct <= proposal_.relativeSupportThresholdPct) {
-            return false;
-        }
-
-        // The criteria 1-3 above are met and the vote can execute.
-        return true;
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
@@ -300,7 +315,7 @@ abstract contract MajorityVotingBase is
             !proposal_.executed;
     }
 
-    /// @notice Calculates the relative of value with respect to a total as a percentage.
+    /// @notice Calculates the relative of a value with respect to a total as a percentage.
     /// @param _value The value.
     /// @param _total The total.
     /// @return returns The relative value as a percentage.
@@ -313,24 +328,24 @@ abstract contract MajorityVotingBase is
     }
 
     function _validateAndSetSettings(
-        uint64 _totalSupportThresholdPct,
-        uint64 _relativeSupportThresholdPct,
+        uint64 _supportThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration
     ) internal virtual {
-        if (_relativeSupportThresholdPct > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _relativeSupportThresholdPct});
+        if (_supportThreshold > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _supportThreshold});
         }
 
-        if (_totalSupportThresholdPct > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _totalSupportThresholdPct});
+        if (_minParticipation > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _minParticipation});
         }
 
         if (_minDuration == 0) {
             revert VoteDurationZero();
         }
 
-        totalSupportThresholdPct = _totalSupportThresholdPct;
-        relativeSupportThresholdPct = _relativeSupportThresholdPct;
+        supportThreshold = _supportThreshold;
+        minParticipation = _minParticipation;
         minDuration = _minDuration;
     }
 
