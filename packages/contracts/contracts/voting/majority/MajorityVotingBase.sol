@@ -339,14 +339,7 @@ abstract contract MajorityVotingBase is
             revert MinDurationOutOfBounds({limit: 365 days, actual: _voteSettings.minDuration});
         }
 
-        emit VoteSettingsUpdated({
-            earlyExecution: _voteSettings.earlyExecution,
-            voteReplacment: _voteSettings.voteReplacment,
-            minParticipation: _voteSettings.minParticipation,
-            supportThreshold: _voteSettings.supportThreshold,
-            minDuration: _voteSettings.minDuration,
-            minProposerVotingPower: _voteSettings.minProposerVotingPower
-        });
+        emit VoteSettingsUpdated({voteSettings: _voteSettings});
     }
 
     /// @notice Validates and returns the proposal vote dates.
