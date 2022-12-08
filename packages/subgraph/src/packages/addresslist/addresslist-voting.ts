@@ -2,48 +2,48 @@ import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
-  VoteCreated,
-  VoteExecuted,
-  ConfigUpdated,
-  UsersAdded,
-  UsersRemoved,
-  AllowlistVoting
-} from '../../../generated/templates/AllowlistVoting/AllowlistVoting';
+  ProposalCreated,
+  ProposalExecuted,
+  VoteSettingsUpdated,
+  AddressesAdded,
+  AddressesRemoved,
+  Addresslist
+} from '../../../generated/templates/Addresslist/Addresslist';
 import {
   Action,
-  AllowlistPackage,
-  AllowlistProposal,
-  AllowlistVoter,
-  AllowlistVote
+  AddresslistPlugin,
+  AddresslistProposal,
+  AddresslistVoter,
+  AddresslistVote
 } from '../../../generated/schema';
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
 
-export function handleVoteCreated(event: VoteCreated): void {
+export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
   let metdata = event.params.metadata.toString();
-  _handleVoteCreated(event, daoId, metdata);
+  _handleProposalCreated(event, daoId, metdata);
 }
 
 // work around: to bypass context and ipfs for testing, as they are not yet supported by matchstick
-export function _handleVoteCreated(
-  event: VoteCreated,
+export function _handleProposalCreated(
+  event: ProposalCreated,
   daoId: string,
   metadata: string
 ): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
-  let proposalEntity = new AllowlistProposal(proposalId);
+  let proposalEntity = new AddresslistProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.pkg = event.address.toHexString();
-  proposalEntity.voteId = event.params.voteId;
+  proposalEntity.plugin = event.address.toHexString();
+  proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
 
-  let contract = AllowlistVoting.bind(event.address);
-  let vote = contract.try_getVote(event.params.voteId);
+  let contract = Addresslist.bind(event.address);
+  let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.open = vote.value.value0;
@@ -53,7 +53,7 @@ export function _handleVoteCreated(
     proposalEntity.snapshotBlock = vote.value.value4;
     proposalEntity.relativeSupportThresholdPct = vote.value.value5;
     proposalEntity.totalSupportThresholdPct = vote.value.value6;
-    proposalEntity.census = vote.value.value7;
+    proposalEntity.totalVotingPower = vote.value.value7;
 
     // actions
     let actions = vote.value.value11;
@@ -63,7 +63,7 @@ export function _handleVoteCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.voteId.toHexString() +
+        event.params.proposalId.toHexString() +
         '_' +
         index.toString();
 
@@ -80,11 +80,11 @@ export function _handleVoteCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AllowlistPackage.load(event.address.toHexString());
+  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    let voteLength = contract.try_votesLength();
+    let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
-      packageEntity.votesLength = voteLength.value;
+      packageEntity.proposalCount = voteLength.value;
       packageEntity.save();
     }
   }
@@ -92,24 +92,24 @@ export function _handleVoteCreated(
 
 export function handleVoteCast(event: VoteCast): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = AllowlistVote.load(voterProposalId);
+  let voterProposalEntity = AddresslistVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new AllowlistVote(voterProposalId);
+    voterProposalEntity = new AddresslistVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
   voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
-  voterProposalEntity.weight = event.params.voteWeight;
+  voterProposalEntity.weight = event.params.votingPower;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 
   // update count
-  let proposalEntity = AllowlistProposal.load(proposalId);
+  let proposalEntity = AddresslistProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = AllowlistVoting.bind(event.address);
-    let vote = contract.try_getVote(event.params.voteId);
+    let contract = Addresslist.bind(event.address);
+    let vote = contract.try_getProposal(event.params.proposalId);
     if (!vote.reverted) {
       let voteCount = vote.value.value8.plus(
         vote.value.value9.plus(vote.value.value10)
@@ -129,7 +129,7 @@ export function handleVoteCast(event: VoteCast): void {
       // where 0.35 => 35
       let currentParticipation = voteCount
         .times(BigInt.fromI32(100))
-        .div(proposalEntity.census);
+        .div(proposalEntity.totalVotingPower);
       // expect a number between 0 and 100
       // where 0.35 => 35
       let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
@@ -150,25 +150,25 @@ export function handleVoteCast(event: VoteCast): void {
   }
 }
 
-export function handleVoteExecuted(event: VoteExecuted): void {
+export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
-  let proposalEntity = AllowlistProposal.load(proposalId);
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let proposalEntity = AddresslistProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
     proposalEntity.save();
   }
 
   // update actions
-  let contract = AllowlistVoting.bind(event.address);
-  let vote = contract.try_getVote(event.params.voteId);
+  let contract = Addresslist.bind(event.address);
+  let vote = contract.try_getProposal(event.params.proposalId);
   if (!vote.reverted) {
     let actions = vote.value.value10;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.voteId.toHexString() +
+        event.params.proposalId.toHexString() +
         '_' +
         index.toString();
 
@@ -181,8 +181,8 @@ export function handleVoteExecuted(event: VoteExecuted): void {
   }
 }
 
-export function handleConfigUpdated(event: ConfigUpdated): void {
-  let packageEntity = AllowlistPackage.load(event.address.toHexString());
+export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
+  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.totalSupportThresholdPct =
       event.params.totalSupportThresholdPct;
@@ -193,27 +193,27 @@ export function handleConfigUpdated(event: ConfigUpdated): void {
   }
 }
 
-export function handleUsersAdded(event: UsersAdded): void {
-  let users = event.params.users;
-  for (let index = 0; index < users.length; index++) {
-    const user = users[index];
-    let voterEntity = AllowlistVoter.load(user.toHexString());
+export function handleAddressesAdded(event: AddressesAdded): void {
+  let members = event.params.members;
+  for (let index = 0; index < members.length; index++) {
+    const member = members[index];
+    let voterEntity = AddresslistVoter.load(member.toHexString());
     if (!voterEntity) {
-      voterEntity = new AllowlistVoter(user.toHexString());
-      voterEntity.address = user.toHexString();
-      voterEntity.pkg = event.address.toHexString();
+      voterEntity = new AddresslistVoter(member.toHexString());
+      voterEntity.address = member.toHexString();
+      voterEntity.plugin = event.address.toHexString();
       voterEntity.save();
     }
   }
 }
 
-export function handleUsersRemoved(event: UsersRemoved): void {
-  let users = event.params.users;
-  for (let index = 0; index < users.length; index++) {
-    const user = users[index];
-    let voterEntity = AllowlistVoter.load(user.toHexString());
+export function handleAddressesRemoved(event: AddressesRemoved): void {
+  let members = event.params.members;
+  for (let index = 0; index < members.length; index++) {
+    const member = members[index];
+    let voterEntity = AddresslistVoter.load(member.toHexString());
     if (voterEntity) {
-      store.remove('AllowlistVoter', user.toHexString());
+      store.remove('AddresslistVoter', member.toHexString());
     }
   }
 }

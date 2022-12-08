@@ -2,47 +2,47 @@ import {BigInt, dataSource} from '@graphprotocol/graph-ts';
 
 import {
   VoteCast,
-  VoteCreated,
-  VoteExecuted,
-  ConfigUpdated,
-  ERC20Voting
-} from '../../../generated/templates/ERC20Voting/ERC20Voting';
+  ProposalCreated,
+  ProposalExecuted,
+  VoteSettingsUpdated,
+  TokenVoting
+} from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
   Action,
-  ERC20VotingPackage,
-  ERC20VotingProposal,
-  ERC20VotingVoter,
-  ERC20Vote
+  TokenVotingPlugin,
+  TokenVotingProposal,
+  TokenVotingVoter,
+  TokenVote
 } from '../../../generated/schema';
 
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
 
-export function handleVoteCreated(event: VoteCreated): void {
+export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
   let daoId = context.getString('daoAddress');
   let metadata = event.params.metadata.toString();
-  _handleVoteCreated(event, daoId, metadata);
+  _handleProposalCreated(event, daoId, metadata);
 }
 
 // work around: to bypass context and ipfs for testing, as they are not yet supported by matchstick
-export function _handleVoteCreated(
-  event: VoteCreated,
+export function _handleProposalCreated(
+  event: ProposalCreated,
   daoId: string,
   metadata: string
 ): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
-  let proposalEntity = new ERC20VotingProposal(proposalId);
+  let proposalEntity = new TokenVotingProposal(proposalId);
   proposalEntity.dao = daoId;
-  proposalEntity.pkg = event.address.toHexString();
-  proposalEntity.voteId = event.params.voteId;
+  proposalEntity.plugin = event.address.toHexString();
+  proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
 
-  let contract = ERC20Voting.bind(event.address);
-  let vote = contract.try_getVote(event.params.voteId);
+  let contract = TokenVoting.bind(event.address);
+  let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.open = vote.value.value0;
@@ -52,7 +52,7 @@ export function _handleVoteCreated(
     proposalEntity.snapshotBlock = vote.value.value4;
     proposalEntity.relativeSupportThresholdPct = vote.value.value5;
     proposalEntity.totalSupportThresholdPct = vote.value.value6;
-    proposalEntity.census = vote.value.value7;
+    proposalEntity.totalVotingPower = vote.value.value7;
 
     // actions
     let actions = vote.value.value11;
@@ -62,7 +62,7 @@ export function _handleVoteCreated(
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.voteId.toHexString() +
+        event.params.proposalId.toHexString() +
         '_' +
         index.toString();
 
@@ -79,11 +79,11 @@ export function _handleVoteCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
+  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    let voteLength = contract.try_votesLength();
+    let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
-      packageEntity.votesLength = voteLength.value;
+      packageEntity.proposalCount = voteLength.value;
       packageEntity.save();
     }
   }
@@ -91,25 +91,25 @@ export function _handleVoteCreated(
 
 export function handleVoteCast(event: VoteCast): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = ERC20Vote.load(voterProposalId);
+  let voterProposalEntity = TokenVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new ERC20Vote(voterProposalId);
+    voterProposalEntity = new TokenVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
   voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
-  voterProposalEntity.weight = event.params.voteWeight;
+  voterProposalEntity.weight = event.params.votingPower;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 
   // voter
-  let voterEntity = ERC20VotingVoter.load(event.params.voter.toHexString());
+  let voterEntity = TokenVotingVoter.load(event.params.voter.toHexString());
   if (!voterEntity) {
-    voterEntity = new ERC20VotingVoter(event.params.voter.toHexString());
+    voterEntity = new TokenVotingVoter(event.params.voter.toHexString());
     voterEntity.address = event.params.voter.toHexString();
-    voterEntity.pkg = event.address.toHexString();
+    voterEntity.plugin = event.address.toHexString();
     voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
   } else {
@@ -118,10 +118,10 @@ export function handleVoteCast(event: VoteCast): void {
   }
 
   // update count
-  let proposalEntity = ERC20VotingProposal.load(proposalId);
+  let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = ERC20Voting.bind(event.address);
-    let vote = contract.try_getVote(event.params.voteId);
+    let contract = TokenVoting.bind(event.address);
+    let vote = contract.try_getProposal(event.params.proposalId);
     if (!vote.reverted) {
       let voteCount = vote.value.value8.plus(
         vote.value.value9.plus(vote.value.value10)
@@ -140,10 +140,13 @@ export function handleVoteCast(event: VoteCast): void {
       // where 0.35 => 35
       let currentParticipation = voteCount
         .times(BigInt.fromI32(100))
-        .div(proposalEntity.census);
+        .div(proposalEntity.totalVotingPower);
       // expect a number between 0 and 100
       // where 0.35 => 35
-      let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+      let currentSupport = new BigInt(0);
+      if (voteCount.gt(new BigInt(0))) {
+        currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+      }
       // set the executable param
       proposalEntity.executable =
         currentParticipation.ge(
@@ -161,25 +164,25 @@ export function handleVoteCast(event: VoteCast): void {
   }
 }
 
-export function handleVoteExecuted(event: VoteExecuted): void {
+export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
-    event.address.toHexString() + '_' + event.params.voteId.toHexString();
-  let proposalEntity = ERC20VotingProposal.load(proposalId);
+    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
     proposalEntity.save();
   }
 
   // update actions
-  let contract = ERC20Voting.bind(event.address);
-  let vote = contract.try_getVote(event.params.voteId);
+  let contract = TokenVoting.bind(event.address);
+  let vote = contract.try_getProposal(event.params.proposalId);
   if (!vote.reverted) {
     let actions = vote.value.value11;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
         '_' +
-        event.params.voteId.toHexString() +
+        event.params.proposalId.toHexString() +
         '_' +
         index.toString();
 
@@ -192,8 +195,8 @@ export function handleVoteExecuted(event: VoteExecuted): void {
   }
 }
 
-export function handleConfigUpdated(event: ConfigUpdated): void {
-  let packageEntity = ERC20VotingPackage.load(event.address.toHexString());
+export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
+  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.relativeSupportThresholdPct =
       event.params.relativeSupportThresholdPct;

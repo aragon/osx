@@ -19,7 +19,6 @@ const dummyMetadata2 = '0x0002';
 const EVENTS = {
   MetadataSet: 'MetadataSet',
   TrustedForwarderSet: 'TrustedForwarderSet',
-  ConfigUpdated: 'ConfigUpdated',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',

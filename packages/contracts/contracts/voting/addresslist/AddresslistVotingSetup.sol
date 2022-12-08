@@ -6,21 +6,21 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {AllowlistVoting} from "./AllowlistVoting.sol";
+import {AddresslistVoting} from "./AddresslistVoting.sol";
 
-/// @title AllowlistVotingSetup
+/// @title AddresslistVotingSetup
 /// @author Aragon Association - 2022
-/// @notice The setup contract of the `AllowlistVoting` plugin.
-contract AllowlistVotingSetup is PluginSetup {
-    /// @notice The address of `AllowlistVoting` plugin logic contract to be used in creating proxy contracts.
-    AllowlistVoting private immutable allowlistVotingBase;
+/// @notice The setup contract of the `AddresslistVoting` plugin.
+contract AddresslistVotingSetup is PluginSetup {
+    /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
+    AddresslistVoting private immutable addresslistVotingBase;
 
     /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
 
-    /// @notice The contract constructor, that deployes the `AllowlistVoting` plugin logic contract.
+    /// @notice The contract constructor, that deployes the `AddresslistVoting` plugin logic contract.
     constructor() {
-        allowlistVotingBase = new AllowlistVoting();
+        addresslistVotingBase = new AddresslistVoting();
     }
 
     /// @inheritdoc IPluginSetup
@@ -40,7 +40,7 @@ contract AllowlistVotingSetup is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode `_data` to extract the params needed for deploying and initializing `AllowlistVoting` plugin.
+        // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
         (
             uint64 totalSupportThresholdPct,
             uint64 relativeSupportThresholdPct,
@@ -50,9 +50,9 @@ contract AllowlistVotingSetup is PluginSetup {
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
-            address(allowlistVotingBase),
+            address(addresslistVotingBase),
             abi.encodeWithSelector(
-                AllowlistVoting.initialize.selector,
+                AddresslistVoting.initialize.selector,
                 dao,
                 totalSupportThresholdPct,
                 relativeSupportThresholdPct,
@@ -74,7 +74,7 @@ contract AllowlistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
+            addresslistVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -82,7 +82,7 @@ contract AllowlistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -90,7 +90,7 @@ contract AllowlistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
@@ -124,7 +124,7 @@ contract AllowlistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.MODIFY_ALLOWLIST_PERMISSION_ID()
+            addresslistVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -132,7 +132,7 @@ contract AllowlistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.SET_CONFIGURATION_PERMISSION_ID()
+            addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -140,7 +140,7 @@ contract AllowlistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            allowlistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[3] = PermissionLib.ItemMultiTarget(
@@ -154,6 +154,6 @@ contract AllowlistVotingSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view returns (address) {
-        return address(allowlistVotingBase);
+        return address(addresslistVotingBase);
     }
 }

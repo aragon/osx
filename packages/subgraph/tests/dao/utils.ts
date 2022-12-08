@@ -439,11 +439,14 @@ export function getMinDuration(contractAddress: string, returns: BigInt): void {
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getVotesLength(contractAddress: string, returns: BigInt): void {
+export function getProposalCount(
+  contractAddress: string,
+  returns: BigInt
+): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'votesLength',
-    'votesLength():(uint256)'
+    'proposalCount',
+    'proposalCount():(uint256)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -466,8 +469,8 @@ export function getIsUserAllowed(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'isAllowed',
-    'isAllowed(address,uint256):(bool)'
+    'isListed',
+    'isListed(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),

@@ -33,7 +33,7 @@ import {
   createSignatureValidatorSetEvent,
   createStandardCallbackRegisteredEvent
 } from './utils';
-import {createERC20VotingProposalEntityState} from '../erc20-voting/utils';
+import {createTokenVotingProposalEntityState} from '../token-voting/utils';
 import {decodeWithdrawParams} from '../../src/dao/utils';
 
 test('Run dao (handleMetadataSet) mappings with mock event', () => {
@@ -333,7 +333,7 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   let proposalId =
     Address.fromHexString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
 
-  createERC20VotingProposalEntityState();
+  createTokenVotingProposalEntityState();
 
   // create token calls
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');

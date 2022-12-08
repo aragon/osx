@@ -73,44 +73,44 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const daoBase = await DAOFactoryContract.daoBase();
   verifyObjArray.push({address: daoBase, args: []});
 
-  const AllowlistVotingSetupContract = await ethers.getContractAt(
-    'AllowlistVotingSetup',
+  const AddresslistVotingSetupContract = await ethers.getContractAt(
+    'AddresslistVotingSetup',
     (
-      await deployments.get('AllowlistVotingSetup')
+      await deployments.get('AddresslistVotingSetup')
     ).address
   );
-  const allowlistVotingBase =
-    await AllowlistVotingSetupContract.getImplementationAddress();
-  verifyObjArray.push({address: allowlistVotingBase, args: []});
+  const addresslistVotingBase =
+    await AddresslistVotingSetupContract.getImplementationAddress();
+  verifyObjArray.push({address: addresslistVotingBase, args: []});
 
-  const ERC20VotingSetupContract = await ethers.getContractAt(
-    'ERC20VotingSetup',
+  const TokenVotingSetupContract = await ethers.getContractAt(
+    'TokenVotingSetup',
     (
-      await deployments.get('ERC20VotingSetup')
+      await deployments.get('TokenVotingSetup')
     ).address
   );
-  const erc20VotingBase =
-    await ERC20VotingSetupContract.getImplementationAddress();
-  verifyObjArray.push({address: erc20VotingBase, args: []});
+  const tokenVotingBase =
+    await TokenVotingSetupContract.getImplementationAddress();
+  verifyObjArray.push({address: tokenVotingBase, args: []});
 
   const governanceERC20Base =
-    await ERC20VotingSetupContract.governanceERC20Base();
+    await TokenVotingSetupContract.governanceERC20Base();
   verifyObjArray.push({
     address: governanceERC20Base,
     args: [ethers.constants.AddressZero, '', ''],
   });
 
   const governanceWrappedERC20Base =
-    await ERC20VotingSetupContract.governanceWrappedERC20Base();
+    await TokenVotingSetupContract.governanceWrappedERC20Base();
   verifyObjArray.push({
     address: governanceWrappedERC20Base,
     args: [ethers.constants.AddressZero, '', ''],
   });
 
-  const merkleMinterBase = await ERC20VotingSetupContract.merkleMinterBase();
+  const merkleMinterBase = await TokenVotingSetupContract.merkleMinterBase();
   verifyObjArray.push({address: merkleMinterBase, args: []});
 
-  const distributorBase = await ERC20VotingSetupContract.distributorBase();
+  const distributorBase = await TokenVotingSetupContract.distributorBase();
   verifyObjArray.push({address: distributorBase, args: []});
 
   const PluginRepoFactoryContract = await ethers.getContractAt(

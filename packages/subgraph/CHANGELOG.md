@@ -14,8 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- renamed *package to *plugin
+- renamed Allowlist to addresslist
 - improved test recompiliation
 - marks some entity as immutable
+- fixes calcuation crash in erc20 voting, when no votes were cast
 
 ## 0.4.0-alpha
 
@@ -30,6 +33,8 @@ On 2022-10-07 15:20:00
 On 2022-10-03 10:38:36
 
 ### Added
+
+- Added an `ERC721Token` entity and `Token` interface to be used by `TokenVotingPlugin`.
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
 - added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
@@ -37,6 +42,11 @@ On 2022-10-03 10:38:36
 
 ### Changed
 
+- Renamed contracts, events, and parameters in `MajorityVoting`:
+  - `ERC20Voting` to `TokenVoting`
+  - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`
+  - `VoteCreated` and `VoteExecuted` to `ProposalCreated` and `ProposalExecuted`
+  - `voteId` to `proposalId`
 - Changed `users` to `members` in `AllowlistPackage`.
 - Adapted subgraph names according to the renaming of the contracts.
 - Updated `manifest`, `registry`, `registry.test`.

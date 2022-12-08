@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {AllowlistVotingSetup} from '../../typechain';
+import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 
@@ -23,19 +23,19 @@ const MINIMUM_DATA = abiCoder.encode(
 );
 
 // Permissions
-const MODIFY_ALLOWLIST_PERMISSION_ID = ethers.utils.id(
-  'MODIFY_ALLOWLIST_PERMISSION'
+const MODIFY_ADDRESSLIST_PERMISSION_ID = ethers.utils.id(
+  'MODIFY_ADDRESSLIST_PERMISSION'
 );
-const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
-  'SET_CONFIGURATION_PERMISSION'
+const CHANGE_VOTE_SETTINGS_PERMISSION_ID = ethers.utils.id(
+  'CHANGE_VOTE_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('AllowlistVotingSetup', function () {
+describe('AddresslistVotingSetup', function () {
   let ownerAddress: string;
   let signers: any;
-  let allowlistVotingSetup: AllowlistVotingSetup;
+  let addresslistVotingSetup: AddresslistVotingSetup;
   let implementationAddress: string;
   let targetDao: any;
 
@@ -44,28 +44,28 @@ describe('AllowlistVotingSetup', function () {
     ownerAddress = await signers[0].getAddress();
     targetDao = await deployNewDAO(ownerAddress);
 
-    const AllowlistVotingSetup = await ethers.getContractFactory(
-      'AllowlistVotingSetup'
+    const AddresslistVotingSetup = await ethers.getContractFactory(
+      'AddresslistVotingSetup'
     );
-    allowlistVotingSetup = await AllowlistVotingSetup.deploy();
+    addresslistVotingSetup = await AddresslistVotingSetup.deploy();
 
     implementationAddress =
-      await allowlistVotingSetup.getImplementationAddress();
+      await addresslistVotingSetup.getImplementationAddress();
   });
 
-  it('creates allowlist voting base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('AllowlistVoting');
-    const allowlistVotingContract = factory.attach(implementationAddress);
+  it('creates addresslist voting base with the correct interface', async () => {
+    const factory = await ethers.getContractFactory('AddresslistVoting');
+    const addresslistVotingContract = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
-      'function addAllowedUsers(address[]  _users)',
-      'function removeAllowedUsers(address[] _users)',
-      'function isAllowed(address account, uint256 blockNumber) returns (bool)',
-      'function allowedUserCount(uint256 blockNumber) returns (uint256)',
+      'function addAddresses(address[]  _voters)',
+      'function removeAddresses(address[] _voters)',
+      'function isListed(address account, uint256 blockNumber) returns (bool)',
+      'function addresslistLength(uint256 blockNumber) returns (uint256)',
     ]);
 
     expect(
-      await allowlistVotingContract.supportsInterface(getInterfaceID(iface))
+      await addresslistVotingContract.supportsInterface(getInterfaceID(iface))
     ).to.be.eq(true);
   });
 
@@ -75,25 +75,28 @@ describe('AllowlistVotingSetup', function () {
       const dataHRABI =
         '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)';
 
-      expect(await allowlistVotingSetup.prepareInstallationDataABI()).to.be.eq(
-        dataHRABI
-      );
+      expect(
+        await addresslistVotingSetup.prepareInstallationDataABI()
+      ).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
-        allowlistVotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
+        addresslistVotingSetup.prepareInstallation(
+          targetDao.address,
+          EMPTY_DATA
+        )
       ).to.be.reverted;
 
       await expect(
-        allowlistVotingSetup.prepareInstallation(
+        addresslistVotingSetup.prepareInstallation(
           targetDao.address,
           MINIMUM_DATA.substring(0, MINIMUM_DATA.length - 1)
         )
       ).to.be.reverted;
 
       await expect(
-        allowlistVotingSetup.prepareInstallation(
+        addresslistVotingSetup.prepareInstallation(
           targetDao.address,
           MINIMUM_DATA
         )
@@ -102,15 +105,15 @@ describe('AllowlistVotingSetup', function () {
 
     it('correctly returns plugin, helpers and permissions', async () => {
       const nonce = await ethers.provider.getTransactionCount(
-        allowlistVotingSetup.address
+        addresslistVotingSetup.address
       );
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: allowlistVotingSetup.address,
+        from: addresslistVotingSetup.address,
         nonce,
       });
 
       const {plugin, helpers, permissions} =
-        await allowlistVotingSetup.callStatic.prepareInstallation(
+        await addresslistVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           MINIMUM_DATA
         );
@@ -124,14 +127,14 @@ describe('AllowlistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          MODIFY_ALLOWLIST_PERMISSION_ID,
+          MODIFY_ADDRESSLIST_PERMISSION_ID,
         ],
         [
           Op.Grant,
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Grant,
@@ -168,37 +171,39 @@ describe('AllowlistVotingSetup', function () {
       );
 
       const nonce = await ethers.provider.getTransactionCount(
-        allowlistVotingSetup.address
+        addresslistVotingSetup.address
       );
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: allowlistVotingSetup.address,
+        from: addresslistVotingSetup.address,
         nonce,
       });
 
-      await allowlistVotingSetup.prepareInstallation(daoAddress, data);
+      await addresslistVotingSetup.prepareInstallation(daoAddress, data);
 
-      const factory = await ethers.getContractFactory('AllowlistVoting');
-      const allowlistVotingContract = factory.attach(anticipatedPluginAddress);
+      const factory = await ethers.getContractFactory('AddresslistVoting');
+      const addresslistVotingContract = factory.attach(
+        anticipatedPluginAddress
+      );
       const latestBlock = await ethers.provider.getBlock('latest');
-
-      expect(await allowlistVotingContract.getDAO()).to.be.equal(daoAddress);
+        
+      expect(await addresslistVotingContract.dao()).to.be.equal(daoAddress);
       expect(
-        await allowlistVotingContract.totalSupportThresholdPct()
+        await addresslistVotingContract.totalSupportThresholdPct()
       ).to.be.equal(totalSupportThresholdPct);
       expect(
-        await allowlistVotingContract.relativeSupportThresholdPct()
+        await addresslistVotingContract.relativeSupportThresholdPct()
       ).to.be.equal(relativeSupportThresholdPct);
-      expect(await allowlistVotingContract.minDuration()).to.be.equal(
+      expect(await addresslistVotingContract.minDuration()).to.be.equal(
         minDuration
       );
 
       await ethers.provider.send('evm_mine', []);
 
       expect(
-        await allowlistVotingContract.allowedUserCount(latestBlock.number)
+        await addresslistVotingContract.addresslistLength(latestBlock.number)
       ).to.be.equal(allowed.length);
       expect(
-        await allowlistVotingContract.isAllowed(allowed[0], latestBlock.number)
+        await addresslistVotingContract.isListed(allowed[0], latestBlock.number)
       ).to.be.equal(true);
     });
   });
@@ -209,7 +214,7 @@ describe('AllowlistVotingSetup', function () {
       const dataHRABI = '';
 
       expect(
-        await allowlistVotingSetup.prepareUninstallationDataABI()
+        await addresslistVotingSetup.prepareUninstallationDataABI()
       ).to.be.eq(dataHRABI);
     });
 
@@ -217,7 +222,7 @@ describe('AllowlistVotingSetup', function () {
       const plugin = ethers.Wallet.createRandom().address;
 
       const permissions =
-        await allowlistVotingSetup.callStatic.prepareUninstallation(
+        await addresslistVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
           plugin,
           [],
@@ -231,14 +236,14 @@ describe('AllowlistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          MODIFY_ALLOWLIST_PERMISSION_ID,
+          MODIFY_ADDRESSLIST_PERMISSION_ID,
         ],
         [
           Op.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Revoke,

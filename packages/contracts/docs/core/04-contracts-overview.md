@@ -89,9 +89,9 @@ To learn more about the architecture of the system, visit the section explaining
 
 | Contract             | Description                                                                                  | Relationship                                                                    |
 | :------------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
-| `ERC20Voting`        | A majority voting plugin using ERC-20 tokens for the census.                                 | inherits from `MajorityVotingBase`                                              |
-| `AllowlistVoting`    | A majority voting plugin using a list of allowed addresses for the census.                   | inherits from `MajorityVotingBase`                                              |
-| `MajorityVotingBase` | Contains abstract, majority voting functionality.                                            | is parent of `ERC20Voting` and `AllowlistVoting`                                |
+| `TokenVoting`        | A majority voting plugin using ERC-20 tokens for the census.                                 | inherits from `MajorityVotingBase`                                              |
+| `AddresslistVoting`  | A majority voting plugin using a list of allowed addresses for the census.                   | inherits from `MajorityVotingBase`                                              |
+| `MajorityVotingBase` | Contains abstract, majority voting functionality.                                            | is parent of `TokenVoting` and `AddresslistVoting`                              |
 | `MerkleMinter`       | Mints `ERC-20` tokens and distributes them on merkle trees using `MerkleDistributor` clones. | is `PluginUUPSUpgradeable`, uses `MerkleDistributor`, is used by `TokenFactory` |
 | `MerkleDistributor`  | Distributes claimable ERC-20 tokens via a merkle tree.                                       | is `PluginUUPSUpgradeable`                                                      |
 
@@ -114,4 +114,4 @@ To learn more about the architecture of the system, visit the section explaining
 | `Uint256Helpers`          | Converts `uint256` to `uint64`.                                            | used by`TimeHelpers`                                            |
 | `auth`                    | Provides a free function to be used in the `DaoAuthorizable` base classes. | used by `DaoAuthorizableBase`, `DaoAuthorizableBaseUpgradeable` |
 | `Proxy`                   | Provides a convenience function to create an UUPS proxy.                   | used by`DAOFactory`, `PluginRepoFactory`                        |
-| `UncheckedMath`           | Provides convenience functions for unchecked math operations.              | used by `PluginRepo`, `AllowlistVoting`                         |
+| `UncheckedMath`           | Provides convenience functions for unchecked math operations.              | used by `PluginRepo`, `AddresslistVoting`                       |

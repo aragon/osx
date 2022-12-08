@@ -5,7 +5,9 @@ import {
   DAO_ADDRESS,
   ADDRESS_FOUR,
   ADDRESS_FIVE,
-  ADDRESS_ZERO
+  ADDRESS_ZERO,
+  ONE_ETH,
+  DAO_TOKEN_ADDRESS
 } from '../constants';
 import {
   createInstallationAppliedEvent,
@@ -25,7 +27,20 @@ import {
 } from '../../src/plugin/pluginSetupProcessor';
 import {assert, clearStore, test} from 'matchstick-as';
 import {Plugin} from '../../generated/schema';
-import {Address, Bytes} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
+import {
+  getMinDuration,
+  getParticipationRequiredPct,
+  getSupportRequiredPct,
+  getSupportsInterface,
+  getProposalCount,
+  getVotingToken
+} from '../dao/utils';
+import {
+  ADDRESSLIST_VOTING_INTERFACE,
+  TOKEN_VOTING_INTERFACE
+} from '../../src/utils/constants';
+import {createTokenCalls} from '../utils';
 
 test('InstallationPrepared event', function() {
   let pluginId = ADDRESS_THREE;
@@ -65,6 +80,7 @@ test('InstallationPrepared event', function() {
 });
 
 test('InstallationApplied event (existent plugin)', function() {
+  // prepare states
   let pluginId = ADDRESS_THREE;
   let preparedEvent = createInstallationPreparedEvent(
     ADDRESS_ONE,
@@ -78,8 +94,20 @@ test('InstallationApplied event (existent plugin)', function() {
   handleInstallationPrepared(preparedEvent);
   let appliedEvent = createInstallationAppliedEvent(DAO_ADDRESS, pluginId);
 
+  // launch calls
+  getSupportRequiredPct(pluginId, BigInt.fromString(ONE_ETH));
+  getParticipationRequiredPct(pluginId, BigInt.fromString(ONE_ETH));
+  getMinDuration(pluginId, BigInt.fromString(ONE_ETH));
+  getProposalCount(pluginId, BigInt.fromString(ONE_ETH));
+  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
+  getVotingToken(pluginId, DAO_TOKEN_ADDRESS);
+  getSupportsInterface(pluginId, TOKEN_VOTING_INTERFACE, true);
+  getSupportsInterface(pluginId, ADDRESSLIST_VOTING_INTERFACE, false);
+
+  // handle
   handleInstallationApplied(appliedEvent);
 
+  // checks
   assert.fieldEquals('Plugin', pluginId, 'sender', ADDRESS_ONE);
   assert.fieldEquals(
     'Plugin',
@@ -99,14 +127,7 @@ test('InstallationApplied event (non existent plugin)', function() {
 
   handleInstallationApplied(event);
 
-  assert.fieldEquals('Plugin', pluginId, 'sender', ADDRESS_ZERO);
-  assert.fieldEquals(
-    'Plugin',
-    pluginId,
-    'dao',
-    Address.fromHexString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals('Plugin', pluginId, 'state', 'Installed');
+  assert.notInStore('Plugin', pluginId);
 
   clearStore();
 });
@@ -173,24 +194,7 @@ test('UpdatePrepared event (non existent plugin)', function() {
 
   handleUpdatePrepared(event);
 
-  assert.fieldEquals('Plugin', pluginId, 'sender', ADDRESS_ONE);
-  assert.fieldEquals(
-    'Plugin',
-    pluginId,
-    'dao',
-    Address.fromHexString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'UpdatePrepared');
-
-  // Plugin Entity exists. previous tests would have failed if not
-  let pluginEntity = Plugin.load(pluginId) as Plugin;
-  assert.bytesEquals(pluginEntity.data, Bytes.fromHexString('0x00'));
-
-  // check if helpers exists
-  for (let i = 0; i < helperIds.length; i++) {
-    assert.fieldEquals('PluginHelper', helperIds[i], 'plugin', pluginId);
-  }
+  assert.notInStore('Plugin', pluginId);
 
   clearStore();
 });
@@ -230,14 +234,7 @@ test('UpdateApplied event (non existent plugin)', function() {
 
   handleUpdateApplied(event);
 
-  assert.fieldEquals('Plugin', pluginId, 'sender', ADDRESS_ZERO);
-  assert.fieldEquals(
-    'Plugin',
-    pluginId,
-    'dao',
-    Address.fromHexString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals('Plugin', pluginId, 'state', 'Installed');
+  assert.notInStore('Plugin', pluginId);
 
   clearStore();
 });
@@ -302,24 +299,7 @@ test('UninstallationPrepared event (non existent plugin)', function() {
 
   handleUninstallationPrepared(event);
 
-  assert.fieldEquals('Plugin', pluginId, 'sender', ADDRESS_ONE);
-  assert.fieldEquals(
-    'Plugin',
-    pluginId,
-    'dao',
-    Address.fromHexString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals('Plugin', pluginId, 'pluginSetup', ADDRESS_TWO);
-  assert.fieldEquals('Plugin', pluginId, 'state', 'UninstallPrepared');
-
-  // Plugin Entity exists. previous tests would have failed if not
-  let pluginEntity = Plugin.load(pluginId) as Plugin;
-  assert.bytesEquals(pluginEntity.data, Bytes.fromHexString('0x00'));
-
-  // check if helpers exists
-  for (let i = 0; i < helperIds.length; i++) {
-    assert.fieldEquals('PluginHelper', helperIds[i], 'plugin', pluginId);
-  }
+  assert.notInStore('Plugin', pluginId);
 
   clearStore();
 });
@@ -359,14 +339,7 @@ test('UninstallationApplied event (non existent plugin)', function() {
 
   handleUninstallationApplied(event);
 
-  assert.fieldEquals('Plugin', pluginId, 'sender', ADDRESS_ZERO);
-  assert.fieldEquals(
-    'Plugin',
-    pluginId,
-    'dao',
-    Address.fromHexString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals('Plugin', pluginId, 'state', 'Uninstalled');
+  assert.notInStore('Plugin', pluginId);
 
   clearStore();
 });

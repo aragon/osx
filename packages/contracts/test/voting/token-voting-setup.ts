@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {ERC20, ERC20VotingSetup} from '../../typechain';
+import {ERC20, TokenVotingSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
@@ -43,49 +43,49 @@ const merkleMintToAddressArray = [ethers.Wallet.createRandom().address];
 const merkleMintToAmountArray = [1];
 
 // Permissions
-const SET_CONFIGURATION_PERMISSION_ID = ethers.utils.id(
-  'SET_CONFIGURATION_PERMISSION'
+const CHANGE_VOTE_SETTINGS_PERMISSION_ID = ethers.utils.id(
+  'CHANGE_VOTE_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe('ERC20VotingSetup', function () {
+describe('TokenVotingSetup', function () {
   let ownerAddress: string;
   let signers: any;
-  let erc20VotingSetup: ERC20VotingSetup;
+  let tokenVotingSetup: TokenVotingSetup;
   let implementationAddress: string;
   let targetDao: any;
-  let erc20TokenContract: ERC20;
+  let erc20Token: ERC20;
 
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
     targetDao = await deployNewDAO(ownerAddress);
 
-    const ERC20VotingSetup = await ethers.getContractFactory(
-      'ERC20VotingSetup'
+    const TokenVotingSetup = await ethers.getContractFactory(
+      'TokenVotingSetup'
     );
-    erc20VotingSetup = await ERC20VotingSetup.deploy();
+    tokenVotingSetup = await TokenVotingSetup.deploy();
 
-    implementationAddress = await erc20VotingSetup.getImplementationAddress();
+    implementationAddress = await tokenVotingSetup.getImplementationAddress();
 
     const ERC20Token = await ethers.getContractFactory('ERC20');
-    erc20TokenContract = await ERC20Token.deploy(tokenName, tokenSymbol);
+    erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
   });
 
-  it('creates erc20 voting base with the correct interface', async () => {
-    const factory = await ethers.getContractFactory('ERC20Voting');
-    const erc20VotingContract = factory.attach(implementationAddress);
+  it('creates token voting base with the correct interface', async () => {
+    const factory = await ethers.getContractFactory('TokenVoting');
+    const tokenVoting = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
       'function initialize(address _dao, uint64 _totalSupportThresholdPct, uint64 _relativeSupportThresholdPct, uint64 _minDuration, address _token)',
     ]);
 
-    expect(
-      await erc20VotingContract.supportsInterface(getInterfaceID(iface))
-    ).to.be.eq(true);
+    expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
+      true
+    );
   });
 
   describe('prepareInstallation', async () => {
@@ -94,25 +94,25 @@ describe('ERC20VotingSetup', function () {
       const dataHRABI =
         '(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
-      expect(await erc20VotingSetup.prepareInstallationDataABI()).to.be.eq(
+      expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
       );
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
-        erc20VotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
+        tokenVotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
       ).to.be.reverted;
 
       await expect(
-        erc20VotingSetup.prepareInstallation(
+        tokenVotingSetup.prepareInstallation(
           targetDao.address,
           MINIMUM_DATA.substring(0, MINIMUM_DATA.length - 2)
         )
       ).to.be.reverted;
 
       await expect(
-        erc20VotingSetup.prepareInstallation(targetDao.address, MINIMUM_DATA)
+        tokenVotingSetup.prepareInstallation(targetDao.address, MINIMUM_DATA)
       ).not.to.be.reverted;
     });
 
@@ -126,7 +126,7 @@ describe('ERC20VotingSetup', function () {
       ]);
 
       await expect(
-        erc20VotingSetup.prepareInstallation(targetDao.address, data)
+        tokenVotingSetup.prepareInstallation(targetDao.address, data)
       ).to.be.revertedWith(customError('MintArrayLengthMismatch', 1, 0));
     });
 
@@ -141,7 +141,7 @@ describe('ERC20VotingSetup', function () {
       ]);
 
       await expect(
-        erc20VotingSetup.prepareInstallation(targetDao.address, data)
+        tokenVotingSetup.prepareInstallation(targetDao.address, data)
       ).to.be.revertedWith(customError('TokenNotContract', tokenAddress));
     });
 
@@ -156,20 +156,20 @@ describe('ERC20VotingSetup', function () {
       ]);
 
       await expect(
-        erc20VotingSetup.prepareInstallation(targetDao.address, data)
+        tokenVotingSetup.prepareInstallation(targetDao.address, data)
       ).to.be.revertedWith(customError('TokenNotERC20', tokenAddress));
     });
 
     it('correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied', async () => {
       const nonce = await ethers.provider.getTransactionCount(
-        erc20VotingSetup.address
+        tokenVotingSetup.address
       );
       const anticipatedWrappedTokenAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce,
       });
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce + 1,
       });
 
@@ -177,12 +177,12 @@ describe('ERC20VotingSetup', function () {
         1,
         1,
         1,
-        [erc20TokenContract.address, tokenName, tokenSymbol],
+        [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
       ]);
 
       const {plugin, helpers, permissions} =
-        await erc20VotingSetup.callStatic.prepareInstallation(
+        await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           data
         );
@@ -197,7 +197,7 @@ describe('ERC20VotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Grant,
@@ -218,10 +218,10 @@ describe('ERC20VotingSetup', function () {
 
     it('correctly sets up `GovernanceWrappedERC20` helper, when an ERC20 token address is supplied', async () => {
       const nonce = await ethers.provider.getTransactionCount(
-        erc20VotingSetup.address
+        tokenVotingSetup.address
       );
       const anticipatedWrappedTokenAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce,
       });
 
@@ -229,11 +229,11 @@ describe('ERC20VotingSetup', function () {
         1,
         1,
         1,
-        [erc20TokenContract.address, tokenName, tokenSymbol],
+        [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
       ]);
 
-      await erc20VotingSetup.prepareInstallation(targetDao.address, data);
+      await tokenVotingSetup.prepareInstallation(targetDao.address, data);
 
       const GovernanceWrappedERC20Factory = await ethers.getContractFactory(
         'GovernanceWrappedERC20'
@@ -249,7 +249,7 @@ describe('ERC20VotingSetup', function () {
       );
 
       expect(await governanceWrappedERC20Contract.underlying()).to.be.equal(
-        erc20TokenContract.address
+        erc20Token.address
       );
     });
 
@@ -265,11 +265,11 @@ describe('ERC20VotingSetup', function () {
       );
 
       const nonce = await ethers.provider.getTransactionCount(
-        erc20VotingSetup.address
+        tokenVotingSetup.address
       );
 
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce,
       });
 
@@ -282,7 +282,7 @@ describe('ERC20VotingSetup', function () {
       ]);
 
       const {plugin, helpers, permissions} =
-        await erc20VotingSetup.callStatic.prepareInstallation(
+        await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           data
         );
@@ -297,7 +297,7 @@ describe('ERC20VotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Grant,
@@ -318,20 +318,20 @@ describe('ERC20VotingSetup', function () {
 
     it('correctly returns plugin, helpers and permissions, when a token address is not supplied', async () => {
       const nonce = await ethers.provider.getTransactionCount(
-        erc20VotingSetup.address
+        tokenVotingSetup.address
       );
       const anticipatedTokenAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce,
       });
 
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce + 1,
       });
 
       const {plugin, helpers, permissions} =
-        await erc20VotingSetup.callStatic.prepareInstallation(
+        await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           MINIMUM_DATA
         );
@@ -346,7 +346,7 @@ describe('ERC20VotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Grant,
@@ -384,34 +384,32 @@ describe('ERC20VotingSetup', function () {
       ]);
 
       const nonce = await ethers.provider.getTransactionCount(
-        erc20VotingSetup.address
+        tokenVotingSetup.address
       );
       const anticipatedTokenAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce,
       });
       const anticipatedPluginAddress = ethers.utils.getContractAddress({
-        from: erc20VotingSetup.address,
+        from: tokenVotingSetup.address,
         nonce: nonce + 1,
       });
 
-      await erc20VotingSetup.prepareInstallation(daoAddress, data);
+      await tokenVotingSetup.prepareInstallation(daoAddress, data);
 
       // check plugin
-      const PluginFactory = await ethers.getContractFactory('ERC20Voting');
-      const erc20VotingContract = PluginFactory.attach(
-        anticipatedPluginAddress
-      );
+      const PluginFactory = await ethers.getContractFactory('TokenVoting');
+      const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
-      expect(await erc20VotingContract.getDAO()).to.be.equal(daoAddress);
-      expect(await erc20VotingContract.totalSupportThresholdPct()).to.be.equal(
+      expect(await tokenVoting.dao()).to.be.equal(daoAddress);
+      expect(await tokenVoting.totalSupportThresholdPct()).to.be.equal(
         totalSupportThresholdPct
       );
-      expect(
-        await erc20VotingContract.relativeSupportThresholdPct()
-      ).to.be.equal(relativeSupportThresholdPct);
-      expect(await erc20VotingContract.minDuration()).to.be.equal(minDuration);
-      expect(await erc20VotingContract.getVotingToken()).to.be.equal(
+      expect(await tokenVoting.relativeSupportThresholdPct()).to.be.equal(
+        relativeSupportThresholdPct
+      );
+      expect(await tokenVoting.minDuration()).to.be.equal(minDuration);
+      expect(await tokenVoting.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
       );
 
@@ -423,7 +421,7 @@ describe('ERC20VotingSetup', function () {
         anticipatedTokenAddress
       );
 
-      expect(await governanceTokenContract.getDAO()).to.be.equal(daoAddress);
+      expect(await governanceTokenContract.dao()).to.be.equal(daoAddress);
       expect(await governanceTokenContract.name()).to.be.equal(tokenName);
       expect(await governanceTokenContract.symbol()).to.be.equal(tokenSymbol);
     });
@@ -434,7 +432,7 @@ describe('ERC20VotingSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(await erc20VotingSetup.prepareUninstallationDataABI()).to.be.eq(
+      expect(await tokenVotingSetup.prepareUninstallationDataABI()).to.be.eq(
         dataHRABI
       );
     });
@@ -443,7 +441,7 @@ describe('ERC20VotingSetup', function () {
       const plugin = ethers.Wallet.createRandom().address;
 
       await expect(
-        erc20VotingSetup.prepareUninstallation(
+        tokenVotingSetup.prepareUninstallation(
           targetDao.address,
           plugin,
           [],
@@ -452,7 +450,7 @@ describe('ERC20VotingSetup', function () {
       ).to.be.revertedWith(customError('WrongHelpersArrayLength', 0));
 
       await expect(
-        erc20VotingSetup.prepareUninstallation(
+        tokenVotingSetup.prepareUninstallation(
           targetDao.address,
           plugin,
           [AddressZero, AddressZero, AddressZero],
@@ -484,7 +482,7 @@ describe('ERC20VotingSetup', function () {
 
       // When the helpers contain governanceWrappedERC20 token
       const permissions1 =
-        await erc20VotingSetup.callStatic.prepareUninstallation(
+        await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
           plugin,
           [governanceWrappedERC20.address],
@@ -497,7 +495,7 @@ describe('ERC20VotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_CONFIGURATION_PERMISSION_ID,
+          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Revoke,
@@ -519,7 +517,7 @@ describe('ERC20VotingSetup', function () {
       expect(permissions1).to.deep.equal([...essentialPermissions]);
 
       const permissions2 =
-        await erc20VotingSetup.callStatic.prepareUninstallation(
+        await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
           plugin,
           [governanceERC20.address],

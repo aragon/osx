@@ -89,7 +89,7 @@ contract DAOFactory {
                 PermissionLib.ItemMultiTarget[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
-                    PluginSetupProcessor.PrepareInstallParams(
+                    PluginSetupProcessor.PrepareInstall(
                         _pluginSettings[i].tag,
                         _pluginSettings[i].pluginSetupRepo,
                         _pluginSettings[i].data
@@ -99,7 +99,7 @@ contract DAOFactory {
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
-                PluginSetupProcessor.ApplyInstallParams(
+                PluginSetupProcessor.ApplyInstall(
                     _pluginSettings[i].tag,
                     _pluginSettings[i].pluginSetupRepo,
                     plugin,

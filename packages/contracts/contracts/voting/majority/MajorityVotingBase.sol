@@ -232,7 +232,7 @@ abstract contract MajorityVotingBase is
     function _execute(uint256 _proposalId) internal virtual {
         proposals[_proposalId].executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
+        bytes[] memory execResults = dao().execute(_proposalId, proposals[_proposalId].actions);
 
         emit ProposalExecuted(_proposalId, execResults);
     }

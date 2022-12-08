@@ -1,10 +1,10 @@
 {
   "goerli": {
     "dao": {
-      "AllowlistVoting": {
+      "AddresslistVoting": {
         "tx": "0x27f0d2ab1cf88446560b9bfeed5d5d0bd25b273861aeb420c773d4f9e5ba0f81",
-        "name": "DummyDAO_Allowlist_Voting_1665145900111",
-        "votingType": "AllowlistVoting",
+        "name": "DummyDAO_Addresslist_Voting_1665145900111",
+        "votingType": "AddresslistVoting",
         "address": "0xB2476e2499146F94138bad830c087Bb4B25ca200",
         "token": "0x0000000000000000000000000000000000000000",
         "voting": "0x4165676689f6af99580250759C62295D1112e749",
@@ -21,7 +21,7 @@
         "proposal": {
           "proposalTx": "0x8a3d6fa71ccea5b0e1374051b06a4ceefbdee5eb708fc454885516ece5d7bef2",
           "metadata": {
-            "name": "AllowlistVoting Dummy Proposal",
+            "name": "AddresslistVoting Dummy Proposal",
             "description": "Dummy withdraw proposal for QA and testing purposes...",
             "links": [
               {
