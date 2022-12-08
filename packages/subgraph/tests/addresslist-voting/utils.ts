@@ -125,6 +125,7 @@ export function createNewVoteSettingsUpdatedEvent(
   minParticipation: string,
   supportThreshold: string,
   minDuration: string,
+  minProposalCreationVotingPower: string,
   contractAddress: string
 ): VoteSettingsUpdated {
   let newVoteSettingsUpdatedEvent = changetype<VoteSettingsUpdated>(
@@ -146,10 +147,19 @@ export function createNewVoteSettingsUpdatedEvent(
     'minDuration',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
+  let minProposalCreationVotingPowerParam = new ethereum.EventParam(
+    'minProposalCreationVotingPower',
+    ethereum.Value.fromSignedBigInt(
+      BigInt.fromString(minProposalCreationVotingPower)
+    )
+  );
 
   newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newVoteSettingsUpdatedEvent.parameters.push(
+    minProposalCreationVotingPowerParam
+  );
 
   return newVoteSettingsUpdatedEvent;
 }

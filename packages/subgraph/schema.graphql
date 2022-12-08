@@ -206,6 +206,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   supportThreshold: BigInt
   minParticipation: BigInt
   minDuration: BigInt
+  minProposalCreationVotingPower: BigInt
   proposalCount: BigInt
   token: Token
   members: [TokenVotingVoter!]! @derivedFrom(field: "plugin")
@@ -264,6 +265,7 @@ type AddresslistPlugin implements IPlugin @entity {
   supportThreshold: BigInt
   minParticipation: BigInt
   minDuration: BigInt
+  minProposalCreationVotingPower: BigInt
   proposalCount: BigInt
   members: [AddresslistVoter!]! @derivedFrom(field: "plugin")
 }
