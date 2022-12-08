@@ -181,8 +181,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.supportThreshold = event.params.supportThreshold;
+    packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }
