@@ -331,13 +331,8 @@ abstract contract MajorityVotingBase is
                 revert DateOutOfBounds({limit: currentTimestamp, actual: startDate});
             }
         }
-        // Check if `startDate` is after the latest possible start date in which case the addition of `minDuration` would lead to an integer overflow.
-        uint64 latestStartDate = type(uint64).max - minDuration;
-        if (latestStartDate < startDate) {
-            revert DateOutOfBounds({limit: latestStartDate, actual: startDate});
-        }
 
-        uint64 earliestEndDate = startDate + minDuration; // After the previous check, this can not overflow.
+        uint64 earliestEndDate = startDate + minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
 
         if (_end == 0) {
             endDate = earliestEndDate;
