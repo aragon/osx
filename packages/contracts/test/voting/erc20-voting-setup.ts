@@ -5,7 +5,8 @@ import {ERC20, ERC20VotingSetup, MerkleMinter} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import { deployWithProxy } from '../test-utils/proxy';
+import {deployWithProxy} from '../test-utils/proxy';
+import {ONE_HOUR} from '../test-utils/voting';
 
 enum Op {
   Grant,
@@ -27,12 +28,12 @@ const MINIMUM_DATA = abiCoder.encode(
     'tuple(address,string,string)',
     'tuple(address[],uint256[])',
   ],
-  [1, 1, 1, [AddressZero, '', ''], [[], []]]
+  [1, 1, ONE_HOUR, [AddressZero, '', ''], [[], []]]
 );
 
 const participationRequiredPct = 1;
 const supportRequiredPct = 2;
-const minDuration = 3;
+const minDuration = ONE_HOUR;
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
 const merkleMintToAddressArray = [ethers.Wallet.createRandom().address];
@@ -122,7 +123,7 @@ describe('ERC20VotingSetup', function () {
           'tuple(address,string,string)',
           'tuple(address[],uint256[])',
         ],
-        [1, 1, 1, [AddressZero, '', ''], [[AddressZero], []]]
+        [1, 1, ONE_HOUR, [AddressZero, '', ''], [[AddressZero], []]]
       );
 
       await expect(
@@ -140,7 +141,7 @@ describe('ERC20VotingSetup', function () {
           'tuple(address,string,string)',
           'tuple(address[],uint256[])',
         ],
-        [1, 1, 1, [tokenAddress, '', ''], [[], []]]
+        [1, 1, ONE_HOUR, [tokenAddress, '', ''], [[], []]]
       );
 
       await expect(
@@ -158,7 +159,7 @@ describe('ERC20VotingSetup', function () {
           'tuple(address,string,string)',
           'tuple(address[],uint256[])',
         ],
-        [1, 1, 1, [tokenAddress, '', ''], [[], []]]
+        [1, 1, ONE_HOUR, [tokenAddress, '', ''], [[], []]]
       );
 
       await expect(
@@ -190,7 +191,7 @@ describe('ERC20VotingSetup', function () {
         [
           1,
           1,
-          1,
+          ONE_HOUR,
           [erc20TokenContract.address, tokenName, tokenSymbol],
           [[], []],
         ]
@@ -251,7 +252,7 @@ describe('ERC20VotingSetup', function () {
         [
           1,
           1,
-          1,
+          ONE_HOUR,
           [erc20TokenContract.address, tokenName, tokenSymbol],
           [[], []],
         ]
@@ -304,7 +305,7 @@ describe('ERC20VotingSetup', function () {
           'tuple(address,string,string)',
           'tuple(address[],uint256[])',
         ],
-        [1, 1, 1, [governanceERC20.address, '', ''], [[], []]]
+        [1, 1, ONE_HOUR, [governanceERC20.address, '', ''], [[], []]]
       );
 
       const {plugin, helpers, permissions} =
@@ -555,7 +556,9 @@ describe('ERC20VotingSetup', function () {
       const MerkleMinterFactory = await ethers.getContractFactory(
         'MerkleMinter'
       );
-      const merkleMinter = await deployWithProxy(MerkleMinterFactory) as MerkleMinter;
+      const merkleMinter = (await deployWithProxy(
+        MerkleMinterFactory
+      )) as MerkleMinter;
       await merkleMinter.initialize(
         targetDao.address,
         token.address,

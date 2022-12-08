@@ -4,7 +4,13 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import {ERC20Voting, DAOMock} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {
+  VoteOption,
+  VOTING_EVENTS,
+  pct16,
+  ONE_HOUR,
+  MAX_UINT64,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployWithProxy} from '../test-utils/proxy';
 
@@ -39,7 +45,7 @@ describe('ERC20Voting', function () {
 
     const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
 
-    voting = await deployWithProxy(ERC20Voting) as ERC20Voting;
+    voting = (await deployWithProxy(ERC20Voting)) as ERC20Voting;
   });
 
   function initializeVoting(
@@ -58,22 +64,16 @@ describe('ERC20Voting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeVoting(1, 2, 3);
+      await initializeVoting(1, 2, ONE_HOUR);
 
-      await expect(initializeVoting(2, 1, 3)).to.be.revertedWith(
+      await expect(initializeVoting(2, 1, ONE_HOUR)).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
-      );
-    });
-
-    it('reverts if min duration is 0', async () => {
-      await expect(initializeVoting(1, 2, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
       );
     });
   });
 
   describe('StartVote', async () => {
-    let minDuration = 3;
+    let minDuration = ONE_HOUR;
     beforeEach(async () => {
       await initializeVoting(1, 2, minDuration);
     });
@@ -85,12 +85,12 @@ describe('ERC20Voting', function () {
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
-    it('reverts if vote duration is less than minDuration', async () => {
+    it('reverts if the start date is set smaller than the current date', async () => {
       await erc20VoteMock.mock.getPastTotalSupply.returns(1);
       const block = await ethers.provider.getBlock('latest');
-      const current = block.timestamp;
-      const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const currentDate = block.timestamp;
+      const startDate = currentDate - 1;
+      const endDate = 0; // startDate + minDuration
       await expect(
         voting.createVote(
           '0x00',
@@ -101,13 +101,47 @@ describe('ERC20Voting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError(
-          'VoteTimesInvalid',
-          current + 1, // TODO hacky
+        customError('DateOutOfBounds', currentDate + 1, startDate)
+      );
+    });
+
+    it('reverts if the start date is after the latest start date', async () => {
+      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
+      const latestStartDate = MAX_UINT64.sub(minDuration);
+      const startDate = latestStartDate.add(1);
+      const endDate = 0; // startDate + minDuration
+      await expect(
+        voting.createVote(
+          '0x00',
+          [],
           startDate,
           endDate,
-          minDuration
+          false,
+          VoteOption.None
         )
+      ).to.be.revertedWith(
+        'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
+      );
+    });
+
+    it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
+      await erc20VoteMock.mock.getPastTotalSupply.returns(1);
+      const block = await ethers.provider.getBlock('latest');
+      const currentTime = block.timestamp;
+      const startDate = currentTime + 1;
+      const earliestEndDate = startDate + minDuration;
+      const endDate = earliestEndDate - 1;
+      await expect(
+        voting.createVote(
+          '0x00',
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', earliestEndDate, endDate)
       );
     });
 
@@ -189,7 +223,7 @@ describe('ERC20Voting', function () {
   });
 
   describe('Vote + Execute:', async () => {
-    let minDuration = 500;
+    let minDuration = ONE_HOUR;
     let supportRequired = pct16(50);
     let minimumQuorom = pct16(20);
     let votingPower = 100;

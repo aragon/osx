@@ -4,6 +4,7 @@ import {ethers} from 'hardhat';
 import {AllowlistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {ONE_HOUR} from '../test-utils/voting';
 
 enum Op {
   Grant,
@@ -19,7 +20,7 @@ const EMPTY_DATA = '0x';
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(
   ['uint64', 'uint64', 'uint64', 'address[]'],
-  [1, 1, 1, []]
+  [1, 1, ONE_HOUR, []]
 );
 
 // Permissions
@@ -154,7 +155,7 @@ describe('AllowlistVotingSetup', function () {
       const daoAddress = targetDao.address;
       const participationRequiredPct = 1;
       const supportRequiredPct = 2;
-      const minDuration = 3;
+      const minDuration = ONE_HOUR;
       const allowed = [ownerAddress];
 
       const data = abiCoder.encode(
