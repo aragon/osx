@@ -284,7 +284,7 @@ describe('TokenVoting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError('DateOutOfBounds', latestStartDate, tooLateStartDate)
+        'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
       );
     });
 
