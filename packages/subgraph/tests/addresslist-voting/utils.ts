@@ -224,6 +224,7 @@ export function createAddresslistProposalEntityState(
   totalSupportThresholdPct: string = MIN_TURNOUT,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
+  creationBlockNumber: BigInt = new BigInt(0),
   open: boolean = true,
   executable: boolean = false,
   executed: boolean = false
@@ -248,6 +249,7 @@ export function createAddresslistProposalEntityState(
   addresslistProposal.executable = executable;
   addresslistProposal.executed = executed;
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
+  addresslistProposal.creationBlockNumber = creationBlockNumber;
   addresslistProposal.save();
 
   return addresslistProposal;

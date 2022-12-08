@@ -184,6 +184,7 @@ export function createTokenVotingProposalEntityState(
   totalSupportThresholdPct: string = MIN_TURNOUT,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
+  creationBlockNumber: BigInt = new BigInt(0),
   open: boolean = true,
   executable: boolean = false,
   executed: boolean = false
@@ -208,6 +209,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.executable = executable;
   tokenVotingProposal.executed = executed;
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
+  tokenVotingProposal.creationBlockNumber = creationBlockNumber;
   tokenVotingProposal.save();
 
   return tokenVotingProposal;
