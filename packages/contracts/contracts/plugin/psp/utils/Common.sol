@@ -6,6 +6,14 @@ import {PluginRepo} from "../../PluginRepo.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../PluginSetup.sol";
 
+function _getPluginId(address _dao, address _plugin) returns (bytes32) {
+    return keccak256(abi.encode(_dao, _plugin));
+}
+
+function _getUpdateId(bytes memory _initData, bytes32 _setupId) returns (bytes32) {
+    return keccak256(abi.encode(keccak256(_initData), _setupId));
+}
+
 /// @notice Returns an identifier for prepared installations by hashing the DAO and plugin address.
 /// @param _dao The address of the DAO conducting the setup.
 /// @param _versionTag The exact version of the plugin to install.
