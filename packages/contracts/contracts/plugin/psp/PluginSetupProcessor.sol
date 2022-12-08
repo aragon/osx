@@ -14,8 +14,7 @@ import {PluginRepoRegistry} from "../../registry/PluginRepoRegistry.sol";
 import {PluginSetup} from "../PluginSetup.sol";
 import {PluginRepo} from "../PluginRepo.sol";
 import {isValidBumpLoose, BumpInvalid} from "../SemanticVersioning.sol";
-import {executePrepareUpdate, validatePrepareUpdate, PrepareUpdateParams} from "./utils/Update.sol";
-import { _getUpdateId } from "./utils/Common.sol";
+import {PluginSetupRef, hHash, pHash, _getSetupId, _getPluginId} from "./utils/Common.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -23,7 +22,9 @@ import { _getUpdateId } from "./utils/Common.sol";
 /// @dev This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
 contract PluginSetupProcessor is DaoAuthorizable {
     using ERC165Checker for address;
-
+    using hHash for address;
+    using pHash for PermissionLib.ItemMultiTarget[];
+    
     /// @notice The ID of the permission required to call the `applyInstallation` function.
     bytes32 public constant APPLY_INSTALLATION_PERMISSION_ID =
         keccak256("APPLY_INSTALLATION_PERMISSION");
@@ -37,26 +38,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     enum State {
         NONE,
-        InstallPrepared,
         InstallApplied,
-        UpdatePrepared,
         UpdateApplied,
-        UninstallPrepared,
         UninstallApplied
     }
 
     struct PluginInformation {
         State state;
-        bytes32 setupId;
-        bytes32 updateIds;
+        bytes32 currentSetupId;
+        bytes32[] setupIds;
     }
 
     mapping(bytes32 => PluginInformation) private states;
 
-    struct PluginSetupRef {
-        PluginRepo.Tag versionTag;
-        PluginRepo pluginSetupRepo;
-    }
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     struct PrepareInstall {
@@ -66,6 +60,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
     struct ApplyInstall {
+        uint256 index;
         PluginSetupRef pluginSetupRef;
         address plugin;
         PermissionLib.ItemMultiTarget[] permissions;
@@ -74,12 +69,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
     struct PrepareUpdate {
         PluginRepo.Tag currentVersionTag;
-        PluginSetupRef pluginSetupRef;
+        PluginRepo.Tag newVersionTag;
+        address pluginSetupRepo;
         IPluginSetup.SetupPayload setupPayload;
     }
 
     /// @notice The struct containing the parameters for the `applyUpdate` function.
     struct ApplyUpdate {
+        uint256 index;
         address plugin;
         PluginSetupRef pluginSetupRef;
         bytes initData;
@@ -145,6 +142,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error SetupAlreadyApplied();
 
     error PluginInWrongState();
+    
+    error InvalidSetupId();
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -286,23 +285,21 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.data
         );
         
-        bytes32 pluginId = _getPluginId(_dao, _plugin);
-        
-        if (states[pluginId].state != State.NONE) {
-            revert PluginInWrongState();
-        }
+        bytes32 pluginId = _getPluginId(_dao, plugin);
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            _getPermissionsHash(preparedDependency.permissions),
-            _getHelpersHash(preparedDependency.helpers)
+            preparedDependency.permissions.pHash(),
+            preparedDependency.helpers.hHash(),
+            bytes32(0)
         );
 
-        states[pluginId] = PluginInformation(
-            State.InstallPrepared,
-            setupId,
-            new bytes32[](0)
-        );
+        PluginInformation storage pluginInformation = states[pluginId];
+        if(pluginInformation.state != State.NONE) {
+            revert PluginInWrongState();
+        }
+
+        pluginInformation.setupIds.push(setupId);
     }
 
     /// @notice Applies the permissions of a prepared installation to a DAO.
@@ -317,23 +314,30 @@ contract PluginSetupProcessor is DaoAuthorizable {
     {
         bytes32 pluginId = _getPluginId(_dao, _params.plugin);
         
-        PluginInformation storage pluginInformation = state[pluginId];
+        PluginInformation storage pluginInformation = states[pluginId];
 
         if (pluginInformation.state != State.InstallPrepared) {
             revert PluginInWrongState();
         }
 
+        bytes32 chosenSetupId = pluginInformation.setupIds[_params.index];
+
         bytes32 setupId = _getSetupId( 
             _params.pluginSetupRef,
-            _getPermissionsHash(_params.permissions),
-            _params.helpersHash
+            _params.permissions.pHash(),
+            _params.helpersHash,
+            bytes32(0)
         );
 
-        if(pluginInformation.setupId != setupId) {
-            // revert
+        if(setupId != chosenSetupId) {
+            revert InvalidSetupId();
         }
+        
+        pluginInformation.activeSetupId = setupId;
 
         pluginInformation.state = State.InstallApplied;
+
+        delete pluginInformation.setupIds;
 
         // Process the permission list.
         DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
@@ -363,15 +367,21 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = _getSetupId(
             PluginSetupRef(
                 _params.currentVersionTag, 
-                _params.pluginSetupRef.pluginSetupRepo
+                _params.pluginSetupRepo
             ),
             _params.permissionsHash,
-            _getHelpersHash(params.currentHelpers)
+            _params.currentHelpers.hHash(),
+            bytes32(0)
         );
 
         if (pluginInformation.currentSetupId != setupId) {
             revert PluginInWrongState();
         }
+
+         // `getVersionByPluginSetup` will revert if `currentPluginSetup` is not part of `pluginSetupRepo`.
+        PluginRepo.Version memory newVersion = _params.pluginSetupRepo.getVersionByPluginSetup(
+            _params.newVersionTag
+        );
 
         // Prepare the update.
         (
@@ -383,16 +393,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 _params.setupPayload
             );
         
-        bytes32 updateId = _getUpdateId(
-            initData,
-            _getSetupId(
-                _params.pluginSetupRef, 
-                _getPermissionsHash(preparedDependency.permissions),
-                _getHelpersHash(preparedDependency.helpers),
-            )
+        bytes32 newSetupId = _getSetupId(
+            PluginSetupRef(
+                _params.newVersionTag, 
+                _params.pluginSetupRepo
+            ),
+            preparedDependency.permissions.pHash(),
+            preparedDependency.helpers.hHash(),
+            initData
         );
 
-        pluginInformation.updateIds.push(updateId);
+        pluginInformation.setupIds.push(newSetupId);
 
         return (preparedDependency.permissions, initData);
     }
@@ -417,21 +428,27 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            _getPermissionsHash(_params.permissions),
-            _params.helpersHash
+            _params.permissions.pHash(),
+            _params.helpersHash,
+            _params.data
         );
 
-        bytes32 updateId = pluginInformation.updateIds[_params.index];
-        bytes32 updateId2 = _getUpdateId(
-            _params.initData,
-            setupId
-        );
+        bytes32 chosenSetupId = pluginInformation.setupIds[_params.index];
 
-        if(updateId != updateId2) {
+        if(chosenSetupId != setupId) {
             // revert
         }
         
-        pluginInformation.setupId = setupId;
+        pluginInformation.currentSetupId = _getSetupId(
+            _params.pluginSetupRef,
+            _params.permissions.pHash(),
+            _params.helpersHash,
+            bytes32(0)
+        );
+
+        delete pluginInformation.setupIds;
+
+        pluginInformation.state != State.UpdateApplied;
 
         PluginRepo.Version memory version = _params.pluginSetupRepo.getVersion(_params.versionTag);
 
@@ -444,8 +461,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
-
-        delete pluginInformation.potentialSetupIds;
     }
 
     /// @notice Prepares the uninstallation of a plugin.
@@ -457,47 +472,47 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         returns (PermissionLib.ItemMultiTarget[] memory permissions)
     {
-        bytes32 setupId = _getSetupId(_dao, _params.pluginSetupRef, _params.plugin);
+        // bytes32 setupId = _getSetupId(_dao, _params.pluginSetupRef, _params.plugin);
 
-        PluginInformation storage pluginInformation = states[setupId];
+        // PluginInformation storage pluginInformation = states[setupId];
 
-        if (
-            pluginInformation.state != State.InstallApplied &&
-            pluginInformation.state != State.UpdateApplied
-        ) {
-            revert PluginInWrongState();
-        }
+        // if (
+        //     pluginInformation.state != State.InstallApplied &&
+        //     pluginInformation.state != State.UpdateApplied
+        // ) {
+        //     revert PluginInWrongState();
+        // }
 
-        if (pluginInformation.helpersHash != _getHelpersHash(_params.currentHelpers)) {
-            revert HelpersHashMismatch();
-        }
+        // if (pluginInformation.helpersHash != _getHelpersHash(_params.currentHelpers)) {
+        //     revert HelpersHashMismatch();
+        // }
 
-        // Reverts if not found.
-        PluginRepo.Version memory version = _params.pluginSetupRepo.getVersion(_params.versionTag);
+        // // Reverts if not found.
+        // PluginRepo.Version memory version = _params.pluginSetupRepo.getVersion(_params.versionTag);
 
-        // Finally, After all the validation steps are run,
-        // start preparing uninstallation and run
-        // the developer's code for the uninstallation.
-        permissions = PluginSetup(version.pluginSetup).prepareUninstallation(
-            _dao,
-            _params.plugin,
-            _params.currentHelpers,
-            _params.data
-        );
+        // // Finally, After all the validation steps are run,
+        // // start preparing uninstallation and run
+        // // the developer's code for the uninstallation.
+        // permissions = PluginSetup(version.pluginSetup).prepareUninstallation(
+        //     _dao,
+        //     _params.plugin,
+        //     _params.currentHelpers,
+        //     _params.data
+        // );
 
-        // set permission hashes.
-        pluginInformation.permissionsHashes = _getPermissionsHash(permissions);
+        // // set permission hashes.
+        // pluginInformation.permissionsHashes = _getPermissionsHash(permissions);
 
-        // emit UninstallationPrepared({
-        //     sender: msg.sender,
-        //     plugin: _params.plugin,
-        //     dao: _dao,
-        //     pluginSetupRepo: _params.pluginSetupRepo,
-        //     versionTag: _params.versionTag,
-        //     data: _params.data,
-        //     currentHelpers: _params.currentHelpers,
-        //     permissions: permissions
-        // });
+        // // emit UninstallationPrepared({
+        // //     sender: msg.sender,
+        // //     plugin: _params.plugin,
+        // //     dao: _dao,
+        // //     pluginSetupRepo: _params.pluginSetupRepo,
+        // //     versionTag: _params.versionTag,
+        // //     data: _params.data,
+        // //     currentHelpers: _params.currentHelpers,
+        // //     permissions: permissions
+        // // });
     }
 
     /// @notice Applies the permissions of a prepared uninstallation to a DAO.
@@ -509,61 +524,29 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID)
     {
-        bytes32 setupId = _getSetupId(_dao, _params.pluginSetupRef, _params.plugin);
+        // bytes32 setupId = _getSetupId(_dao, _params.pluginSetupRef, _params.plugin);
 
-        PluginInformation storage pluginInformation = states[setupId];
+        // PluginInformation storage pluginInformation = states[setupId];
 
-        if (pluginInformation.state != State.UninstallPrepared) {
-            revert PluginInWrongState();
-        }
+        // if (pluginInformation.state != State.UninstallPrepared) {
+        //     revert PluginInWrongState();
+        // }
 
-        if (pluginInformation.permissionsHash != _getPermissionsHash(_params.permissions)) {
-            revert PermissionsHashMismatch();
-        }
+        // if (pluginInformation.permissionsHash != _getPermissionsHash(_params.permissions)) {
+        //     revert PermissionsHashMismatch();
+        // }
 
-        DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+        // DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
 
-        // Free up space by deleting the helpers and permission hash being not needed anymore.
-        delete states[setupId];
+        // // Free up space by deleting the helpers and permission hash being not needed anymore.
+        // delete states[setupId];
 
-        // emit UninstallationApplied({
-        //     dao: _dao,
-        //     plugin: _params.plugin,
-        //     pluginSetupRepo: _params.pluginSetupRepo,
-        //     versionTag: _params.versionTag
-        // });
-    }
-
-    /// @notice Returns an identifier for prepared installations by hashing the DAO and plugin address.
-    /// @param _dao The address of the DAO conducting the setup.
-    /// @param _versionTag The exact version of the plugin to install.
-    /// @param _pluginSetupRepo The address of plugin setup repo.
-    /// @param _plugin The address of the `Plugin` contract associated with the setup.
-    function _getSetupId(
-        address _dao,
-        PluginSetupRef memory _pluginSetupRef,
-        address _plugin
-    ) private pure returns (bytes32 setupId) {
-        setupId = keccak256(
-            abi.encode(_dao, _pluginSetupRef.versionTag, _pluginSetupRef.pluginSetupRepo, _plugin)
-        );
-    }
-
-    /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
-    /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.
-    function _getHelpersHash(address[] memory _helpers) private pure returns (bytes32 helpersHash) {
-        helpersHash = keccak256(abi.encode(_helpers));
-    }
-
-    /// @notice Returns a hash of an array of multi-targeted permission operations.
-    /// @param _permissions The array of of multi-targeted permission operations.
-    /// @return bytes The hash of the array of permission operations.
-    function _getPermissionsHash(PermissionLib.ItemMultiTarget[] memory _permissions)
-        private
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encode(_permissions));
+        // // emit UninstallationApplied({
+        // //     dao: _dao,
+        // //     plugin: _params.plugin,
+        // //     pluginSetupRepo: _params.pluginSetupRepo,
+        // //     versionTag: _params.versionTag
+        // // });
     }
 
     /// @notice Upgrades an UUPSUpgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).

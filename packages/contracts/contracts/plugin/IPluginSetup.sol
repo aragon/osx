@@ -5,11 +5,16 @@ pragma solidity 0.8.10;
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 interface IPluginSetup {
+    /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
+    /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedDependency {
         address[] helpers;
         PermissionLib.ItemMultiTarget[] permissions;
     }
 
+    /// @param plugin The address of the `Plugin`.
+    /// @param currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
+    /// @param data The `bytes` encoded data containing the input parameters for the preparation of update/uninstall as specified in the `prepareUpdateDataABI()` or `prepareUninstallationDataABI` function.
     struct SetupPayload {
         address plugin;
         address[] currentHelpers;
@@ -24,8 +29,7 @@ interface IPluginSetup {
     /// @param _dao The address of the installing DAO.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
-    /// @return helpers The address array of all helpers (contracts or EOAs) associated with the plugin after the installation.
-    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
+    /// @return preparedDependency TOD:GIORGI
     function prepareInstallation(address _dao, bytes memory _data)
         external
         returns (address plugin, PreparedDependency memory preparedDependency);
@@ -37,17 +41,13 @@ interface IPluginSetup {
 
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
-    /// @param _plugin The address of the `Plugin` contract to update from.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param _currentBuildId The build id of the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the `prepareUpdateDataABI()` function.
-    /// @return updatedHelpers The address array of helpers (contracts or EOAs) associated with the plugin after the update.
+    /// @param _currentBuild The build number of the plugin to update from.
+    /// @param _payload TOD:GIORGI how to add explanation ? 
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
-    /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the updating DAO.
-    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
+    /// @return preparedDependency TOD:GIORGI
     function prepareUpdate(
         address _dao,
-        uint16 _currentBuildId,
+        uint16 _currentBuild,
         SetupPayload calldata _payload
     ) external returns (bytes memory initData, PreparedDependency memory preparedDependency);
 
@@ -57,11 +57,8 @@ interface IPluginSetup {
 
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.
-    /// @param _plugin The address of the `Plugin` contract to update from.
-    /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters for the uninstalltion as specified in the `prepareUninstallationDataABI()` function.
+    /// @param _payload TOD:GIORGI how to add explanation ? 
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
-    /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external
         returns (PermissionLib.ItemMultiTarget[] memory permissions);

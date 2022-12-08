@@ -17,7 +17,7 @@ interface IMajorityVoting {
         No
     }
 
-    struct Vote {
+    struct Proposal {
         bool executed;
         uint64 startDate;
         uint64 endDate;
