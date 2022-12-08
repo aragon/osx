@@ -28,7 +28,7 @@ describe('AddresslistVoting', function () {
   const startOffset = 10;
   const minDuration = 500;
   const id = 0;
-  let minProposalCreationVotingPower = 0;
+  let minProposerVotingPower = 0;
 
   let mergedAbi: any;
   let addresslistVotingFactoryBytecode: any;
@@ -107,7 +107,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(0)
       );
 
@@ -117,7 +117,7 @@ describe('AddresslistVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
-          minProposalCreationVotingPower,
+          minProposerVotingPower,
           addresslist(0)
         )
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
@@ -134,7 +134,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(0)
       );
     });
@@ -185,14 +185,14 @@ describe('AddresslistVoting', function () {
     minParticipation = pct16(20);
 
     it('reverts if user is not allowed to create a vote', async () => {
-      minProposalCreationVotingPower = 1;
+      minProposerVotingPower = 1;
 
       await voting.initialize(
         dao.address,
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(1)
       );
 
@@ -211,7 +211,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(1)
       );
 
@@ -243,7 +243,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(1)
       );
 
@@ -289,7 +289,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(1)
       );
 
@@ -326,7 +326,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(1)
       );
 
@@ -372,7 +372,7 @@ describe('AddresslistVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         addresslist(10)
       );
 
@@ -552,7 +552,7 @@ describe('AddresslistVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
-          minProposalCreationVotingPower,
+          minProposerVotingPower,
           addresslist(10)
         );
 
@@ -658,7 +658,7 @@ describe('AddresslistVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
-          minProposalCreationVotingPower,
+          minProposerVotingPower,
           addresslist(10)
         );
         expect(

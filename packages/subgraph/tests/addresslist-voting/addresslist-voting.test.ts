@@ -44,7 +44,7 @@ let snapshotBlock = '100';
 let supportThreshold = '1000';
 let minParticipation = '500';
 let minDuration = '3600';
-let minProposalCreationVotingPower = '0';
+let minProposerVotingPower = '0';
 let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -247,7 +247,7 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
     supportThreshold,
     minParticipation,
     minDuration,
-    minProposalCreationVotingPower,
+    minProposerVotingPower,
     VOTING_ADDRESS
   );
 
@@ -272,8 +272,8 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
   assert.fieldEquals(
     'AddresslistPlugin',
     entityID,
-    'minProposalCreationVotingPower',
-    minProposalCreationVotingPower
+    'minProposerVotingPower',
+    minProposerVotingPower
   );
 
   clearStore();

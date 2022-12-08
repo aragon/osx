@@ -73,7 +73,7 @@ abstract contract MajorityVotingBase is
     uint64 public supportThreshold;
     uint64 public minParticipation;
     uint64 public minDuration;
-    uint256 public minProposalCreationVotingPower;
+    uint256 public minProposerVotingPower;
 
     uint256 public proposalCount;
 
@@ -118,20 +118,20 @@ abstract contract MajorityVotingBase is
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote
-    /// @param _minProposalCreationVotingPower The minimal voting power needed to create a proposal.
+    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
     function __MajorityVotingBase_init(
         IDAO _dao,
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
-        uint256 _minProposalCreationVotingPower
+        uint256 _minProposerVotingPower
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
         _validateAndSetSettings(
             _supportThreshold,
             _minParticipation,
             _minDuration,
-            _minProposalCreationVotingPower
+            _minProposerVotingPower
         );
     }
 
@@ -153,13 +153,13 @@ abstract contract MajorityVotingBase is
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
-        uint256 _minProposalCreationVotingPower
+        uint256 _minProposerVotingPower
     ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
         _validateAndSetSettings(
             _supportThreshold,
             _minParticipation,
             _minDuration,
-            _minProposalCreationVotingPower
+            _minProposerVotingPower
         );
     }
 
@@ -344,7 +344,7 @@ abstract contract MajorityVotingBase is
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
-        uint256 _minProposalCreationVotingPower
+        uint256 _minProposerVotingPower
     ) internal virtual {
         if (_supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({limit: PCT_BASE, actual: _supportThreshold});
@@ -361,13 +361,13 @@ abstract contract MajorityVotingBase is
         supportThreshold = _supportThreshold;
         minParticipation = _minParticipation;
         minDuration = _minDuration;
-        minProposalCreationVotingPower = _minProposalCreationVotingPower;
+        minProposerVotingPower = _minProposerVotingPower;
 
         emit VoteSettingsUpdated({
             minParticipation: _minParticipation,
             supportThreshold: _supportThreshold,
             minDuration: _minDuration,
-            minProposalCreationVotingPower: _minProposalCreationVotingPower
+            minProposerVotingPower: _minProposerVotingPower
         });
     }
 

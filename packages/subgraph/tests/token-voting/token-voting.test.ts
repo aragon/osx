@@ -39,7 +39,7 @@ let snapshotBlock = '100';
 let supportThreshold = '1000';
 let minParticipation = '500';
 let minDuration = '3600';
-let minProposalCreationVotingPower = '0';
+let minProposerVotingPower = '0';
 let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -293,7 +293,7 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
     supportThreshold,
     minParticipation,
     minDuration,
-    minProposalCreationVotingPower,
+    minProposerVotingPower,
     VOTING_ADDRESS
   );
 
@@ -318,8 +318,8 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,
-    'minProposalCreationVotingPower',
-    minProposalCreationVotingPower
+    'minProposerVotingPower',
+    minProposerVotingPower
   );
 
   clearStore();

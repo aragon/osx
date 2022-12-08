@@ -26,7 +26,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposalCreationVotingPower, address[] members)";
+            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -45,7 +45,7 @@ contract AddresslistVotingSetup is PluginSetup {
             uint64 supportThreshold,
             uint64 minParticipation,
             uint64 minDuration,
-            uint256 minProposalCreationVotingPower,
+            uint256 minProposerVotingPower,
             address[] memory members
         ) = abi.decode(_data, (uint64, uint64, uint64, uint256, address[]));
 
@@ -58,7 +58,7 @@ contract AddresslistVotingSetup is PluginSetup {
                 supportThreshold,
                 minParticipation,
                 minDuration,
-                minProposalCreationVotingPower,
+                minProposerVotingPower,
                 members
             )
         );

@@ -30,14 +30,14 @@ const prepareInstallDataTypes = [
 const minParticipation = 25;
 const supportThreshold = 50;
 const minDuration = 10;
-const minProposalCreationVotingPower = 1;
+const minProposerVotingPower = 1;
 
 // minimum bytes for `prepareInstallation` data param.
 const MINIMUM_DATA = abiCoder.encode(prepareInstallDataTypes, [
   supportThreshold,
   minParticipation,
   minDuration,
-  minProposalCreationVotingPower,
+  minProposerVotingPower,
   [AddressZero, '', ''],
   [[], []],
 ]);
@@ -83,7 +83,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address _dao, uint64 _supportThreshold, uint64 _minParticipation, uint64 _minDuration, uint256 minProposalCreationVotingPower, address _token)',
+      'function initialize(address _dao, uint64 _supportThreshold, uint64 _minParticipation, uint64 _minDuration, uint256 minProposerVotingPower, address _token)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -95,7 +95,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposalCreationVotingPower, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -124,7 +124,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [AddressZero, '', ''],
         [[AddressZero], []],
       ]);
@@ -140,7 +140,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [tokenAddress, '', ''],
         [[], []],
       ]);
@@ -156,7 +156,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [tokenAddress, '', ''],
         [[], []],
       ]);
@@ -183,7 +183,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
       ]);
@@ -236,7 +236,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [erc20Token.address, tokenName, tokenSymbol],
         [[], []],
       ]);
@@ -285,7 +285,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [governanceERC20.address, '', ''],
         [[], []],
       ]);
@@ -388,7 +388,7 @@ describe('TokenVotingSetup', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],
       ]);
@@ -419,8 +419,8 @@ describe('TokenVotingSetup', function () {
         supportThreshold
       );
       expect(await tokenVoting.minDuration()).to.be.equal(minDuration);
-      expect(await tokenVoting.minProposalCreationVotingPower()).to.be.equal(
-        minProposalCreationVotingPower
+      expect(await tokenVoting.minProposerVotingPower()).to.be.equal(
+        minProposerVotingPower
       );
       expect(await tokenVoting.getVotingToken()).to.be.equal(
         anticipatedTokenAddress

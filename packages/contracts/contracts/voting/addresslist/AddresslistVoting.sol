@@ -58,7 +58,7 @@ contract AddresslistVoting is MajorityVotingBase {
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
-        uint256 _minProposalCreationVotingPower,
+        uint256 _minProposerVotingPower,
         address[] calldata _members
     ) public initializer {
         __MajorityVotingBase_init(
@@ -66,7 +66,7 @@ contract AddresslistVoting is MajorityVotingBase {
             _supportThreshold,
             _minParticipation,
             _minDuration,
-            _minProposalCreationVotingPower
+            _minProposerVotingPower
         );
 
         // add member addresses to the address list
@@ -122,7 +122,7 @@ contract AddresslistVoting is MajorityVotingBase {
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!(minProposalCreationVotingPower == 0) && !isListed(_msgSender(), snapshotBlock)) {
+        if (!(minProposerVotingPower == 0) && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 

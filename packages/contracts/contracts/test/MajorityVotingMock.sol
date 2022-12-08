@@ -10,14 +10,14 @@ contract MajorityVotingMock is MajorityVotingBase {
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
-        uint256 _minProposalCreationVotingPower
+        uint256 _minProposerVotingPower
     ) public initializer {
         __MajorityVotingBase_init(
             _dao,
             _supportThreshold,
             _minParticipation,
             _minDuration,
-            _minProposalCreationVotingPower
+            _minProposerVotingPower
         );
     }
 

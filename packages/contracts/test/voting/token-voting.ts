@@ -33,7 +33,7 @@ describe('TokenVoting', function () {
   const startOffset = 10;
   const minDuration = 500;
   const id = 0;
-  let minProposalCreationVotingPower = 0;
+  let minProposerVotingPower = 0;
 
   let mergedAbi: any;
   let tokenVotingFactoryBytecode: any;
@@ -103,7 +103,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -113,7 +113,7 @@ describe('TokenVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
-          minProposalCreationVotingPower,
+          minProposerVotingPower,
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
@@ -126,7 +126,7 @@ describe('TokenVoting', function () {
           supportThreshold,
           minParticipation,
           0,
-          minProposalCreationVotingPower,
+          minProposerVotingPower,
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(customError('VoteDurationZero'));
@@ -136,7 +136,7 @@ describe('TokenVoting', function () {
   describe('Proposal creation', async () => {
     supportThreshold = pct16(50);
     minParticipation = pct16(20);
-    minProposalCreationVotingPower = 1;
+    minProposerVotingPower = 1;
 
     it('reverts if the creater does not own tokens', async () => {
       await voting.initialize(
@@ -144,7 +144,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -164,7 +164,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -180,7 +180,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -217,7 +217,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -265,7 +265,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -307,7 +307,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -360,7 +360,7 @@ describe('TokenVoting', function () {
         supportThreshold,
         minParticipation,
         minDuration,
-        minProposalCreationVotingPower,
+        minProposerVotingPower,
         governanceErc20Mock.address
       );
 
@@ -594,7 +594,7 @@ describe('TokenVoting', function () {
           supportThreshold,
           minParticipation,
           minDuration,
-          minProposalCreationVotingPower,
+          minProposerVotingPower,
           governanceErc20Mock.address
         );
 

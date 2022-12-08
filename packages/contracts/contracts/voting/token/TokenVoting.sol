@@ -29,14 +29,14 @@ contract TokenVoting is MajorityVotingBase {
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote in seconds.
-    /// @param _minProposalCreationVotingPower The minimal voting power needed to create a proposal.
+    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
-        uint256 _minProposalCreationVotingPower,
+        uint256 _minProposerVotingPower,
         IVotesUpgradeable _token
     ) public initializer {
         __MajorityVotingBase_init(
@@ -44,7 +44,7 @@ contract TokenVoting is MajorityVotingBase {
             _supportThreshold,
             _minParticipation,
             _minDuration,
-            _minProposalCreationVotingPower
+            _minProposerVotingPower
         );
 
         votingToken = _token;
@@ -78,9 +78,7 @@ contract TokenVoting is MajorityVotingBase {
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        if (
-            votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposalCreationVotingPower
-        ) {
+        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower) {
             revert VoteCreationForbidden(_msgSender());
         }
 

@@ -38,14 +38,14 @@ describe('MajorityVotingMock', function () {
     minParticipation: any,
     supportThreshold: any,
     minDuration: any,
-    minProposalCreationVotingPower: any
+    minProposerVotingPower: any
   ) {
     return votingBase.initializeMock(
       dao.address,
       minParticipation,
       supportThreshold,
       minDuration,
-      minProposalCreationVotingPower
+      minProposerVotingPower
     );
   }
 
