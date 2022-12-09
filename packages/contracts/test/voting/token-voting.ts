@@ -71,6 +71,10 @@ describe('TokenVoting', function () {
   });
 
   beforeEach(async () => {
+    supportThreshold = pct16(50);
+    minParticipation = pct16(20);
+    minProposerVotingPower = 0;
+
     governanceErc20Mock = await deployMockContract(
       signers[0],
       ERC20Governance.abi
@@ -94,9 +98,6 @@ describe('TokenVoting', function () {
   });
 
   describe('initialize: ', async () => {
-    supportThreshold = pct16(50);
-    minParticipation = pct16(20);
-
     it('reverts if trying to re-initialize', async () => {
       await voting.initialize(
         dao.address,
@@ -134,11 +135,9 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal creation', async () => {
-    supportThreshold = pct16(50);
-    minParticipation = pct16(20);
-    minProposerVotingPower = 1;
+    it('reverts if the user is not allowed to create a proposal', async () => {
+      minProposerVotingPower = 1;
 
-    it('reverts if the creater does not own tokens', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -152,13 +151,73 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastVotes.returns(0);
 
       await expect(
-        voting.createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
       ).to.be.revertedWith(
         customError('VoteCreationForbidden', signers[0].address)
       );
+
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.not.be.reverted;
     });
 
-    it('reverts total token supply while creating a vote is 0', async () => {
+    it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
+      minProposerVotingPower = 123;
+
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower,
+        governanceErc20Mock.address
+      );
+
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(0);
+
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('VoteCreationForbidden', signers[0].address)
+      );
+
+      await governanceErc20Mock.mock.getPastVotes.returns(123);
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.not.be.reverted;
+    });
+
+    it('reverts if the total token supply is 0', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -351,9 +410,6 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    supportThreshold = pct16(50);
-    minParticipation = pct16(20);
-
     beforeEach(async () => {
       await voting.initialize(
         dao.address,
@@ -519,13 +575,13 @@ describe('TokenVoting', function () {
       await voting.connect(signers[1]).vote(id, VoteOption.No, false);
 
       // vote with 5 abstain votes
-      await governanceErc20Mock.mock.getPastVotes.returns(5);
+      await governanceErc20Mock.mock.getPastVotes.returns(4);
       await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
       // closes the vote
       await advanceAfterVoteEnd(endDate);
 
-      //The vote is not executable because the participation with 20% is still too low, despite a support of 67% and the voting period being over
+      //The vote is not executable because the participation with 19% is still too low, despite a support of 67% and the voting period being over
       expect(await voting.canExecute(id)).to.equal(false);
     });
 
@@ -585,10 +641,10 @@ describe('TokenVoting', function () {
 
   describe('Configurations for different use cases', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
-      supportThreshold = pct16(50);
-      minParticipation = pct16(25);
-
       beforeEach(async () => {
+        supportThreshold = pct16(50);
+        minParticipation = pct16(25);
+
         await voting.initialize(
           dao.address,
           supportThreshold,

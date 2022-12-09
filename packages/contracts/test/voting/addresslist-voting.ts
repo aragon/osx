@@ -25,10 +25,10 @@ describe('AddresslistVoting', function () {
   let endDate: number;
   let supportThreshold: BigNumber;
   let minParticipation: BigNumber;
+  let minProposerVotingPower: Number;
   const startOffset = 10;
   const minDuration = 500;
   const id = 0;
-  let minProposerVotingPower = 0;
 
   let mergedAbi: any;
   let addresslistVotingFactoryBytecode: any;
@@ -65,6 +65,10 @@ describe('AddresslistVoting', function () {
   });
 
   beforeEach(async () => {
+    supportThreshold = pct16(50);
+    minParticipation = pct16(20);
+    minProposerVotingPower = 0;
+
     const AddresslistVotingFactory = new ethers.ContractFactory(
       mergedAbi,
       addresslistVotingFactoryBytecode,
@@ -99,9 +103,6 @@ describe('AddresslistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      supportThreshold = pct16(50);
-      minParticipation = pct16(20);
-
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -126,9 +127,6 @@ describe('AddresslistVoting', function () {
 
   describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
-      supportThreshold = pct16(50);
-      minParticipation = pct16(20);
-
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -181,10 +179,7 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal creation', async () => {
-    supportThreshold = pct16(50);
-    minParticipation = pct16(20);
-
-    it('reverts if user is not allowed to create a vote', async () => {
+    it('reverts if the user is not allowed to create a proposal', async () => {
       minProposerVotingPower = 1;
 
       await voting.initialize(
@@ -193,7 +188,7 @@ describe('AddresslistVoting', function () {
         minParticipation,
         minDuration,
         minProposerVotingPower,
-        addresslist(1)
+        addresslist(1) // signers[0] is listed
       );
 
       await expect(
@@ -203,6 +198,39 @@ describe('AddresslistVoting', function () {
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[1].address)
       );
+
+      await expect(
+        voting
+          .connect(signers[0])
+          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+      ).to.not.be.reverted;
+    });
+
+    it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
+      minProposerVotingPower = 123;
+
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower,
+        addresslist(1) // signers[0] is listed
+      );
+
+      await expect(
+        voting
+          .connect(signers[1])
+          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+      ).to.be.revertedWith(
+        customError('ProposalCreationForbidden', signers[1].address)
+      );
+
+      await expect(
+        voting
+          .connect(signers[0])
+          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+      ).to.not.be.reverted;
     });
 
     it('reverts if vote duration is less than the minimal duration', async () => {
@@ -237,7 +265,7 @@ describe('AddresslistVoting', function () {
       );
     });
 
-    it('should create a vote successfully, but not vote', async () => {
+    it('should create a proposal successfully, but not vote', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -283,7 +311,7 @@ describe('AddresslistVoting', function () {
       expect(vote.actions[0].data).to.equal(dummyActions[0].data);
     });
 
-    it('should create a vote and cast a vote immediately', async () => {
+    it('should create a proposal and cast a vote immediately', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -320,7 +348,7 @@ describe('AddresslistVoting', function () {
       expect(proposal.no).to.equal(0);
     });
 
-    it('reverts creation when voting before the start date', async () => {
+    it('reverts creation if the creator tries to vote before the start date', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -363,9 +391,6 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    const supportThreshold = pct16(50);
-    const minParticipation = pct16(20);
-
     beforeEach(async () => {
       await voting.initialize(
         dao.address,
@@ -543,10 +568,10 @@ describe('AddresslistVoting', function () {
 
   describe('Parameters can satisfy different use cases:', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
-      supportThreshold = pct16(50);
-      minParticipation = pct16(25);
-
       beforeEach(async () => {
+        supportThreshold = pct16(50);
+        minParticipation = pct16(25);
+
         await voting.initialize(
           dao.address,
           supportThreshold,
