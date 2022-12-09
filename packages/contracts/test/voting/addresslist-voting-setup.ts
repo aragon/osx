@@ -1,6 +1,5 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AddresslistVotingSetup} from '../../typechain';
@@ -16,16 +15,8 @@ enum Op {
 }
 
 let defaultData: any;
-let voteSettings: VoteSettings;
-let voteSettingsDefault: [
-  boolean,
-  boolean,
-  BigNumber,
-  BigNumber,
-  number,
-  number
-];
-let members: string[];
+let defaultVoteSettings: VoteSettings;
+let defaultMembers: string[];
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -53,7 +44,10 @@ describe('AddresslistVotingSetup', function () {
   let targetDao: any;
 
   before(async () => {
-    voteSettings = {
+    signers = await ethers.getSigners();
+    targetDao = await deployNewDAO(signers[0].address);
+
+    defaultVoteSettings = {
       earlyExecution: true,
       voteReplacement: false,
       supportThreshold: pct16(50),
@@ -61,10 +55,7 @@ describe('AddresslistVotingSetup', function () {
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
-
-    signers = await ethers.getSigners();
-    targetDao = await deployNewDAO(signers[0].address);
-    members = [signers[0].address];
+    defaultMembers = [signers[0].address];
 
     const AddresslistVotingSetup = await ethers.getContractFactory(
       'AddresslistVotingSetup'
@@ -74,11 +65,9 @@ describe('AddresslistVotingSetup', function () {
     implementationAddress =
       await addresslistVotingSetup.getImplementationAddress();
 
-    voteSettingsDefault = [true, false, pct16(50), pct16(20), 3600, 0];
-
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
-      voteSettingsDefault,
-      [],
+      Object.values(defaultVoteSettings),
+      defaultMembers,
     ]);
   });
 
@@ -184,11 +173,6 @@ describe('AddresslistVotingSetup', function () {
     });
 
     it('correctly sets up the plugin', async () => {
-      const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
-        members,
-      ]);
-
       const nonce = await ethers.provider.getTransactionCount(
         addresslistVotingSetup.address
       );
@@ -197,7 +181,10 @@ describe('AddresslistVotingSetup', function () {
         nonce,
       });
 
-      await addresslistVotingSetup.prepareInstallation(targetDao.address, data);
+      await addresslistVotingSetup.prepareInstallation(
+        targetDao.address,
+        defaultData
+      );
 
       const factory = await ethers.getContractFactory('AddresslistVoting');
       const addresslistVotingContract = factory.attach(
@@ -209,25 +196,28 @@ describe('AddresslistVotingSetup', function () {
         targetDao.address
       );
       expect(await addresslistVotingContract.minParticipation()).to.be.equal(
-        voteSettings.minParticipation
+        defaultVoteSettings.minParticipation
       );
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
-        voteSettings.supportThreshold
+        defaultVoteSettings.supportThreshold
       );
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
-        voteSettings.minDuration
+        defaultVoteSettings.minDuration
       );
       expect(
         await addresslistVotingContract.minProposerVotingPower()
-      ).to.be.equal(voteSettings.minProposerVotingPower);
+      ).to.be.equal(defaultVoteSettings.minProposerVotingPower);
 
       await ethers.provider.send('evm_mine', []);
 
       expect(
         await addresslistVotingContract.addresslistLength(latestBlock.number)
-      ).to.be.equal(members.length);
+      ).to.be.equal(defaultMembers.length);
       expect(
-        await addresslistVotingContract.isListed(members[0], latestBlock.number)
+        await addresslistVotingContract.isListed(
+          defaultMembers[0],
+          latestBlock.number
+        )
       ).to.be.equal(true);
     });
   });

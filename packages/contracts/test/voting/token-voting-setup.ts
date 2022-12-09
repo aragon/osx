@@ -17,17 +17,9 @@ enum Op {
 }
 
 let defaultData: any;
-let voteSettings: VoteSettings;
-let voteSettingsDefault: [
-  boolean,
-  boolean,
-  BigNumber,
-  BigNumber,
-  number,
-  number
-];
-let tokenSettingsDefault: [string, string, string];
-let mintSettingsDefault: [string[], number[]];
+let defaultVoteSettings: VoteSettings;
+let defaultVokenSettings: {addr: string; name: string; symbol: string};
+let defaultMintSettings: {receivers: string[]; amounts: number[]};
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -60,7 +52,10 @@ describe('TokenVotingSetup', function () {
   let erc20Token: ERC20;
 
   before(async () => {
-    voteSettings = {
+    signers = await ethers.getSigners();
+    targetDao = await deployNewDAO(signers[0].address);
+
+    defaultVoteSettings = {
       earlyExecution: true,
       voteReplacement: false,
       supportThreshold: pct16(50),
@@ -68,9 +63,8 @@ describe('TokenVotingSetup', function () {
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
-
-    signers = await ethers.getSigners();
-    targetDao = await deployNewDAO(signers[0].address);
+    defaultVokenSettings = {addr: AddressZero, name: '', symbol: ''};
+    defaultMintSettings = {receivers: [], amounts: []};
 
     const TokenVotingSetup = await ethers.getContractFactory(
       'TokenVotingSetup'
@@ -82,14 +76,10 @@ describe('TokenVotingSetup', function () {
     const ERC20Token = await ethers.getContractFactory('ERC20');
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
 
-    voteSettingsDefault = [true, false, pct16(50), pct16(20), 3600, 0];
-    tokenSettingsDefault = [AddressZero, '', ''];
-    mintSettingsDefault = [[], []];
-
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
-      voteSettingsDefault,
-      tokenSettingsDefault,
-      mintSettingsDefault,
+      Object.values(defaultVoteSettings),
+      Object.values(defaultVokenSettings),
+      Object.values(defaultMintSettings),
     ]);
   });
 
@@ -137,8 +127,8 @@ describe('TokenVotingSetup', function () {
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
-        tokenSettingsDefault,
+        Object.values(defaultVoteSettings),
+        Object.values(defaultVokenSettings),
         [[AddressZero], []],
       ]);
 
@@ -150,9 +140,9 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not a contract', async () => {
       const tokenAddress = signers[0].address;
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
+        Object.values(defaultVoteSettings),
         [tokenAddress, '', ''],
-        mintSettingsDefault,
+        Object.values(defaultMintSettings),
       ]);
 
       await expect(
@@ -163,9 +153,9 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not ERC20', async () => {
       const tokenAddress = implementationAddress;
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
+        Object.values(defaultVoteSettings),
         [tokenAddress, '', ''],
-        mintSettingsDefault,
+        Object.values(defaultMintSettings),
       ]);
 
       await expect(
@@ -187,9 +177,9 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
+        Object.values(defaultVoteSettings),
         [erc20Token.address, tokenName, tokenSymbol],
-        mintSettingsDefault,
+        Object.values(defaultMintSettings),
       ]);
 
       const {plugin, helpers, permissions} =
@@ -237,9 +227,9 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
+        Object.values(defaultVoteSettings),
         [erc20Token.address, tokenName, tokenSymbol],
-        mintSettingsDefault,
+        Object.values(defaultMintSettings),
       ]);
 
       await tokenVotingSetup.prepareInstallation(targetDao.address, data);
@@ -283,9 +273,9 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
+        Object.values(defaultVoteSettings),
         [governanceERC20.address, '', ''],
-        mintSettingsDefault,
+        Object.values(defaultMintSettings),
       ]);
 
       const {plugin, helpers, permissions} =
@@ -383,7 +373,7 @@ describe('TokenVotingSetup', function () {
       const daoAddress = targetDao.address;
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        voteSettingsDefault,
+        Object.values(defaultVoteSettings),
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],
       ]);
@@ -408,16 +398,16 @@ describe('TokenVotingSetup', function () {
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
       expect(await tokenVoting.minParticipation()).to.be.equal(
-        voteSettings.minParticipation
+        defaultVoteSettings.minParticipation
       );
       expect(await tokenVoting.supportThreshold()).to.be.equal(
-        voteSettings.supportThreshold
+        defaultVoteSettings.supportThreshold
       );
       expect(await tokenVoting.minDuration()).to.be.equal(
-        voteSettings.minDuration
+        defaultVoteSettings.minDuration
       );
       expect(await tokenVoting.minProposerVotingPower()).to.be.equal(
-        voteSettings.minProposerVotingPower
+        defaultVoteSettings.minProposerVotingPower
       );
       expect(await tokenVoting.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
