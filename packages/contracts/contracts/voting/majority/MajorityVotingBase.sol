@@ -97,6 +97,9 @@ abstract contract MajorityVotingBase is
     /// @notice Thrown if zero is not allowed as a value
     error ZeroValueNotAllowed();
 
+    /// @notice Thrown if both, early execution and vote replacement, are selected.
+    error EarlyExecutionAndVoteReplacementNotAllowed();
+
     /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
     /// - has not started,
     /// - has ended,
@@ -333,6 +336,10 @@ abstract contract MajorityVotingBase is
     /// @notice Validates and sets the proposal vote settings.
     /// @param _voteSettings The vote settings to be validated and set.
     function _validateAndSetSettings(VoteSettings calldata _voteSettings) internal virtual {
+        if (_voteSettings.earlyExecution && _voteSettings.voteReplacement) {
+            revert EarlyExecutionAndVoteReplacementNotAllowed();
+        }
+
         if (_voteSettings.supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({limit: PCT_BASE, actual: _voteSettings.supportThreshold});
         }
@@ -348,6 +355,8 @@ abstract contract MajorityVotingBase is
         if (_voteSettings.minDuration > 365 days) {
             revert MinDurationOutOfBounds({limit: 365 days, actual: _voteSettings.minDuration});
         }
+
+        voteSettings = _voteSettings;
 
         emit VoteSettingsUpdated({voteSettings: _voteSettings});
     }

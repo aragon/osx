@@ -1,6 +1,5 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO} from '../../typechain';
@@ -12,7 +11,7 @@ import {
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
-  ONE_HOUR,
+  VoteSettings,
   MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
@@ -25,11 +24,9 @@ describe('AddresslistVoting', function () {
   let dummyMetadata: string;
   let startDate: number;
   let endDate: number;
-  let supportThreshold: BigNumber;
-  let minParticipation: BigNumber;
-  let minProposerVotingPower: Number;
+  let voteSettings: VoteSettings;
+
   const startOffset = 10;
-  const minDuration = ONE_HOUR;
   const id = 0;
 
   let mergedAbi: any;
@@ -67,9 +64,14 @@ describe('AddresslistVoting', function () {
   });
 
   beforeEach(async () => {
-    supportThreshold = pct16(50);
-    minParticipation = pct16(20);
-    minProposerVotingPower = 0;
+    voteSettings = {
+      earlyExecution: true,
+      voteReplacement: false,
+      supportThreshold: pct16(50),
+      minParticipation: pct16(20),
+      minDuration: 3600,
+      minProposerVotingPower: 0,
+    };
 
     const AddresslistVotingFactory = new ethers.ContractFactory(
       mergedAbi,
@@ -79,7 +81,7 @@ describe('AddresslistVoting', function () {
     voting = await AddresslistVotingFactory.deploy();
 
     startDate = (await getTime()) + startOffset;
-    endDate = startDate + minDuration;
+    endDate = startDate + voteSettings.minDuration;
 
     dao.grant(
       dao.address,
@@ -105,38 +107,17 @@ describe('AddresslistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(0)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(0));
 
       await expect(
-        voting.initialize(
-          dao.address,
-          supportThreshold,
-          minParticipation,
-          minDuration,
-          minProposerVotingPower,
-          addresslist(0)
-        )
+        voting.initialize(dao.address, voteSettings, addresslist(0))
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(0)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(0));
     });
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
@@ -182,14 +163,11 @@ describe('AddresslistVoting', function () {
 
   describe('Proposal creation', async () => {
     it('reverts if the user is not allowed to create a proposal', async () => {
-      minProposerVotingPower = 1;
+      voteSettings.minProposerVotingPower = 1;
 
       await voting.initialize(
         dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
+        voteSettings,
         addresslist(1) // signers[0] is listed
       );
 
@@ -209,14 +187,11 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
-      minProposerVotingPower = 123;
+      voteSettings.minProposerVotingPower = 123;
 
       await voting.initialize(
         dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
+        voteSettings,
         addresslist(1) // signers[0] is listed
       );
 
@@ -236,14 +211,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the start date is set smaller than the current date', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(1)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(1));
 
       const currentDate = await getTime();
       const startDateInThePast = currentDate - 1;
@@ -268,16 +236,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the start date is after the latest start date', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(1)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(1));
 
-      const latestStartDate = MAX_UINT64.sub(minDuration);
+      const latestStartDate = MAX_UINT64.sub(voteSettings.minDuration);
       const tooLateStartDate = latestStartDate.add(1);
       const endDate = 0; // startDate + minDuration
 
@@ -296,17 +257,10 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(1)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(1));
 
       const startDate = (await getTime()) + 1;
-      const earliestEndDate = startDate + minDuration;
+      const earliestEndDate = startDate + voteSettings.minDuration;
       const tooEarlyEndDate = earliestEndDate - 1;
 
       await expect(
@@ -324,14 +278,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal successfully, but not vote', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(1)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(1));
 
       expect(
         await voting.createProposal(
@@ -348,36 +295,37 @@ describe('AddresslistVoting', function () {
 
       const block = await ethers.provider.getBlock('latest');
 
-      const vote = await voting.getProposal(id);
-      expect(vote.open).to.equal(true);
-      expect(vote.executed).to.equal(false);
-      expect(vote.snapshotBlock).to.equal(block.number - 1);
-      expect(vote._supportThreshold).to.equal(supportThreshold);
-      expect(vote._minParticipation).to.equal(minParticipation);
-      expect(vote.yes).to.equal(0);
-      expect(vote.no).to.equal(0);
+      const proposal = await voting.getProposal(id);
+      expect(proposal.open).to.equal(true);
+      expect(proposal.executed).to.equal(false);
+      expect(proposal.voteConfiguration.snapshotBlock).to.equal(
+        block.number - 1
+      );
+      expect(proposal.voteConfiguration.supportThreshold).to.equal(
+        voteSettings.supportThreshold
+      );
+      expect(proposal.voteConfiguration.minParticipation).to.equal(
+        voteSettings.minParticipation
+      );
+      expect(
+        proposal.voteConfiguration.startDate.add(voteSettings.minDuration)
+      ).to.equal(proposal.voteConfiguration.endDate);
 
-      expect(vote.startDate.add(minDuration)).to.equal(vote.endDate);
+      expect(proposal.tally.yes).to.equal(0);
+      expect(proposal.tally.no).to.equal(0);
 
       expect(await voting.canVote(id, signers[0].address)).to.equal(true);
       expect(await voting.canVote(id, signers[1].address)).to.equal(false);
       expect(await voting.canVote(1, signers[0].address)).to.equal(false);
 
-      expect(vote.actions.length).to.equal(1);
-      expect(vote.actions[0].to).to.equal(dummyActions[0].to);
-      expect(vote.actions[0].value).to.equal(dummyActions[0].value);
-      expect(vote.actions[0].data).to.equal(dummyActions[0].data);
+      expect(proposal.actions.length).to.equal(1);
+      expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
+      expect(proposal.actions[0].value).to.equal(dummyActions[0].value);
+      expect(proposal.actions[0].data).to.equal(dummyActions[0].data);
     });
 
     it('should create a proposal and cast a vote immediately', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(1)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(1));
 
       expect(
         await voting.createProposal(
@@ -398,23 +346,22 @@ describe('AddresslistVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.snapshotBlock).to.equal(block.number - 1);
-      expect(proposal._supportThreshold).to.equal(supportThreshold);
-      expect(proposal._minParticipation).to.equal(minParticipation);
+      expect(proposal.voteConfiguration.snapshotBlock).to.equal(
+        block.number - 1
+      );
+      expect(proposal.voteConfiguration.supportThreshold).to.equal(
+        voteSettings.supportThreshold
+      );
+      expect(proposal.voteConfiguration.minParticipation).to.equal(
+        voteSettings.minParticipation
+      );
 
-      expect(proposal.yes).to.equal(1);
-      expect(proposal.no).to.equal(0);
+      expect(proposal.tally.yes).to.equal(1);
+      expect(proposal.tally.no).to.equal(0);
     });
 
     it('reverts creation if the creator tries to vote before the start date', async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(1)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(1));
 
       expect(await getTime()).to.be.lessThan(startDate);
 
@@ -450,14 +397,7 @@ describe('AddresslistVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     beforeEach(async () => {
-      await voting.initialize(
-        dao.address,
-        supportThreshold,
-        minParticipation,
-        minDuration,
-        minProposerVotingPower,
-        addresslist(10)
-      );
+      await voting.initialize(dao.address, voteSettings, addresslist(10));
 
       expect(
         (
@@ -490,22 +430,22 @@ describe('AddresslistVoting', function () {
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
-      let vote = await voting.getProposal(id);
-      expect(vote.yes).to.equal(1);
+      let proposal = await voting.getProposal(id);
+      expect(proposal.tally.yes).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.No, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.No, 1);
 
-      vote = await voting.getProposal(id);
-      expect(vote.no).to.equal(1);
+      proposal = await voting.getProposal(id);
+      expect(proposal.tally.no).to.equal(1);
 
       expect(await voting.vote(id, VoteOption.Abstain, false))
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.Abstain, 1);
 
-      vote = await voting.getProposal(id);
-      expect(vote.abstain).to.equal(1);
+      proposal = await voting.getProposal(id);
+      expect(proposal.tally.abstain).to.equal(1);
     });
 
     it('should not double-count votes by the same address', async () => {
@@ -513,21 +453,21 @@ describe('AddresslistVoting', function () {
 
       await voting.vote(id, VoteOption.Yes, false);
       await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getProposal(id)).yes).to.equal(1);
-      expect((await voting.getProposal(id)).no).to.equal(0);
-      expect((await voting.getProposal(id)).abstain).to.equal(0);
+      expect((await voting.getProposal(id)).tally.yes).to.equal(1);
+      expect((await voting.getProposal(id)).tally.no).to.equal(0);
+      expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
 
       await voting.vote(id, VoteOption.No, false);
       await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getProposal(id)).yes).to.equal(0);
-      expect((await voting.getProposal(id)).no).to.equal(1);
-      expect((await voting.getProposal(id)).abstain).to.equal(0);
+      expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+      expect((await voting.getProposal(id)).tally.no).to.equal(1);
+      expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
 
       await voting.vote(id, VoteOption.Abstain, false);
       await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getProposal(id)).yes).to.equal(0);
-      expect((await voting.getProposal(id)).no).to.equal(0);
-      expect((await voting.getProposal(id)).abstain).to.equal(1);
+      expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+      expect((await voting.getProposal(id)).tally.no).to.equal(0);
+      expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
     });
 
     it('can execute early if participation is large enough', async () => {
@@ -540,8 +480,12 @@ describe('AddresslistVoting', function () {
       await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
       await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
 
-      expect(await voting.participation(id)).to.be.gte(minParticipation);
-      expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+      expect(await voting.worstCaseSupport(id)).to.be.gt(
+        voteSettings.supportThreshold
+      );
+      expect(await voting.participation(id)).to.be.gte(
+        voteSettings.minParticipation
+      );
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
@@ -556,14 +500,21 @@ describe('AddresslistVoting', function () {
       await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
       await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
 
-      expect(await voting.participation(id)).to.be.gte(minParticipation);
-      expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+      expect(await voting.worstCaseSupport(id)).to.be.lte(
+        voteSettings.supportThreshold
+      );
+      expect(await voting.participation(id)).to.be.gte(
+        voteSettings.minParticipation
+      );
       expect(await voting.canExecute(id)).to.equal(false);
 
       await advanceAfterVoteEnd(endDate);
 
-      expect(await voting.participation(id)).to.be.gte(minParticipation);
-      expect(await voting.support(id)).to.be.gt(supportThreshold);
+      expect(await voting.support(id)).to.be.gt(voteSettings.supportThreshold);
+      expect(await voting.participation(id)).to.be.gte(
+        voteSettings.minParticipation
+      );
+
       expect(await voting.canExecute(id)).to.equal(true);
     });
 
@@ -627,17 +578,9 @@ describe('AddresslistVoting', function () {
   describe('Parameters can satisfy different use cases:', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
-        supportThreshold = pct16(50);
-        minParticipation = pct16(25);
+        voteSettings.minParticipation = pct16(25);
 
-        await voting.initialize(
-          dao.address,
-          supportThreshold,
-          minParticipation,
-          minDuration,
-          minProposerVotingPower,
-          addresslist(10)
-        );
+        await voting.initialize(dao.address, voteSettings, addresslist(10));
 
         await voting.createProposal(
           dummyMetadata,
@@ -654,14 +597,22 @@ describe('AddresslistVoting', function () {
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -672,14 +623,22 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
         await voting.connect(signers[2]).vote(id, VoteOption.No, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.support(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -690,14 +649,22 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(true); // all criteria are met
       });
 
@@ -710,14 +677,22 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(true);
 
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
@@ -725,25 +700,21 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[8]).vote(id, VoteOption.No, false);
         await voting.connect(signers[9]).vote(id, VoteOption.No, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(true);
       });
     });
 
     describe('A special majority vote with >50% support and >75% participation required', async () => {
       beforeEach(async () => {
-        supportThreshold = pct16(50);
-        minParticipation = pct16(75);
+        voteSettings.minParticipation = pct16(75);
 
-        await voting.initialize(
-          dao.address,
-          supportThreshold,
-          minParticipation,
-          minDuration,
-          minProposerVotingPower,
-          addresslist(10)
-        );
+        await voting.initialize(dao.address, voteSettings, addresslist(10));
         expect(
           (
             await voting.createProposal(
@@ -763,14 +734,22 @@ describe('AddresslistVoting', function () {
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -786,14 +765,22 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.support(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -809,14 +796,22 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
         await voting.connect(signers[7]).vote(id, VoteOption.Abstain, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.eq(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.eq(true);
       });
 
@@ -830,14 +825,22 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.eq(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -852,35 +855,55 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[5]).vote(id, VoteOption.No, false);
         await voting.connect(signers[6]).vote(id, VoteOption.No, false);
 
-        expect(await voting.participation(id)).to.be.lt(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.lt(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[7]).vote(id, VoteOption.No, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(false); // participation is met but not support
 
         // let signer[7] switch vote from no to yes // TODO ADAPT TEST IF VOTE REPLACEMENT AND EARLY EXECUTION ARE MADE MUTUALLY EXCLUSIVE
         await voting.connect(signers[7]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.lte(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
 
         expect(await voting.canExecute(id)).to.equal(false); // Still not sufficient for early execution because the support could still be <= 50 if the two remaining voters vote no
 
         await voting.connect(signers[8]).vote(id, VoteOption.Abstain, false);
 
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.worstCaseSupport(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(true); // The vote` outcome cannot change anymore (5 yes, 3 no, 1 abstain)
 
         await advanceAfterVoteEnd(endDate);
 
         // this doesn't change after the vote is over
-        expect(await voting.participation(id)).to.be.gte(minParticipation);
-        expect(await voting.support(id)).to.be.gt(supportThreshold);
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
         expect(await voting.canExecute(id)).to.equal(true);
       });
     });

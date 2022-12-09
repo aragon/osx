@@ -52,7 +52,7 @@ interface IMajorityVoting {
 
     struct VoteSettings {
         bool earlyExecution;
-        bool voteReplacment;
+        bool voteReplacement;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 minDuration;
@@ -61,7 +61,7 @@ interface IMajorityVoting {
 
     struct VoteConfiguration {
         bool earlyExecution;
-        bool voteReplacment;
+        bool voteReplacement;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 startDate;
