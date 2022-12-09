@@ -8,6 +8,7 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/psp/PluginSetupProcessor.sol";
+import {hHash} "../plugin/psp/utils/Common.sol";
 
 /// @title DAOFactory
 /// @author Aragon Association - 2022
@@ -85,7 +86,7 @@ contract DAOFactory {
             // Prepare plugin.
             (
                 address plugin,
-                ,
+                address[] memory helpers
                 PermissionLib.ItemMultiTarget[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
@@ -100,6 +101,7 @@ contract DAOFactory {
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
                 PluginSetupProcessor.ApplyInstall(
+                    hHash(helpers),
                     _pluginSettings[i].tag,
                     _pluginSettings[i].pluginSetupRepo,
                     plugin,

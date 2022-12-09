@@ -49,6 +49,20 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     mapping(bytes32 => PluginInformation) private states;
 
+    struct Hashes {
+        bytes32 permissionsHash;
+        bytes32 helpersHash;
+        bytes32 setupId;
+    }
+
+    struct PluginInformation {
+        State state;
+        Hashes current;
+        Hashes[] hashes;
+    }
+
+    mapping(bytes32 => PluginInformation) private states;
+
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     struct PrepareInstall {
         PluginSetupRef pluginSetupRef;
@@ -266,7 +280,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @return permissions The prepared list of multi-targeted permission operations to be applied to the installing DAO.
     function prepareInstallation(address _dao, PrepareInstall calldata _params)
         external
-        returns (address plugin, IPluginSetup.PreparedDependency memory preparedDependency)
+        returns (
+            address plugin,
+            uint256 index,
+            IPluginSetup.PreparedDependency memory preparedDependency
+        )
     {
         PluginRepo pluginSetupRepo = _params.pluginSetupRef.pluginSetupRepo;
 
@@ -291,6 +309,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
+            // Setting this empty as there's no need to confirm authenticity of it
+            // in applyInstallation as it's not used there. This becomes useful for update.
             bytes("")
         );
 
@@ -299,7 +319,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginInWrongState();
         }
 
+        // If pluginSetup returns the same plugin address each time we call it,
+        // It should still be possible that prepareInstallation can
+        // be called multiple times. This brings 2 good features.
+        // 1. the same plugin can be prepared multiple times(with different _params.data)
+        // arguments and dao can decide which one to applyInstall for.
+        // 2. If the plugin was prepared with the specific params.data that dao doesn't like,
+        // they should be able to prepare it again.
         pluginInformation.setupIds.push(setupId);
+
+        return (plugin, index, preparedDependency);
     }
 
     /// @notice Applies the permissions of a prepared installation to a DAO.
@@ -317,6 +346,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginInWrongState();
         }
 
+        // DAO passes the index to choose which preparedInstallation should be used.
         bytes32 chosenSetupId = pluginInformation.setupIds[_params.index];
 
         bytes32 setupId = _getSetupId(
@@ -330,10 +360,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert InvalidSetupId();
         }
 
+        // Assings the setupId which was used for the installation.
         pluginInformation.currentSetupId = setupId;
 
         pluginInformation.state = State.InstallApplied;
 
+        // Once the plugin gets installed, we remove all
+        // the prepared instances for extra safety.
         delete pluginInformation.setupIds;
 
         // Process the permission list.
@@ -369,7 +402,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         if (pluginInformation.currentSetupId != setupId) {
-            revert PluginInWrongState();
+            revert InvalidSetupId();
         }
 
         // `getVersionByPluginSetup` will revert if `currentPluginSetup` is not part of `pluginSetupRepo`.
@@ -391,9 +424,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
+            // initData that was returned by the current preparation for update
+            // must be included in the setupId generation which allows us
+            // to confirm its authenticity when applyUpdate is called.
             initData
         );
 
+        // It's allowed to call multiple prepare Update for the same plugin and
+        // later decide which one to applyUpdate for or it might be the case
+        // where dao doesn't like the current prepareUpdate(might have been called with wrong parameters)
+        // and they want to use another prepare Update's results !
         pluginInformation.setupIds.push(newSetupId);
 
         return (preparedDependency.permissions, initData);
@@ -427,9 +467,15 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 chosenSetupId = pluginInformation.setupIds[_params.index];
 
         if (chosenSetupId != setupId) {
-            // revert
+            revert InvalidSetupId();
         }
 
+        // Once the applyUpdate is called and arguments are confirmed(including initData)
+        // we update the setupId with the new versionTag, permissions and helpers.
+        // NOTE that `initData` gets updated by `bytes("")` as it's no longer required
+        // for the next/future prepareUpdate.
+        // TODO: in the `_getSetupId`, we duplicate the first 3 params abi encoding just
+        // to store it with one modification(bytes("") instead of _params.initData)
         pluginInformation.currentSetupId = _getSetupId(
             _params.pluginSetupRef,
             pHash(_params.permissions),
@@ -437,9 +483,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes("")
         );
 
+        // clear the prepared instances for the extra safety.
         delete pluginInformation.setupIds;
-
-        pluginInformation.state != State.UpdateApplied;
 
         PluginRepo.Version memory version = _params.pluginSetupRef.pluginSetupRepo.getVersion(
             _params.pluginSetupRef.versionTag
