@@ -26,26 +26,14 @@ contract TokenVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote in seconds.
-    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
+    /// @param _voteSettings The vote settings.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower,
+        VoteSettings calldata _voteSettings,
         IVotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(
-            _dao,
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+        __MajorityVotingBase_init(_dao, _voteSettings);
 
         votingToken = _token;
     }
@@ -78,7 +66,10 @@ contract TokenVoting is MajorityVotingBase {
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower) {
+        if (
+            votingToken.getPastVotes(_msgSender(), snapshotBlock) <
+            voteSettings.minProposerVotingPower
+        ) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -87,10 +78,11 @@ contract TokenVoting is MajorityVotingBase {
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
         (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
-        proposal_.supportThreshold = supportThreshold;
-        proposal_.minParticipation = minParticipation;
-        proposal_.totalVotingPower = totalVotingPower;
         proposal_.snapshotBlock = snapshotBlock;
+        proposal_.supportThreshold = voteSettings.supportThreshold;
+        proposal_.minParticipation = voteSettings.minParticipation;
+
+        proposal_.totalVotingPower = totalVotingPower;
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {

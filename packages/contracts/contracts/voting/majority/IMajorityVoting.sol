@@ -50,6 +50,13 @@ interface IMajorityVoting {
         No
     }
 
+    struct VoteSettings {
+        uint64 supportThreshold;
+        uint64 minParticipation;
+        uint64 minDuration;
+        uint256 minProposerVotingPower;
+    }
+
     struct Proposal {
         bool executed;
         uint64 startDate;
@@ -101,16 +108,7 @@ interface IMajorityVoting {
     );
 
     /// @notice Changes the vote settings.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote in seconds.
-    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
-    function changeVoteSettings(
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) external;
+    function changeVoteSettings(VoteSettings calldata _voteSettings) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.

@@ -69,12 +69,10 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
-    uint64 public supportThreshold;
-    uint64 public minParticipation;
-    uint64 public minDuration;
-    uint256 public minProposerVotingPower;
+    /// @notice The struct storing the vote settings.
+    VoteSettings public voteSettings;
 
+    /// @notice A counter counting the created proposals.
     uint256 public proposalCount;
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
@@ -115,24 +113,13 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote
-    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
-    function __MajorityVotingBase_init(
-        IDAO _dao,
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) internal onlyInitializing {
+    /// @param _voteSettings The vote settings.
+    function __MajorityVotingBase_init(IDAO _dao, VoteSettings calldata _voteSettings)
+        internal
+        onlyInitializing
+    {
         __PluginUUPSUpgradeable_init(_dao);
-        _validateAndSetSettings(
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+        _validateAndSetSettings(_voteSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -149,18 +136,11 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function changeVoteSettings(
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
-        _validateAndSetSettings(
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+    function changeVoteSettings(VoteSettings calldata _voteSettings)
+        external
+        auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID)
+    {
+        _validateAndSetSettings(_voteSettings);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -241,8 +221,8 @@ abstract contract MajorityVotingBase is
             uint64 startDate,
             uint64 endDate,
             uint64 snapshotBlock,
-            uint64 _supportThreshold,
-            uint64 _minParticipation,
+            uint64 supportThreshold,
+            uint64 minParticipation,
             uint256 totalVotingPower,
             uint256 yes,
             uint256 no,
@@ -257,8 +237,8 @@ abstract contract MajorityVotingBase is
         startDate = proposal_.startDate;
         endDate = proposal_.endDate;
         snapshotBlock = proposal_.snapshotBlock;
-        _supportThreshold = proposal_.supportThreshold;
-        _minParticipation = proposal_.minParticipation;
+        supportThreshold = proposal_.supportThreshold;
+        minParticipation = proposal_.minParticipation;
         totalVotingPower = proposal_.totalVotingPower;
         yes = proposal_.yes;
         no = proposal_.no;
@@ -341,42 +321,29 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice Validates and sets the proposal vote settings.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation in percent.
-    /// @param _minDuration The minimum duration of a vote
-    /// @param _minProposerVotingPower The minimum voting power needed to create a proposal.
-    function _validateAndSetSettings(
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) internal virtual {
-        if (_supportThreshold > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _supportThreshold});
+    /// @param _voteSettings The vote settings to be validated and set.
+    function _validateAndSetSettings(VoteSettings calldata _voteSettings) internal virtual {
+        if (_voteSettings.supportThreshold > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _voteSettings.supportThreshold});
         }
 
-        if (_minParticipation > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _minParticipation});
+        if (_voteSettings.minParticipation > PCT_BASE) {
+            revert PercentageExceeds100({limit: PCT_BASE, actual: _voteSettings.minParticipation});
         }
 
-        if (_minDuration < 60 minutes) {
-            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _minDuration});
+        if (_voteSettings.minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _voteSettings.minDuration});
         }
 
-        if (_minDuration > 365 days) {
-            revert MinDurationOutOfBounds({limit: 365 days, actual: _minDuration});
+        if (_voteSettings.minDuration > 365 days) {
+            revert MinDurationOutOfBounds({limit: 365 days, actual: _voteSettings.minDuration});
         }
-
-        supportThreshold = _supportThreshold;
-        minParticipation = _minParticipation;
-        minDuration = _minDuration;
-        minProposerVotingPower = _minProposerVotingPower;
 
         emit VoteSettingsUpdated({
-            minParticipation: _minParticipation,
-            supportThreshold: _supportThreshold,
-            minDuration: _minDuration,
-            minProposerVotingPower: _minProposerVotingPower
+            minParticipation: _voteSettings.minParticipation,
+            supportThreshold: _voteSettings.supportThreshold,
+            minDuration: _voteSettings.minDuration,
+            minProposerVotingPower: _voteSettings.minProposerVotingPower
         });
     }
 
@@ -403,7 +370,7 @@ abstract contract MajorityVotingBase is
             }
         }
 
-        uint64 earliestEndDate = startDate + minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
+        uint64 earliestEndDate = startDate + voteSettings.minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
 
         if (_end == 0) {
             endDate = earliestEndDate;

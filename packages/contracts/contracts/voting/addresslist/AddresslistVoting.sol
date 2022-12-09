@@ -45,25 +45,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote in seconds.
-    /// @param _members The initial member addresses to be listed.
+    /// @param _voteSettings The vote settings.
     function initialize(
         IDAO _dao,
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower,
+        VoteSettings calldata _voteSettings,
         address[] calldata _members
     ) public initializer {
-        __MajorityVotingBase_init(
-            _dao,
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+        __MajorityVotingBase_init(_dao, _voteSettings);
 
         // add member addresses to the address list
         _addAddresses(_members);
@@ -118,7 +106,7 @@ contract AddresslistVoting is MajorityVotingBase {
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (minProposerVotingPower != 0 && !isListed(_msgSender(), snapshotBlock)) {
+        if (voteSettings.minProposerVotingPower != 0 && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -128,8 +116,9 @@ contract AddresslistVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[proposalId];
         (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
         proposal_.snapshotBlock = snapshotBlock;
-        proposal_.supportThreshold = supportThreshold;
-        proposal_.minParticipation = minParticipation;
+        proposal_.supportThreshold = voteSettings.supportThreshold;
+        proposal_.minParticipation = voteSettings.minParticipation;
+
         proposal_.totalVotingPower = addresslistLength(snapshotBlock);
 
         unchecked {
