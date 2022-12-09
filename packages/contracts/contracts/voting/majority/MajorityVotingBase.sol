@@ -152,7 +152,7 @@ abstract contract MajorityVotingBase is
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _executeIfDecided,
+        bool _tryEarlyExecution,
         VoteOption _choice
     ) external virtual returns (uint256 proposalId);
 

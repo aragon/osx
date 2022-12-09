@@ -102,7 +102,7 @@ contract AddresslistVoting is MajorityVotingBase {
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _executeIfDecided,
+        bool _tryEarlyExecution,
         VoteOption _choice
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
@@ -140,7 +140,7 @@ contract AddresslistVoting is MajorityVotingBase {
             metadata: _proposalMetadata
         });
 
-        vote(proposalId, _choice, _executeIfDecided);
+        vote(proposalId, _choice, _tryEarlyExecution);
     }
 
     /// @inheritdoc MajorityVotingBase

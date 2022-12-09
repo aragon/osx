@@ -522,7 +522,7 @@ describe('AddresslistVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
-      it('executes the vote immediately when the vote is decided early and the `executeIfDecided` option is selected', async () => {
+      it('executes the vote immediately when the vote is decided early and the `tryEarlyExecution` option is selected', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
@@ -530,18 +530,18 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
 
-        // `executeIfDecided` is turned on but the vote is not decided yet
+        // `tryEarlyExecution` is turned on but the vote is not decided yet
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
         let tx = await voting
           .connect(signers[5])
           .vote(id, VoteOption.Yes, false);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned off and the vote is decided
+        // `tryEarlyExecution` is turned off and the vote is decided
         tx = await voting.connect(signers[6]).vote(id, VoteOption.Yes, false);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned on and the vote is decided
+        // `tryEarlyExecution` is turned on and the vote is decided
         tx = await voting
           .connect(signers[7])
           .vote(id, VoteOption.Abstain, true);
@@ -676,7 +676,7 @@ describe('AddresslistVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
-      it('does not execute when voting with the `executeIfDecided` option', async () => {
+      it('does not execute when voting with the `tryEarlyExecution` option', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
@@ -686,7 +686,7 @@ describe('AddresslistVoting', function () {
         await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
         expect(await voting.canExecute(id)).to.equal(false);
 
-        // `executeIfDecided` is turned on but the vote is not decided yet
+        // `tryEarlyExecution` is turned on but the vote is not decided yet
         let tx = await voting
           .connect(signers[5])
           .vote(id, VoteOption.Yes, true);
@@ -701,11 +701,11 @@ describe('AddresslistVoting', function () {
 
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned off and the vote is decided
+        // `tryEarlyExecution` is turned off and the vote is decided
         tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned on and the vote is decided
+        // `tryEarlyExecution` is turned on and the vote is decided
         tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, true);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
       });

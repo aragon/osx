@@ -624,23 +624,23 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
-      it('executes the vote immediately when the vote is decided early and the executeIfDecided options is selected', async () => {
+      it('executes the vote immediately when the vote is decided early and the tryEarlyExecution options is selected', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
         await governanceErc20Mock.mock.getPastVotes.returns(50);
 
-        // `executeIfDecided` is turned on but the vote is not decided yet
+        // `tryEarlyExecution` is turned on but the vote is not decided yet
         let tx = await voting
           .connect(signers[0])
           .vote(id, VoteOption.Yes, true);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned off and the vote is decided
+        // `tryEarlyExecution` is turned off and the vote is decided
         await governanceErc20Mock.mock.getPastVotes.returns(1);
         tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned on and the vote is decided
+        // `tryEarlyExecution` is turned on and the vote is decided
         tx = await voting.connect(signers[2]).vote(id, VoteOption.Yes, true);
         {
           const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
@@ -781,14 +781,14 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
-      it('does not execute when voting with the `executeIfDecided` option', async () => {
+      it('does not execute when voting with the `tryEarlyExecution` option', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
         await governanceErc20Mock.mock.getPastVotes.returns(50);
         await voting.vote(id, VoteOption.Yes, false);
         expect(await voting.canExecute(id)).to.equal(false);
 
-        // `executeIfDecided` is turned on but the vote is not decided yet
+        // `tryEarlyExecution` is turned on but the vote is not decided yet
         await governanceErc20Mock.mock.getPastVotes.returns(1);
         let tx = await voting
           .connect(signers[1])
@@ -804,11 +804,11 @@ describe('TokenVoting', function () {
 
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned off and the vote is decided
+        // `tryEarlyExecution` is turned off and the vote is decided
         tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-        // `executeIfDecided` is turned on and the vote is decided
+        // `tryEarlyExecution` is turned on and the vote is decided
         tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, true);
         expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
       });
