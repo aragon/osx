@@ -80,6 +80,8 @@ contract TokenVoting is MajorityVotingBase {
             proposal_.voteConfiguration.endDate
         ) = _validateVoteDates(_startDate, _endDate);
         proposal_.voteConfiguration.snapshotBlock = snapshotBlock;
+        proposal_.voteConfiguration.earlyExecution = earlyExecution();
+        proposal_.voteConfiguration.voteReplacement = voteReplacement();
         proposal_.voteConfiguration.supportThreshold = supportThreshold();
         proposal_.voteConfiguration.minParticipation = minParticipation();
 
@@ -151,6 +153,14 @@ contract TokenVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
+
+        if (
+            proposal_.voters[_voter] != VoteOption.None &&
+            proposal_.voteConfiguration.voteReplacement == false
+        ) {
+            revert VoteReplacementNotAllowed();
+        }
+
         return
             _isVoteOpen(proposal_) &&
             votingToken.getPastVotes(_voter, proposal_.voteConfiguration.snapshotBlock) > 0;

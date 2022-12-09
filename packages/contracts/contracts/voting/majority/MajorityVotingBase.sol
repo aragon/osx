@@ -239,6 +239,16 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
+    function earlyExecution() public view returns (bool) {
+        return voteSettings.earlyExecution;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function voteReplacement() public view returns (bool) {
+        return voteSettings.voteReplacement;
+    }
+
+    /// @inheritdoc IMajorityVoting
     function getProposal(uint256 _proposalId)
         public
         view
@@ -301,6 +311,7 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
+                proposal_.voteConfiguration.earlyExecution &&
                 worstCaseSupport(_proposalId) > proposal_.voteConfiguration.supportThreshold &&
                 participation(_proposalId) >= proposal_.voteConfiguration.minParticipation;
         } else {

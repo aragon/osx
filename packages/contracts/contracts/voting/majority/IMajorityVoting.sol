@@ -182,6 +182,14 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
+    /// @notice Returns the early exeucution parameter stored in the vote settings.
+    /// @return The early execution parameter.
+    function earlyExecution() external view returns (bool);
+
+    /// @notice Returns the vote replacement parameter stored in the vote settings.
+    /// @return The vote replacement parameter.
+    function voteReplacement() external view returns (bool);
+
     /// @notice Returns the support threshold parameter stored in the vote settings.
     /// @return The support threshold parameter.
     function supportThreshold() external view returns (uint64);
