@@ -396,182 +396,327 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    beforeEach(async () => {
-      await voting.initialize(dao.address, voteSettings, addresslist(10));
+    describe('Early execution allowed', async () => {
+      beforeEach(async () => {
+        await voting.initialize(dao.address, voteSettings, addresslist(10));
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            startDate,
-            endDate,
-            false,
-            VoteOption.None
-          )
-        ).value
-      ).to.equal(id);
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
+
+      it('does not allow voting, when the vote has not started yet', async () => {
+        expect(await getTime()).to.be.lessThan(startDate);
+
+        expect(await voting.canVote(id, signers[0].address)).to.equal(false);
+
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+      });
+
+      it('increases the yes, no, and abstain count and emits correct events', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        expect(await voting.vote(id, VoteOption.Yes, false))
+          .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
+          .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+
+        let proposal = await voting.getProposal(id);
+        expect(proposal.tally.yes).to.equal(1);
+
+        expect(await voting.vote(id, VoteOption.No, false))
+          .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
+          .withArgs(id, signers[0].address, VoteOption.No, 1);
+
+        proposal = await voting.getProposal(id);
+        expect(proposal.tally.no).to.equal(1);
+
+        expect(await voting.vote(id, VoteOption.Abstain, false))
+          .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
+          .withArgs(id, signers[0].address, VoteOption.Abstain, 1);
+
+        proposal = await voting.getProposal(id);
+        expect(proposal.tally.abstain).to.equal(1);
+      });
+
+      it('should not allow vote replacement', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.vote(id, VoteOption.Yes, false);
+
+        expect(
+          (await voting.vote(id, VoteOption.Yes, false)).tally.yes
+        ).to.be.revertedWith(customError('VoteReplacementNotAllowed'));
+      });
+
+      it('can execute early if participation is large enough', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it('can execute normally if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
+        await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it('executes the vote immediately when the vote is decided early and the executeIfDecided options is selected', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+
+        // `executeIfDecided` is turned on but the vote is not decided yet
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
+        let tx = await voting
+          .connect(signers[5])
+          .vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `executeIfDecided` is turned off and the vote is decided
+        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `executeIfDecided` is turned on and the vote is decided
+        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, true);
+        {
+          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+          expect(event.args.actor).to.equal(voting.address);
+          expect(event.args.callId).to.equal(id);
+          expect(event.args.actions.length).to.equal(1);
+          expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+          expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+          expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+          expect(event.args.execResults).to.deep.equal(['0x']);
+
+          const vote = await voting.getProposal(id);
+
+          expect(vote.executed).to.equal(true);
+        }
+
+        // check for the `ProposalExecuted` event in the voting contract
+        {
+          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          expect(event.args.proposalId).to.equal(id);
+          expect(event.args.execResults).to.deep.equal(['0x']);
+        }
+
+        // calling execute again should fail
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
+
+      it('reverts if vote is not decided yet', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
     });
 
-    it('does not allow voting, when the vote has not started yet', async () => {
-      expect(await getTime()).to.be.lessThan(startDate);
+    describe('Vote replacement allowed', async () => {
+      beforeEach(async () => {
+        voteSettings.earlyExecution = false;
+        voteSettings.voteReplacement = true;
+        await voting.initialize(dao.address, voteSettings, addresslist(10));
 
-      expect(await voting.canVote(id, signers[0].address)).to.equal(false);
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
 
-      await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastForbidden', id, signers[0].address)
-      );
-    });
+      it('should allow vote replacement but not double-count votes by the same address', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-    it('increases the yes, no, and abstain count and emits correct events', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        await voting.vote(id, VoteOption.Yes, false);
+        await voting.vote(id, VoteOption.Yes, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(1);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
 
-      expect(await voting.vote(id, VoteOption.Yes, false))
-        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+        await voting.vote(id, VoteOption.No, false);
+        await voting.vote(id, VoteOption.No, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(1);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
 
-      let proposal = await voting.getProposal(id);
-      expect(proposal.tally.yes).to.equal(1);
+        await voting.vote(id, VoteOption.Abstain, false);
+        await voting.vote(id, VoteOption.Abstain, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
+      });
 
-      expect(await voting.vote(id, VoteOption.No, false))
-        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.No, 1);
+      it('cannot early execute', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-      proposal = await voting.getProposal(id);
-      expect(proposal.tally.no).to.equal(1);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
 
-      expect(await voting.vote(id, VoteOption.Abstain, false))
-        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.Abstain, 1);
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+      });
 
-      proposal = await voting.getProposal(id);
-      expect(proposal.tally.abstain).to.equal(1);
-    });
+      it('can execute normally if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-    it('should not double-count votes by the same address', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
+        await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
 
-      await voting.vote(id, VoteOption.Yes, false);
-      await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getProposal(id)).tally.yes).to.equal(1);
-      expect((await voting.getProposal(id)).tally.no).to.equal(0);
-      expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
 
-      await voting.vote(id, VoteOption.No, false);
-      await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getProposal(id)).tally.yes).to.equal(0);
-      expect((await voting.getProposal(id)).tally.no).to.equal(1);
-      expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
+        await advanceAfterVoteEnd(endDate);
 
-      await voting.vote(id, VoteOption.Abstain, false);
-      await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getProposal(id)).tally.yes).to.equal(0);
-      expect((await voting.getProposal(id)).tally.no).to.equal(0);
-      expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
-    });
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
 
-    it('can execute early if participation is large enough', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
 
-      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+      it('executes the vote immediately when the vote is decided early and the executeIfDecided options is selected', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-      expect(await voting.worstCaseSupport(id)).to.be.gt(
-        voteSettings.supportThreshold
-      );
-      expect(await voting.participation(id)).to.be.gte(
-        voteSettings.minParticipation
-      );
-      expect(await voting.canExecute(id)).to.equal(true);
-    });
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
 
-    it('can execute normally if participation and support are met', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        // `executeIfDecided` is turned on but the vote is not decided yet
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
+        let tx = await voting
+          .connect(signers[5])
+          .vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[3]).vote(id, VoteOption.No, false);
-      await voting.connect(signers[4]).vote(id, VoteOption.No, false);
-      await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
-      await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
+        // `executeIfDecided` is turned off and the vote is decided
+        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-      expect(await voting.worstCaseSupport(id)).to.be.lte(
-        voteSettings.supportThreshold
-      );
-      expect(await voting.participation(id)).to.be.gte(
-        voteSettings.minParticipation
-      );
-      expect(await voting.canExecute(id)).to.equal(false);
+        // `executeIfDecided` is turned on and the vote is decided
+        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, true);
+        {
+          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-      await advanceAfterVoteEnd(endDate);
+          expect(event.args.actor).to.equal(voting.address);
+          expect(event.args.callId).to.equal(id);
+          expect(event.args.actions.length).to.equal(1);
+          expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+          expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+          expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+          expect(event.args.execResults).to.deep.equal(['0x']);
 
-      expect(await voting.support(id)).to.be.gt(voteSettings.supportThreshold);
-      expect(await voting.participation(id)).to.be.gte(
-        voteSettings.minParticipation
-      );
+          const vote = await voting.getProposal(id);
 
-      expect(await voting.canExecute(id)).to.equal(true);
-    });
+          expect(vote.executed).to.equal(true);
+        }
 
-    it('executes the vote immediately when the vote is decided early and the executeIfDecided options is selected', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        // check for the `ProposalExecuted` event in the voting contract
+        {
+          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          expect(event.args.proposalId).to.equal(id);
+          expect(event.args.execResults).to.deep.equal(['0x']);
+        }
 
-      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-      await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        // calling execute again should fail
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
 
-      // `executeIfDecided` is turned on but the vote is not decided yet
-      await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
-      let tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-      expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+      it('reverts if vote is not decided yet', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-      // `executeIfDecided` is turned off and the vote is decided
-      tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-      expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
-      // `executeIfDecided` is turned on and the vote is decided
-      tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, true);
-      {
-        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
-
-        expect(event.args.actor).to.equal(voting.address);
-        expect(event.args.callId).to.equal(id);
-        expect(event.args.actions.length).to.equal(1);
-        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
-        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
-        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
-        expect(event.args.execResults).to.deep.equal(['0x']);
-
-        const vote = await voting.getProposal(id);
-
-        expect(vote.executed).to.equal(true);
-      }
-
-      // check for the `ProposalExecuted` event in the voting contract
-      {
-        const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
-        expect(event.args.proposalId).to.equal(id);
-        expect(event.args.execResults).to.deep.equal(['0x']);
-      }
-
-      // calling execute again should fail
-      await expect(voting.execute(id)).to.be.revertedWith(
-        customError('ProposalExecutionForbidden', id)
-      );
-    });
-
-    it('reverts if vote is not decided yet', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
-
-      await expect(voting.execute(id)).to.be.revertedWith(
-        customError('ProposalExecutionForbidden', id)
-      );
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
     });
   });
 

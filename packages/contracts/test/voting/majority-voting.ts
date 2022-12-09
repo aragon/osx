@@ -115,9 +115,7 @@ describe('MajorityVotingMock', function () {
       voteSettings.voteReplacement = true;
       await expect(
         votingBase.changeVoteSettings(voteSettings)
-      ).to.be.revertedWith(
-        customError('EarlyExecutionAndVoteReplacementNotAllowed')
-      );
+      ).to.be.revertedWith(customError('VoteReplacementNotAllowed'));
     });
 
     it('should change the vote settings successfully', async () => {
