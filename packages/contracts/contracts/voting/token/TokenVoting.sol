@@ -155,8 +155,8 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (
-            proposal_.voters[_voter] != VoteOption.None &&
-            proposal_.voteConfiguration.voteReplacement == false
+            !proposal_.voteConfiguration.voteReplacement &&
+            proposal_.voters[_voter] != VoteOption.None
         ) {
             revert VoteReplacementNotAllowed();
         }

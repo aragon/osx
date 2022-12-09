@@ -444,242 +444,384 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    beforeEach(async () => {
-      await voting.initialize(
-        dao.address,
-        voteSettings,
-        governanceErc20Mock.address
-      );
+    context('Early Execution', async () => {
+      beforeEach(async () => {
+        voteSettings.earlyExecution = true;
+        voteSettings.voteReplacement = false;
 
-      // set voting power to 100
-      await governanceErc20Mock.mock.getPastTotalSupply.returns(
-        totalVotingPower
-      );
-      await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await voting.initialize(
+          dao.address,
+          voteSettings,
+          governanceErc20Mock.address
+        );
 
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            startDate,
-            endDate,
-            false,
-            VoteOption.None
-          )
-        ).value
-      ).to.equal(id);
+        // set voting power to 100
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(
+          totalVotingPower
+        );
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
+
+      it('does not allow voting, when the vote has not started yet', async () => {
+        expect(await getTime()).to.be.lessThan(startDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+      });
+
+      it('should not be able to vote if user has 0 token', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(0);
+
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+      });
+
+      it('increases the yes, no, and abstain count and emits correct events', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        expect(await voting.connect(signers[0]).vote(id, VoteOption.Yes, false))
+          .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
+          .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+
+        let proposal = await voting.getProposal(id);
+        expect(proposal.tally.yes).to.equal(1);
+        expect(proposal.tally.yes).to.equal(1);
+        expect(proposal.tally.no).to.equal(0);
+        expect(proposal.tally.abstain).to.equal(0);
+
+        expect(await voting.connect(signers[1]).vote(id, VoteOption.No, false))
+          .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
+          .withArgs(id, signers[1].address, VoteOption.No, 1);
+
+        proposal = await voting.getProposal(id);
+        expect(proposal.tally.no).to.equal(1);
+        expect(proposal.tally.no).to.equal(1);
+        expect(proposal.tally.abstain).to.equal(0);
+
+        expect(
+          await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false)
+        )
+          .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
+          .withArgs(id, signers[2].address, VoteOption.Abstain, 1);
+
+        proposal = await voting.getProposal(id);
+        expect(proposal.tally.yes).to.equal(1);
+        expect(proposal.tally.no).to.equal(1);
+        expect(proposal.tally.abstain).to.equal(1);
+      });
+
+      it('reverts on vote replacement', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        await voting.vote(id, VoteOption.Yes, false);
+
+        // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteReplacementNotAllowed')
+        );
+      });
+
+      it('can execute early if participation is large enough', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(50);
+        await voting.vote(id, VoteOption.Yes, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it('can execute normally if participation is large enough', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        // vote with 50 yes votes
+        await governanceErc20Mock.mock.getPastVotes.returns(50);
+        await voting.vote(id, VoteOption.Yes, false);
+
+        // vote 30 voting no votes
+        await governanceErc20Mock.mock.getPastVotes.returns(30);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+
+        // vote with 10 abstain votes
+        await governanceErc20Mock.mock.getPastVotes.returns(10);
+        await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
+
+        // closes the vote
+        await advanceAfterVoteEnd(endDate);
+
+        //The vote is executable as support > 50%, participation > 20%, and the voting period is over
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it('cannot execute normally if participation is too low', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        // vote with 10 yes votes
+        await governanceErc20Mock.mock.getPastVotes.returns(10);
+        await voting.vote(id, VoteOption.Yes, false);
+
+        // vote with 5 no votes
+        await governanceErc20Mock.mock.getPastVotes.returns(5);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+
+        // vote with 5 abstain votes
+        await governanceErc20Mock.mock.getPastVotes.returns(4);
+        await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
+
+        // closes the vote
+        await advanceAfterVoteEnd(endDate);
+
+        //The vote is not executable because the participation with 19% is still too low, despite a support of 67% and the voting period being over
+        expect(await voting.canExecute(id)).to.equal(false);
+      });
+
+      it('executes the vote immediately when the vote is decided early and the executeIfDecided options is selected', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(50);
+
+        // `executeIfDecided` is turned on but the vote is not decided yet
+        let tx = await voting
+          .connect(signers[0])
+          .vote(id, VoteOption.Yes, true);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `executeIfDecided` is turned off and the vote is decided
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+        tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `executeIfDecided` is turned on and the vote is decided
+        tx = await voting.connect(signers[2]).vote(id, VoteOption.Yes, true);
+        {
+          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+          expect(event.args.actor).to.equal(voting.address);
+          expect(event.args.callId).to.equal(id);
+          expect(event.args.actions.length).to.equal(1);
+          expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+          expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+          expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+          expect(event.args.execResults).to.deep.equal(['0x']);
+
+          const vote = await voting.getProposal(id);
+
+          expect(vote.executed).to.equal(true);
+        }
+
+        // check for the `ProposalExecuted` event in the voting contract
+        {
+          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          expect(event.args.proposalId).to.equal(id);
+          expect(event.args.execResults).to.deep.equal(['0x']);
+        }
+
+        // calling execute again should fail
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
+
+      it('reverts if vote is not decided yet', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
     });
 
-    it('does not allow voting, when the vote has not started yet', async () => {
-      expect(await getTime()).to.be.lessThan(startDate);
+    context('Vote Replacement', async () => {
+      beforeEach(async () => {
+        voteSettings.earlyExecution = false;
+        voteSettings.voteReplacement = true;
 
-      await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await voting.initialize(
+          dao.address,
+          voteSettings,
+          governanceErc20Mock.address
+        );
 
-      await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastForbidden', id, signers[0].address)
-      );
-    });
+        // set voting power to 100
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(
+          totalVotingPower
+        );
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-    it('should not be able to vote if user has 0 token', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
 
-      await governanceErc20Mock.mock.getPastVotes.returns(0);
+      it('should allow vote replacement but not double-count votes by the same address', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-      await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-        customError('VoteCastForbidden', id, signers[0].address)
-      );
-    });
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-    it('increases the yes, no, and abstain votes and emit correct events', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        await voting.vote(id, VoteOption.Yes, false);
+        await voting.vote(id, VoteOption.Yes, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(1);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
 
-      await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await voting.vote(id, VoteOption.No, false);
+        await voting.vote(id, VoteOption.No, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(1);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
 
-      expect(await voting.vote(id, VoteOption.Yes, false))
-        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+        await voting.vote(id, VoteOption.Abstain, false);
+        await voting.vote(id, VoteOption.Abstain, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
+      });
 
-      let proposal = await voting.getProposal(id);
-      expect(proposal.tally.yes).to.equal(1);
-      expect(proposal.tally.no).to.equal(0);
-      expect(proposal.tally.abstain).to.equal(0);
+      it('cannot early execute', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-      expect(await voting.vote(id, VoteOption.No, false))
-        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.No, 1);
+        await governanceErc20Mock.mock.getPastVotes.returns(51);
+        await voting.vote(id, VoteOption.Yes, false);
 
-      proposal = await voting.getProposal(0);
-      expect(proposal.tally.yes).to.equal(0);
-      expect(proposal.tally.no).to.equal(1);
-      expect(proposal.tally.abstain).to.equal(0);
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+      });
 
-      expect(await voting.vote(id, VoteOption.Abstain, false))
-        .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.Abstain, 1);
+      it('can execute normally if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-      proposal = await voting.getProposal(id);
-      expect(proposal.tally.yes).to.equal(0);
-      expect(proposal.tally.no).to.equal(0);
-      expect(proposal.tally.abstain).to.equal(1);
-    });
+        await governanceErc20Mock.mock.getPastVotes.returns(30);
+        await voting.vote(id, VoteOption.Yes, false);
+        await governanceErc20Mock.mock.getPastVotes.returns(20);
+        await voting.vote(id, VoteOption.No, false);
+        await governanceErc20Mock.mock.getPastVotes.returns(20);
+        await voting.vote(id, VoteOption.Abstain, false);
 
-    it('should not double-count votes by the same address', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
 
-      await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await advanceAfterVoteEnd(endDate);
 
-      await voting.vote(id, VoteOption.Yes, false);
-      await voting.vote(id, VoteOption.Yes, false);
-      expect((await voting.getProposal(id)).tally.yes).to.equal(1);
-      expect((await voting.getProposal(id)).tally.no).to.equal(0);
-      expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
+        expect(await voting.support(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
 
-      await voting.vote(id, VoteOption.No, false);
-      await voting.vote(id, VoteOption.No, false);
-      expect((await voting.getProposal(id)).tally.yes).to.equal(0);
-      expect((await voting.getProposal(id)).tally.no).to.equal(1);
-      expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
 
-      await voting.vote(id, VoteOption.Abstain, false);
-      await voting.vote(id, VoteOption.Abstain, false);
-      expect((await voting.getProposal(id)).tally.yes).to.equal(0);
-      expect((await voting.getProposal(id)).tally.no).to.equal(0);
-      expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
-    });
+      it('does not execute when voting with the `executeIfDecided` option', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-    it('can execute early if participation is large enough', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
+        await governanceErc20Mock.mock.getPastVotes.returns(50);
+        await voting.vote(id, VoteOption.Yes, false);
+        expect(await voting.canExecute(id)).to.equal(false);
 
-      await governanceErc20Mock.mock.getPastVotes.returns(50);
-      await voting.vote(id, VoteOption.Yes, false);
+        // `executeIfDecided` is turned on but the vote is not decided yet
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+        let tx = await voting
+          .connect(signers[1])
+          .vote(id, VoteOption.Yes, true);
 
-      expect(await voting.worstCaseSupport(id)).to.be.lte(
-        voteSettings.supportThreshold
-      );
-      expect(await voting.participation(id)).to.be.gte(
-        voteSettings.minParticipation
-      );
-      expect(await voting.canExecute(id)).to.equal(false);
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          voteSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          voteSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
 
-      await governanceErc20Mock.mock.getPastVotes.returns(1);
-      await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-      expect(await voting.participation(id)).to.be.gte(
-        voteSettings.minParticipation
-      );
-      expect(await voting.worstCaseSupport(id)).to.be.gt(
-        voteSettings.supportThreshold
-      );
-      expect(await voting.canExecute(id)).to.equal(true);
+        // `executeIfDecided` is turned off and the vote is decided
+        tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
 
-      await advanceAfterVoteEnd(endDate);
+        // `executeIfDecided` is turned on and the vote is decided
+        tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, true);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+      });
 
-      expect(await voting.participation(id)).to.be.gte(
-        voteSettings.minParticipation
-      );
-      expect(await voting.support(id)).to.be.gt(voteSettings.supportThreshold);
-      expect(await voting.canExecute(id)).to.equal(true);
-    });
+      it('reverts if vote is not decided yet', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
 
-    it('can execute normally if participation is large enough', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
-
-      // vote with 50 yes votes
-      await governanceErc20Mock.mock.getPastVotes.returns(50);
-      await voting.vote(id, VoteOption.Yes, false);
-
-      // vote 30 voting no votes
-      await governanceErc20Mock.mock.getPastVotes.returns(30);
-      await voting.connect(signers[1]).vote(id, VoteOption.No, false);
-
-      // vote with 10 abstain votes
-      await governanceErc20Mock.mock.getPastVotes.returns(10);
-      await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
-
-      // closes the vote
-      await advanceAfterVoteEnd(endDate);
-
-      //The vote is executable as support > 50%, participation > 20%, and the voting period is over
-      expect(await voting.canExecute(id)).to.equal(true);
-    });
-
-    it('cannot execute normally if participation is too low', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
-
-      // vote with 10 yes votes
-      await governanceErc20Mock.mock.getPastVotes.returns(10);
-      await voting.vote(id, VoteOption.Yes, false);
-
-      // vote with 5 no votes
-      await governanceErc20Mock.mock.getPastVotes.returns(5);
-      await voting.connect(signers[1]).vote(id, VoteOption.No, false);
-
-      // vote with 5 abstain votes
-      await governanceErc20Mock.mock.getPastVotes.returns(4);
-      await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
-
-      // closes the vote
-      await advanceAfterVoteEnd(endDate);
-
-      //The vote is not executable because the participation with 19% is still too low, despite a support of 67% and the voting period being over
-      expect(await voting.canExecute(id)).to.equal(false);
-    });
-
-    it('executes the vote immediately when the vote is decided early and the executeIfDecided options is selected', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
-
-      await governanceErc20Mock.mock.getPastVotes.returns(50);
-
-      // `executeIfDecided` is turned on but the vote is not decided yet
-      let tx = await voting.connect(signers[0]).vote(id, VoteOption.Yes, true);
-      expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
-      // `executeIfDecided` is turned off and the vote is decided
-      await governanceErc20Mock.mock.getPastVotes.returns(1);
-      tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-      expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
-      // `executeIfDecided` is turned on and the vote is decided
-      tx = await voting.connect(signers[1]).vote(id, VoteOption.Yes, true);
-      {
-        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
-
-        expect(event.args.actor).to.equal(voting.address);
-        expect(event.args.callId).to.equal(id);
-        expect(event.args.actions.length).to.equal(1);
-        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
-        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
-        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
-        expect(event.args.execResults).to.deep.equal(['0x']);
-
-        const vote = await voting.getProposal(id);
-
-        expect(vote.executed).to.equal(true);
-      }
-
-      // check for the `ProposalExecuted` event in the voting contract
-      {
-        const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
-        expect(event.args.proposalId).to.equal(id);
-        expect(event.args.execResults).to.deep.equal(['0x']);
-      }
-
-      // calling execute again should fail
-      await expect(voting.execute(id)).to.be.revertedWith(
-        customError('ProposalExecutionForbidden', id)
-      );
-    });
-
-    it('reverts if vote is not decided yet', async () => {
-      await advanceIntoVoteTime(startDate, endDate);
-
-      await expect(voting.execute(id)).to.be.revertedWith(
-        customError('ProposalExecutionForbidden', id)
-      );
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
     });
   });
-
   describe('Configurations for different use cases', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
