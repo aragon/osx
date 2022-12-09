@@ -102,6 +102,7 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
     'createdAt',
     event.block.timestamp.toString()
   );
+  assert.fieldEquals('AddresslistProposal', entityID, 'creationBlockNumber', event.block.number.toString())
   assert.fieldEquals('AddresslistProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
     'AddresslistProposal',
@@ -230,6 +231,8 @@ test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event',
   // checks
   assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
   assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'true');
+  assert.fieldEquals('AddresslistProposal', entityID, 'executionDate', event.block.timestamp.toString())
+  assert.fieldEquals('AddresslistProposal', entityID, 'executionBlockNumber', event.block.number.toString())
 
   clearStore();
 });

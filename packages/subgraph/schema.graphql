@@ -251,7 +251,10 @@ type TokenVotingProposal implements Proposal @entity {
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  creationBlockNumber: BigInt!
   executable: Boolean
+  executionDate: BigInt
+  executionBlockNumber: BigInt
 }
 
 # Addresslist
@@ -307,5 +310,8 @@ type AddresslistProposal implements Proposal @entity {
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  creationBlockNumber: BigInt!
   executable: Boolean
+  executionDate: BigInt
+  executionBlockNumber: BigInt
 }

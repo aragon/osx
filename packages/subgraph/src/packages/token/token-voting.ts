@@ -40,6 +40,7 @@ export function _handleProposalCreated(
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
+  proposalEntity.creationBlockNumber = event.block.number;
 
   let contract = TokenVoting.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
@@ -165,6 +166,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executionDate = event.block.timestamp;
+    proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.save();
   }
 

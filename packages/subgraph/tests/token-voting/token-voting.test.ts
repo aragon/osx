@@ -97,6 +97,7 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     'createdAt',
     event.block.timestamp.toString()
   );
+  assert.fieldEquals('TokenVotingProposal', entityID, 'creationBlockNumber', event.block.number.toString())
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -276,6 +277,8 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
   // checks
   assert.fieldEquals('TokenVotingProposal', entityID, 'id', entityID);
   assert.fieldEquals('TokenVotingProposal', entityID, 'executed', 'true');
+  assert.fieldEquals('TokenVotingProposal', entityID, 'executionDate', event.block.timestamp.toString())
+  assert.fieldEquals('TokenVotingProposal', entityID, 'executionBlockNumber', event.block.number.toString())
 
   clearStore();
 });
