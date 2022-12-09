@@ -308,7 +308,7 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        if (_isVoteOpen(proposal_) && proposal_.voteConfiguration.earlyExecution) {
+        if (_isVoteOpen(proposal_)) {
             // Early execution
             return
                 proposal_.voteConfiguration.earlyExecution &&
