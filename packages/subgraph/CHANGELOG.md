@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.5.0-alpha
+On 2022-12-09 15:16:22
+
 ### Added
 
 - Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
