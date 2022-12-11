@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
@@ -8,6 +8,8 @@ import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
+
+chai.use(smock.matchers);
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 
@@ -27,7 +29,7 @@ const EVENTS = {
   Executed: 'Executed',
   NativeTokenDeposited: 'NativeTokenDeposited',
   SignatureValidatorSet: 'SignatureValidatorSet',
-  StandardCallbackRegistered: "StandardCallbackRegistered"
+  StandardCallbackRegistered: 'StandardCallbackRegistered',
 };
 
 const PERMISSION_IDS = {
@@ -44,7 +46,7 @@ const PERMISSION_IDS = {
   MINT_PERMISSION_ID: ethers.utils.id('MINT_PERMISSION'),
   REGISTER_STANDARD_CALLBACK_PERMISSION_ID: ethers.utils.id(
     'REGISTER_STANDARD_CALLBACK_PERMISSION'
-  )
+  ),
 };
 
 describe('DAO', function () {
@@ -411,7 +413,7 @@ describe('DAO', function () {
       ).to.be.revertedWith(customError('ZeroAmount'));
     });
   });
-  
+
   describe('registerStandardCallback:', async () => {
     it('reverts if `REGISTER_STANDARD_CALLBACK_PERMISSION` is not granted', async () => {
       await dao.revoke(
@@ -419,13 +421,9 @@ describe('DAO', function () {
         ownerAddress,
         PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       );
-  
+
       await expect(
-        dao.registerStandardCallback(
-          '0x00000001',
-          '0x00000001',
-          '0x00000001'
-        )
+        dao.registerStandardCallback('0x00000001', '0x00000001', '0x00000001')
       ).to.be.revertedWith(
         customError(
           'Unauthorized',
@@ -441,13 +439,9 @@ describe('DAO', function () {
       // The below id (Real usecase example)
       // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
       // callbackSelector (onERC721Received.selector)
-      const id = "0x150b7a02"
+      const id = '0x150b7a02';
       await expect(
-        dao.registerStandardCallback(
-          '0x00000001',
-          '0x00000002',
-          '0x00000001'
-        )
+        dao.registerStandardCallback('0x00000001', '0x00000002', '0x00000001')
       )
         .to.emit(dao, EVENTS.StandardCallbackRegistered)
         .withArgs('0x00000001', '0x00000002', '0x00000001');
@@ -457,33 +451,31 @@ describe('DAO', function () {
       // (Real usecase example)
       // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
       // callbackSelector (onERC721Received.selector)
-      const id = "0x150b7a02"
-      
+      const id = '0x150b7a02';
+
       // onERC721Received selector doesn't exist, so it should fail..
       await expect(
         signers[0].sendTransaction({
           to: dao.address,
           data: id,
         })
-      ).to.be.revertedWith(customError('UnkownCallback', id, `0x${'00'.repeat(32)}`));
+      ).to.be.revertedWith(
+        customError('UnkownCallback', id, `0x${'00'.repeat(32)}`)
+      );
 
       // register onERC721Received selector
-      await dao.registerStandardCallback(
-        id,
-        id,
-        id
-      )
-      
+      await dao.registerStandardCallback(id, id, id);
+
       let onERC721ReceivedReturned = await ethers.provider.call({
         to: dao.address,
         data: id,
-      })
-      
+      });
+
       // TODO: ethers utils pads zero to the left. we need to pad to the right.
-      expect(onERC721ReceivedReturned).to.equal(id + '00'.repeat(28))
+      expect(onERC721ReceivedReturned).to.equal(id + '00'.repeat(28));
       expect(await dao.supportsInterface(id)).to.equal(true);
     });
-  })
+  });
 
   describe('receive:', async () => {
     const amount = ethers.utils.parseEther('1.23');

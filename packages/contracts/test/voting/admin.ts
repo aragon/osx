@@ -1,5 +1,6 @@
+import chai, {expect} from 'chai';
+import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {DAO} from '../../typechain';
@@ -8,6 +9,9 @@ import {findEvent} from '../../utils/event';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {BigNumber} from 'ethers';
+
+chai.use(smock.matchers);
 
 const EVENTS = {
   ProposalCreated: 'ProposalCreated',
@@ -23,7 +27,7 @@ const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 describe('Admin plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
-  let dao: DAO;
+  let dao: any;
   let ownerAddress: string;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -45,7 +49,7 @@ describe('Admin plugin', function () {
     dummyActions = [
       {
         to: ownerAddress,
-        data: '0x00000000',
+        data: '0x0000',
         value: 0,
       },
     ];
@@ -53,8 +57,10 @@ describe('Admin plugin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
+    // const DAO = await ethers.getContractFactory('DAO');
+    // dao = await DAO.deploy();
+    const mockDAOFactory = await smock.mock('DAO');
+    dao = await mockDAOFactory.deploy();
     await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
   });
 
@@ -197,6 +203,18 @@ describe('Admin plugin', function () {
       const event = await findEvent(tx, EVENTS.ProposalCreated);
 
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
+    });
+
+    it("calls DAO's execute function correctly", async () => {
+      await plugin.executeProposal(dummyMetadata, dummyActions);
+
+      expect(dao.execute).has.been.calledWith(BigNumber.from(0), [
+        [
+          dummyActions[0].to,
+          BigNumber.from(dummyActions[0].value),
+          dummyActions[0].data,
+        ],
+      ]);
     });
   });
 });
