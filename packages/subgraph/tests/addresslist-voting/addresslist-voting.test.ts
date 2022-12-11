@@ -21,8 +21,8 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  MIN_SUPPORT,
-  MIN_TURNOUT,
+  SUPPORT_THRESHOLD,
+  MIN_PARTICIPATION,
   VOTING_POWER
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
@@ -41,8 +41,8 @@ let proposalId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
 let snapshotBlock = '100';
-let relativeSupportThresholdPct = '1000';
-let totalSupportThresholdPct = '500';
+let supportThreshold = '1000';
+let minParticipation = '500';
 let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -63,8 +63,8 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
     startDate,
     endDate,
     snapshotBlock,
-    relativeSupportThresholdPct,
-    totalSupportThresholdPct,
+    supportThreshold,
+    minParticipation,
     totalVotingPower,
     '0',
     '0',
@@ -102,12 +102,13 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
     'createdAt',
     event.block.timestamp.toString()
   );
+  assert.fieldEquals('AddresslistProposal', entityID, 'creationBlockNumber', event.block.number.toString())
   assert.fieldEquals('AddresslistProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
     'AddresslistProposal',
     entityID,
-    'relativeSupportThresholdPct',
-    relativeSupportThresholdPct
+    'supportThreshold',
+    supportThreshold
   );
 
   assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'false');
@@ -136,12 +137,12 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
-    MIN_SUPPORT,
-    MIN_TURNOUT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
     VOTING_POWER,
-    '1',
-    '0',
-    '0',
+    '1', // yes
+    '0', // no
+    '0', // abstain
     actions
   );
 
@@ -149,8 +150,8 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   let event = createNewVoteCastEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
-    '2',
-    '1',
+    '2', // yes
+    '1', // votingPower
     VOTING_ADDRESS
   );
 
@@ -162,12 +163,11 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
 
   // check proposal
   assert.fieldEquals('AddresslistProposal', proposal.id, 'yes', '1');
-  // check executable
-  // the total voting power is 3, currently total votes = 1
-  // the min participation is 0.5; 0.33 <= 0.5 => false
-  // currently yes = 1
-  // the min support is 0.5; 1 >= 0.5 => true
-  // is not executable
+  // Check executable
+  // yes: 1, no: 0, abstain: 0
+  // support          : 100%
+  // worstCaseSupport :  33%
+  // participation    :  33%
   assert.fieldEquals('AddresslistProposal', proposal.id, 'executable', 'false');
   // check vote count
   assert.fieldEquals('AddresslistProposal', proposal.id, 'voteCount', '1');
@@ -180,30 +180,31 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
-    MIN_SUPPORT,
-    MIN_TURNOUT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
     VOTING_POWER,
-    '1',
-    '0',
-    '1',
+    '2', // yes
+    '0', // no
+    '0', // abstain
     actions
   );
+
   // create event
   let event2 = createNewVoteCastEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
-    '1', // abstain
+    '2', // yes
     '1',
     VOTING_ADDRESS
   );
 
   handleVoteCast(event2);
-  // check executable
-  // the total voting power is 3, currently total votes = 2
-  // the min participation is 0.5; 0.66 >= 0.5 => true
-  // currently yes = 1, abstain = 1
-  // the min support is 0.5; 0.5 >= 0.5 => true
-  // is executable
+
+  // Check executable
+  // yes: 2, no: 0, abstain: 0
+  // support          : 100%
+  // worstCaseSupport :  67%
+  // participation    :  67%
   assert.fieldEquals('AddresslistProposal', proposal.id, 'executable', 'true');
 
   assert.fieldEquals('AddresslistProposal', proposal.id, 'voteCount', '2');
@@ -230,6 +231,8 @@ test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event',
   // checks
   assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
   assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'true');
+  assert.fieldEquals('AddresslistProposal', entityID, 'executionDate', event.block.timestamp.toString())
+  assert.fieldEquals('AddresslistProposal', entityID, 'executionBlockNumber', event.block.number.toString())
 
   clearStore();
 });
@@ -253,18 +256,8 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
 
   // checks
   assert.fieldEquals('AddresslistPlugin', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'AddresslistPlugin',
-    entityID,
-    'totalSupportThresholdPct',
-    '2'
-  );
-  assert.fieldEquals(
-    'AddresslistPlugin',
-    entityID,
-    'relativeSupportThresholdPct',
-    '1'
-  );
+  assert.fieldEquals('AddresslistPlugin', entityID, 'minParticipation', '1');
+  assert.fieldEquals('AddresslistPlugin', entityID, 'supportThreshold', '2');
   assert.fieldEquals('AddresslistPlugin', entityID, 'minDuration', '3600');
 
   clearStore();

@@ -26,23 +26,18 @@ contract TokenVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _totalSupportThresholdPct The total support threshold in percent.
-    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
-    /// @param _minDuration The minimal duration of a vote.
+    /// @param _supportThreshold The support threshold in percent.
+    /// @param _minParticipation The minimum participation ratio in percent.
+    /// @param _minDuration The minimal duration of a vote in seconds.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
-        uint64 _totalSupportThresholdPct,
-        uint64 _relativeSupportThresholdPct,
+        uint64 _supportThreshold,
+        uint64 _minParticipation,
         uint64 _minDuration,
         IVotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(
-            _dao,
-            _totalSupportThresholdPct,
-            _relativeSupportThresholdPct,
-            _minDuration
-        );
+        __MajorityVotingBase_init(_dao, _supportThreshold, _minParticipation, _minDuration);
 
         votingToken = _token;
     }
@@ -80,23 +75,28 @@ contract TokenVoting is MajorityVotingBase {
         // Calculate the start and end time of the vote
         uint64 currentTimestamp = getTimestamp64();
 
-        if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + minDuration;
+        if (_startDate == 0) {
+            _startDate = currentTimestamp;
+        }
+        if (_endDate == 0) {
+            _endDate = _startDate + minDuration;
+        }
 
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
+        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp) {
             revert VotingPeriodInvalid({
                 current: currentTimestamp,
                 start: _startDate,
                 end: _endDate,
                 minDuration: minDuration
             });
+        }
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
         proposal_.startDate = _startDate;
         proposal_.endDate = _endDate;
-        proposal_.relativeSupportThresholdPct = relativeSupportThresholdPct;
-        proposal_.totalSupportThresholdPct = totalSupportThresholdPct;
+        proposal_.supportThreshold = supportThreshold;
+        proposal_.minParticipation = minParticipation;
         proposal_.totalVotingPower = totalVotingPower;
         proposal_.snapshotBlock = snapshotBlock;
 

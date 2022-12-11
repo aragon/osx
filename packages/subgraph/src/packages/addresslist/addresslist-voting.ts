@@ -41,6 +41,7 @@ export function _handleProposalCreated(
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
+  proposalEntity.creationBlockNumber = event.block.number;
 
   let contract = Addresslist.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
@@ -51,8 +52,8 @@ export function _handleProposalCreated(
     proposalEntity.startDate = vote.value.value2;
     proposalEntity.endDate = vote.value.value3;
     proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.relativeSupportThresholdPct = vote.value.value5;
-    proposalEntity.totalSupportThresholdPct = vote.value.value6;
+    proposalEntity.supportThreshold = vote.value.value5;
+    proposalEntity.minParticipation = vote.value.value6;
     proposalEntity.totalVotingPower = vote.value.value7;
 
     // actions
@@ -101,7 +102,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalEntity.proposal = proposalId;
   }
   voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
-  voterProposalEntity.weight = event.params.votingPower;
+  voterProposalEntity.votingPower = event.params.votingPower;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 
@@ -111,39 +112,36 @@ export function handleVoteCast(event: VoteCast): void {
     let contract = Addresslist.bind(event.address);
     let vote = contract.try_getProposal(event.params.proposalId);
     if (!vote.reverted) {
-      let voteCount = vote.value.value8.plus(
-        vote.value.value9.plus(vote.value.value10)
-      );
       let yes = vote.value.value8;
+      let no = vote.value.value9;
+      let abstain = vote.value.value10;
+      let voteCount = yes.plus(no.plus(abstain));
+
       proposalEntity.yes = yes;
-      proposalEntity.no = vote.value.value9;
-      proposalEntity.abstain = vote.value.value10;
+      proposalEntity.no = no;
+      proposalEntity.abstain = abstain;
       proposalEntity.voteCount = voteCount;
 
-      // check if the current vote results meet
-      // the conditions for the proposal to pass:
-      // - total support    :  N_yes / N_total >= total support threshold
-      // - relative support :  N_yes / (N_yes + N_no) >= relative support threshold
+      // check if the current vote results meet the conditions for the proposal to pass:
+      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
+      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
       // expect a number between 0 and 100
-      // where 0.35 => 35
       let currentParticipation = voteCount
         .times(BigInt.fromI32(100))
         .div(proposalEntity.totalVotingPower);
-      // expect a number between 0 and 100
-      // where 0.35 => 35
-      let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+
+      let worstCaseSupport = yes
+        .times(BigInt.fromI32(100))
+        .div(proposalEntity.totalVotingPower.minus(abstain));
+
       // set the executable param
       proposalEntity.executable =
-        currentParticipation.ge(
-          proposalEntity.totalSupportThresholdPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+        worstCaseSupport.gt(
+          proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
         ) &&
-        currentSupport.ge(
-          proposalEntity.relativeSupportThresholdPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+        currentParticipation.ge(
+          proposalEntity.minParticipation.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
     }
@@ -156,6 +154,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = AddresslistProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executionDate = event.block.timestamp;
+    proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.save();
   }
 
@@ -184,10 +184,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = AddresslistPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.totalSupportThresholdPct =
-      event.params.totalSupportThresholdPct;
-    packageEntity.relativeSupportThresholdPct =
-      event.params.relativeSupportThresholdPct;
+    packageEntity.supportThreshold = event.params.supportThreshold;
+    packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.save();
   }

@@ -15,8 +15,8 @@ import {
   CREATED_AT,
   DAO_ADDRESS,
   END_DATE,
-  MIN_SUPPORT,
-  MIN_TURNOUT,
+  SUPPORT_THRESHOLD,
+  MIN_PARTICIPATION,
   PROPOSAL_ENTITY_ID,
   SNAPSHOT_BLOCK,
   START_DATE,
@@ -122,8 +122,8 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVoteSettingsUpdatedEvent(
-  totalSupportThresholdPct: string,
-  relativeSupportThresholdPct: string,
+  minParticipation: string,
+  supportThreshold: string,
   minDuration: string,
   contractAddress: string
 ): VoteSettingsUpdated {
@@ -134,23 +134,21 @@ export function createNewVoteSettingsUpdatedEvent(
   newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVoteSettingsUpdatedEvent.parameters = [];
 
-  let totalSupportThresholdPctParam = new ethereum.EventParam(
-    'totalSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(totalSupportThresholdPct))
+  let minParticipationParam = new ethereum.EventParam(
+    'minParticipation',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minParticipation))
   );
-  let relativeSupportThresholdPctParam = new ethereum.EventParam(
-    'relativeSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(
-      BigInt.fromString(relativeSupportThresholdPct)
-    )
+  let supportThresholdParam = new ethereum.EventParam(
+    'supportThreshold',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportThreshold))
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
 
-  newVoteSettingsUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
-  newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
+  newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
+  newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
 
   return newVoteSettingsUpdatedEvent;
@@ -220,10 +218,11 @@ export function createAddresslistProposalEntityState(
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  relativeSupportThresholdPct: string = MIN_SUPPORT,
-  totalSupportThresholdPct: string = MIN_TURNOUT,
+  supportThreshold: string = SUPPORT_THRESHOLD,
+  minParticipation: string = MIN_PARTICIPATION,
   totalVotingPower: string = VOTING_POWER,
   createdAt: string = CREATED_AT,
+  creationBlockNumber: BigInt = new BigInt(0),
   open: boolean = true,
   executable: boolean = false,
   executed: boolean = false
@@ -237,17 +236,14 @@ export function createAddresslistProposalEntityState(
   addresslistProposal.startDate = BigInt.fromString(startDate);
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  addresslistProposal.relativeSupportThresholdPct = BigInt.fromString(
-    relativeSupportThresholdPct
-  );
-  addresslistProposal.totalSupportThresholdPct = BigInt.fromString(
-    totalSupportThresholdPct
-  );
+  addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
+  addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
   addresslistProposal.open = open;
   addresslistProposal.executable = executable;
   addresslistProposal.executed = executed;
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
+  addresslistProposal.creationBlockNumber = creationBlockNumber;
   addresslistProposal.save();
 
   return addresslistProposal;

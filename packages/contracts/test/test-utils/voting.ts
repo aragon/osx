@@ -1,4 +1,5 @@
 import {ethers} from 'hardhat';
+import {expect} from 'chai';
 
 export enum VoteOption {
   None,
@@ -23,4 +24,15 @@ export async function advanceTime(time: number) {
 export async function advanceTimeTo(timestamp: number) {
   const delta = timestamp - (await getTime());
   await advanceTime(delta);
+}
+
+export async function advanceIntoVoteTime(startDate: number, endDate: number) {
+  await advanceTimeTo(startDate);
+  expect(await getTime()).to.be.greaterThanOrEqual(startDate);
+  expect(await getTime()).to.be.lessThan(endDate);
+}
+
+export async function advanceAfterVoteEnd(endDate: number) {
+  await advanceTimeTo(endDate);
+  expect(await getTime()).to.be.greaterThanOrEqual(endDate);
 }

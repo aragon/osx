@@ -23,17 +23,17 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
-    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
-    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
+    let supportThreshold = contract.try_supportThreshold();
+    let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
-    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
+    packageEntity.supportThreshold = supportThreshold.reverted
       ? null
-      : relativeSupportThresholdPct.value;
-    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
+      : supportThreshold.value;
+    packageEntity.minParticipation = minParticipation.reverted
       ? null
-      : totalSupportThresholdPct.value;
+      : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
@@ -52,16 +52,16 @@ function createAddresslistPlugin(plugin: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new AddresslistPlugin(plugin.toHexString());
     let contract = AddresslistContract.bind(plugin);
-    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
-    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
+    let supportThreshold = contract.try_supportThreshold();
+    let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
 
-    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
+    packageEntity.supportThreshold = supportThreshold.reverted
       ? null
-      : relativeSupportThresholdPct.value;
-    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
+      : supportThreshold.value;
+    packageEntity.minParticipation = minParticipation.reverted
       ? null
-      : totalSupportThresholdPct.value;
+      : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     // Create template
