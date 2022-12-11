@@ -21,7 +21,7 @@ contract Admin is PluginCloneable {
     bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID =
         keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
-    /// @notice The incrimental id for proposals and executions.
+    /// @notice The incremental ID for proposals and executions.
     Counters.Counter internal proposalId;
 
     /// @notice Emitted when a proposal is created.
