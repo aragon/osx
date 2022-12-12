@@ -1,6 +1,6 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
-import {AddresslistProposal} from '../../generated/schema';
+import {AddresslistVotingProposal} from '../../generated/schema';
 
 import {
   ProposalCreated,
@@ -12,17 +12,19 @@ import {
 } from '../../generated/templates/Addresslist/Addresslist';
 import {
   ADDRESS_ONE,
-  CREATED_AT,
   DAO_ADDRESS,
-  END_DATE,
-  SUPPORT_THRESHOLD,
-  MIN_PARTICIPATION,
   PROPOSAL_ENTITY_ID,
-  SNAPSHOT_BLOCK,
-  START_DATE,
   PROPOSAL_ID,
   VOTING_ADDRESS,
-  VOTING_POWER
+  EARLY_EXECUTION,
+  VOTE_REPLACEMENT,
+  SUPPORT_THRESHOLD,
+  MIN_PARTICIPATION,
+  START_DATE,
+  END_DATE,
+  SNAPSHOT_BLOCK,
+  TOTAL_VOTING_POWER,
+  CREATED_AT
 } from '../constants';
 
 // events
@@ -122,6 +124,8 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVoteSettingsUpdatedEvent(
+  earlyExecution: boolean,
+  voteReplacement: boolean,
   minParticipation: string,
   supportThreshold: string,
   minDuration: string,
@@ -135,13 +139,21 @@ export function createNewVoteSettingsUpdatedEvent(
   newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVoteSettingsUpdatedEvent.parameters = [];
 
-  let minParticipationParam = new ethereum.EventParam(
-    'minParticipation',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(minParticipation))
+  let earlyExecutionParam = new ethereum.EventParam(
+    'earlyExecution',
+    ethereum.Value.fromBoolean(earlyExecution)
+  );
+  let voteReplacementParam = new ethereum.EventParam(
+    'voteReplacement',
+    ethereum.Value.fromBoolean(voteReplacement)
   );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(supportThreshold))
+  );
+  let minParticipationParam = new ethereum.EventParam(
+    'minParticipation',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minParticipation))
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
@@ -152,6 +164,8 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
+  newVoteSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
+  newVoteSettingsUpdatedEvent.parameters.push(voteReplacementParam);
   newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
@@ -215,41 +229,54 @@ export function getProposalCountCall(
 
 // state
 
-export function createAddresslistProposalEntityState(
+export function createAddresslistVotingProposalEntityState(
   entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = VOTING_ADDRESS,
   creator: string = ADDRESS_ONE,
   proposalId: string = PROPOSAL_ID,
+
+  open: boolean = true,
+  executed: boolean = false,
+
+  earlyExecution: boolean = EARLY_EXECUTION,
+  voteReplacement: boolean = VOTE_REPLACEMENT,
+  supportThreshold: string = SUPPORT_THRESHOLD,
+  minParticipation: string = MIN_PARTICIPATION,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  supportThreshold: string = SUPPORT_THRESHOLD,
-  minParticipation: string = MIN_PARTICIPATION,
-  totalVotingPower: string = VOTING_POWER,
+
+  totalVotingPower: string = TOTAL_VOTING_POWER,
+
   createdAt: string = CREATED_AT,
   creationBlockNumber: BigInt = new BigInt(0),
-  open: boolean = true,
-  executable: boolean = false,
-  executed: boolean = false
-): AddresslistProposal {
-  let addresslistProposal = new AddresslistProposal(entityID);
+  executable: boolean = false
+): AddresslistVotingProposal {
+  let addresslistProposal = new AddresslistVotingProposal(entityID);
   addresslistProposal.dao = Address.fromString(dao).toHexString();
   addresslistProposal.plugin = Address.fromString(pkg).toHexString();
   addresslistProposal.proposalId = BigInt.fromString(proposalId);
   addresslistProposal.creator = Address.fromString(creator);
 
+  addresslistProposal.open = open;
+  addresslistProposal.executed = executed;
+
+  addresslistProposal.earlyExecution = earlyExecution;
+  addresslistProposal.voteReplacement = voteReplacement;
+  addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
+  addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
   addresslistProposal.startDate = BigInt.fromString(startDate);
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
-  addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
+
+  //addresslistProposal.voteCount = BigInt.fromString(minParticipation); // Correct?
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
-  addresslistProposal.open = open;
-  addresslistProposal.executable = executable;
-  addresslistProposal.executed = executed;
+
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
   addresslistProposal.creationBlockNumber = creationBlockNumber;
+  addresslistProposal.executable = executable;
+
   addresslistProposal.save();
 
   return addresslistProposal;

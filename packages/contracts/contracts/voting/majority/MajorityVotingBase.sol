@@ -369,7 +369,14 @@ abstract contract MajorityVotingBase is
 
         voteSettings = _voteSettings;
 
-        emit VoteSettingsUpdated({voteSettings: _voteSettings});
+        emit VoteSettingsUpdated({
+            earlyExecution: _voteSettings.earlyExecution,
+            voteReplacement: _voteSettings.voteReplacement,
+            supportThreshold: _voteSettings.supportThreshold,
+            minParticipation: _voteSettings.minParticipation,
+            minDuration: _voteSettings.minDuration,
+            minProposerVotingPower: _voteSettings.minProposerVotingPower
+        });
     }
 
     /// @notice Validates and returns the proposal vote dates.

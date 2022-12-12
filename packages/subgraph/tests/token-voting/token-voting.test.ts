@@ -15,12 +15,16 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
-  END_DATE,
+  EARLY_EXECUTION,
+  VOTE_REPLACEMENT,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
-  SNAPSHOT_BLOCK,
+  MIN_DURATION,
+  MIN_PROPOSER_VOTING_POWER,
   START_DATE,
-  VOTING_POWER
+  END_DATE,
+  SNAPSHOT_BLOCK,
+  TOTAL_VOTING_POWER
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
@@ -33,14 +37,6 @@ import {
 } from './utils';
 
 let proposalId = '0';
-let startDate = '1644851000';
-let endDate = '1644852000';
-let snapshotBlock = '100';
-let supportThreshold = '1000';
-let minParticipation = '500';
-let minDuration = '3600';
-let minProposerVotingPower = '0';
-let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Token Voting (handleProposalCreated) mappings with mock event', () => {
@@ -57,15 +53,20 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     proposalId,
     true,
     false,
-    startDate,
-    endDate,
-    snapshotBlock,
-    supportThreshold,
-    minParticipation,
-    totalVotingPower,
-    '0',
-    '0',
-    '0',
+
+    EARLY_EXECUTION,
+    VOTE_REPLACEMENT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    '0', // abstain
+    '0', // yes
+    '0', // no
+    TOTAL_VOTING_POWER,
+
     actions
   );
 
@@ -99,35 +100,56 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     'createdAt',
     event.block.timestamp.toString()
   );
+<<<<<<< refs/remotes/origin/develop
   assert.fieldEquals('TokenVotingProposal', entityID, 'creationBlockNumber', event.block.number.toString())
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', startDate);
+=======
+  assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', START_DATE);
+
+>>>>>>> Fixed the subgraph
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
-    'snapshotBlock',
-    snapshotBlock
+    'earlyExecution',
+    EARLY_EXECUTION.toString()
+  );
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'voteReplacement',
+    VOTE_REPLACEMENT.toString()
   );
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
     'supportThreshold',
-    supportThreshold
+    SUPPORT_THRESHOLD
   );
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
     'minParticipation',
-    minParticipation
+    MIN_PARTICIPATION
   );
+
+  assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', START_DATE);
+  assert.fieldEquals('TokenVotingProposal', entityID, 'endDate', END_DATE);
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'snapshotBlock',
+    SNAPSHOT_BLOCK
+  );
+
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
     'totalVotingPower',
-    totalVotingPower
+    TOTAL_VOTING_POWER
   );
   assert.fieldEquals('TokenVotingProposal', entityID, 'executed', 'false');
 
-  // chack TokenVotingPlugin
+  // check TokenVotingPlugin
   assert.fieldEquals(
     'TokenVotingPlugin',
     Address.fromString(VOTING_ADDRESS).toHexString(),
@@ -147,15 +169,20 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     PROPOSAL_ID,
     true,
     false,
+
+    EARLY_EXECUTION,
+    VOTE_REPLACEMENT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
-    SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
-    VOTING_POWER,
+
+    '0', // abstain
     '1', // yes
     '0', // no
-    '0', // abstain
+    TOTAL_VOTING_POWER,
+
     actions
   );
 
@@ -164,7 +191,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     PROPOSAL_ID,
     ADDRESS_ONE,
     '2', // Yes
-    '1',
+    '1', // votingPower
     VOTING_ADDRESS
   );
 
@@ -172,7 +199,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('TokenVote', entityID, 'id', entityID);
+  assert.fieldEquals('TokenVotingVote', entityID, 'id', entityID);
 
   // check voter
   assert.fieldEquals('TokenVotingVoter', ADDRESS_ONE, 'id', ADDRESS_ONE);
@@ -194,7 +221,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
 
   // Check executable
-  // yes: 1, no: 0, abstain: 0
+  // abstain: 0, yes: 1, no: 0
   // support          : 100%
   // worstCaseSupport :  33%
   // participation    :  33%
@@ -207,15 +234,20 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     PROPOSAL_ID,
     true,
     false,
+
+    EARLY_EXECUTION,
+    VOTE_REPLACEMENT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
-    SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
-    VOTING_POWER,
-    '2',
-    '0',
-    '0',
+
+    '0', // abstain
+    '2', // yes
+    '0', // no
+    TOTAL_VOTING_POWER,
+
     actions
   );
   // create event
@@ -230,7 +262,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event2);
 
   // Check executable
-  // yes: 2, no: 0, abstain: 0
+  // abstain: 0, yes: 2, no: 0
   // support          : 100%
   // worstCaseSupport :  67%
   // participation    :  67%
@@ -258,15 +290,20 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
     proposalId,
     true,
     true,
-    startDate,
-    endDate,
-    snapshotBlock,
-    supportThreshold,
-    minParticipation,
-    totalVotingPower,
-    '1',
-    '0',
-    '0',
+
+    EARLY_EXECUTION,
+    VOTE_REPLACEMENT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    '0', // abstain
+    '1', // yes
+    '0', // no
+    TOTAL_VOTING_POWER,
+
     actions
   );
 
@@ -293,10 +330,13 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
 
   // create event
   let event = createNewVoteSettingsUpdatedEvent(
-    supportThreshold,
-    minParticipation,
-    minDuration,
-    minProposerVotingPower,
+    EARLY_EXECUTION,
+    VOTE_REPLACEMENT,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
+    MIN_DURATION,
+    MIN_PROPOSER_VOTING_POWER,
+
     VOTING_ADDRESS
   );
 
@@ -308,21 +348,38 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,
+    'earlyExecution',
+    EARLY_EXECUTION.toString()
+  );
+  assert.fieldEquals(
+    'TokenVotingPlugin',
+    entityID,
+    'voteReplacement',
+    VOTE_REPLACEMENT.toString()
+  );
+  assert.fieldEquals(
+    'TokenVotingPlugin',
+    entityID,
     'supportThreshold',
-    supportThreshold
+    SUPPORT_THRESHOLD
   );
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,
     'minParticipation',
-    minParticipation
+    MIN_PARTICIPATION
   );
-  assert.fieldEquals('TokenVotingPlugin', entityID, 'minDuration', minDuration);
+  assert.fieldEquals(
+    'TokenVotingPlugin',
+    entityID,
+    'minDuration',
+    MIN_DURATION
+  );
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,
     'minProposerVotingPower',
-    minProposerVotingPower
+    MIN_PROPOSER_VOTING_POWER
   );
 
   clearStore();

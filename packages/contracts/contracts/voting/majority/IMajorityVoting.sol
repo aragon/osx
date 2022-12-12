@@ -70,10 +70,10 @@ interface IMajorityVoting {
     }
 
     struct Tally {
-        uint256 totalVotingPower;
         uint256 abstain;
         uint256 yes;
         uint256 no;
+        uint256 totalVotingPower;
     }
 
     struct Proposal {
@@ -108,8 +108,15 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the vote settings are updated.
-    /// @param voteSettings The vote settings.
-    event VoteSettingsUpdated(VoteSettings voteSettings);
+    /// @param earlyExecution The vote settings.
+    event VoteSettingsUpdated(
+        bool earlyExecution,
+        bool voteReplacement,
+        uint64 supportThreshold,
+        uint64 minParticipation,
+        uint64 minDuration,
+        uint256 minProposerVotingPower
+    );
 
     /// @notice Changes the vote settings.
     function changeVoteSettings(VoteSettings calldata _voteSettings) external;

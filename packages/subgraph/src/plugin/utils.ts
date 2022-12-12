@@ -1,13 +1,13 @@
 import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
-import {Addresslist as AddresslistContract} from '../../generated/templates/Addresslist/Addresslist';
+import {Addresslist as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {TokenVoting, Addresslist, Admin} from '../../generated/templates';
+import {TokenVoting, AddresslistVoting, Admin} from '../../generated/templates';
 import {
   DaoPlugin,
   TokenVotingPlugin,
-  AddresslistPlugin,
+  AddresslistVotingPlugin,
   AdminPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
@@ -23,7 +23,7 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
-    let supportThreshold = contract.try_voteSettings.supportThreshold();
+    let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
@@ -47,14 +47,26 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
   }
 }
 
-function createAddresslistPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = AddresslistPlugin.load(plugin.toHexString());
+function createAddresslistVotingPlugin(who: Address, daoId: string): void {
+  let packageEntity = AddresslistVotingPlugin.load(who.toHexString());
   if (!packageEntity) {
-    packageEntity = new AddresslistPlugin(plugin.toHexString());
-    let contract = AddresslistContract.bind(plugin);
+    packageEntity = new AddresslistVotingPlugin(who.toHexString());
+    let contract = AddresslistVotingContract.bind(who);
+
+    let earlyExecution = contract.try_earlyExecution();
+    let voteReplacement = contract.try_voteReplacement();
+
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
+    let minProposerVotingPower = contract.try_minProposerVotingPower();
+
+    packageEntity.earlyExecution = earlyExecution.reverted
+      ? false
+      : earlyExecution.value;
+    packageEntity.voteReplacement = voteReplacement.reverted
+      ? false
+      : voteReplacement.value;
 
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
@@ -64,10 +76,14 @@ function createAddresslistPlugin(plugin: Address, daoId: string): void {
       : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
+    packageEntity.minProposerVotingPower = minProposerVotingPower.reverted
+      ? null
+      : minProposerVotingPower.value;
+
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    Addresslist.createWithContext(plugin, context);
+    AddresslistVoting.createWithContext(plugin, context);
 
     packageEntity.save();
   }
@@ -106,7 +122,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
   if (TokenVotingInterfaceSuppoted) {
     createTokenVotingPlugin(plugin, daoId);
   } else if (addresslistInterfaceSuppoted) {
-    createAddresslistPlugin(plugin, daoId);
+    createAddresslistVotingPlugin(plugin, daoId);
   } else if (adminInterfaceSupported) {
     createAdminPlugin(plugin, daoId);
   }

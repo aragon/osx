@@ -12,7 +12,7 @@ import {
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVoter,
-  TokenVote
+  TokenVotingVote
 } from '../../../generated/schema';
 
 import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
@@ -43,20 +43,31 @@ export function _handleProposalCreated(
   proposalEntity.creationBlockNumber = event.block.number;
 
   let contract = TokenVoting.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
+  let proposal = contract.try_getProposal(event.params.proposalId);
 
-  if (!vote.reverted) {
-    proposalEntity.open = vote.value.value0;
-    proposalEntity.executed = vote.value.value1;
-    proposalEntity.startDate = vote.value.value2;
-    proposalEntity.endDate = vote.value.value3;
-    proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.supportThreshold = vote.value.value5;
-    proposalEntity.minParticipation = vote.value.value6;
-    proposalEntity.totalVotingPower = vote.value.value7;
+  if (!proposal.reverted) {
+    proposalEntity.open = proposal.value.value0;
+    proposalEntity.executed = proposal.value.value1;
 
-    // actions
-    let actions = vote.value.value11;
+    // VoteConfiguration
+    let voteConfiguration = proposal.value.value2;
+    proposalEntity.earlyExecution = voteConfiguration.earlyExecution;
+    proposalEntity.voteReplacement = voteConfiguration.voteReplacement;
+    proposalEntity.supportThreshold = voteConfiguration.supportThreshold;
+    proposalEntity.minParticipation = voteConfiguration.minParticipation;
+    proposalEntity.startDate = voteConfiguration.startDate;
+    proposalEntity.endDate = voteConfiguration.endDate;
+    proposalEntity.snapshotBlock = voteConfiguration.snapshotBlock;
+
+    // Tally
+    let tally = proposal.value.value3;
+    proposalEntity.abstain = tally.abstain;
+    proposalEntity.yes = tally.yes;
+    proposalEntity.no = tally.no;
+    proposalEntity.totalVotingPower = tally.totalVotingPower;
+
+    // Actions
+    let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -94,9 +105,9 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = TokenVote.load(voterProposalId);
+  let voterProposalEntity = TokenVotingVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new TokenVote(voterProposalId);
+    voterProposalEntity = new TokenVotingVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
@@ -122,11 +133,14 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalEntity = TokenVotingProposal.load(proposalId);
   if (proposalEntity) {
     let contract = TokenVoting.bind(event.address);
-    let vote = contract.try_getProposal(event.params.proposalId);
-    if (!vote.reverted) {
-      let yes = vote.value.value8;
-      let no = vote.value.value9;
-      let abstain = vote.value.value10;
+    let proposal = contract.try_getProposal(event.params.proposalId);
+
+    if (!proposal.reverted) {
+      let tally = proposal.value.value3;
+
+      let abstain = tally.abstain;
+      let yes = tally.yes;
+      let no = tally.no;
       let voteCount = yes.plus(no.plus(abstain));
 
       proposalEntity.yes = yes;
@@ -175,7 +189,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let contract = TokenVoting.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
   if (!vote.reverted) {
-    let actions = vote.value.value11;
+    let actions = vote.value.value4;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
@@ -196,6 +210,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
+    packageEntity.earlyExecution = event.params.earlyExecution;
+    packageEntity.voteReplacement = event.params.voteReplacement;
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;

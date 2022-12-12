@@ -14,13 +14,15 @@ import {
   PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   VOTING_ADDRESS,
-  CREATED_AT,
-  END_DATE,
+  EARLY_EXECUTION,
+  VOTE_REPLACEMENT,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
-  SNAPSHOT_BLOCK,
   START_DATE,
-  VOTING_POWER
+  END_DATE,
+  SNAPSHOT_BLOCK,
+  TOTAL_VOTING_POWER,
+  CREATED_AT
 } from '../constants';
 
 // events
@@ -120,6 +122,8 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVoteSettingsUpdatedEvent(
+  earlyExecution: boolean,
+  voteReplacement: boolean,
   supportThreshold: string,
   minParticipation: string,
   minDuration: string,
@@ -133,6 +137,14 @@ export function createNewVoteSettingsUpdatedEvent(
   newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVoteSettingsUpdatedEvent.parameters = [];
 
+  let earlyExecutionParam = new ethereum.EventParam(
+    'earlyExecution',
+    ethereum.Value.fromBoolean(earlyExecution)
+  );
+  let voteReplacementParam = new ethereum.EventParam(
+    'voteReplacement',
+    ethereum.Value.fromBoolean(voteReplacement)
+  );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(supportThreshold))
@@ -150,10 +162,13 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
+  newVoteSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
+  newVoteSettingsUpdatedEvent.parameters.push(voteReplacementParam);
   newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
   newVoteSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
+
   return newVoteSettingsUpdatedEvent;
 }
 
@@ -180,17 +195,23 @@ export function createTokenVotingProposalEntityState(
   pkg: string = VOTING_ADDRESS,
   creator: string = ADDRESS_ONE,
   proposalId: string = PROPOSAL_ID,
+
+  open: boolean = true,
+  executed: boolean = false,
+
+  earlyExecution: boolean = EARLY_EXECUTION,
+  voteReplacement: boolean = VOTE_REPLACEMENT,
+  supportThreshold: string = SUPPORT_THRESHOLD,
+  minParticipation: string = MIN_PARTICIPATION,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  supportThreshold: string = SUPPORT_THRESHOLD,
-  minParticipation: string = MIN_PARTICIPATION,
-  totalVotingPower: string = VOTING_POWER,
+
+  totalVotingPower: string = TOTAL_VOTING_POWER,
+
   createdAt: string = CREATED_AT,
   creationBlockNumber: BigInt = new BigInt(0),
-  open: boolean = true,
-  executable: boolean = false,
-  executed: boolean = false
+  executable: boolean = false
 ): TokenVotingProposal {
   let tokenVotingProposal = new TokenVotingProposal(entityID);
   tokenVotingProposal.dao = Address.fromString(dao).toHexString();
@@ -198,17 +219,24 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.proposalId = BigInt.fromString(proposalId);
   tokenVotingProposal.creator = Address.fromString(creator);
 
+  tokenVotingProposal.open = open;
+  tokenVotingProposal.executed = executed;
+
+  tokenVotingProposal.earlyExecution = earlyExecution;
+  tokenVotingProposal.voteReplacement = voteReplacement;
+  tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
+  tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
   tokenVotingProposal.startDate = BigInt.fromString(startDate);
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
-  tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
+
+  //tokenVotingProposal.voteCount = BigInt.fromString(minParticipation); // Correct?
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
-  tokenVotingProposal.open = open;
-  tokenVotingProposal.executable = executable;
-  tokenVotingProposal.executed = executed;
+
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
   tokenVotingProposal.creationBlockNumber = creationBlockNumber;
+  tokenVotingProposal.executable = executable;
+
   tokenVotingProposal.save();
 
   return tokenVotingProposal;
