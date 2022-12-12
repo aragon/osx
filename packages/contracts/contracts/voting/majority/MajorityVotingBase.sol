@@ -91,7 +91,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice Thrown when a sender is not allowed to create a vote.
     /// @param sender The sender address.
-    error VoteCreationForbidden(address sender);
+    error ProposalCreationForbidden(address sender);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero(); ///TODO  remove

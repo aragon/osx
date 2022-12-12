@@ -160,7 +160,7 @@ describe('TokenVoting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError('VoteCreationForbidden', signers[0].address)
+        customError('ProposalCreationForbidden', signers[0].address)
       );
 
       await governanceErc20Mock.mock.getPastVotes.returns(1);
@@ -201,7 +201,7 @@ describe('TokenVoting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError('VoteCreationForbidden', signers[0].address)
+        customError('ProposalCreationForbidden', signers[0].address)
       );
 
       await governanceErc20Mock.mock.getPastVotes.returns(123);

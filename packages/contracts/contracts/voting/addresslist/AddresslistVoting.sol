@@ -34,10 +34,6 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @notice The checkpointed history of the length of the address list.
     Checkpoints.History private _addresslistLengthCheckpoints;
 
-    /// @notice Thrown when a sender is not allowed to create a vote.
-    /// @param sender The sender address.
-    error ProposalCreationForbidden(address sender);
-
     /// @notice Emitted when new members are added to the address list.
     /// @param members The array of member addresses to be added.
     event AddressesAdded(address[] members);

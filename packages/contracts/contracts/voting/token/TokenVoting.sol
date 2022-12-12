@@ -79,7 +79,7 @@ contract TokenVoting is MajorityVotingBase {
         if (totalVotingPower == 0) revert NoVotingPower();
 
         if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower) {
-            revert VoteCreationForbidden(_msgSender());
+            revert ProposalCreationForbidden(_msgSender());
         }
 
         proposalId = proposalCount++;
