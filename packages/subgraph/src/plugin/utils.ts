@@ -107,14 +107,14 @@ export function addPlugin(daoId: string, plugin: Address): void {
     createTokenVotingPlugin(plugin, daoId);
   } else if (addresslistInterfaceSuppoted) {
     createAddresslistPlugin(plugin, daoId);
-  } else if (adminInterfaceSuppoted) {
+  } else if (adminInterfaceSupported) {
     createAdminPlugin(plugin, daoId);
   }
 
   if (
     TokenVotingInterfaceSuppoted ||
     addresslistInterfaceSuppoted ||
-    adminInterfaceSuppoted
+    adminInterfaceSupported
   ) {
     let daoPluginEntityId = daoId + '_' + plugin.toHexString();
     let daoPluginEntity = new DaoPlugin(daoPluginEntityId);

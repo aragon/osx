@@ -50,7 +50,7 @@ contract Admin is PluginCloneable {
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
         return interfaceId == ADMIN_ADDRESS_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
