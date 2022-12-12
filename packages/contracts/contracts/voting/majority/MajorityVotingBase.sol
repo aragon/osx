@@ -388,6 +388,7 @@ abstract contract MajorityVotingBase is
     function _validateVoteDates(uint64 _start, uint64 _end)
         internal
         view
+        virtual
         returns (uint64 startDate, uint64 endDate)
     {
         uint64 currentTimestamp = getTimestamp64();
