@@ -12,6 +12,8 @@ import {
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
+  ONE_HOUR,
+  MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
@@ -27,7 +29,7 @@ describe('AddresslistVoting', function () {
   let minParticipation: BigNumber;
   let minProposerVotingPower: Number;
   const startOffset = 10;
-  const minDuration = 500;
+  const minDuration = ONE_HOUR;
   const id = 0;
 
   let mergedAbi: any;
@@ -233,7 +235,7 @@ describe('AddresslistVoting', function () {
       ).to.not.be.reverted;
     });
 
-    it('reverts if vote duration is less than the minimal duration', async () => {
+    it('reverts if the start date is set smaller than the current date', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -243,25 +245,81 @@ describe('AddresslistVoting', function () {
         addresslist(1)
       );
 
-      const tooShortEndDate = endDate - 10;
+      const currentDate = await getTime();
+      const startDateInThePast = currentDate - 1;
+      const endDate = 0; // startDate + minDuration
+
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          startDateInThePast,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError(
+          'DateOutOfBounds',
+          currentDate + 1, // await takes one second
+          startDateInThePast
+        )
+      );
+    });
+
+    it('reverts if the start date is after the latest start date', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower,
+        addresslist(1)
+      );
+
+      const latestStartDate = MAX_UINT64.sub(minDuration);
+      const tooLateStartDate = latestStartDate.add(1);
+      const endDate = 0; // startDate + minDuration
+
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          tooLateStartDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', latestStartDate, tooLateStartDate)
+      );
+    });
+
+    it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower,
+        addresslist(1)
+      );
+
+      const startDate = (await getTime()) + 1;
+      const earliestEndDate = startDate + minDuration;
+      const tooEarlyEndDate = earliestEndDate - 1;
 
       await expect(
         voting.createProposal(
           dummyMetadata,
           [],
           startDate,
-          tooShortEndDate,
+          tooEarlyEndDate,
           false,
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError(
-          'VotingPeriodInvalid',
-          (await getTime()) + 1,
-          startDate,
-          tooShortEndDate,
-          minDuration
-        )
+        customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
       );
     });
 

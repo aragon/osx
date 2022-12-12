@@ -13,6 +13,8 @@ import {
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
+  ONE_HOUR,
+  MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
@@ -31,7 +33,7 @@ describe('TokenVoting', function () {
   let minParticipation: BigNumber;
   const totalVotingPower = 100;
   const startOffset = 10;
-  const minDuration = 500;
+  const minDuration = ONE_HOUR;
   const id = 0;
   let minProposerVotingPower = 0;
 
@@ -118,19 +120,6 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
-    });
-
-    it('reverts if min duration is 0', async () => {
-      await expect(
-        voting.initialize(
-          dao.address,
-          supportThreshold,
-          minParticipation,
-          0,
-          minProposerVotingPower,
-          governanceErc20Mock.address
-        )
-      ).to.be.revertedWith(customError('VoteDurationZero'));
     });
   });
 
@@ -233,7 +222,7 @@ describe('TokenVoting', function () {
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
-    it('reverts if vote duration is less than minDuration', async () => {
+    it('reverts if the start date is set smaller than the current date', async () => {
       await voting.initialize(
         dao.address,
         supportThreshold,
@@ -246,27 +235,87 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-      const block = await ethers.provider.getBlock('latest');
-      const current = block.timestamp;
-      const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const currentDate = await getTime();
+      const startDateInThePast = currentDate - 1;
+      const endDate = 0; // startDate + minDuration
+
       await expect(
         voting.createProposal(
           dummyMetadata,
           [],
-          startDate,
+          startDateInThePast,
           endDate,
           false,
           VoteOption.None
         )
       ).to.be.revertedWith(
         customError(
-          'VotingPeriodInvalid',
-          current + 1, // TODO hacky
-          startDate,
-          endDate,
-          minDuration
+          'DateOutOfBounds',
+          currentDate + 1, // await takes one second
+          startDateInThePast
         )
+      );
+    });
+
+    it('reverts if the start date is after the latest start date', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower,
+        governanceErc20Mock.address
+      );
+
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+      const latestStartDate = MAX_UINT64.sub(minDuration);
+      const tooLateStartDate = latestStartDate.add(1);
+      const endDate = 0; // startDate + minDuration
+
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          tooLateStartDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', latestStartDate, tooLateStartDate)
+      );
+    });
+
+    it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
+      await voting.initialize(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower,
+        governanceErc20Mock.address
+      );
+
+      await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
+      await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+      const startDate = (await getTime()) + 1;
+      const earliestEndDate = startDate + minDuration;
+      const tooEarlyEndDate = earliestEndDate - 1;
+
+      await expect(
+        voting.createProposal(
+          dummyMetadata,
+          [],
+          startDate,
+          tooEarlyEndDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
       );
     });
 

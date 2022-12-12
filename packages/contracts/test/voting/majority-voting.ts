@@ -4,7 +4,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MajorityVotingMock, DAO} from '../../typechain';
 import {VOTING_EVENTS} from '../../utils/event';
-import {pct16} from '../test-utils/voting';
+import {pct16, ONE_HOUR, ONE_YEAR} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('MajorityVotingMock', function () {
@@ -12,6 +12,10 @@ describe('MajorityVotingMock', function () {
   let votingBase: MajorityVotingMock;
   let dao: DAO;
   let ownerAddress: string;
+  const supportThreshold = pct16(50);
+  const minParticipation = pct16(20);
+  const minDuration = ONE_HOUR;
+  const minProposerVotingPower = 0;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -34,63 +38,99 @@ describe('MajorityVotingMock', function () {
     );
   });
 
-  function initializeMock(
-    minParticipation: any,
-    supportThreshold: any,
-    minDuration: any,
-    minProposerVotingPower: any
-  ) {
-    return votingBase.initializeMock(
-      dao.address,
-      minParticipation,
-      supportThreshold,
-      minDuration,
-      minProposerVotingPower
-    );
-  }
-
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeMock(1, 2, 3, 0);
-
-      await expect(initializeMock(1, 2, 3, 0)).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
+      await votingBase.initializeMock(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower
       );
-    });
 
-    it('reverts if min duration is 0', async () => {
-      await expect(initializeMock(1, 2, 0, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
-      );
+      await expect(
+        votingBase.initializeMock(
+          dao.address,
+          supportThreshold,
+          minParticipation,
+          minDuration,
+          minProposerVotingPower
+        )
+      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('changeVoteSettings: ', async () => {
     beforeEach(async () => {
-      await initializeMock(1, 2, 3, 0);
+      await votingBase.initializeMock(
+        dao.address,
+        supportThreshold,
+        minParticipation,
+        minDuration,
+        minProposerVotingPower
+      );
     });
-    it('reverts if settings are invalid', async () => {
+    it('reverts if the support threshold specified exceeds 100%', async () => {
       await expect(
-        votingBase.changeVoteSettings(1, pct16(1000), 3, 0)
+        votingBase.changeVoteSettings(
+          supportThreshold,
+          pct16(1000),
+          minDuration,
+          minProposerVotingPower
+        )
       ).to.be.revertedWith(
         customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
+    });
 
+    it('reverts if the participation threshold specified exceeds 100%', async () => {
       await expect(
-        votingBase.changeVoteSettings(pct16(1000), 2, 3, 0)
+        votingBase.changeVoteSettings(
+          pct16(1000),
+          minParticipation,
+          minDuration,
+          minProposerVotingPower
+        )
       ).to.be.revertedWith(
         customError('PercentageExceeds100', pct16(100), pct16(1000))
       );
-
-      await expect(
-        votingBase.changeVoteSettings(1, 2, 0, 0)
-      ).to.be.revertedWith(customError('VoteDurationZero'));
     });
 
-    it('should change the settings successfully', async () => {
-      expect(await votingBase.changeVoteSettings(2, 4, 8, 12))
+    it('reverts if the minimal duration is out of bounds', async () => {
+      await expect(
+        votingBase.changeVoteSettings(
+          supportThreshold,
+          minParticipation,
+          minDuration - 1,
+          minProposerVotingPower
+        )
+      ).to.be.revertedWith(
+        customError('MinDurationOutOfBounds', minDuration, minDuration - 1)
+      );
+
+      await expect(
+        votingBase.changeVoteSettings(
+          supportThreshold,
+          minParticipation,
+          ONE_YEAR + 1,
+          minProposerVotingPower
+        )
+      ).to.be.revertedWith(
+        customError('MinDurationOutOfBounds', ONE_YEAR, ONE_YEAR + 1)
+      );
+    });
+
+    it('should change the vote settings successfully', async () => {
+      expect(
+        await votingBase.changeVoteSettings(
+          minParticipation,
+          4,
+          minDuration + 1,
+          minProposerVotingPower
+        )
+      )
         .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
-        .withArgs(2, 4, 8, 12);
+        .withArgs(minParticipation, 4, minDuration + 1);
     });
   });
 });

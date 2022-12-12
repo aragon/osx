@@ -122,31 +122,11 @@ contract AddresslistVoting is MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        // calculate start and end time for the vote
-        uint64 currentTimestamp = getTimestamp64();
-
-        if (_startDate == 0) {
-            _startDate = currentTimestamp;
-        }
-        if (_endDate == 0) {
-            _endDate = _startDate + minDuration;
-        }
-
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp) {
-            revert VotingPeriodInvalid({
-                current: currentTimestamp,
-                start: _startDate,
-                end: _endDate,
-                minDuration: minDuration
-            });
-        }
-
         proposalId = proposalCount++;
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
-        proposal_.startDate = _startDate;
-        proposal_.endDate = _endDate;
+        (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
         proposal_.snapshotBlock = snapshotBlock;
         proposal_.supportThreshold = supportThreshold;
         proposal_.minParticipation = minParticipation;
