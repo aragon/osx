@@ -118,7 +118,7 @@ contract AddresslistVoting is MajorityVotingBase {
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!(minProposerVotingPower == 0) && !isListed(_msgSender(), snapshotBlock)) {
+        if (minProposerVotingPower != 0 && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
