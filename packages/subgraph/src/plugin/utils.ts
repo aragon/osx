@@ -101,7 +101,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
     ADDRESSLIST_VOTING_INTERFACE
   );
 
-  let adminInterfaceSuppoted = supportsInterface(contract, ADMIN_INTERFACE);
+  let adminInterfaceSupported = supportsInterface(contract, ADMIN_INTERFACE);
 
   if (TokenVotingInterfaceSuppoted) {
     createTokenVotingPlugin(plugin, daoId);

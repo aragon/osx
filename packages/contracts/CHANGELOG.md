@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removed initiating empty helpers array in `AddresslistVotingSetup`.
+- Remove empty helpers array initialization in `AddresslistVotingSetup`.
 - Removed the redundant base class `DaoAuthorizableBaseUpgradeable`.
 - Removed `isApprovedForAll` check from initialize function of `ENSSubdomainRegistrar.sol`.
 - Removed test related to `isApprovedForAll` in `ens-subdomain-registry.ts`.

@@ -57,8 +57,6 @@ describe('Admin plugin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    // const DAO = await ethers.getContractFactory('DAO');
-    // dao = await DAO.deploy();
     const mockDAOFactory = await smock.mock('DAO');
     dao = await mockDAOFactory.deploy();
     await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
@@ -139,7 +137,7 @@ describe('Admin plugin', function () {
       );
     });
 
-    it('fails to call `executeProposal()` if `ADMIN_EXECUTE_PERMISSION` is not granted for the admin address', async () => {
+    it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {
       await dao.revoke(
         plugin.address,
         ownerAddress,
@@ -180,7 +178,7 @@ describe('Admin plugin', function () {
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
     });
 
-    it('correctly emits ProposalExecuted event', async () => {
+    it('correctly emits the `ProposalExecuted` event', async () => {
       const currentExpectedProposalId = 0;
       const expectedDummyResults = ['0x'];
 
@@ -189,7 +187,7 @@ describe('Admin plugin', function () {
         .withArgs(currentExpectedProposalId, expectedDummyResults);
     });
 
-    it('correctly increments proposal id', async () => {
+    it('correctly increments the proposal ID', async () => {
       const currentExpectedProposalId = 0;
 
       await plugin.executeProposal(dummyMetadata, dummyActions);
@@ -205,7 +203,7 @@ describe('Admin plugin', function () {
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
 
-    it("calls DAO's execute function correctly", async () => {
+    it("calls the DAO's execute function correctly", async () => {
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
       expect(dao.execute).has.been.calledWith(BigNumber.from(0), [

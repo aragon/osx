@@ -13,7 +13,7 @@ On 2022-12-09 15:16:22
 
 ### Added
 
-- Added support for `AdminPlugin`.
+- Added support for the `AdminPlugin`.
 - Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
 - Adds support for `PluginRepo`, `PluginRegistry` and `PluginSetupProcessor`
 - Added `Withdrawn`, `TrustedForwarderSet`, `StandardCallbackRegistered` and `handleStandardCallbackRegistered` events handling to `DaoTemplate`
