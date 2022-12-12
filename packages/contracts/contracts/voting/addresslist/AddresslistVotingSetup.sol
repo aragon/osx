@@ -62,7 +62,7 @@ contract AddresslistVotingSetup is PluginSetup {
         );
 
         // Prepare helpers
-        helpers = new address[](0);
+        (helpers); // silence the warning.
 
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](4);
