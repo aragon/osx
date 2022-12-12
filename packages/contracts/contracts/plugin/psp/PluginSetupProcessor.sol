@@ -341,6 +341,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes("")
         );
 
+        // Allow calling `applyInstallation` only when
+        // plugin was uninstalled or never been installed before.
+        if (pluginInformation.currentSetupId != bytes32(0)) {
+            revert PluginInWrongState();
+        }
+
         // If the plugin block number exceeds the setupId preparation block number,
         // This means applyInstallation was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
