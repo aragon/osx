@@ -27,7 +27,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(tuple(bool, bool, uint64, uint64, uint64, uint256) voteSettings, address[] members)";
+            "(tuple(bool, bool, uint64, uint64, uint64, uint256) pluginSettings, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -42,10 +42,8 @@ contract AddresslistVotingSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
-        (IMajorityVoting.VoteSettings memory voteSettings, address[] memory members) = abi.decode(
-            _data,
-            (IMajorityVoting.VoteSettings, address[])
-        );
+        (IMajorityVoting.PluginSettings memory pluginSettings, address[] memory members) = abi
+            .decode(_data, (IMajorityVoting.PluginSettings, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
@@ -53,7 +51,7 @@ contract AddresslistVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
                 dao,
-                voteSettings,
+                pluginSettings,
                 members
             )
         );

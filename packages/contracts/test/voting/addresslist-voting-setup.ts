@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {VoteSettings, pct16, ONE_HOUR} from '../test-utils/voting';
+import {PluginSettings, pct16, ONE_HOUR} from '../test-utils/voting';
 
 enum Op {
   Grant,
@@ -15,7 +15,7 @@ enum Op {
 }
 
 let defaultData: any;
-let defaultVoteSettings: VoteSettings;
+let defaultPluginSettings: PluginSettings;
 let defaultMembers: string[];
 
 const abiCoder = ethers.utils.defaultAbiCoder;
@@ -47,7 +47,7 @@ describe('AddresslistVotingSetup', function () {
     signers = await ethers.getSigners();
     targetDao = await deployNewDAO(signers[0].address);
 
-    defaultVoteSettings = {
+    defaultPluginSettings = {
       earlyExecution: true,
       voteReplacement: false,
       supportThreshold: pct16(50),
@@ -66,7 +66,7 @@ describe('AddresslistVotingSetup', function () {
       await addresslistVotingSetup.getImplementationAddress();
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
-      Object.values(defaultVoteSettings),
+      Object.values(defaultPluginSettings),
       defaultMembers,
     ]);
   });
@@ -92,7 +92,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(bool, bool, uint64, uint64, uint64, uint256) voteSettings, address[] members)';
+        '(tuple(bool, bool, uint64, uint64, uint64, uint256) pluginSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -196,17 +196,17 @@ describe('AddresslistVotingSetup', function () {
         targetDao.address
       );
       expect(await addresslistVotingContract.minParticipation()).to.be.equal(
-        defaultVoteSettings.minParticipation
+        defaultPluginSettings.minParticipation
       );
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
-        defaultVoteSettings.supportThreshold
+        defaultPluginSettings.supportThreshold
       );
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
-        defaultVoteSettings.minDuration
+        defaultPluginSettings.minDuration
       );
       expect(
         await addresslistVotingContract.minProposerVotingPower()
-      ).to.be.equal(defaultVoteSettings.minProposerVotingPower);
+      ).to.be.equal(defaultPluginSettings.minProposerVotingPower);
 
       await ethers.provider.send('evm_mine', []);
 

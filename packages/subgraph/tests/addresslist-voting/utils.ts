@@ -6,7 +6,7 @@ import {
   ProposalCreated,
   VoteCast,
   ProposalExecuted,
-  VoteSettingsUpdated,
+  PluginSettingsUpdated,
   AddressesAdded,
   AddressesRemoved
 } from '../../generated/templates/Addresslist/Addresslist';
@@ -123,7 +123,7 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewVoteSettingsUpdatedEvent(
+export function createNewPluginSettingsUpdatedEvent(
   earlyExecution: boolean,
   voteReplacement: boolean,
   minParticipation: string,
@@ -131,13 +131,13 @@ export function createNewVoteSettingsUpdatedEvent(
   minDuration: string,
   minProposerVotingPower: string,
   contractAddress: string
-): VoteSettingsUpdated {
-  let newVoteSettingsUpdatedEvent = changetype<VoteSettingsUpdated>(
+): PluginSettingsUpdated {
+  let newPluginSettingsUpdatedEvent = changetype<PluginSettingsUpdated>(
     newMockEvent()
   );
 
-  newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
-  newVoteSettingsUpdatedEvent.parameters = [];
+  newPluginSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newPluginSettingsUpdatedEvent.parameters = [];
 
   let earlyExecutionParam = new ethereum.EventParam(
     'earlyExecution',
@@ -164,14 +164,14 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newVoteSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
-  newVoteSettingsUpdatedEvent.parameters.push(voteReplacementParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
-  newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
+  newPluginSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
+  newPluginSettingsUpdatedEvent.parameters.push(voteReplacementParam);
+  newPluginSettingsUpdatedEvent.parameters.push(minParticipationParam);
+  newPluginSettingsUpdatedEvent.parameters.push(supportThresholdParam);
+  newPluginSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newPluginSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
 
-  return newVoteSettingsUpdatedEvent;
+  return newPluginSettingsUpdatedEvent;
 }
 
 export function createNewAddressesAddedEvent(

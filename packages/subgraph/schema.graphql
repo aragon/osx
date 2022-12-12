@@ -196,7 +196,7 @@ enum VoteOption {
   No
 }
 
-type VoteSettings @entity {
+type PluginSettings @entity {
   id: ID! # plugin address
 }
 

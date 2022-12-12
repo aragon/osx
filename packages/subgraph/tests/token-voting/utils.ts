@@ -2,7 +2,7 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  VoteSettingsUpdated,
+  PluginSettingsUpdated,
   VoteCast,
   ProposalCreated,
   ProposalExecuted
@@ -121,7 +121,7 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewVoteSettingsUpdatedEvent(
+export function createNewPluginSettingsUpdatedEvent(
   earlyExecution: boolean,
   voteReplacement: boolean,
   supportThreshold: string,
@@ -129,13 +129,13 @@ export function createNewVoteSettingsUpdatedEvent(
   minDuration: string,
   minProposerVotingPower: string,
   contractAddress: string
-): VoteSettingsUpdated {
-  let newVoteSettingsUpdatedEvent = changetype<VoteSettingsUpdated>(
+): PluginSettingsUpdated {
+  let newPluginSettingsUpdatedEvent = changetype<PluginSettingsUpdated>(
     newMockEvent()
   );
 
-  newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
-  newVoteSettingsUpdatedEvent.parameters = [];
+  newPluginSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newPluginSettingsUpdatedEvent.parameters = [];
 
   let earlyExecutionParam = new ethereum.EventParam(
     'earlyExecution',
@@ -162,14 +162,14 @@ export function createNewVoteSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newVoteSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
-  newVoteSettingsUpdatedEvent.parameters.push(voteReplacementParam);
-  newVoteSettingsUpdatedEvent.parameters.push(supportThresholdParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minParticipationParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
+  newPluginSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
+  newPluginSettingsUpdatedEvent.parameters.push(voteReplacementParam);
+  newPluginSettingsUpdatedEvent.parameters.push(supportThresholdParam);
+  newPluginSettingsUpdatedEvent.parameters.push(minParticipationParam);
+  newPluginSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newPluginSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
 
-  return newVoteSettingsUpdatedEvent;
+  return newPluginSettingsUpdatedEvent;
 }
 
 // calls

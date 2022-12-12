@@ -6,7 +6,7 @@ import {
   handleVoteCast,
   handleProposalExecuted,
   handleAddressesRemoved,
-  handleVoteSettingsUpdated,
+  handlePluginSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/addresslist/addresslist-voting';
 import {
@@ -39,7 +39,7 @@ import {
   createNewProposalExecutedEvent,
   createNewAddressesRemovedEvent,
   createNewProposalCreatedEvent,
-  createNewVoteSettingsUpdatedEvent,
+  createNewPluginSettingsUpdatedEvent,
   getProposalCountCall,
   createAddresslistVotingProposalEntityState
 } from './utils';
@@ -352,14 +352,14 @@ test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event',
   clearStore();
 });
 
-test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock event', () => {
+test('Run Addresslist Voting (handlePluginSettingsUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
   let addresslistVotingPlugin = new AddresslistVotingPlugin(entityID);
   addresslistVotingPlugin.save();
 
   // create event
-  let event = createNewVoteSettingsUpdatedEvent(
+  let event = createNewPluginSettingsUpdatedEvent(
     EARLY_EXECUTION,
     VOTE_REPLACEMENT,
     SUPPORT_THRESHOLD,
@@ -371,7 +371,7 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
   );
 
   // handle event
-  handleVoteSettingsUpdated(event);
+  handlePluginSettingsUpdated(event);
 
   // checks
   assert.fieldEquals('AddresslistVotingPlugin', entityID, 'id', entityID);

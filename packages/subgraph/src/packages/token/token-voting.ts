@@ -4,7 +4,7 @@ import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  VoteSettingsUpdated,
+  PluginSettingsUpdated,
   TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
@@ -207,7 +207,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
+export function handlePluginSettingsUpdated(
+  event: PluginSettingsUpdated
+): void {
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.earlyExecution = event.params.earlyExecution;

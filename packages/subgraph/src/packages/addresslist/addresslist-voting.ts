@@ -4,7 +4,7 @@ import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  VoteSettingsUpdated,
+  PluginSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
   Addresslist
@@ -195,7 +195,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
+export function handlePluginSettingsUpdated(
+  event: PluginSettingsUpdated
+): void {
   let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.earlyExecution = event.params.earlyExecution;

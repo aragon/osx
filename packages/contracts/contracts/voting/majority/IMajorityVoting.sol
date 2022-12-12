@@ -50,7 +50,7 @@ interface IMajorityVoting {
         No
     }
 
-    struct VoteSettings {
+    struct PluginSettings {
         bool earlyExecution;
         bool voteReplacement;
         uint64 supportThreshold;
@@ -109,7 +109,7 @@ interface IMajorityVoting {
 
     /// @notice Emitted when the vote settings are updated.
     /// @param earlyExecution The vote settings.
-    event VoteSettingsUpdated(
+    event PluginSettingsUpdated(
         bool earlyExecution,
         bool voteReplacement,
         uint64 supportThreshold,
@@ -119,7 +119,7 @@ interface IMajorityVoting {
     );
 
     /// @notice Changes the vote settings.
-    function changeVoteSettings(VoteSettings calldata _voteSettings) external;
+    function changePluginSettings(PluginSettings calldata _pluginSettings) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.

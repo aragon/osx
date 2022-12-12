@@ -9,7 +9,7 @@ export enum VoteOption {
   No,
 }
 
-export type VoteSettings = {
+export type PluginSettings = {
   earlyExecution: boolean;
   voteReplacement: boolean;
   supportThreshold: BigNumber;

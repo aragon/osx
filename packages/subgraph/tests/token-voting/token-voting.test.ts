@@ -4,7 +4,7 @@ import {Address, BigInt} from '@graphprotocol/graph-ts';
 import {
   handleVoteCast,
   handleProposalExecuted,
-  handleVoteSettingsUpdated,
+  handlePluginSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/token/token-voting';
 import {TokenVotingPlugin} from '../../generated/schema';
@@ -31,7 +31,7 @@ import {
   createNewVoteCastEvent,
   createNewProposalExecutedEvent,
   createNewProposalCreatedEvent,
-  createNewVoteSettingsUpdatedEvent,
+  createNewPluginSettingsUpdatedEvent,
   getProposalCountCall,
   createTokenVotingProposalEntityState
 } from './utils';
@@ -322,14 +322,14 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
   clearStore();
 });
 
-test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', () => {
+test('Run Token Voting (handlePluginSettingsUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
   let tokenVotingPlugin = new TokenVotingPlugin(entityID);
   tokenVotingPlugin.save();
 
   // create event
-  let event = createNewVoteSettingsUpdatedEvent(
+  let event = createNewPluginSettingsUpdatedEvent(
     EARLY_EXECUTION,
     VOTE_REPLACEMENT,
     SUPPORT_THRESHOLD,
@@ -341,7 +341,7 @@ test('Run Token Voting (handleVoteSettingsUpdated) mappings with mock event', ()
   );
 
   // handle event
-  handleVoteSettingsUpdated(event);
+  handlePluginSettingsUpdated(event);
 
   // checks
   assert.fieldEquals('TokenVotingPlugin', entityID, 'id', entityID);
