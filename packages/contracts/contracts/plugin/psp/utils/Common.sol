@@ -14,7 +14,7 @@ struct PluginSetupRef {
 /// @notice Returns an identifier for the plugin id.
 /// @param _dao The address of the DAO conducting the setup.
 /// @param _plugin The plugin address
-function _getPluginId(address _dao, address _plugin) returns (bytes32) {
+function _getPluginId(address _dao, address _plugin) pure returns (bytes32) {
     return keccak256(abi.encode(_dao, _plugin));
 }
 
@@ -24,11 +24,11 @@ function _getPluginId(address _dao, address _plugin) returns (bytes32) {
 /// @param _helperHash The hash of the helper contract addresses.
 /// @param _data data that is passed by the user or wdd.. GIORGI
 function _getSetupId(
-    PluginSetupRef calldata _pluginSetupRef,
+    PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionHash,
     bytes32 _helperHash,
     bytes memory _data
-) returns (bytes32) {
+) pure returns (bytes32) {
     return
         keccak256(
             abi.encode(
@@ -43,13 +43,13 @@ function _getSetupId(
 
 /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
 /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.
-function hHash(address[] memory _helpers) returns (bytes32) {
+function hHash(address[] memory _helpers) pure returns (bytes32) {
     return keccak256(abi.encode(_helpers));
 }
 
 /// @notice Returns a hash of an array of multi-targeted permission operations.
 /// @param _permissions The array of of multi-targeted permission operations.
 /// @return bytes The hash of the array of permission operations.
-function pHash(PermissionLib.ItemMultiTarget[] memory _permissions) returns (bytes32) {
+function pHash(PermissionLib.ItemMultiTarget[] memory _permissions) pure returns (bytes32) {
     return keccak256(abi.encode(_permissions));
 }

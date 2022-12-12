@@ -49,20 +49,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     mapping(bytes32 => PluginInformation) private states;
 
-    struct Hashes {
-        bytes32 permissionsHash;
-        bytes32 helpersHash;
-        bytes32 setupId;
-    }
-
-    struct PluginInformation {
-        State state;
-        Hashes current;
-        Hashes[] hashes;
-    }
-
-    mapping(bytes32 => PluginInformation) private states;
-
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     struct PrepareInstall {
         PluginSetupRef pluginSetupRef;
@@ -71,30 +57,28 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
     struct ApplyInstall {
-        uint256 index;
-        bytes32 helpersHash;
         PluginSetupRef pluginSetupRef;
         address plugin;
         PermissionLib.ItemMultiTarget[] permissions;
+        bytes32 helpersHash;
     }
 
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
     struct PrepareUpdate {
-        bytes32 permissionsHash;
         PluginRepo.Tag currentVersionTag;
         PluginRepo.Tag newVersionTag;
         PluginRepo pluginSetupRepo;
         IPluginSetup.SetupPayload setupPayload;
+        bytes32 permissionsHash;
     }
 
     /// @notice The struct containing the parameters for the `applyUpdate` function.
     struct ApplyUpdate {
-        uint256 index;
-        bytes32 helpersHash;
         address plugin;
         PluginSetupRef pluginSetupRef;
         bytes initData;
         PermissionLib.ItemMultiTarget[] permissions;
+        bytes32 helpersHash;
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
@@ -144,10 +128,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error PluginRepoNonexistent();
 
     /// @notice Thrown if a plugin setup is not prepared.
-    error SetupNotPrepared();
+    /// @param setupId The abi encoded hash of versionTag & permissions & helpers.
+    error SetupNotPrepared(bytes32 setupId);
 
     /// @notice Thrown if a plugin setup was already prepared.
-    error SetupAlreadyPrepared();
+    /// @param setupId The abi encoded hash of versionTag & permissions & helpers.
+    error SetupAlreadyPrepared(bytes32 setupId);
 
     /// @notice Thrown if a plugin setup is not applied.
     error SetupNotApplied();
@@ -155,9 +141,18 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin setup was already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
     error SetupAlreadyApplied();
 
+    /// @notice Thrown when the update version is invalid.
+    /// @param currentVersionTag The current version of the plugin from which it updates.
+    /// @param newVersionTag The new version of the plugin to which it updates.
+    error UpdateVersionInvalid(PluginRepo.Tag currentVersionTag, PluginRepo.Tag newVersionTag);
+
+    /// @notice Thrown when operation is not valid because plugin is in wrong state.
     error PluginInWrongState();
 
-    error InvalidSetupId();
+    /// @notice Thrown when user's arguments for the apply function don't match the currently applied setupId.
+    /// @param currentSetupId The current setup id to which user's preparation setup should match to.
+    /// @param setupId The user's preparation setup id.
+    error InvalidSetupId(bytes32 currentSetupId, bytes32 setupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -276,15 +271,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareInstallation` function.
     /// @return plugin The prepared plugin contract address.
-    /// @return helpers The prepared list of helper contract addresses, that a plugin might require to operate.
-    /// @return permissions The prepared list of multi-targeted permission operations to be applied to the installing DAO.
+    /// @return preparedDependency TOD:GIORGI
     function prepareInstallation(address _dao, PrepareInstall calldata _params)
         external
-        returns (
-            address plugin,
-            uint256 index,
-            IPluginSetup.PreparedDependency memory preparedDependency
-        )
+        returns (address plugin, IPluginSetup.PreparedDependency memory preparedDependency)
     {
         PluginRepo pluginSetupRepo = _params.pluginSetupRef.pluginSetupRepo;
 
@@ -293,6 +283,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginRepoNonexistent();
         }
 
+        // reverts if not found
         PluginRepo.Version memory version = pluginSetupRepo.getVersion(
             _params.pluginSetupRef.versionTag
         );
@@ -309,26 +300,25 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
-            // Setting this empty as there's no need to confirm authenticity of it
+            // Setting this empty as there's no need to confirm its authenticity
             // in applyInstallation as it's not used there. This becomes useful for update.
             bytes("")
         );
 
         PluginInformation storage pluginInformation = states[pluginId];
+
         if (pluginInformation.state != State.NONE) {
             revert PluginInWrongState();
         }
 
-        // If pluginSetup returns the same plugin address each time we call it,
-        // It should still be possible that prepareInstallation can
-        // be called multiple times. This brings 2 good features.
-        // 1. the same plugin can be prepared multiple times(with different _params.data)
-        // arguments and dao can decide which one to applyInstall for.
-        // 2. If the plugin was prepared with the specific params.data that dao doesn't like,
-        // they should be able to prepare it again.
+        bool setupIdExists = _exists(pluginInformation.setupIds, setupId);
+        if (setupIdExists) {
+            revert SetupAlreadyPrepared(setupId);
+        }
+
         pluginInformation.setupIds.push(setupId);
 
-        return (plugin, index, preparedDependency);
+        return (plugin, preparedDependency);
     }
 
     /// @notice Applies the permissions of a prepared installation to a DAO.
@@ -346,9 +336,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginInWrongState();
         }
 
-        // DAO passes the index to choose which preparedInstallation should be used.
-        bytes32 chosenSetupId = pluginInformation.setupIds[_params.index];
-
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
             pHash(_params.permissions),
@@ -356,18 +343,22 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes("")
         );
 
-        if (setupId != chosenSetupId) {
-            revert InvalidSetupId();
+        bytes32[] storage potentialSetupIds = pluginInformation.setupIds;
+
+        // Make sure setupId has been prepared before..
+        bool setupIdExists = _exists(potentialSetupIds, setupId);
+        if (!setupIdExists) {
+            revert SetupNotPrepared(setupId);
         }
 
-        // Assings the setupId which was used for the installation.
+        // Assigns the setupId which was used for the applyInstallation.
         pluginInformation.currentSetupId = setupId;
 
         pluginInformation.state = State.InstallApplied;
 
         // Once the plugin gets installed, we remove all
         // the prepared instances for extra safety.
-        delete pluginInformation.setupIds;
+        _cleanSetupIds(potentialSetupIds);
 
         // Process the permission list.
         DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
@@ -383,6 +374,36 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         returns (PermissionLib.ItemMultiTarget[] memory, bytes memory)
     {
+        if (
+            _params.currentVersionTag.release != _params.newVersionTag.release ||
+            _params.currentVersionTag.build <= _params.newVersionTag.build
+        ) {
+            revert UpdateVersionInvalid({
+                currentVersionTag: _params.currentVersionTag,
+                newVersionTag: _params.newVersionTag
+            });
+        }
+
+        // // Check that plugin is `PluginUUPSUpgradable`.
+        if (!_params.setupPayload.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+            revert IPluginNotSupported({plugin: _params.setupPayload.plugin});
+        }
+        if (IPlugin(_params.setupPayload.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+            revert PluginNonupgradeable({plugin: _params.setupPayload.plugin});
+        }
+
+        PluginRepo.Version memory currentVersion = _params.pluginSetupRepo.getVersion(
+            _params.currentVersionTag
+        );
+
+        PluginRepo.Version memory newVersion = _params.pluginSetupRepo.getVersion(
+            _params.newVersionTag
+        );
+
+        if (currentVersion.pluginSetup == newVersion.pluginSetup) {
+            // revert plugin setups can't be the same(pointless)
+        }
+
         bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
 
         PluginInformation storage pluginInformation = states[pluginId];
@@ -402,13 +423,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         if (pluginInformation.currentSetupId != setupId) {
-            revert InvalidSetupId();
+            revert InvalidSetupId({
+                currentSetupId: pluginInformation.currentSetupId,
+                setupId: setupId
+            });
         }
-
-        // `getVersionByPluginSetup` will revert if `currentPluginSetup` is not part of `pluginSetupRepo`.
-        PluginRepo.Version memory newVersion = _params.pluginSetupRepo.getVersion(
-            _params.newVersionTag
-        );
 
         // Prepare the update.
         (
@@ -429,6 +448,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             // to confirm its authenticity when applyUpdate is called.
             initData
         );
+
+        bool setupIdExists = _exists(pluginInformation.setupIds, newSetupId);
+        if (setupIdExists) {
+            revert SetupAlreadyPrepared(newSetupId);
+        }
 
         // It's allowed to call multiple prepare Update for the same plugin and
         // later decide which one to applyUpdate for or it might be the case
@@ -464,10 +488,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.initData
         );
 
-        bytes32 chosenSetupId = pluginInformation.setupIds[_params.index];
+        bytes32[] storage potentialSetupIds = pluginInformation.setupIds;
 
-        if (chosenSetupId != setupId) {
-            revert InvalidSetupId();
+        bool setupIdExists = _exists(potentialSetupIds, setupId);
+        if (!setupIdExists) {
+            revert SetupNotPrepared(setupId);
         }
 
         // Once the applyUpdate is called and arguments are confirmed(including initData)
@@ -484,7 +509,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         // clear the prepared instances for the extra safety.
-        delete pluginInformation.setupIds;
+        _cleanSetupIds(potentialSetupIds);
 
         PluginRepo.Version memory version = _params.pluginSetupRef.pluginSetupRepo.getVersion(
             _params.pluginSetupRef.versionTag
@@ -629,19 +654,32 @@ contract PluginSetupProcessor is DaoAuthorizable {
             });
         }
     }
+
+    /// @notice checks if the setupId has been prepared before.
+    /// @param _setupIds the prepared setup ids
+    /// @param _setupId the setupId that is checked inside _setupIds
+    /// @return bool whether _setupId exists inside _setupIds
+    function _exists(bytes32[] storage _setupIds, bytes32 _setupId) private view returns (bool) {
+        uint256 length = _setupIds.length;
+        for (uint256 i; i < length; ++i) {
+            if (_setupId == _setupIds[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// @notice cleans the array once it's no longer useful.
+    /// @dev optimized version of clearing the array.
+    /// @param _setupIds the array of setup ids that are present for the plugin's preparation list.
+    function _cleanSetupIds(bytes32[] storage _setupIds) private {
+        assembly {
+            sstore(_setupIds.slot, 0)
+        }
+    }
 }
 
-//  struct Hashes {
-//             bytes32 permissionsHash;
-//             bytes32 helpersHash;
-//             bytes32 setupId;
-//         }
-
-//         struct PluginInformation {
-//             State state;
-//             bytes32 currentSetupId;
-//             Hashes current;
-//             Hashes[] hashes;
-//         }
-
-//         mapping(bytes32 => PluginInformation) private states;
+// // 1.0 => 2.0 (permission1, helper1)
+// // 1.0 => 2.1 (permission1, helper1)
+// // 1.0 => 2.0 (permission1, helper2)
+// map[pluginId][setupId] = true

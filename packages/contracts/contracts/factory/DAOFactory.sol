@@ -8,7 +8,8 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/psp/PluginSetupProcessor.sol";
-import {hHash} "../plugin/psp/utils/Common.sol";
+import {hHash, PluginSetupRef} from "../plugin/psp/utils/Common.sol";
+import {IPluginSetup} from "../plugin/psp/PluginSetupProcessor.sol";
 
 /// @title DAOFactory
 /// @author Aragon Association - 2022
@@ -30,8 +31,7 @@ contract DAOFactory {
     }
 
     struct PluginSettings {
-        PluginRepo.Tag tag; // The `PluginSetup` address of the plugin.
-        PluginRepo pluginSetupRepo; // The `PluginRepo` of the plugin.
+        PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
         bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     }
 
@@ -86,13 +86,11 @@ contract DAOFactory {
             // Prepare plugin.
             (
                 address plugin,
-                address[] memory helpers
-                PermissionLib.ItemMultiTarget[] memory permissions
+                IPluginSetup.PreparedDependency memory preparedDependency
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
                     PluginSetupProcessor.PrepareInstall(
-                        _pluginSettings[i].tag,
-                        _pluginSettings[i].pluginSetupRepo,
+                        _pluginSettings[i].pluginSetupRef,
                         _pluginSettings[i].data
                     )
                 );
@@ -101,11 +99,10 @@ contract DAOFactory {
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
                 PluginSetupProcessor.ApplyInstall(
-                    hHash(helpers),
-                    _pluginSettings[i].tag,
-                    _pluginSettings[i].pluginSetupRepo,
+                    _pluginSettings[i].pluginSetupRef,
                     plugin,
-                    permissions
+                    preparedDependency.permissions,
+                    hHash(preparedDependency.helpers)
                 )
             );
         }

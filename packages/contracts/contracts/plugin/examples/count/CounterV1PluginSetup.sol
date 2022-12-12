@@ -38,11 +38,7 @@ contract CounterV1PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -61,8 +57,10 @@ contract CounterV1PluginSetup is PluginSetup {
             _num
         );
 
-        permissions = new PermissionLib.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
-        helpers = new address[](1);
+        PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](
+            _multiplyHelper == address(0) ? 3 : 2
+        );
+        address[] memory helpers = new address[](1);
 
         // deploy
         plugin = createERC1967Proxy(address(counterBase), initData);
@@ -97,7 +95,10 @@ contract CounterV1PluginSetup is PluginSetup {
         // add helpers
         helpers[0] = multiplyHelper;
 
-        return (plugin, helpers, permissions);
+        preparedDependency.helpers = helpers;
+        preparedDependency.permissions = permissions;
+
+        return (plugin, preparedDependency);
     }
 
     /// @inheritdoc IPluginSetup
@@ -106,36 +107,38 @@ contract CounterV1PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata _activeHelpers,
-        bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        permissions = new PermissionLib.ItemMultiTarget[](_activeHelpers.length != 0 ? 3 : 2);
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        virtual
+        override
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+    {
+        permissions = new PermissionLib.ItemMultiTarget[](
+            _payload.currentHelpers.length != 0 ? 3 : 2
+        );
 
         // set permissions
         permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_ORACLE,
             keccak256("EXECUTE_PERMISSION")
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_ORACLE,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
-        if (_activeHelpers.length != 0) {
+        if (_payload.currentHelpers.length != 0) {
             permissions[2] = PermissionLib.ItemMultiTarget(
                 PermissionLib.Operation.Revoke,
-                _activeHelpers[0],
-                _plugin,
+                _payload.currentHelpers[0],
+                _payload.plugin,
                 NO_ORACLE,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );

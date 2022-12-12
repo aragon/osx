@@ -32,11 +32,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         IDAO dao = IDAO(_dao);
 
@@ -62,10 +58,10 @@ contract AddresslistVotingSetup is PluginSetup {
         );
 
         // Prepare helpers
-        helpers = new address[](0);
+        address[] memory helpers = new address[](0);
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](4);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -101,6 +97,9 @@ contract AddresslistVotingSetup is PluginSetup {
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        preparedDependency.permissions = permissions;
+        preparedDependency.helpers = helpers;
     }
 
     /// @inheritdoc IPluginSetup
@@ -109,19 +108,18 @@ contract AddresslistVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata,
-        bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        view
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+    {
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](4);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_ORACLE,
             addresslistVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
@@ -129,7 +127,7 @@ contract AddresslistVotingSetup is PluginSetup {
 
         permissions[1] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_ORACLE,
             addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
@@ -137,7 +135,7 @@ contract AddresslistVotingSetup is PluginSetup {
 
         permissions[2] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_ORACLE,
             addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
@@ -146,7 +144,7 @@ contract AddresslistVotingSetup is PluginSetup {
         permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
