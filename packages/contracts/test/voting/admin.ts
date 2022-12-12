@@ -159,7 +159,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly emits the ProposalCreated event', async () => {
-      const currentExpectedProposalId = 0;
+      const currentExpectedProposalId = 1;
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
@@ -179,7 +179,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly emits the `ProposalExecuted` event', async () => {
-      const currentExpectedProposalId = 0;
+      const currentExpectedProposalId = 1;
       const expectedDummyResults = ['0x'];
 
       await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
@@ -188,7 +188,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly increments the proposal ID', async () => {
-      const currentExpectedProposalId = 0;
+      const currentExpectedProposalId = 1;
 
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
@@ -204,9 +204,11 @@ describe('Admin plugin', function () {
     });
 
     it("calls the DAO's execute function correctly", async () => {
+      const proposalId = 1;
+
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      expect(dao.execute).has.been.calledWith(BigNumber.from(0), [
+      expect(dao.execute).has.been.calledWith(BigNumber.from(proposalId), [
         [
           dummyActions[0].to,
           BigNumber.from(dummyActions[0].value),

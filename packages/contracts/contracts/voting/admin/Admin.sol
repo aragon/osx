@@ -62,16 +62,17 @@ contract Admin is PluginCloneable {
         auth(EXECUTE_PROPOSAL_PERMISSION_ID)
         returns (bytes[] memory)
     {
-        // Create proposal
-        emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata, _actions);
+        // Increment proposalId
+        proposalId.increment();
 
         // Execute
         bytes[] memory execResults = dao.execute(proposalId.current(), _actions);
 
-        emit ProposalExecuted(proposalId.current(), execResults);
+        // Create proposal
+        emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata, _actions);
 
-        // Increment proposalId
-        proposalId.increment();
+        // Execute proposal
+        emit ProposalExecuted(proposalId.current(), execResults);
 
         return execResults;
     }
