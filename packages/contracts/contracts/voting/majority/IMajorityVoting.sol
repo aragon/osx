@@ -92,23 +92,31 @@ interface IMajorityVoting {
     /// @param supportThreshold The support threshold in percent.
     /// @param minParticipation The minimum participation ratio in percent.
     /// @param minDuration The minimal duration of a vote in seconds.
-    event VoteSettingsUpdated(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration);
+    /// @param minProposerVotingPower The minimal voting power needed to create a proposal.
+    event VoteSettingsUpdated(
+        uint64 supportThreshold,
+        uint64 minParticipation,
+        uint64 minDuration,
+        uint256 minProposerVotingPower
+    );
 
     /// @notice Changes the vote settings.
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote in seconds.
+    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
     function changeVoteSettings(
         uint64 _supportThreshold,
         uint64 _minParticipation,
-        uint64 _minDuration
+        uint64 _minDuration,
+        uint256 _minProposerVotingPower
     ) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed after the proposal passes.
-    /// @param _startDate The start date of the proposal vote. If 0, uses current timestamp.
-    /// @param _endDate The end date of the proposal vote. If 0, uses `_start` + `minDuration`.
+    /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
+    /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
     /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
     /// @param _choice The vote choice to cast on creation.
     /// @return proposalId The ID of the proposal.

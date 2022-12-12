@@ -34,10 +34,6 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @notice The checkpointed history of the length of the address list.
     Checkpoints.History private _addresslistLengthCheckpoints;
 
-    /// @notice Thrown when a sender is not allowed to create a vote.
-    /// @param sender The sender address.
-    error ProposalCreationForbidden(address sender);
-
     /// @notice Emitted when new members are added to the address list.
     /// @param members The array of member addresses to be added.
     event AddressesAdded(address[] members);
@@ -58,9 +54,16 @@ contract AddresslistVoting is MajorityVotingBase {
         uint64 _supportThreshold,
         uint64 _minParticipation,
         uint64 _minDuration,
+        uint256 _minProposerVotingPower,
         address[] calldata _members
     ) public initializer {
-        __MajorityVotingBase_init(_dao, _supportThreshold, _minParticipation, _minDuration);
+        __MajorityVotingBase_init(
+            _dao,
+            _supportThreshold,
+            _minParticipation,
+            _minDuration,
+            _minProposerVotingPower
+        );
 
         // add member addresses to the address list
         _addAddresses(_members);
@@ -90,7 +93,7 @@ contract AddresslistVoting is MajorityVotingBase {
     function _addAddresses(address[] calldata _members) internal {
         _updateAddresslist(_members, true);
 
-        emit AddressesAdded(_members);
+        emit AddressesAdded({members: _members});
     }
 
     /// @notice Removes members from the address list.
@@ -101,7 +104,7 @@ contract AddresslistVoting is MajorityVotingBase {
     {
         _updateAddresslist(_members, false);
 
-        emit AddressesRemoved(_members);
+        emit AddressesRemoved({members: _members});
     }
 
     /// @inheritdoc IMajorityVoting
@@ -115,7 +118,7 @@ contract AddresslistVoting is MajorityVotingBase {
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isListed(_msgSender(), snapshotBlock)) {
+        if (minProposerVotingPower != 0 && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -155,7 +158,11 @@ contract AddresslistVoting is MajorityVotingBase {
             }
         }
 
-        emit ProposalCreated(proposalId, _msgSender(), _proposalMetadata);
+        emit ProposalCreated({
+            proposalId: proposalId,
+            creator: _msgSender(),
+            metadata: _proposalMetadata
+        });
 
         vote(proposalId, _choice, _executeIfDecided);
     }
@@ -191,7 +198,12 @@ contract AddresslistVoting is MajorityVotingBase {
 
         proposal_.voters[_voter] = _choice;
 
-        emit VoteCast(_proposalId, _voter, uint8(_choice), 1);
+        emit VoteCast({
+            proposalId: _proposalId,
+            voter: _voter,
+            choice: uint8(_choice),
+            votingPower: 1
+        });
 
         if (_executesIfDecided && _canExecute(_proposalId)) {
             _execute(_proposalId);

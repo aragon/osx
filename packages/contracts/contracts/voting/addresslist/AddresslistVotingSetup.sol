@@ -26,7 +26,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, address[] members)";
+            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -45,8 +45,9 @@ contract AddresslistVotingSetup is PluginSetup {
             uint64 supportThreshold,
             uint64 minParticipation,
             uint64 minDuration,
+            uint256 minProposerVotingPower,
             address[] memory members
-        ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
+        ) = abi.decode(_data, (uint64, uint64, uint64, uint256, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
@@ -57,6 +58,7 @@ contract AddresslistVotingSetup is PluginSetup {
                 supportThreshold,
                 minParticipation,
                 minDuration,
+                minProposerVotingPower,
                 members
             )
         );

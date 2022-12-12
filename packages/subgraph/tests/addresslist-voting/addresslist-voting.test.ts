@@ -43,6 +43,8 @@ let endDate = '1644852000';
 let snapshotBlock = '100';
 let supportThreshold = '1000';
 let minParticipation = '500';
+let minDuration = '3600';
+let minProposerVotingPower = '0';
 let totalVotingPower = '1000';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
@@ -245,9 +247,10 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
 
   // create event
   let event = createNewVoteSettingsUpdatedEvent(
-    '2',
-    '1',
-    '3600',
+    supportThreshold,
+    minParticipation,
+    minDuration,
+    minProposerVotingPower,
     VOTING_ADDRESS
   );
 
@@ -256,9 +259,25 @@ test('Run Addresslist Voting (handleVoteSettingsUpdated) mappings with mock even
 
   // checks
   assert.fieldEquals('AddresslistPlugin', entityID, 'id', entityID);
-  assert.fieldEquals('AddresslistPlugin', entityID, 'minParticipation', '1');
-  assert.fieldEquals('AddresslistPlugin', entityID, 'supportThreshold', '2');
-  assert.fieldEquals('AddresslistPlugin', entityID, 'minDuration', '3600');
+  assert.fieldEquals(
+    'AddresslistPlugin',
+    entityID,
+    'supportThreshold',
+    supportThreshold
+  );
+  assert.fieldEquals(
+    'AddresslistPlugin',
+    entityID,
+    'minParticipation',
+    minParticipation
+  );
+  assert.fieldEquals('AddresslistPlugin', entityID, 'minDuration', minDuration);
+  assert.fieldEquals(
+    'AddresslistPlugin',
+    entityID,
+    'minProposerVotingPower',
+    minProposerVotingPower
+  );
 
   clearStore();
 });

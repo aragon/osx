@@ -199,6 +199,7 @@ export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
+    packageEntity.minProposerVotingPower = event.params.minProposerVotingPower;
     packageEntity.save();
   }
 }

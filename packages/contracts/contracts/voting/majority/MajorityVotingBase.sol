@@ -73,6 +73,7 @@ abstract contract MajorityVotingBase is
     uint64 public supportThreshold;
     uint64 public minParticipation;
     uint64 public minDuration;
+    uint256 public minProposerVotingPower;
 
     uint256 public proposalCount;
 
@@ -87,6 +88,10 @@ abstract contract MajorityVotingBase is
     /// @param end The end date of the vote as a unix timestamp.
     /// @param minDuration The minimal duration of the vote in seconds.
     error VotingPeriodInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+
+    /// @notice Thrown when a sender is not allowed to create a vote.
+    /// @param sender The sender address.
+    error ProposalCreationForbidden(address sender);
 
     /// @notice Thrown if the selected vote duration is zero
     error VoteDurationZero(); ///TODO  remove
@@ -113,17 +118,21 @@ abstract contract MajorityVotingBase is
     /// @param _supportThreshold The support threshold in percent.
     /// @param _minParticipation The minimum participation ratio in percent.
     /// @param _minDuration The minimal duration of a vote
+    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
     function __MajorityVotingBase_init(
         IDAO _dao,
         uint64 _supportThreshold,
         uint64 _minParticipation,
-        uint64 _minDuration
+        uint64 _minDuration,
+        uint256 _minProposerVotingPower
     ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
-
-        _validateAndSetSettings(_supportThreshold, _minParticipation, _minDuration);
-
-        emit VoteSettingsUpdated(_supportThreshold, _minParticipation, _minDuration);
+        _validateAndSetSettings(
+            _supportThreshold,
+            _minParticipation,
+            _minDuration,
+            _minProposerVotingPower
+        );
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -143,11 +152,15 @@ abstract contract MajorityVotingBase is
     function changeVoteSettings(
         uint64 _supportThreshold,
         uint64 _minParticipation,
-        uint64 _minDuration
+        uint64 _minDuration,
+        uint256 _minProposerVotingPower
     ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
-        _validateAndSetSettings(_supportThreshold, _minParticipation, _minDuration);
-
-        emit VoteSettingsUpdated(_supportThreshold, _minParticipation, _minDuration);
+        _validateAndSetSettings(
+            _supportThreshold,
+            _minParticipation,
+            _minDuration,
+            _minProposerVotingPower
+        );
     }
 
     /// @inheritdoc IMajorityVoting
@@ -271,7 +284,7 @@ abstract contract MajorityVotingBase is
 
         bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
 
-        emit ProposalExecuted(_proposalId, execResults);
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
@@ -330,7 +343,8 @@ abstract contract MajorityVotingBase is
     function _validateAndSetSettings(
         uint64 _supportThreshold,
         uint64 _minParticipation,
-        uint64 _minDuration
+        uint64 _minDuration,
+        uint256 _minProposerVotingPower
     ) internal virtual {
         if (_supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({limit: PCT_BASE, actual: _supportThreshold});
@@ -347,8 +361,16 @@ abstract contract MajorityVotingBase is
         supportThreshold = _supportThreshold;
         minParticipation = _minParticipation;
         minDuration = _minDuration;
+        minProposerVotingPower = _minProposerVotingPower;
+
+        emit VoteSettingsUpdated({
+            minParticipation: _minParticipation,
+            supportThreshold: _supportThreshold,
+            minDuration: _minDuration,
+            minProposerVotingPower: _minProposerVotingPower
+        });
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[47] private __gap;
+    uint256[46] private __gap;
 }
