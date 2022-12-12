@@ -106,7 +106,7 @@ contract AddresslistVoting is MajorityVotingBase {
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (voteSettings.minProposerVotingPower != 0 && !isListed(_msgSender(), snapshotBlock)) {
+        if (minProposerVotingPower() != 0 && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -114,12 +114,16 @@ contract AddresslistVoting is MajorityVotingBase {
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
-        (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
-        proposal_.snapshotBlock = snapshotBlock;
-        proposal_.supportThreshold = voteSettings.supportThreshold;
-        proposal_.minParticipation = voteSettings.minParticipation;
 
-        proposal_.totalVotingPower = addresslistLength(snapshotBlock);
+        (
+            proposal_.voteConfiguration.startDate,
+            proposal_.voteConfiguration.endDate
+        ) = _validateVoteDates(_startDate, _endDate);
+        proposal_.voteConfiguration.snapshotBlock = snapshotBlock;
+        proposal_.voteConfiguration.supportThreshold = supportThreshold();
+        proposal_.voteConfiguration.minParticipation = minParticipation();
+
+        proposal_.tally.totalVotingPower = addresslistLength(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -149,20 +153,20 @@ contract AddresslistVoting is MajorityVotingBase {
 
         // Remove the previous vote.
         if (state == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes - 1;
+            proposal_.tally.yes = proposal_.tally.yes - 1;
         } else if (state == VoteOption.No) {
-            proposal_.no = proposal_.no - 1;
+            proposal_.tally.no = proposal_.tally.no - 1;
         } else if (state == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain - 1;
+            proposal_.tally.abstain = proposal_.tally.abstain - 1;
         }
 
         // Store the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes + 1;
+            proposal_.tally.yes = proposal_.tally.yes + 1;
         } else if (_choice == VoteOption.No) {
-            proposal_.no = proposal_.no + 1;
+            proposal_.tally.no = proposal_.tally.no + 1;
         } else if (_choice == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain + 1;
+            proposal_.tally.abstain = proposal_.tally.abstain + 1;
         }
 
         proposal_.voters[_voter] = _choice;
@@ -201,7 +205,8 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
-        return _isVoteOpen(proposal_) && isListed(_voter, proposal_.snapshotBlock);
+        return
+            _isVoteOpen(proposal_) && isListed(_voter, proposal_.voteConfiguration.snapshotBlock);
     }
 
     /// @notice Updates the address list by adding or removing members.

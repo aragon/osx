@@ -196,6 +196,16 @@ enum VoteOption {
   No
 }
 
+type VoteSettings @entity {
+  id: ID! # plugin address
+  earlyExecution: Boolean
+  voteReplacement: Boolean
+  supportThreshold: BigInt
+  minParticipation: BigInt
+  minDuration: BigInt
+  minProposerVotingPower: BigInt
+}
+
 # TokenVoting
 
 type TokenVotingPlugin implements IPlugin @entity {
@@ -203,10 +213,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
-  supportThreshold: BigInt
-  minParticipation: BigInt
-  minDuration: BigInt
-  minProposerVotingPower: BigInt
+  voteSettings: VoteSettings!
   proposalCount: BigInt
   token: Token
   members: [TokenVotingVoter!]! @derivedFrom(field: "plugin")
@@ -265,10 +272,7 @@ type AddresslistPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AddresslistProposal!]! @derivedFrom(field: "plugin")
-  supportThreshold: BigInt
-  minParticipation: BigInt
-  minDuration: BigInt
-  minProposerVotingPower: BigInt
+  voteSettings: VoteSettings!
   proposalCount: BigInt
   members: [AddresslistVoter!]! @derivedFrom(field: "plugin")
 }

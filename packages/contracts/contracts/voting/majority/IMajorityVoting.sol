@@ -59,17 +59,27 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower;
     }
 
-    struct Proposal {
-        bool executed;
+    struct VoteConfiguration {
+        bool earlyExecution;
+        bool voteReplacment;
+        uint64 supportThreshold;
+        uint64 minParticipation;
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
-        uint64 supportThreshold;
-        uint64 minParticipation;
+    }
+
+    struct Tally {
+        uint256 totalVotingPower;
+        uint256 abstain;
         uint256 yes;
         uint256 no;
-        uint256 abstain;
-        uint256 totalVotingPower;
+    }
+
+    struct Proposal {
+        bool executed;
+        VoteConfiguration voteConfiguration;
+        Tally tally;
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
     }
@@ -172,19 +182,28 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
+    /// @notice Returns the support threshold parameter stored in the vote settings.
+    /// @return The support threshold parameter.
+    function supportThreshold() external view returns (uint64);
+
+    /// @notice Returns the minimum participation parameter stored in the vote settings.
+    /// @return The minimum participation parameter.
+    function minParticipation() external view returns (uint64);
+
+    /// @notice Returns the minimum duration parameter stored in the vote settings.
+    /// @return The minimum duration parameter.
+    function minDuration() external view returns (uint64);
+
+    /// @notice Returns the minimum voting power required to create a proposa stored in the vote settings.
+    /// @return The minimum voting power required to create a proposal.
+    function minProposerVotingPower() external view returns (uint256);
+
     /// @notice Returns all information for a proposal by its ID.
     /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the proposal is open or not.
     /// @return executed Wheter the proposal is executed or not.
-    /// @return startDate The start date of the proposal vote.
-    /// @return endDate The end date of the proposal vote.
-    /// @return snapshotBlock The block number of the snapshot taken for this proposal.
-    /// @return supportThreshold The support threshold in percent.
-    /// @return minParticipation The minimum participation ratio in percent.
-    /// @return totalVotingPower The total number of eligible votes that can be casted.
-    /// @return yes The number of `yes` votes.
-    /// @return no The number of `no` votes.
-    /// @return abstain The number of `abstain` votes.
+    /// @return voteConfiguration The configuration of the proposal vote.
+    /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
         external
@@ -192,15 +211,8 @@ interface IMajorityVoting {
         returns (
             bool open,
             bool executed,
-            uint64 startDate,
-            uint64 endDate,
-            uint64 snapshotBlock,
-            uint64 supportThreshold,
-            uint64 minParticipation,
-            uint256 totalVotingPower,
-            uint256 yes,
-            uint256 no,
-            uint256 abstain,
+            VoteConfiguration memory voteConfiguration,
+            Tally memory tally,
             IDAO.Action[] memory actions
         );
 }

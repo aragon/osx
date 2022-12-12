@@ -23,7 +23,7 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
   if (!packageEntity) {
     packageEntity = new TokenVotingPlugin(who.toHexString());
     let contract = TokenVotingContract.bind(who);
-    let supportThreshold = contract.try_supportThreshold();
+    let supportThreshold = contract.try_voteSettings.supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();

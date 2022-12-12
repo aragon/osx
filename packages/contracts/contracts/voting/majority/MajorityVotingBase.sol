@@ -70,7 +70,7 @@ abstract contract MajorityVotingBase is
     mapping(uint256 => Proposal) internal proposals;
 
     /// @notice The struct storing the vote settings.
-    VoteSettings public voteSettings;
+    VoteSettings private voteSettings;
 
     /// @notice A counter counting the created proposals.
     uint256 public proposalCount;
@@ -190,14 +190,18 @@ abstract contract MajorityVotingBase is
     function support(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        return _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+        return _calculatePct(proposal_.tally.yes, proposal_.tally.yes + proposal_.tally.no);
     }
 
     /// @inheritdoc IMajorityVoting
     function worstCaseSupport(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        return _calculatePct(proposal_.yes, proposal_.totalVotingPower - proposal_.abstain);
+        return
+            _calculatePct(
+                proposal_.tally.yes,
+                proposal_.tally.totalVotingPower - proposal_.tally.abstain
+            );
     }
 
     /// @inheritdoc IMajorityVoting
@@ -206,9 +210,29 @@ abstract contract MajorityVotingBase is
 
         return
             _calculatePct(
-                proposal_.yes + proposal_.no + proposal_.abstain,
-                proposal_.totalVotingPower
+                proposal_.tally.yes + proposal_.tally.no + proposal_.tally.abstain,
+                proposal_.tally.totalVotingPower
             );
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function supportThreshold() public view returns (uint64) {
+        return voteSettings.supportThreshold;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function minParticipation() public view returns (uint64) {
+        return voteSettings.minParticipation;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function minDuration() public view returns (uint64) {
+        return voteSettings.minDuration;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function minProposerVotingPower() public view returns (uint256) {
+        return voteSettings.minProposerVotingPower;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -218,15 +242,8 @@ abstract contract MajorityVotingBase is
         returns (
             bool open,
             bool executed,
-            uint64 startDate,
-            uint64 endDate,
-            uint64 snapshotBlock,
-            uint64 supportThreshold,
-            uint64 minParticipation,
-            uint256 totalVotingPower,
-            uint256 yes,
-            uint256 no,
-            uint256 abstain,
+            VoteConfiguration memory voteConfiguration,
+            Tally memory tally,
             IDAO.Action[] memory actions
         )
     {
@@ -234,15 +251,8 @@ abstract contract MajorityVotingBase is
 
         open = _isVoteOpen(proposal_);
         executed = proposal_.executed;
-        startDate = proposal_.startDate;
-        endDate = proposal_.endDate;
-        snapshotBlock = proposal_.snapshotBlock;
-        supportThreshold = proposal_.supportThreshold;
-        minParticipation = proposal_.minParticipation;
-        totalVotingPower = proposal_.totalVotingPower;
-        yes = proposal_.yes;
-        no = proposal_.no;
-        abstain = proposal_.abstain;
+        voteConfiguration = proposal_.voteConfiguration;
+        tally = proposal_.tally;
         actions = proposal_.actions;
     }
 
@@ -288,13 +298,13 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
-                worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) >= proposal_.minParticipation;
+                worstCaseSupport(_proposalId) > proposal_.voteConfiguration.supportThreshold &&
+                participation(_proposalId) >= proposal_.voteConfiguration.minParticipation;
         } else {
             // Normal execution
             return
-                support(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) >= proposal_.minParticipation;
+                support(_proposalId) > proposal_.voteConfiguration.supportThreshold &&
+                participation(_proposalId) >= proposal_.voteConfiguration.minParticipation;
         }
     }
 
@@ -303,8 +313,8 @@ abstract contract MajorityVotingBase is
     /// @return True if the proposal vote is open, false otherwise.
     function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
         return
-            getTimestamp64() < proposal_.endDate &&
-            getTimestamp64() >= proposal_.startDate &&
+            getTimestamp64() < proposal_.voteConfiguration.endDate &&
+            getTimestamp64() >= proposal_.voteConfiguration.startDate &&
             !proposal_.executed;
     }
 

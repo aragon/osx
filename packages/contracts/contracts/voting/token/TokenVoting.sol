@@ -66,10 +66,7 @@ contract TokenVoting is MajorityVotingBase {
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        if (
-            votingToken.getPastVotes(_msgSender(), snapshotBlock) <
-            voteSettings.minProposerVotingPower
-        ) {
+        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -77,12 +74,16 @@ contract TokenVoting is MajorityVotingBase {
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
-        (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
-        proposal_.snapshotBlock = snapshotBlock;
-        proposal_.supportThreshold = voteSettings.supportThreshold;
-        proposal_.minParticipation = voteSettings.minParticipation;
 
-        proposal_.totalVotingPower = totalVotingPower;
+        (
+            proposal_.voteConfiguration.startDate,
+            proposal_.voteConfiguration.endDate
+        ) = _validateVoteDates(_startDate, _endDate);
+        proposal_.voteConfiguration.snapshotBlock = snapshotBlock;
+        proposal_.voteConfiguration.supportThreshold = supportThreshold();
+        proposal_.voteConfiguration.minParticipation = minParticipation();
+
+        proposal_.tally.totalVotingPower = totalVotingPower;
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -109,25 +110,28 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.snapshotBlock);
+        uint256 votingPower = votingToken.getPastVotes(
+            _voter,
+            proposal_.voteConfiguration.snapshotBlock
+        );
         VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes - votingPower;
+            proposal_.tally.yes = proposal_.tally.yes - votingPower;
         } else if (state == VoteOption.No) {
-            proposal_.no = proposal_.no - votingPower;
+            proposal_.tally.no = proposal_.tally.no - votingPower;
         } else if (state == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain - votingPower;
+            proposal_.tally.abstain = proposal_.tally.abstain - votingPower;
         }
 
         // write the updated/new vote for the voter.
         if (_choice == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes + votingPower;
+            proposal_.tally.yes = proposal_.tally.yes + votingPower;
         } else if (_choice == VoteOption.No) {
-            proposal_.no = proposal_.no + votingPower;
+            proposal_.tally.no = proposal_.tally.no + votingPower;
         } else if (_choice == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain + votingPower;
+            proposal_.tally.abstain = proposal_.tally.abstain + votingPower;
         }
 
         proposal_.voters[_voter] = _choice;
@@ -148,7 +152,8 @@ contract TokenVoting is MajorityVotingBase {
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
         return
-            _isVoteOpen(proposal_) && votingToken.getPastVotes(_voter, proposal_.snapshotBlock) > 0;
+            _isVoteOpen(proposal_) &&
+            votingToken.getPastVotes(_voter, proposal_.voteConfiguration.snapshotBlock) > 0;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
