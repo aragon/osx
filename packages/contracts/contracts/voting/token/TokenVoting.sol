@@ -76,14 +76,14 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[proposalId];
 
         (
-            proposal_.proposalVoteConfiguration.startDate,
-            proposal_.proposalVoteConfiguration.endDate
+            proposal_.configuration.startDate,
+            proposal_.configuration.endDate
         ) = _validateProposalDates(_startDate, _endDate);
-        proposal_.proposalVoteConfiguration.snapshotBlock = snapshotBlock;
-        proposal_.proposalVoteConfiguration.earlyExecution = earlyExecution();
-        proposal_.proposalVoteConfiguration.voteReplacement = voteReplacement();
-        proposal_.proposalVoteConfiguration.supportThreshold = supportThreshold();
-        proposal_.proposalVoteConfiguration.minParticipation = minParticipation();
+        proposal_.configuration.snapshotBlock = snapshotBlock;
+        proposal_.configuration.earlyExecution = earlyExecution();
+        proposal_.configuration.voteReplacement = voteReplacement();
+        proposal_.configuration.supportThreshold = supportThreshold();
+        proposal_.configuration.minParticipation = minParticipation();
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
@@ -114,7 +114,7 @@ contract TokenVoting is MajorityVotingBase {
         // This could re-enter, though we can assume the governance token is not malicious
         uint256 votingPower = votingToken.getPastVotes(
             _voter,
-            proposal_.proposalVoteConfiguration.snapshotBlock
+            proposal_.configuration.snapshotBlock
         );
         VoteOption state = proposal_.voters[_voter];
 
@@ -155,15 +155,14 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (
-            !proposal_.proposalVoteConfiguration.voteReplacement &&
-            proposal_.voters[_voter] != VoteOption.None
+            !proposal_.configuration.voteReplacement && proposal_.voters[_voter] != VoteOption.None
         ) {
             revert VoteReplacementNotAllowed();
         }
 
         return
             _isVoteOpen(proposal_) &&
-            votingToken.getPastVotes(_voter, proposal_.proposalVoteConfiguration.snapshotBlock) > 0;
+            votingToken.getPastVotes(_voter, proposal_.configuration.snapshotBlock) > 0;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

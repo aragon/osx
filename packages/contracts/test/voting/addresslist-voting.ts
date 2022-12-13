@@ -298,20 +298,16 @@ describe('AddresslistVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.proposalVoteConfiguration.snapshotBlock).to.equal(
-        block.number - 1
-      );
-      expect(proposal.proposalVoteConfiguration.supportThreshold).to.equal(
+      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.configuration.supportThreshold).to.equal(
         pluginSettings.supportThreshold
       );
-      expect(proposal.proposalVoteConfiguration.minParticipation).to.equal(
+      expect(proposal.configuration.minParticipation).to.equal(
         pluginSettings.minParticipation
       );
       expect(
-        proposal.proposalVoteConfiguration.startDate.add(
-          pluginSettings.minDuration
-        )
-      ).to.equal(proposal.proposalVoteConfiguration.endDate);
+        proposal.configuration.startDate.add(pluginSettings.minDuration)
+      ).to.equal(proposal.configuration.endDate);
 
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
@@ -348,13 +344,11 @@ describe('AddresslistVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.proposalVoteConfiguration.snapshotBlock).to.equal(
-        block.number - 1
-      );
-      expect(proposal.proposalVoteConfiguration.supportThreshold).to.equal(
+      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.configuration.supportThreshold).to.equal(
         pluginSettings.supportThreshold
       );
-      expect(proposal.proposalVoteConfiguration.minParticipation).to.equal(
+      expect(proposal.configuration.minParticipation).to.equal(
         pluginSettings.minParticipation
       );
 

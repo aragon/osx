@@ -325,20 +325,16 @@ describe('TokenVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.proposalVoteConfiguration.supportThreshold).to.equal(
+      expect(proposal.configuration.supportThreshold).to.equal(
         pluginSettings.supportThreshold
       );
-      expect(proposal.proposalVoteConfiguration.minParticipation).to.equal(
+      expect(proposal.configuration.minParticipation).to.equal(
         pluginSettings.minParticipation
       );
-      expect(proposal.proposalVoteConfiguration.snapshotBlock).to.equal(
-        block.number - 1
-      );
+      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
       expect(
-        proposal.proposalVoteConfiguration.startDate.add(
-          pluginSettings.minDuration
-        )
-      ).to.equal(proposal.proposalVoteConfiguration.endDate);
+        proposal.configuration.startDate.add(pluginSettings.minDuration)
+      ).to.equal(proposal.configuration.endDate);
 
       expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(0);
@@ -382,15 +378,13 @@ describe('TokenVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.proposalVoteConfiguration.supportThreshold).to.equal(
+      expect(proposal.configuration.supportThreshold).to.equal(
         pluginSettings.supportThreshold
       );
-      expect(proposal.proposalVoteConfiguration.minParticipation).to.equal(
+      expect(proposal.configuration.minParticipation).to.equal(
         pluginSettings.minParticipation
       );
-      expect(proposal.proposalVoteConfiguration.snapshotBlock).to.equal(
-        block.number - 1
-      );
+      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
 
       expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(1);

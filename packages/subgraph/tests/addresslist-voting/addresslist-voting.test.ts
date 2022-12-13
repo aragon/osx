@@ -62,7 +62,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     true,
     false,
 
-    // ProposalVoteConfiguration
+    // Configuration
     EARLY_EXECUTION,
     VOTE_REPLACEMENT,
     SUPPORT_THRESHOLD,
@@ -222,7 +222,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    // ProposalVoteConfiguration
+    // Configuration
     EARLY_EXECUTION,
     VOTE_REPLACEMENT,
     SUPPORT_THRESHOLD,

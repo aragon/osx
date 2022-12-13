@@ -59,7 +59,7 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower;
     }
 
-    struct ProposalVoteConfiguration {
+    struct Configuration {
         bool earlyExecution;
         bool voteReplacement;
         uint64 supportThreshold;
@@ -78,7 +78,7 @@ interface IMajorityVoting {
 
     struct Proposal {
         bool executed;
-        ProposalVoteConfiguration proposalVoteConfiguration;
+        Configuration configuration;
         Tally tally;
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
@@ -222,7 +222,7 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the proposal is open or not.
     /// @return executed Wheter the proposal is executed or not.
-    /// @return proposalVoteConfiguration The configuration of the proposal vote.
+    /// @return configuration The configuration of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
@@ -231,7 +231,7 @@ interface IMajorityVoting {
         returns (
             bool open,
             bool executed,
-            ProposalVoteConfiguration memory proposalVoteConfiguration,
+            Configuration memory configuration,
             Tally memory tally,
             IDAO.Action[] memory actions
         );
