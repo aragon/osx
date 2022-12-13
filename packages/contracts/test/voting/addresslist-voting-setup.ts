@@ -90,7 +90,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8, uint64, uint64, uint64, uint256) pluginSettings, address[] members)';
+        '(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) pluginSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
