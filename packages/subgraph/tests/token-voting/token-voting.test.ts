@@ -11,7 +11,7 @@ import {TokenVotingPlugin} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
-  VOTING_ADDRESS,
+  CONTRACT_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
@@ -42,14 +42,14 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
   let tokenVotingPlugin = new TokenVotingPlugin(
-    Address.fromString(VOTING_ADDRESS).toHexString()
+    Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
   tokenVotingPlugin.save();
 
   // create calls
-  getProposalCountCall(VOTING_ADDRESS, '1');
+  getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     proposalId,
     true,
     false,
@@ -75,17 +75,17 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     proposalId,
     ADDRESS_ONE,
     STRING_DATA,
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
-    Address.fromString(VOTING_ADDRESS).toHexString() +
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
     BigInt.fromString(proposalId).toHexString();
-  let packageId = Address.fromString(VOTING_ADDRESS).toHexString();
+  let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks
   assert.fieldEquals('TokenVotingProposal', entityID, 'id', entityID);
@@ -153,7 +153,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // check TokenVotingPlugin
   assert.fieldEquals(
     'TokenVotingPlugin',
-    Address.fromString(VOTING_ADDRESS).toHexString(),
+    Address.fromString(CONTRACT_ADDRESS).toHexString(),
     'proposalCount',
     '1'
   );
@@ -166,7 +166,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
   // create calls
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     PROPOSAL_ID,
     true,
     false,
@@ -193,7 +193,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     ADDRESS_ONE,
     '2', // Yes
     '1', // votingPower
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   handleVoteCast(event);
@@ -209,7 +209,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     'TokenVotingVoter',
     ADDRESS_ONE,
     'plugin',
-    Address.fromString(VOTING_ADDRESS).toHexString()
+    Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
   assert.fieldEquals(
     'TokenVotingVoter',
@@ -231,7 +231,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'voteCount', '1');
   // create calls
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     PROPOSAL_ID,
     true,
     false,
@@ -257,7 +257,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     ADDRESS_ONE,
     '2', // yes
     '1', // votingPower
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   handleVoteCast(event2);
@@ -276,18 +276,19 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
 test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
-  let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
+  let entityID =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() + '_' + '0x0';
 
   createTokenVotingProposalEntityState(
     entityID,
     DAO_ADDRESS,
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     ADDRESS_ONE
   );
 
   // create calls
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     proposalId,
     true,
     true,
@@ -309,7 +310,7 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
   );
 
   // create event
-  let event = createNewProposalExecutedEvent('0', VOTING_ADDRESS);
+  let event = createNewProposalExecutedEvent('0', CONTRACT_ADDRESS);
 
   // handle event
   handleProposalExecuted(event);
@@ -335,7 +336,7 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
 
 test('Run TokenVoting (handlePluginSettingsUpdated) mappings with mock event', () => {
   // create state
-  let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
+  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let tokenVotingPlugin = new TokenVotingPlugin(entityID);
   tokenVotingPlugin.save();
 
@@ -348,7 +349,7 @@ test('Run TokenVoting (handlePluginSettingsUpdated) mappings with mock event', (
     MIN_DURATION,
     MIN_PROPOSER_VOTING_POWER,
 
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   // handle event

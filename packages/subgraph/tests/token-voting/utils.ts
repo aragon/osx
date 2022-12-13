@@ -13,7 +13,7 @@ import {
   DAO_ADDRESS,
   PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
-  VOTING_ADDRESS,
+  CONTRACT_ADDRESS,
   EARLY_EXECUTION,
   VOTE_REPLACEMENT,
   SUPPORT_THRESHOLD,
@@ -192,7 +192,7 @@ export function getProposalCountCall(
 export function createTokenVotingProposalEntityState(
   entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
-  pkg: string = VOTING_ADDRESS,
+  pkg: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
   proposalId: string = PROPOSAL_ID,
 

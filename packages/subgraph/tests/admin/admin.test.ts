@@ -10,7 +10,7 @@ import {
   ONE_ETH,
   STRING_DATA,
   PROPOSAL_ID,
-  VOTING_ADDRESS
+  CONTRACT_ADDRESS
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -28,7 +28,7 @@ const actionData = '0x00000000';
 
 test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => {
   // create state
-  let pluginId = Address.fromString(VOTING_ADDRESS).toHexString();
+  let pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let adminPlugin = new AdminPlugin(pluginId);
   adminPlugin.save();
 
@@ -39,14 +39,14 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
     ADDRESS_ONE,
     STRING_DATA,
     actions,
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
-    Address.fromString(VOTING_ADDRESS).toHexString() +
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
     BigInt.fromString(PROPOSAL_ID).toHexString();
 
@@ -68,7 +68,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // check actions
   for (let index = 0; index < actions.length; index++) {
     const actionId =
-      VOTING_ADDRESS + '_' + PROPOSAL_ID + '_' + index.toString();
+      CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + index.toString();
     const actionEntity = Action.load(actionId);
     if (actionEntity) {
       assert.fieldEquals('Action', actionId, 'id', actionId);
@@ -85,12 +85,12 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
 
 test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () => {
   // create state
-  let pluginId = Address.fromString(VOTING_ADDRESS).toHexString();
+  let pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let adminPlugin = new AdminPlugin(pluginId);
   adminPlugin.save();
 
   let entityID =
-    Address.fromString(VOTING_ADDRESS).toHexString() +
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
     BigInt.fromString(PROPOSAL_ID).toHexString();
 
@@ -107,7 +107,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.adminstrator = adminstratorAddress.toHexString();
   adminProposal.save();
 
-  const actionId = VOTING_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;
+  const actionId = CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;
   let action = new Action(actionId);
   action.to = Address.fromString(ADDRESS_TWO);
   action.value = BigInt.fromString(actionValue);
@@ -117,7 +117,11 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   action.save();
 
   // create event
-  let event = createProposalExecutedEvent(PROPOSAL_ID, ['0x'], VOTING_ADDRESS);
+  let event = createProposalExecutedEvent(
+    PROPOSAL_ID,
+    ['0x'],
+    CONTRACT_ADDRESS
+  );
 
   // handle event
   handleProposalExecuted(event);

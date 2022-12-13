@@ -17,7 +17,7 @@ import {
   ADDRESS_ONE,
   ADDRESS_TWO,
   DAO_TOKEN_ADDRESS,
-  VOTING_ADDRESS,
+  CONTRACT_ADDRESS,
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
@@ -50,14 +50,14 @@ let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
   let addresslistVotingPlugin = new AddresslistVotingPlugin(
-    Address.fromString(VOTING_ADDRESS).toHexString()
+    Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
   addresslistVotingPlugin.save();
 
   // create calls
-  getProposalCountCall(VOTING_ADDRESS, '1');
+  getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     proposalId,
     true,
     false,
@@ -85,17 +85,17 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     proposalId,
     ADDRESS_ONE,
     STRING_DATA,
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
   let entityID =
-    Address.fromString(VOTING_ADDRESS).toHexString() +
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
     '_' +
     BigInt.fromString(proposalId).toHexString();
-  let packageId = Address.fromString(VOTING_ADDRESS).toHexString();
+  let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks
   assert.fieldEquals('AddresslistVotingProposal', entityID, 'id', entityID);
@@ -203,7 +203,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   // check AddresslistVotingPlugin
   assert.fieldEquals(
     'AddresslistVotingPlugin',
-    Address.fromString(VOTING_ADDRESS).toHexString(),
+    Address.fromString(CONTRACT_ADDRESS).toHexString(),
     'proposalCount',
     '1'
   );
@@ -217,7 +217,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   // create calls
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     PROPOSAL_ID,
     true,
     false,
@@ -246,7 +246,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     ADDRESS_ONE,
     '2', // yes
     '1', // votingPower
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   handleVoteCast(event);
@@ -278,7 +278,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
   // create calls
   createGetProposalCall(
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     PROPOSAL_ID,
     true,
     false,
@@ -305,7 +305,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     ADDRESS_ONE,
     '2', // yes
     '1', // votingPower
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   handleVoteCast(event2);
@@ -334,16 +334,17 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
 test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
-  let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
+  let entityID =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() + '_' + '0x0';
   createAddresslistVotingProposalEntityState(
     entityID,
     DAO_ADDRESS,
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     ADDRESS_ONE
   );
 
   // create event
-  let event = createNewProposalExecutedEvent('0', VOTING_ADDRESS);
+  let event = createNewProposalExecutedEvent('0', CONTRACT_ADDRESS);
 
   // handle event
   handleProposalExecuted(event);
@@ -369,7 +370,7 @@ test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', 
 
 test('Run AddresslistVoting (handlePluginSettingsUpdated) mappings with mock event', () => {
   // create state
-  let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
+  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let addresslistVotingPlugin = new AddresslistVotingPlugin(entityID);
   addresslistVotingPlugin.save();
 
@@ -382,7 +383,7 @@ test('Run AddresslistVoting (handlePluginSettingsUpdated) mappings with mock eve
     MIN_DURATION,
     MIN_PROPOSER_VOTING_POWER,
 
-    VOTING_ADDRESS
+    CONTRACT_ADDRESS
   );
 
   // handle event
@@ -437,7 +438,7 @@ test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', ()
   ];
 
   // create event
-  let event = createNewAddressesAddedEvent(userArray, VOTING_ADDRESS);
+  let event = createNewAddressesAddedEvent(userArray, CONTRACT_ADDRESS);
 
   // handle event
   handleAddressesAdded(event);
@@ -459,7 +460,7 @@ test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', ()
     'AddresslistVotingVoter',
     userArray[0].toHexString(),
     'plugin',
-    Address.fromString(VOTING_ADDRESS).toHexString()
+    Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
 
   clearStore();
@@ -475,12 +476,12 @@ test('Run AddresslistVoting (AddressesRemoved) mappings with mock event', () => 
   for (let index = 0; index < userArray.length; index++) {
     const user = userArray[index];
     let userEntity = new AddresslistVotingVoter(user.toHexString());
-    userEntity.plugin = Address.fromString(VOTING_ADDRESS).toHexString();
+    userEntity.plugin = Address.fromString(CONTRACT_ADDRESS).toHexString();
     userEntity.save();
   }
 
   // create event
-  let event = createNewAddressesRemovedEvent([userArray[1]], VOTING_ADDRESS);
+  let event = createNewAddressesRemovedEvent([userArray[1]], CONTRACT_ADDRESS);
 
   // handle event
   handleAddressesRemoved(event);
