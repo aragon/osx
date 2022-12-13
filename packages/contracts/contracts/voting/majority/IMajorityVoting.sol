@@ -59,6 +59,13 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower;
     }
 
+    struct Proposal {
+        bool executed;
+        Configuration configuration;
+        Tally tally;
+        mapping(address => VoteOption) voters;
+        IDAO.Action[] actions;
+    }
     struct Configuration {
         bool earlyExecution;
         bool voteReplacement;
@@ -68,20 +75,11 @@ interface IMajorityVoting {
         uint64 endDate;
         uint64 snapshotBlock;
     }
-
     struct Tally {
         uint256 abstain;
         uint256 yes;
         uint256 no;
         uint256 totalVotingPower;
-    }
-
-    struct Proposal {
-        bool executed;
-        Configuration configuration;
-        Tally tally;
-        mapping(address => VoteOption) voters;
-        IDAO.Action[] actions;
     }
 
     /// @notice Emitted when a vote is cast by a voter.
