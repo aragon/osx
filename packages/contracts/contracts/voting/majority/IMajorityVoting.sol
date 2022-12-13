@@ -195,23 +195,23 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the early voting voteMode stored in the vote settings.
-    /// @return The voteMode parameter.
+    /// @notice Returns the vote mod () stored in the plugin settings.
+    /// @return The vote mode parameter.
     function voteMode() external view returns (VoteMode);
 
-    /// @notice Returns the support threshold parameter stored in the vote settings.
+    /// @notice Returns the support threshold parameter stored in the plugin settings.
     /// @return The support threshold parameter.
     function supportThreshold() external view returns (uint64);
 
-    /// @notice Returns the minimum participation parameter stored in the vote settings.
+    /// @notice Returns the minimum participation parameter stored in the plugin settings.
     /// @return The minimum participation parameter.
     function minParticipation() external view returns (uint64);
 
-    /// @notice Returns the minimum duration parameter stored in the vote settings.
+    /// @notice Returns the minimum duration parameter stored in the plugin settings.
     /// @return The minimum duration parameter.
     function minDuration() external view returns (uint64);
 
-    /// @notice Returns the minimum voting power required to create a proposa stored in the vote settings.
+    /// @notice Returns the minimum voting power required to create a proposa stored in the plugin settings.
     /// @return The minimum voting power required to create a proposal.
     function minProposerVotingPower() external view returns (uint256);
 

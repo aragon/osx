@@ -69,7 +69,7 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice The struct storing the vote settings.
+    /// @notice The struct storing the plugin settings.
     PluginSettings private pluginSettings;
 
     /// @notice A counter counting the created proposals.
@@ -116,7 +116,7 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _pluginSettings The vote settings.
+    /// @param _pluginSettings The plugin settings.
     function __MajorityVotingBase_init(IDAO _dao, PluginSettings calldata _pluginSettings)
         internal
         onlyInitializing
@@ -339,7 +339,7 @@ abstract contract MajorityVotingBase is
         return (_value * PCT_BASE) / _total;
     }
 
-    /// @notice Validates and sets the proposal vote settings.
+    /// @notice Validates and sets the proposal plugin settings.
     /// @param _pluginSettings The plugin settings to be validated and set.
     function _validateAndSetSettings(PluginSettings calldata _pluginSettings) internal virtual {
         if (_pluginSettings.supportThreshold > PCT_BASE) {

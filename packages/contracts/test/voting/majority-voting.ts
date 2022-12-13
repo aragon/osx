@@ -116,9 +116,9 @@ describe('MajorityVotingMock', function () {
       );
     });
 
-    it('should change the vote settings successfully', async () => {
+    it('should change the plugin settings successfully', async () => {
       expect(await votingBase.updatePluginSettings(pluginSettings))
-        .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
+        .to.emit(votingBase, VOTING_EVENTS.PLUGIN_SETTINGS_UPDATED)
         .withArgs(
           pluginSettings.voteMode,
           pluginSettings.supportThreshold,
