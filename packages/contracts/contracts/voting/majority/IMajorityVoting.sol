@@ -19,10 +19,10 @@ import "../../core/IDAO.sol";
 ///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
 ///
 ///  #### Vote Replacement Execution
-///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest voteOption is tallied.
+///  The contract allows votes to be replaced. Voters can change their vote multiple times and only the latest vote option is tallied.
 ///
 ///  #### Early Execution
-///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
+///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more voters voting. Accordingly, vote replacement and early execution are mutually exclusive options.
 ///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
 ///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
 ///  $$\begin{align*}
@@ -43,6 +43,11 @@ import "../../core/IDAO.sol";
 ///  For minimal values, $\ge$ comparison is used. This **does** include the minimum participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
 /// @dev This contract implements the `IMajorityVoting` interface.
 interface IMajorityVoting {
+    /// @notice Vote options that a voter can chose from.
+    /// @param None The default option state of a voter indicating the absence of from the vote. This option neither influences support nor participation.
+    /// @param Abstain This option does not influence the support but counts towards participation.
+    /// @param Yes This option increases the support and counts towards participation.
+    /// @param No This option decreases the support and counts towards participation.
     enum VoteOption {
         None,
         Abstain,
@@ -50,12 +55,22 @@ interface IMajorityVoting {
         No
     }
 
+    /// @notice The vote mode in which the plugin can be configured.
+    /// @param Standard In standard mode, early execution and vote replacement are disabled.
+    /// @param EarlyExecution In early execution mode, a proposal can be executed early if the vote outcome cannot mathematically change by more voters voting.
+    /// @param VoteReplacment In vote replacement mode, voters can change their vote multiple times and only the latest vote option is tallied.
     enum VoteMode {
         Standard,
         EarlyExecution,
         VoteReplacement
     }
 
+    /// @notice A container for the plugin-wide proposal vote settings.
+    /// @param voteMode A parameter to select the vote mode.
+    /// @param supportThreshold The support threshold value.
+    /// @param minParticipation The minimum participation value.
+    /// @param minDuration The minimum duration of the proposal vote in seconds.
+    /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     struct PluginSettings {
         VoteMode voteMode;
         uint64 supportThreshold;
@@ -64,6 +79,12 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower;
     }
 
+    /// @notice A container for proposal-related information.
+    /// @param executed Wheter the proposal is executed or not.
+    /// @param configuration The proposal-specific vote settings at the time of the proposal creation.
+    /// @param tally The vote tally of the proposal.
+    /// @param voters The votes casted by the voters.
+    /// @param actions The actions to be executed when the proposal passes.
     struct Proposal {
         bool executed;
         Configuration configuration;
@@ -71,6 +92,14 @@ interface IMajorityVoting {
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
     }
+
+    /// @notice A container for the proposal-specific vote settings.
+    /// @param voteMode A parameter to select the vote mode.
+    /// @param supportThreshold The support threshold value.
+    /// @param minParticipation The minimum participation value.
+    /// @param startDate The start date of the proposal vote.
+    /// @param endDate The end date of the proposal vote.
+    /// @param snapshotBlock The number of the block prior to the proposal creation.
     struct Configuration {
         VoteMode voteMode;
         uint64 supportThreshold;
@@ -79,6 +108,12 @@ interface IMajorityVoting {
         uint64 endDate;
         uint64 snapshotBlock;
     }
+
+    /// @notice A container for the proposal vote tally.
+    /// @param abstain The number of abstain votes casted.
+    /// @param yes The number of yes votes casted.
+    /// @param no The number of no votes casted.
+    /// @param totalVotingPower The total voting power available at the block prior to the proposal creation.
     struct Tally {
         uint256 abstain;
         uint256 yes;
@@ -110,7 +145,7 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the plugin settings are updated.
-    /// @param voteMode A parameter to select the voting voteMode allowing to enable early execution (`voteMode == 1`), vote replacment (`voteMode == 2`) or none of former (`voteMode == 0`).
+    /// @param voteMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
