@@ -49,15 +49,17 @@ export function _handleProposalCreated(
     proposalEntity.open = proposal.value.value0;
     proposalEntity.executed = proposal.value.value1;
 
-    // VoteConfiguration
-    let voteConfiguration = proposal.value.value2;
-    proposalEntity.earlyExecution = voteConfiguration.earlyExecution;
-    proposalEntity.voteReplacement = voteConfiguration.voteReplacement;
-    proposalEntity.supportThreshold = voteConfiguration.supportThreshold;
-    proposalEntity.minParticipation = voteConfiguration.minParticipation;
-    proposalEntity.startDate = voteConfiguration.startDate;
-    proposalEntity.endDate = voteConfiguration.endDate;
-    proposalEntity.snapshotBlock = voteConfiguration.snapshotBlock;
+    // ProposalVoteConfiguration
+    let proposalVoteConfiguration = proposal.value.value2;
+    proposalEntity.earlyExecution = proposalVoteConfiguration.earlyExecution;
+    proposalEntity.voteReplacement = proposalVoteConfiguration.voteReplacement;
+    proposalEntity.supportThreshold =
+      proposalVoteConfiguration.supportThreshold;
+    proposalEntity.minParticipation =
+      proposalVoteConfiguration.minParticipation;
+    proposalEntity.startDate = proposalVoteConfiguration.startDate;
+    proposalEntity.endDate = proposalVoteConfiguration.endDate;
+    proposalEntity.snapshotBlock = proposalVoteConfiguration.snapshotBlock;
 
     // Tally
     let tally = proposal.value.value3;

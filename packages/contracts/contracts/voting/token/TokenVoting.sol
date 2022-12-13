@@ -76,14 +76,14 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[proposalId];
 
         (
-            proposal_.voteConfiguration.startDate,
-            proposal_.voteConfiguration.endDate
+            proposal_.proposalVoteConfiguration.startDate,
+            proposal_.proposalVoteConfiguration.endDate
         ) = _validateVoteDates(_startDate, _endDate);
-        proposal_.voteConfiguration.snapshotBlock = snapshotBlock;
-        proposal_.voteConfiguration.earlyExecution = earlyExecution();
-        proposal_.voteConfiguration.voteReplacement = voteReplacement();
-        proposal_.voteConfiguration.supportThreshold = supportThreshold();
-        proposal_.voteConfiguration.minParticipation = minParticipation();
+        proposal_.proposalVoteConfiguration.snapshotBlock = snapshotBlock;
+        proposal_.proposalVoteConfiguration.earlyExecution = earlyExecution();
+        proposal_.proposalVoteConfiguration.voteReplacement = voteReplacement();
+        proposal_.proposalVoteConfiguration.supportThreshold = supportThreshold();
+        proposal_.proposalVoteConfiguration.minParticipation = minParticipation();
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
@@ -114,7 +114,7 @@ contract TokenVoting is MajorityVotingBase {
         // This could re-enter, though we can assume the governance token is not malicious
         uint256 votingPower = votingToken.getPastVotes(
             _voter,
-            proposal_.voteConfiguration.snapshotBlock
+            proposal_.proposalVoteConfiguration.snapshotBlock
         );
         VoteOption state = proposal_.voters[_voter];
 
@@ -155,7 +155,7 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (
-            !proposal_.voteConfiguration.voteReplacement &&
+            !proposal_.proposalVoteConfiguration.voteReplacement &&
             proposal_.voters[_voter] != VoteOption.None
         ) {
             revert VoteReplacementNotAllowed();
@@ -163,7 +163,7 @@ contract TokenVoting is MajorityVotingBase {
 
         return
             _isVoteOpen(proposal_) &&
-            votingToken.getPastVotes(_voter, proposal_.voteConfiguration.snapshotBlock) > 0;
+            votingToken.getPastVotes(_voter, proposal_.proposalVoteConfiguration.snapshotBlock) > 0;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

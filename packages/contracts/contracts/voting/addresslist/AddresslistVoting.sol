@@ -117,14 +117,14 @@ contract AddresslistVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[proposalId];
 
         (
-            proposal_.voteConfiguration.startDate,
-            proposal_.voteConfiguration.endDate
+            proposal_.proposalVoteConfiguration.startDate,
+            proposal_.proposalVoteConfiguration.endDate
         ) = _validateVoteDates(_startDate, _endDate);
-        proposal_.voteConfiguration.snapshotBlock = snapshotBlock;
-        proposal_.voteConfiguration.earlyExecution = earlyExecution();
-        proposal_.voteConfiguration.voteReplacement = voteReplacement();
-        proposal_.voteConfiguration.supportThreshold = supportThreshold();
-        proposal_.voteConfiguration.minParticipation = minParticipation();
+        proposal_.proposalVoteConfiguration.snapshotBlock = snapshotBlock;
+        proposal_.proposalVoteConfiguration.earlyExecution = earlyExecution();
+        proposal_.proposalVoteConfiguration.voteReplacement = voteReplacement();
+        proposal_.proposalVoteConfiguration.supportThreshold = supportThreshold();
+        proposal_.proposalVoteConfiguration.minParticipation = minParticipation();
 
         proposal_.tally.totalVotingPower = addresslistLength(snapshotBlock);
 
@@ -210,14 +210,15 @@ contract AddresslistVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (
-            !proposal_.voteConfiguration.voteReplacement &&
+            !proposal_.proposalVoteConfiguration.voteReplacement &&
             proposal_.voters[_voter] != VoteOption.None
         ) {
             revert VoteReplacementNotAllowed();
         }
 
         return
-            _isVoteOpen(proposal_) && isListed(_voter, proposal_.voteConfiguration.snapshotBlock);
+            _isVoteOpen(proposal_) &&
+            isListed(_voter, proposal_.proposalVoteConfiguration.snapshotBlock);
     }
 
     /// @notice Updates the address list by adding or removing members.

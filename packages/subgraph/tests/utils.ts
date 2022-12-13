@@ -70,23 +70,23 @@ export function createGetProposalCall(
 
   actions: ethereum.Tuple[]
 ): void {
-  let voteConfiguration = new ethereum.Tuple();
+  let proposalVoteConfiguration = new ethereum.Tuple();
 
-  voteConfiguration.push(ethereum.Value.fromBoolean(earlyExecution));
-  voteConfiguration.push(ethereum.Value.fromBoolean(voteReplacement));
-  voteConfiguration.push(
+  proposalVoteConfiguration.push(ethereum.Value.fromBoolean(earlyExecution));
+  proposalVoteConfiguration.push(ethereum.Value.fromBoolean(voteReplacement));
+  proposalVoteConfiguration.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThreshold))
   );
-  voteConfiguration.push(
+  proposalVoteConfiguration.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(minParticipation))
   );
-  voteConfiguration.push(
+  proposalVoteConfiguration.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate))
   );
-  voteConfiguration.push(
+  proposalVoteConfiguration.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate))
   );
-  voteConfiguration.push(
+  proposalVoteConfiguration.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock))
   );
 
@@ -111,8 +111,8 @@ export function createGetProposalCall(
       ethereum.Value.fromBoolean(open),
       ethereum.Value.fromBoolean(executed),
 
-      // VoteConfiguration
-      ethereum.Value.fromTuple(voteConfiguration),
+      // ProposalVoteConfiguration
+      ethereum.Value.fromTuple(proposalVoteConfiguration),
 
       // Tally
       ethereum.Value.fromTuple(tally),

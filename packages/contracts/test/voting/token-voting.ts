@@ -325,18 +325,20 @@ describe('TokenVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.voteConfiguration.supportThreshold).to.equal(
+      expect(proposal.proposalVoteConfiguration.supportThreshold).to.equal(
         pluginSettings.supportThreshold
       );
-      expect(proposal.voteConfiguration.minParticipation).to.equal(
+      expect(proposal.proposalVoteConfiguration.minParticipation).to.equal(
         pluginSettings.minParticipation
       );
-      expect(proposal.voteConfiguration.snapshotBlock).to.equal(
+      expect(proposal.proposalVoteConfiguration.snapshotBlock).to.equal(
         block.number - 1
       );
       expect(
-        proposal.voteConfiguration.startDate.add(pluginSettings.minDuration)
-      ).to.equal(proposal.voteConfiguration.endDate);
+        proposal.proposalVoteConfiguration.startDate.add(
+          pluginSettings.minDuration
+        )
+      ).to.equal(proposal.proposalVoteConfiguration.endDate);
 
       expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(0);
@@ -380,13 +382,13 @@ describe('TokenVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.voteConfiguration.supportThreshold).to.equal(
+      expect(proposal.proposalVoteConfiguration.supportThreshold).to.equal(
         pluginSettings.supportThreshold
       );
-      expect(proposal.voteConfiguration.minParticipation).to.equal(
+      expect(proposal.proposalVoteConfiguration.minParticipation).to.equal(
         pluginSettings.minParticipation
       );
-      expect(proposal.voteConfiguration.snapshotBlock).to.equal(
+      expect(proposal.proposalVoteConfiguration.snapshotBlock).to.equal(
         block.number - 1
       );
 

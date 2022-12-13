@@ -59,7 +59,7 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower;
     }
 
-    struct VoteConfiguration {
+    struct ProposalVoteConfiguration {
         bool earlyExecution;
         bool voteReplacement;
         uint64 supportThreshold;
@@ -78,7 +78,7 @@ interface IMajorityVoting {
 
     struct Proposal {
         bool executed;
-        VoteConfiguration voteConfiguration;
+        ProposalVoteConfiguration proposalVoteConfiguration;
         Tally tally;
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
@@ -118,7 +118,7 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower
     );
 
-    /// @notice Changes the vote settings.
+    /// @notice Changes the plugin settings.
     function changePluginSettings(PluginSettings calldata _pluginSettings) external;
 
     /// @notice Creates a new proposal.
@@ -213,11 +213,11 @@ interface IMajorityVoting {
     /// @return The minimum voting power required to create a proposal.
     function minProposerVotingPower() external view returns (uint256);
 
-    /// @notice Returns all information for a proposal by its ID.
+    /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the proposal is open or not.
     /// @return executed Wheter the proposal is executed or not.
-    /// @return voteConfiguration The configuration of the proposal vote.
+    /// @return proposalVoteConfiguration The configuration of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
@@ -226,7 +226,7 @@ interface IMajorityVoting {
         returns (
             bool open,
             bool executed,
-            VoteConfiguration memory voteConfiguration,
+            ProposalVoteConfiguration memory proposalVoteConfiguration,
             Tally memory tally,
             IDAO.Action[] memory actions
         );

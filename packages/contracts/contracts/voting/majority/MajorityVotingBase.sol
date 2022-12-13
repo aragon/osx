@@ -255,7 +255,7 @@ abstract contract MajorityVotingBase is
         returns (
             bool open,
             bool executed,
-            VoteConfiguration memory voteConfiguration,
+            ProposalVoteConfiguration memory proposalVoteConfiguration,
             Tally memory tally,
             IDAO.Action[] memory actions
         )
@@ -264,7 +264,7 @@ abstract contract MajorityVotingBase is
 
         open = _isVoteOpen(proposal_);
         executed = proposal_.executed;
-        voteConfiguration = proposal_.voteConfiguration;
+        proposalVoteConfiguration = proposal_.proposalVoteConfiguration;
         tally = proposal_.tally;
         actions = proposal_.actions;
     }
@@ -311,14 +311,15 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
-                proposal_.voteConfiguration.earlyExecution &&
-                worstCaseSupport(_proposalId) > proposal_.voteConfiguration.supportThreshold &&
-                participation(_proposalId) >= proposal_.voteConfiguration.minParticipation;
+                proposal_.proposalVoteConfiguration.earlyExecution &&
+                worstCaseSupport(_proposalId) >
+                proposal_.proposalVoteConfiguration.supportThreshold &&
+                participation(_proposalId) >= proposal_.proposalVoteConfiguration.minParticipation;
         } else {
             // Normal execution
             return
-                support(_proposalId) > proposal_.voteConfiguration.supportThreshold &&
-                participation(_proposalId) >= proposal_.voteConfiguration.minParticipation;
+                support(_proposalId) > proposal_.proposalVoteConfiguration.supportThreshold &&
+                participation(_proposalId) >= proposal_.proposalVoteConfiguration.minParticipation;
         }
     }
 
@@ -327,8 +328,8 @@ abstract contract MajorityVotingBase is
     /// @return True if the proposal vote is open, false otherwise.
     function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
         return
-            getTimestamp64() < proposal_.voteConfiguration.endDate &&
-            getTimestamp64() >= proposal_.voteConfiguration.startDate &&
+            getTimestamp64() < proposal_.proposalVoteConfiguration.endDate &&
+            getTimestamp64() >= proposal_.proposalVoteConfiguration.startDate &&
             !proposal_.executed;
     }
 
