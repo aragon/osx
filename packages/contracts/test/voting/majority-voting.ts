@@ -40,7 +40,7 @@ describe('MajorityVotingMock', function () {
     dao.grant(
       votingBase.address,
       ownerAddress,
-      ethers.utils.id('CHANGE_VOTE_SETTINGS_PERMISSION')
+      ethers.utils.id('SET_PLUGIN_SETTINGS_PERMISSION')
     );
   });
 
@@ -61,7 +61,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the support threshold specified exceeds 100%', async () => {
       pluginSettings.supportThreshold = pct16(1000);
       await expect(
-        votingBase.changePluginSettings(pluginSettings)
+        votingBase.setPluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
@@ -75,7 +75,7 @@ describe('MajorityVotingMock', function () {
       pluginSettings.minParticipation = pct16(1000);
 
       await expect(
-        votingBase.changePluginSettings(pluginSettings)
+        votingBase.setPluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
@@ -88,7 +88,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the minimal duration is shorter than one hour', async () => {
       pluginSettings.minDuration = ONE_HOUR - 1;
       await expect(
-        votingBase.changePluginSettings(pluginSettings)
+        votingBase.setPluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
@@ -101,7 +101,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the minimal duration is longer than one year', async () => {
       pluginSettings.minDuration = ONE_YEAR + 1;
       await expect(
-        votingBase.changePluginSettings(pluginSettings)
+        votingBase.setPluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
@@ -114,12 +114,12 @@ describe('MajorityVotingMock', function () {
     it('reverts if early execution and vote replacement are both true', async () => {
       pluginSettings.voteReplacement = true;
       await expect(
-        votingBase.changePluginSettings(pluginSettings)
+        votingBase.setPluginSettings(pluginSettings)
       ).to.be.revertedWith(customError('VoteReplacementNotAllowed'));
     });
 
     it('should change the vote settings successfully', async () => {
-      expect(await votingBase.changePluginSettings(pluginSettings))
+      expect(await votingBase.setPluginSettings(pluginSettings))
         .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
         .withArgs(
           pluginSettings.earlyExecution,

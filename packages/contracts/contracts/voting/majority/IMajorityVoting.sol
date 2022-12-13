@@ -123,8 +123,9 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower
     );
 
-    /// @notice Changes the plugin settings.
-    function changePluginSettings(PluginSettings calldata _pluginSettings) external;
+    /// @notice Sets the plugin settings.
+    /// @param _pluginSettings The new plugin settings.
+    function setPluginSettings(PluginSettings calldata _pluginSettings) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.

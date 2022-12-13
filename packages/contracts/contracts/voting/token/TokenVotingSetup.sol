@@ -195,7 +195,7 @@ contract TokenVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            tokenVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.SET_PLUGIN_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -266,7 +266,7 @@ contract TokenVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            tokenVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.SET_PLUGIN_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(

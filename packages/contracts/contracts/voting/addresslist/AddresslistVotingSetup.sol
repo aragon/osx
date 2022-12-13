@@ -77,7 +77,7 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.SET_PLUGIN_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -127,7 +127,7 @@ contract AddresslistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.SET_PLUGIN_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
