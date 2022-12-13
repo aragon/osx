@@ -269,7 +269,7 @@ type TokenVotingProposal implements Proposal @entity {
   executionBlockNumber: BigInt
 }
 
-# Addresslist
+# AddresslistVoting
 
 type AddresslistVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"

@@ -230,7 +230,6 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
 
-  //tokenVotingProposal.voteCount = BigInt.fromString(minParticipation); // Correct?
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
 
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);

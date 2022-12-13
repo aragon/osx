@@ -11,7 +11,7 @@ import {
 } from '../../src/packages/addresslist/addresslist-voting';
 import {
   AddresslistVotingPlugin,
-  AddresslistVoter
+  AddresslistVotingVoter
 } from '../../generated/schema';
 import {
   ADDRESS_ONE,
@@ -47,7 +47,7 @@ import {
 let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
-test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', () => {
+test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
   let addresslistVotingPlugin = new AddresslistVotingPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -130,7 +130,12 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
     'createdAt',
     event.block.timestamp.toString()
   );
-  assert.fieldEquals('AddresslistProposal', entityID, 'creationBlockNumber', event.block.number.toString())
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'creationBlockNumber',
+    event.block.number.toString()
+  );
   assert.fieldEquals(
     'AddresslistVotingProposal',
     entityID,
@@ -206,7 +211,7 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
   clearStore();
 });
 
-test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
+test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   // create state
   let proposal = createAddresslistVotingProposalEntityState();
 
@@ -248,7 +253,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('AddresslistVote', entityID, 'id', entityID);
+  assert.fieldEquals('AddresslistVotingVote', entityID, 'id', entityID);
 
   // check proposal
   assert.fieldEquals('AddresslistVotingProposal', proposal.id, 'yes', '1');
@@ -299,7 +304,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
     PROPOSAL_ID,
     ADDRESS_ONE,
     '2', // yes
-    '1',
+    '1', // votingPower
     VOTING_ADDRESS
   );
 
@@ -327,7 +332,7 @@ test('Run Addresslist Voting (handleVoteCast) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event', () => {
+test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
   createAddresslistVotingProposalEntityState(
@@ -344,15 +349,25 @@ test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event',
   handleProposalExecuted(event);
 
   // checks
-  assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'true');
-  assert.fieldEquals('AddresslistProposal', entityID, 'executionDate', event.block.timestamp.toString())
-  assert.fieldEquals('AddresslistProposal', entityID, 'executionBlockNumber', event.block.number.toString())
+  assert.fieldEquals('AddresslistVotingProposal', entityID, 'id', entityID);
+  assert.fieldEquals('AddresslistVotingProposal', entityID, 'executed', 'true');
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'executionDate',
+    event.block.timestamp.toString()
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'executionBlockNumber',
+    event.block.number.toString()
+  );
 
   clearStore();
 });
 
-test('Run Addresslist Voting (handlePluginSettingsUpdated) mappings with mock event', () => {
+test('Run AddresslistVoting (handlePluginSettingsUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
   let addresslistVotingPlugin = new AddresslistVotingPlugin(entityID);
@@ -415,7 +430,7 @@ test('Run Addresslist Voting (handlePluginSettingsUpdated) mappings with mock ev
   clearStore();
 });
 
-test('Run Addresslist Voting (handleAddressesAdded) mappings with mock event', () => {
+test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
@@ -429,19 +444,19 @@ test('Run Addresslist Voting (handleAddressesAdded) mappings with mock event', (
 
   // checks
   assert.fieldEquals(
-    'AddresslistVoter',
+    'AddresslistVotingVoter',
     userArray[0].toHexString(),
     'id',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
-    'AddresslistVoter',
+    'AddresslistVotingVoter',
     userArray[0].toHexString(),
     'address',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
-    'AddresslistVoter',
+    'AddresslistVotingVoter',
     userArray[0].toHexString(),
     'plugin',
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -450,7 +465,7 @@ test('Run Addresslist Voting (handleAddressesAdded) mappings with mock event', (
   clearStore();
 });
 
-test('Run Addresslist Voting (AddressesRemoved) mappings with mock event', () => {
+test('Run AddresslistVoting (AddressesRemoved) mappings with mock event', () => {
   // create state
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -459,7 +474,7 @@ test('Run Addresslist Voting (AddressesRemoved) mappings with mock event', () =>
 
   for (let index = 0; index < userArray.length; index++) {
     const user = userArray[index];
-    let userEntity = new AddresslistVoter(user.toHexString());
+    let userEntity = new AddresslistVotingVoter(user.toHexString());
     userEntity.plugin = Address.fromString(VOTING_ADDRESS).toHexString();
     userEntity.save();
   }
@@ -472,12 +487,12 @@ test('Run Addresslist Voting (AddressesRemoved) mappings with mock event', () =>
 
   // checks
   assert.fieldEquals(
-    'AddresslistVoter',
+    'AddresslistVotingVoter',
     userArray[0].toHexString(),
     'id',
     userArray[0].toHexString()
   );
-  assert.notInStore('AddresslistVoter', userArray[1].toHexString());
+  assert.notInStore('AddresslistVotingVoter', userArray[1].toHexString());
 
   clearStore();
 });

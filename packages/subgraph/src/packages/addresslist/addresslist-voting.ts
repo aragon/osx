@@ -7,8 +7,8 @@ import {
   PluginSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
-  Addresslist
-} from '../../../generated/templates/Addresslist/Addresslist';
+  AddresslistVoting
+} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   Action,
   AddresslistVotingPlugin,
@@ -43,7 +43,7 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
 
-  let contract = Addresslist.bind(event.address);
+  let contract = AddresslistVoting.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
@@ -120,7 +120,7 @@ export function handleVoteCast(event: VoteCast): void {
   // update count
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = Addresslist.bind(event.address);
+    let contract = AddresslistVoting.bind(event.address);
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
@@ -174,7 +174,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 
   // update actions
-  let contract = Addresslist.bind(event.address);
+  let contract = AddresslistVoting.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);
   if (!proposal.reverted) {
     let actions = proposal.value.value4;

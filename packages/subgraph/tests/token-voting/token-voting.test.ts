@@ -39,7 +39,7 @@ import {
 let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
-test('Run Token Voting (handleProposalCreated) mappings with mock event', () => {
+test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   // create state
   let tokenVotingPlugin = new TokenVotingPlugin(
     Address.fromString(VOTING_ADDRESS).toHexString()
@@ -100,13 +100,14 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     'createdAt',
     event.block.timestamp.toString()
   );
-<<<<<<< refs/remotes/origin/develop
-  assert.fieldEquals('TokenVotingProposal', entityID, 'creationBlockNumber', event.block.number.toString())
-  assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', startDate);
-=======
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'creationBlockNumber',
+    event.block.number.toString()
+  );
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', START_DATE);
 
->>>>>>> Fixed the subgraph
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
@@ -160,7 +161,7 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
   clearStore();
 });
 
-test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
+test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   let proposal = createTokenVotingProposalEntityState();
 
   // create calls
@@ -255,7 +256,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
     PROPOSAL_ID,
     ADDRESS_ONE,
     '2', // yes
-    '1',
+    '1', // votingPower
     VOTING_ADDRESS
   );
 
@@ -273,7 +274,7 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Token Voting (handleProposalExecuted) mappings with mock event', () => {
+test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
 
@@ -316,13 +317,23 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
   // checks
   assert.fieldEquals('TokenVotingProposal', entityID, 'id', entityID);
   assert.fieldEquals('TokenVotingProposal', entityID, 'executed', 'true');
-  assert.fieldEquals('TokenVotingProposal', entityID, 'executionDate', event.block.timestamp.toString())
-  assert.fieldEquals('TokenVotingProposal', entityID, 'executionBlockNumber', event.block.number.toString())
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'executionDate',
+    event.block.timestamp.toString()
+  );
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'executionBlockNumber',
+    event.block.number.toString()
+  );
 
   clearStore();
 });
 
-test('Run Token Voting (handlePluginSettingsUpdated) mappings with mock event', () => {
+test('Run TokenVoting (handlePluginSettingsUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(VOTING_ADDRESS).toHexString();
   let tokenVotingPlugin = new TokenVotingPlugin(entityID);

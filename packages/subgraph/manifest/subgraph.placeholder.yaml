@@ -161,12 +161,12 @@ templates:
           handler: handleProposalCreated
         - event: PluginSettingsUpdated(bool,bool,uint64,uint64,uint64,uint256)
           handler: handlePluginSettingsUpdated
-  # Addresslist (package)
-  - name: Addresslist
+  # AddresslistVoting (package)
+  - name: AddresslistVoting
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: Addresslist
+      abi: AddresslistVoting
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -175,7 +175,7 @@ templates:
       entities:
         - Dao
       abis:
-        - name: Addresslist
+        - name: AddresslistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)

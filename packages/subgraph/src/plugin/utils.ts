@@ -1,7 +1,7 @@
 import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
-import {Addresslist as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
+import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
 import {TokenVoting, AddresslistVoting, Admin} from '../../generated/templates';
 import {
@@ -18,11 +18,11 @@ import {
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
-function createTokenVotingPlugin(who: Address, daoId: string): void {
-  let packageEntity = TokenVotingPlugin.load(who.toHexString());
+function createTokenVotingPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
-    packageEntity = new TokenVotingPlugin(who.toHexString());
-    let contract = TokenVotingContract.bind(who);
+    packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    let contract = TokenVotingContract.bind(plugin);
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
@@ -41,17 +41,17 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    TokenVoting.createWithContext(who, context);
+    TokenVoting.createWithContext(plugin, context);
 
     packageEntity.save();
   }
 }
 
-function createAddresslistVotingPlugin(who: Address, daoId: string): void {
-  let packageEntity = AddresslistVotingPlugin.load(who.toHexString());
+function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
-    packageEntity = new AddresslistVotingPlugin(who.toHexString());
-    let contract = AddresslistVotingContract.bind(who);
+    packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    let contract = AddresslistVotingContract.bind(plugin);
 
     let earlyExecution = contract.try_earlyExecution();
     let voteReplacement = contract.try_voteReplacement();

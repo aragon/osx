@@ -9,7 +9,7 @@ import {
   PluginSettingsUpdated,
   AddressesAdded,
   AddressesRemoved
-} from '../../generated/templates/Addresslist/Addresslist';
+} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
@@ -270,7 +270,6 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
 
-  //addresslistProposal.voteCount = BigInt.fromString(minParticipation); // Correct?
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
 
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
