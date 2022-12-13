@@ -66,7 +66,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the support threshold specified exceeds 100%', async () => {
       pluginSettings.supportThreshold = pct16(1000);
       await expect(
-        votingBase.setPluginSettings(pluginSettings)
+        votingBase.updatePluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
@@ -80,7 +80,7 @@ describe('MajorityVotingMock', function () {
       pluginSettings.minParticipation = pct16(1000);
 
       await expect(
-        votingBase.setPluginSettings(pluginSettings)
+        votingBase.updatePluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
@@ -93,7 +93,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the minimal duration is shorter than one hour', async () => {
       pluginSettings.minDuration = ONE_HOUR - 1;
       await expect(
-        votingBase.setPluginSettings(pluginSettings)
+        votingBase.updatePluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
@@ -106,7 +106,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the minimal duration is longer than one year', async () => {
       pluginSettings.minDuration = ONE_YEAR + 1;
       await expect(
-        votingBase.setPluginSettings(pluginSettings)
+        votingBase.updatePluginSettings(pluginSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
@@ -117,7 +117,7 @@ describe('MajorityVotingMock', function () {
     });
 
     it('should change the vote settings successfully', async () => {
-      expect(await votingBase.setPluginSettings(pluginSettings))
+      expect(await votingBase.updatePluginSettings(pluginSettings))
         .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
         .withArgs(
           pluginSettings.voteMode,

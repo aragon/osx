@@ -125,7 +125,7 @@ interface IMajorityVoting {
 
     /// @notice Sets the plugin settings.
     /// @param _pluginSettings The new plugin settings.
-    function setPluginSettings(PluginSettings calldata _pluginSettings) external;
+    function updatePluginSettings(PluginSettings calldata _pluginSettings) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.

@@ -59,7 +59,7 @@ abstract contract MajorityVotingBase is
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required to call the `setPluginSettings` function.
+    /// @notice The ID of the permission required to call the `updatePluginSettings` function.
     bytes32 public constant SET_PLUGIN_SETTINGS_PERMISSION_ID =
         keccak256("SET_PLUGIN_SETTINGS_PERMISSION");
 
@@ -139,7 +139,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function setPluginSettings(PluginSettings calldata _pluginSettings)
+    function updatePluginSettings(PluginSettings calldata _pluginSettings)
         external
         auth(SET_PLUGIN_SETTINGS_PERMISSION_ID)
     {
