@@ -82,19 +82,19 @@ abstract contract MajorityVotingBase is
     /// @param actual The actual value.
     error PercentageExceeds100(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the selected vote times are not allowed.
-    /// @param current The maximal value.
-    /// @param start The start date of the vote as a unix timestamp.
-    /// @param end The end date of the vote as a unix timestamp.
-    /// @param minDuration The minimal duration of the vote in seconds.
-    error VotingPeriodInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    /// @notice Thrown if a date is out of bounds.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error DateOutOfBounds(uint64 limit, uint64 actual);
+
+    /// @notice Thrown if the minimal duration value is out of bounds.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error MinDurationOutOfBounds(uint64 limit, uint64 actual);
 
     /// @notice Thrown when a sender is not allowed to create a vote.
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
-
-    /// @notice Thrown if the selected vote duration is zero
-    error VoteDurationZero(); ///TODO  remove
 
     /// @notice Thrown if zero is not allowed as a value
     error ZeroValueNotAllowed();
@@ -340,6 +340,11 @@ abstract contract MajorityVotingBase is
         return (_value * PCT_BASE) / _total;
     }
 
+    /// @notice Validates and sets the proposal vote settings.
+    /// @param _supportThreshold The support threshold in percent.
+    /// @param _minParticipation The minimum participation in percent.
+    /// @param _minDuration The minimum duration of a vote
+    /// @param _minProposerVotingPower The minimum voting power needed to create a proposal.
     function _validateAndSetSettings(
         uint64 _supportThreshold,
         uint64 _minParticipation,
@@ -354,8 +359,12 @@ abstract contract MajorityVotingBase is
             revert PercentageExceeds100({limit: PCT_BASE, actual: _minParticipation});
         }
 
-        if (_minDuration == 0) {
-            revert VoteDurationZero();
+        if (_minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _minDuration});
+        }
+
+        if (_minDuration > 365 days) {
+            revert MinDurationOutOfBounds({limit: 365 days, actual: _minDuration});
         }
 
         supportThreshold = _supportThreshold;
@@ -369,6 +378,42 @@ abstract contract MajorityVotingBase is
             minDuration: _minDuration,
             minProposerVotingPower: _minProposerVotingPower
         });
+    }
+
+    /// @notice Validates and returns the proposal vote dates.
+    /// @param _start The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
+    /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
+    /// @return startDate The validated start date of the proposal vote.
+    /// @return endDate The validated end date of the proposal vote.
+    function _validateVoteDates(uint64 _start, uint64 _end)
+        internal
+        view
+        virtual
+        returns (uint64 startDate, uint64 endDate)
+    {
+        uint64 currentTimestamp = getTimestamp64();
+
+        if (_start == 0) {
+            startDate = currentTimestamp;
+        } else {
+            startDate = _start;
+
+            if (startDate < currentTimestamp) {
+                revert DateOutOfBounds({limit: currentTimestamp, actual: startDate});
+            }
+        }
+
+        uint64 earliestEndDate = startDate + minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
+
+        if (_end == 0) {
+            endDate = earliestEndDate;
+        } else {
+            endDate = _end;
+
+            if (endDate < earliestEndDate) {
+                revert DateOutOfBounds({limit: earliestEndDate, actual: endDate});
+            }
+        }
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

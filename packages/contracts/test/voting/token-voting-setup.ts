@@ -6,6 +6,7 @@ import {ERC20, TokenVotingSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {ONE_HOUR} from '../test-utils/voting';
 
 enum Op {
   Grant,
@@ -29,7 +30,7 @@ const prepareInstallDataTypes = [
 
 const minParticipation = 25;
 const supportThreshold = 50;
-const minDuration = 10;
+const minDuration = ONE_HOUR;
 const minProposerVotingPower = 1;
 
 // minimum bytes for `prepareInstallation` data param.

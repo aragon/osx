@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {ONE_HOUR} from '../test-utils/voting';
 
 enum Op {
   Grant,
@@ -19,7 +20,7 @@ const EMPTY_DATA = '0x';
 
 const supportThreshold = 50;
 const minParticipation = 25;
-const minDuration = 10;
+const minDuration = ONE_HOUR;
 const minProposerVotingPower = 1;
 let members: string[];
 
