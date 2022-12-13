@@ -51,7 +51,7 @@ interface IMajorityVoting {
     }
 
     enum VoteMode {
-        Default,
+        Standard,
         EarlyExecution,
         VoteReplacement
     }
