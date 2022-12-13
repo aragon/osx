@@ -60,7 +60,7 @@ abstract contract MajorityVotingBase is
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
     /// @notice The ID of the permission required to call the `updatePluginSettings` function.
-    bytes32 public constant SET_PLUGIN_SETTINGS_PERMISSION_ID =
+    bytes32 public constant UPDATE_PLUGIN_SETTINGS_PERMISSION_ID =
         keccak256("SET_PLUGIN_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
@@ -141,7 +141,7 @@ abstract contract MajorityVotingBase is
     /// @inheritdoc IMajorityVoting
     function updatePluginSettings(PluginSettings calldata _pluginSettings)
         external
-        auth(SET_PLUGIN_SETTINGS_PERMISSION_ID)
+        auth(UPDATE_PLUGIN_SETTINGS_PERMISSION_ID)
     {
         _validateAndSetSettings(_pluginSettings);
     }

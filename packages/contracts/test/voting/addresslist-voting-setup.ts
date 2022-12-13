@@ -30,7 +30,7 @@ const prepareInstallationDataTypes = [
 const MODIFY_ADDRESSLIST_PERMISSION_ID = ethers.utils.id(
   'MODIFY_ADDRESSLIST_PERMISSION'
 );
-const SET_PLUGIN_SETTINGS_PERMISSION_ID = ethers.utils.id(
+const UPDATE_PLUGIN_SETTINGS_PERMISSION_ID = ethers.utils.id(
   'SET_PLUGIN_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
@@ -151,7 +151,7 @@ describe('AddresslistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_PLUGIN_SETTINGS_PERMISSION_ID,
+          UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Grant,
@@ -255,7 +255,7 @@ describe('AddresslistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          SET_PLUGIN_SETTINGS_PERMISSION_ID,
+          UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
         ],
         [
           Op.Revoke,
