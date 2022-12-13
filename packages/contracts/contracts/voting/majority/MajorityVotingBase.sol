@@ -391,7 +391,7 @@ abstract contract MajorityVotingBase is
     /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
     /// @return startDate The validated start date of the proposal vote.
     /// @return endDate The validated end date of the proposal vote.
-    function _validateVoteDates(uint64 _start, uint64 _end)
+    function _validateProposalDates(uint64 _start, uint64 _end)
         internal
         view
         virtual

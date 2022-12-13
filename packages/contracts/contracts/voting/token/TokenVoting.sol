@@ -78,7 +78,7 @@ contract TokenVoting is MajorityVotingBase {
         (
             proposal_.proposalVoteConfiguration.startDate,
             proposal_.proposalVoteConfiguration.endDate
-        ) = _validateVoteDates(_startDate, _endDate);
+        ) = _validateProposalDates(_startDate, _endDate);
         proposal_.proposalVoteConfiguration.snapshotBlock = snapshotBlock;
         proposal_.proposalVoteConfiguration.earlyExecution = earlyExecution();
         proposal_.proposalVoteConfiguration.voteReplacement = voteReplacement();
