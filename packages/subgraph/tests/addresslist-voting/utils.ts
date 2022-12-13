@@ -254,7 +254,7 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.open = open;
   addresslistProposal.executed = executed;
 
-  addresslistProposal.voteMode = BigInt.fromString(voteMode);
+  addresslistProposal.voteMode = voteMode;
   addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
   addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
   addresslistProposal.startDate = BigInt.fromString(startDate);

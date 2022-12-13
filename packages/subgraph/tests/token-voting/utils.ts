@@ -214,7 +214,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.open = open;
   tokenVotingProposal.executed = executed;
 
-  tokenVotingProposal.voteMode = BigInt.fromString(voteMode);
+  tokenVotingProposal.voteMode = voteMode;
   tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
   tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
   tokenVotingProposal.startDate = BigInt.fromString(startDate);

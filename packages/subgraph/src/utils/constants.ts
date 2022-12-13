@@ -7,6 +7,11 @@ export const VOTER_OPTIONS = new Map<number, string>()
   .set(2, 'Yes')
   .set(3, 'No');
 
+export const VOTE_MODES = new Map<number, string>()
+  .set(0, 'Default')
+  .set(1, 'EarlyExecution')
+  .set(2, 'VoteReplacement');
+
 export const TOKEN_VOTING_INTERFACE = '0x72a13b7e';
 export const ADDRESSLIST_VOTING_INTERFACE = '0x8d8aae2d';
 export const ADMIN_INTERFACE = '0x9102c53e';

@@ -19,7 +19,8 @@ import {handleERC20Token} from '../utils/tokens';
 import {
   TOKEN_VOTING_INTERFACE,
   ADDRESSLIST_VOTING_INTERFACE,
-  ADMIN_INTERFACE
+  ADMIN_INTERFACE,
+  VOTE_MODES
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
@@ -66,7 +67,7 @@ function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
 
     packageEntity.voteMode = voteMode.reverted
       ? null
-      : BigInt.fromI32(voteMode.value);
+      : VOTE_MODES.get(voteMode.value);
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
       : supportThreshold.value;

@@ -196,6 +196,12 @@ enum VoteOption {
   No
 }
 
+enum VoteMode {
+  Default
+  EarlyExecution
+  VoteReplacement
+}
+
 type PluginSettings @entity {
   id: ID! # plugin address
 }
@@ -207,7 +213,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
-  voteMode: BigInt
+  voteMode: VoteMode
   supportThreshold: BigInt
   minParticipation: BigInt
   minDuration: BigInt
@@ -244,7 +250,7 @@ type TokenVotingProposal implements Proposal @entity {
   creator: Bytes!
   metadata: String
 
-  voteMode: BigInt!
+  voteMode: VoteMode!
   supportThreshold: BigInt!
   minParticipation: BigInt!
   startDate: BigInt!
@@ -274,7 +280,7 @@ type AddresslistVotingPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
-  voteMode: BigInt
+  voteMode: VoteMode
   supportThreshold: BigInt
   minParticipation: BigInt
   minDuration: BigInt
@@ -309,7 +315,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   creator: Bytes!
   metadata: String
 
-  voteMode: BigInt!
+  voteMode: VoteMode!
   supportThreshold: BigInt!
   minParticipation: BigInt!
   startDate: BigInt!

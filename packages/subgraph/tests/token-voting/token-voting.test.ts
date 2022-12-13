@@ -8,6 +8,7 @@ import {
   _handleProposalCreated
 } from '../../src/packages/token/token-voting';
 import {TokenVotingPlugin} from '../../generated/schema';
+import {VOTE_MODES} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -25,6 +26,7 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER
 } from '../constants';
+
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
   createNewVoteCastEvent,
@@ -106,7 +108,12 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   );
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', START_DATE);
 
-  assert.fieldEquals('TokenVotingProposal', entityID, 'voteMode', VOTE_MODE);
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'voteMode',
+    VOTE_MODES.get(parseInt(VOTE_MODE))
+  );
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
@@ -340,7 +347,12 @@ test('Run TokenVoting (handlePluginSettingsUpdated) mappings with mock event', (
 
   // checks
   assert.fieldEquals('TokenVotingPlugin', entityID, 'id', entityID);
-  assert.fieldEquals('TokenVotingPlugin', entityID, 'voteMode', VOTE_MODE);
+  assert.fieldEquals(
+    'TokenVotingPlugin',
+    entityID,
+    'voteMode',
+    VOTE_MODES.get(parseInt(VOTE_MODE))
+  );
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,

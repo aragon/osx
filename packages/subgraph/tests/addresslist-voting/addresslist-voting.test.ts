@@ -13,6 +13,7 @@ import {
   AddresslistVotingPlugin,
   AddresslistVotingVoter
 } from '../../generated/schema';
+import {VOTE_MODES} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -145,7 +146,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     'AddresslistVotingProposal',
     entityID,
     'voteMode',
-    VOTE_MODE
+    VOTE_MODES.get(parseInt(VOTE_MODE))
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
@@ -384,7 +385,7 @@ test('Run AddresslistVoting (handlePluginSettingsUpdated) mappings with mock eve
     'AddresslistVotingPlugin',
     entityID,
     'voteMode',
-    VOTE_MODE
+    VOTE_MODES.get(parseInt(VOTE_MODE))
   );
   assert.fieldEquals(
     'AddresslistVotingPlugin',

@@ -16,7 +16,7 @@ import {
   AddresslistVotingVoter,
   AddresslistVotingVote
 } from '../../../generated/schema';
-import {TEN_POWER_16, VOTER_OPTIONS} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_OPTIONS, VOTE_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -52,7 +52,7 @@ export function _handleProposalCreated(
 
     // Configuration
     let configuration = vote.value.value2;
-    proposalEntity.voteMode = BigInt.fromI32(configuration.voteMode);
+    proposalEntity.voteMode = VOTE_MODES.get(configuration.voteMode);
     proposalEntity.supportThreshold = configuration.supportThreshold;
     proposalEntity.minParticipation = configuration.minParticipation;
     proposalEntity.startDate = configuration.startDate;
@@ -199,7 +199,7 @@ export function handlePluginSettingsUpdated(
 ): void {
   let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.voteMode = BigInt.fromI32(event.params.voteMode);
+    packageEntity.voteMode = VOTE_MODES.get(event.params.voteMode);
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
