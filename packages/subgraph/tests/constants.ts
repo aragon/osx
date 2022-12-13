@@ -22,8 +22,7 @@ export const HALF_ETH = '500000000000000000';
 
 export const ONE_HOUR = '3600';
 
-export const EARLY_EXECUTION = true;
-export const VOTE_REPLACEMENT = false;
+export const VOTE_MODE = '1'; // EarlyExecution
 export const SUPPORT_THRESHOLD = '500000000000000000';
 export const MIN_PARTICIPATION = '500000000000000000';
 export const MIN_DURATION = ONE_HOUR;

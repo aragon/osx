@@ -16,8 +16,7 @@ import {
   PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
-  EARLY_EXECUTION,
-  VOTE_REPLACEMENT,
+  VOTE_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   START_DATE,
@@ -80,18 +79,18 @@ export function createNewVoteCastEvent(
     'voter',
     ethereum.Value.fromAddress(Address.fromString(voter))
   );
-  let choiceParam = new ethereum.EventParam(
-    'choice',
+  let voteOptionParam = new ethereum.EventParam(
+    'voteOption',
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(creatorChoice))
   );
   let votingPowerParam = new ethereum.EventParam(
-    'choice',
+    'voteOption',
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingPower))
   );
 
   createProposalCastEvent.parameters.push(proposalIdParam);
   createProposalCastEvent.parameters.push(voterParam);
-  createProposalCastEvent.parameters.push(choiceParam);
+  createProposalCastEvent.parameters.push(voteOptionParam);
   createProposalCastEvent.parameters.push(votingPowerParam);
 
   return createProposalCastEvent;
@@ -124,10 +123,9 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewPluginSettingsUpdatedEvent(
-  earlyExecution: boolean,
-  voteReplacement: boolean,
-  minParticipation: string,
+  voteMode: string,
   supportThreshold: string,
+  minParticipation: string,
   minDuration: string,
   minProposerVotingPower: string,
   contractAddress: string
@@ -139,13 +137,9 @@ export function createNewPluginSettingsUpdatedEvent(
   newPluginSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newPluginSettingsUpdatedEvent.parameters = [];
 
-  let earlyExecutionParam = new ethereum.EventParam(
-    'earlyExecution',
-    ethereum.Value.fromBoolean(earlyExecution)
-  );
-  let voteReplacementParam = new ethereum.EventParam(
-    'voteReplacement',
-    ethereum.Value.fromBoolean(voteReplacement)
+  let voteModeParam = new ethereum.EventParam(
+    'voteMode',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteMode))
   );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
@@ -164,8 +158,7 @@ export function createNewPluginSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newPluginSettingsUpdatedEvent.parameters.push(earlyExecutionParam);
-  newPluginSettingsUpdatedEvent.parameters.push(voteReplacementParam);
+  newPluginSettingsUpdatedEvent.parameters.push(voteModeParam);
   newPluginSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newPluginSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newPluginSettingsUpdatedEvent.parameters.push(minDurationParam);
@@ -239,8 +232,7 @@ export function createAddresslistVotingProposalEntityState(
   open: boolean = true,
   executed: boolean = false,
 
-  earlyExecution: boolean = EARLY_EXECUTION,
-  voteReplacement: boolean = VOTE_REPLACEMENT,
+  voteMode: string = VOTE_MODE,
   supportThreshold: string = SUPPORT_THRESHOLD,
   minParticipation: string = MIN_PARTICIPATION,
   startDate: string = START_DATE,
@@ -262,8 +254,7 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.open = open;
   addresslistProposal.executed = executed;
 
-  addresslistProposal.earlyExecution = earlyExecution;
-  addresslistProposal.voteReplacement = voteReplacement;
+  addresslistProposal.voteMode = BigInt.fromString(voteMode);
   addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
   addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
   addresslistProposal.startDate = BigInt.fromString(startDate);

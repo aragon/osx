@@ -9,9 +9,21 @@ export enum VoteOption {
   No,
 }
 
+export enum VoteMode {
+  Default,
+  EarlyExecution,
+  VoteReplacement,
+}
+
+export enum Op {
+  Grant,
+  Revoke,
+  Freeze,
+  GrantWithOracle,
+}
+
 export type PluginSettings = {
-  earlyExecution: boolean;
-  voteReplacement: boolean;
+  voteMode: number;
   supportThreshold: BigNumber;
   minParticipation: BigNumber;
   minDuration: number;

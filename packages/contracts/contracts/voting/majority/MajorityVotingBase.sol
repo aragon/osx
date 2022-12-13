@@ -26,7 +26,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 ///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
 ///
 ///  #### Vote Replacement Execution
-///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
+///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest voteOption is tallied.
 ///
 ///  #### Early Execution
 ///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
@@ -153,19 +153,19 @@ abstract contract MajorityVotingBase is
         uint64 _startDate,
         uint64 _endDate,
         bool _tryEarlyExecution,
-        VoteOption _choice
+        VoteOption _voteOption
     ) external virtual returns (uint256 proposalId);
 
     /// @inheritdoc IMajorityVoting
     function vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         bool _tryEarlyExecution
     ) public {
-        if (_choice != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
+        if (_voteOption != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
             revert VoteCastForbidden(_proposalId, _msgSender());
         }
-        _vote(_proposalId, _choice, _msgSender(), _tryEarlyExecution);
+        _vote(_proposalId, _voteOption, _msgSender(), _tryEarlyExecution);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -239,13 +239,8 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function earlyExecution() public view returns (bool) {
-        return pluginSettings.earlyExecution;
-    }
-
-    /// @inheritdoc IMajorityVoting
-    function voteReplacement() public view returns (bool) {
-        return pluginSettings.voteReplacement;
+    function voteMode() public view returns (VoteMode) {
+        return pluginSettings.voteMode;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -271,11 +266,11 @@ abstract contract MajorityVotingBase is
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
-    /// @param _choice Whether voter abstains, supports or not supports to vote.
+    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         address _voter,
         bool _tryEarlyExecution
     ) internal virtual;
@@ -311,7 +306,7 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
-                proposal_.configuration.earlyExecution &&
+                proposal_.configuration.voteMode == VoteMode.EarlyExecution &&
                 worstCaseSupport(_proposalId) > proposal_.configuration.supportThreshold &&
                 participation(_proposalId) >= proposal_.configuration.minParticipation;
         } else {
@@ -347,10 +342,6 @@ abstract contract MajorityVotingBase is
     /// @notice Validates and sets the proposal vote settings.
     /// @param _pluginSettings The plugin settings to be validated and set.
     function _validateAndSetSettings(PluginSettings calldata _pluginSettings) internal virtual {
-        if (_pluginSettings.earlyExecution && _pluginSettings.voteReplacement) {
-            revert VoteReplacementNotAllowed();
-        }
-
         if (_pluginSettings.supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({
                 limit: PCT_BASE,
@@ -376,8 +367,7 @@ abstract contract MajorityVotingBase is
         pluginSettings = _pluginSettings;
 
         emit PluginSettingsUpdated({
-            earlyExecution: _pluginSettings.earlyExecution,
-            voteReplacement: _pluginSettings.voteReplacement,
+            voteMode: _pluginSettings.voteMode,
             supportThreshold: _pluginSettings.supportThreshold,
             minParticipation: _pluginSettings.minParticipation,
             minDuration: _pluginSettings.minDuration,

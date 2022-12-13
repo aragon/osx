@@ -15,8 +15,7 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
-  EARLY_EXECUTION,
-  VOTE_REPLACEMENT,
+  VOTE_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   MIN_DURATION,
@@ -54,8 +53,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     true,
     false,
 
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -108,18 +106,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   );
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', START_DATE);
 
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    entityID,
-    'earlyExecution',
-    EARLY_EXECUTION.toString()
-  );
-  assert.fieldEquals(
-    'TokenVotingProposal',
-    entityID,
-    'voteReplacement',
-    VOTE_REPLACEMENT.toString()
-  );
+  assert.fieldEquals('TokenVotingProposal', entityID, 'voteMode', VOTE_MODE);
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
@@ -171,8 +158,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -236,8 +222,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -293,8 +278,7 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     true,
     true,
 
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -342,8 +326,7 @@ test('Run TokenVoting (handlePluginSettingsUpdated) mappings with mock event', (
 
   // create event
   let event = createNewPluginSettingsUpdatedEvent(
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     MIN_DURATION,
@@ -357,18 +340,7 @@ test('Run TokenVoting (handlePluginSettingsUpdated) mappings with mock event', (
 
   // checks
   assert.fieldEquals('TokenVotingPlugin', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'TokenVotingPlugin',
-    entityID,
-    'earlyExecution',
-    EARLY_EXECUTION.toString()
-  );
-  assert.fieldEquals(
-    'TokenVotingPlugin',
-    entityID,
-    'voteReplacement',
-    VOTE_REPLACEMENT.toString()
-  );
+  assert.fieldEquals('TokenVotingPlugin', entityID, 'voteMode', VOTE_MODE);
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,

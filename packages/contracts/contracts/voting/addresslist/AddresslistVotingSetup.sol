@@ -26,8 +26,7 @@ contract AddresslistVotingSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(bool, bool, uint64, uint64, uint64, uint256) pluginSettings, address[] members)";
+        return "(tuple(uint8, uint64, uint64, uint64, uint256) pluginSettings, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup

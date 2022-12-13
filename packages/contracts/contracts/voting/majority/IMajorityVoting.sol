@@ -19,7 +19,7 @@ import "../../core/IDAO.sol";
 ///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
 ///
 ///  #### Vote Replacement Execution
-///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
+///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest voteOption is tallied.
 ///
 ///  #### Early Execution
 ///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
@@ -50,9 +50,14 @@ interface IMajorityVoting {
         No
     }
 
+    enum VoteMode {
+        Default,
+        EarlyExecution,
+        VoteReplacement
+    }
+
     struct PluginSettings {
-        bool earlyExecution;
-        bool voteReplacement;
+        VoteMode voteMode;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 minDuration;
@@ -67,8 +72,7 @@ interface IMajorityVoting {
         IDAO.Action[] actions;
     }
     struct Configuration {
-        bool earlyExecution;
-        bool voteReplacement;
+        VoteMode voteMode;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 startDate;
@@ -85,12 +89,12 @@ interface IMajorityVoting {
     /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
     /// @param voter The voter casting the vote.
-    /// @param choice The vote option chosen.
+    /// @param voteOption The vote option chosen.
     /// @param votingPower The voting power behind this vote.
     event VoteCast(
         uint256 indexed proposalId,
         address indexed voter,
-        uint8 choice,
+        VoteOption voteOption,
         uint256 votingPower
     );
 
@@ -106,15 +110,13 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the plugin settings are updated.
-    /// @param earlyExecution The toggle to enable early execution. This allows proposals to be executed before the end date, if the vote outcome cannot change by more voters participating.
-    /// @param voteReplacement The toggle to enable vote replacement. This allows voters to change there vote choice as long as the vote is still open. Note, that this is mutally exclusive with the early execution.
+    /// @param voteMode A parameter to select the voting voteMode allowing to enable early execution (`voteMode == 1`), vote replacment (`voteMode == 2`) or none of former (`voteMode == 0`).
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     event PluginSettingsUpdated(
-        bool earlyExecution,
-        bool voteReplacement,
+        VoteMode voteMode,
         uint64 supportThreshold,
         uint64 minParticipation,
         uint64 minDuration,
@@ -131,7 +133,7 @@ interface IMajorityVoting {
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    /// @param _choice The vote choice to cast on creation.
+    /// @param _voteOption The vote voteOption to cast on creation.
     /// @return proposalId The ID of the proposal.
     function createProposal(
         bytes calldata _proposalMetadata,
@@ -139,17 +141,17 @@ interface IMajorityVoting {
         uint64 _startDate,
         uint64 _endDate,
         bool _tryEarlyExecution,
-        VoteOption _choice
+        VoteOption _voteOption
     ) external returns (uint256 proposalId);
 
     /// @notice Votes for a vote option and optionally executes the proposal.
-    /// @dev `_choice`, 1 -> abstain, 2 -> yes, 3 -> no
+    /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
-    /// @param  _choice Whether voter abstains, supports or not supports to vote.
+    /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external;
 
@@ -193,13 +195,9 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the early exeucution parameter stored in the vote settings.
-    /// @return The early execution parameter.
-    function earlyExecution() external view returns (bool);
-
-    /// @notice Returns the vote replacement parameter stored in the vote settings.
-    /// @return The vote replacement parameter.
-    function voteReplacement() external view returns (bool);
+    /// @notice Returns the early voting voteMode stored in the vote settings.
+    /// @return The voteMode parameter.
+    function voteMode() external view returns (VoteMode);
 
     /// @notice Returns the support threshold parameter stored in the vote settings.
     /// @return The support threshold parameter.

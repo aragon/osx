@@ -21,8 +21,7 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
-  EARLY_EXECUTION,
-  VOTE_REPLACEMENT,
+  VOTE_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   MIN_DURATION,
@@ -63,8 +62,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     false,
 
     // Configuration
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -146,14 +144,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   assert.fieldEquals(
     'AddresslistVotingProposal',
     entityID,
-    'earlyExecution',
-    EARLY_EXECUTION.toString()
-  );
-  assert.fieldEquals(
-    'AddresslistVotingProposal',
-    entityID,
-    'voteReplacement',
-    VOTE_REPLACEMENT.toString()
+    'voteMode',
+    VOTE_MODE
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
@@ -223,8 +215,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     false,
 
     // Configuration
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -283,8 +274,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -376,8 +366,7 @@ test('Run AddresslistVoting (handlePluginSettingsUpdated) mappings with mock eve
 
   // create event
   let event = createNewPluginSettingsUpdatedEvent(
-    EARLY_EXECUTION,
-    VOTE_REPLACEMENT,
+    VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     MIN_DURATION,
@@ -394,14 +383,8 @@ test('Run AddresslistVoting (handlePluginSettingsUpdated) mappings with mock eve
   assert.fieldEquals(
     'AddresslistVotingPlugin',
     entityID,
-    'earlyExecution',
-    EARLY_EXECUTION.toString()
-  );
-  assert.fieldEquals(
-    'AddresslistVotingPlugin',
-    entityID,
-    'voteReplacement',
-    VOTE_REPLACEMENT.toString()
+    'voteMode',
+    VOTE_MODE
   );
   assert.fieldEquals(
     'AddresslistVotingPlugin',

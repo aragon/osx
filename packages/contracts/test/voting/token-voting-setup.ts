@@ -1,20 +1,18 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {ERC20, TokenVotingSetup} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {PluginSettings, pct16, ONE_HOUR} from '../test-utils/voting';
-
-enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
+import {
+  PluginSettings,
+  Op,
+  VoteMode,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 
 let defaultData: any;
 let defaultPluginSettings: PluginSettings;
@@ -26,7 +24,7 @@ const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
 const prepareInstallationDataTypes = [
-  'tuple(bool,bool,uint64,uint64,uint64,uint256)',
+  'tuple(uint8,uint64,uint64,uint64,uint256)',
   'tuple(address,string,string)',
   'tuple(address[],uint256[])',
 ];
@@ -56,8 +54,7 @@ describe('TokenVotingSetup', function () {
     targetDao = await deployNewDAO(signers[0].address);
 
     defaultPluginSettings = {
-      earlyExecution: true,
-      voteReplacement: false,
+      voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
       minDuration: ONE_HOUR,
@@ -89,7 +86,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address,(bool,bool,uint64,uint64,uint64,uint256), address)',
+      'function initialize(address,(uint8,uint64,uint64,uint64,uint256), address)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -101,7 +98,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(bool, bool, uint64, uint64, uint64, uint256) pluginSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(tuple(uint8, uint64, uint64, uint64, uint256) pluginSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI

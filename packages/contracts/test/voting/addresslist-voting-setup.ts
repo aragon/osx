@@ -5,14 +5,13 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {PluginSettings, pct16, ONE_HOUR} from '../test-utils/voting';
-
-enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
+import {
+  PluginSettings,
+  Op,
+  VoteMode,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 
 let defaultData: any;
 let defaultPluginSettings: PluginSettings;
@@ -23,7 +22,7 @@ const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
 const prepareInstallationDataTypes = [
-  'tuple(bool,bool,uint64,uint64,uint64,uint256)',
+  'tuple(uint8,uint64,uint64,uint64,uint256)',
   'address[]',
 ];
 
@@ -48,8 +47,7 @@ describe('AddresslistVotingSetup', function () {
     targetDao = await deployNewDAO(signers[0].address);
 
     defaultPluginSettings = {
-      earlyExecution: true,
-      voteReplacement: false,
+      voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
       minDuration: ONE_HOUR,
@@ -80,7 +78,7 @@ describe('AddresslistVotingSetup', function () {
       'function removeAddresses(address[])',
       'function isListed(address,uint256) returns (bool)',
       'function addresslistLength(uint256) returns (uint256)',
-      'function initialize(address,(bool,bool,uint64,uint64,uint64,uint256),address[])',
+      'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
     ]);
 
     expect(
@@ -92,7 +90,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(bool, bool, uint64, uint64, uint64, uint256) pluginSettings, address[] members)';
+        '(tuple(uint8, uint64, uint64, uint64, uint256) pluginSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()

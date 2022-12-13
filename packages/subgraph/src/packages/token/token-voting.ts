@@ -15,7 +15,7 @@ import {
   TokenVotingVote
 } from '../../../generated/schema';
 
-import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_OPTIONS} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -51,8 +51,7 @@ export function _handleProposalCreated(
 
     // Configuration
     let configuration = proposal.value.value2;
-    proposalEntity.earlyExecution = configuration.earlyExecution;
-    proposalEntity.voteReplacement = configuration.voteReplacement;
+    proposalEntity.voteMode = BigInt.fromI32(configuration.voteMode);
     proposalEntity.supportThreshold = configuration.supportThreshold;
     proposalEntity.minParticipation = configuration.minParticipation;
     proposalEntity.startDate = configuration.startDate;
@@ -111,7 +110,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
-  voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
+  voterProposalEntity.voteOption = VOTER_OPTIONS.get(event.params.voteOption);
   voterProposalEntity.votingPower = event.params.votingPower;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
@@ -187,9 +186,9 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
 
   // update actions
   let contract = TokenVoting.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
-  if (!vote.reverted) {
-    let actions = vote.value.value4;
+  let proposal = contract.try_getProposal(event.params.proposalId);
+  if (!proposal.reverted) {
+    let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
@@ -212,8 +211,7 @@ export function handlePluginSettingsUpdated(
 ): void {
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.earlyExecution = event.params.earlyExecution;
-    packageEntity.voteReplacement = event.params.voteReplacement;
+    packageEntity.voteMode = BigInt.fromI32(event.params.voteMode);
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;

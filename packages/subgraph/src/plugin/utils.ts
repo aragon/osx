@@ -1,4 +1,9 @@
-import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  DataSourceContext,
+  store
+} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
 import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
@@ -53,21 +58,15 @@ function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
     packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
     let contract = AddresslistVotingContract.bind(plugin);
 
-    let earlyExecution = contract.try_earlyExecution();
-    let voteReplacement = contract.try_voteReplacement();
-
+    let voteMode = contract.try_voteMode();
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let minProposerVotingPower = contract.try_minProposerVotingPower();
 
-    packageEntity.earlyExecution = earlyExecution.reverted
-      ? false
-      : earlyExecution.value;
-    packageEntity.voteReplacement = voteReplacement.reverted
-      ? false
-      : voteReplacement.value;
-
+    packageEntity.voteMode = voteMode.reverted
+      ? null
+      : BigInt.fromI32(voteMode.value);
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
       : supportThreshold.value;

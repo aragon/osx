@@ -103,7 +103,7 @@ contract AddresslistVoting is MajorityVotingBase {
         uint64 _startDate,
         uint64 _endDate,
         bool _tryEarlyExecution,
-        VoteOption _choice
+        VoteOption _voteOption
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -121,8 +121,7 @@ contract AddresslistVoting is MajorityVotingBase {
             proposal_.configuration.endDate
         ) = _validateProposalDates(_startDate, _endDate);
         proposal_.configuration.snapshotBlock = snapshotBlock;
-        proposal_.configuration.earlyExecution = earlyExecution();
-        proposal_.configuration.voteReplacement = voteReplacement();
+        proposal_.configuration.voteMode = voteMode();
         proposal_.configuration.supportThreshold = supportThreshold();
         proposal_.configuration.minParticipation = minParticipation();
 
@@ -140,13 +139,13 @@ contract AddresslistVoting is MajorityVotingBase {
             metadata: _proposalMetadata
         });
 
-        vote(proposalId, _choice, _tryEarlyExecution);
+        vote(proposalId, _voteOption, _tryEarlyExecution);
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         address _voter,
         bool _tryEarlyExecution
     ) internal override {
@@ -164,20 +163,20 @@ contract AddresslistVoting is MajorityVotingBase {
         }
 
         // Store the updated/new vote for the voter.
-        if (_choice == VoteOption.Yes) {
+        if (_voteOption == VoteOption.Yes) {
             proposal_.tally.yes = proposal_.tally.yes + 1;
-        } else if (_choice == VoteOption.No) {
+        } else if (_voteOption == VoteOption.No) {
             proposal_.tally.no = proposal_.tally.no + 1;
-        } else if (_choice == VoteOption.Abstain) {
+        } else if (_voteOption == VoteOption.Abstain) {
             proposal_.tally.abstain = proposal_.tally.abstain + 1;
         }
 
-        proposal_.voters[_voter] = _choice;
+        proposal_.voters[_voter] = _voteOption;
 
         emit VoteCast({
             proposalId: _proposalId,
             voter: _voter,
-            choice: uint8(_choice),
+            voteOption: _voteOption,
             votingPower: 1
         });
 
@@ -210,7 +209,8 @@ contract AddresslistVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (
-            !proposal_.configuration.voteReplacement && proposal_.voters[_voter] != VoteOption.None
+            proposal_.configuration.voteMode != VoteMode.VoteReplacement &&
+            proposal_.voters[_voter] != VoteOption.None
         ) {
             revert VoteReplacementNotAllowed();
         }

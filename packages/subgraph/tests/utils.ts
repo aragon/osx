@@ -55,8 +55,7 @@ export function createGetProposalCall(
   open: boolean,
   executed: boolean,
 
-  earlyExecution: boolean,
-  voteReplacement: boolean,
+  voteMode: string,
   supportThreshold: string,
   minParticipation: string,
   startDate: string,
@@ -72,8 +71,9 @@ export function createGetProposalCall(
 ): void {
   let configuration = new ethereum.Tuple();
 
-  configuration.push(ethereum.Value.fromBoolean(earlyExecution));
-  configuration.push(ethereum.Value.fromBoolean(voteReplacement));
+  configuration.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteMode))
+  );
   configuration.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThreshold))
   );
@@ -102,7 +102,7 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(bool,bool,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))

@@ -4,7 +4,13 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MajorityVotingMock, DAO} from '../../typechain';
 import {VOTING_EVENTS} from '../../utils/event';
-import {pct16, PluginSettings, ONE_HOUR, ONE_YEAR} from '../test-utils/voting';
+import {
+  PluginSettings,
+  VoteMode,
+  pct16,
+  ONE_HOUR,
+  ONE_YEAR,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('MajorityVotingMock', function () {
@@ -25,11 +31,10 @@ describe('MajorityVotingMock', function () {
 
   beforeEach(async () => {
     pluginSettings = {
-      earlyExecution: true,
-      voteReplacement: false,
+      voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
-      minDuration: 3600,
+      minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
 
@@ -111,19 +116,11 @@ describe('MajorityVotingMock', function () {
       );
     });
 
-    it('reverts if early execution and vote replacement are both true', async () => {
-      pluginSettings.voteReplacement = true;
-      await expect(
-        votingBase.setPluginSettings(pluginSettings)
-      ).to.be.revertedWith(customError('VoteReplacementNotAllowed'));
-    });
-
     it('should change the vote settings successfully', async () => {
       expect(await votingBase.setPluginSettings(pluginSettings))
         .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
         .withArgs(
-          pluginSettings.earlyExecution,
-          pluginSettings.voteReplacement,
+          pluginSettings.voteMode,
           pluginSettings.supportThreshold,
           pluginSettings.minParticipation,
           pluginSettings.minDuration,

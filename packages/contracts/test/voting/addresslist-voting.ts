@@ -12,6 +12,8 @@ import {
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
   PluginSettings,
+  VoteMode,
+  ONE_HOUR,
   MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
@@ -65,11 +67,10 @@ describe('AddresslistVoting', function () {
 
   beforeEach(async () => {
     pluginSettings = {
-      earlyExecution: true,
-      voteReplacement: false,
+      voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
-      minDuration: 3600,
+      minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
 
@@ -394,8 +395,7 @@ describe('AddresslistVoting', function () {
   describe('Proposal + Execute:', async () => {
     context('Early Execution', async () => {
       beforeEach(async () => {
-        pluginSettings.earlyExecution = true;
-        pluginSettings.voteReplacement = false;
+        pluginSettings.voteMode = VoteMode.EarlyExecution;
 
         await voting.initialize(dao.address, pluginSettings, addresslist(10));
 
@@ -581,8 +581,7 @@ describe('AddresslistVoting', function () {
 
     context('Vote Replacement', async () => {
       beforeEach(async () => {
-        pluginSettings.earlyExecution = false;
-        pluginSettings.voteReplacement = true;
+        pluginSettings.voteMode = VoteMode.VoteReplacement;
 
         await voting.initialize(dao.address, pluginSettings, addresslist(10));
 
