@@ -321,9 +321,11 @@ abstract contract MajorityVotingBase is
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
     function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
+        uint64 currentTime = getTimestamp64();
+
         return
-            getTimestamp64() < proposal_.configuration.endDate &&
-            getTimestamp64() >= proposal_.configuration.startDate &&
+            proposal_.configuration.startDate <= currentTime &&
+            currentTime < proposal_.configuration.endDate &&
             !proposal_.executed;
     }
 
