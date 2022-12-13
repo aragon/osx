@@ -219,27 +219,27 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function supportThreshold() public view returns (uint64) {
+    function supportThreshold() public view virtual returns (uint64) {
         return pluginSettings.supportThreshold;
     }
 
     /// @inheritdoc IMajorityVoting
-    function minParticipation() public view returns (uint64) {
+    function minParticipation() public view virtual returns (uint64) {
         return pluginSettings.minParticipation;
     }
 
     /// @inheritdoc IMajorityVoting
-    function minDuration() public view returns (uint64) {
+    function minDuration() public view virtual returns (uint64) {
         return pluginSettings.minDuration;
     }
 
     /// @inheritdoc IMajorityVoting
-    function minProposerVotingPower() public view returns (uint256) {
+    function minProposerVotingPower() public view virtual returns (uint256) {
         return pluginSettings.minProposerVotingPower;
     }
 
     /// @inheritdoc IMajorityVoting
-    function voteMode() public view returns (VoteMode) {
+    function voteMode() public view virtual returns (VoteMode) {
         return pluginSettings.voteMode;
     }
 
