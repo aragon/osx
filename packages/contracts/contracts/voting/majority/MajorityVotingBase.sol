@@ -7,9 +7,9 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
-import {IMajorityVoting} from "./IMajorityVoting.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
@@ -98,7 +98,7 @@ abstract contract MajorityVotingBase is
     error ZeroValueNotAllowed();
 
     /// @notice Thrown if both, early execution and vote replacement, are selected.
-    error EarlyExecutionAndVoteReplacementNotAllowed();
+    error VoteReplacementNotAllowed();
 
     /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
     /// - has not started,
@@ -337,7 +337,7 @@ abstract contract MajorityVotingBase is
     /// @param _voteSettings The vote settings to be validated and set.
     function _validateAndSetSettings(VoteSettings calldata _voteSettings) internal virtual {
         if (_voteSettings.earlyExecution && _voteSettings.voteReplacement) {
-            revert EarlyExecutionAndVoteReplacementNotAllowed();
+            revert VoteReplacementNotAllowed();
         }
 
         if (_voteSettings.supportThreshold > PCT_BASE) {

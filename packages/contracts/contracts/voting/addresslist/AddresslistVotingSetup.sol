@@ -6,6 +6,7 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup
@@ -26,7 +27,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower, address[] members)";
+            "(tuple(bool, bool, uint64, uint64, uint64, uint256) voteSettings, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -41,13 +42,10 @@ contract AddresslistVotingSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
-        (
-            uint64 supportThreshold,
-            uint64 minParticipation,
-            uint64 minDuration,
-            uint256 minProposerVotingPower,
-            address[] memory members
-        ) = abi.decode(_data, (uint64, uint64, uint64, uint256, address[]));
+        (IMajorityVoting.VoteSettings memory voteSettings, address[] memory members) = abi.decode(
+            _data,
+            (IMajorityVoting.VoteSettings, address[])
+        );
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
@@ -55,10 +53,7 @@ contract AddresslistVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
                 dao,
-                supportThreshold,
-                minParticipation,
-                minDuration,
-                minProposerVotingPower,
+                voteSettings,
                 members
             )
         );

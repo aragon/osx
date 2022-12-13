@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {Checkpoints} from "@openzeppelin/contracts/utils/Checkpoints.sol";
+import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
@@ -15,24 +15,25 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is MajorityVotingBase {
-    using Checkpoints for Checkpoints.History;
+    using CheckpointsUpgradeable for CheckpointsUpgradeable.History;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
         this.addAddresses.selector ^
             this.removeAddresses.selector ^
             this.isListed.selector ^
-            this.addresslistLength.selector;
+            this.addresslistLength.selector ^
+            this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
         keccak256("MODIFY_ADDRESSLIST_PERMISSION");
 
     /// @notice The mapping containing the checkpointed history of the address list.
-    mapping(address => Checkpoints.History) private _addresslistCheckpoints;
+    mapping(address => CheckpointsUpgradeable.History) private _addresslistCheckpoints;
 
     /// @notice The checkpointed history of the length of the address list.
-    Checkpoints.History private _addresslistLengthCheckpoints;
+    CheckpointsUpgradeable.History private _addresslistLengthCheckpoints;
 
     /// @notice Emitted when new members are added to the address list.
     /// @param members The array of member addresses to be added.
