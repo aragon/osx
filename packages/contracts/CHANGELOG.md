@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `VoteMode` enumeration to specify if the vote should be conducted in `Standard`, `EarlyExecution`, or `VoteReplacement` mode.
 - Added `Admin` plugin.
 - Added NFT compatibility by using OpenZepplin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
 - Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
@@ -20,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The plugin-wide settings are now stored in a `private` `PluginSettings` struct and made available through getters.
+- Structured the `getProposal` return data by adding a `struct Configuration` and `struct Tally`.
+- Bounded `minDuration` between one hour and one year and prevent integer overflows during the start date calculation (HAL-03, HAL-04).
 - Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
 - Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
 - Renamed the names of folders, files, contracts, events, functions, and parameters in `MajorityVoting` to match with the SDK and Subgraph naming:
