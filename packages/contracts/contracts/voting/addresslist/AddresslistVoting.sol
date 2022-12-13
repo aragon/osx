@@ -148,7 +148,7 @@ contract AddresslistVoting is MajorityVotingBase {
         uint256 _proposalId,
         VoteOption _choice,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal override {
         Proposal storage proposal_ = proposals[_proposalId];
 
@@ -181,7 +181,7 @@ contract AddresslistVoting is MajorityVotingBase {
             votingPower: 1
         });
 
-        if (_executesIfDecided && _canExecute(_proposalId)) {
+        if (_tryEarlyExecution && _canExecute(_proposalId)) {
             _execute(_proposalId);
         }
     }

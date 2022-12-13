@@ -160,12 +160,12 @@ abstract contract MajorityVotingBase is
     function vote(
         uint256 _proposalId,
         VoteOption _choice,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) public {
         if (_choice != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
             revert VoteCastForbidden(_proposalId, _msgSender());
         }
-        _vote(_proposalId, _choice, _msgSender(), _executesIfDecided);
+        _vote(_proposalId, _choice, _msgSender(), _tryEarlyExecution);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -272,12 +272,12 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
         uint256 _proposalId,
         VoteOption _choice,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal virtual;
 
     /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
@@ -293,7 +293,7 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
-    /// @return True if the given voter can vote on a certain proposal, false otherwise.
+    /// @return Returns `true` if the given voter can vote on a certain proposal and `false` otherwise.
     function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.

@@ -24,7 +24,7 @@ contract MajorityVotingMock is MajorityVotingBase {
         uint256, /* _proposalId */
         VoteOption, /* _choice */
         address, /* _voter */
-        bool /* _executesIfDecided */
+        bool /* _tryEarlyExecution */
     ) internal pure override {}
 
     function _canVote(

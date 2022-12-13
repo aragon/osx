@@ -107,7 +107,7 @@ contract TokenVoting is MajorityVotingBase {
         uint256 _proposalId,
         VoteOption _choice,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal override {
         Proposal storage proposal_ = proposals[_proposalId];
 
@@ -145,7 +145,7 @@ contract TokenVoting is MajorityVotingBase {
             votingPower: votingPower
         });
 
-        if (_executesIfDecided && _canExecute(_proposalId)) {
+        if (_tryEarlyExecution && _canExecute(_proposalId)) {
             _execute(_proposalId);
         }
     }

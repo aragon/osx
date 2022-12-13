@@ -107,8 +107,13 @@ interface IMajorityVoting {
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
-    /// @notice Emitted when the vote settings are updated.
-    /// @param earlyExecution The vote settings.
+    /// @notice Emitted when the plugin settings are updated.
+    /// @param earlyExecution The toggle to enable early execution. This allows proposals to be executed before the end date, if the vote outcome cannot change by more voters participating.
+    /// @param voteReplacement The toggle to enable vote replacement. This allows voters to change there vote choice as long as the vote is still open. Note, that this is mutally exclusive with the early execution.
+    /// @param supportThreshold The support threshold value.
+    /// @param minParticipation The minimum participation value.
+    /// @param minDuration The minimum duration of the proposal vote in seconds.
+    /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     event PluginSettingsUpdated(
         bool earlyExecution,
         bool voteReplacement,
@@ -126,7 +131,7 @@ interface IMajorityVoting {
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _tryEarlyExecution If `true`,  to early execution is tried.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @param _choice The vote choice to cast on creation.
     /// @return proposalId The ID of the proposal.
     function createProposal(
@@ -142,11 +147,11 @@ interface IMajorityVoting {
     /// @dev `_choice`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
     /// @param  _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided Whether the proposal actions should be executed if the vote outcome cannot change anymore.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function vote(
         uint256 _proposalId,
         VoteOption _choice,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) external;
 
     /// @notice Internal function to check if a voter can participate on a proposal vote. This can be because the vote
