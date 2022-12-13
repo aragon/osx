@@ -440,6 +440,134 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
+    context('Vote Replacement', async () => {
+      beforeEach(async () => {
+        pluginSettings.voteMode = VoteMode.Standard;
+
+        await voting.initialize(
+          dao.address,
+          pluginSettings,
+          governanceErc20Mock.address
+        );
+
+        // set voting power to 100
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(
+          totalVotingPower
+        );
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
+
+      it('reverts on vote replacement', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        await voting.vote(id, VoteOption.Yes, false);
+
+        // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteReplacementNotAllowed')
+        );
+      });
+
+      it('cannot early execute', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(51);
+        await voting.vote(id, VoteOption.Yes, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+      });
+
+      it('can execute normally if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(30);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await governanceErc20Mock.mock.getPastVotes.returns(20);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+        await governanceErc20Mock.mock.getPastVotes.returns(20);
+        await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.support(id)).to.be.gt(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it('does not execute when voting with the `tryEarlyExecution` option', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(50);
+        await voting.vote(id, VoteOption.Yes, false);
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        // `tryEarlyExecution` is turned on but the vote is not decided yet
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+        let tx = await voting
+          .connect(signers[1])
+          .vote(id, VoteOption.Yes, true);
+
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `tryEarlyExecution` is turned off and the vote is decided
+        tx = await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `tryEarlyExecution` is turned on and the vote is decided
+        tx = await voting.connect(signers[3]).vote(id, VoteOption.Yes, true);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+      });
+
+      it('reverts if vote is not decided yet', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
+    });
     context('Early Execution', async () => {
       beforeEach(async () => {
         pluginSettings.voteMode = VoteMode.EarlyExecution;
@@ -816,6 +944,7 @@ describe('TokenVoting', function () {
       });
     });
   });
+
   describe('Configurations for different use cases', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {

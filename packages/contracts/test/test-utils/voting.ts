@@ -10,7 +10,7 @@ export enum VoteOption {
 }
 
 export enum VoteMode {
-  Default,
+  Standard,
   EarlyExecution,
   VoteReplacement,
 }

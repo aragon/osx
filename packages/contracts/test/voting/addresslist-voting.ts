@@ -393,7 +393,131 @@ describe('AddresslistVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    context('Early Execution', async () => {
+    context('Standard Mode', async () => {
+      beforeEach(async () => {
+        pluginSettings.voteMode = VoteMode.Standard;
+
+        await voting.initialize(dao.address, pluginSettings, addresslist(10));
+
+        expect(
+          (
+            await voting.createProposal(
+              dummyMetadata,
+              dummyActions,
+              startDate,
+              endDate,
+              false,
+              VoteOption.None
+            )
+          ).value
+        ).to.equal(id);
+      });
+
+      it('reverts on vote replacement', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.vote(id, VoteOption.Yes, false);
+
+        // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteReplacementNotAllowed')
+        );
+      });
+
+      it('cannot early execute', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+      });
+
+      it('can execute normally if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
+        await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
+        await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
+
+        expect(await voting.worstCaseSupport(id)).to.be.lte(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.support(id)).to.be.gt(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+
+      it('does not execute when voting with the `tryEarlyExecution` option', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        // `tryEarlyExecution` is turned on but the vote is not decided yet
+        let tx = await voting
+          .connect(signers[5])
+          .vote(id, VoteOption.Yes, true);
+
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          pluginSettings.supportThreshold
+        );
+        expect(await voting.participation(id)).to.be.gte(
+          pluginSettings.minParticipation
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `tryEarlyExecution` is turned off and the vote is decided
+        tx = await voting.connect(signers[6]).vote(id, VoteOption.Yes, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `tryEarlyExecution` is turned on and the vote is decided
+        tx = await voting.connect(signers[7]).vote(id, VoteOption.Yes, true);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+      });
+
+      it('reverts if vote is not decided yet', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
+    });
+
+    context('Early Execution Mode', async () => {
       beforeEach(async () => {
         pluginSettings.voteMode = VoteMode.EarlyExecution;
 
@@ -579,7 +703,7 @@ describe('AddresslistVoting', function () {
       });
     });
 
-    context('Vote Replacement', async () => {
+    context('Vote Replacement Mode', async () => {
       beforeEach(async () => {
         pluginSettings.voteMode = VoteMode.VoteReplacement;
 
