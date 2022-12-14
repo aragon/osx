@@ -15,13 +15,6 @@ export enum VoteMode {
   VoteReplacement,
 }
 
-export enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
-
 export type PluginSettings = {
   voteMode: number;
   supportThreshold: BigNumber;

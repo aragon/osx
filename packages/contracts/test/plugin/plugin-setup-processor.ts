@@ -25,16 +25,17 @@ import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 import {deployNewDAO} from '../test-utils/dao';
 import {findEvent} from '../../utils/event';
+import {Operation} from '../core/permission/permission-manager';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
   prepareUpdate,
   prepareUninstallation,
-  Operation,
   mockPermissionsOperations,
   PermissionOperation,
   mockHelpers,
 } from '../test-utils/plugin-setup-processor';
+
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
@@ -105,7 +106,7 @@ describe('Plugin Setup Processor', function () {
 
     PluginUV1 = await ethers.getContractFactory('PluginUUPSUpgradeableV1Mock');
     PluginUV2 = await ethers.getContractFactory('PluginUUPSUpgradeableV2Mock');
-    PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock')
+    PluginUV3 = await ethers.getContractFactory('PluginUUPSUpgradeableV3Mock');
 
     // Deploy PluginUUPSUpgradeableSetupMock
     const SetupV1 = await ethers.getContractFactory(
@@ -182,7 +183,7 @@ describe('Plugin Setup Processor', function () {
 
     // Plugin Setup Processor
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
-    
+
     // Create and register a plugin on the PluginRepoRegistry
     let tx = await pluginRepoFactory.createPluginRepoWithVersion(
       `PluginUUPSUpgradeableMock`,
@@ -1295,7 +1296,7 @@ describe('Plugin Setup Processor', function () {
           setupUV3
         );
       });
-      
+
       it('cannot update again to V1', async () => {
         await expect(
           updateHelper(
@@ -1440,7 +1441,7 @@ describe('Plugin Setup Processor', function () {
               )
             );
           });
-        
+
           it('cannot update back to V1', async () => {
             await expect(
               updateHelper(
@@ -1778,14 +1779,14 @@ describe('Plugin Setup Processor', function () {
       // Special case where implementations from old and new setups don't change.
       it('updates to v4', async () => {
         await updateHelper(
-            psp,
-            targetDao,
-            proxy,
-            repoU,
-            helpersV3,
-            setupUV3,
-            setupUV4
-        )
+          psp,
+          targetDao,
+          proxy,
+          repoU,
+          helpersV3,
+          setupUV3,
+          setupUV4
+        );
       });
 
       it('cannot update again to V3', async () => {
@@ -1993,14 +1994,14 @@ async function updateHelper(
   expect(appliedUpdateEvent).to.not.equal(undefined);
 
   // If the base contracts don't change from current and new plugin setups,
-  // PluginSetupProcessor shouldn't call `upgradeTo` or `upgradeToAndCall` 
-  // on the plugin. The below check for this still is not 100% ensuring, 
-  // As function `upgradeTo` might be called but event `Upgraded` 
+  // PluginSetupProcessor shouldn't call `upgradeTo` or `upgradeToAndCall`
+  // on the plugin. The below check for this still is not 100% ensuring,
+  // As function `upgradeTo` might be called but event `Upgraded`
   // not thrown(OZ changed the logic or name) which will trick the test to pass..
   const currentImpl = await currentVersionSetup.getImplementationAddress();
   const newImpl = await newVersionSetup.getImplementationAddress();
-  
-  const upgradedEvent = await findEvent(applyUpdateTx, EVENTS.Upgraded)
+
+  const upgradedEvent = await findEvent(applyUpdateTx, EVENTS.Upgraded);
   if (currentImpl == newImpl) {
     expect(upgradedEvent).to.equal(undefined);
   } else {

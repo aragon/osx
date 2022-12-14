@@ -5,13 +5,8 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {
-  PluginSettings,
-  Op,
-  VoteMode,
-  pct16,
-  ONE_HOUR,
-} from '../test-utils/voting';
+import {Operation} from '../core/permission/permission-manager';
+import {PluginSettings, VoteMode, pct16, ONE_HOUR} from '../test-utils/voting';
 
 let defaultData: any;
 let defaultPluginSettings: PluginSettings;
@@ -140,28 +135,28 @@ describe('AddresslistVotingSetup', function () {
       expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           targetDao.address,
           AddressZero,
           MODIFY_ADDRESSLIST_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           targetDao.address,
           AddressZero,
           UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           targetDao.address,
           AddressZero,
           UPGRADE_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           targetDao.address,
           plugin,
           AddressZero,
@@ -244,28 +239,28 @@ describe('AddresslistVotingSetup', function () {
       expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
-          Op.Revoke,
+          Operation.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
           MODIFY_ADDRESSLIST_PERMISSION_ID,
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
           UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
           UPGRADE_PERMISSION_ID,
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           targetDao.address,
           plugin,
           AddressZero,

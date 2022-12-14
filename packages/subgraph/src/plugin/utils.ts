@@ -1,9 +1,4 @@
-import {
-  Address,
-  BigInt,
-  DataSourceContext,
-  store
-} from '@graphprotocol/graph-ts';
+import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
 import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
