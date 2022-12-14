@@ -230,7 +230,7 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the vote mod () stored in the plugin settings.
+    /// @notice Returns the vote mode stored in the plugin settings.
     /// @return The vote mode parameter.
     function voteMode() external view returns (VoteMode);
 
