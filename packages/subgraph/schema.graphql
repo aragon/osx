@@ -55,7 +55,7 @@ type Permission @entity(immutable: true) {
 
 # Executions
 
-type Action @entity(immutable: true) {
+type Action @entity {
   id: ID!
   to: Bytes!
   value: BigInt!
