@@ -116,7 +116,7 @@ contract AddresslistVoting is MajorityVotingBase {
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _assertValidProposalDates(
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
             _startDate,
             _endDate
         );
