@@ -119,7 +119,7 @@ abstract contract MajorityVotingBase is
         onlyInitializing
     {
         __PluginUUPSUpgradeable_init(_dao);
-        _validateAndUpdateSettings(_votingSettings);
+        _updateVotingSettings(_votingSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -140,7 +140,7 @@ abstract contract MajorityVotingBase is
         external
         auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
     {
-        _validateAndUpdateSettings(_votingSettings);
+        _updateVotingSettings(_votingSettings);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -337,9 +337,9 @@ abstract contract MajorityVotingBase is
         return (_value * PCT_BASE) / _total;
     }
 
-    /// @notice Validates and updates the proposal voting settings.
+    /// @notice Internal function to update the plugin-wide proposal vote settings.
     /// @param _votingSettings The voting settings to be validated and updated.
-    function _validateAndUpdateSettings(VotingSettings calldata _votingSettings) internal virtual {
+    function _updateVotingSettings(VotingSettings calldata _votingSettings) internal virtual {
         if (_votingSettings.supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({
                 limit: PCT_BASE,
