@@ -306,12 +306,11 @@ abstract contract MajorityVotingBase is
                 proposal_.parameters.voteMode == VoteMode.EarlyExecution &&
                 worstCaseSupport(_proposalId) > proposal_.parameters.supportThreshold &&
                 participation(_proposalId) >= proposal_.parameters.minParticipation;
-        } else {
-            // Normal execution
-            return
-                support(_proposalId) > proposal_.parameters.supportThreshold &&
-                participation(_proposalId) >= proposal_.parameters.minParticipation;
         }
+        // Normal execution
+        return
+            support(_proposalId) > proposal_.parameters.supportThreshold &&
+            participation(_proposalId) >= proposal_.parameters.minParticipation;
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
