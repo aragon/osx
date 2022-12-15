@@ -14,7 +14,7 @@ import {PluginRepoRegistry} from "../../registry/PluginRepoRegistry.sol";
 import {PluginSetup} from "../PluginSetup.sol";
 import {PluginRepo} from "../PluginRepo.sol";
 import {isValidBumpLoose, BumpInvalid} from "../SemanticVersioning.sol";
-import {PluginSetupRef, hHash, pHash, _getSetupId, _getPluginId} from "./utils/Common.sol";
+import {PluginSetupRef, aHash, hHash, pHash, _getSetupId, _getPluginId} from "./utils/Common.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -54,6 +54,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address plugin;
         PermissionLib.ItemMultiTarget[] permissions;
         bytes32 helpersHash;
+        IDAO.Action[] actions;
     }
 
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
@@ -62,7 +63,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginRepo.Tag newVersionTag;
         PluginRepo pluginSetupRepo;
         IPluginSetup.SetupPayload setupPayload;
-        bytes32 permissionsHash;
     }
 
     /// @notice The struct containing the parameters for the `applyUpdate` function.
@@ -72,6 +72,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes initData;
         PermissionLib.ItemMultiTarget[] permissions;
         bytes32 helpersHash;
+        IDAO.Action[] actions;
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
@@ -148,7 +149,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param currentSetupId The current setup id to which user's preparation setup should match to.
     /// @param setupId The user's preparation setup id.
     error InvalidSetupId(bytes32 currentSetupId, bytes32 setupId);
-    
+
     /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply.
     /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
     error SetupNotEligible(bytes32 setupId);
@@ -299,8 +300,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
-            // Setting this empty as there's no need to confirm its authenticity
-            // in applyInstallation as it's not used there. This becomes useful for update.
+            aHash(preparedDependency.actions),
             bytes("")
         );
 
@@ -311,8 +311,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         if (pluginInformation.currentSetupId != bytes32(0)) {
             revert PluginAlreadyInstalled();
         }
-
-        // TODO: We might want to add the check to revert if setupId is already there.
+        
         pluginInformation.setupIds[setupId] = block.number;
 
         return (plugin, preparedDependency);
@@ -328,11 +327,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 pluginId = _getPluginId(_dao, _params.plugin);
 
         PluginInformation storage pluginInformation = states[pluginId];
-
+        
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
             pHash(_params.permissions),
             _params.helpersHash,
+            aHash(_params.actions),
             bytes("")
         );
 
@@ -349,11 +349,26 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert SetupNotEligible(setupId);
         }
 
-        pluginInformation.currentSetupId = setupId;
+        bytes32 newSetupId = _getSetupId(
+            _params.pluginSetupRef,
+            bytes32(0),
+            _params.helpersHash,
+            bytes32(0),
+            bytes("")
+        );
+
+        pluginInformation.currentSetupId = newSetupId;
         pluginInformation.blockNumber = block.number;
 
+        DAO dao = DAO(payable(_dao));
+
         // Process the permission list.
-        DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+        dao.bulkOnMultiTarget(_params.permissions);
+
+        // Process the actions
+        dao.grant(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
+        dao.execute(1, _params.actions);
+        dao.revoke(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
     }
 
     /// @notice Prepares the update of an UUPS upgradeable plugin.
@@ -402,8 +417,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             PluginSetupRef(_params.currentVersionTag, _params.pluginSetupRepo),
-            _params.permissionsHash,
+            bytes32(0),
             hHash(_params.setupPayload.currentHelpers),
+            bytes32(0),
             bytes("")
         );
 
@@ -430,6 +446,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
+            aHash(preparedDependency.actions),
             // initData that was returned by the current preparation for update
             // must be included in the setupId generation which allows us
             // to confirm its authenticity when applyUpdate is called.
@@ -457,6 +474,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(_params.permissions),
             _params.helpersHash,
+            aHash(_params.actions),
             _params.initData
         );
 
@@ -475,8 +493,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // to store it with one modification(bytes("") instead of _params.initData)
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
-            pHash(_params.permissions),
+            bytes32(0),
             _params.helpersHash,
+            bytes32(0),
             bytes("")
         );
 
@@ -496,6 +515,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+
+        DAO dao = DAO(payable(_dao));
+
+        // Process the actions
+        dao.grant(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
+        dao.execute(1, _params.actions);
+        dao.revoke(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
     }
 
     /// @notice Prepares the uninstallation of a plugin.
@@ -513,8 +539,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            _params.permissionsHash,
+            bytes32(0),
             hHash(_params.setupPayload.currentHelpers),
+            bytes32(0),
             bytes("")
         );
 
@@ -538,6 +565,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(permissions),
             hHash(_params.setupPayload.currentHelpers),
+            bytes32(0),
             bytes("")
         );
 
@@ -561,6 +589,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(_params.permissions),
             _params.helpersHash,
+            bytes32(0),
             bytes("")
         );
 

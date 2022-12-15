@@ -5,6 +5,9 @@ pragma solidity 0.8.10;
 import {PluginRepo} from "../../PluginRepo.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
 import {PluginSetup} from "../../PluginSetup.sol";
+import {IPluginSetup} from "../../IPluginSetup.sol";
+
+import {IDAO} from "../../../core/IDAO.sol";
 
 struct PluginSetupRef {
     PluginRepo.Tag versionTag;
@@ -27,6 +30,7 @@ function _getSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionHash,
     bytes32 _helperHash,
+    bytes32 _actionsHash,
     bytes memory _data
 ) pure returns (bytes32) {
     return
@@ -36,6 +40,7 @@ function _getSetupId(
                 _pluginSetupRef.pluginSetupRepo,
                 _permissionHash,
                 _helperHash,
+                _actionsHash,
                 keccak256(_data)
             )
         );
@@ -53,3 +58,11 @@ function hHash(address[] memory _helpers) pure returns (bytes32) {
 function pHash(PermissionLib.ItemMultiTarget[] memory _permissions) pure returns (bytes32) {
     return keccak256(abi.encode(_permissions));
 }
+
+/// @notice Returns a hash of an array of IDAO.Action;
+/// @param _actions The array of Actions
+/// @return bytes The hash of the array of Actions;
+function aHash(IDAO.Action[] memory _actions) pure returns (bytes32) {
+    return keccak256(abi.encode(_actions));
+}
+

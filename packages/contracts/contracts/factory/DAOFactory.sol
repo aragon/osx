@@ -102,7 +102,8 @@ contract DAOFactory {
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
                     preparedDependency.permissions,
-                    hHash(preparedDependency.helpers)
+                    hHash(preparedDependency.helpers),
+                    preparedDependency.actions
                 )
             );
         }
