@@ -80,7 +80,7 @@ contract TokenVoting is MajorityVotingBase {
             _endDate
         );
         proposal_.parameters.snapshotBlock = snapshotBlock;
-        proposal_.parameters.voteMode = voteMode();
+        proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minParticipation = minParticipation();
 
@@ -158,7 +158,7 @@ contract TokenVoting is MajorityVotingBase {
             return false;
         } else if (
             proposal_.voters[_voter] != VoteOption.None &&
-            proposal_.parameters.voteMode != VoteMode.VoteReplacement
+            proposal_.parameters.votingMode != VotingMode.VoteReplacement
         ) {
             // The voter has already voted but vote replacment is not allowed.
             return false;

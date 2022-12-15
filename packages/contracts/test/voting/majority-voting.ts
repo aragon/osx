@@ -6,7 +6,7 @@ import {MajorityVotingMock, DAO} from '../../typechain';
 import {VOTING_EVENTS} from '../../utils/event';
 import {
   VotingSettings,
-  VoteMode,
+  VotingMode,
   pct16,
   ONE_HOUR,
   ONE_YEAR,
@@ -31,7 +31,7 @@ describe('MajorityVotingMock', function () {
 
   beforeEach(async () => {
     votingSettings = {
-      voteMode: VoteMode.EarlyExecution,
+      votingMode: VotingMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
       minDuration: ONE_HOUR,
@@ -120,7 +120,7 @@ describe('MajorityVotingMock', function () {
       expect(await votingBase.updateVotingSettings(votingSettings))
         .to.emit(votingBase, VOTING_EVENTS.VOTING_SETTINGS_UPDATED)
         .withArgs(
-          votingSettings.voteMode,
+          votingSettings.votingMode,
           votingSettings.supportThreshold,
           votingSettings.minParticipation,
           votingSettings.minDuration,

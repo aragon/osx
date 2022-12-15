@@ -13,7 +13,7 @@ import {
   AddresslistVotingPlugin,
   AddresslistVotingVoter
 } from '../../generated/schema';
-import {VOTE_MODES} from '../../src/utils/constants';
+import {VOTING_MODES} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
   ADDRESS_TWO,
@@ -22,7 +22,7 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
-  VOTE_MODE,
+  VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   MIN_DURATION,
@@ -63,7 +63,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     false,
 
     // ProposalParameters
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -145,8 +145,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   assert.fieldEquals(
     'AddresslistVotingProposal',
     entityID,
-    'voteMode',
-    VOTE_MODES.get(parseInt(VOTE_MODE))
+    'votingMode',
+    VOTING_MODES.get(parseInt(VOTING_MODE))
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
@@ -216,7 +216,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     false,
 
     // ProposalParameters
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -275,7 +275,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -367,7 +367,7 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
 
   // create event
   let event = createNewVotingSettingsUpdatedEvent(
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     MIN_DURATION,
@@ -384,8 +384,8 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
   assert.fieldEquals(
     'AddresslistVotingPlugin',
     entityID,
-    'voteMode',
-    VOTE_MODES.get(parseInt(VOTE_MODE))
+    'votingMode',
+    VOTING_MODES.get(parseInt(VOTING_MODE))
   );
   assert.fieldEquals(
     'AddresslistVotingPlugin',

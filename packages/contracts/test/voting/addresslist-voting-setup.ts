@@ -6,7 +6,12 @@ import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import {VotingSettings, VoteMode, pct16, ONE_HOUR} from '../test-utils/voting';
+import {
+  VotingSettings,
+  VotingMode,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -42,7 +47,7 @@ describe('AddresslistVotingSetup', function () {
     targetDao = await deployNewDAO(signers[0].address);
 
     defaultVotingSettings = {
-      voteMode: VoteMode.EarlyExecution,
+      votingMode: VotingMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
       minDuration: ONE_HOUR,
@@ -85,7 +90,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
+        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()

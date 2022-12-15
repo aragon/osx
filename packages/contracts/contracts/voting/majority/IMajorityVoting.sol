@@ -55,24 +55,24 @@ interface IMajorityVoting {
         No
     }
 
-    /// @notice The vote mode in which the plugin can be configured.
+    /// @notice The different voting modes available.
     /// @param Standard In standard mode, early execution and vote replacement are disabled.
     /// @param EarlyExecution In early execution mode, a proposal can be executed early if the vote outcome cannot mathematically change by more voters voting.
     /// @param VoteReplacment In vote replacement mode, voters can change their vote multiple times and only the latest vote option is tallied.
-    enum VoteMode {
+    enum VotingMode {
         Standard,
         EarlyExecution,
         VoteReplacement
     }
 
     /// @notice A container for the plugin-wide proposal vote settings.
-    /// @param voteMode A parameter to select the vote mode.
+    /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     struct VotingSettings {
-        VoteMode voteMode;
+        VotingMode votingMode;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 minDuration;
@@ -94,14 +94,14 @@ interface IMajorityVoting {
     }
 
     /// @notice A container for the proposal-specific vote settings.
-    /// @param voteMode A parameter to select the vote mode.
+    /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
     struct ProposalParameters {
-        VoteMode voteMode;
+        VotingMode votingMode;
         uint64 supportThreshold;
         uint64 minParticipation;
         uint64 startDate;
@@ -145,13 +145,13 @@ interface IMajorityVoting {
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the voting settings are updated.
-    /// @param voteMode A parameter to select the vote mode.
+    /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     event VotingSettingsUpdated(
-        VoteMode voteMode,
+        VotingMode votingMode,
         uint64 supportThreshold,
         uint64 minParticipation,
         uint64 minDuration,
@@ -232,7 +232,7 @@ interface IMajorityVoting {
 
     /// @notice Returns the vote mode stored in the voting settings.
     /// @return The vote mode parameter.
-    function voteMode() external view returns (VoteMode);
+    function votingMode() external view returns (VotingMode);
 
     /// @notice Returns the support threshold parameter stored in the voting settings.
     /// @return The support threshold parameter.

@@ -236,8 +236,8 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function voteMode() public view virtual returns (VoteMode) {
-        return votingSettings.voteMode;
+    function votingMode() public view virtual returns (VotingMode) {
+        return votingSettings.votingMode;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -303,7 +303,7 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
-                proposal_.parameters.voteMode == VoteMode.EarlyExecution &&
+                proposal_.parameters.votingMode == VotingMode.EarlyExecution &&
                 worstCaseSupport(_proposalId) > proposal_.parameters.supportThreshold &&
                 participation(_proposalId) >= proposal_.parameters.minParticipation;
         }
@@ -365,7 +365,7 @@ abstract contract MajorityVotingBase is
         votingSettings = _votingSettings;
 
         emit VotingSettingsUpdated({
-            voteMode: _votingSettings.voteMode,
+            votingMode: _votingSettings.votingMode,
             supportThreshold: _votingSettings.supportThreshold,
             minParticipation: _votingSettings.minParticipation,
             minDuration: _votingSettings.minDuration,

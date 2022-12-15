@@ -15,7 +15,7 @@ import {
   TOKEN_VOTING_INTERFACE,
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
-  VOTE_MODES
+  VOTING_MODES
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
@@ -54,15 +54,15 @@ function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
     packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
     let contract = AddresslistVotingContract.bind(plugin);
 
-    let voteMode = contract.try_voteMode();
+    let votingMode = contract.try_votingMode();
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let minProposerVotingPower = contract.try_minProposerVotingPower();
 
-    packageEntity.voteMode = voteMode.reverted
+    packageEntity.votingMode = votingMode.reverted
       ? null
-      : VOTE_MODES.get(voteMode.value);
+      : VOTING_MODES.get(votingMode.value);
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
       : supportThreshold.value;

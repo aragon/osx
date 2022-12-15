@@ -8,7 +8,7 @@ import {
   _handleProposalCreated
 } from '../../src/packages/token/token-voting';
 import {TokenVotingPlugin} from '../../generated/schema';
-import {VOTE_MODES} from '../../src/utils/constants';
+import {VOTING_MODES} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
   DAO_TOKEN_ADDRESS,
@@ -16,7 +16,7 @@ import {
   STRING_DATA,
   DAO_ADDRESS,
   PROPOSAL_ID,
-  VOTE_MODE,
+  VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   MIN_DURATION,
@@ -55,7 +55,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     true,
     false,
 
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -111,8 +111,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
-    'voteMode',
-    VOTE_MODES.get(parseInt(VOTE_MODE))
+    'votingMode',
+    VOTING_MODES.get(parseInt(VOTING_MODE))
   );
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -165,7 +165,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -229,7 +229,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -285,7 +285,7 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     true,
     true,
 
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     START_DATE,
@@ -333,7 +333,7 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
 
   // create event
   let event = createNewVotingSettingsUpdatedEvent(
-    VOTE_MODE,
+    VOTING_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
     MIN_DURATION,
@@ -350,8 +350,8 @@ test('Run TokenVoting (handleVotingSettingsUpdated) mappings with mock event', (
   assert.fieldEquals(
     'TokenVotingPlugin',
     entityID,
-    'voteMode',
-    VOTE_MODES.get(parseInt(VOTE_MODE))
+    'votingMode',
+    VOTING_MODES.get(parseInt(VOTING_MODE))
   );
   assert.fieldEquals(
     'TokenVotingPlugin',

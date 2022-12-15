@@ -15,7 +15,7 @@ import {
   TokenVotingVote
 } from '../../../generated/schema';
 
-import {TEN_POWER_16, VOTER_OPTIONS, VOTE_MODES} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -51,7 +51,7 @@ export function _handleProposalCreated(
 
     // ProposalParameters
     let parameters = proposal.value.value2;
-    proposalEntity.voteMode = VOTE_MODES.get(parameters.voteMode);
+    proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
     proposalEntity.supportThreshold = parameters.supportThreshold;
     proposalEntity.minParticipation = parameters.minParticipation;
     proposalEntity.startDate = parameters.startDate;
@@ -211,7 +211,7 @@ export function handleVotingSettingsUpdated(
 ): void {
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.voteMode = VOTE_MODES.get(event.params.voteMode);
+    packageEntity.votingMode = VOTING_MODES.get(event.params.votingMode);
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;

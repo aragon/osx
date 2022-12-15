@@ -16,7 +16,7 @@ import {
   PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
-  VOTE_MODE,
+  VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   START_DATE,
@@ -123,7 +123,7 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVotingSettingsUpdatedEvent(
-  voteMode: string,
+  votingMode: string,
   supportThreshold: string,
   minParticipation: string,
   minDuration: string,
@@ -137,9 +137,9 @@ export function createNewVotingSettingsUpdatedEvent(
   newVotingSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVotingSettingsUpdatedEvent.parameters = [];
 
-  let voteModeParam = new ethereum.EventParam(
-    'voteMode',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteMode))
+  let votingModeParam = new ethereum.EventParam(
+    'votingMode',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(votingMode))
   );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
@@ -158,7 +158,7 @@ export function createNewVotingSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newVotingSettingsUpdatedEvent.parameters.push(voteModeParam);
+  newVotingSettingsUpdatedEvent.parameters.push(votingModeParam);
   newVotingSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVotingSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVotingSettingsUpdatedEvent.parameters.push(minDurationParam);
@@ -232,7 +232,7 @@ export function createAddresslistVotingProposalEntityState(
   open: boolean = true,
   executed: boolean = false,
 
-  voteMode: string = VOTE_MODE,
+  votingMode: string = VOTING_MODE,
   supportThreshold: string = SUPPORT_THRESHOLD,
   minParticipation: string = MIN_PARTICIPATION,
   startDate: string = START_DATE,
@@ -254,7 +254,7 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.open = open;
   addresslistProposal.executed = executed;
 
-  addresslistProposal.voteMode = voteMode;
+  addresslistProposal.votingMode = votingMode;
   addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
   addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
   addresslistProposal.startDate = BigInt.fromString(startDate);

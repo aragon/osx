@@ -9,14 +9,14 @@ export enum VoteOption {
   No,
 }
 
-export enum VoteMode {
+export enum VotingMode {
   Standard,
   EarlyExecution,
   VoteReplacement,
 }
 
 export type VotingSettings = {
-  voteMode: number;
+  votingMode: number;
   supportThreshold: BigNumber;
   minParticipation: BigNumber;
   minDuration: number;

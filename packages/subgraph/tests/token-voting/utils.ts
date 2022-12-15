@@ -14,7 +14,7 @@ import {
   PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
-  VOTE_MODE,
+  VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
   START_DATE,
@@ -121,7 +121,7 @@ export function createNewProposalExecutedEvent(
 }
 
 export function createNewVotingSettingsUpdatedEvent(
-  voteMode: string,
+  votingMode: string,
   supportThreshold: string,
   minParticipation: string,
   minDuration: string,
@@ -135,9 +135,9 @@ export function createNewVotingSettingsUpdatedEvent(
   newVotingSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newVotingSettingsUpdatedEvent.parameters = [];
 
-  let voteModeParam = new ethereum.EventParam(
-    'voteMode',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(voteMode))
+  let votingModeParam = new ethereum.EventParam(
+    'votingMode',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(votingMode))
   );
   let supportThresholdParam = new ethereum.EventParam(
     'supportThreshold',
@@ -156,7 +156,7 @@ export function createNewVotingSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newVotingSettingsUpdatedEvent.parameters.push(voteModeParam);
+  newVotingSettingsUpdatedEvent.parameters.push(votingModeParam);
   newVotingSettingsUpdatedEvent.parameters.push(supportThresholdParam);
   newVotingSettingsUpdatedEvent.parameters.push(minParticipationParam);
   newVotingSettingsUpdatedEvent.parameters.push(minDurationParam);
@@ -192,7 +192,7 @@ export function createTokenVotingProposalEntityState(
   open: boolean = true,
   executed: boolean = false,
 
-  voteMode: string = VOTE_MODE,
+  votingMode: string = VOTING_MODE,
   supportThreshold: string = SUPPORT_THRESHOLD,
   minParticipation: string = MIN_PARTICIPATION,
   startDate: string = START_DATE,
@@ -214,7 +214,7 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.open = open;
   tokenVotingProposal.executed = executed;
 
-  tokenVotingProposal.voteMode = voteMode;
+  tokenVotingProposal.votingMode = votingMode;
   tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
   tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
   tokenVotingProposal.startDate = BigInt.fromString(startDate);

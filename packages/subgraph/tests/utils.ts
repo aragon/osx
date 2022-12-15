@@ -55,7 +55,7 @@ export function createGetProposalCall(
   open: boolean,
   executed: boolean,
 
-  voteMode: string,
+  votingMode: string,
   supportThreshold: string,
   minParticipation: string,
   startDate: string,
@@ -72,7 +72,7 @@ export function createGetProposalCall(
   let parameters = new ethereum.Tuple();
 
   parameters.push(
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteMode))
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingMode))
   );
   parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThreshold))

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a `VoteMode` enumeration to specify if the vote should be conducted in `Standard`, `EarlyExecution`, or `VoteReplacement` mode.
+- Added a `VotingMode` enumeration to specify if the vote should be conducted in `Standard`, `EarlyExecution`, or `VoteReplacement` mode.
 - Added `Admin` plugin.
 - Added NFT compatibility by using OpenZepplin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
 - Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions

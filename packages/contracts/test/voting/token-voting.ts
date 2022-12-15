@@ -13,7 +13,7 @@ import {
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
   VotingSettings,
-  VoteMode,
+  VotingMode,
   ONE_HOUR,
   MAX_UINT64,
 } from '../test-utils/voting';
@@ -73,7 +73,7 @@ describe('TokenVoting', function () {
 
   beforeEach(async () => {
     votingSettings = {
-      voteMode: VoteMode.EarlyExecution,
+      votingMode: VotingMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
       minDuration: ONE_HOUR,
@@ -442,7 +442,7 @@ describe('TokenVoting', function () {
   describe('Proposal + Execute:', async () => {
     context('Vote Replacement', async () => {
       beforeEach(async () => {
-        votingSettings.voteMode = VoteMode.Standard;
+        votingSettings.votingMode = VotingMode.Standard;
 
         await voting.initialize(
           dao.address,
@@ -570,7 +570,7 @@ describe('TokenVoting', function () {
     });
     context('Early Execution', async () => {
       beforeEach(async () => {
-        votingSettings.voteMode = VoteMode.EarlyExecution;
+        votingSettings.votingMode = VotingMode.EarlyExecution;
 
         await voting.initialize(
           dao.address,
@@ -805,7 +805,7 @@ describe('TokenVoting', function () {
 
     context('Vote Replacement', async () => {
       beforeEach(async () => {
-        votingSettings.voteMode = VoteMode.VoteReplacement;
+        votingSettings.votingMode = VotingMode.VoteReplacement;
 
         await voting.initialize(
           dao.address,

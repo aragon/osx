@@ -12,7 +12,7 @@ import {
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
   VotingSettings,
-  VoteMode,
+  VotingMode,
   ONE_HOUR,
   MAX_UINT64,
 } from '../test-utils/voting';
@@ -67,7 +67,7 @@ describe('AddresslistVoting', function () {
 
   beforeEach(async () => {
     votingSettings = {
-      voteMode: VoteMode.EarlyExecution,
+      votingMode: VotingMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
       minDuration: ONE_HOUR,
@@ -395,7 +395,7 @@ describe('AddresslistVoting', function () {
   describe('Proposal + Execute:', async () => {
     context('Standard Mode', async () => {
       beforeEach(async () => {
-        votingSettings.voteMode = VoteMode.Standard;
+        votingSettings.votingMode = VotingMode.Standard;
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
 
@@ -519,7 +519,7 @@ describe('AddresslistVoting', function () {
 
     context('Early Execution Mode', async () => {
       beforeEach(async () => {
-        votingSettings.voteMode = VoteMode.EarlyExecution;
+        votingSettings.votingMode = VotingMode.EarlyExecution;
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
 
@@ -705,7 +705,7 @@ describe('AddresslistVoting', function () {
 
     context('Vote Replacement Mode', async () => {
       beforeEach(async () => {
-        votingSettings.voteMode = VoteMode.VoteReplacement;
+        votingSettings.votingMode = VotingMode.VoteReplacement;
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
 
