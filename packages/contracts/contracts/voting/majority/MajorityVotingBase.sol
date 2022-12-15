@@ -374,12 +374,12 @@ abstract contract MajorityVotingBase is
         });
     }
 
-    /// @notice Validates and returns the proposal vote dates.
+    /// @notice Asserts and returns valid proposal vote dates.
     /// @param _start The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
     /// @return startDate The validated start date of the proposal vote.
     /// @return endDate The validated end date of the proposal vote.
-    function _validateProposalDates(uint64 _start, uint64 _end)
+    function _assertValidProposalDates(uint64 _start, uint64 _end)
         internal
         view
         virtual

@@ -75,7 +75,7 @@ contract TokenVoting is MajorityVotingBase {
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _assertValidProposalDates(
             _startDate,
             _endDate
         );
