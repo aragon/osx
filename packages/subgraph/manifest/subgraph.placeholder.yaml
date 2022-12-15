@@ -159,8 +159,8 @@ templates:
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes)
           handler: handleProposalCreated
-        - event: PluginSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
-          handler: handlePluginSettingsUpdated
+        - event: MajorityVotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+          handler: handleMajorityVotingSettingsUpdated
   # AddresslistVoting (package)
   - name: AddresslistVoting
     kind: ethereum/contract
@@ -184,8 +184,8 @@ templates:
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes)
           handler: handleProposalCreated
-        - event: PluginSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
-          handler: handlePluginSettingsUpdated
+        - event: MajorityVotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+          handler: handleMajorityVotingSettingsUpdated
         - event: AddressesAdded(address[])
           handler: handleAddressesAdded
         - event: AddressesRemoved(address[])

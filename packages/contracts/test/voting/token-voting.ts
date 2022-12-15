@@ -12,7 +12,7 @@ import {
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
-  PluginSettings,
+  MajorityVotingSettings,
   VoteMode,
   ONE_HOUR,
   MAX_UINT64,
@@ -30,7 +30,7 @@ describe('TokenVoting', function () {
   let dummyMetadata: string;
   let startDate: number;
   let endDate: number;
-  let pluginSettings: PluginSettings;
+  let majorityVotingSettings: MajorityVotingSettings;
 
   const startOffset = 10;
   const id = 0;
@@ -72,7 +72,7 @@ describe('TokenVoting', function () {
   });
 
   beforeEach(async () => {
-    pluginSettings = {
+    majorityVotingSettings = {
       voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
@@ -93,7 +93,7 @@ describe('TokenVoting', function () {
     voting = await TokenVotingFactory.deploy();
 
     startDate = (await getTime()) + startOffset;
-    endDate = startDate + pluginSettings.minDuration;
+    endDate = startDate + majorityVotingSettings.minDuration;
 
     dao.grant(
       dao.address,
@@ -106,14 +106,14 @@ describe('TokenVoting', function () {
     it('reverts if trying to re-initialize', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
       await expect(
         voting.initialize(
           dao.address,
-          pluginSettings,
+          majorityVotingSettings,
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
@@ -122,11 +122,11 @@ describe('TokenVoting', function () {
 
   describe('Proposal creation', async () => {
     it('reverts if the user is not allowed to create a proposal', async () => {
-      pluginSettings.minProposerVotingPower = 1;
+      majorityVotingSettings.minProposerVotingPower = 1;
 
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -160,11 +160,11 @@ describe('TokenVoting', function () {
     });
 
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
-      pluginSettings.minProposerVotingPower = 123;
+      majorityVotingSettings.minProposerVotingPower = 123;
 
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -200,7 +200,7 @@ describe('TokenVoting', function () {
     it('reverts if the total token supply is 0', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -213,7 +213,7 @@ describe('TokenVoting', function () {
     it('reverts if the start date is set smaller than the current date', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -245,14 +245,16 @@ describe('TokenVoting', function () {
     it('reverts if the start date is after the latest start date', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-      const latestStartDate = MAX_UINT64.sub(pluginSettings.minDuration);
+      const latestStartDate = MAX_UINT64.sub(
+        majorityVotingSettings.minDuration
+      );
       const tooLateStartDate = latestStartDate.add(1);
       const endDate = 0; // startDate + minDuration
 
@@ -273,7 +275,7 @@ describe('TokenVoting', function () {
     it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -281,7 +283,7 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
       const startDate = (await getTime()) + 1;
-      const earliestEndDate = startDate + pluginSettings.minDuration;
+      const earliestEndDate = startDate + majorityVotingSettings.minDuration;
       const tooEarlyEndDate = earliestEndDate - 1;
 
       await expect(
@@ -301,7 +303,7 @@ describe('TokenVoting', function () {
     it('should create a vote successfully, but not vote', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -327,14 +329,14 @@ describe('TokenVoting', function () {
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
       expect(proposal.configuration.supportThreshold).to.equal(
-        pluginSettings.supportThreshold
+        majorityVotingSettings.supportThreshold
       );
       expect(proposal.configuration.minParticipation).to.equal(
-        pluginSettings.minParticipation
+        majorityVotingSettings.minParticipation
       );
       expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
       expect(
-        proposal.configuration.startDate.add(pluginSettings.minDuration)
+        proposal.configuration.startDate.add(majorityVotingSettings.minDuration)
       ).to.equal(proposal.configuration.endDate);
 
       expect(proposal.tally.totalVotingPower).to.equal(1);
@@ -352,7 +354,7 @@ describe('TokenVoting', function () {
     it('should create a vote and cast a vote immediately', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -380,10 +382,10 @@ describe('TokenVoting', function () {
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
       expect(proposal.configuration.supportThreshold).to.equal(
-        pluginSettings.supportThreshold
+        majorityVotingSettings.supportThreshold
       );
       expect(proposal.configuration.minParticipation).to.equal(
-        pluginSettings.minParticipation
+        majorityVotingSettings.minParticipation
       );
       expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
 
@@ -396,7 +398,7 @@ describe('TokenVoting', function () {
     it('reverts creation when voting before the start date', async () => {
       await voting.initialize(
         dao.address,
-        pluginSettings,
+        majorityVotingSettings,
         governanceErc20Mock.address
       );
 
@@ -442,11 +444,11 @@ describe('TokenVoting', function () {
   describe('Proposal + Execute:', async () => {
     context('Vote Replacement', async () => {
       beforeEach(async () => {
-        pluginSettings.voteMode = VoteMode.Standard;
+        majorityVotingSettings.voteMode = VoteMode.Standard;
 
         await voting.initialize(
           dao.address,
-          pluginSettings,
+          majorityVotingSettings,
           governanceErc20Mock.address
         );
 
@@ -490,10 +492,10 @@ describe('TokenVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         expect(await voting.worstCaseSupport(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
       });
@@ -509,20 +511,20 @@ describe('TokenVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false);
 
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.support(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
 
         expect(await voting.canExecute(id)).to.equal(true);
@@ -542,10 +544,10 @@ describe('TokenVoting', function () {
           .vote(id, VoteOption.Yes, true);
 
         expect(await voting.worstCaseSupport(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
@@ -570,11 +572,11 @@ describe('TokenVoting', function () {
     });
     context('Early Execution', async () => {
       beforeEach(async () => {
-        pluginSettings.voteMode = VoteMode.EarlyExecution;
+        majorityVotingSettings.voteMode = VoteMode.EarlyExecution;
 
         await voting.initialize(
           dao.address,
-          pluginSettings,
+          majorityVotingSettings,
           governanceErc20Mock.address
         );
 
@@ -674,10 +676,10 @@ describe('TokenVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
@@ -685,20 +687,20 @@ describe('TokenVoting', function () {
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.worstCaseSupport(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(true);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.support(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(true);
       });
@@ -805,11 +807,11 @@ describe('TokenVoting', function () {
 
     context('Vote Replacement', async () => {
       beforeEach(async () => {
-        pluginSettings.voteMode = VoteMode.VoteReplacement;
+        majorityVotingSettings.voteMode = VoteMode.VoteReplacement;
 
         await voting.initialize(
           dao.address,
-          pluginSettings,
+          majorityVotingSettings,
           governanceErc20Mock.address
         );
 
@@ -865,10 +867,10 @@ describe('TokenVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         expect(await voting.worstCaseSupport(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
       });
@@ -884,20 +886,20 @@ describe('TokenVoting', function () {
         await voting.vote(id, VoteOption.Abstain, false);
 
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.support(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
 
         expect(await voting.canExecute(id)).to.equal(true);
@@ -917,10 +919,10 @@ describe('TokenVoting', function () {
           .vote(id, VoteOption.Yes, true);
 
         expect(await voting.worstCaseSupport(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
@@ -948,11 +950,11 @@ describe('TokenVoting', function () {
   describe('Configurations for different use cases', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
-        pluginSettings.minParticipation = pct16(25);
+        majorityVotingSettings.minParticipation = pct16(25);
 
         await voting.initialize(
           dao.address,
-          pluginSettings,
+          majorityVotingSettings,
           governanceErc20Mock.address
         );
 
@@ -979,20 +981,20 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
         expect(await voting.participation(id)).to.be.lt(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.lt(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.support(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(false);
       });
@@ -1006,20 +1008,20 @@ describe('TokenVoting', function () {
         await voting.connect(signers[1]).vote(id, VoteOption.No, false);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.support(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(false);
       });
@@ -1031,20 +1033,20 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.support(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(true);
       });
@@ -1054,10 +1056,10 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.worstCaseSupport(id)).to.be.lte(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(false);
 
@@ -1065,20 +1067,20 @@ describe('TokenVoting', function () {
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.worstCaseSupport(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(true);
 
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(
-          pluginSettings.minParticipation
+          majorityVotingSettings.minParticipation
         );
         expect(await voting.support(id)).to.be.gt(
-          pluginSettings.supportThreshold
+          majorityVotingSettings.supportThreshold
         );
         expect(await voting.canExecute(id)).to.equal(true);
       });

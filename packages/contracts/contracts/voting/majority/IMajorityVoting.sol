@@ -71,7 +71,7 @@ interface IMajorityVoting {
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
-    struct PluginSettings {
+    struct MajorityVotingSettings {
         VoteMode voteMode;
         uint64 supportThreshold;
         uint64 minParticipation;
@@ -144,13 +144,13 @@ interface IMajorityVoting {
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
-    /// @notice Emitted when the plugin settings are updated.
+    /// @notice Emitted when the majority voting settings are updated.
     /// @param voteMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
-    event PluginSettingsUpdated(
+    event MajorityVotingSettingsUpdated(
         VoteMode voteMode,
         uint64 supportThreshold,
         uint64 minParticipation,
@@ -158,9 +158,10 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower
     );
 
-    /// @notice Sets the plugin settings.
-    /// @param _pluginSettings The new plugin settings.
-    function updatePluginSettings(PluginSettings calldata _pluginSettings) external;
+    /// @notice Sets the majority voting settings.
+    /// @param _majorityVotingSettings The new majority voting settings.
+    function updateMajorityVotingSettings(MajorityVotingSettings calldata _majorityVotingSettings)
+        external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
@@ -230,23 +231,23 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the vote mode stored in the plugin settings.
+    /// @notice Returns the vote mode stored in the majority voting settings.
     /// @return The vote mode parameter.
     function voteMode() external view returns (VoteMode);
 
-    /// @notice Returns the support threshold parameter stored in the plugin settings.
+    /// @notice Returns the support threshold parameter stored in the majority voting settings.
     /// @return The support threshold parameter.
     function supportThreshold() external view returns (uint64);
 
-    /// @notice Returns the minimum participation parameter stored in the plugin settings.
+    /// @notice Returns the minimum participation parameter stored in the majority voting settings.
     /// @return The minimum participation parameter.
     function minParticipation() external view returns (uint64);
 
-    /// @notice Returns the minimum duration parameter stored in the plugin settings.
+    /// @notice Returns the minimum duration parameter stored in the majority voting settings.
     /// @return The minimum duration parameter.
     function minDuration() external view returns (uint64);
 
-    /// @notice Returns the minimum voting power required to create a proposa stored in the plugin settings.
+    /// @notice Returns the minimum voting power required to create a proposa stored in the majority voting settings.
     /// @return The minimum voting power required to create a proposal.
     function minProposerVotingPower() external view returns (uint256);
 

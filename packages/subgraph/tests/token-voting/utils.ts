@@ -2,7 +2,7 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  PluginSettingsUpdated,
+  MajorityVotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
   ProposalExecuted
@@ -120,20 +120,22 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewPluginSettingsUpdatedEvent(
+export function createNewMajorityVotingSettingsUpdatedEvent(
   voteMode: string,
   supportThreshold: string,
   minParticipation: string,
   minDuration: string,
   minProposerVotingPower: string,
   contractAddress: string
-): PluginSettingsUpdated {
-  let newPluginSettingsUpdatedEvent = changetype<PluginSettingsUpdated>(
-    newMockEvent()
-  );
+): MajorityVotingSettingsUpdated {
+  let newMajorityVotingSettingsUpdatedEvent = changetype<
+    MajorityVotingSettingsUpdated
+  >(newMockEvent());
 
-  newPluginSettingsUpdatedEvent.address = Address.fromString(contractAddress);
-  newPluginSettingsUpdatedEvent.parameters = [];
+  newMajorityVotingSettingsUpdatedEvent.address = Address.fromString(
+    contractAddress
+  );
+  newMajorityVotingSettingsUpdatedEvent.parameters = [];
 
   let voteModeParam = new ethereum.EventParam(
     'voteMode',
@@ -156,13 +158,15 @@ export function createNewPluginSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newPluginSettingsUpdatedEvent.parameters.push(voteModeParam);
-  newPluginSettingsUpdatedEvent.parameters.push(supportThresholdParam);
-  newPluginSettingsUpdatedEvent.parameters.push(minParticipationParam);
-  newPluginSettingsUpdatedEvent.parameters.push(minDurationParam);
-  newPluginSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
+  newMajorityVotingSettingsUpdatedEvent.parameters.push(voteModeParam);
+  newMajorityVotingSettingsUpdatedEvent.parameters.push(supportThresholdParam);
+  newMajorityVotingSettingsUpdatedEvent.parameters.push(minParticipationParam);
+  newMajorityVotingSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newMajorityVotingSettingsUpdatedEvent.parameters.push(
+    minProposerVotingPowerParam
+  );
 
-  return newPluginSettingsUpdatedEvent;
+  return newMajorityVotingSettingsUpdatedEvent;
 }
 
 // calls

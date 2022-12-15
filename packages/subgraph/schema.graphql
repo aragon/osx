@@ -202,7 +202,7 @@ enum VoteMode {
   VoteReplacement
 }
 
-type PluginSettings @entity {
+type MajorityVotingSettings @entity {
   id: ID! # plugin address
 }
 

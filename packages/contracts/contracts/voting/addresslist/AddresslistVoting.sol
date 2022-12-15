@@ -46,13 +46,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _pluginSettings The plugin settings.
+    /// @param _majorityVotingSettings The majority voting settings.
     function initialize(
         IDAO _dao,
-        PluginSettings calldata _pluginSettings,
+        MajorityVotingSettings calldata _majorityVotingSettings,
         address[] calldata _members
     ) public initializer {
-        __MajorityVotingBase_init(_dao, _pluginSettings);
+        __MajorityVotingBase_init(_dao, _majorityVotingSettings);
 
         // add member addresses to the address list
         _addAddresses(_members);

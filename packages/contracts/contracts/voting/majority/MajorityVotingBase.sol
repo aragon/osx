@@ -59,9 +59,9 @@ abstract contract MajorityVotingBase is
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required to call the `updatePluginSettings` function.
-    bytes32 public constant UPDATE_PLUGIN_SETTINGS_PERMISSION_ID =
-        keccak256("SET_PLUGIN_SETTINGS_PERMISSION");
+    /// @notice The ID of the permission required to call the `updateMajorityVotingSettings` function.
+    bytes32 public constant UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID =
+        keccak256("UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
@@ -69,8 +69,8 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice The struct storing the plugin settings.
-    PluginSettings private pluginSettings;
+    /// @notice The struct storing the majority voting settings.
+    MajorityVotingSettings private majorityVotingSettings;
 
     /// @notice A counter counting the created proposals.
     uint256 public proposalCount;
@@ -113,13 +113,13 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _pluginSettings The plugin settings.
-    function __MajorityVotingBase_init(IDAO _dao, PluginSettings calldata _pluginSettings)
-        internal
-        onlyInitializing
-    {
+    /// @param _majorityVotingSettings The majority voting settings.
+    function __MajorityVotingBase_init(
+        IDAO _dao,
+        MajorityVotingSettings calldata _majorityVotingSettings
+    ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
-        _validateAndUpdateSettings(_pluginSettings);
+        _validateAndUpdateSettings(_majorityVotingSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -136,11 +136,11 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function updatePluginSettings(PluginSettings calldata _pluginSettings)
+    function updateMajorityVotingSettings(MajorityVotingSettings calldata _majorityVotingSettings)
         external
-        auth(UPDATE_PLUGIN_SETTINGS_PERMISSION_ID)
+        auth(UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID)
     {
-        _validateAndUpdateSettings(_pluginSettings);
+        _validateAndUpdateSettings(_majorityVotingSettings);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -217,27 +217,27 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function supportThreshold() public view virtual returns (uint64) {
-        return pluginSettings.supportThreshold;
+        return majorityVotingSettings.supportThreshold;
     }
 
     /// @inheritdoc IMajorityVoting
     function minParticipation() public view virtual returns (uint64) {
-        return pluginSettings.minParticipation;
+        return majorityVotingSettings.minParticipation;
     }
 
     /// @inheritdoc IMajorityVoting
     function minDuration() public view virtual returns (uint64) {
-        return pluginSettings.minDuration;
+        return majorityVotingSettings.minDuration;
     }
 
     /// @inheritdoc IMajorityVoting
     function minProposerVotingPower() public view virtual returns (uint256) {
-        return pluginSettings.minProposerVotingPower;
+        return majorityVotingSettings.minProposerVotingPower;
     }
 
     /// @inheritdoc IMajorityVoting
     function voteMode() public view virtual returns (VoteMode) {
-        return pluginSettings.voteMode;
+        return majorityVotingSettings.voteMode;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -338,39 +338,48 @@ abstract contract MajorityVotingBase is
         return (_value * PCT_BASE) / _total;
     }
 
-    /// @notice Validates and updates the proposal plugin settings.
-    /// @param _pluginSettings The plugin settings to be validated and updated.
-    function _validateAndUpdateSettings(PluginSettings calldata _pluginSettings) internal virtual {
-        if (_pluginSettings.supportThreshold > PCT_BASE) {
+    /// @notice Validates and updates the proposal majority voting settings.
+    /// @param _majorityVotingSettings The majority voting settings to be validated and updated.
+    function _validateAndUpdateSettings(MajorityVotingSettings calldata _majorityVotingSettings)
+        internal
+        virtual
+    {
+        if (_majorityVotingSettings.supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({
                 limit: PCT_BASE,
-                actual: _pluginSettings.supportThreshold
+                actual: _majorityVotingSettings.supportThreshold
             });
         }
 
-        if (_pluginSettings.minParticipation > PCT_BASE) {
+        if (_majorityVotingSettings.minParticipation > PCT_BASE) {
             revert PercentageExceeds100({
                 limit: PCT_BASE,
-                actual: _pluginSettings.minParticipation
+                actual: _majorityVotingSettings.minParticipation
             });
         }
 
-        if (_pluginSettings.minDuration < 60 minutes) {
-            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _pluginSettings.minDuration});
+        if (_majorityVotingSettings.minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({
+                limit: 60 minutes,
+                actual: _majorityVotingSettings.minDuration
+            });
         }
 
-        if (_pluginSettings.minDuration > 365 days) {
-            revert MinDurationOutOfBounds({limit: 365 days, actual: _pluginSettings.minDuration});
+        if (_majorityVotingSettings.minDuration > 365 days) {
+            revert MinDurationOutOfBounds({
+                limit: 365 days,
+                actual: _majorityVotingSettings.minDuration
+            });
         }
 
-        pluginSettings = _pluginSettings;
+        majorityVotingSettings = _majorityVotingSettings;
 
-        emit PluginSettingsUpdated({
-            voteMode: _pluginSettings.voteMode,
-            supportThreshold: _pluginSettings.supportThreshold,
-            minParticipation: _pluginSettings.minParticipation,
-            minDuration: _pluginSettings.minDuration,
-            minProposerVotingPower: _pluginSettings.minProposerVotingPower
+        emit MajorityVotingSettingsUpdated({
+            voteMode: _majorityVotingSettings.voteMode,
+            supportThreshold: _majorityVotingSettings.supportThreshold,
+            minParticipation: _majorityVotingSettings.minParticipation,
+            minDuration: _majorityVotingSettings.minDuration,
+            minProposerVotingPower: _majorityVotingSettings.minProposerVotingPower
         });
     }
 
@@ -397,7 +406,7 @@ abstract contract MajorityVotingBase is
             }
         }
 
-        uint64 earliestEndDate = startDate + pluginSettings.minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
+        uint64 earliestEndDate = startDate + majorityVotingSettings.minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
 
         if (_end == 0) {
             endDate = earliestEndDate;

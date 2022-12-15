@@ -27,7 +27,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) pluginSettings, address[] members)";
+            "(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) majorityVotingSettings, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -42,8 +42,10 @@ contract AddresslistVotingSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
-        (IMajorityVoting.PluginSettings memory pluginSettings, address[] memory members) = abi
-            .decode(_data, (IMajorityVoting.PluginSettings, address[]));
+        (
+            IMajorityVoting.MajorityVotingSettings memory majorityVotingSettings,
+            address[] memory members
+        ) = abi.decode(_data, (IMajorityVoting.MajorityVotingSettings, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
@@ -51,7 +53,7 @@ contract AddresslistVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
                 dao,
-                pluginSettings,
+                majorityVotingSettings,
                 members
             )
         );
@@ -77,7 +79,7 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_PLUGIN_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -127,7 +129,7 @@ contract AddresslistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_PLUGIN_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(

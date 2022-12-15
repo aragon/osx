@@ -7,10 +7,15 @@ import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import {PluginSettings, VoteMode, pct16, ONE_HOUR} from '../test-utils/voting';
+import {
+  MajorityVotingSettings,
+  VoteMode,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 
 let defaultData: any;
-let defaultPluginSettings: PluginSettings;
+let defaultMajorityVotingSettings: MajorityVotingSettings;
 let defaultVokenSettings: {addr: string; name: string; symbol: string};
 let defaultMintSettings: {receivers: string[]; amounts: number[]};
 
@@ -30,8 +35,8 @@ const merkleMintToAddressArray = [ethers.Wallet.createRandom().address];
 const merkleMintToAmountArray = [1];
 
 // Permissions
-const UPDATE_PLUGIN_SETTINGS_PERMISSION_ID = ethers.utils.id(
-  'SET_PLUGIN_SETTINGS_PERMISSION'
+const UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
+  'UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
@@ -48,7 +53,7 @@ describe('TokenVotingSetup', function () {
     signers = await ethers.getSigners();
     targetDao = await deployNewDAO(signers[0].address);
 
-    defaultPluginSettings = {
+    defaultMajorityVotingSettings = {
       voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
@@ -69,7 +74,7 @@ describe('TokenVotingSetup', function () {
     erc20Token = await ERC20Token.deploy(tokenName, tokenSymbol);
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
-      Object.values(defaultPluginSettings),
+      Object.values(defaultMajorityVotingSettings),
       Object.values(defaultVokenSettings),
       Object.values(defaultMintSettings),
     ]);
@@ -93,7 +98,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) pluginSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) majorityVotingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -119,7 +124,7 @@ describe('TokenVotingSetup', function () {
 
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         Object.values(defaultVokenSettings),
         [[AddressZero], []],
       ]);
@@ -132,7 +137,7 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not a contract', async () => {
       const tokenAddress = signers[0].address;
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         [tokenAddress, '', ''],
         Object.values(defaultMintSettings),
       ]);
@@ -145,7 +150,7 @@ describe('TokenVotingSetup', function () {
     it('fails if passed token address is not ERC20', async () => {
       const tokenAddress = implementationAddress;
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         [tokenAddress, '', ''],
         Object.values(defaultMintSettings),
       ]);
@@ -169,7 +174,7 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         [erc20Token.address, tokenName, tokenSymbol],
         Object.values(defaultMintSettings),
       ]);
@@ -190,7 +195,7 @@ describe('TokenVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
+          UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -219,7 +224,7 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         [erc20Token.address, tokenName, tokenSymbol],
         Object.values(defaultMintSettings),
       ]);
@@ -265,7 +270,7 @@ describe('TokenVotingSetup', function () {
       });
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         [governanceERC20.address, '', ''],
         Object.values(defaultMintSettings),
       ]);
@@ -286,7 +291,7 @@ describe('TokenVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
+          UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -335,7 +340,7 @@ describe('TokenVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
+          UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -365,7 +370,7 @@ describe('TokenVotingSetup', function () {
       const daoAddress = targetDao.address;
 
       const data = abiCoder.encode(prepareInstallationDataTypes, [
-        Object.values(defaultPluginSettings),
+        Object.values(defaultMajorityVotingSettings),
         [AddressZero, tokenName, tokenSymbol],
         [merkleMintToAddressArray, merkleMintToAmountArray],
       ]);
@@ -390,16 +395,16 @@ describe('TokenVotingSetup', function () {
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
       expect(await tokenVoting.minParticipation()).to.be.equal(
-        defaultPluginSettings.minParticipation
+        defaultMajorityVotingSettings.minParticipation
       );
       expect(await tokenVoting.supportThreshold()).to.be.equal(
-        defaultPluginSettings.supportThreshold
+        defaultMajorityVotingSettings.supportThreshold
       );
       expect(await tokenVoting.minDuration()).to.be.equal(
-        defaultPluginSettings.minDuration
+        defaultMajorityVotingSettings.minDuration
       );
       expect(await tokenVoting.minProposerVotingPower()).to.be.equal(
-        defaultPluginSettings.minProposerVotingPower
+        defaultMajorityVotingSettings.minProposerVotingPower
       );
       expect(await tokenVoting.getVotingToken()).to.be.equal(
         anticipatedTokenAddress
@@ -487,7 +492,7 @@ describe('TokenVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
+          UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
           Operation.Revoke,

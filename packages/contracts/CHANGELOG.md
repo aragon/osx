@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The plugin-wide settings are now stored in a `private` `PluginSettings` struct and made available through getters.
+- The plugin-wide settings are now stored in a `private` `MajorityVotingSettings` struct and made available through getters.
 - Structured the `getProposal` return data by adding a `struct Configuration` and `struct Tally`.
 - Bounded `minDuration` between one hour and one year and prevent integer overflows during the start date calculation (HAL-03, HAL-04).
 - Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
