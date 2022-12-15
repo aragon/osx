@@ -202,10 +202,6 @@ enum VotingMode {
   VoteReplacement
 }
 
-type VotingSettings @entity {
-  id: ID! # plugin address
-}
-
 # TokenVoting
 
 type TokenVotingPlugin implements IPlugin @entity {
