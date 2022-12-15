@@ -218,7 +218,7 @@ contract AddresslistVoting is MajorityVotingBase {
             proposal_.voters[_voter] != VoteOption.None &&
             proposal_.parameters.voteMode != VoteMode.VoteReplacement
         ) {
-            // The vote has already voted but vote replacment is not allowed.
+            // The voter has already voted but vote replacment is not allowed.
             return false;
         }
 
