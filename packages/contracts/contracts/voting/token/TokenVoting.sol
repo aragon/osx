@@ -153,16 +153,13 @@ contract TokenVoting is MajorityVotingBase {
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        if (
-            proposal_.configuration.voteMode != VoteMode.VoteReplacement &&
-            proposal_.voters[_voter] != VoteOption.None
-        ) {
-            revert VoteReplacementNotAllowed();
-        }
-
         return
             _isVoteOpen(proposal_) &&
-            votingToken.getPastVotes(_voter, proposal_.configuration.snapshotBlock) > 0;
+            // Check if voter has voting power.
+            votingToken.getPastVotes(_voter, proposal_.configuration.snapshotBlock) > 0 &&
+            // Check if the vote is a disallowed vote replacement.
+            !(proposal_.configuration.voteMode != VoteMode.VoteReplacement &&
+                proposal_.voters[_voter] != VoteOption.None);
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

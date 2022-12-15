@@ -97,9 +97,6 @@ abstract contract MajorityVotingBase is
     /// @notice Thrown if zero is not allowed as a value
     error ZeroValueNotAllowed();
 
-    /// @notice Thrown if both, early execution and vote replacement, are selected.
-    error VoteReplacementNotAllowed();
-
     /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
     /// - has not started,
     /// - has ended,

@@ -420,7 +420,7 @@ describe('AddresslistVoting', function () {
 
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
-          customError('VoteReplacementNotAllowed')
+          customError('VoteCastForbidden', id, signers[0].address)
         );
       });
 
@@ -587,7 +587,7 @@ describe('AddresslistVoting', function () {
 
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
-          customError('VoteReplacementNotAllowed')
+          customError('VoteCastForbidden', id, signers[0].address)
         );
       });
 

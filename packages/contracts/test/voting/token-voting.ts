@@ -479,7 +479,7 @@ describe('TokenVoting', function () {
 
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
-          customError('VoteReplacementNotAllowed')
+          customError('VoteCastForbidden', id, signers[0].address)
         );
       });
 
@@ -663,7 +663,7 @@ describe('TokenVoting', function () {
 
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
-          customError('VoteReplacementNotAllowed')
+          customError('VoteCastForbidden', id, signers[0].address)
         );
       });
 
