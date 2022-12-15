@@ -208,13 +208,21 @@ contract AddresslistVoting is MajorityVotingBase {
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        return
-            _isVoteOpen(proposal_) &&
-            // Check if voter has voting power.
-            isListed(_voter, proposal_.parameters.snapshotBlock) &&
-            // Check if the vote is a disallowed vote replacement.
-            !(proposal_.parameters.voteMode != VoteMode.VoteReplacement &&
-                proposal_.voters[_voter] != VoteOption.None);
+        if (!_isVoteOpen(proposal_)) {
+            // The proposal vote hasn't started or has already ended.
+            return false;
+        } else if (!isListed(_voter, proposal_.parameters.snapshotBlock)) {
+            // The voter has no voting power.
+            return false;
+        } else if (
+            proposal_.voters[_voter] != VoteOption.None &&
+            proposal_.parameters.voteMode != VoteMode.VoteReplacement
+        ) {
+            // The vote has already voted but vote replacment is not allowed.
+            return false;
+        }
+
+        return true;
     }
 
     /// @notice Updates the address list by adding or removing members.
