@@ -101,7 +101,10 @@ jobs:
       - name: Build Contracts
         run: cd ./packages/contracts/ && yarn run build
       - name: Deploy Subgraph
-        run: cd ./packages/subgraph/ && yarn run deploy
+        run: |
+          cd ./packages/subgraph/
+          SUBGRAPH_VERSION=$(cat package.json | jq -r .version)
+          yarn run deploy
         env:
           NETWORK_NAME: ${{ matrix.network }}
           THEGRAPH_USERNAME: aragon
