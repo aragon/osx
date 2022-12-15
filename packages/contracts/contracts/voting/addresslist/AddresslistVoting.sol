@@ -116,14 +116,14 @@ contract AddresslistVoting is MajorityVotingBase {
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
 
-        (
-            proposal_.configuration.startDate,
-            proposal_.configuration.endDate
-        ) = _validateProposalDates(_startDate, _endDate);
-        proposal_.configuration.snapshotBlock = snapshotBlock;
-        proposal_.configuration.voteMode = voteMode();
-        proposal_.configuration.supportThreshold = supportThreshold();
-        proposal_.configuration.minParticipation = minParticipation();
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
+            _startDate,
+            _endDate
+        );
+        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.voteMode = voteMode();
+        proposal_.parameters.supportThreshold = supportThreshold();
+        proposal_.parameters.minParticipation = minParticipation();
 
         proposal_.tally.totalVotingPower = addresslistLength(snapshotBlock);
 
@@ -211,9 +211,9 @@ contract AddresslistVoting is MajorityVotingBase {
         return
             _isVoteOpen(proposal_) &&
             // Check if voter has voting power.
-            isListed(_voter, proposal_.configuration.snapshotBlock) &&
+            isListed(_voter, proposal_.parameters.snapshotBlock) &&
             // Check if the vote is a disallowed vote replacement.
-            !(proposal_.configuration.voteMode != VoteMode.VoteReplacement &&
+            !(proposal_.parameters.voteMode != VoteMode.VoteReplacement &&
                 proposal_.voters[_voter] != VoteOption.None);
     }
 

@@ -62,7 +62,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     true,
     false,
 
-    // Configuration
+    // ProposalParameters
     VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,
@@ -215,7 +215,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     true,
     false,
 
-    // Configuration
+    // ProposalParameters
     VOTE_MODE,
     SUPPORT_THRESHOLD,
     MIN_PARTICIPATION,

@@ -75,14 +75,14 @@ contract TokenVoting is MajorityVotingBase {
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
 
-        (
-            proposal_.configuration.startDate,
-            proposal_.configuration.endDate
-        ) = _validateProposalDates(_startDate, _endDate);
-        proposal_.configuration.snapshotBlock = snapshotBlock;
-        proposal_.configuration.voteMode = voteMode();
-        proposal_.configuration.supportThreshold = supportThreshold();
-        proposal_.configuration.minParticipation = minParticipation();
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
+            _startDate,
+            _endDate
+        );
+        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.voteMode = voteMode();
+        proposal_.parameters.supportThreshold = supportThreshold();
+        proposal_.parameters.minParticipation = minParticipation();
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
@@ -111,10 +111,7 @@ contract TokenVoting is MajorityVotingBase {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(
-            _voter,
-            proposal_.configuration.snapshotBlock
-        );
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock);
         VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
@@ -156,9 +153,9 @@ contract TokenVoting is MajorityVotingBase {
         return
             _isVoteOpen(proposal_) &&
             // Check if voter has voting power.
-            votingToken.getPastVotes(_voter, proposal_.configuration.snapshotBlock) > 0 &&
+            votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock) > 0 &&
             // Check if the vote is a disallowed vote replacement.
-            !(proposal_.configuration.voteMode != VoteMode.VoteReplacement &&
+            !(proposal_.parameters.voteMode != VoteMode.VoteReplacement &&
                 proposal_.voters[_voter] != VoteOption.None);
     }
 

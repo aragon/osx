@@ -325,16 +325,16 @@ describe('AddresslistVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
-      expect(proposal.configuration.supportThreshold).to.equal(
+      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.parameters.supportThreshold).to.equal(
         majorityVotingSettings.supportThreshold
       );
-      expect(proposal.configuration.minParticipation).to.equal(
+      expect(proposal.parameters.minParticipation).to.equal(
         majorityVotingSettings.minParticipation
       );
       expect(
-        proposal.configuration.startDate.add(majorityVotingSettings.minDuration)
-      ).to.equal(proposal.configuration.endDate);
+        proposal.parameters.startDate.add(majorityVotingSettings.minDuration)
+      ).to.equal(proposal.parameters.endDate);
 
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
@@ -375,11 +375,11 @@ describe('AddresslistVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
-      expect(proposal.configuration.supportThreshold).to.equal(
+      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.parameters.supportThreshold).to.equal(
         majorityVotingSettings.supportThreshold
       );
-      expect(proposal.configuration.minParticipation).to.equal(
+      expect(proposal.parameters.minParticipation).to.equal(
         majorityVotingSettings.minParticipation
       );
 

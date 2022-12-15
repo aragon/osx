@@ -23,7 +23,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 ///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
 ///  Majority voting implies that the support threshold is set with
 ///  $$\texttt{supportThreshold} \ge 50\% .$$
-///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
+///  However, this is not enforced by the contract code and developers can make unsafe parameterss and only the frontend will warn about bad parameter settings.
 ///
 ///  #### Vote Replacement Execution
 ///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest voteOption is tallied.
@@ -247,7 +247,7 @@ abstract contract MajorityVotingBase is
         returns (
             bool open,
             bool executed,
-            Configuration memory configuration,
+            ProposalParameters memory parameters,
             Tally memory tally,
             IDAO.Action[] memory actions
         )
@@ -256,7 +256,7 @@ abstract contract MajorityVotingBase is
 
         open = _isVoteOpen(proposal_);
         executed = proposal_.executed;
-        configuration = proposal_.configuration;
+        parameters = proposal_.parameters;
         tally = proposal_.tally;
         actions = proposal_.actions;
     }
@@ -303,14 +303,14 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
-                proposal_.configuration.voteMode == VoteMode.EarlyExecution &&
-                worstCaseSupport(_proposalId) > proposal_.configuration.supportThreshold &&
-                participation(_proposalId) >= proposal_.configuration.minParticipation;
+                proposal_.parameters.voteMode == VoteMode.EarlyExecution &&
+                worstCaseSupport(_proposalId) > proposal_.parameters.supportThreshold &&
+                participation(_proposalId) >= proposal_.parameters.minParticipation;
         } else {
             // Normal execution
             return
-                support(_proposalId) > proposal_.configuration.supportThreshold &&
-                participation(_proposalId) >= proposal_.configuration.minParticipation;
+                support(_proposalId) > proposal_.parameters.supportThreshold &&
+                participation(_proposalId) >= proposal_.parameters.minParticipation;
         }
     }
 
@@ -321,8 +321,8 @@ abstract contract MajorityVotingBase is
         uint64 currentTime = getTimestamp64();
 
         return
-            proposal_.configuration.startDate <= currentTime &&
-            currentTime < proposal_.configuration.endDate &&
+            proposal_.parameters.startDate <= currentTime &&
+            currentTime < proposal_.parameters.endDate &&
             !proposal_.executed;
     }
 

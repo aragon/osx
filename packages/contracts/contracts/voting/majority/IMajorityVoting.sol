@@ -16,7 +16,7 @@ import "../../core/IDAO.sol";
 ///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
 ///  Majority voting implies that the support threshold is set with
 ///  $$\texttt{supportThreshold} \ge 50\% .$$
-///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
+///  However, this is not enforced by the contract code and developers can make unsafe parameterss and only the frontend will warn about bad parameter settings.
 ///
 ///  #### Vote Replacement Execution
 ///  The contract allows votes to be replaced. Voters can change their vote multiple times and only the latest vote option is tallied.
@@ -81,13 +81,13 @@ interface IMajorityVoting {
 
     /// @notice A container for proposal-related information.
     /// @param executed Wheter the proposal is executed or not.
-    /// @param configuration The proposal-specific vote settings at the time of the proposal creation.
+    /// @param parameters The proposal-specific vote settings at the time of the proposal creation.
     /// @param tally The vote tally of the proposal.
     /// @param voters The votes casted by the voters.
     /// @param actions The actions to be executed when the proposal passes.
     struct Proposal {
         bool executed;
-        Configuration configuration;
+        ProposalParameters parameters;
         Tally tally;
         mapping(address => VoteOption) voters;
         IDAO.Action[] actions;
@@ -100,7 +100,7 @@ interface IMajorityVoting {
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
-    struct Configuration {
+    struct ProposalParameters {
         VoteMode voteMode;
         uint64 supportThreshold;
         uint64 minParticipation;
@@ -255,7 +255,7 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal.
     /// @return open Wheter the proposal is open or not.
     /// @return executed Wheter the proposal is executed or not.
-    /// @return configuration The configuration of the proposal vote.
+    /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
@@ -264,7 +264,7 @@ interface IMajorityVoting {
         returns (
             bool open,
             bool executed,
-            Configuration memory configuration,
+            ProposalParameters memory parameters,
             Tally memory tally,
             IDAO.Action[] memory actions
         );

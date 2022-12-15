@@ -69,24 +69,24 @@ export function createGetProposalCall(
 
   actions: ethereum.Tuple[]
 ): void {
-  let configuration = new ethereum.Tuple();
+  let parameters = new ethereum.Tuple();
 
-  configuration.push(
+  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteMode))
   );
-  configuration.push(
+  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThreshold))
   );
-  configuration.push(
+  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(minParticipation))
   );
-  configuration.push(
+  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate))
   );
-  configuration.push(
+  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate))
   );
-  configuration.push(
+  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock))
   );
 
@@ -111,8 +111,8 @@ export function createGetProposalCall(
       ethereum.Value.fromBoolean(open),
       ethereum.Value.fromBoolean(executed),
 
-      // Configuration
-      ethereum.Value.fromTuple(configuration),
+      // ProposalParameters
+      ethereum.Value.fromTuple(parameters),
 
       // Tally
       ethereum.Value.fromTuple(tally),

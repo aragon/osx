@@ -328,16 +328,16 @@ describe('TokenVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.configuration.supportThreshold).to.equal(
+      expect(proposal.parameters.supportThreshold).to.equal(
         majorityVotingSettings.supportThreshold
       );
-      expect(proposal.configuration.minParticipation).to.equal(
+      expect(proposal.parameters.minParticipation).to.equal(
         majorityVotingSettings.minParticipation
       );
-      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
       expect(
-        proposal.configuration.startDate.add(majorityVotingSettings.minDuration)
-      ).to.equal(proposal.configuration.endDate);
+        proposal.parameters.startDate.add(majorityVotingSettings.minDuration)
+      ).to.equal(proposal.parameters.endDate);
 
       expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(0);
@@ -381,13 +381,13 @@ describe('TokenVoting', function () {
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
-      expect(proposal.configuration.supportThreshold).to.equal(
+      expect(proposal.parameters.supportThreshold).to.equal(
         majorityVotingSettings.supportThreshold
       );
-      expect(proposal.configuration.minParticipation).to.equal(
+      expect(proposal.parameters.minParticipation).to.equal(
         majorityVotingSettings.minParticipation
       );
-      expect(proposal.configuration.snapshotBlock).to.equal(block.number - 1);
+      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
       expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(1);
@@ -947,7 +947,7 @@ describe('TokenVoting', function () {
     });
   });
 
-  describe('Configurations for different use cases', async () => {
+  describe('ProposalParameterss for different use cases', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
         majorityVotingSettings.minParticipation = pct16(25);
