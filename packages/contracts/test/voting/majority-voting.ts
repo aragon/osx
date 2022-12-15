@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {MajorityVotingMock, DAO} from '../../typechain';
 import {VOTING_EVENTS} from '../../utils/event';
 import {
-  MajorityVotingSettings,
+  VotingSettings,
   VoteMode,
   pct16,
   ONE_HOUR,
@@ -18,7 +18,7 @@ describe('MajorityVotingMock', function () {
   let votingBase: MajorityVotingMock;
   let dao: DAO;
   let ownerAddress: string;
-  let majorityVotingSettings: MajorityVotingSettings;
+  let majorityVotingSettings: VotingSettings;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -45,7 +45,7 @@ describe('MajorityVotingMock', function () {
     dao.grant(
       votingBase.address,
       ownerAddress,
-      ethers.utils.id('UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION')
+      ethers.utils.id('UPDATE_VOTING_SETTINGS_PERMISSION')
     );
   });
 
@@ -66,7 +66,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the support threshold specified exceeds 100%', async () => {
       majorityVotingSettings.supportThreshold = pct16(1000);
       await expect(
-        votingBase.updateMajorityVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(majorityVotingSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
@@ -80,7 +80,7 @@ describe('MajorityVotingMock', function () {
       majorityVotingSettings.minParticipation = pct16(1000);
 
       await expect(
-        votingBase.updateMajorityVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(majorityVotingSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
@@ -93,7 +93,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the minimal duration is shorter than one hour', async () => {
       majorityVotingSettings.minDuration = ONE_HOUR - 1;
       await expect(
-        votingBase.updateMajorityVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(majorityVotingSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
@@ -106,7 +106,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the minimal duration is longer than one year', async () => {
       majorityVotingSettings.minDuration = ONE_YEAR + 1;
       await expect(
-        votingBase.updateMajorityVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(majorityVotingSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
@@ -117,9 +117,7 @@ describe('MajorityVotingMock', function () {
     });
 
     it('should change the majority voting settings successfully', async () => {
-      expect(
-        await votingBase.updateMajorityVotingSettings(majorityVotingSettings)
-      )
+      expect(await votingBase.updateVotingSettings(majorityVotingSettings))
         .to.emit(votingBase, VOTING_EVENTS.MAJORITY_VOTING_SETTINGS_UPDATED)
         .withArgs(
           majorityVotingSettings.voteMode,

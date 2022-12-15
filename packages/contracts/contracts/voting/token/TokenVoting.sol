@@ -30,7 +30,7 @@ contract TokenVoting is MajorityVotingBase {
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
-        MajorityVotingSettings calldata _majorityVotingSettings,
+        VotingSettings calldata _majorityVotingSettings,
         IVotesUpgradeable _token
     ) public initializer {
         __MajorityVotingBase_init(_dao, _majorityVotingSettings);

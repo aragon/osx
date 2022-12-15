@@ -11,7 +11,7 @@ import {
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
-  MajorityVotingSettings,
+  VotingSettings,
   VoteMode,
   ONE_HOUR,
   MAX_UINT64,
@@ -26,7 +26,7 @@ describe('AddresslistVoting', function () {
   let dummyMetadata: string;
   let startDate: number;
   let endDate: number;
-  let majorityVotingSettings: MajorityVotingSettings;
+  let majorityVotingSettings: VotingSettings;
 
   const startOffset = 10;
   const id = 0;

@@ -15,7 +15,7 @@ export enum VoteMode {
   VoteReplacement,
 }
 
-export type MajorityVotingSettings = {
+export type VotingSettings = {
   voteMode: number;
   supportThreshold: BigNumber;
   minParticipation: BigNumber;

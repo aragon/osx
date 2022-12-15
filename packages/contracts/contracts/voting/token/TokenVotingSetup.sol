@@ -109,17 +109,13 @@ contract TokenVotingSetup is PluginSetup {
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
-            IMajorityVoting.MajorityVotingSettings memory majorityVotingSettings,
+            IMajorityVoting.VotingSettings memory majorityVotingSettings,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
         ) = abi.decode(
                 _data,
-                (
-                    IMajorityVoting.MajorityVotingSettings,
-                    TokenSettings,
-                    GovernanceERC20.MintSettings
-                )
+                (IMajorityVoting.VotingSettings, TokenSettings, GovernanceERC20.MintSettings)
             );
 
         // Check mint setting.
@@ -204,7 +200,7 @@ contract TokenVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            tokenVotingBase.UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -275,7 +271,7 @@ contract TokenVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            tokenVotingBase.UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(

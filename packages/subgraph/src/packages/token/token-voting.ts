@@ -4,7 +4,7 @@ import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  MajorityVotingSettingsUpdated,
+  VotingSettingsUpdated,
   TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
@@ -206,8 +206,8 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleMajorityVotingSettingsUpdated(
-  event: MajorityVotingSettingsUpdated
+export function handleVotingSettingsUpdated(
+  event: VotingSettingsUpdated
 ): void {
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {

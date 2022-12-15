@@ -49,7 +49,7 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @param _majorityVotingSettings The majority voting settings.
     function initialize(
         IDAO _dao,
-        MajorityVotingSettings calldata _majorityVotingSettings,
+        VotingSettings calldata _majorityVotingSettings,
         address[] calldata _members
     ) public initializer {
         __MajorityVotingBase_init(_dao, _majorityVotingSettings);

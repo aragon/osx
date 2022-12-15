@@ -59,9 +59,9 @@ abstract contract MajorityVotingBase is
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required to call the `updateMajorityVotingSettings` function.
-    bytes32 public constant UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID =
-        keccak256("UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION");
+    /// @notice The ID of the permission required to call the `updateVotingSettings` function.
+    bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
+        keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
@@ -70,7 +70,7 @@ abstract contract MajorityVotingBase is
     mapping(uint256 => Proposal) internal proposals;
 
     /// @notice The struct storing the majority voting settings.
-    MajorityVotingSettings private majorityVotingSettings;
+    VotingSettings private majorityVotingSettings;
 
     /// @notice A counter counting the created proposals.
     uint256 public proposalCount;
@@ -114,10 +114,10 @@ abstract contract MajorityVotingBase is
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _majorityVotingSettings The majority voting settings.
-    function __MajorityVotingBase_init(
-        IDAO _dao,
-        MajorityVotingSettings calldata _majorityVotingSettings
-    ) internal onlyInitializing {
+    function __MajorityVotingBase_init(IDAO _dao, VotingSettings calldata _majorityVotingSettings)
+        internal
+        onlyInitializing
+    {
         __PluginUUPSUpgradeable_init(_dao);
         _validateAndUpdateSettings(_majorityVotingSettings);
     }
@@ -136,9 +136,9 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function updateMajorityVotingSettings(MajorityVotingSettings calldata _majorityVotingSettings)
+    function updateVotingSettings(VotingSettings calldata _majorityVotingSettings)
         external
-        auth(UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID)
+        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
     {
         _validateAndUpdateSettings(_majorityVotingSettings);
     }
@@ -340,7 +340,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice Validates and updates the proposal majority voting settings.
     /// @param _majorityVotingSettings The majority voting settings to be validated and updated.
-    function _validateAndUpdateSettings(MajorityVotingSettings calldata _majorityVotingSettings)
+    function _validateAndUpdateSettings(VotingSettings calldata _majorityVotingSettings)
         internal
         virtual
     {
@@ -374,7 +374,7 @@ abstract contract MajorityVotingBase is
 
         majorityVotingSettings = _majorityVotingSettings;
 
-        emit MajorityVotingSettingsUpdated({
+        emit VotingSettingsUpdated({
             voteMode: _majorityVotingSettings.voteMode,
             supportThreshold: _majorityVotingSettings.supportThreshold,
             minParticipation: _majorityVotingSettings.minParticipation,

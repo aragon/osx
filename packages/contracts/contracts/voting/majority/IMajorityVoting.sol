@@ -71,7 +71,7 @@ interface IMajorityVoting {
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
-    struct MajorityVotingSettings {
+    struct VotingSettings {
         VoteMode voteMode;
         uint64 supportThreshold;
         uint64 minParticipation;
@@ -150,7 +150,7 @@ interface IMajorityVoting {
     /// @param minParticipation The minimum participation value.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
-    event MajorityVotingSettingsUpdated(
+    event VotingSettingsUpdated(
         VoteMode voteMode,
         uint64 supportThreshold,
         uint64 minParticipation,
@@ -160,8 +160,7 @@ interface IMajorityVoting {
 
     /// @notice Sets the majority voting settings.
     /// @param _majorityVotingSettings The new majority voting settings.
-    function updateMajorityVotingSettings(MajorityVotingSettings calldata _majorityVotingSettings)
-        external;
+    function updateVotingSettings(VotingSettings calldata _majorityVotingSettings) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.

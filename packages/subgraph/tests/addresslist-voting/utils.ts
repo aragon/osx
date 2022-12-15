@@ -6,7 +6,7 @@ import {
   ProposalCreated,
   VoteCast,
   ProposalExecuted,
-  MajorityVotingSettingsUpdated,
+  VotingSettingsUpdated,
   AddressesAdded,
   AddressesRemoved
 } from '../../generated/templates/AddresslistVoting/AddresslistVoting';
@@ -122,22 +122,20 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewMajorityVotingSettingsUpdatedEvent(
+export function createNewVotingSettingsUpdatedEvent(
   voteMode: string,
   supportThreshold: string,
   minParticipation: string,
   minDuration: string,
   minProposerVotingPower: string,
   contractAddress: string
-): MajorityVotingSettingsUpdated {
-  let newMajorityVotingSettingsUpdatedEvent = changetype<
-    MajorityVotingSettingsUpdated
-  >(newMockEvent());
-
-  newMajorityVotingSettingsUpdatedEvent.address = Address.fromString(
-    contractAddress
+): VotingSettingsUpdated {
+  let newVotingSettingsUpdatedEvent = changetype<VotingSettingsUpdated>(
+    newMockEvent()
   );
-  newMajorityVotingSettingsUpdatedEvent.parameters = [];
+
+  newVotingSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newVotingSettingsUpdatedEvent.parameters = [];
 
   let voteModeParam = new ethereum.EventParam(
     'voteMode',
@@ -160,15 +158,13 @@ export function createNewMajorityVotingSettingsUpdatedEvent(
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
   );
 
-  newMajorityVotingSettingsUpdatedEvent.parameters.push(voteModeParam);
-  newMajorityVotingSettingsUpdatedEvent.parameters.push(minParticipationParam);
-  newMajorityVotingSettingsUpdatedEvent.parameters.push(supportThresholdParam);
-  newMajorityVotingSettingsUpdatedEvent.parameters.push(minDurationParam);
-  newMajorityVotingSettingsUpdatedEvent.parameters.push(
-    minProposerVotingPowerParam
-  );
+  newVotingSettingsUpdatedEvent.parameters.push(voteModeParam);
+  newVotingSettingsUpdatedEvent.parameters.push(minParticipationParam);
+  newVotingSettingsUpdatedEvent.parameters.push(supportThresholdParam);
+  newVotingSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newVotingSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
 
-  return newMajorityVotingSettingsUpdatedEvent;
+  return newVotingSettingsUpdatedEvent;
 }
 
 export function createNewAddressesAddedEvent(

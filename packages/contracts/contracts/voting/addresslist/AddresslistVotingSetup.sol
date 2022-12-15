@@ -43,9 +43,9 @@ contract AddresslistVotingSetup is PluginSetup {
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
         (
-            IMajorityVoting.MajorityVotingSettings memory majorityVotingSettings,
+            IMajorityVoting.VotingSettings memory majorityVotingSettings,
             address[] memory members
-        ) = abi.decode(_data, (IMajorityVoting.MajorityVotingSettings, address[]));
+        ) = abi.decode(_data, (IMajorityVoting.VotingSettings, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
@@ -79,7 +79,7 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -129,7 +129,7 @@ contract AddresslistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(

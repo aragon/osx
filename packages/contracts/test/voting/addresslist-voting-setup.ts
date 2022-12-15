@@ -6,15 +6,10 @@ import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import {
-  MajorityVotingSettings,
-  VoteMode,
-  pct16,
-  ONE_HOUR,
-} from '../test-utils/voting';
+import {VotingSettings, VoteMode, pct16, ONE_HOUR} from '../test-utils/voting';
 
 let defaultData: any;
-let defaultMajorityVotingSettings: MajorityVotingSettings;
+let defaultVotingSettings: VotingSettings;
 let defaultMembers: string[];
 
 const abiCoder = ethers.utils.defaultAbiCoder;
@@ -30,8 +25,8 @@ const prepareInstallationDataTypes = [
 const MODIFY_ADDRESSLIST_PERMISSION_ID = ethers.utils.id(
   'MODIFY_ADDRESSLIST_PERMISSION'
 );
-const UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
-  'UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION'
+const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
+  'UPDATE_VOTING_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
@@ -46,7 +41,7 @@ describe('AddresslistVotingSetup', function () {
     signers = await ethers.getSigners();
     targetDao = await deployNewDAO(signers[0].address);
 
-    defaultMajorityVotingSettings = {
+    defaultVotingSettings = {
       voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
@@ -64,7 +59,7 @@ describe('AddresslistVotingSetup', function () {
       await addresslistVotingSetup.getImplementationAddress();
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
-      Object.values(defaultMajorityVotingSettings),
+      Object.values(defaultVotingSettings),
       defaultMembers,
     ]);
   });
@@ -151,7 +146,7 @@ describe('AddresslistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID,
+          UPDATE_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -194,17 +189,17 @@ describe('AddresslistVotingSetup', function () {
         targetDao.address
       );
       expect(await addresslistVotingContract.minParticipation()).to.be.equal(
-        defaultMajorityVotingSettings.minParticipation
+        defaultVotingSettings.minParticipation
       );
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
-        defaultMajorityVotingSettings.supportThreshold
+        defaultVotingSettings.supportThreshold
       );
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
-        defaultMajorityVotingSettings.minDuration
+        defaultVotingSettings.minDuration
       );
       expect(
         await addresslistVotingContract.minProposerVotingPower()
-      ).to.be.equal(defaultMajorityVotingSettings.minProposerVotingPower);
+      ).to.be.equal(defaultVotingSettings.minProposerVotingPower);
 
       await ethers.provider.send('evm_mine', []);
 
@@ -255,7 +250,7 @@ describe('AddresslistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_MAJORITY_VOTING_SETTINGS_PERMISSION_ID,
+          UPDATE_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
           Operation.Revoke,
