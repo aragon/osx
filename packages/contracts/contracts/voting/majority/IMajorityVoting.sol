@@ -144,7 +144,7 @@ interface IMajorityVoting {
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
-    /// @notice Emitted when the majority voting settings are updated.
+    /// @notice Emitted when the voting settings are updated.
     /// @param voteMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
@@ -158,9 +158,9 @@ interface IMajorityVoting {
         uint256 minProposerVotingPower
     );
 
-    /// @notice Sets the majority voting settings.
-    /// @param _majorityVotingSettings The new majority voting settings.
-    function updateVotingSettings(VotingSettings calldata _majorityVotingSettings) external;
+    /// @notice Updates the voting settings.
+    /// @param _votingSettings The new voting settings.
+    function updateVotingSettings(VotingSettings calldata _votingSettings) external;
 
     /// @notice Creates a new proposal.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
@@ -230,23 +230,23 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the vote mode stored in the majority voting settings.
+    /// @notice Returns the vote mode stored in the voting settings.
     /// @return The vote mode parameter.
     function voteMode() external view returns (VoteMode);
 
-    /// @notice Returns the support threshold parameter stored in the majority voting settings.
+    /// @notice Returns the support threshold parameter stored in the voting settings.
     /// @return The support threshold parameter.
     function supportThreshold() external view returns (uint64);
 
-    /// @notice Returns the minimum participation parameter stored in the majority voting settings.
+    /// @notice Returns the minimum participation parameter stored in the voting settings.
     /// @return The minimum participation parameter.
     function minParticipation() external view returns (uint64);
 
-    /// @notice Returns the minimum duration parameter stored in the majority voting settings.
+    /// @notice Returns the minimum duration parameter stored in the voting settings.
     /// @return The minimum duration parameter.
     function minDuration() external view returns (uint64);
 
-    /// @notice Returns the minimum voting power required to create a proposa stored in the majority voting settings.
+    /// @notice Returns the minimum voting power required to create a proposa stored in the voting settings.
     /// @return The minimum voting power required to create a proposal.
     function minProposerVotingPower() external view returns (uint256);
 

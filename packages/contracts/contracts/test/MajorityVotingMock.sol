@@ -5,11 +5,8 @@ pragma solidity 0.8.10;
 import "../voting/majority/MajorityVotingBase.sol";
 
 contract MajorityVotingMock is MajorityVotingBase {
-    function initializeMock(IDAO _dao, VotingSettings calldata _majorityVotingSettings)
-        public
-        initializer
-    {
-        __MajorityVotingBase_init(_dao, _majorityVotingSettings);
+    function initializeMock(IDAO _dao, VotingSettings calldata _votingSettings) public initializer {
+        __MajorityVotingBase_init(_dao, _votingSettings);
     }
 
     function createProposal(

@@ -92,7 +92,7 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) majorityVotingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -109,7 +109,7 @@ contract TokenVotingSetup is PluginSetup {
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
-            IMajorityVoting.VotingSettings memory majorityVotingSettings,
+            IMajorityVoting.VotingSettings memory votingSettings,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
@@ -182,12 +182,7 @@ contract TokenVotingSetup is PluginSetup {
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
-            abi.encodeWithSelector(
-                TokenVoting.initialize.selector,
-                dao,
-                majorityVotingSettings,
-                token
-            )
+            abi.encodeWithSelector(TokenVoting.initialize.selector, dao, votingSettings, token)
         );
 
         // Prepare permissions

@@ -69,8 +69,8 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice The struct storing the majority voting settings.
-    VotingSettings private majorityVotingSettings;
+    /// @notice The struct storing the voting settings.
+    VotingSettings private votingSettings;
 
     /// @notice A counter counting the created proposals.
     uint256 public proposalCount;
@@ -113,13 +113,13 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _majorityVotingSettings The majority voting settings.
-    function __MajorityVotingBase_init(IDAO _dao, VotingSettings calldata _majorityVotingSettings)
+    /// @param _votingSettings The voting settings.
+    function __MajorityVotingBase_init(IDAO _dao, VotingSettings calldata _votingSettings)
         internal
         onlyInitializing
     {
         __PluginUUPSUpgradeable_init(_dao);
-        _validateAndUpdateSettings(_majorityVotingSettings);
+        _validateAndUpdateSettings(_votingSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -136,11 +136,11 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function updateVotingSettings(VotingSettings calldata _majorityVotingSettings)
+    function updateVotingSettings(VotingSettings calldata _votingSettings)
         external
         auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
     {
-        _validateAndUpdateSettings(_majorityVotingSettings);
+        _validateAndUpdateSettings(_votingSettings);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -217,27 +217,27 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function supportThreshold() public view virtual returns (uint64) {
-        return majorityVotingSettings.supportThreshold;
+        return votingSettings.supportThreshold;
     }
 
     /// @inheritdoc IMajorityVoting
     function minParticipation() public view virtual returns (uint64) {
-        return majorityVotingSettings.minParticipation;
+        return votingSettings.minParticipation;
     }
 
     /// @inheritdoc IMajorityVoting
     function minDuration() public view virtual returns (uint64) {
-        return majorityVotingSettings.minDuration;
+        return votingSettings.minDuration;
     }
 
     /// @inheritdoc IMajorityVoting
     function minProposerVotingPower() public view virtual returns (uint256) {
-        return majorityVotingSettings.minProposerVotingPower;
+        return votingSettings.minProposerVotingPower;
     }
 
     /// @inheritdoc IMajorityVoting
     function voteMode() public view virtual returns (VoteMode) {
-        return majorityVotingSettings.voteMode;
+        return votingSettings.voteMode;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -338,48 +338,39 @@ abstract contract MajorityVotingBase is
         return (_value * PCT_BASE) / _total;
     }
 
-    /// @notice Validates and updates the proposal majority voting settings.
-    /// @param _majorityVotingSettings The majority voting settings to be validated and updated.
-    function _validateAndUpdateSettings(VotingSettings calldata _majorityVotingSettings)
-        internal
-        virtual
-    {
-        if (_majorityVotingSettings.supportThreshold > PCT_BASE) {
+    /// @notice Validates and updates the proposal voting settings.
+    /// @param _votingSettings The voting settings to be validated and updated.
+    function _validateAndUpdateSettings(VotingSettings calldata _votingSettings) internal virtual {
+        if (_votingSettings.supportThreshold > PCT_BASE) {
             revert PercentageExceeds100({
                 limit: PCT_BASE,
-                actual: _majorityVotingSettings.supportThreshold
+                actual: _votingSettings.supportThreshold
             });
         }
 
-        if (_majorityVotingSettings.minParticipation > PCT_BASE) {
+        if (_votingSettings.minParticipation > PCT_BASE) {
             revert PercentageExceeds100({
                 limit: PCT_BASE,
-                actual: _majorityVotingSettings.minParticipation
+                actual: _votingSettings.minParticipation
             });
         }
 
-        if (_majorityVotingSettings.minDuration < 60 minutes) {
-            revert MinDurationOutOfBounds({
-                limit: 60 minutes,
-                actual: _majorityVotingSettings.minDuration
-            });
+        if (_votingSettings.minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _votingSettings.minDuration});
         }
 
-        if (_majorityVotingSettings.minDuration > 365 days) {
-            revert MinDurationOutOfBounds({
-                limit: 365 days,
-                actual: _majorityVotingSettings.minDuration
-            });
+        if (_votingSettings.minDuration > 365 days) {
+            revert MinDurationOutOfBounds({limit: 365 days, actual: _votingSettings.minDuration});
         }
 
-        majorityVotingSettings = _majorityVotingSettings;
+        votingSettings = _votingSettings;
 
         emit VotingSettingsUpdated({
-            voteMode: _majorityVotingSettings.voteMode,
-            supportThreshold: _majorityVotingSettings.supportThreshold,
-            minParticipation: _majorityVotingSettings.minParticipation,
-            minDuration: _majorityVotingSettings.minDuration,
-            minProposerVotingPower: _majorityVotingSettings.minProposerVotingPower
+            voteMode: _votingSettings.voteMode,
+            supportThreshold: _votingSettings.supportThreshold,
+            minParticipation: _votingSettings.minParticipation,
+            minDuration: _votingSettings.minDuration,
+            minProposerVotingPower: _votingSettings.minProposerVotingPower
         });
     }
 
@@ -406,7 +397,7 @@ abstract contract MajorityVotingBase is
             }
         }
 
-        uint64 earliestEndDate = startDate + majorityVotingSettings.minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
+        uint64 earliestEndDate = startDate + votingSettings.minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
 
         if (_end == 0) {
             endDate = earliestEndDate;

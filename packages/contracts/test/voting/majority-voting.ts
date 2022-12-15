@@ -18,7 +18,7 @@ describe('MajorityVotingMock', function () {
   let votingBase: MajorityVotingMock;
   let dao: DAO;
   let ownerAddress: string;
-  let majorityVotingSettings: VotingSettings;
+  let votingSettings: VotingSettings;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -30,7 +30,7 @@ describe('MajorityVotingMock', function () {
   });
 
   beforeEach(async () => {
-    majorityVotingSettings = {
+    votingSettings = {
       voteMode: VoteMode.EarlyExecution,
       supportThreshold: pct16(50),
       minParticipation: pct16(20),
@@ -51,80 +51,80 @@ describe('MajorityVotingMock', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await votingBase.initializeMock(dao.address, majorityVotingSettings);
+      await votingBase.initializeMock(dao.address, votingSettings);
 
       await expect(
-        votingBase.initializeMock(dao.address, majorityVotingSettings)
+        votingBase.initializeMock(dao.address, votingSettings)
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('validateAndSetSettings: ', async () => {
     beforeEach(async () => {
-      await votingBase.initializeMock(dao.address, majorityVotingSettings);
+      await votingBase.initializeMock(dao.address, votingSettings);
     });
     it('reverts if the support threshold specified exceeds 100%', async () => {
-      majorityVotingSettings.supportThreshold = pct16(1000);
+      votingSettings.supportThreshold = pct16(1000);
       await expect(
-        votingBase.updateVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(votingSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
           pct16(100),
-          majorityVotingSettings.supportThreshold
+          votingSettings.supportThreshold
         )
       );
     });
 
     it('reverts if the participation threshold specified exceeds 100%', async () => {
-      majorityVotingSettings.minParticipation = pct16(1000);
+      votingSettings.minParticipation = pct16(1000);
 
       await expect(
-        votingBase.updateVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(votingSettings)
       ).to.be.revertedWith(
         customError(
           'PercentageExceeds100',
           pct16(100),
-          majorityVotingSettings.minParticipation
+          votingSettings.minParticipation
         )
       );
     });
 
     it('reverts if the minimal duration is shorter than one hour', async () => {
-      majorityVotingSettings.minDuration = ONE_HOUR - 1;
+      votingSettings.minDuration = ONE_HOUR - 1;
       await expect(
-        votingBase.updateVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(votingSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
           ONE_HOUR,
-          majorityVotingSettings.minDuration
+          votingSettings.minDuration
         )
       );
     });
 
     it('reverts if the minimal duration is longer than one year', async () => {
-      majorityVotingSettings.minDuration = ONE_YEAR + 1;
+      votingSettings.minDuration = ONE_YEAR + 1;
       await expect(
-        votingBase.updateVotingSettings(majorityVotingSettings)
+        votingBase.updateVotingSettings(votingSettings)
       ).to.be.revertedWith(
         customError(
           'MinDurationOutOfBounds',
           ONE_YEAR,
-          majorityVotingSettings.minDuration
+          votingSettings.minDuration
         )
       );
     });
 
-    it('should change the majority voting settings successfully', async () => {
-      expect(await votingBase.updateVotingSettings(majorityVotingSettings))
-        .to.emit(votingBase, VOTING_EVENTS.MAJORITY_VOTING_SETTINGS_UPDATED)
+    it('should change the voting settings successfully', async () => {
+      expect(await votingBase.updateVotingSettings(votingSettings))
+        .to.emit(votingBase, VOTING_EVENTS.VOTING_SETTINGS_UPDATED)
         .withArgs(
-          majorityVotingSettings.voteMode,
-          majorityVotingSettings.supportThreshold,
-          majorityVotingSettings.minParticipation,
-          majorityVotingSettings.minDuration,
-          majorityVotingSettings.minProposerVotingPower
+          votingSettings.voteMode,
+          votingSettings.supportThreshold,
+          votingSettings.minParticipation,
+          votingSettings.minDuration,
+          votingSettings.minProposerVotingPower
         );
     });
   });
