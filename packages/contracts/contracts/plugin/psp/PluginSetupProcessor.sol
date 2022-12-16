@@ -373,12 +373,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Prepares the update of an UUPS upgradeable plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
-    /// @return permissions The list of multi-targeted permission operations to be applied to the updating DAO.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
+    /// @return preparedDependency TOD:GIORGI
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
     function prepareUpdate(address _dao, PrepareUpdate calldata _params)
         external
-        returns (PermissionLib.ItemMultiTarget[] memory, bytes memory)
+        returns (bytes memory, IPluginSetup.PreparedDependency memory preparedDependency)
     {
         if (
             _params.currentVersionTag.release != _params.newVersionTag.release ||
@@ -458,7 +458,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         pluginInformation.setupIds[newSetupId] = block.number;
 
-        return (preparedDependency.permissions, initData);
+        return (initData, preparedDependency);
     }
 
     /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
