@@ -16,7 +16,7 @@ import {
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
-let defaultVokenSettings: {addr: string; name: string; symbol: string};
+let defaultTokenSettings: {addr: string; name: string; symbol: string};
 let defaultMintSettings: {receivers: string[]; amounts: number[]};
 
 const abiCoder = ethers.utils.defaultAbiCoder;
@@ -60,7 +60,7 @@ describe('TokenVotingSetup', function () {
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
-    defaultVokenSettings = {addr: AddressZero, name: '', symbol: ''};
+    defaultTokenSettings = {addr: AddressZero, name: '', symbol: ''};
     defaultMintSettings = {receivers: [], amounts: []};
 
     const TokenVotingSetup = await ethers.getContractFactory(
@@ -75,7 +75,7 @@ describe('TokenVotingSetup', function () {
 
     defaultData = abiCoder.encode(prepareInstallationDataTypes, [
       Object.values(defaultVotingSettings),
-      Object.values(defaultVokenSettings),
+      Object.values(defaultTokenSettings),
       Object.values(defaultMintSettings),
     ]);
   });
@@ -125,7 +125,7 @@ describe('TokenVotingSetup', function () {
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const data = abiCoder.encode(prepareInstallationDataTypes, [
         Object.values(defaultVotingSettings),
-        Object.values(defaultVokenSettings),
+        Object.values(defaultTokenSettings),
         [[AddressZero], []],
       ]);
 
