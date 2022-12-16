@@ -367,7 +367,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         pluginInformation.currentSetupId = newSetupId;
         pluginInformation.blockNumber = block.number;
 
-        _executeOnDAO(_dao, _params.permissions, _params.actions);
+        _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
     }
 
     /// @notice Prepares the update of an UUPS upgradeable plugin.
@@ -514,7 +514,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);
         }
 
-        _executeOnDAO(_dao, _params.permissions, _params.actions);
+        _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
     }
 
     /// @notice Prepares the uninstallation of a plugin.
@@ -664,10 +664,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Helper function to apply permissions + execute actions on the dao.
     /// @param _dao The address of the DAO conducting the setup.
+    /// @param _setupId the setup id of the preparation object.
     /// @param _permissions The permissions array
     /// @param _actions The follow up actions that will be executed at the time of plugin installation/update.
     function _executeOnDAO(
         address _dao,
+        bytes32 _setupId,
         PermissionLib.ItemMultiTarget[] calldata _permissions,
         IDAO.Action[] calldata _actions
     ) private {
@@ -678,7 +680,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Process the actions
         dao.grant(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
-        dao.execute(1, _actions);
+        dao.execute(uint256(_setupId), _actions);
         dao.revoke(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
     }
 }
