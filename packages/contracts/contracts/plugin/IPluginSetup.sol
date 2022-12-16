@@ -44,7 +44,7 @@ interface IPluginSetup {
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
     /// @param _currentBuild The build number of the plugin to update from.
-    /// @param _payload TOD:GIORGI how to add explanation ? 
+    /// @param _payload TOD:GIORGI how to add explanation ?
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
     /// @return preparedDependency TOD:GIORGI
     function prepareUpdate(
@@ -59,7 +59,7 @@ interface IPluginSetup {
 
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.
-    /// @param _payload TOD:GIORGI how to add explanation ? 
+    /// @param _payload TOD:GIORGI how to add explanation ?
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external

@@ -311,7 +311,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
         if (pluginInformation.currentSetupId != bytes32(0)) {
             revert PluginAlreadyInstalled();
         }
-        
+
+        // Only allow to prepare if setupId has not been prepared before.
+        // NOTE that if plugin was uninstalled, the same setupId can still
+        // be prepared as blockNumber would end up being higher than setupId's blockNumber.
+        if(pluginInformation.blockNumber < pluginInformation.setupIds[setupId]) {
+            revert SetupAlreadyPrepared(setupId);
+        }
+
         pluginInformation.setupIds[setupId] = block.number;
 
         return (plugin, preparedDependency);
@@ -327,7 +334,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 pluginId = _getPluginId(_dao, _params.plugin);
 
         PluginInformation storage pluginInformation = states[pluginId];
-        
+
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
             pHash(_params.permissions),
@@ -360,15 +367,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         pluginInformation.currentSetupId = newSetupId;
         pluginInformation.blockNumber = block.number;
 
-        DAO dao = DAO(payable(_dao));
-
-        // Process the permission list.
-        dao.bulkOnMultiTarget(_params.permissions);
-
-        // Process the actions
-        dao.grant(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
-        dao.execute(1, _params.actions);
-        dao.revoke(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
+        _executeOnDAO(_dao, _params.permissions, _params.actions);
     }
 
     /// @notice Prepares the update of an UUPS upgradeable plugin.
@@ -447,13 +446,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
             aHash(preparedDependency.actions),
-            // initData that was returned by the current preparation for update
-            // must be included in the setupId generation which allows us
-            // to confirm its authenticity when applyUpdate is called.
             initData
         );
 
-        // TODO: We might want to add the check to revert if newSetupId is already there.
+        // Only allow to prepare if setupId has not been prepared before.
+        // Note that the following check ensures that the same setupId can be prepared
+        // once again if the plugin was uninstalled and then installed.. 
+        if(pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
+            revert SetupAlreadyPrepared(setupId);
+        }
+
         pluginInformation.setupIds[newSetupId] = block.number;
 
         return (preparedDependency.permissions, initData);
@@ -486,11 +488,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Once the applyUpdate is called and arguments are confirmed(including initData)
-        // we update the setupId with the new versionTag, permissions and helpers.
-        // NOTE that `initData` gets updated by `bytes("")` as it's no longer required
-        // for the next/future prepareUpdate.
-        // TODO: in the `_getSetupId`, we duplicate the first 3 params abi encoding just
-        // to store it with one modification(bytes("") instead of _params.initData)
+        // we update the setupId with the new versionTag, the current helpers. All other
+        // data can be put with bytes(0) as they don't need to be confirmed in the later 
+        // prepareUpdate/prepareUninstallation.
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             bytes32(0),
@@ -514,14 +514,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);
         }
 
-        DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
-
-        DAO dao = DAO(payable(_dao));
-
-        // Process the actions
-        dao.grant(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
-        dao.execute(1, _params.actions);
-        dao.revoke(_dao, address(this),  dao.EXECUTE_PERMISSION_ID());
+        _executeOnDAO(_dao, _params.permissions, _params.actions);
     }
 
     /// @notice Prepares the uninstallation of a plugin.
@@ -564,10 +557,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             pHash(permissions),
-            hHash(_params.setupPayload.currentHelpers),
+            bytes32(0),
             bytes32(0),
             bytes("")
         );
+
+        // Only allow to prepare if setupId has not been prepared before.
+        // Note that the following check ensures that the same setupId can be prepared
+        // once again if the plugin was uninstalled and then installed/updated.. 
+        if(pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
+            revert SetupAlreadyPrepared(setupId);
+        }
 
         pluginInformation.setupIds[newSetupId] = block.number;
     }
@@ -661,9 +661,24 @@ contract PluginSetupProcessor is DaoAuthorizable {
             });
         }
     }
-}
 
-// // 1.0 => 2.0 (permission1, helper1)
-// // 1.0 => 2.1 (permission1, helper1)
-// // 1.0 => 2.0 (permission1, helper2)
-// map[pluginId][setupId] = true
+    /// @notice Helper function to apply permissions + execute actions on the dao.
+    /// @param _dao The address of the DAO conducting the setup.
+    /// @param _permissions The permissions array
+    /// @param _actions The follow up actions that will be executed at the time of plugin installation/update.
+    function _executeOnDAO(
+        address _dao,
+        PermissionLib.ItemMultiTarget[] calldata _permissions,
+        IDAO.Action[] calldata _actions
+    ) private {
+        DAO dao = DAO(payable(_dao));
+
+        // Process the permissions
+        dao.bulkOnMultiTarget(_permissions);
+
+        // Process the actions
+        dao.grant(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
+        dao.execute(1, _actions);
+        dao.revoke(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
+    }
+}

@@ -121,7 +121,7 @@ contract PluginRepo is
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
 
-    // How it looks:
+    // How it looks: Will be removed as the last commit before the merge.
     // Release 1
     // //  1 => {
     //         pluginSetup: 0x12  (implementation: 0x55)
