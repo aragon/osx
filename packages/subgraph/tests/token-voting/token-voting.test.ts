@@ -99,7 +99,12 @@ test('Run Token Voting (handleProposalCreated) mappings with mock event', () => 
     'createdAt',
     event.block.timestamp.toString()
   );
-  assert.fieldEquals('TokenVotingProposal', entityID, 'creationBlockNumber', event.block.number.toString())
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'creationBlockNumber',
+    event.block.number.toString()
+  );
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
     'TokenVotingProposal',
@@ -175,17 +180,22 @@ test('Run Token Voting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals('TokenVote', entityID, 'id', entityID);
 
   // check voter
-  assert.fieldEquals('TokenVotingVoter', ADDRESS_ONE, 'id', ADDRESS_ONE);
-  assert.fieldEquals('TokenVotingVoter', ADDRESS_ONE, 'address', ADDRESS_ONE);
+  let memberId =
+    Address.fromString(VOTING_ADDRESS).toHexString() +
+    '_' +
+    Address.fromString(ADDRESS_ONE).toHexString();
+
+  assert.fieldEquals('TokenVotingVoter', memberId, 'id', memberId);
+  assert.fieldEquals('TokenVotingVoter', memberId, 'address', ADDRESS_ONE);
   assert.fieldEquals(
     'TokenVotingVoter',
-    ADDRESS_ONE,
+    memberId,
     'plugin',
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
   assert.fieldEquals(
     'TokenVotingVoter',
-    ADDRESS_ONE,
+    memberId,
     'lastUpdated',
     event.block.timestamp.toString()
   );
@@ -279,8 +289,18 @@ test('Run Token Voting (handleProposalExecuted) mappings with mock event', () =>
   // checks
   assert.fieldEquals('TokenVotingProposal', entityID, 'id', entityID);
   assert.fieldEquals('TokenVotingProposal', entityID, 'executed', 'true');
-  assert.fieldEquals('TokenVotingProposal', entityID, 'executionDate', event.block.timestamp.toString())
-  assert.fieldEquals('TokenVotingProposal', entityID, 'executionBlockNumber', event.block.number.toString())
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'executionDate',
+    event.block.timestamp.toString()
+  );
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'executionBlockNumber',
+    event.block.number.toString()
+  );
 
   clearStore();
 });

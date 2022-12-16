@@ -104,7 +104,12 @@ test('Run Addresslist Voting (handleProposalCreated) mappings with mock event', 
     'createdAt',
     event.block.timestamp.toString()
   );
-  assert.fieldEquals('AddresslistProposal', entityID, 'creationBlockNumber', event.block.number.toString())
+  assert.fieldEquals(
+    'AddresslistProposal',
+    entityID,
+    'creationBlockNumber',
+    event.block.number.toString()
+  );
   assert.fieldEquals('AddresslistProposal', entityID, 'startDate', startDate);
   assert.fieldEquals(
     'AddresslistProposal',
@@ -233,8 +238,18 @@ test('Run Addresslist Voting (handleProposalExecuted) mappings with mock event',
   // checks
   assert.fieldEquals('AddresslistProposal', entityID, 'id', entityID);
   assert.fieldEquals('AddresslistProposal', entityID, 'executed', 'true');
-  assert.fieldEquals('AddresslistProposal', entityID, 'executionDate', event.block.timestamp.toString())
-  assert.fieldEquals('AddresslistProposal', entityID, 'executionBlockNumber', event.block.number.toString())
+  assert.fieldEquals(
+    'AddresslistProposal',
+    entityID,
+    'executionDate',
+    event.block.timestamp.toString()
+  );
+  assert.fieldEquals(
+    'AddresslistProposal',
+    entityID,
+    'executionBlockNumber',
+    event.block.number.toString()
+  );
 
   clearStore();
 });
@@ -295,21 +310,22 @@ test('Run Addresslist Voting (handleAddressesAdded) mappings with mock event', (
   handleAddressesAdded(event);
 
   // checks
+
+  let memberId =
+    Address.fromString(VOTING_ADDRESS).toHexString() +
+    '_' +
+    userArray[0].toHexString();
+
+  assert.fieldEquals('AddresslistVoter', memberId, 'id', memberId);
   assert.fieldEquals(
     'AddresslistVoter',
-    userArray[0].toHexString(),
-    'id',
-    userArray[0].toHexString()
-  );
-  assert.fieldEquals(
-    'AddresslistVoter',
-    userArray[0].toHexString(),
+    memberId,
     'address',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
     'AddresslistVoter',
-    userArray[0].toHexString(),
+    memberId,
     'plugin',
     Address.fromString(VOTING_ADDRESS).toHexString()
   );
@@ -319,32 +335,43 @@ test('Run Addresslist Voting (handleAddressesAdded) mappings with mock event', (
 
 test('Run Addresslist Voting (AddressesRemoved) mappings with mock event', () => {
   // create state
-  let userArray = [
+  let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
-  for (let index = 0; index < userArray.length; index++) {
-    const user = userArray[index];
-    let userEntity = new AddresslistVoter(user.toHexString());
-    userEntity.plugin = Address.fromString(VOTING_ADDRESS).toHexString();
+  for (let index = 0; index < memberAddresses.length; index++) {
+    const user = memberAddresses[index].toHexString();
+    const pluginId = Address.fromString(VOTING_ADDRESS).toHexString();
+    let memberId = pluginId + '_' + user;
+    let userEntity = new AddresslistVoter(memberId);
+    userEntity.plugin = pluginId;
     userEntity.save();
   }
 
+  // checks
+  let memberId1 =
+    Address.fromString(VOTING_ADDRESS).toHexString() +
+    '_' +
+    memberAddresses[0].toHexString();
+  let memberId2 =
+    Address.fromString(VOTING_ADDRESS).toHexString() +
+    '_' +
+    memberAddresses[1].toHexString();
+  assert.fieldEquals('AddresslistVoter', memberId2, 'id', memberId2);
+
   // create event
-  let event = createNewAddressesRemovedEvent([userArray[1]], VOTING_ADDRESS);
+  let event = createNewAddressesRemovedEvent(
+    [memberAddresses[1]],
+    VOTING_ADDRESS
+  );
 
   // handle event
   handleAddressesRemoved(event);
 
   // checks
-  assert.fieldEquals(
-    'AddresslistVoter',
-    userArray[0].toHexString(),
-    'id',
-    userArray[0].toHexString()
-  );
-  assert.notInStore('AddresslistVoter', userArray[1].toHexString());
+  assert.fieldEquals('AddresslistVoter', memberId1, 'id', memberId1);
+  assert.notInStore('AddresslistVoter', memberId2);
 
   clearStore();
 });
