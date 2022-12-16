@@ -315,7 +315,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Only allow to prepare if setupId has not been prepared before.
         // NOTE that if plugin was uninstalled, the same setupId can still
         // be prepared as blockNumber would end up being higher than setupId's blockNumber.
-        if(pluginInformation.blockNumber < pluginInformation.setupIds[setupId]) {
+        if (pluginInformation.blockNumber < pluginInformation.setupIds[setupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
@@ -378,7 +378,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
     function prepareUpdate(address _dao, PrepareUpdate calldata _params)
         external
-        returns (bytes memory, IPluginSetup.PreparedDependency memory preparedDependency)
+        returns (bytes memory initData, IPluginSetup.PreparedDependency memory preparedDependency)
     {
         if (
             _params.currentVersionTag.release != _params.newVersionTag.release ||
@@ -432,14 +432,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Prepare the update.
-        (
-            bytes memory initData,
-            IPluginSetup.PreparedDependency memory preparedDependency
-        ) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
-                _dao,
-                _params.currentVersionTag.build,
-                _params.setupPayload
-            );
+        (initData, preparedDependency) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
+            _dao,
+            _params.currentVersionTag.build,
+            _params.setupPayload
+        );
 
         bytes32 newSetupId = _getSetupId(
             PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
@@ -451,8 +448,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Only allow to prepare if setupId has not been prepared before.
         // Note that the following check ensures that the same setupId can be prepared
-        // once again if the plugin was uninstalled and then installed.. 
-        if(pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
+        // once again if the plugin was uninstalled and then installed..
+        if (pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
@@ -489,7 +486,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Once the applyUpdate is called and arguments are confirmed(including initData)
         // we update the setupId with the new versionTag, the current helpers. All other
-        // data can be put with bytes(0) as they don't need to be confirmed in the later 
+        // data can be put with bytes(0) as they don't need to be confirmed in the later
         // prepareUpdate/prepareUninstallation.
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
@@ -564,8 +561,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Only allow to prepare if setupId has not been prepared before.
         // Note that the following check ensures that the same setupId can be prepared
-        // once again if the plugin was uninstalled and then installed/updated.. 
-        if(pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
+        // once again if the plugin was uninstalled and then installed/updated..
+        if (pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
