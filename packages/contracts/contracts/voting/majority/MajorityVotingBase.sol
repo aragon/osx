@@ -73,7 +73,7 @@ abstract contract MajorityVotingBase is
     VotingSettings private votingSettings;
 
     /// @notice A counter counting the created proposals.
-    uint256 public proposalCount;
+    uint256 public proposalCount; // TODO put this in a proposals interface
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.

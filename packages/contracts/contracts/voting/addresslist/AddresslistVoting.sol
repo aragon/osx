@@ -53,7 +53,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     }
 
     /// @notice Adds new members to the address list.
-    /// @param _members The addresses of the members to be added.
+    /// @param _members The addresses of members to be added.
+    /// @dev This functin is used during the plugin initialization.
     function addAddresses(address[] calldata _members)
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
@@ -61,24 +62,13 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         _addAddresses(_members);
     }
 
-    /// @notice Internal function to add new members to the address list.
-    /// @param _members The addresses of members to be added.
-    /// @dev This functin is used during the plugin initialization.
-    function _addAddresses(address[] calldata _members) internal {
-        _updateAddresslist(_members, true);
-
-        emit AddressesAdded({members: _members});
-    }
-
-    /// @notice Removes members from the address list.
+    /// @notice Removes existing members from the address list.
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members)
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _updateAddresslist(_members, false);
-
-        emit AddressesRemoved({members: _members});
+        _removeAddresses(_members);
     }
 
     /// @inheritdoc IMajorityVoting

@@ -62,6 +62,22 @@ abstract contract Addresslist is TimeHelpers {
         }
     }
 
+    /// @notice Internal function to add new members to the address list.
+    /// @param _members The addresses of the members to be added.
+    function _addAddresses(address[] calldata _members) internal {
+        _updateAddresslist(_members, true);
+
+        emit AddressesAdded({members: _members});
+    }
+
+    /// @notice Internal function to remove existing members from the address list.
+    /// @param _members The addresses of the members to be removed.
+    function _removeAddresses(address[] calldata _members) internal {
+        _updateAddresslist(_members, false);
+
+        emit AddressesRemoved({members: _members});
+    }
+
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
