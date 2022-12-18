@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "../../core/IDAO.sol";
+import {IDAO} from "../../core/IDAO.sol";
 
 /// @title IMajorityVoting
 /// @author Aragon Association - 2022
@@ -133,17 +133,6 @@ interface IMajorityVoting {
         uint256 votingPower
     );
 
-    /// @notice Emitted when a proposal is created.
-    /// @param proposalId The ID of the proposal.
-    /// @param creator  The creator of the proposal.
-    /// @param metadata The IPFS hash pointing to the proposal metadata.
-    event ProposalCreated(uint256 indexed proposalId, address indexed creator, bytes metadata);
-
-    /// @notice Emitted when a proposal is executed.
-    /// @param proposalId The ID of the proposal.
-    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
     /// @notice Emitted when the voting settings are updated.
     /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
@@ -162,22 +151,22 @@ interface IMajorityVoting {
     /// @param _votingSettings The new voting settings.
     function updateVotingSettings(VotingSettings calldata _votingSettings) external;
 
-    /// @notice Creates a new proposal.
-    /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
+    /// @notice Creates a new majority voting proposal.
+    /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @param _voteOption The vote voteOption to cast on creation.
-    /// @return proposalId The ID of the proposal.
+    /// @return id The ID of the proposal.
     function createProposal(
-        bytes calldata _proposalMetadata,
+        bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
         bool _tryEarlyExecution,
         VoteOption _voteOption
-    ) external returns (uint256 proposalId);
+    ) external returns (uint256 id);
 
     /// @notice Votes for a vote option and optionally executes the proposal.
     /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no

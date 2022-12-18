@@ -3,8 +3,9 @@
 pragma solidity 0.8.10;
 
 import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
@@ -16,6 +17,8 @@ import {Addresslist} from "./Addresslist.sol";
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is Addresslist, MajorityVotingBase {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
         this.addAddresses.selector ^
@@ -73,23 +76,23 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
     /// @inheritdoc IMajorityVoting
     function createProposal(
-        bytes calldata _proposalMetadata,
+        bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
         bool _tryEarlyExecution,
         VoteOption _voteOption
-    ) external override returns (uint256 proposalId) {
+    ) external override returns (uint256 id) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         if (minProposerVotingPower() != 0 && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount++;
+        id = _createProposal(_msgSender(), _metadata, _actions);
 
-        // Create the proposal
-        Proposal storage proposal_ = proposals[proposalId];
+        // Store proposal related information
+        Proposal storage proposal_ = proposals[id];
 
         (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
             _startDate,
@@ -108,13 +111,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             }
         }
 
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _proposalMetadata
-        });
-
-        vote(proposalId, _voteOption, _tryEarlyExecution);
+        vote(id, _voteOption, _tryEarlyExecution);
     }
 
     /// @inheritdoc MajorityVotingBase

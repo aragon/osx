@@ -93,7 +93,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @notice Emitted when a proposal is created.
     /// @param proposalId  The ID of the proposal.
     /// @param creator  The creator of the proposal.
-    /// @param metadata The IPFS hash pointing to the proposal metadata.
+    /// @param metadata The metadata of the proposal.
     event ProposalCreated(
         uint256 indexed proposalId,
         address indexed creator,
@@ -177,7 +177,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         _removeAddresses(_members);
     }
 
-    function createProposal(bytes calldata _proposalMetadata, IDAO.Action[] calldata _actions)
+    function createProposal(bytes calldata _metadata, IDAO.Action[] calldata _actions)
         external
         returns (uint256 proposalId)
     {
@@ -205,7 +205,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         emit ProposalCreated({
             proposalId: proposalId,
             creator: _msgSender(),
-            metadata: _proposalMetadata,
+            metadata: _metadata,
             actions: _actions
         });
     }

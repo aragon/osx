@@ -685,7 +685,6 @@ describe('AddresslistVoting', function () {
         {
           const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
-          expect(event.args.execResults).to.deep.equal(['0x']);
         }
 
         // calling execute again should fail

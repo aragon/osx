@@ -324,6 +324,7 @@ describe('TokenVoting', function () {
       const block = await ethers.provider.getBlock('latest');
 
       const proposal = await voting.getProposal(id);
+
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
       expect(proposal.parameters.supportThreshold).to.equal(
@@ -785,7 +786,6 @@ describe('TokenVoting', function () {
         {
           const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
-          expect(event.args.execResults).to.deep.equal(['0x']);
         }
 
         // calling execute again should fail

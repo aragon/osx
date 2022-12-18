@@ -10,7 +10,7 @@ contract MajorityVotingMock is MajorityVotingBase {
     }
 
     function createProposal(
-        bytes calldata, /* _proposalMetadata */
+        bytes calldata, /* _metadata */
         IDAO.Action[] calldata, /* _actions */
         uint64, /* _startDate */
         uint64, /* _endDate */
