@@ -75,6 +75,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         IDAO.Action[] actions;
     }
 
+    struct ApplyUpdateUI {
+        address plugin;
+        PluginSetupRef pluginSetupRef;
+        bytes32 helpersHash;
+    }
+
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
     struct PrepareUninstall {
         PluginSetupRef pluginSetupRef;
@@ -390,26 +396,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             });
         }
 
-        // // Check that plugin is `PluginUUPSUpgradable`.
-        if (!_params.setupPayload.plugin.supportsInterface(type(IPlugin).interfaceId)) {
-            revert IPluginNotSupported({plugin: _params.setupPayload.plugin});
-        }
-        if (IPlugin(_params.setupPayload.plugin).pluginType() != IPlugin.PluginType.UUPS) {
-            revert PluginNonupgradeable({plugin: _params.setupPayload.plugin});
-        }
-
-        PluginRepo.Version memory currentVersion = _params.pluginSetupRepo.getVersion(
-            _params.currentVersionTag
-        );
-
-        PluginRepo.Version memory newVersion = _params.pluginSetupRepo.getVersion(
-            _params.newVersionTag
-        );
-
-        if (currentVersion.pluginSetup == newVersion.pluginSetup) {
-            // revert plugin setups can't be the same(pointless)
-        }
-
         bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
 
         PluginInformation storage pluginInformation = states[pluginId];
@@ -431,20 +417,52 @@ contract PluginSetupProcessor is DaoAuthorizable {
             });
         }
 
-        // Prepare the update.
-        (initData, preparedDependency) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
-            _dao,
-            _params.currentVersionTag.build,
-            _params.setupPayload
+        PluginRepo.Version memory currentVersion = _params.pluginSetupRepo.getVersion(
+            _params.currentVersionTag
         );
 
-        bytes32 newSetupId = _getSetupId(
-            PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
-            pHash(preparedDependency.permissions),
-            hHash(preparedDependency.helpers),
-            aHash(preparedDependency.actions),
-            initData
+        PluginRepo.Version memory newVersion = _params.pluginSetupRepo.getVersion(
+            _params.newVersionTag
         );
+
+        bytes32 newSetupId;
+
+        // If the current version's pluginSetup is equal to
+        // new version's plugin setup, it means plugin or plugin setup
+        // have not changed and only UI change is detected. In such a case,
+        // We don't call plugin setup to not cause any side effects.
+        if (currentVersion.pluginSetup == newVersion.pluginSetup) {
+            newSetupId = _getSetupId(
+                PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
+                bytes32(0),
+                bytes32(0),
+                bytes32(0),
+                bytes("")
+            );
+        } else {
+            // Check that plugin is `PluginUUPSUpgradable`.
+            if (!_params.setupPayload.plugin.supportsInterface(type(IPlugin).interfaceId)) {
+                revert IPluginNotSupported({plugin: _params.setupPayload.plugin});
+            }
+            if (IPlugin(_params.setupPayload.plugin).pluginType() != IPlugin.PluginType.UUPS) {
+                revert PluginNonupgradeable({plugin: _params.setupPayload.plugin});
+            }
+            
+            // Prepare the update.
+            (initData, preparedDependency) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
+                _dao,
+                _params.currentVersionTag.build,
+                _params.setupPayload
+            );
+
+            newSetupId = _getSetupId(
+                PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
+                pHash(preparedDependency.permissions),
+                hHash(preparedDependency.helpers),
+                aHash(preparedDependency.actions),
+                initData
+            );
+        }
 
         // Only allow to prepare if setupId has not been prepared before.
         // Note that the following check ensures that the same setupId can be prepared
@@ -514,6 +532,36 @@ contract PluginSetupProcessor is DaoAuthorizable {
         _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
     }
 
+    /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
+    /// @param _dao The address of the updating DAO.
+    /// @param _params The struct containing the parameters for the `applyInstallation` function.
+    function applyUpdateOnlyForUI(address _dao, ApplyUpdate calldata _params)
+        external
+        canApply(_dao, APPLY_UPDATE_PERMISSION_ID)
+    {
+        bytes32 pluginId = _getPluginId(_dao, _params.plugin);
+
+        PluginInformation storage pluginInformation = states[pluginId];
+
+        bytes32 setupId = _getSetupId(
+            _params.pluginSetupRef,
+            bytes32(0),
+            _params.helpersHash,
+            bytes32(0),
+            bytes("")
+        );
+
+        // If the plugin block number exceeds the setupId preparation block number,
+        // This means applyUpdateOnlyForUI or applyUpdate was already called on another setupId
+        // and all the rest setupIds should become idle or setupId is not prepared before.
+        if (pluginInformation.blockNumber >= pluginInformation.setupIds[setupId]) {
+            revert SetupNotEligible(setupId);
+        }        
+
+        pluginInformation.blockNumber = block.number;
+        pluginInformation.currentSetupId = setupId;   
+    }
+    
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
