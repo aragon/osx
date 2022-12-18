@@ -358,6 +358,8 @@ test('Run Addresslist Voting (AddressesRemoved) mappings with mock event', () =>
     Address.fromString(VOTING_ADDRESS).toHexString() +
     '_' +
     memberAddresses[1].toHexString();
+
+  assert.fieldEquals('AddresslistVoter', memberId1, 'id', memberId1);
   assert.fieldEquals('AddresslistVoter', memberId2, 'id', memberId2);
 
   // create event
