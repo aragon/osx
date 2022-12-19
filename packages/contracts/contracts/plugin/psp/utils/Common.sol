@@ -15,7 +15,7 @@ struct PluginSetupRef {
 }
 
 enum PreparationType {
-    NONE,
+    None,
     Install,
     Update,
     Uninstall

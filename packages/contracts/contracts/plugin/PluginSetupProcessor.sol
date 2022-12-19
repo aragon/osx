@@ -359,7 +359,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.helpersHash,
             bytes32(0),
             bytes(""),
-            PreparationType.NONE
+            PreparationType.None
         );
 
         pluginInformation.currentSetupId = newSetupId;
@@ -402,7 +402,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             currentHelpersHash,
             bytes32(0),
             bytes(""),
-            PreparationType.NONE
+            PreparationType.None
         );
 
         // The following check implicitly confirms that plugin
@@ -517,7 +517,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.helpersHash,
             bytes32(0),
             bytes(""),
-            PreparationType.NONE
+            PreparationType.None
         );
 
         pluginInformation.blockNumber = block.number;
@@ -560,7 +560,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             hHash(_params.setupPayload.currentHelpers),
             bytes32(0),
             bytes(""),
-            PreparationType.NONE
+            PreparationType.None
         );
 
         if (pluginInformation.currentSetupId != setupId) {
