@@ -21,13 +21,11 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUpgradeable {
     /// @notice Vote options that a voter can chose from.
-    /// @param None The default option state of a voter indicating the absence of from the vote. This option neither influences support nor participation.
-    /// @param Abstain This option does not influence the support but counts towards participation.
-    /// @param Yes This option increases the support and counts towards participation.
-    /// @param No This option decreases the support and counts towards participation.
-    enum VoteOption {
+    /// @param None The default option state of a signer indicating the absence of from the .
+    /// @param Confirmed This option confirms the proposal.
+    enum SignOption {
         None,
-        Approved
+        Confirmed
     }
 
     /// @notice A container for proposal-related information.
@@ -40,19 +38,15 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         bool executed;
         ProposalParameters parameters;
         Tally tally;
-        mapping(address => VoteOption) voters;
+        mapping(address => SignOption) voters;
         IDAO.Action[] actions;
     }
 
-    /// @notice A container for the proposal-specific vote settings.
-    /// @param votingMode A parameter to select the vote mode.
-    /// @param supportThreshold The support threshold value.
-    /// @param minParticipation The minimum participation value.
-    /// @param startDate The start date of the proposal vote.
-    /// @param endDate The end date of the proposal vote.
+    /// @notice A container for the .
+    /// @param confirmationsRequired The number of confirmations required.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
     struct ProposalParameters {
-        uint64 requiredApprovals;
+        uint64 confirmationsRequired;
         uint64 snapshotBlock;
     }
 
@@ -60,10 +54,10 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @param abstain The number of abstain votes casted.
     /// @param yes The number of yes votes casted.
     /// @param no The number of no votes casted.
-    /// @param totalVotingPower The total voting power available at the block prior to the proposal creation.
+    /// @param signerCount The total voting power available at the block prior to the proposal creation.
     struct Tally {
         uint256 approvals;
-        uint256 totalVotingPower;
+        uint256 signerCount;
     }
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -82,7 +76,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
 
-    uint64 private requiredApprovals;
+    uint64 private confirmationsRequired;
 
     /// @notice A counter counting the created proposals.
     uint256 public proposalCount; // TODO put this in a proposals interface
@@ -118,7 +112,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     event VoteCast(
         uint256 indexed proposalId,
         address indexed voter,
-        VoteOption voteOption,
+        SignOption voteOption,
         uint256 votingPower
     );
 
@@ -128,12 +122,12 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     // /// @param _majorityVotingSettings The majority voting settings.
     function initialize(
         IDAO _dao,
-        uint64 _requiredApprovals,
+        uint64 _confirmationsRequired,
         address[] calldata _members
     ) public initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
-        requiredApprovals = _requiredApprovals;
+        confirmationsRequired = _confirmationsRequired;
 
         // add member addresses to the address list
         _addAddresses(_members);
@@ -152,11 +146,11 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
-    function updateVotingSettings(uint64 _requiredApprovals)
+    function updateVotingSettings(uint64 _confirmationsRequired)
         external
         auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
     {
-        requiredApprovals = _requiredApprovals;
+        confirmationsRequired = _confirmationsRequired;
     }
 
     /// @notice Adds new members to the address list.
@@ -193,8 +187,8 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         Proposal storage proposal_ = proposals[proposalId];
 
         proposal_.parameters.snapshotBlock = snapshotBlock;
-        proposal_.parameters.requiredApprovals = requiredApprovals;
-        proposal_.tally.totalVotingPower = addresslistLength(snapshotBlock);
+        proposal_.parameters.confirmationsRequired = confirmationsRequired;
+        proposal_.tally.signerCount = addresslistLength(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -214,7 +208,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (isListed(_voter, proposal_.parameters.snapshotBlock)) {
-            proposal_.voters[_voter] = VoteOption.Approved;
+            proposal_.voters[_voter] = SignOption.Confirmed;
             proposal_.tally.approvals += 1;
         }
     }
@@ -237,7 +231,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         if (!isListed(_signer, proposal_.parameters.snapshotBlock)) {
             // The voter has no voting power.
             return false;
-        } else if (proposal_.voters[_signer] != VoteOption.None) {
+        } else if (proposal_.voters[_signer] != SignOption.None) {
             // The signer has already approved
             return false;
         }
@@ -257,25 +251,25 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
             return false;
         }
 
-        return proposal_.tally.approvals >= proposal_.parameters.requiredApprovals;
+        return proposal_.tally.approvals >= proposal_.parameters.confirmationsRequired;
     }
 
     function _vote(
         uint256 _proposalId,
-        VoteOption _voteOption,
+        SignOption _voteOption,
         address _voter,
         bool _tryEarlyExecution
     ) internal {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        VoteOption state = proposal_.voters[_voter];
+        SignOption state = proposal_.voters[_voter];
         // Remove the previous vote.
-        if (state == VoteOption.Approved) {
+        if (state == SignOption.Confirmed) {
             proposal_.tally.approvals -= 1;
         }
 
         // Store the updated/new vote for the voter.
-        if (_voteOption == VoteOption.Approved) {
+        if (_voteOption == SignOption.Confirmed) {
             proposal_.tally.approvals += 1;
         }
 
