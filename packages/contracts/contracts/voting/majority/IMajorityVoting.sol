@@ -65,7 +65,7 @@ interface IMajorityVoting {
         VoteReplacement
     }
 
-    /// @notice A container for the plugin-wide proposal vote settings.
+    /// @notice A container for the majority voting settings that will be applied as parameters on proposal creation.
     /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
@@ -81,7 +81,7 @@ interface IMajorityVoting {
 
     /// @notice A container for proposal-related information.
     /// @param executed Wheter the proposal is executed or not.
-    /// @param parameters The proposal-specific vote settings at the time of the proposal creation.
+    /// @param parameters The proposal parameters at the time of the proposal creation.
     /// @param tally The vote tally of the proposal.
     /// @param voters The votes casted by the voters.
     /// @param actions The actions to be executed when the proposal passes.
@@ -93,7 +93,7 @@ interface IMajorityVoting {
         IDAO.Action[] actions;
     }
 
-    /// @notice A container for the proposal-specific vote settings.
+    /// @notice A container for the proposal parameters at the time of proposal creation.
     /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
     /// @param minParticipation The minimum participation value.
