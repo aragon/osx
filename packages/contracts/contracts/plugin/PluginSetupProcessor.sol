@@ -13,7 +13,7 @@ import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizabl
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
-import {PluginSetupRef, aHash, hHash, pHash, _getSetupId, _getPluginId} from "./psp/utils/Common.sol";
+import {PluginSetupRef, aHash, hHash, pHash, _getSetupId, _getPluginId, PreparationType} from "./psp/utils/Common.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -279,7 +279,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
             aHash(preparedDependency.actions),
-            bytes("")
+            bytes(""),
+            PreparationType.Install
         );
 
         PluginInformation storage pluginInformation = states[pluginId];
@@ -329,7 +330,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(_params.permissions),
             _params.helpersHash,
             aHash(_params.actions),
-            bytes("")
+            bytes(""),
+            PreparationType.Install
         );
 
         // Allow calling `applyInstallation` only when
@@ -350,7 +352,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes32(0),
             _params.helpersHash,
             bytes32(0),
-            bytes("")
+            bytes(""),
+            PreparationType.NONE
         );
 
         pluginInformation.currentSetupId = newSetupId;
@@ -410,7 +413,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes32(0),
             hHash(_params.setupPayload.currentHelpers),
             bytes32(0),
-            bytes("")
+            bytes(""),
+            PreparationType.NONE
         );
 
         // The following check implicitly confirms that plugin
@@ -434,7 +438,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
             aHash(preparedDependency.actions),
-            initData
+            initData,
+            PreparationType.Update
         );
 
         // Only allow to prepare if setupId has not been prepared before.
@@ -476,7 +481,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(_params.permissions),
             _params.helpersHash,
             aHash(_params.actions),
-            _params.initData
+            _params.initData,
+            PreparationType.Update
         );
 
         // If the plugin block number exceeds the setupId preparation block number,
@@ -495,7 +501,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes32(0),
             _params.helpersHash,
             bytes32(0),
-            bytes("")
+            bytes(""),
+            PreparationType.NONE
         );
 
         pluginInformation.blockNumber = block.number;
@@ -537,7 +544,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             bytes32(0),
             hHash(_params.setupPayload.currentHelpers),
             bytes32(0),
-            bytes("")
+            bytes(""),
+            PreparationType.NONE
         );
 
         if (pluginInformation.currentSetupId != setupId) {
@@ -561,7 +569,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(permissions),
             bytes32(0),
             aHash(actions),
-            bytes("")
+            bytes(""),
+            PreparationType.Uninstall
         );
 
         // Only allow to prepare if setupId has not been prepared before.
@@ -603,7 +612,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pHash(_params.permissions),
             bytes32(0),
             aHash(_params.actions),
-            bytes("")
+            bytes(""),
+            PreparationType.Uninstall
         );
 
         // If the plugin block number exceeds the setupId preparation block number,
