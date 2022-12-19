@@ -14,8 +14,8 @@ contract MajorityVotingMock is MajorityVotingBase {
         IDAO.Action[] calldata, /* _actions */
         uint64, /* _startDate */
         uint64, /* _endDate */
-        bool, /* _tryEarlyExecution */
-        VoteOption /* _voteOption */
+        VoteOption, /* _voteOption */
+        bool /* _tryEarlyExecution */
     ) external pure override returns (uint256 proposalId) {
         return 0;
     }

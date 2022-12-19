@@ -139,8 +139,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[0].address)
@@ -153,8 +153,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.not.be.reverted;
     });
@@ -177,8 +177,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[0].address)
@@ -191,8 +191,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.not.be.reverted;
     });
@@ -206,7 +206,7 @@ describe('TokenVoting', function () {
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+        voting.createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
@@ -230,8 +230,8 @@ describe('TokenVoting', function () {
           [],
           startDateInThePast,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError(
@@ -262,8 +262,8 @@ describe('TokenVoting', function () {
           [],
           tooLateStartDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
@@ -290,8 +290,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           tooEarlyEndDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
@@ -314,8 +314,8 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
@@ -366,8 +366,8 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
@@ -417,8 +417,8 @@ describe('TokenVoting', function () {
           dummyActions,
           startDate,
           endDate,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       ).to.be.revertedWith(
         customError('VoteCastForbidden', id, signers[0].address)
@@ -432,8 +432,8 @@ describe('TokenVoting', function () {
             dummyActions,
             startDate,
             endDate,
-            false,
-            VoteOption.None
+            VoteOption.None,
+            false
           )
         ).value
       ).to.equal(id);
@@ -464,8 +464,8 @@ describe('TokenVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -592,8 +592,8 @@ describe('TokenVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -826,8 +826,8 @@ describe('TokenVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -967,8 +967,8 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         );
       });
 

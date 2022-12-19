@@ -3,7 +3,6 @@
 pragma solidity 0.8.10;
 
 import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -15,8 +14,8 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
 /// @title Multisig
-/// @author Aragon Association - 2021-2022.
-/// @notice TODO.
+/// @author Aragon Association - 2022.
+/// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract Multisig is
     Initializable,
@@ -24,44 +23,37 @@ contract Multisig is
     Addresslist,
     GovernancePluginUUPSUpgradeable
 {
-    /// @notice Vote options that a voter can chose from.
-    /// @param None The default option state of a signer indicating the absence of from the .
-    /// @param Confirmed This option confirms the proposal.
-    enum SignOption {
-        None,
-        Confirmed
-    }
+    using CheckpointsUpgradeable for CheckpointsUpgradeable.History;
 
     /// @notice A container for proposal-related information.
     /// @param executed Wheter the proposal is executed or not.
-    /// @param parameters The proposal-specific vote settings at the time of the proposal creation.
-    /// @param tally The vote tally of the proposal.
-    /// @param voters The votes casted by the voters.
+    /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
+    /// @param tally The approve tally of the proposal.
+    /// @param approvers The approves casted by the approvers.
     /// @param actions The actions to be executed when the proposal passes.
     struct Proposal {
+        bool open;
         bool executed;
         ProposalParameters parameters;
         Tally tally;
-        mapping(address => SignOption) voters;
+        mapping(address => bool) approvers;
         IDAO.Action[] actions;
     }
 
-    /// @notice A container for the .
-    /// @param confirmationsRequired The number of confirmations required.
+    /// @notice A container for the proposal parameters.
+    /// @param minApprovals The number of approvals required.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
     struct ProposalParameters {
-        uint64 confirmationsRequired;
+        uint256 minApprovals;
         uint64 snapshotBlock;
     }
 
-    /// @notice A container for the proposal vote tally.
-    /// @param abstain The number of abstain votes casted.
-    /// @param yes The number of yes votes casted.
-    /// @param no The number of no votes casted.
-    /// @param signerCount The total voting power available at the block prior to the proposal creation.
+    /// @notice A container for the proposal tally.
+    /// @param approvals The number of approvals casted.
+    /// @param addresslistLength The length of the .
     struct Tally {
         uint256 approvals;
-        uint256 signerCount;
+        uint256 addresslistLength;
     }
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -73,41 +65,52 @@ contract Multisig is
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
-    bytes32 public constant UPDATE_SIGNERS_PERMISSION_ID = keccak256("UPDATE_SIGNERS_PERMISSION");
+    bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
+        keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
 
-    uint64 private confirmationsRequired;
+    /// @notice The minimum approval parameter.
+    uint256 private minApprovals_;
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice Emitted when the Confirmation settings are updated.
-    /// @param confirmationsRequired The number of confirmations required for a proposal to pass.
-    event ConfirmationSettingsUpdated(uint64 confirmationsRequired);
-
-    /// @notice Emitted when a vote is cast by a voter.
+    /// @notice Thrown if a approver is not allowed to cast a approve. This can be because the proposal
+    /// - is not open,
+    /// - was executed, or
+    /// - the approver is not on the addresslist
     /// @param proposalId The ID of the proposal.
-    /// @param voter The voter casting the vote.
-    /// @param voteOption The vote option chosen.
-    /// @param votingPower The voting power behind this vote.
-    event VoteCast(
-        uint256 indexed proposalId,
-        address indexed voter,
-        SignOption voteOption,
-        uint256 votingPower
-    );
+    /// @param sender The address of the sender.
+    error ApprovalCastForbidden(uint256 proposalId, address sender);
 
-    /// @notice Thrown when a sender is not allowed to create a vote.
+    /// @notice Thrown if the proposal execution is forbidden.
+    /// @param proposalId The ID of the proposal.
+    error ProposalExecutionForbidden(uint256 proposalId);
+
+    /// @notice Thrown if the minimal approvals value is out of bounds (less than 1 or greater than the number of members in the address list).
+    /// @param limit The maximal value.
+    /// @param actual The actual value.
+    error MinApprovalsOutOfBounds(uint256 limit, uint256 actual);
+
+    /// @notice Emitted when new members are added to the address list.
+    /// @param members The array of member addresses to be added.
+    event AddressesAdded(address[] members);
+
+    /// @notice Emitted when members are removed from the address list.
+    /// @param members The array of member addresses to be removed.
+    event AddressesRemoved(address[] members);
+
+    /// @notice Emitted when the multisig settings are updated.
+    /// @param minApprovals The minimum approvals value.
+    event MinApprovalUpdated(uint256 minApprovals);
+
+    /// @notice Emitted when an proposal is approve by an approver.
+    /// @param proposalId The ID of the proposal.
+    /// @param approver The approver casting the approve.
+    event Approved(uint256 indexed proposalId, address indexed approver);
+
+    /// @notice Thrown when a sender is not allowed to create a approve.
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
-
-    /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
-    /// - has not started,
-    /// - has ended,
-    /// - was executed, or
-    /// - the voter doesn't have voting powers.
-    /// @param proposalId The ID of the proposal.
-    /// @param sender The address of the voter.
-    error VoteCastForbidden(uint256 proposalId, address sender);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -115,15 +118,15 @@ contract Multisig is
     // /// @param _majorityVotingSettings The majority voting settings.
     function initialize(
         IDAO _dao,
-        uint64 _confirmationsRequired,
+        uint256 _minApprovals,
         address[] calldata _members
     ) public initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
-        confirmationsRequired = _confirmationsRequired;
-
         // add member addresses to the address list
-        _addAddresses(_members);
+        _updateAddresslist(_members, true);
+        _updateMinApprovals(_minApprovals);
+        emit AddressesAdded({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -133,44 +136,96 @@ contract Multisig is
         public
         view
         virtual
-        override(ERC165Upgradeable, GovernancePluginUUPSUpgradeable)
+        override(ERC165Upgradeable, PluginUUPSUpgradeable)
         returns (bool)
     {
         return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
-    /// @notice Internal function to update the plugin-wide proposal confirmation settings.
-    /// @param _confirmationsRequired The confirmations required.
-    function _updateConfirmationSettings(uint64 _confirmationsRequired) internal {
-        confirmationsRequired = _confirmationsRequired;
-
-        emit ConfirmationSettingsUpdated({confirmationsRequired: _confirmationsRequired});
+    /// @notice Returns the support threshold parameter stored in the voting settings.
+    /// @return The support threshold parameter.
+    function minApprovals() public view virtual returns (uint256) {
+        return minApprovals_;
     }
 
-    /// @notice Adds new members to the address list.
-    /// @param _members The addresses of the members to be added.
-    function addAddresses(address[] calldata _members, uint64 _newConfirmationsRequired)
+    /// @notice Returns the number of approvals,
+    /// @param _proposalId The ID of the proposal.
+    /// @return The number of approvals.
+    function approvals(uint256 _proposalId) public view returns (uint256) {
+        return proposals[_proposalId].tally.approvals;
+    }
+
+    /// @notice Updates the minimal approval parameter.
+    /// @param _minApprovals The new minimal approval value.
+    function updateMinApprovals(uint256 _minApprovals)
         external
-        auth(UPDATE_SIGNERS_PERMISSION_ID)
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
-        _addAddresses(_members);
-        _updateConfirmationSettings(_newConfirmationsRequired);
+        _updateMinApprovals(_minApprovals);
+    }
+
+    /// @notice Adds new members to the address list and updates the minimum approval parameter.
+    /// @param _members The addresses of the members to be added.
+    /// @param _minApprovals The new minimal approval value.
+    function addAddresses(address[] calldata _members, uint256 _minApprovals)
+        external
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
+    {
+        _updateAddresslist(_members, true);
+
+        if (_minApprovals != 0) {
+            _updateMinApprovals(_minApprovals);
+        }
+
+        emit AddressesAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members, uint64 _newConfirmationsRequired)
+    /// @param _minApprovals The new minimal approval value.
+    function removeAddresses(address[] calldata _members, uint256 _minApprovals)
         external
-        auth(UPDATE_SIGNERS_PERMISSION_ID)
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
-        _removeAddresses(_members);
-        _updateConfirmationSettings(_newConfirmationsRequired);
+        _updateAddresslist(_members, false);
+
+        if (_minApprovals != 0) {
+            _updateMinApprovals(_minApprovals);
+        }
+
+        emit AddressesRemoved({members: _members});
     }
 
-    function createProposal(bytes calldata _metadata, IDAO.Action[] calldata _actions)
-        external
-        returns (uint256 id)
-    {
+    /// @notice Internal function to update the minimal approval parameter.
+    /// @param _minApprovals The new minimal approval value.
+    function _updateMinApprovals(uint256 _minApprovals) internal virtual {
+        uint256 addresslistLength_ = addresslistLength(0);
+
+        if (_minApprovals > addresslistLength_) {
+            revert MinApprovalsOutOfBounds({limit: addresslistLength_, actual: _minApprovals});
+        }
+
+        if (_minApprovals < 1) {
+            revert MinApprovalsOutOfBounds({limit: 1, actual: _minApprovals});
+        }
+
+        minApprovals_ = _minApprovals;
+
+        emit MinApprovalUpdated({minApprovals: _minApprovals});
+    }
+
+    /// @notice Creates a new majority voting proposal.
+    /// @param _metadata The metadata of the proposal.
+    /// @param _actions The actions that will be executed after the proposal passes.
+    /// @param _approve_ If true, the sender will approve the proposal.
+    /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
+    /// @return id The ID of the proposal.
+    function createProposal(
+        bytes calldata _metadata,
+        IDAO.Action[] calldata _actions,
+        bool _approve_,
+        bool _tryExecution
+    ) external returns (uint256 id) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         if (!isListed(_msgSender(), snapshotBlock)) {
@@ -182,38 +237,139 @@ contract Multisig is
         // Create the proposal
         Proposal storage proposal_ = proposals[id];
 
+        proposal_.open = true;
         proposal_.parameters.snapshotBlock = snapshotBlock;
-        proposal_.parameters.confirmationsRequired = confirmationsRequired;
-        proposal_.tally.signerCount = addresslistLength(snapshotBlock);
+        proposal_.parameters.minApprovals = minApprovals_;
+        proposal_.tally.addresslistLength = addresslistLength(snapshotBlock); // TODO redundant?
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
                 proposal_.actions.push(_actions[i]);
             }
         }
-    }
 
-    function approve(uint256 _proposalId, address _voter) external {
-        Proposal storage proposal_ = proposals[_proposalId];
-
-        if (isListed(_voter, proposal_.parameters.snapshotBlock)) {
-            proposal_.voters[_voter] = SignOption.Confirmed;
-            proposal_.tally.approvals += 1;
+        if (_approve_) {
+            approve(id, _tryExecution); // TODO Will msg.Sender be wrong here? Probably yes. Test and fix for all other voting classes as well.
         }
     }
 
-    /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists.
+    /// @notice Approves and, optionally, executes the proposal.
     /// @param _proposalId The ID of the proposal.
-    /// @param _signer The address of the voter to check.
-    /// @return Returns `true` if the given voter can vote on a certain proposal and `false` otherwise.
-    function _canApprove(uint256 _proposalId, address _signer) internal view returns (bool) {
+    /// @param _tryExecution If `true`, execution is tried after the approval cast. The call does not revert if execution is not possible.
+    function approve(uint256 _proposalId, bool _tryExecution) public {
+        address approver = _msgSender();
+        if (!_canApprove(_proposalId, approver)) {
+            revert ApprovalCastForbidden(_proposalId, approver);
+        }
+
+        _approve(_proposalId, approver, _tryExecution);
+    }
+
+    /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
+    /// - was executed, or
+    /// - the voter is not listed.
+    /// @param _proposalId The proposal Id.
+    /// @param _account The address of the user to check.
+    /// @return bool Returns true if the account is allowed to vote.
+    ///@dev The function assumes the queried proposal exists.
+    function canApprove(uint256 _proposalId, address _account) external view returns (bool) {
+        return _canApprove(_proposalId, _account);
+    }
+
+    /// @notice Checks if a proposal can be executed.
+    /// @param _proposalId The ID of the proposal to be checked.
+    /// @return True if the proposal can be executed, false otherwise.
+    function canExecute(uint256 _proposalId) external view returns (bool) {
+        return _canExecute(_proposalId);
+    }
+
+    /// @notice Returns all information for a proposal vote by its ID.
+    /// @param _proposalId The ID of the proposal.
+    /// @return open Wheter the proposal is open or not.
+    /// @return executed Wheter the proposal is executed or not.
+    /// @return parameters The parameters of the proposal vote.
+    /// @return tally The current tally of the proposal vote.
+    /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
+    function getProposal(uint256 _proposalId)
+        external
+        view
+        returns (
+            bool open,
+            bool executed,
+            ProposalParameters memory parameters,
+            Tally memory tally,
+            IDAO.Action[] memory actions
+        )
+    {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        if (!isListed(_signer, proposal_.parameters.snapshotBlock)) {
-            // The voter has no voting power.
+        open = proposal_.open;
+        executed = proposal_.executed;
+        parameters = proposal_.parameters;
+        tally = proposal_.tally;
+        actions = proposal_.actions;
+    }
+
+    /// @notice Internal function to approve and, optionally, execute the proposal.
+    /// @param _proposalId The ID of the proposal.
+    /// @param _tryExecution If `true`, execution is tried after the approval cast. The call does not revert if execution is not possible.
+    function _approve(
+        uint256 _proposalId,
+        address _approver,
+        bool _tryExecution
+    ) internal {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        proposal_.tally.approvals += 1;
+        proposal_.approvers[_approver] = true;
+
+        emit Approved({proposalId: _proposalId, approver: _approver});
+
+        if (_tryExecution && _canExecute(_proposalId)) {
+            _execute(_proposalId);
+        }
+    }
+
+    /// @notice Executes a proposal.
+    /// @param _proposalId The ID of the proposal to be executed.
+    function execute(uint256 _proposalId) public {
+        if (!_canExecute(_proposalId)) {
+            revert ProposalExecutionForbidden(_proposalId);
+        }
+
+        _execute(_proposalId);
+    }
+
+    /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
+    /// @param _proposalId The ID of the proposal.
+    function _execute(uint256 _proposalId) internal {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        proposal_.open = false;
+        proposal_.executed = true;
+
+        _executeProposal(_proposalId, proposals[_proposalId].actions);
+    }
+
+    /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists. //TODO is this assumption relevant?
+    /// @param _proposalId The ID of the proposal.
+    /// @param _account The account to check.
+    /// @return Returns `true` if the given account can approve on a certain proposal and `false` otherwise.
+    function _canApprove(uint256 _proposalId, address _account) internal view returns (bool) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        if (!_isProposalOpen(proposal_)) {
+            // The proposal was executed already
             return false;
-        } else if (proposal_.voters[_signer] != SignOption.None) {
-            // The signer has already approved
+        }
+
+        if (!isListed(_account, proposal_.parameters.snapshotBlock)) {
+            // The approver has no voting power.
+            return false;
+        }
+
+        if (proposal_.approvers[_account]) {
+            // The approver has already approved
             return false;
         }
 
@@ -222,61 +378,23 @@ contract Multisig is
 
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
-    /// @return True if the proposal can be executed, false otherwise.
-    /// @dev Threshold and minimal values are compared with `>` and `>=` comparators, respectively.
+    /// @return Returns `true` if the proposal can be executed and `false` otherwise.
     function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        // Verify that the vote has not been executed already.
-        if (proposal_.executed) {
+        // Verify that the proposal has not been executed already.
+        if (!_isProposalOpen(proposal_)) {
             return false;
         }
 
-        return proposal_.tally.approvals >= proposal_.parameters.confirmationsRequired;
+        return proposal_.tally.approvals >= proposal_.parameters.minApprovals;
     }
 
-    function vote(
-        SignOption _voteOption,
-        uint256 _proposalId,
-        bool _tryEarlyExecution
-    ) public {
-        if (!_canApprove(_proposalId, _msgSender())) {
-            revert VoteCastForbidden(_proposalId, _msgSender());
-        }
-        _vote(_proposalId, _voteOption, _msgSender(), _tryEarlyExecution);
-    }
-
-    function _vote(
-        uint256 _proposalId,
-        SignOption _voteOption,
-        address _voter,
-        bool _tryEarlyExecution
-    ) internal {
-        Proposal storage proposal_ = proposals[_proposalId];
-
-        SignOption state = proposal_.voters[_voter];
-        // Remove the previous vote.
-        if (state == SignOption.Confirmed) {
-            proposal_.tally.approvals -= 1;
-        }
-
-        // Store the updated/new vote for the voter.
-        if (_voteOption == SignOption.Confirmed) {
-            proposal_.tally.approvals += 1;
-        }
-
-        proposal_.voters[_voter] = _voteOption;
-
-        emit VoteCast({
-            proposalId: _proposalId,
-            voter: _voter,
-            voteOption: _voteOption,
-            votingPower: 1
-        });
-
-        if (_tryEarlyExecution && _canExecute(_proposalId)) {
-            _executeProposal(_proposalId, proposal_.actions);
-        }
+    /// @notice Internal function to check if a proposal vote is still open.
+    /// @param proposal_ The proposal struct.
+    /// @return True if the proposal vote is open, false otherwise.
+    function _isProposalOpen(Proposal storage proposal_) internal view virtual returns (bool) {
+        return proposal_.open && !proposal_.executed;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

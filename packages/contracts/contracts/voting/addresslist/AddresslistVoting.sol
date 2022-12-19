@@ -93,8 +93,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _tryEarlyExecution,
-        VoteOption _voteOption
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
     ) external override returns (uint256 id) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -171,17 +171,17 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
+    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (!_isVoteOpen(proposal_)) {
             // The proposal vote hasn't started or has already ended.
             return false;
-        } else if (!isListed(_voter, proposal_.parameters.snapshotBlock)) {
+        } else if (!isListed(_account, proposal_.parameters.snapshotBlock)) {
             // The voter has no voting power.
             return false;
         } else if (
-            proposal_.voters[_voter] != VoteOption.None &&
+            proposal_.voters[_account] != VoteOption.None &&
             proposal_.parameters.votingMode != VotingMode.VoteReplacement
         ) {
             // The voter has already voted but vote replacment is not allowed.

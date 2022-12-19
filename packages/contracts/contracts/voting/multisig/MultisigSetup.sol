@@ -6,29 +6,26 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Multisig} from "./Multisig.sol";
 
-/*
 /// @title MultisigSetup
 /// @author Aragon Association - 2022
 /// @notice The setup contract of the `Multisig` plugin.
 contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
-    Multisig private immutable multisigVotingBase;
+    Multisig private immutable multisigBase;
 
     /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
 
     /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
     constructor() {
-        multisigVotingBase = new Multisig();
+        multisigBase = new Multisig();
     }
 
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(uint8 voteMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) majorityVotingSettings, address[] members)";
+        return "(uint256 minApprovals, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -43,28 +40,19 @@ contract MultisigSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
-        //IMajorityVoting.VotingSettings memory majorityVotingSettings,
-        address[] memory members = abi.decode(
-            _data,
-            (IMajorityVoting.MajorityVotingSettings, address[])
-        );
+        (uint256 minApprovals, address[] memory members) = abi.decode(_data, (uint256, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
-            address(multisigVotingBase),
-            abi.encodeWithSelector(
-                Multisig.initialize.selector,
-                dao,
-                //majorityVotingSettings,
-                members
-            )
+            address(multisigBase),
+            abi.encodeWithSelector(Multisig.initialize.selector, dao, minApprovals, members)
         );
 
         // Prepare helpers
         (helpers); // silence the warning.
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        permissions = new PermissionLib.ItemMultiTarget[](3);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -73,7 +61,7 @@ contract MultisigSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            multisigVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
+            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -81,19 +69,11 @@ contract MultisigSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            multisigVotingBase.UPDATE_PLUGIN_SETTINGS_PERMISSION_ID()
-        );
-
-        permissions[2] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            NO_ORACLE,
-            multisigVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[3] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
@@ -123,7 +103,7 @@ contract MultisigSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            multisigVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
+            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -131,18 +111,10 @@ contract MultisigSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            multisigVotingBase.UPDATE_PLUGIN_SETTINGS_PERMISSION_ID()
+            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Revoke,
-            _plugin,
-            _dao,
-            NO_ORACLE,
-            multisigVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
-        );
-
-        permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
@@ -153,7 +125,6 @@ contract MultisigSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view returns (address) {
-        return address(multisigVotingBase);
+        return address(multisigBase);
     }
 }
-*/

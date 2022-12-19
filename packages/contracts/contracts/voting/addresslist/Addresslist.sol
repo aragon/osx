@@ -31,11 +31,11 @@ abstract contract Addresslist is TimeHelpers {
     }
 
     /// @notice Returns the length of the address list at a specific block number.
-    /// @param _blockNumber The specific block to get the count from.
+    /// @param _blockNumber The specific block to get the count from. If `0`, then the latest checkpoint value is returned.
     /// @return The address list length at the specified block number.
     function addresslistLength(uint256 _blockNumber) public view returns (uint256) {
         if (_blockNumber == 0) {
-            _blockNumber = getBlockNumber64() - 1;
+            return _addresslistLengthCheckpoints.latest();
         }
         return _addresslistLengthCheckpoints.getAtBlock(_blockNumber);
     }

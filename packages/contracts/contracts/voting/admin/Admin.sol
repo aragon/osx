@@ -5,11 +5,13 @@ pragma solidity 0.8.10;
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
+
+import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {GovernancePluginCloneable} from "../GovernancePluginCloneable.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.
-/// @notice The admin address governance plugin giving execution permission on the DAO to a single address
+/// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
 contract Admin is GovernancePluginCloneable {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =

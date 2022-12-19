@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {GovernancePluginUUPSUpgradeable} from "../GovernancePluginUUPSUpgradeable.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
@@ -72,9 +72,6 @@ abstract contract MajorityVotingBase is
     /// @notice The struct storing the voting settings.
     VotingSettings private votingSettings;
 
-    /// @notice A counter counting the created proposals.
-    uint256 public proposalCount; // TODO put this in a proposals interface
-
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.
     /// @param actual The actual value.
@@ -85,7 +82,7 @@ abstract contract MajorityVotingBase is
     /// @param actual The actual value.
     error DateOutOfBounds(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the minimal duration value is out of bounds.
+    /// @notice Thrown if the minimal duration value is out of bounds (less than one hour or greater than 1 year).
     /// @param limit The limit value.
     /// @param actual The actual value.
     error MinDurationOutOfBounds(uint64 limit, uint64 actual);
@@ -97,14 +94,14 @@ abstract contract MajorityVotingBase is
     /// @notice Thrown if zero is not allowed as a value
     error ZeroValueNotAllowed();
 
-    /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
+    /// @notice Thrown if an account is not allowed to cast a vote. This can be because the vote
     /// - has not started,
     /// - has ended,
     /// - was executed, or
-    /// - the voter doesn't have voting powers.
+    /// - the account doesn't have voting powers.
     /// @param proposalId The ID of the proposal.
-    /// @param sender The address of the voter.
-    error VoteCastForbidden(uint256 proposalId, address sender);
+    /// @param account The address of the _account.
+    error VoteCastForbidden(uint256 proposalId, address account);
 
     /// @notice Thrown if the proposal execution is forbidden.
     /// @param proposalId The ID of the proposal.
@@ -129,7 +126,7 @@ abstract contract MajorityVotingBase is
         public
         view
         virtual
-        override(ERC165Upgradeable, GovernancePluginUUPSUpgradeable)
+        override(ERC165Upgradeable, PluginUUPSUpgradeable)
         returns (bool)
     {
         return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
@@ -149,8 +146,8 @@ abstract contract MajorityVotingBase is
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _tryEarlyExecution,
-        VoteOption _voteOption
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
     ) external virtual returns (uint256 proposalId);
 
     /// @inheritdoc IMajorityVoting
@@ -159,10 +156,12 @@ abstract contract MajorityVotingBase is
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) public {
-        if (_voteOption != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
-            revert VoteCastForbidden(_proposalId, _msgSender());
+        address account = _msgSender();
+
+        if (_voteOption != VoteOption.None && !_canVote(_proposalId, account)) {
+            revert VoteCastForbidden({proposalId: _proposalId, account: account});
         }
-        _vote(_proposalId, _voteOption, _msgSender(), _tryEarlyExecution);
+        _vote(_proposalId, _voteOption, account, _tryEarlyExecution);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -242,7 +241,7 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function getProposal(uint256 _proposalId)
-        public
+        external
         view
         returns (
             bool open,

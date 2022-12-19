@@ -15,12 +15,17 @@ abstract contract GovernancePlugin is GovernanceBase, Plugin {
     /// @notice The incremental ID for proposals and executions.
     Counters.Counter private proposalId;
 
+    /* TODO
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant GOVERNANCE_INTERFACE_ID =
+        this.increment.selector ^ this.executeProposal.selector;
+
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interace.
     /// @return bool Returns true if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return false; // TODO interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
-    }
+        return interfaceId == GOVERNANCE_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }*/
 
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.

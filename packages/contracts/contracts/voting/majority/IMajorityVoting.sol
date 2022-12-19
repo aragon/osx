@@ -156,19 +156,19 @@ interface IMajorityVoting {
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @param _voteOption The vote voteOption to cast on creation.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @return id The ID of the proposal.
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _tryEarlyExecution,
-        VoteOption _voteOption
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
     ) external returns (uint256 id);
 
-    /// @notice Votes for a vote option and optionally executes the proposal.
+    /// @notice Votes for a vote option and, optionally, executes the proposal.
     /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
     /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
@@ -179,16 +179,16 @@ interface IMajorityVoting {
         bool _tryEarlyExecution
     ) external;
 
-    /// @notice Internal function to check if a voter can participate on a proposal vote. This can be because the vote
+    /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
     /// - has not started,
     /// - has ended,
     /// - was executed, or
     /// - the voter doesn't have voting powers.
     /// @param _proposalId The proposal Id.
-    /// @param _voter The address of the voter to check.
+    /// @param _account The address of the voter to check.
     /// @return bool Returns true if the voter is allowed to vote.
     ///@dev The function assumes the queried proposal exists.
-    function canVote(uint256 _proposalId, address _voter) external view returns (bool);
+    function canVote(uint256 _proposalId, address _account) external view returns (bool);
 
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.

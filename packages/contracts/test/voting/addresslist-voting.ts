@@ -175,7 +175,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[1].address)
       );
@@ -183,7 +183,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.not.be.reverted;
     });
 
@@ -199,7 +199,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[1].address)
       );
@@ -207,7 +207,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.not.be.reverted;
     });
 
@@ -224,8 +224,8 @@ describe('AddresslistVoting', function () {
           [],
           startDateInThePast,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError(
@@ -249,8 +249,8 @@ describe('AddresslistVoting', function () {
           [],
           tooLateStartDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
@@ -270,8 +270,8 @@ describe('AddresslistVoting', function () {
           [],
           startDate,
           tooEarlyEndDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
@@ -287,8 +287,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
@@ -332,8 +332,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
@@ -369,8 +369,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           startDate,
           endDate,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       ).to.be.revertedWith(
         customError('VoteCastForbidden', id, signers[0].address)
@@ -384,8 +384,8 @@ describe('AddresslistVoting', function () {
             dummyActions,
             startDate,
             endDate,
-            false,
-            VoteOption.None
+            VoteOption.None,
+            false
           )
         ).value
       ).to.equal(id);
@@ -406,8 +406,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -530,8 +530,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -715,8 +715,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -850,8 +850,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         );
       });
 
@@ -985,8 +985,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
