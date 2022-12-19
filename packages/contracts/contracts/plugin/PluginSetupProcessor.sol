@@ -374,7 +374,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     {
         if (
             _params.currentVersionTag.release != _params.newVersionTag.release ||
-            _params.currentVersionTag.build <= _params.newVersionTag.build
+            _params.currentVersionTag.build >= _params.newVersionTag.build
         ) {
             revert UpdateVersionInvalid({
                 currentVersionTag: _params.currentVersionTag,
