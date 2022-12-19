@@ -12,8 +12,8 @@ export const VOTING_MODES = new Map<number, string>()
   .set(1, 'EarlyExecution')
   .set(2, 'VoteReplacement');
 
-export const TOKEN_VOTING_INTERFACE = '0x72a13b7e';
-export const ADDRESSLIST_VOTING_INTERFACE = '0x8d8aae2d';
+export const TOKEN_VOTING_INTERFACE = '0x302aac6a';
+export const ADDRESSLIST_VOTING_INTERFACE = '0x429aac70';
 export const ADMIN_INTERFACE = '0x9102c53e';
 
 export const TEN_POWER_16 = '10000000000000000';
