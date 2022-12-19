@@ -7,6 +7,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IDAO} from "../../../core/IDAO.sol";
 import {PluginSetup} from "../../PluginSetup.sol";
 import {IPluginSetup} from "../../IPluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
@@ -40,9 +41,7 @@ contract CounterV2PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (
-            address plugin, PreparedDependency memory preparedDependency
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -61,7 +60,9 @@ contract CounterV2PluginSetup is PluginSetup {
             _num
         );
 
-        PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
+        PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](
+            _multiplyHelper == address(0) ? 3 : 2
+        );
         address[] memory helpers = new address[](1);
 
         // deploy
@@ -96,7 +97,7 @@ contract CounterV2PluginSetup is PluginSetup {
 
         // add helpers
         helpers[0] = multiplyHelper;
-        
+
         preparedDependency.helpers = helpers;
         preparedDependency.permissions = permissions;
 
@@ -117,14 +118,12 @@ contract CounterV2PluginSetup is PluginSetup {
         external
         view
         override
-        returns (
-            bytes memory initData, PreparedDependency memory preparedDependency
-        )
+        returns (bytes memory initData, PreparedDependency memory preparedDependency)
     {
         uint256 _newVariable;
-        
+
         // if (_oldVersion[0] == 1 && _oldVersion[1] == 0) { // TODO:GIORGI
-        if(_currentBuild == 1) {
+        if (_currentBuild == 1) {
             (_newVariable) = abi.decode(_payload.data, (uint256));
             initData = abi.encodeWithSelector(
                 bytes4(keccak256("setNewVariable(uint256)")),
@@ -155,10 +154,17 @@ contract CounterV2PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-       address _dao, SetupPayload calldata _payload
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        permissions = new PermissionLib.ItemMultiTarget[](_payload.currentHelpers.length != 0 ? 3 : 2);
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        virtual
+        override
+        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
+    {
+        (actions);
+        
+        permissions = new PermissionLib.ItemMultiTarget[](
+            _payload.currentHelpers.length != 0 ? 3 : 2
+        );
 
         // set permissions
         permissions[0] = PermissionLib.ItemMultiTarget(

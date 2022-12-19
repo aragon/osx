@@ -14,6 +14,13 @@ struct PluginSetupRef {
     PluginRepo pluginSetupRepo;
 }
 
+enum PreparationType {
+    NONE,
+    Install,
+    Update,
+    Uninstall
+}
+
 /// @notice Returns an identifier for the plugin id.
 /// @param _dao The address of the DAO conducting the setup.
 /// @param _plugin The plugin address
@@ -31,7 +38,8 @@ function _getSetupId(
     bytes32 _permissionHash,
     bytes32 _helperHash,
     bytes32 _actionsHash,
-    bytes memory _data
+    bytes memory _data,
+    PreparationType _preparationType
 ) pure returns (bytes32) {
     return
         keccak256(
@@ -41,7 +49,8 @@ function _getSetupId(
                 _permissionHash,
                 _helperHash,
                 _actionsHash,
-                keccak256(_data)
+                keccak256(_data),
+                _preparationType
             )
         );
 }

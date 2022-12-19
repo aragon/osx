@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IDAO} from "../../../core/IDAO.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginCloneableV1Mock, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";
@@ -42,9 +43,9 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
     {
-        (_dao, _payload);
+        (_dao, _payload, actions);
         permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
     }
 
@@ -86,9 +87,9 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
     {
-        (_dao, _payload);
+        (_dao, _payload, actions);
         permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);
     }
 
