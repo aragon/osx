@@ -9,12 +9,12 @@ abstract contract GovernanceBase is IProposal {
     /// @notice Internal function to create a proposal.
     /// @param _metadata The the proposal metadata.
     /// @param _actions The actions that will be executed after the proposal passes.
-    /// @return id The ID of the proposal.
+    /// @return proposalId The ID of the proposal.
     function _createProposal(
         address _creator,
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions
-    ) internal virtual returns (uint256) {}
+    ) internal virtual returns (uint256 proposalId) {}
 
     /// @notice Internal function to execute a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
