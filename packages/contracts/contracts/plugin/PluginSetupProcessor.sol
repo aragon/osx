@@ -87,7 +87,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginSetupRef pluginSetupRef;
         address[] currentHelpers;
         PermissionLib.ItemMultiTarget[] permissions;
-        bytes32 helpersHash;
         IDAO.Action[] actions;
     }
 
@@ -602,7 +601,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
             pHash(_params.permissions),
-            _params.helpersHash,
+            bytes32(0),
             aHash(_params.actions),
             bytes("")
         );
