@@ -4,17 +4,16 @@ pragma solidity 0.8.10;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
-import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {IPlugin} from "../../core/plugin/IPlugin.sol";
-import {IPluginSetup} from "../IPluginSetup.sol";
-import {DaoAuthorizable} from "../../core/component/dao-authorizable/DaoAuthorizable.sol";
-import {DAO, IDAO} from "../../core/DAO.sol";
-import {PluginRepoRegistry} from "../../registry/PluginRepoRegistry.sol";
-import {PluginSetup} from "../PluginSetup.sol";
-import {PluginRepo} from "../PluginRepo.sol";
-import {isValidBumpLoose, BumpInvalid} from "../SemanticVersioning.sol";
-import {PluginSetupRef, aHash, hHash, pHash, _getSetupId, _getPluginId} from "./utils/Common.sol";
+import {PermissionLib} from "../core/permission/PermissionLib.sol";
+import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {IPlugin} from "../core/plugin/IPlugin.sol";
+import {IPluginSetup} from "./IPluginSetup.sol";
+import {PluginSetup} from "./PluginSetup.sol";
+import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizable.sol";
+import {DAO, IDAO} from "../core/DAO.sol";
+import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
+import {PluginRepo} from "./PluginRepo.sol";
+import {PluginSetupRef, aHash, hHash, pHash, _getSetupId, _getPluginId} from "./psp/utils/Common.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
