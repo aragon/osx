@@ -6,6 +6,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IDAO} from "../../../core/IDAO.sol";
 import {IPluginSetup} from "../../IPluginSetup.sol";
 import {PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
@@ -111,8 +112,10 @@ contract CounterV1PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
     {
+        (actions);
+        
         permissions = new PermissionLib.ItemMultiTarget[](
             _payload.currentHelpers.length != 0 ? 3 : 2
         );

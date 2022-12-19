@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IDAO} from "../../../core/IDAO.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
@@ -42,9 +43,9 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
     {
-        (_dao, _payload);
+        (_dao, _payload, actions);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
 
