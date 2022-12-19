@@ -9,11 +9,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
-import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
-import {isValidBumpStrict, BumpInvalid} from "./SemanticVersioning.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -36,7 +34,6 @@ contract PluginRepo is
     struct Version {
         Tag tag;
         address pluginSetup;
-        bool verified;
         bytes contentURI;
     }
 
@@ -49,19 +46,19 @@ contract PluginRepo is
     /// @notice Current latest release id(there can be maximum uint8 = 255 possibility).
     uint256 public latestRelease;
 
-    /// @notice increasing build ids per release
+    /// @notice increasing build numbers per release
     /// @dev keys can only be uint8 even though uint256 is specified to reduce gas cost.
-    mapping(uint256 => uint256) internal buildIdsPerRelease;
+    mapping(uint256 => uint256) internal buildsPerRelease;
 
     /// @notice The mapping between version hash and its corresponding Version information.
-    /// @dev key: keccak(abi.encode(releaseId, buildId)) value: Version struct.
+    /// @dev key: keccak(abi.encode(release, build)) value: Version struct.
     mapping(bytes32 => Version) internal versions;
 
     /// @notice The mapping between plugin setup address and its corresponding versionHash
     mapping(address => bytes32) internal latestTagHashForPluginSetup;
 
     /// @notice Thrown if version does not exist.
-    /// @param versionHash The version Hash(releaseId + buildId)
+    /// @param versionHash The version Hash(release + build)
     error VersionHashDoesNotExist(bytes32 versionHash);
 
     /// @notice Thrown if a contract does not inherit from `PluginSetup`.
@@ -77,35 +74,34 @@ contract PluginRepo is
     error InvalidContractAddress(address invalidContract);
 
     /// @notice Thrown if release id is 0.
-    error ReleaseIdNull();
+    error ReleaseNull();
 
     /// @notice Thrown if release id is by more than 1 to the previous release id.
-    /// @param currentReleaseId the current latest release id.
-    /// @param newReleaseId new release id dev is trying to push.
-    error ReleaseIdTooBig(uint256 currentReleaseId, uint256 newReleaseId);
+    /// @param currentRelease the current latest release id.
+    /// @param newRelease new release id dev is trying to push.
+    error ReleaseTooBig(uint256 currentRelease, uint256 newRelease);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param releaseId the release id in which pluginSetup is found.
-    /// @param buildId the build id of the release id in which pluginSetup is found.
+    /// @param release the release number in which pluginSetup is found.
+    /// @param build the build number of the release number in which pluginSetup is found.
     /// @param pluginSetup the plugin setup address.
     error PluginSetupExistsInAnotherRelease(
-        uint8 releaseId,
-        uint16 buildId,
+        uint8 release,
+        uint16 build,
         address pluginSetup
     );
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param releaseId the release id
-    /// @param buildId the build id
+    /// @param release the release number
+    /// @param build the build number
     /// @param pluginSetup The address of the plugin setup contract.
     /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
     /// @param pluginSetup the plugin setup address.
     event VersionCreated(
-        uint8 releaseId,
-        uint16 buildId,
+        uint8 release,
+        uint16 build,
         address indexed pluginSetup,
-        bytes contentURI,
-        bool verified
+        bytes contentURI
     );
 
     /// @notice Initializes the contract by
@@ -173,12 +169,12 @@ contract PluginRepo is
         }
 
         if (_release == 0) {
-            revert ReleaseIdNull();
+            revert ReleaseNull();
         }
 
         // Can't release 3 unless 2 is released.
         if (_release - latestRelease > 1) {
-            revert ReleaseIdTooBig(latestRelease, _release);
+            revert ReleaseTooBig(latestRelease, _release);
         }
 
         if (_release > latestRelease) {
@@ -197,7 +193,7 @@ contract PluginRepo is
 
         uint16 build;
         unchecked {
-            build = uint16(buildIdsPerRelease[_release]++);
+            build = uint16(buildsPerRelease[_release]++);
         }
 
         Tag memory tag = Tag(_release, build);
@@ -206,13 +202,12 @@ contract PluginRepo is
         versions[_tagHash] = Version(
             tag,
             _pluginSetup,
-            false,
             _contentURI
         );
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
-        emit VersionCreated(_release, build, _pluginSetup, _contentURI, false);
+        emit VersionCreated(_release, build, _pluginSetup, _contentURI);
     }
 
 
@@ -220,7 +215,7 @@ contract PluginRepo is
     /// @param _release the release number.
     /// @return Version the latest version in the release number.
     function getLatestVersion(uint8 _release) public view returns (Version memory) {
-        uint16 latestBuild = uint16(buildIdsPerRelease[_release]);
+        uint16 latestBuild = uint16(buildsPerRelease[_release]);
         return getVersion(tagHash(Tag(_release, latestBuild)));
     }
 
@@ -260,15 +255,15 @@ contract PluginRepo is
     }
 
     /// @notice Gets the total number of published versions per release.
-    /// @param _releaseId release id.
+    /// @param _release release id.
     /// @return The number of published versions in the release.
-    function versionCount(uint8 _releaseId) public view returns (uint256) {
-        return buildIdsPerRelease[_releaseId];
+    function versionCount(uint8 _release) public view returns (uint256) {
+        return buildsPerRelease[_release];
     }
     
     /// @notice get the tag hash.
     /// @param _tag the tag.
-    /// @return bytes32 the keccak hash of abi encoded _releaseId and _buildId
+    /// @return bytes32 the keccak hash of abi encoded _release and _build
     function tagHash(Tag memory _tag) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_tag.release, _tag.build));
     }
