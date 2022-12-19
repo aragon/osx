@@ -39,7 +39,7 @@ abstract contract GovernancePluginUUPSUpgradeable is GovernanceBase, PluginUUPSU
         virtual
         override
     {
-        dao.execute(_proposalId, _actions);
-        emit ProposalExecuted({proposalId: _proposalId});
+        bytes[] memory execResults = dao.execute(_proposalId, _actions);
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 }

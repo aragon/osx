@@ -39,7 +39,7 @@ abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
         virtual
         override
     {
-        dao.execute(_proposalId, _actions);
-        emit ProposalExecuted({proposalId: _proposalId});
+        bytes[] memory execResults = dao.execute(_proposalId, _actions);
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 }

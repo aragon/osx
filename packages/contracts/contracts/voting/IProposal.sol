@@ -19,6 +19,6 @@ interface IProposal {
 
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId The ID of the proposal.
-    // /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId); //, bytes[] execResults);
+    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
+    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 }
