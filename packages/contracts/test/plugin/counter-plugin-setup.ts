@@ -9,18 +9,7 @@ import {
   CounterV2PluginSetup,
   MultiplyHelper,
 } from '../../typechain';
-
-const EVENTS = {
-  PLUGIN_UPDATED: 'PluginUpdated',
-  PLUGIN_DEPLOYED: 'PluginDeployed',
-};
-
-enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
+import {Operation} from '../core/permission/permission-manager';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -99,13 +88,19 @@ describe('CounterPluginSetup(Example)', function () {
 
       expect(permissions).to.deep.equal([
         [
-          Op.Grant,
+          Operation.Grant,
           daoMock.address,
           plugin,
           AddressZero,
           ethers.utils.id('EXECUTE_PERMISSION'),
         ],
-        [Op.Grant, plugin, daoMock.address, AddressZero, multiplyPermissionId],
+        [
+          Operation.Grant,
+          plugin,
+          daoMock.address,
+          AddressZero,
+          multiplyPermissionId,
+        ],
       ]);
     });
 
@@ -126,14 +121,26 @@ describe('CounterPluginSetup(Example)', function () {
 
       expect(permissions).to.deep.equal([
         [
-          Op.Grant,
+          Operation.Grant,
           daoMock.address,
           plugin,
           AddressZero,
           ethers.utils.id('EXECUTE_PERMISSION'),
         ],
-        [Op.Grant, plugin, daoMock.address, AddressZero, multiplyPermissionId],
-        [Op.Grant, helpers[0], plugin, AddressZero, multiplyPermissionId],
+        [
+          Operation.Grant,
+          plugin,
+          daoMock.address,
+          AddressZero,
+          multiplyPermissionId,
+        ],
+        [
+          Operation.Grant,
+          helpers[0],
+          plugin,
+          AddressZero,
+          multiplyPermissionId,
+        ],
       ]);
     });
   });
@@ -163,7 +170,13 @@ describe('CounterPluginSetup(Example)', function () {
       expect(activeHelpers.length).to.be.equal(1);
       expect(initData).to.be.equal(expectedInitData);
       expect(permissions).to.deep.equal([
-        [Op.Revoke, daoMock.address, plugin, AddressZero, multiplyPermissionId],
+        [
+          Operation.Revoke,
+          daoMock.address,
+          plugin,
+          AddressZero,
+          multiplyPermissionId,
+        ],
       ]);
     });
   });
@@ -179,14 +192,14 @@ describe('CounterPluginSetup(Example)', function () {
 
       expect(permissions).to.deep.equal([
         [
-          Op.Revoke,
+          Operation.Revoke,
           daoMock.address,
           address1,
           AddressZero,
           ethers.utils.id('EXECUTE_PERMISSION'),
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           address1,
           daoMock.address,
           AddressZero,
@@ -208,14 +221,20 @@ describe('CounterPluginSetup(Example)', function () {
 
       expect(permissions).to.deep.equal([
         [
-          Op.Revoke,
+          Operation.Revoke,
           daoMock.address,
           plugin,
           AddressZero,
           ethers.utils.id('EXECUTE_PERMISSION'),
         ],
-        [Op.Revoke, plugin, daoMock.address, AddressZero, multiplyPermissionId],
-        [Op.Revoke, helper, plugin, AddressZero, multiplyPermissionId],
+        [
+          Operation.Revoke,
+          plugin,
+          daoMock.address,
+          AddressZero,
+          multiplyPermissionId,
+        ],
+        [Operation.Revoke, helper, plugin, AddressZero, multiplyPermissionId],
       ]);
     });
   });

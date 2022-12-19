@@ -4,19 +4,19 @@ import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  VoteSettingsUpdated,
+  VotingSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
-  Addresslist
-} from '../../../generated/templates/Addresslist/Addresslist';
+  AddresslistVoting
+} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   Action,
-  AddresslistPlugin,
-  AddresslistProposal,
-  AddresslistVoter,
-  AddresslistVote
+  AddresslistVotingPlugin,
+  AddresslistVotingProposal,
+  AddresslistVotingVoter,
+  AddresslistVotingVote
 } from '../../../generated/schema';
-import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -34,7 +34,7 @@ export function _handleProposalCreated(
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
-  let proposalEntity = new AddresslistProposal(proposalId);
+  let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
   proposalEntity.proposalId = event.params.proposalId;
@@ -43,21 +43,31 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
 
-  let contract = Addresslist.bind(event.address);
+  let contract = AddresslistVoting.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.open = vote.value.value0;
     proposalEntity.executed = vote.value.value1;
-    proposalEntity.startDate = vote.value.value2;
-    proposalEntity.endDate = vote.value.value3;
-    proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.supportThreshold = vote.value.value5;
-    proposalEntity.minParticipation = vote.value.value6;
-    proposalEntity.totalVotingPower = vote.value.value7;
 
-    // actions
-    let actions = vote.value.value11;
+    // ProposalParameters
+    let parameters = vote.value.value2;
+    proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
+    proposalEntity.supportThreshold = parameters.supportThreshold;
+    proposalEntity.minParticipation = parameters.minParticipation;
+    proposalEntity.startDate = parameters.startDate;
+    proposalEntity.endDate = parameters.endDate;
+    proposalEntity.snapshotBlock = parameters.snapshotBlock;
+
+    // Tally
+    let tally = vote.value.value3;
+    proposalEntity.abstain = tally.abstain;
+    proposalEntity.yes = tally.yes;
+    proposalEntity.no = tally.no;
+    proposalEntity.totalVotingPower = tally.totalVotingPower;
+
+    // Actions
+    let actions = vote.value.value4;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -81,7 +91,7 @@ export function _handleProposalCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
+  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
@@ -95,26 +105,29 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = AddresslistVote.load(voterProposalId);
+  let voterProposalEntity = AddresslistVotingVote.load(voterProposalId);
   if (!voterProposalEntity) {
-    voterProposalEntity = new AddresslistVote(voterProposalId);
+    voterProposalEntity = new AddresslistVotingVote(voterProposalId);
     voterProposalEntity.voter = event.params.voter.toHexString();
     voterProposalEntity.proposal = proposalId;
   }
-  voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
+  voterProposalEntity.voteOption = VOTER_OPTIONS.get(event.params.voteOption);
   voterProposalEntity.votingPower = event.params.votingPower;
   voterProposalEntity.createdAt = event.block.timestamp;
   voterProposalEntity.save();
 
   // update count
-  let proposalEntity = AddresslistProposal.load(proposalId);
+  let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = Addresslist.bind(event.address);
-    let vote = contract.try_getProposal(event.params.proposalId);
-    if (!vote.reverted) {
-      let yes = vote.value.value8;
-      let no = vote.value.value9;
-      let abstain = vote.value.value10;
+    let contract = AddresslistVoting.bind(event.address);
+    let proposal = contract.try_getProposal(event.params.proposalId);
+
+    if (!proposal.reverted) {
+      let tally = proposal.value.value3;
+
+      let abstain = tally.abstain;
+      let yes = tally.yes;
+      let no = tally.no;
       let voteCount = yes.plus(no.plus(abstain));
 
       proposalEntity.yes = yes;
@@ -151,7 +164,7 @@ export function handleVoteCast(event: VoteCast): void {
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-  let proposalEntity = AddresslistProposal.load(proposalId);
+  let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
@@ -160,10 +173,10 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 
   // update actions
-  let contract = Addresslist.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
-  if (!vote.reverted) {
-    let actions = vote.value.value10;
+  let contract = AddresslistVoting.bind(event.address);
+  let proposal = contract.try_getProposal(event.params.proposalId);
+  if (!proposal.reverted) {
+    let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
@@ -181,9 +194,12 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
-  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
+export function handleVotingSettingsUpdated(
+  event: VotingSettingsUpdated
+): void {
+  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
+    packageEntity.votingMode = VOTING_MODES.get(event.params.votingMode);
     packageEntity.supportThreshold = event.params.supportThreshold;
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
@@ -196,9 +212,9 @@ export function handleAddressesAdded(event: AddressesAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index];
-    let voterEntity = AddresslistVoter.load(member.toHexString());
+    let voterEntity = AddresslistVotingVoter.load(member.toHexString());
     if (!voterEntity) {
-      voterEntity = new AddresslistVoter(member.toHexString());
+      voterEntity = new AddresslistVotingVoter(member.toHexString());
       voterEntity.address = member.toHexString();
       voterEntity.plugin = event.address.toHexString();
       voterEntity.save();
@@ -210,9 +226,9 @@ export function handleAddressesRemoved(event: AddressesRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index];
-    let voterEntity = AddresslistVoter.load(member.toHexString());
+    let voterEntity = AddresslistVotingVoter.load(member.toHexString());
     if (voterEntity) {
-      store.remove('AddresslistVoter', member.toHexString());
+      store.remove('AddresslistVotingVoter', member.toHexString());
     }
   }
 }

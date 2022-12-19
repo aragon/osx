@@ -5,37 +5,33 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {AddresslistVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {ONE_HOUR} from '../test-utils/voting';
+import {Operation} from '../core/permission/permission-manager';
+import {
+  VotingSettings,
+  VotingMode,
+  pct16,
+  ONE_HOUR,
+} from '../test-utils/voting';
 
-enum Op {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
-}
+let defaultData: any;
+let defaultVotingSettings: VotingSettings;
+let defaultMembers: string[];
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-const supportThreshold = 50;
-const minParticipation = 25;
-const minDuration = ONE_HOUR;
-const minProposerVotingPower = 1;
-let members: string[];
-
-// minimum bytes for `prepareInstallation` data param.
-const MINIMUM_DATA = abiCoder.encode(
-  ['uint64', 'uint64', 'uint64', 'uint256', 'address[]'],
-  [supportThreshold, minParticipation, minDuration, minProposerVotingPower, []]
-);
+const prepareInstallationDataTypes = [
+  'tuple(uint8,uint64,uint64,uint64,uint256)',
+  'address[]',
+];
 
 // Permissions
 const MODIFY_ADDRESSLIST_PERMISSION_ID = ethers.utils.id(
   'MODIFY_ADDRESSLIST_PERMISSION'
 );
-const CHANGE_VOTE_SETTINGS_PERMISSION_ID = ethers.utils.id(
-  'CHANGE_VOTE_SETTINGS_PERMISSION'
+const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
+  'UPDATE_VOTING_SETTINGS_PERMISSION'
 );
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
@@ -49,7 +45,15 @@ describe('AddresslistVotingSetup', function () {
   before(async () => {
     signers = await ethers.getSigners();
     targetDao = await deployNewDAO(signers[0].address);
-    members = [signers[0].address];
+
+    defaultVotingSettings = {
+      votingMode: VotingMode.EarlyExecution,
+      supportThreshold: pct16(50),
+      minParticipation: pct16(20),
+      minDuration: ONE_HOUR,
+      minProposerVotingPower: 0,
+    };
+    defaultMembers = [signers[0].address];
 
     const AddresslistVotingSetup = await ethers.getContractFactory(
       'AddresslistVotingSetup'
@@ -58,6 +62,11 @@ describe('AddresslistVotingSetup', function () {
 
     implementationAddress =
       await addresslistVotingSetup.getImplementationAddress();
+
+    defaultData = abiCoder.encode(prepareInstallationDataTypes, [
+      Object.values(defaultVotingSettings),
+      defaultMembers,
+    ]);
   });
 
   it('creates addresslist voting base with the correct interface', async () => {
@@ -65,10 +74,11 @@ describe('AddresslistVotingSetup', function () {
     const addresslistVotingContract = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
-      'function addAddresses(address[]  _voters)',
-      'function removeAddresses(address[] _voters)',
-      'function isListed(address account, uint256 blockNumber) returns (bool)',
-      'function addresslistLength(uint256 blockNumber) returns (uint256)',
+      'function addAddresses(address[])',
+      'function removeAddresses(address[])',
+      'function isListed(address,uint256) returns (bool)',
+      'function addresslistLength(uint256) returns (uint256)',
+      'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
     ]);
 
     expect(
@@ -80,7 +90,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower, address[] members)';
+        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -98,14 +108,14 @@ describe('AddresslistVotingSetup', function () {
       await expect(
         addresslistVotingSetup.prepareInstallation(
           targetDao.address,
-          MINIMUM_DATA.substring(0, MINIMUM_DATA.length - 1)
+          defaultData.substring(0, defaultData.length - 1)
         )
       ).to.be.reverted;
 
       await expect(
         addresslistVotingSetup.prepareInstallation(
           targetDao.address,
-          MINIMUM_DATA
+          defaultData
         )
       ).not.to.be.reverted;
     });
@@ -122,7 +132,7 @@ describe('AddresslistVotingSetup', function () {
       const {plugin, helpers, permissions} =
         await addresslistVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
-          MINIMUM_DATA
+          defaultData
         );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
@@ -130,28 +140,28 @@ describe('AddresslistVotingSetup', function () {
       expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           targetDao.address,
           AddressZero,
           MODIFY_ADDRESSLIST_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           targetDao.address,
           AddressZero,
-          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
+          UPDATE_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           plugin,
           targetDao.address,
           AddressZero,
           UPGRADE_PERMISSION_ID,
         ],
         [
-          Op.Grant,
+          Operation.Grant,
           targetDao.address,
           plugin,
           AddressZero,
@@ -161,17 +171,6 @@ describe('AddresslistVotingSetup', function () {
     });
 
     it('correctly sets up the plugin', async () => {
-      const data = abiCoder.encode(
-        ['uint64', 'uint64', 'uint64', 'uint256', 'address[]'],
-        [
-          supportThreshold,
-          minParticipation,
-          minDuration,
-          minProposerVotingPower,
-          members,
-        ]
-      );
-
       const nonce = await ethers.provider.getTransactionCount(
         addresslistVotingSetup.address
       );
@@ -180,7 +179,10 @@ describe('AddresslistVotingSetup', function () {
         nonce,
       });
 
-      await addresslistVotingSetup.prepareInstallation(targetDao.address, data);
+      await addresslistVotingSetup.prepareInstallation(
+        targetDao.address,
+        defaultData
+      );
 
       const factory = await ethers.getContractFactory('AddresslistVoting');
       const addresslistVotingContract = factory.attach(
@@ -192,25 +194,28 @@ describe('AddresslistVotingSetup', function () {
         targetDao.address
       );
       expect(await addresslistVotingContract.minParticipation()).to.be.equal(
-        minParticipation
+        defaultVotingSettings.minParticipation
       );
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
-        supportThreshold
+        defaultVotingSettings.supportThreshold
       );
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
-        minDuration
+        defaultVotingSettings.minDuration
       );
       expect(
         await addresslistVotingContract.minProposerVotingPower()
-      ).to.be.equal(minProposerVotingPower);
+      ).to.be.equal(defaultVotingSettings.minProposerVotingPower);
 
       await ethers.provider.send('evm_mine', []);
 
       expect(
         await addresslistVotingContract.addresslistLength(latestBlock.number)
-      ).to.be.equal(members.length);
+      ).to.be.equal(defaultMembers.length);
       expect(
-        await addresslistVotingContract.isListed(members[0], latestBlock.number)
+        await addresslistVotingContract.isListed(
+          defaultMembers[0],
+          latestBlock.number
+        )
       ).to.be.equal(true);
     });
   });
@@ -239,28 +244,28 @@ describe('AddresslistVotingSetup', function () {
       expect(permissions.length).to.be.equal(4);
       expect(permissions).to.deep.equal([
         [
-          Op.Revoke,
+          Operation.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
           MODIFY_ADDRESSLIST_PERMISSION_ID,
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
-          CHANGE_VOTE_SETTINGS_PERMISSION_ID,
+          UPDATE_VOTING_SETTINGS_PERMISSION_ID,
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           plugin,
           targetDao.address,
           AddressZero,
           UPGRADE_PERMISSION_ID,
         ],
         [
-          Op.Revoke,
+          Operation.Revoke,
           targetDao.address,
           plugin,
           AddressZero,

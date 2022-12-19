@@ -24,7 +24,7 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 const addressZero = ethers.constants.AddressZero;
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
-enum Operation {
+export enum Operation {
   Grant,
   Revoke,
   Freeze,

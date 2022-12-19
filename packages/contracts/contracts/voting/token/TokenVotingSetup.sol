@@ -19,6 +19,7 @@ import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol"
 import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
 import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
 /// @title TokenVotingSetup
@@ -91,7 +92,7 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -108,16 +109,13 @@ contract TokenVotingSetup is PluginSetup {
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
-            uint64 supportThreshold,
-            uint64 minParticipation,
-            uint64 minDuration,
-            uint256 minProposerVotingPower,
+            IMajorityVoting.VotingSettings memory votingSettings,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
         ) = abi.decode(
                 _data,
-                (uint64, uint64, uint64, uint256, TokenSettings, GovernanceERC20.MintSettings)
+                (IMajorityVoting.VotingSettings, TokenSettings, GovernanceERC20.MintSettings)
             );
 
         // Check mint setting.
@@ -184,15 +182,7 @@ contract TokenVotingSetup is PluginSetup {
         // Prepare and deploy plugin proxy.
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
-            abi.encodeWithSelector(
-                TokenVoting.initialize.selector,
-                dao,
-                supportThreshold,
-                minParticipation,
-                minDuration,
-                minProposerVotingPower,
-                token
-            )
+            abi.encodeWithSelector(TokenVoting.initialize.selector, dao, votingSettings, token)
         );
 
         // Prepare permissions
@@ -205,7 +195,7 @@ contract TokenVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            tokenVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -276,7 +266,7 @@ contract TokenVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            tokenVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(

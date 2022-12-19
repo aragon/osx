@@ -7,9 +7,9 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
-import {IMajorityVoting} from "./IMajorityVoting.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
@@ -23,10 +23,10 @@ import {IDAO} from "../../core/IDAO.sol";
 ///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
 ///  Majority voting implies that the support threshold is set with
 ///  $$\texttt{supportThreshold} \ge 50\% .$$
-///  However, this is not enforced by the contract code and developers can make unsafe configurations and only the frontend will warn about bad parameter settings.
+///  However, this is not enforced by the contract code and developers can make unsafe parameterss and only the frontend will warn about bad parameter settings.
 ///
 ///  #### Vote Replacement Execution
-///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest choice is tallied.
+///  The contract allows votes to be replaced. Voters can vote multiple times and only the latest voteOption is tallied.
 ///
 ///  #### Early Execution
 ///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more people voting. Accordingly, vote replacement and early execution are mutually exclusive options.
@@ -59,9 +59,9 @@ abstract contract MajorityVotingBase is
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
-    /// @notice The ID of the permission required to call the `changeVoteSettings` function.
-    bytes32 public constant CHANGE_VOTE_SETTINGS_PERMISSION_ID =
-        keccak256("CHANGE_VOTE_SETTINGS_PERMISSION");
+    /// @notice The ID of the permission required to call the `updateVotingSettings` function.
+    bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
+        keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
@@ -69,12 +69,10 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    //TODO put in a struct named VoteSettings, later add earlyExecutionAllowed
-    uint64 public supportThreshold;
-    uint64 public minParticipation;
-    uint64 public minDuration;
-    uint256 public minProposerVotingPower;
+    /// @notice The struct storing the voting settings.
+    VotingSettings private votingSettings;
 
+    /// @notice A counter counting the created proposals.
     uint256 public proposalCount;
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
@@ -115,24 +113,13 @@ abstract contract MajorityVotingBase is
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote
-    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
-    function __MajorityVotingBase_init(
-        IDAO _dao,
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) internal onlyInitializing {
+    /// @param _votingSettings The voting settings.
+    function __MajorityVotingBase_init(IDAO _dao, VotingSettings calldata _votingSettings)
+        internal
+        onlyInitializing
+    {
         __PluginUUPSUpgradeable_init(_dao);
-        _validateAndSetSettings(
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+        _updateVotingSettings(_votingSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -149,18 +136,11 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function changeVoteSettings(
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) external auth(CHANGE_VOTE_SETTINGS_PERMISSION_ID) {
-        _validateAndSetSettings(
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+    function updateVotingSettings(VotingSettings calldata _votingSettings)
+        external
+        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
+    {
+        _updateVotingSettings(_votingSettings);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -169,20 +149,20 @@ abstract contract MajorityVotingBase is
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _executeIfDecided,
-        VoteOption _choice
+        bool _tryEarlyExecution,
+        VoteOption _voteOption
     ) external virtual returns (uint256 proposalId);
 
     /// @inheritdoc IMajorityVoting
     function vote(
         uint256 _proposalId,
-        VoteOption _choice,
-        bool _executesIfDecided
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
     ) public {
-        if (_choice != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
+        if (_voteOption != VoteOption.None && !_canVote(_proposalId, _msgSender())) {
             revert VoteCastForbidden(_proposalId, _msgSender());
         }
-        _vote(_proposalId, _choice, _msgSender(), _executesIfDecided);
+        _vote(_proposalId, _voteOption, _msgSender(), _tryEarlyExecution);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -210,14 +190,18 @@ abstract contract MajorityVotingBase is
     function support(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        return _calculatePct(proposal_.yes, proposal_.yes + proposal_.no);
+        return _calculatePct(proposal_.tally.yes, proposal_.tally.yes + proposal_.tally.no);
     }
 
     /// @inheritdoc IMajorityVoting
     function worstCaseSupport(uint256 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        return _calculatePct(proposal_.yes, proposal_.totalVotingPower - proposal_.abstain);
+        return
+            _calculatePct(
+                proposal_.tally.yes,
+                proposal_.tally.totalVotingPower - proposal_.tally.abstain
+            );
     }
 
     /// @inheritdoc IMajorityVoting
@@ -226,9 +210,34 @@ abstract contract MajorityVotingBase is
 
         return
             _calculatePct(
-                proposal_.yes + proposal_.no + proposal_.abstain,
-                proposal_.totalVotingPower
+                proposal_.tally.yes + proposal_.tally.no + proposal_.tally.abstain,
+                proposal_.tally.totalVotingPower
             );
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function supportThreshold() public view virtual returns (uint64) {
+        return votingSettings.supportThreshold;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function minParticipation() public view virtual returns (uint64) {
+        return votingSettings.minParticipation;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function minDuration() public view virtual returns (uint64) {
+        return votingSettings.minDuration;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function minProposerVotingPower() public view virtual returns (uint256) {
+        return votingSettings.minProposerVotingPower;
+    }
+
+    /// @inheritdoc IMajorityVoting
+    function votingMode() public view virtual returns (VotingMode) {
+        return votingSettings.votingMode;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -238,15 +247,8 @@ abstract contract MajorityVotingBase is
         returns (
             bool open,
             bool executed,
-            uint64 startDate,
-            uint64 endDate,
-            uint64 snapshotBlock,
-            uint64 _supportThreshold,
-            uint64 _minParticipation,
-            uint256 totalVotingPower,
-            uint256 yes,
-            uint256 no,
-            uint256 abstain,
+            ProposalParameters memory parameters,
+            Tally memory tally,
             IDAO.Action[] memory actions
         )
     {
@@ -254,27 +256,20 @@ abstract contract MajorityVotingBase is
 
         open = _isVoteOpen(proposal_);
         executed = proposal_.executed;
-        startDate = proposal_.startDate;
-        endDate = proposal_.endDate;
-        snapshotBlock = proposal_.snapshotBlock;
-        _supportThreshold = proposal_.supportThreshold;
-        _minParticipation = proposal_.minParticipation;
-        totalVotingPower = proposal_.totalVotingPower;
-        yes = proposal_.yes;
-        no = proposal_.no;
-        abstain = proposal_.abstain;
+        parameters = proposal_.parameters;
+        tally = proposal_.tally;
         actions = proposal_.actions;
     }
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
-    /// @param _choice Whether voter abstains, supports or not supports to vote.
-    /// @param _executesIfDecided if true, and it's the last vote required, immediately executes a vote.
+    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal virtual;
 
     /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
@@ -290,7 +285,7 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
-    /// @return True if the given voter can vote on a certain proposal, false otherwise.
+    /// @return Returns `true` if the given voter can vote on a certain proposal and `false` otherwise.
     function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
@@ -308,23 +303,25 @@ abstract contract MajorityVotingBase is
         if (_isVoteOpen(proposal_)) {
             // Early execution
             return
-                worstCaseSupport(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) >= proposal_.minParticipation;
-        } else {
-            // Normal execution
-            return
-                support(_proposalId) > proposal_.supportThreshold &&
-                participation(_proposalId) >= proposal_.minParticipation;
+                proposal_.parameters.votingMode == VotingMode.EarlyExecution &&
+                worstCaseSupport(_proposalId) > proposal_.parameters.supportThreshold &&
+                participation(_proposalId) >= proposal_.parameters.minParticipation;
         }
+        // Normal execution
+        return
+            support(_proposalId) > proposal_.parameters.supportThreshold &&
+            participation(_proposalId) >= proposal_.parameters.minParticipation;
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
     function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
+        uint64 currentTime = getTimestamp64();
+
         return
-            getTimestamp64() < proposal_.endDate &&
-            getTimestamp64() >= proposal_.startDate &&
+            proposal_.parameters.startDate <= currentTime &&
+            currentTime < proposal_.parameters.endDate &&
             !proposal_.executed;
     }
 
@@ -340,43 +337,39 @@ abstract contract MajorityVotingBase is
         return (_value * PCT_BASE) / _total;
     }
 
-    /// @notice Validates and sets the proposal vote settings.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation in percent.
-    /// @param _minDuration The minimum duration of a vote
-    /// @param _minProposerVotingPower The minimum voting power needed to create a proposal.
-    function _validateAndSetSettings(
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower
-    ) internal virtual {
-        if (_supportThreshold > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _supportThreshold});
+    /// @notice Internal function to update the plugin-wide proposal vote settings.
+    /// @param _votingSettings The voting settings to be validated and updated.
+    function _updateVotingSettings(VotingSettings calldata _votingSettings) internal virtual {
+        if (_votingSettings.supportThreshold > PCT_BASE) {
+            revert PercentageExceeds100({
+                limit: PCT_BASE,
+                actual: _votingSettings.supportThreshold
+            });
         }
 
-        if (_minParticipation > PCT_BASE) {
-            revert PercentageExceeds100({limit: PCT_BASE, actual: _minParticipation});
+        if (_votingSettings.minParticipation > PCT_BASE) {
+            revert PercentageExceeds100({
+                limit: PCT_BASE,
+                actual: _votingSettings.minParticipation
+            });
         }
 
-        if (_minDuration < 60 minutes) {
-            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _minDuration});
+        if (_votingSettings.minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _votingSettings.minDuration});
         }
 
-        if (_minDuration > 365 days) {
-            revert MinDurationOutOfBounds({limit: 365 days, actual: _minDuration});
+        if (_votingSettings.minDuration > 365 days) {
+            revert MinDurationOutOfBounds({limit: 365 days, actual: _votingSettings.minDuration});
         }
 
-        supportThreshold = _supportThreshold;
-        minParticipation = _minParticipation;
-        minDuration = _minDuration;
-        minProposerVotingPower = _minProposerVotingPower;
+        votingSettings = _votingSettings;
 
-        emit VoteSettingsUpdated({
-            minParticipation: _minParticipation,
-            supportThreshold: _supportThreshold,
-            minDuration: _minDuration,
-            minProposerVotingPower: _minProposerVotingPower
+        emit VotingSettingsUpdated({
+            votingMode: _votingSettings.votingMode,
+            supportThreshold: _votingSettings.supportThreshold,
+            minParticipation: _votingSettings.minParticipation,
+            minDuration: _votingSettings.minDuration,
+            minProposerVotingPower: _votingSettings.minProposerVotingPower
         });
     }
 
@@ -385,7 +378,7 @@ abstract contract MajorityVotingBase is
     /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
     /// @return startDate The validated start date of the proposal vote.
     /// @return endDate The validated end date of the proposal vote.
-    function _validateVoteDates(uint64 _start, uint64 _end)
+    function _validateProposalDates(uint64 _start, uint64 _end)
         internal
         view
         virtual
@@ -403,7 +396,7 @@ abstract contract MajorityVotingBase is
             }
         }
 
-        uint64 earliestEndDate = startDate + minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
+        uint64 earliestEndDate = startDate + votingSettings.minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
 
         if (_end == 0) {
             endDate = earliestEndDate;
