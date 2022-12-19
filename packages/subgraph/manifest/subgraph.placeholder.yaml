@@ -155,7 +155,7 @@ templates:
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256)
+        - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
@@ -180,7 +180,7 @@ templates:
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256)
+        - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
@@ -207,7 +207,7 @@ templates:
         - name: Admin
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
       eventHandlers:
-        - event: ProposalExecuted(indexed uint256)
+        - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
