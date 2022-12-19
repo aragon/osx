@@ -428,21 +428,22 @@ test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', ()
   handleAddressesAdded(event);
 
   // checks
+
+  let memberId =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
+    '_' +
+    userArray[0].toHexString();
+
+  assert.fieldEquals('AddresslistVotingVoter', memberId, 'id', memberId);
   assert.fieldEquals(
     'AddresslistVotingVoter',
-    userArray[0].toHexString(),
-    'id',
-    userArray[0].toHexString()
-  );
-  assert.fieldEquals(
-    'AddresslistVotingVoter',
-    userArray[0].toHexString(),
+    memberId,
     'address',
     userArray[0].toHexString()
   );
   assert.fieldEquals(
     'AddresslistVotingVoter',
-    userArray[0].toHexString(),
+    memberId,
     'plugin',
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
@@ -452,32 +453,45 @@ test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', ()
 
 test('Run AddresslistVoting (AddressesRemoved) mappings with mock event', () => {
   // create state
-  let userArray = [
+  let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
-  for (let index = 0; index < userArray.length; index++) {
-    const user = userArray[index];
-    let userEntity = new AddresslistVotingVoter(user.toHexString());
-    userEntity.plugin = Address.fromString(CONTRACT_ADDRESS).toHexString();
+  for (let index = 0; index < memberAddresses.length; index++) {
+    const user = memberAddresses[index].toHexString();
+    const pluginId = Address.fromString(CONTRACT_ADDRESS).toHexString();
+    let memberId = pluginId + '_' + user;
+    let userEntity = new AddresslistVotingVoter(memberId);
+    userEntity.plugin = pluginId;
     userEntity.save();
   }
 
+  // checks
+  let memberId1 =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
+    '_' +
+    memberAddresses[0].toHexString();
+  let memberId2 =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
+    '_' +
+    memberAddresses[1].toHexString();
+
+  assert.fieldEquals('AddresslistVotingVoter', memberId1, 'id', memberId1);
+  assert.fieldEquals('AddresslistVotingVoter', memberId2, 'id', memberId2);
+
   // create event
-  let event = createNewAddressesRemovedEvent([userArray[1]], CONTRACT_ADDRESS);
+  let event = createNewAddressesRemovedEvent(
+    [memberAddresses[1]],
+    CONTRACT_ADDRESS
+  );
 
   // handle event
   handleAddressesRemoved(event);
 
   // checks
-  assert.fieldEquals(
-    'AddresslistVotingVoter',
-    userArray[0].toHexString(),
-    'id',
-    userArray[0].toHexString()
-  );
-  assert.notInStore('AddresslistVotingVoter', userArray[1].toHexString());
+  assert.fieldEquals('AddresslistVotingVoter', memberId1, 'id', memberId1);
+  assert.notInStore('AddresslistVotingVoter', memberId2);
 
   clearStore();
 });

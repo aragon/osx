@@ -101,8 +101,8 @@ export function _handleProposalCreated(
 }
 
 export function handleVoteCast(event: VoteCast): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let pluginId = event.address.toHexString();
+  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
   let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
   let voterProposalEntity = TokenVotingVote.load(voterProposalId);
   if (!voterProposalEntity) {
@@ -116,11 +116,14 @@ export function handleVoteCast(event: VoteCast): void {
   voterProposalEntity.save();
 
   // voter
-  let voterEntity = TokenVotingVoter.load(event.params.voter.toHexString());
+  let member = event.params.voter.toHexString();
+  let memberId = pluginId + '_' + member;
+
+  let voterEntity = TokenVotingVoter.load(memberId);
   if (!voterEntity) {
-    voterEntity = new TokenVotingVoter(event.params.voter.toHexString());
+    voterEntity = new TokenVotingVoter(memberId);
     voterEntity.address = event.params.voter.toHexString();
-    voterEntity.plugin = event.address.toHexString();
+    voterEntity.plugin = pluginId;
     voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
   } else {

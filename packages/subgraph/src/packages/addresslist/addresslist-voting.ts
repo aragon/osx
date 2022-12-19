@@ -211,12 +211,15 @@ export function handleVotingSettingsUpdated(
 export function handleAddressesAdded(event: AddressesAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index];
-    let voterEntity = AddresslistVotingVoter.load(member.toHexString());
+    const member = members[index].toHexString();
+    const pluginId = event.address.toHexString();
+    const memberId = pluginId + '_' + member;
+
+    let voterEntity = AddresslistVotingVoter.load(memberId);
     if (!voterEntity) {
-      voterEntity = new AddresslistVotingVoter(member.toHexString());
-      voterEntity.address = member.toHexString();
-      voterEntity.plugin = event.address.toHexString();
+      voterEntity = new AddresslistVotingVoter(memberId);
+      voterEntity.address = member;
+      voterEntity.plugin = pluginId;
       voterEntity.save();
     }
   }
@@ -225,10 +228,13 @@ export function handleAddressesAdded(event: AddressesAdded): void {
 export function handleAddressesRemoved(event: AddressesRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index];
-    let voterEntity = AddresslistVotingVoter.load(member.toHexString());
+    const member = members[index].toHexString();
+    const pluginId = event.address.toHexString();
+    const memberId = pluginId + '_' + member;
+
+    let voterEntity = AddresslistVotingVoter.load(memberId);
     if (voterEntity) {
-      store.remove('AddresslistVotingVoter', member.toHexString());
+      store.remove('AddresslistVotingVoter', memberId);
     }
   }
 }

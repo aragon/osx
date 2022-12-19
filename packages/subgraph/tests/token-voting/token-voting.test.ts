@@ -196,17 +196,22 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals('TokenVotingVote', entityID, 'id', entityID);
 
   // check voter
-  assert.fieldEquals('TokenVotingVoter', ADDRESS_ONE, 'id', ADDRESS_ONE);
-  assert.fieldEquals('TokenVotingVoter', ADDRESS_ONE, 'address', ADDRESS_ONE);
+  let memberId =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
+    '_' +
+    Address.fromString(ADDRESS_ONE).toHexString();
+
+  assert.fieldEquals('TokenVotingVoter', memberId, 'id', memberId);
+  assert.fieldEquals('TokenVotingVoter', memberId, 'address', ADDRESS_ONE);
   assert.fieldEquals(
     'TokenVotingVoter',
-    ADDRESS_ONE,
+    memberId,
     'plugin',
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
   assert.fieldEquals(
     'TokenVotingVoter',
-    ADDRESS_ONE,
+    memberId,
     'lastUpdated',
     event.block.timestamp.toString()
   );
