@@ -21,14 +21,6 @@ abstract contract Addresslist is TimeHelpers {
     /// @notice The checkpointed history of the length of the address list.
     CheckpointsUpgradeable.History private _addresslistLengthCheckpoints;
 
-    /// @notice Emitted when new members are added to the address list.
-    /// @param members The array of member addresses to be added.
-    event AddressesAdded(address[] members);
-
-    /// @notice Emitted when members are removed from the address list.
-    /// @param members The array of member addresses to be removed.
-    event AddressesRemoved(address[] members);
-
     /// @notice Checks if an account is on the address list at given block number.
     /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
@@ -60,22 +52,6 @@ abstract contract Addresslist is TimeHelpers {
         for (uint256 i = 0; i < _members.length; i++) {
             _addresslistCheckpoints[_members[i]].push(_enabled ? 1 : 0);
         }
-    }
-
-    /// @notice Internal function to add new members to the address list.
-    /// @param _members The addresses of the members to be added.
-    function _addAddresses(address[] calldata _members) internal {
-        _updateAddresslist(_members, true);
-
-        emit AddressesAdded({members: _members});
-    }
-
-    /// @notice Internal function to remove existing members from the address list.
-    /// @param _members The addresses of the members to be removed.
-    function _removeAddresses(address[] calldata _members) internal {
-        _updateAddresslist(_members, false);
-
-        emit AddressesRemoved({members: _members});
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
