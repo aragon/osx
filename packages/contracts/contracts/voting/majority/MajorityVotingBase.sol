@@ -2,16 +2,14 @@
 
 pragma solidity 0.8.10;
 
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {GovernancePluginUUPSUpgradeable} from "../GovernancePluginUUPSUpgradeable.sol";
+import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022
@@ -58,8 +56,6 @@ abstract contract MajorityVotingBase is
     TimeHelpers,
     GovernancePluginUUPSUpgradeable
 {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MAJORITY_VOTING_INTERFACE_ID = type(IMajorityVoting).interfaceId;
 
@@ -75,6 +71,9 @@ abstract contract MajorityVotingBase is
 
     /// @notice The struct storing the voting settings.
     VotingSettings private votingSettings;
+
+    /// @notice A counter counting the created proposals.
+    uint256 public proposalCount; // TODO put this in a proposals interface
 
     /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
     /// @param limit The maximal value.
@@ -119,7 +118,7 @@ abstract contract MajorityVotingBase is
         internal
         onlyInitializing
     {
-        __PluginUUPSUpgradeable_init(_dao);
+        __GovernancePluginUUPSUpgradeable_init(_dao);
         _updateVotingSettings(_votingSettings);
     }
 
@@ -130,7 +129,7 @@ abstract contract MajorityVotingBase is
         public
         view
         virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
+        override(ERC165Upgradeable, GovernancePluginUUPSUpgradeable)
         returns (bool)
     {
         return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
@@ -146,7 +145,7 @@ abstract contract MajorityVotingBase is
 
     /// @inheritdoc IMajorityVoting
     function createProposal(
-        bytes calldata _metadata,
+        bytes calldata _proposalMetadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
@@ -167,14 +166,9 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function execute(uint256 _proposalId) public override {
-        if (!_canExecute(_proposalId)) {
-            revert ProposalExecutionForbidden(_proposalId);
-        }
-
-        Proposal storage proposal_ = proposals[_proposalId];
-
-        _executeProposal(_proposalId, proposal_.actions);
+    function execute(uint256 _proposalId) public {
+        if (!_canExecute(_proposalId)) revert ProposalExecutionForbidden(_proposalId);
+        _execute(_proposalId);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -283,9 +277,9 @@ abstract contract MajorityVotingBase is
     function _execute(uint256 _proposalId) internal virtual {
         proposals[_proposalId].executed = true;
 
-        dao.execute(_proposalId, proposals[_proposalId].actions);
+        bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
 
-        emit ProposalExecuted({proposalId: _proposalId});
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.

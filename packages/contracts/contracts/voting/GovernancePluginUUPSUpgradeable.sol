@@ -14,6 +14,20 @@ abstract contract GovernancePluginUUPSUpgradeable is GovernanceBase, PluginUUPSU
     /// @notice The incremental ID for proposals and executions.
     CountersUpgradeable.Counter private proposalId;
 
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interace.
+    /// @return bool Returns true if the interface is supported.
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return false; // TODO interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
+    }
+
+    /// @notice Initializes the contract.
+    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
+    /// @param _dao The associated DAO.
+    function __GovernancePluginUUPSUpgradeable_init(IDAO _dao) internal virtual onlyInitializing {
+        __PluginUUPSUpgradeable_init(_dao);
+    }
+
     /// @inheritdoc GovernanceBase
     function _createProposal(
         address _creator,

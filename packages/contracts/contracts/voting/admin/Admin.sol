@@ -4,17 +4,13 @@ pragma solidity 0.8.10;
 
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {GovernancePluginCloneable} from "../GovernancePluginCloneable.sol";
-import {GovernanceBase} from "../GovernanceBase.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.
 /// @notice The admin address governance plugin giving execution permission on the DAO to a single address
 contract Admin is GovernancePluginCloneable {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =
         this.initialize.selector ^ this.executeProposal.selector;
@@ -27,7 +23,7 @@ contract Admin is GovernancePluginCloneable {
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
     function initialize(IDAO _dao) public initializer {
-        __PluginCloneable_init(_dao);
+        __GovernancePluginCloneable_init(_dao);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
