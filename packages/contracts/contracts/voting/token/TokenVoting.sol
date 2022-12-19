@@ -26,26 +26,14 @@ contract TokenVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote in seconds.
-    /// @param _minProposerVotingPower The minimal voting power needed to create a proposal.
+    /// @param _votingSettings The voting settings.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower,
+        VotingSettings calldata _votingSettings,
         IVotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(
-            _dao,
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+        __MajorityVotingBase_init(_dao, _votingSettings);
 
         votingToken = _token;
     }
@@ -70,15 +58,15 @@ contract TokenVoting is MajorityVotingBase {
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _executeIfDecided,
-        VoteOption _choice
+        bool _tryEarlyExecution,
+        VoteOption _voteOption
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower) {
+        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -86,11 +74,17 @@ contract TokenVoting is MajorityVotingBase {
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
-        (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
-        proposal_.supportThreshold = supportThreshold;
-        proposal_.minParticipation = minParticipation;
-        proposal_.totalVotingPower = totalVotingPower;
-        proposal_.snapshotBlock = snapshotBlock;
+
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
+            _startDate,
+            _endDate
+        );
+        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.votingMode = votingMode();
+        proposal_.parameters.supportThreshold = supportThreshold();
+        proposal_.parameters.minParticipation = minParticipation();
+
+        proposal_.tally.totalVotingPower = totalVotingPower;
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -104,50 +98,50 @@ contract TokenVoting is MajorityVotingBase {
             metadata: _proposalMetadata
         });
 
-        vote(proposalId, _choice, _executeIfDecided);
+        vote(proposalId, _voteOption, _tryEarlyExecution);
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal override {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.snapshotBlock);
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock);
         VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes - votingPower;
+            proposal_.tally.yes = proposal_.tally.yes - votingPower;
         } else if (state == VoteOption.No) {
-            proposal_.no = proposal_.no - votingPower;
+            proposal_.tally.no = proposal_.tally.no - votingPower;
         } else if (state == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain - votingPower;
+            proposal_.tally.abstain = proposal_.tally.abstain - votingPower;
         }
 
         // write the updated/new vote for the voter.
-        if (_choice == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes + votingPower;
-        } else if (_choice == VoteOption.No) {
-            proposal_.no = proposal_.no + votingPower;
-        } else if (_choice == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain + votingPower;
+        if (_voteOption == VoteOption.Yes) {
+            proposal_.tally.yes = proposal_.tally.yes + votingPower;
+        } else if (_voteOption == VoteOption.No) {
+            proposal_.tally.no = proposal_.tally.no + votingPower;
+        } else if (_voteOption == VoteOption.Abstain) {
+            proposal_.tally.abstain = proposal_.tally.abstain + votingPower;
         }
 
-        proposal_.voters[_voter] = _choice;
+        proposal_.voters[_voter] = _voteOption;
 
         emit VoteCast({
             proposalId: _proposalId,
             voter: _voter,
-            choice: uint8(_choice),
+            voteOption: _voteOption,
             votingPower: votingPower
         });
 
-        if (_executesIfDecided && _canExecute(_proposalId)) {
+        if (_tryEarlyExecution && _canExecute(_proposalId)) {
             _execute(_proposalId);
         }
     }
@@ -155,8 +149,22 @@ contract TokenVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
-        return
-            _isVoteOpen(proposal_) && votingToken.getPastVotes(_voter, proposal_.snapshotBlock) > 0;
+
+        if (!_isVoteOpen(proposal_)) {
+            // The proposal vote hasn't started or has already ended.
+            return false;
+        } else if (votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock) == 0) {
+            // The voter has no voting power.
+            return false;
+        } else if (
+            proposal_.voters[_voter] != VoteOption.None &&
+            proposal_.parameters.votingMode != VotingMode.VoteReplacement
+        ) {
+            // The voter has already voted but vote replacment is not allowed.
+            return false;
+        }
+
+        return true;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

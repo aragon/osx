@@ -20,6 +20,7 @@ On 2022-12-09 15:16:22
 
 ### Changed
 
+- Unified naming of the `MajorityVoting` related variables and functions as well as reordering of the function arguments.
 - Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
 - Renamed *package to *plugin.
 - Renamed Allowlist to Addresslist.

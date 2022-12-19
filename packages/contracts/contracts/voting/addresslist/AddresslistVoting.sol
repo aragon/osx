@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {Checkpoints} from "@openzeppelin/contracts/utils/Checkpoints.sol";
+import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
@@ -15,24 +15,25 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is MajorityVotingBase {
-    using Checkpoints for Checkpoints.History;
+    using CheckpointsUpgradeable for CheckpointsUpgradeable.History;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
         this.addAddresses.selector ^
             this.removeAddresses.selector ^
             this.isListed.selector ^
-            this.addresslistLength.selector;
+            this.addresslistLength.selector ^
+            this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
         keccak256("MODIFY_ADDRESSLIST_PERMISSION");
 
     /// @notice The mapping containing the checkpointed history of the address list.
-    mapping(address => Checkpoints.History) private _addresslistCheckpoints;
+    mapping(address => CheckpointsUpgradeable.History) private _addresslistCheckpoints;
 
     /// @notice The checkpointed history of the length of the address list.
-    Checkpoints.History private _addresslistLengthCheckpoints;
+    CheckpointsUpgradeable.History private _addresslistLengthCheckpoints;
 
     /// @notice Emitted when new members are added to the address list.
     /// @param members The array of member addresses to be added.
@@ -45,25 +46,13 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _supportThreshold The support threshold in percent.
-    /// @param _minParticipation The minimum participation ratio in percent.
-    /// @param _minDuration The minimal duration of a vote in seconds.
-    /// @param _members The initial member addresses to be listed.
+    /// @param _votingSettings The voting settings.
     function initialize(
         IDAO _dao,
-        uint64 _supportThreshold,
-        uint64 _minParticipation,
-        uint64 _minDuration,
-        uint256 _minProposerVotingPower,
+        VotingSettings calldata _votingSettings,
         address[] calldata _members
     ) public initializer {
-        __MajorityVotingBase_init(
-            _dao,
-            _supportThreshold,
-            _minParticipation,
-            _minDuration,
-            _minProposerVotingPower
-        );
+        __MajorityVotingBase_init(_dao, _votingSettings);
 
         // add member addresses to the address list
         _addAddresses(_members);
@@ -113,12 +102,12 @@ contract AddresslistVoting is MajorityVotingBase {
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _executeIfDecided,
-        VoteOption _choice
+        bool _tryEarlyExecution,
+        VoteOption _voteOption
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (minProposerVotingPower != 0 && !isListed(_msgSender(), snapshotBlock)) {
+        if (minProposerVotingPower() != 0 && !isListed(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -126,11 +115,17 @@ contract AddresslistVoting is MajorityVotingBase {
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
-        (proposal_.startDate, proposal_.endDate) = _validateVoteDates(_startDate, _endDate);
-        proposal_.snapshotBlock = snapshotBlock;
-        proposal_.supportThreshold = supportThreshold;
-        proposal_.minParticipation = minParticipation;
-        proposal_.totalVotingPower = addresslistLength(snapshotBlock);
+
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
+            _startDate,
+            _endDate
+        );
+        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.votingMode = votingMode();
+        proposal_.parameters.supportThreshold = supportThreshold();
+        proposal_.parameters.minParticipation = minParticipation();
+
+        proposal_.tally.totalVotingPower = addresslistLength(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -144,15 +139,15 @@ contract AddresslistVoting is MajorityVotingBase {
             metadata: _proposalMetadata
         });
 
-        vote(proposalId, _choice, _executeIfDecided);
+        vote(proposalId, _voteOption, _tryEarlyExecution);
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal override {
         Proposal storage proposal_ = proposals[_proposalId];
 
@@ -160,32 +155,32 @@ contract AddresslistVoting is MajorityVotingBase {
 
         // Remove the previous vote.
         if (state == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes - 1;
+            proposal_.tally.yes = proposal_.tally.yes - 1;
         } else if (state == VoteOption.No) {
-            proposal_.no = proposal_.no - 1;
+            proposal_.tally.no = proposal_.tally.no - 1;
         } else if (state == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain - 1;
+            proposal_.tally.abstain = proposal_.tally.abstain - 1;
         }
 
         // Store the updated/new vote for the voter.
-        if (_choice == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes + 1;
-        } else if (_choice == VoteOption.No) {
-            proposal_.no = proposal_.no + 1;
-        } else if (_choice == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain + 1;
+        if (_voteOption == VoteOption.Yes) {
+            proposal_.tally.yes = proposal_.tally.yes + 1;
+        } else if (_voteOption == VoteOption.No) {
+            proposal_.tally.no = proposal_.tally.no + 1;
+        } else if (_voteOption == VoteOption.Abstain) {
+            proposal_.tally.abstain = proposal_.tally.abstain + 1;
         }
 
-        proposal_.voters[_voter] = _choice;
+        proposal_.voters[_voter] = _voteOption;
 
         emit VoteCast({
             proposalId: _proposalId,
             voter: _voter,
-            choice: uint8(_choice),
+            voteOption: _voteOption,
             votingPower: 1
         });
 
-        if (_executesIfDecided && _canExecute(_proposalId)) {
+        if (_tryEarlyExecution && _canExecute(_proposalId)) {
             _execute(_proposalId);
         }
     }
@@ -212,7 +207,22 @@ contract AddresslistVoting is MajorityVotingBase {
     /// @inheritdoc MajorityVotingBase
     function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
-        return _isVoteOpen(proposal_) && isListed(_voter, proposal_.snapshotBlock);
+
+        if (!_isVoteOpen(proposal_)) {
+            // The proposal vote hasn't started or has already ended.
+            return false;
+        } else if (!isListed(_voter, proposal_.parameters.snapshotBlock)) {
+            // The voter has no voting power.
+            return false;
+        } else if (
+            proposal_.voters[_voter] != VoteOption.None &&
+            proposal_.parameters.votingMode != VotingMode.VoteReplacement
+        ) {
+            // The voter has already voted but vote replacment is not allowed.
+            return false;
+        }
+
+        return true;
     }
 
     /// @notice Updates the address list by adding or removing members.

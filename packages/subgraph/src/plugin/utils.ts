@@ -1,28 +1,29 @@
 import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
-import {Addresslist as AddresslistContract} from '../../generated/templates/Addresslist/Addresslist';
+import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {TokenVoting, Addresslist, Admin} from '../../generated/templates';
+import {TokenVoting, AddresslistVoting, Admin} from '../../generated/templates';
 import {
   DaoPlugin,
   TokenVotingPlugin,
-  AddresslistPlugin,
+  AddresslistVotingPlugin,
   AdminPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
   TOKEN_VOTING_INTERFACE,
   ADDRESSLIST_VOTING_INTERFACE,
-  ADMIN_INTERFACE
+  ADMIN_INTERFACE,
+  VOTING_MODES
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
-function createTokenVotingPlugin(who: Address, daoId: string): void {
-  let packageEntity = TokenVotingPlugin.load(who.toHexString());
+function createTokenVotingPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
-    packageEntity = new TokenVotingPlugin(who.toHexString());
-    let contract = TokenVotingContract.bind(who);
+    packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    let contract = TokenVotingContract.bind(plugin);
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
@@ -41,21 +42,27 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    TokenVoting.createWithContext(who, context);
+    TokenVoting.createWithContext(plugin, context);
 
     packageEntity.save();
   }
 }
 
-function createAddresslistPlugin(plugin: Address, daoId: string): void {
-  let packageEntity = AddresslistPlugin.load(plugin.toHexString());
+function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
-    packageEntity = new AddresslistPlugin(plugin.toHexString());
-    let contract = AddresslistContract.bind(plugin);
+    packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    let contract = AddresslistVotingContract.bind(plugin);
+
+    let votingMode = contract.try_votingMode();
     let supportThreshold = contract.try_supportThreshold();
     let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
+    let minProposerVotingPower = contract.try_minProposerVotingPower();
 
+    packageEntity.votingMode = votingMode.reverted
+      ? null
+      : VOTING_MODES.get(votingMode.value);
     packageEntity.supportThreshold = supportThreshold.reverted
       ? null
       : supportThreshold.value;
@@ -64,10 +71,14 @@ function createAddresslistPlugin(plugin: Address, daoId: string): void {
       : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
+    packageEntity.minProposerVotingPower = minProposerVotingPower.reverted
+      ? null
+      : minProposerVotingPower.value;
+
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    Addresslist.createWithContext(plugin, context);
+    AddresslistVoting.createWithContext(plugin, context);
 
     packageEntity.save();
   }
@@ -106,7 +117,7 @@ export function addPlugin(daoId: string, plugin: Address): void {
   if (TokenVotingInterfaceSuppoted) {
     createTokenVotingPlugin(plugin, daoId);
   } else if (addresslistInterfaceSuppoted) {
-    createAddresslistPlugin(plugin, daoId);
+    createAddresslistVotingPlugin(plugin, daoId);
   } else if (adminInterfaceSupported) {
     createAdminPlugin(plugin, daoId);
   }

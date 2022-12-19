@@ -6,7 +6,7 @@ import {Permission, ContractPermissionId} from '../../generated/schema';
 import {
   DAO_ADDRESS,
   ADDRESS_ONE,
-  VOTING_ADDRESS,
+  CONTRACT_ADDRESS,
   ADDRESS_TWO
 } from '../constants';
 import {
@@ -27,7 +27,7 @@ test('Run dao (handleGranted) mappings with mock event', () => {
     contractPermissionId,
     ADDRESS_ONE,
     DAO_ADDRESS,
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     ADDRESS_TWO,
     DAO_ADDRESS
   );
@@ -77,7 +77,7 @@ test('Run dao (handleGranted) mappings with mock event', () => {
   let permissionEntityID =
     contractPermissionIdEntityID +
     '_' +
-    Address.fromString(VOTING_ADDRESS).toHexString();
+    Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   assert.fieldEquals(
     'Permission',
@@ -95,7 +95,7 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
     contractPermissionId,
     ADDRESS_ONE,
     DAO_ADDRESS,
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     ADDRESS_TWO,
     DAO_ADDRESS
   );
@@ -124,7 +124,7 @@ test('Run dao (handleGranted) mappings with reverted mocke call', () => {
   let daoPluginEntityID =
     Address.fromString(DAO_ADDRESS).toHexString() +
     '_' +
-    Address.fromString(VOTING_ADDRESS).toHexString();
+    Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   assert.notInStore('DaoPlugin', daoPluginEntityID);
 
@@ -141,7 +141,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   let permissionEntityID =
     contractPermissionIdEntityID +
     '_' +
-    Address.fromString(VOTING_ADDRESS).toHexString();
+    Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   let contractPermissionIdEntity = new ContractPermissionId(
     contractPermissionIdEntityID
@@ -157,7 +157,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   let permissionEntity = new Permission(permissionEntityID);
   permissionEntity.contractPermissionId = contractPermissionIdEntity.id;
   permissionEntity.dao = Address.fromString(DAO_ADDRESS).toHexString();
-  permissionEntity.where = Address.fromString(VOTING_ADDRESS);
+  permissionEntity.where = Address.fromString(CONTRACT_ADDRESS);
   permissionEntity.contractPermissionId = contractPermissionId.toHexString();
   permissionEntity.who = Address.fromString(ADDRESS_ONE);
   permissionEntity.actor = Address.fromString(ADDRESS_ONE);
@@ -176,7 +176,7 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
     contractPermissionId,
     ADDRESS_ONE,
     DAO_ADDRESS,
-    VOTING_ADDRESS,
+    CONTRACT_ADDRESS,
     DAO_ADDRESS
   );
 

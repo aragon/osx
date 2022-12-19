@@ -196,6 +196,12 @@ enum VoteOption {
   No
 }
 
+enum VotingMode {
+  Standard
+  EarlyExecution
+  VoteReplacement
+}
+
 # TokenVoting
 
 type TokenVotingPlugin implements IPlugin @entity {
@@ -203,6 +209,7 @@ type TokenVotingPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
+  votingMode: VotingMode
   supportThreshold: BigInt
   minParticipation: BigInt
   minDuration: BigInt
@@ -215,17 +222,17 @@ type TokenVotingPlugin implements IPlugin @entity {
 type TokenVotingVoter @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [TokenVote!]! @derivedFrom(field: "voter")
+  proposals: [TokenVotingVote!]! @derivedFrom(field: "voter")
   plugin: TokenVotingPlugin!
   lastUpdated: BigInt
 }
 
-type TokenVote @entity {
+type TokenVotingVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
   voter: TokenVotingVoter!
   proposal: TokenVotingProposal!
-  vote: VoteOption!
+  voteOption: VoteOption!
   votingPower: BigInt!
   createdAt: BigInt!
 }
@@ -238,17 +245,21 @@ type TokenVotingProposal implements Proposal @entity {
   proposalId: BigInt!
   creator: Bytes!
   metadata: String
+
+  votingMode: VotingMode!
+  supportThreshold: BigInt!
+  minParticipation: BigInt!
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
-  supportThreshold: BigInt!
-  minParticipation: BigInt!
+
   yes: BigInt
   no: BigInt
   abstain: BigInt
   voteCount: BigInt
   totalVotingPower: BigInt!
-  voters: [TokenVote!]! @derivedFrom(field: "proposal")
+
+  voters: [TokenVotingVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
@@ -258,57 +269,62 @@ type TokenVotingProposal implements Proposal @entity {
   executionBlockNumber: BigInt
 }
 
-# Addresslist
+# AddresslistVoting
 
-type AddresslistPlugin implements IPlugin @entity {
+type AddresslistVotingPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
-  proposals: [AddresslistProposal!]! @derivedFrom(field: "plugin")
+  proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
+  votingMode: VotingMode
   supportThreshold: BigInt
   minParticipation: BigInt
   minDuration: BigInt
   minProposerVotingPower: BigInt
   proposalCount: BigInt
-  members: [AddresslistVoter!]! @derivedFrom(field: "plugin")
+  members: [AddresslistVotingVoter!]! @derivedFrom(field: "plugin")
 }
 
-type AddresslistVoter @entity {
+type AddresslistVotingVoter @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AddresslistVote!]! @derivedFrom(field: "voter")
-  plugin: AddresslistPlugin!
+  proposals: [AddresslistVotingVote!]! @derivedFrom(field: "voter")
+  plugin: AddresslistVotingPlugin!
 }
 
-type AddresslistVote @entity {
+type AddresslistVotingVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
-  voter: AddresslistVoter!
-  proposal: AddresslistProposal!
-  vote: VoteOption!
+  voter: AddresslistVotingVoter!
+  proposal: AddresslistVotingProposal!
+  voteOption: VoteOption!
   votingPower: BigInt!
   createdAt: BigInt!
 }
 
-type AddresslistProposal implements Proposal @entity {
+type AddresslistVotingProposal implements Proposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  plugin: AddresslistPlugin!
+  plugin: AddresslistVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
   metadata: String
+
+  votingMode: VotingMode!
+  supportThreshold: BigInt!
+  minParticipation: BigInt!
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
-  supportThreshold: BigInt!
-  minParticipation: BigInt!
-  totalVotingPower: BigInt!
+
+  abstain: BigInt
   yes: BigInt
   no: BigInt
-  abstain: BigInt
   voteCount: BigInt
-  voters: [AddresslistVote!]! @derivedFrom(field: "proposal")
+  totalVotingPower: BigInt!
+
+  voters: [AddresslistVotingVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
