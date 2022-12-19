@@ -7,11 +7,10 @@ import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intr
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {GovernancePluginUUPSUpgradeable} from "../GovernancePluginUUPSUpgradeable.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
@@ -19,7 +18,12 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2021-2022.
 /// @notice TODO.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUpgradeable {
+contract Multisig is
+    Initializable,
+    ERC165Upgradeable,
+    Addresslist,
+    GovernancePluginUUPSUpgradeable
+{
     /// @notice Vote options that a voter can chose from.
     /// @param None The default option state of a signer indicating the absence of from the .
     /// @param Confirmed This option confirms the proposal.
@@ -69,40 +73,16 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
-    bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
-        keccak256("MODIFY_ADDRESSLIST_PERMISSION");
-
-    /// @notice The ID of the permission required to call the `updateVotingSettings` function.
-    bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
-        keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
+    bytes32 public constant UPDATE_SIGNERS_PERMISSION_ID = keccak256("UPDATE_SIGNERS_PERMISSION");
 
     uint64 private confirmationsRequired;
-
-    /// @notice A counter counting the created proposals.
-    uint256 public proposalCount; // TODO put this in a proposals interface
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice Emitted when a proposal is created.
-    /// @param proposalId  The ID of the proposal.
-    /// @param creator  The creator of the proposal.
-    /// @param metadata The metadata of the proposal.
-    event ProposalCreated(
-        uint256 indexed proposalId,
-        address indexed creator,
-        bytes metadata,
-        IDAO.Action[] actions
-    );
-
-    /// @notice Emitted when a proposal is executed.
-    /// @param proposalId  The ID of the proposal.
-    /// @param execResults The bytes array resulting from the vote execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
-    /// @notice Thrown when a sender is not allowed to create a vote.
-    /// @param sender The sender address.
-    error ProposalCreationForbidden(address sender);
+    /// @notice Emitted when the Confirmation settings are updated.
+    /// @param confirmationsRequired The number of confirmations required for a proposal to pass.
+    event ConfirmationSettingsUpdated(uint64 confirmationsRequired);
 
     /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
@@ -115,6 +95,19 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         SignOption voteOption,
         uint256 votingPower
     );
+
+    /// @notice Thrown when a sender is not allowed to create a vote.
+    /// @param sender The sender address.
+    error ProposalCreationForbidden(address sender);
+
+    /// @notice Thrown if a voter is not allowed to cast a vote. This can be because the vote
+    /// - has not started,
+    /// - has ended,
+    /// - was executed, or
+    /// - the voter doesn't have voting powers.
+    /// @param proposalId The ID of the proposal.
+    /// @param sender The address of the voter.
+    error VoteCastForbidden(uint256 proposalId, address sender);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -140,40 +133,43 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         public
         view
         virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
+        override(ERC165Upgradeable, GovernancePluginUUPSUpgradeable)
         returns (bool)
     {
         return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
-    function updateVotingSettings(uint64 _confirmationsRequired)
-        external
-        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
-    {
+    /// @notice Internal function to update the plugin-wide proposal confirmation settings.
+    /// @param _confirmationsRequired The confirmations required.
+    function _updateConfirmationSettings(uint64 _confirmationsRequired) internal {
         confirmationsRequired = _confirmationsRequired;
+
+        emit ConfirmationSettingsUpdated({confirmationsRequired: _confirmationsRequired});
     }
 
     /// @notice Adds new members to the address list.
     /// @param _members The addresses of the members to be added.
-    function addAddresses(address[] calldata _members)
+    function addAddresses(address[] calldata _members, uint64 _newConfirmationsRequired)
         external
-        auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
+        auth(UPDATE_SIGNERS_PERMISSION_ID)
     {
         _addAddresses(_members);
+        _updateConfirmationSettings(_newConfirmationsRequired);
     }
 
     /// @notice Removes existing members from the address list.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members)
+    function removeAddresses(address[] calldata _members, uint64 _newConfirmationsRequired)
         external
-        auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
+        auth(UPDATE_SIGNERS_PERMISSION_ID)
     {
         _removeAddresses(_members);
+        _updateConfirmationSettings(_newConfirmationsRequired);
     }
 
     function createProposal(bytes calldata _metadata, IDAO.Action[] calldata _actions)
         external
-        returns (uint256 proposalId)
+        returns (uint256 id)
     {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -181,10 +177,10 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount++;
+        id = _createProposal(_msgSender(), _metadata, _actions);
 
         // Create the proposal
-        Proposal storage proposal_ = proposals[proposalId];
+        Proposal storage proposal_ = proposals[id];
 
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.confirmationsRequired = confirmationsRequired;
@@ -195,13 +191,6 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
                 proposal_.actions.push(_actions[i]);
             }
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     function approve(uint256 _proposalId, address _voter) external {
@@ -211,14 +200,6 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
             proposal_.voters[_voter] = SignOption.Confirmed;
             proposal_.tally.approvals += 1;
         }
-    }
-
-    function _execute(uint256 _proposalId) internal virtual {
-        proposals[_proposalId].executed = true;
-
-        bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
-
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 
     /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists.
@@ -254,6 +235,17 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         return proposal_.tally.approvals >= proposal_.parameters.confirmationsRequired;
     }
 
+    function vote(
+        SignOption _voteOption,
+        uint256 _proposalId,
+        bool _tryEarlyExecution
+    ) public {
+        if (!_canApprove(_proposalId, _msgSender())) {
+            revert VoteCastForbidden(_proposalId, _msgSender());
+        }
+        _vote(_proposalId, _voteOption, _msgSender(), _tryEarlyExecution);
+    }
+
     function _vote(
         uint256 _proposalId,
         SignOption _voteOption,
@@ -283,7 +275,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         });
 
         if (_tryEarlyExecution && _canExecute(_proposalId)) {
-            _execute(_proposalId);
+            _executeProposal(_proposalId, proposal_.actions);
         }
     }
 
