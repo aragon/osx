@@ -339,6 +339,18 @@ describe('Multisig', function () {
       );
     });
 
+    it('approves with the msg.sender address', async () => {
+      let tx = await multisig.connect(signers[0]).approve(id, false);
+
+      const event = await findEvent(tx, 'Approved');
+      expect(event.args.proposalId).to.eq(id);
+      expect(event.args.approver).to.not.eq(multisig.address);
+      expect(event.args.approver).to.eq(signers[0].address);
+
+      const prop = await multisig.getProposal(id);
+      expect(prop.tally.approvals).to.equal(1);
+    });
+
     it('executes if the minimum approval is met', async () => {
       await multisig.connect(signers[0]).approve(id, false);
       await multisig.connect(signers[1]).approve(id, false);
