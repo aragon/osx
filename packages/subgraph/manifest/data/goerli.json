@@ -4,18 +4,18 @@
   "dataSources": {
     "DAORegistry": {
       "name": "DAORegistry",
-      "address": "0xF9514f4Eac328F53d94c87B76c407B9a67E1441A",
-      "startBlock": 7879081
+      "address": "0xA95650e066801FD8296D1B1C734D95e29D90B79E",
+      "startBlock": 8170118
     },
     "PluginRepoRegistry": {
       "name": "PluginRepoRegistry",
-      "address": "0x22C8AEA0Ad1c1872E60bD43b3FaF20471F7CC43f",
-      "startBlock": 7879085
+      "address": "0x35F0CA4B13C101aa19bBf54E0ddaa4c723FAa56C",
+      "startBlock": 8170131
     },
     "PluginSetupProcessor": {
       "name": "PluginSetupProcessor",
-      "address": "0xf7777b97EBEec7EaFCFD28aabE31EDd8F9b46A08",
-      "startBlock": 7879087
+      "address": "0xA57f171A2fe4B71F993d3518A86965Ee849a860A",
+      "startBlock": 8170139
     }
   }
 }
