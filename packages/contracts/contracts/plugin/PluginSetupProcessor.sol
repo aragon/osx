@@ -33,6 +33,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 public constant APPLY_UNINSTALLATION_PERMISSION_ID =
         keccak256("APPLY_UNINSTALLATION_PERMISSION");
 
+    /// @notice Used when there's UI update only which gets stored for the setupId generation.
+    /// @dev keccak256(abi.encode[])
+    bytes32 private constant EMPTY_ARRAY_ENCODED_HASH =
+        bytes32(0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd);
+
     struct PluginInformation {
         uint256 blockNumber;
         bytes32 currentSetupId;
@@ -72,12 +77,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PermissionLib.ItemMultiTarget[] permissions;
         bytes32 helpersHash;
         IDAO.Action[] actions;
-    }
-
-    struct ApplyUpdateUI {
-        address plugin;
-        PluginSetupRef pluginSetupRef;
-        bytes32 helpersHash;
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
@@ -431,11 +430,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         if (currentVersion.pluginSetup == newVersion.pluginSetup) {
             newSetupId = _getSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
-                // The keccak256 hash of the abi.encode([])
-                bytes32(0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd),
+                EMPTY_ARRAY_ENCODED_HASH,
                 currentHelpersHash,
-                // The keccak256 hash of the abi.encode([])
-                bytes32(0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd),
+                EMPTY_ARRAY_ENCODED_HASH,
                 bytes(""),
                 PreparationType.Update
             );
@@ -741,11 +738,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         DAO dao = DAO(payable(_dao));
 
         // Process the permissions
+        // PSP on the dao should have ROOT permission
         if (_permissions.length > 0) {
             dao.bulkOnMultiTarget(_permissions);
         }
 
         // Process the actions
+        // Since PSP has ROOT permission, it can grant/revoke below permissions.
         if (_actions.length > 0) {
             dao.grant(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
             dao.execute(uint256(_setupId), _actions);
