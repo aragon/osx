@@ -174,12 +174,18 @@ contract Multisig is
         emit AddressesAdded({members: _members});
     }
 
-    /// @notice Removes existing members from the address list.
+    /// @notice Removes existing members from the address list. Previously, it checks if the new addresslist length at least as long as the minimum approvals parameter requires.
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members)
         external
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
+        // Check if the new addresslist has become shorter than the current minimum number of approvals required.
+        uint256 newAddresslistLength = addresslistLength(0) - _members.length;
+        if (newAddresslistLength < minApprovals_) {
+            revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
+        }
+
         _updateAddresslist(_members, false);
 
         emit AddressesRemoved({members: _members});
