@@ -12,9 +12,6 @@ import {GovernanceBase} from "./GovernanceBase.sol";
 abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant GOVERNANCE_INTERFACE_ID = type(IProposal).interfaceId;
-
     /// @notice The incremental ID for proposals and executions.
     CountersUpgradeable.Counter private proposalCounter;
 
@@ -26,10 +23,10 @@ abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == GOVERNANCE_INTERFACE_ID || super.supportsInterface(interfaceId);
+        return interfaceId == type(IProposal).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /// @inheritdoc IProposal
