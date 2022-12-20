@@ -94,12 +94,10 @@ describe('Multisig', function () {
   });
 
   describe('Addresslisting members: ', async () => {
-    beforeEach(async () => {
+    it('should return false, if a user is not listed', async () => {
       minApprovals = 1;
       await multisig.initialize(dao.address, minApprovals, addresslist(1));
-    });
 
-    it('should return false, if a user is not listed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
@@ -107,7 +105,10 @@ describe('Multisig', function () {
       ).to.equal(false);
     });
 
-    it('should add new members to the address list and set the minimum approval', async () => {
+    it('should add new members to the address list', async () => {
+      minApprovals = 1;
+      await multisig.initialize(dao.address, minApprovals, addresslist(1));
+
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
@@ -117,12 +118,8 @@ describe('Multisig', function () {
         await multisig.isListed(signers[1].address, block1.number)
       ).to.equal(false);
 
-      expect(await multisig.minApprovals()).to.equal(1);
-
-      const newMinApprovals = 2;
-      await multisig.addAddresses([signers[1].address], newMinApprovals);
-
-      expect(await multisig.minApprovals()).to.equal(2);
+      // add a new member
+      await multisig.addAddresses([signers[1].address]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -134,9 +131,9 @@ describe('Multisig', function () {
       ).to.equal(true);
     });
 
-    it('should remove users from the address list and set the minimum approval', async () => {
-      minApprovals = 2;
-      await multisig.addAddresses([signers[1].address], minApprovals);
+    it('should remove users from the address list', async () => {
+      minApprovals = 1;
+      await multisig.initialize(dao.address, minApprovals, addresslist(2));
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -147,10 +144,8 @@ describe('Multisig', function () {
         await multisig.isListed(signers[1].address, block1.number)
       ).to.equal(true);
 
-      expect(await multisig.minApprovals()).to.equal(2);
-      const newMinApprovals = 1;
-      await multisig.removeAddresses([signers[1].address], newMinApprovals);
-      expect(await multisig.minApprovals()).to.equal(1);
+      // remove an existing member
+      await multisig.removeAddresses([signers[1].address]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -160,6 +155,39 @@ describe('Multisig', function () {
       expect(
         await multisig.isListed(signers[1].address, block2.number)
       ).to.equal(false);
+    });
+
+    it('reverts if the address list would become empty', async () => {
+      minApprovals = 1;
+      await multisig.initialize(dao.address, minApprovals, addresslist(1));
+
+      await expect(
+        multisig.removeAddresses([signers[1].address])
+      ).to.be.revertedWith(
+        customError(
+          'MinApprovalsOutOfBounds',
+          (await multisig.addresslistLength(0)) - 1,
+          minApprovals
+        )
+      );
+    });
+
+    it('reverts if the address list would become shorter than the current minimum approval parameter requires', async () => {
+      minApprovals = 2;
+      await multisig.initialize(dao.address, minApprovals, addresslist(3));
+
+      await expect(multisig.removeAddresses([signers[1].address])).to.not.be
+        .reverted;
+
+      await expect(
+        multisig.removeAddresses([signers[2].address])
+      ).to.be.revertedWith(
+        customError(
+          'MinApprovalsOutOfBounds',
+          (await multisig.addresslistLength(0)) - 1,
+          minApprovals
+        )
+      );
     });
   });
 
