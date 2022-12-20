@@ -165,32 +165,22 @@ contract Multisig is
 
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
-    /// @param _minApprovals The new minimal approval value.
-    function addAddresses(address[] calldata _members, uint256 _minApprovals)
+    function addAddresses(address[] calldata _members)
         external
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
         _updateAddresslist(_members, true);
-
-        if (_minApprovals != 0) {
-            _updateMinApprovals(_minApprovals);
-        }
 
         emit AddressesAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
     /// @param _members The addresses of the members to be removed.
-    /// @param _minApprovals The new minimal approval value.
-    function removeAddresses(address[] calldata _members, uint256 _minApprovals)
+    function removeAddresses(address[] calldata _members)
         external
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
         _updateAddresslist(_members, false);
-
-        if (_minApprovals != 0) {
-            _updateMinApprovals(_minApprovals);
-        }
 
         emit AddressesRemoved({members: _members});
     }
