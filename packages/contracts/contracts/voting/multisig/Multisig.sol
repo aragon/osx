@@ -125,7 +125,9 @@ contract Multisig is
         // add member addresses to the address list
         _updateAddresslist(_members, true);
         _updateMinApprovals(_minApprovals);
+
         emit AddressesAdded({members: _members});
+        emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -161,6 +163,8 @@ contract Multisig is
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
         _updateMinApprovals(_minApprovals);
+
+        emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
 
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
@@ -174,7 +178,7 @@ contract Multisig is
         emit AddressesAdded({members: _members});
     }
 
-    /// @notice Removes existing members from the address list. Previously, it checks if the new addresslist length at least as long as the minimum approvals parameter requires.
+    /// @notice Removes existing members from the address list. Previously, it checks if the new addresslist length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members)
         external
@@ -301,8 +305,6 @@ contract Multisig is
         }
 
         minApprovals_ = _minApprovals;
-
-        emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
 
     /// @notice Internal function to approve and, optionally, execute the proposal.
