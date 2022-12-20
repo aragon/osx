@@ -195,24 +195,6 @@ contract Multisig is
         emit AddressesRemoved({members: _members});
     }
 
-    /// @notice Internal function to update the minimal approval parameter.
-    /// @param _minApprovals The new minimal approval value.
-    function _updateMinApprovals(uint256 _minApprovals) internal virtual {
-        uint256 addresslistLength_ = addresslistLength(0);
-
-        if (_minApprovals > addresslistLength_) {
-            revert MinApprovalsOutOfBounds({limit: addresslistLength_, actual: _minApprovals});
-        }
-
-        if (_minApprovals < 1) {
-            revert MinApprovalsOutOfBounds({limit: 1, actual: _minApprovals});
-        }
-
-        minApprovals_ = _minApprovals;
-
-        emit MinApprovalUpdated({minApprovals: _minApprovals});
-    }
-
     /// @notice Creates a new majority voting proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
@@ -307,6 +289,24 @@ contract Multisig is
         parameters = proposal_.parameters;
         tally = proposal_.tally;
         actions = proposal_.actions;
+    }
+
+    /// @notice Internal function to update the minimal approval parameter.
+    /// @param _minApprovals The new minimal approval value.
+    function _updateMinApprovals(uint256 _minApprovals) internal virtual {
+        uint256 addresslistLength_ = addresslistLength(0);
+
+        if (_minApprovals > addresslistLength_) {
+            revert MinApprovalsOutOfBounds({limit: addresslistLength_, actual: _minApprovals});
+        }
+
+        if (_minApprovals < 1) {
+            revert MinApprovalsOutOfBounds({limit: 1, actual: _minApprovals});
+        }
+
+        minApprovals_ = _minApprovals;
+
+        emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
 
     /// @notice Internal function to approve and, optionally, execute the proposal.
