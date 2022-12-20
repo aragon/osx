@@ -6,7 +6,7 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup
@@ -42,8 +42,8 @@ contract AddresslistVotingSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
-        (IMajorityVoting.VotingSettings memory votingSettings, address[] memory members) = abi
-            .decode(_data, (IMajorityVoting.VotingSettings, address[]));
+        (MajorityVotingBase.VotingSettings memory votingSettings, address[] memory members) = abi
+            .decode(_data, (MajorityVotingBase.VotingSettings, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(

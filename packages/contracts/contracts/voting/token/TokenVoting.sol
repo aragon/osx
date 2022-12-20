@@ -55,7 +55,7 @@ contract TokenVoting is MajorityVotingBase {
         return votingToken;
     }
 
-    /// @inheritdoc IMajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,

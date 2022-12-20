@@ -55,72 +55,6 @@ interface IMajorityVoting {
         No
     }
 
-    /// @notice The different voting modes available.
-    /// @param Standard In standard mode, early execution and vote replacement are disabled.
-    /// @param EarlyExecution In early execution mode, a proposal can be executed early before the end date if the vote outcome cannot mathematically change by more voters voting.
-    /// @param VoteReplacment In vote replacement mode, voters can change their vote multiple times and only the latest vote option is tallied.
-    enum VotingMode {
-        Standard,
-        EarlyExecution,
-        VoteReplacement
-    }
-
-    /// @notice A container for the majority voting settings that will be applied as parameters on proposal creation.
-    /// @param votingMode A parameter to select the vote mode.
-    /// @param supportThreshold The support threshold value.
-    /// @param minParticipation The minimum participation value.
-    /// @param minDuration The minimum duration of the proposal vote in seconds.
-    /// @param minProposerVotingPower The minimum voting power required to create a proposal.
-    struct VotingSettings {
-        VotingMode votingMode;
-        uint64 supportThreshold;
-        uint64 minParticipation;
-        uint64 minDuration;
-        uint256 minProposerVotingPower;
-    }
-
-    /// @notice A container for proposal-related information.
-    /// @param executed Wheter the proposal is executed or not.
-    /// @param parameters The proposal parameters at the time of the proposal creation.
-    /// @param tally The vote tally of the proposal.
-    /// @param voters The votes casted by the voters.
-    /// @param actions The actions to be executed when the proposal passes.
-    struct Proposal {
-        bool executed;
-        ProposalParameters parameters;
-        Tally tally;
-        mapping(address => VoteOption) voters;
-        IDAO.Action[] actions;
-    }
-
-    /// @notice A container for the proposal parameters at the time of proposal creation.
-    /// @param votingMode A parameter to select the vote mode.
-    /// @param supportThreshold The support threshold value.
-    /// @param minParticipation The minimum participation value.
-    /// @param startDate The start date of the proposal vote.
-    /// @param endDate The end date of the proposal vote.
-    /// @param snapshotBlock The number of the block prior to the proposal creation.
-    struct ProposalParameters {
-        VotingMode votingMode;
-        uint64 supportThreshold;
-        uint64 minParticipation;
-        uint64 startDate;
-        uint64 endDate;
-        uint64 snapshotBlock;
-    }
-
-    /// @notice A container for the proposal vote tally.
-    /// @param abstain The number of abstain votes casted.
-    /// @param yes The number of yes votes casted.
-    /// @param no The number of no votes casted.
-    /// @param totalVotingPower The total voting power available at the block prior to the proposal creation.
-    struct Tally {
-        uint256 abstain;
-        uint256 yes;
-        uint256 no;
-        uint256 totalVotingPower;
-    }
-
     /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
     /// @param voter The voter casting the vote.
@@ -133,76 +67,13 @@ interface IMajorityVoting {
         uint256 votingPower
     );
 
-    /// @notice Emitted when the voting settings are updated.
-    /// @param votingMode A parameter to select the vote mode.
-    /// @param supportThreshold The support threshold value.
-    /// @param minParticipation The minimum participation value.
-    /// @param minDuration The minimum duration of the proposal vote in seconds.
-    /// @param minProposerVotingPower The minimum voting power required to create a proposal.
-    event VotingSettingsUpdated(
-        VotingMode votingMode,
-        uint64 supportThreshold,
-        uint64 minParticipation,
-        uint64 minDuration,
-        uint256 minProposerVotingPower
-    );
+    /// @notice Returns the support threshold parameter stored in the voting settings.
+    /// @return The support threshold parameter.
+    function supportThreshold() external view returns (uint64);
 
-    /// @notice Updates the voting settings.
-    /// @param _votingSettings The new voting settings.
-    function updateVotingSettings(VotingSettings calldata _votingSettings) external;
-
-    /// @notice Creates a new majority voting proposal.
-    /// @param _metadata The metadata of the proposal.
-    /// @param _actions The actions that will be executed after the proposal passes.
-    /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
-    /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _voteOption The vote voteOption to cast on creation.
-    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    /// @return id The ID of the proposal.
-    function createProposal(
-        bytes calldata _metadata,
-        IDAO.Action[] calldata _actions,
-        uint64 _startDate,
-        uint64 _endDate,
-        VoteOption _voteOption,
-        bool _tryEarlyExecution
-    ) external returns (uint256 id);
-
-    /// @notice Votes for a vote option and, optionally, executes the proposal.
-    /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
-    /// @param _proposalId The ID of the proposal.
-    /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
-    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    function vote(
-        uint256 _proposalId,
-        VoteOption _voteOption,
-        bool _tryEarlyExecution
-    ) external;
-
-    /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
-    /// - has not started,
-    /// - has ended,
-    /// - was executed, or
-    /// - the voter doesn't have voting powers.
-    /// @param _proposalId The proposal Id.
-    /// @param _account The address of the voter to check.
-    /// @return bool Returns true if the voter is allowed to vote.
-    ///@dev The function assumes the queried proposal exists.
-    function canVote(uint256 _proposalId, address _account) external view returns (bool);
-
-    /// @notice Executes a proposal.
-    /// @param _proposalId The ID of the proposal to be executed.
-    function execute(uint256 _proposalId) external;
-
-    /// @notice Checks if a proposal can be executed.
-    /// @param _proposalId The ID of the proposal to be checked.
-    /// @return True if the proposal can be executed, false otherwise.
-    function canExecute(uint256 _proposalId) external view returns (bool);
-
-    /// @notice Returns the vote option stored for a voter for a proposal vote.
-    /// @param _proposalId The ID of the proposal.
-    /// @return The vote option cast by a voter for a certain proposal.
-    function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
+    /// @notice Returns the minimum participation parameter stored in the voting settings.
+    /// @return The minimum participation parameter.
+    function minParticipation() external view returns (uint64);
 
     /// @notice Returns the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote.
     /// @param _proposalId The ID of the proposal.
@@ -219,41 +90,39 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the vote mode stored in the voting settings.
-    /// @return The vote mode parameter.
-    function votingMode() external view returns (VotingMode);
+    /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
+    /// - has not started,
+    /// - has ended,
+    /// - was executed, or
+    /// - the voter doesn't have voting powers.
+    /// @param _proposalId The proposal Id.
+    /// @param _account The address of the voter to check.
+    /// @return bool Returns true if the voter is allowed to vote.
+    ///@dev The function assumes the queried proposal exists.
+    function canVote(uint256 _proposalId, address _account) external view returns (bool);
 
-    /// @notice Returns the support threshold parameter stored in the voting settings.
-    /// @return The support threshold parameter.
-    function supportThreshold() external view returns (uint64);
+    /// @notice Checks if a proposal can be executed.
+    /// @param _proposalId The ID of the proposal to be checked.
+    /// @return True if the proposal can be executed, false otherwise.
+    function canExecute(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Returns the minimum participation parameter stored in the voting settings.
-    /// @return The minimum participation parameter.
-    function minParticipation() external view returns (uint64);
-
-    /// @notice Returns the minimum duration parameter stored in the voting settings.
-    /// @return The minimum duration parameter.
-    function minDuration() external view returns (uint64);
-
-    /// @notice Returns the minimum voting power required to create a proposa stored in the voting settings.
-    /// @return The minimum voting power required to create a proposal.
-    function minProposerVotingPower() external view returns (uint256);
-
-    /// @notice Returns all information for a proposal vote by its ID.
+    /// @notice Votes for a vote option and, optionally, executes the proposal.
+    /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
-    /// @return open Wheter the proposal is open or not.
-    /// @return executed Wheter the proposal is executed or not.
-    /// @return parameters The parameters of the proposal vote.
-    /// @return tally The current tally of the proposal vote.
-    /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    function getProposal(uint256 _proposalId)
-        external
-        view
-        returns (
-            bool open,
-            bool executed,
-            ProposalParameters memory parameters,
-            Tally memory tally,
-            IDAO.Action[] memory actions
-        );
+    /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
+    function vote(
+        uint256 _proposalId,
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
+    ) external;
+
+    /// @notice Executes a proposal.
+    /// @param _proposalId The ID of the proposal to be executed.
+    function execute(uint256 _proposalId) external;
+
+    /// @notice Returns the vote option stored for a voter for a proposal vote.
+    /// @param _proposalId The ID of the proposal.
+    /// @return The vote option cast by a voter for a certain proposal.
+    function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
 }

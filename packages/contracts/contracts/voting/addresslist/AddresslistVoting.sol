@@ -87,7 +87,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         emit AddressesRemoved({members: _members});
     }
 
-    /// @inheritdoc IMajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
