@@ -107,16 +107,18 @@ export function handleVoteCast(event: VoteCast): void {
   let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
   let voterVoteId = member + '_' + proposalId;
 
-  let voterVoteEntity = TokenVotingVote.load(voterVoteId);
-  if (!voterVoteEntity) {
-    voterVoteEntity = new TokenVotingVote(voterVoteId);
-    voterVoteEntity.voter = memberId;
-    voterVoteEntity.proposal = proposalId;
+  let voterProposalVoteEntity = TokenVotingVote.load(voterVoteId);
+  if (!voterProposalVoteEntity) {
+    voterProposalVoteEntity = new TokenVotingVote(voterVoteId);
+    voterProposalVoteEntity.voter = memberId;
+    voterProposalVoteEntity.proposal = proposalId;
   }
-  voterVoteEntity.voteOption = VOTER_OPTIONS.get(event.params.voteOption);
-  voterVoteEntity.votingPower = event.params.votingPower;
-  voterVoteEntity.createdAt = event.block.timestamp;
-  voterVoteEntity.save();
+  voterProposalVoteEntity.voteOption = VOTER_OPTIONS.get(
+    event.params.voteOption
+  );
+  voterProposalVoteEntity.votingPower = event.params.votingPower;
+  voterProposalVoteEntity.createdAt = event.block.timestamp;
+  voterProposalVoteEntity.save();
 
   // voter
   let voterEntity = TokenVotingVoter.load(memberId);
