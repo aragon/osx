@@ -12,11 +12,15 @@ import {GovernanceBase} from "./GovernanceBase.sol";
 abstract contract GovernancePlugin is GovernanceBase, Plugin {
     using Counters for Counters.Counter;
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant GOVERNANCE_INTERFACE_ID = type(IProposal).interfaceId;
+
     /// @notice The incremental ID for proposals and executions.
     Counters.Counter private proposalCounter;
 
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant GOVERNANCE_INTERFACE_ID = type(IProposal).interfaceId;
+    /// @notice Constructs the plugin by storing the associated DAO.
+    /// @param _dao The DAO contract.
+    constructor(IDAO _dao) Plugin(_dao) {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interace.
@@ -29,10 +33,6 @@ abstract contract GovernancePlugin is GovernanceBase, Plugin {
     function proposalCount() external view returns (uint256) {
         return proposalCounter.current();
     }
-
-    /// @notice Constructs the plugin by storing the associated DAO.
-    /// @param _dao The DAO contract.
-    constructor(IDAO _dao) Plugin(_dao) {}
 
     /// @inheritdoc GovernanceBase
     function _createProposal(

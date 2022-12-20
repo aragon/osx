@@ -12,11 +12,18 @@ import {GovernanceBase} from "./GovernanceBase.sol";
 abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant GOVERNANCE_INTERFACE_ID = type(IProposal).interfaceId;
+
     /// @notice The incremental ID for proposals and executions.
     CountersUpgradeable.Counter private proposalCounter;
 
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant GOVERNANCE_INTERFACE_ID = type(IProposal).interfaceId;
+    /// @notice Initializes the contract.
+    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
+    /// @param _dao The associated DAO.
+    function __GovernancePluginCloneable_init(IDAO _dao) internal virtual onlyInitializing {
+        __PluginCloneable_init(_dao);
+    }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interace.
@@ -28,13 +35,6 @@ abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
     /// @inheritdoc IProposal
     function proposalCount() external view returns (uint256) {
         return proposalCounter.current();
-    }
-
-    /// @notice Initializes the contract.
-    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
-    /// @param _dao The associated DAO.
-    function __GovernancePluginCloneable_init(IDAO _dao) internal virtual onlyInitializing {
-        __PluginCloneable_init(_dao);
     }
 
     /// @inheritdoc GovernanceBase
