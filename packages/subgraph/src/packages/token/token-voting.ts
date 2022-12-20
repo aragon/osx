@@ -102,27 +102,27 @@ export function _handleProposalCreated(
 
 export function handleVoteCast(event: VoteCast): void {
   let pluginId = event.address.toHexString();
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
-  let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = TokenVotingVote.load(voterProposalId);
-  if (!voterProposalEntity) {
-    voterProposalEntity = new TokenVotingVote(voterProposalId);
-    voterProposalEntity.voter = event.params.voter.toHexString();
-    voterProposalEntity.proposal = proposalId;
-  }
-  voterProposalEntity.voteOption = VOTER_OPTIONS.get(event.params.voteOption);
-  voterProposalEntity.votingPower = event.params.votingPower;
-  voterProposalEntity.createdAt = event.block.timestamp;
-  voterProposalEntity.save();
-
-  // voter
   let member = event.params.voter.toHexString();
   let memberId = pluginId + '_' + member;
+  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let voterVoteId = member + '_' + proposalId;
 
+  let voterVoteEntity = TokenVotingVote.load(voterVoteId);
+  if (!voterVoteEntity) {
+    voterVoteEntity = new TokenVotingVote(voterVoteId);
+    voterVoteEntity.voter = memberId;
+    voterVoteEntity.proposal = proposalId;
+  }
+  voterVoteEntity.voteOption = VOTER_OPTIONS.get(event.params.voteOption);
+  voterVoteEntity.votingPower = event.params.votingPower;
+  voterVoteEntity.createdAt = event.block.timestamp;
+  voterVoteEntity.save();
+
+  // voter
   let voterEntity = TokenVotingVoter.load(memberId);
   if (!voterEntity) {
     voterEntity = new TokenVotingVoter(memberId);
-    voterEntity.address = event.params.voter.toHexString();
+    voterEntity.address = member;
     voterEntity.plugin = pluginId;
     voterEntity.lastUpdated = event.block.timestamp;
     voterEntity.save();
