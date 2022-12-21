@@ -180,6 +180,14 @@ describe('AddresslistMock', function () {
       expect(await addresslist.isListed(signers[2].address)).to.equal(true);
       expect(await addresslist.addresslistLength()).to.equal(2);
     });
+
+    it('reverts if the array of new addresses to be added contains an address multiple times', async () => {
+      await expect(
+        addresslist.addAddresses([signers[0].address, signers[0].address])
+      ).to.be.revertedWith(
+        customError('InvalidAddresslistUpdate', signers[0].address)
+      );
+    });
   });
 
   context('removeAddresses', function () {
@@ -219,6 +227,17 @@ describe('AddresslistMock', function () {
       expect(await addresslist.isListed(signers[0].address)).to.equal(true);
       expect(await addresslist.isListed(signers[1].address)).to.equal(true);
       expect(await addresslist.addresslistLength()).to.equal(2);
+    });
+
+    it('reverts if the array of existing addresses to be removed contains an address multiple times', async () => {
+      await addresslist.addAddresses([signers[0].address, signers[1].address]);
+      await ethers.provider.send('evm_mine', []);
+
+      await expect(
+        addresslist.removeAddresses([signers[0].address, signers[0].address])
+      ).to.be.revertedWith(
+        customError('InvalidAddresslistUpdate', signers[0].address)
+      );
     });
   });
 });
