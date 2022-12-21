@@ -73,10 +73,14 @@ contract Multisig is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice Thrown if a approver is not allowed to cast a approve. This can be because the proposal
+    /// @notice Thrown when a sender is not allowed to create a proposal.
+    /// @param sender The sender address.
+    error ProposalCreationForbidden(address sender);
+
+    /// @notice Thrown if a approver is not allowed to cast an approve. This can be because the proposal
     /// - is not open,
     /// - was executed, or
-    /// - the approver is not on the addresslist
+    /// - the approver is not on the address list
     /// @param proposalId The ID of the proposal.
     /// @param sender The address of the sender.
     error ApprovalCastForbidden(uint256 proposalId, address sender);
@@ -106,10 +110,6 @@ contract Multisig is
     /// @param proposalId The ID of the proposal.
     /// @param approver The approver casting the approve.
     event Approved(uint256 indexed proposalId, address indexed approver);
-
-    /// @notice Thrown when a sender is not allowed to create a approve.
-    /// @param sender The sender address.
-    error ProposalCreationForbidden(address sender);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

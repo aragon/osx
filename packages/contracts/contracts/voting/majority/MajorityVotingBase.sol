@@ -152,7 +152,7 @@ abstract contract MajorityVotingBase is
     /// @param actual The actual value.
     error MinDurationOutOfBounds(uint64 limit, uint64 actual);
 
-    /// @notice Thrown when a sender is not allowed to create a vote.
+    /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
 
