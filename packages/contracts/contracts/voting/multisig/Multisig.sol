@@ -238,9 +238,10 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         proposal_.parameters.minApprovals = minApprovals_;
         proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                proposal_.actions.push(_actions[i]);
+        for (uint256 i = 0; i < _actions.length; ) {
+            proposal_.actions.push(_actions[i]);
+            unchecked {
+                ++i;
             }
         }
 

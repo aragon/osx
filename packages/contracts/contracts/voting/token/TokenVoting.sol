@@ -86,9 +86,10 @@ contract TokenVoting is MajorityVotingBase {
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                proposal_.actions.push(_actions[i]);
+        for (uint256 i = 0; i < _actions.length; ) {
+            proposal_.actions.push(_actions[i]);
+            unchecked {
+                ++i;
             }
         }
 

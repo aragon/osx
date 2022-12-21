@@ -106,9 +106,10 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
         proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                proposal_.actions.push(_actions[i]);
+        for (uint256 i = 0; i < _actions.length; ) {
+            proposal_.actions.push(_actions[i]);
+            unchecked {
+                ++i;
             }
         }
 
