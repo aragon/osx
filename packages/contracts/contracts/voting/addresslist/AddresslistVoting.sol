@@ -83,17 +83,17 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         uint64 _endDate,
         VoteOption _voteOption,
         bool _tryEarlyExecution
-    ) external override returns (uint256 id) {
+    ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         if (minProposerVotingPower() != 0 && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        id = _createProposal(_msgSender(), _metadata, _actions);
+        proposalId = proposalCount();
 
         // Store proposal related information
-        Proposal storage proposal_ = proposals[id];
+        Proposal storage proposal_ = proposals[proposalId];
 
         (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
             _startDate,
@@ -112,7 +112,16 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             }
         }
 
-        vote(id, _voteOption, _tryEarlyExecution);
+        _incrementProposalCount();
+
+        vote(proposalId, _voteOption, _tryEarlyExecution);
+
+        emit ProposalCreated({
+            proposalId: proposalId,
+            creator: _msgSender(),
+            metadata: _metadata,
+            actions: _actions
+        });
     }
 
     /// @inheritdoc MajorityVotingBase
