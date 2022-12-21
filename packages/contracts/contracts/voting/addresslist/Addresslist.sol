@@ -49,8 +49,12 @@ abstract contract Addresslist is TimeHelpers {
             _members.length
         );
 
-        for (uint256 i = 0; i < _members.length; i++) {
+        for (uint256 i = 0; i < _members.length; ) {
             _addresslistCheckpoints[_members[i]].push(_enabled ? 1 : 0);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
