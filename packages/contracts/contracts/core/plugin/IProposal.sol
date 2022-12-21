@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import {IDAO} from "../core/IDAO.sol";
+import {IDAO} from "../IDAO.sol";
 
 interface IProposal {
     /// @notice Returns the proposal count determining the next proposal ID.

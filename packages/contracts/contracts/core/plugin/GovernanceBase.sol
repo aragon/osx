@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {IDAO} from "../core/IDAO.sol";
+import {IDAO} from "../IDAO.sol";
 import {IProposal} from "./IProposal.sol";
 
 abstract contract GovernanceBase is IProposal {

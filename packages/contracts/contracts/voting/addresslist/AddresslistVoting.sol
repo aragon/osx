@@ -2,10 +2,6 @@
 
 pragma solidity 0.8.10;
 
-import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
@@ -17,8 +13,6 @@ import {Addresslist} from "./Addresslist.sol";
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is Addresslist, MajorityVotingBase {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
         this.addAddresses.selector ^

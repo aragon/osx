@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.10;
 
-import {PluginCloneable} from "../core/plugin/PluginCloneable.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IProposal} from "./IProposal.sol";
+import {IDAO} from "../IDAO.sol";
+import {PluginCloneable} from "./PluginCloneable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
+import {IProposal} from "./IProposal.sol";
 
 abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
     /// @notice Initializes the contract.

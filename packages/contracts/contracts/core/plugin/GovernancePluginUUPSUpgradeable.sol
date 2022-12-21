@@ -4,10 +4,10 @@ pragma solidity 0.8.10;
 
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IProposal} from "./IProposal.sol";
+import {IDAO} from "../IDAO.sol";
+import {PluginUUPSUpgradeable} from "./PluginUUPSUpgradeable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
+import {IProposal} from "./IProposal.sol";
 
 abstract contract GovernancePluginUUPSUpgradeable is GovernanceBase, PluginUUPSUpgradeable {
     /// @notice Initializes the contract.
