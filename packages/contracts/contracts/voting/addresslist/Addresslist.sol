@@ -3,7 +3,6 @@
 pragma solidity 0.8.10;
 
 import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
