@@ -7,6 +7,9 @@ import {PluginCloneable} from "./PluginCloneable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 import {IProposal} from "./IProposal.sol";
 
+/// @title GovernancePluginCloneable
+/// @author Aragon Association - 2022
+/// @notice An abstract, non-upgradeable contract to inherit from when creating a governance plugin being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
 abstract contract GovernancePluginCloneable is PluginCloneable, GovernanceBase {
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).

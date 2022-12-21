@@ -7,6 +7,9 @@ import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cou
 import {IDAO} from "../IDAO.sol";
 import {IProposal} from "./IProposal.sol";
 
+/// @title GovernanceBase
+/// @author Aragon Association - 2022
+/// @notice An abstract base contract defining the traits and internal functionality of a governance plugin.
 abstract contract GovernanceBase is IProposal {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 

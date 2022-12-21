@@ -9,6 +9,9 @@ import {PluginUUPSUpgradeable} from "./PluginUUPSUpgradeable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 import {IProposal} from "./IProposal.sol";
 
+/// @title GovernancePluginUUPSUpgradeable
+/// @author Aragon Association - 2022
+/// @notice An abstract, upgradeable contract to inherit from when creating a governance plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract GovernancePluginUUPSUpgradeable is PluginUUPSUpgradeable, GovernanceBase {
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).

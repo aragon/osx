@@ -7,6 +7,9 @@ import {Plugin} from "./Plugin.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 import {IProposal} from "./IProposal.sol";
 
+/// @title GovernancePlugin
+/// @author Aragon Association - 2022
+/// @notice An abstract, non-upgradeable inherit from when creating a governance plugin being deployed via the `new` keyword.
 abstract contract GovernancePlugin is Plugin, GovernanceBase {
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.

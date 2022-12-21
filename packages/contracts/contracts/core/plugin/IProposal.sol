@@ -4,6 +4,9 @@ pragma solidity 0.8.10;
 
 import {IDAO} from "../IDAO.sol";
 
+/// @title IPlugin
+/// @author Aragon Association - 2022
+/// @notice An interface defining for proposal related functions and events.
 interface IProposal {
     /// @notice Returns the proposal count determining the next proposal ID.
     /// @return The proposal count.
