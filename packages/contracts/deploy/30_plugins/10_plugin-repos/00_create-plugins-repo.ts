@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // AdminSetup
   await createPluginRepo(hre, 'Admin', 'AdminSetup', [1, 0, 0], '0x');
 
-  // Multisig
+  // MultisigSetup
   await createPluginRepo(hre, 'Multisig', 'MultisigSetup', [1, 0, 0], '0x');
 };
 export default func;
