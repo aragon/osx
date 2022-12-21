@@ -4,11 +4,10 @@ pragma solidity 0.8.10;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../core/IDAO.sol";
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
+import {IDAO} from "../../core/IDAO.sol";
+import {GovernancePluginUUPSUpgradeable} from "../../core/plugin/GovernancePluginUUPSUpgradeable.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
@@ -16,9 +15,12 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUpgradeable {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
+contract Multisig is
+    Initializable,
+    ERC165Upgradeable,
+    Addresslist,
+    GovernancePluginUUPSUpgradeable
+{
     /// @notice A container for proposal-related information.
     /// @param executed Wheter the proposal is executed or not.
     /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
@@ -67,9 +69,6 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @notice The minimum approval parameter.
     uint256 private minApprovals_;
 
-    /// @notice The incremental ID for proposals and executions.
-    CountersUpgradeable.Counter private proposalCounter;
-
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
@@ -103,23 +102,6 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @param approver The approver casting the approve.
     event Approved(uint256 indexed proposalId, address indexed approver);
 
-    /// @notice Emitted when a proposal is created.
-    /// @param proposalId The ID of the proposal.
-    /// @param creator  The creator of the proposal.
-    /// @param metadata The metadata of the proposal.
-    /// @param actions The actions that will be executed if the proposal passes.
-    event ProposalCreated(
-        uint256 indexed proposalId,
-        address indexed creator,
-        bytes metadata,
-        IDAO.Action[] actions
-    );
-
-    /// @notice Emitted when a proposal is executed.
-    /// @param proposalId The ID of the proposal.
-    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -146,16 +128,10 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         public
         view
         virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
+        override(ERC165Upgradeable, GovernancePluginUUPSUpgradeable)
         returns (bool)
     {
         return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
-    }
-
-    /// @notice Returns the proposal count determining the next proposal ID.
-    /// @return The proposal count.
-    function proposalCount() public view virtual returns (uint256) {
-        return proposalCounter.current();
     }
 
     /// @notice Returns the support threshold parameter stored in the voting settings.
@@ -215,28 +191,28 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _approve_ If true, the sender will approve the proposal.
     /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    /// @return proposalId The ID of the proposal.
+    /// @return id The ID of the proposal.
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         bool _approve_,
         bool _tryExecution
-    ) external returns (uint256 proposalId) {
+    ) external returns (uint256 id) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
         if (!isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCounter.current();
+        id = _createProposal(_msgSender(), _metadata, _actions);
 
         // Create the proposal
-        Proposal storage proposal_ = proposals[proposalId];
+        Proposal storage proposal_ = proposals[id];
 
         proposal_.open = true;
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.minApprovals = minApprovals_;
-        proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
+        proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO redundant?
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -244,18 +220,9 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
             }
         }
 
-        _incrementProposalCount();
-
         if (_approve_) {
             approve(proposalId, _tryExecution);
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @notice Approves and, optionally, executes the proposal.
@@ -369,8 +336,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         proposal_.open = false;
         proposal_.executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, proposal_.actions);
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+        _executeProposal(_proposalId, proposals[_proposalId].actions);
     }
 
     /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists. //TODO is this assumption relevant?
@@ -419,13 +385,8 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         return proposal_.open && !proposal_.executed;
     }
 
-    /// @notice Internal function to increments the proposal count by one.
-    function _incrementProposalCount() internal virtual {
-        return proposalCounter.increment();
-    }
-
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[47] private __gap;
+    uint256[48] private __gap;
 }
