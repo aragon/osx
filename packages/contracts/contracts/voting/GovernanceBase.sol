@@ -40,6 +40,6 @@ abstract contract GovernanceBase is IProposal {
 
     /// @notice Internal function to execute a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
-    /// @param _actions The array of actions.
+    /// @param _actions The array of actions to be executed.
     function _executeProposal(uint256 _proposalId, IDAO.Action[] memory _actions) internal virtual;
 }
