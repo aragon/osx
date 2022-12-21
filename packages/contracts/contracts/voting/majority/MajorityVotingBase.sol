@@ -211,32 +211,6 @@ abstract contract MajorityVotingBase is
         return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
-    /// @notice Updates the voting settings.
-    /// @param _votingSettings The new voting settings.
-    function updateVotingSettings(VotingSettings calldata _votingSettings)
-        external
-        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
-    {
-        _updateVotingSettings(_votingSettings);
-    }
-
-    /// @notice Creates a new majority voting proposal.
-    /// @param _metadata The metadata of the proposal.
-    /// @param _actions The actions that will be executed after the proposal passes.
-    /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
-    /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _voteOption The vote voteOption to cast on creation.
-    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    /// @return proposalId The ID of the proposal.
-    function createProposal(
-        bytes calldata _metadata,
-        IDAO.Action[] calldata _actions,
-        uint64 _startDate,
-        uint64 _endDate,
-        VoteOption _voteOption,
-        bool _tryEarlyExecution
-    ) external virtual returns (uint256 proposalId);
-
     /// @inheritdoc IMajorityVoting
     function vote(
         uint256 _proposalId,
@@ -355,6 +329,32 @@ abstract contract MajorityVotingBase is
         tally = proposal_.tally;
         actions = proposal_.actions;
     }
+
+    /// @notice Updates the voting settings.
+    /// @param _votingSettings The new voting settings.
+    function updateVotingSettings(VotingSettings calldata _votingSettings)
+        external
+        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
+    {
+        _updateVotingSettings(_votingSettings);
+    }
+
+    /// @notice Creates a new majority voting proposal.
+    /// @param _metadata The metadata of the proposal.
+    /// @param _actions The actions that will be executed after the proposal passes.
+    /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
+    /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
+    /// @param _voteOption The vote voteOption to cast on creation.
+    /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
+    /// @return proposalId The ID of the proposal.
+    function createProposal(
+        bytes calldata _metadata,
+        IDAO.Action[] calldata _actions,
+        uint64 _startDate,
+        uint64 _endDate,
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
+    ) external virtual returns (uint256 proposalId);
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
