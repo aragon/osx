@@ -14,7 +14,7 @@ abstract contract GovernanceBase is IProposal {
     CountersUpgradeable.Counter private proposalCounter;
 
     /// @inheritdoc IProposal
-    function proposalCount() external view returns (uint256) {
+    function proposalCount() public view returns (uint256) {
         return proposalCounter.current();
     }
 
