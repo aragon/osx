@@ -120,12 +120,12 @@ describe('AddresslistVoting', function () {
     beforeEach(async () => {
       await voting.initialize(dao.address, votingSettings, addresslist(0));
     });
-    it('should return false, if user is not allowed', async () => {
+    it('should return false, if user is not listed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(signers[0].address, block1.number)).to.equal(
-        false
-      );
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block1.number)
+      ).to.equal(false);
     });
 
     it('should add new users in the address list', async () => {
@@ -134,11 +134,11 @@ describe('AddresslistVoting', function () {
       const block = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
 
-      expect(await voting.isListed(signers[0].address, block.number)).to.equal(
-        true
-      );
-      expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
-      expect(await voting.isListed(signers[1].address, 0)).to.equal(true);
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block.number)
+      ).to.equal(true);
+      expect(await voting.isListed(signers[0].address)).to.equal(true);
+      expect(await voting.isListed(signers[1].address)).to.equal(true);
     });
 
     it('should remove users from the address list', async () => {
@@ -146,19 +146,19 @@ describe('AddresslistVoting', function () {
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(signers[0].address, block1.number)).to.equal(
-        true
-      );
-      expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block1.number)
+      ).to.equal(true);
+      expect(await voting.isListed(signers[0].address)).to.equal(true);
 
       await voting.removeAddresses(addresslist(1));
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(signers[0].address, block2.number)).to.equal(
-        false
-      );
-      expect(await voting.isListed(signers[0].address, 0)).to.equal(false);
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block2.number)
+      ).to.equal(false);
+      expect(await voting.isListed(signers[0].address)).to.equal(false);
     });
   });
 

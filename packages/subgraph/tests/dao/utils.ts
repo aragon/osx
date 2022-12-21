@@ -470,7 +470,7 @@ export function getIsUserAllowed(
   createMockedFunction(
     Address.fromString(contractAddress),
     'isListed',
-    'isListed(address,uint256):(bool)'
+    'isListedAtBlock(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),

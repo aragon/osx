@@ -101,7 +101,7 @@ describe('Multisig', function () {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await multisig.isListed(signers[9].address, block1.number)
+        await multisig.isListedAtBlock(signers[9].address, block1.number)
       ).to.equal(false);
     });
 
@@ -112,10 +112,10 @@ describe('Multisig', function () {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await multisig.isListed(signers[0].address, block1.number)
+        await multisig.isListedAtBlock(signers[0].address, block1.number)
       ).to.equal(true);
       expect(
-        await multisig.isListed(signers[1].address, block1.number)
+        await multisig.isListedAtBlock(signers[1].address, block1.number)
       ).to.equal(false);
 
       // add a new member
@@ -124,10 +124,10 @@ describe('Multisig', function () {
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await multisig.isListed(signers[0].address, block2.number)
+        await multisig.isListedAtBlock(signers[0].address, block2.number)
       ).to.equal(true);
       expect(
-        await multisig.isListed(signers[1].address, block2.number)
+        await multisig.isListedAtBlock(signers[1].address, block2.number)
       ).to.equal(true);
     });
 
@@ -138,10 +138,10 @@ describe('Multisig', function () {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await multisig.isListed(signers[0].address, block1.number)
+        await multisig.isListedAtBlock(signers[0].address, block1.number)
       ).to.equal(true);
       expect(
-        await multisig.isListed(signers[1].address, block1.number)
+        await multisig.isListedAtBlock(signers[1].address, block1.number)
       ).to.equal(true);
 
       // remove an existing member
@@ -150,10 +150,10 @@ describe('Multisig', function () {
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
       expect(
-        await multisig.isListed(signers[0].address, block2.number)
+        await multisig.isListedAtBlock(signers[0].address, block2.number)
       ).to.equal(true);
       expect(
-        await multisig.isListed(signers[1].address, block2.number)
+        await multisig.isListedAtBlock(signers[1].address, block2.number)
       ).to.equal(false);
     });
 
@@ -162,7 +162,7 @@ describe('Multisig', function () {
       await multisig.initialize(dao.address, minApprovals, addresslist(1));
 
       await expect(
-        multisig.removeAddresses([signers[1].address])
+        multisig.removeAddresses([signers[0].address])
       ).to.be.revertedWith(
         customError(
           'MinApprovalsOutOfBounds',

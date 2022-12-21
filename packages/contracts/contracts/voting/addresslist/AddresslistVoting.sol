@@ -18,6 +18,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         this.addAddresses.selector ^
             this.removeAddresses.selector ^
             this.isListed.selector ^
+            this.isListedAtBlock.selector ^
             this.addresslistLength.selector ^
             this.addresslistLengthAtBlock.selector ^
             this.initialize.selector;
@@ -38,7 +39,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         // add member addresses to the address list
-        _updateAddresslist(_members, true);
+        _addAddresses(_members);
         emit AddressesAdded({members: _members});
     }
 
@@ -58,7 +59,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _updateAddresslist(_members, true);
+        _addAddresses(_members);
 
         emit AddressesAdded({members: _members});
     }
@@ -69,7 +70,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         external
         auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
     {
-        _updateAddresslist(_members, false);
+        _removeAddresses(_members);
 
         emit AddressesRemoved({members: _members});
     }
@@ -85,7 +86,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     ) external override returns (uint256 id) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (minProposerVotingPower() != 0 && !isListed(_msgSender(), snapshotBlock)) {
+        if (minProposerVotingPower() != 0 && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -164,7 +165,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         if (!_isVoteOpen(proposal_)) {
             // The proposal vote hasn't started or has already ended.
             return false;
-        } else if (!isListed(_account, proposal_.parameters.snapshotBlock)) {
+        } else if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
             // The voter has no voting power.
             return false;
         } else if (

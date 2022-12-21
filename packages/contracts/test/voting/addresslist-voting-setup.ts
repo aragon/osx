@@ -76,7 +76,8 @@ describe('AddresslistVotingSetup', function () {
     const iface = new ethers.utils.Interface([
       'function addAddresses(address[])',
       'function removeAddresses(address[])',
-      'function isListed(address,uint256) returns (bool)',
+      'function isListed(address) returns (bool)',
+      'function isListedAtBlock(address,uint256) returns (bool)',
       'function addresslistLength() returns (uint256)',
       'function addresslistLengthAtBlock(uint256) returns (uint256)',
       'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
@@ -215,7 +216,7 @@ describe('AddresslistVotingSetup', function () {
         )
       ).to.be.equal(defaultMembers.length);
       expect(
-        await addresslistVotingContract.isListed(
+        await addresslistVotingContract.isListedAtBlock(
           defaultMembers[0],
           latestBlock.number
         )

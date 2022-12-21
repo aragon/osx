@@ -21,6 +21,10 @@ abstract contract Addresslist is TimeHelpers {
     /// @notice The checkpointed history of the length of the address list.
     CheckpointsUpgradeable.History private _addresslistLengthCheckpoints;
 
+    /// @notice Thrown when the address list update is invalid, which can be cause by the addition of an existing member or removal of a non-existing member.
+    /// @param member The array of member addresses to be added.
+    error InvalidAddresslistUpdate(address member);
+
     /// @notice Emitted when new members are added to the address list.
     /// @param members The array of member addresses to be added.
     event AddressesAdded(address[] members);
@@ -29,13 +33,19 @@ abstract contract Addresslist is TimeHelpers {
     /// @param members The array of member addresses to be removed.
     event AddressesRemoved(address[] members);
 
-    /// @notice Checks if an account is on the address list at given block number.
+    /// @notice Checks if an account is on the address list at a specific block number.
     /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
-    function isListed(address _account, uint256 _blockNumber) public view returns (bool) {
-        if (_blockNumber == 0) _blockNumber = getBlockNumber64() - 1;
-
+    /// @return Whether the account is listed at the specified block number.
+    function isListedAtBlock(address _account, uint256 _blockNumber) public view returns (bool) {
         return _addresslistCheckpoints[_account].getAtBlock(_blockNumber) == 1;
+    }
+
+    /// @notice Checks if an account is currently on the address list.
+    /// @param _account The account address being checked.
+    /// @return Whether the account is currently listed.
+    function isListed(address _account) public view returns (bool) {
+        return _addresslistCheckpoints[_account].latest() == 1;
     }
 
     /// @notice Returns the length of the address list at a specific block number.
@@ -46,27 +56,45 @@ abstract contract Addresslist is TimeHelpers {
     }
 
     /// @notice Returns the current length of the address list.
-    /// @return The address list length at the specified block number.
+    /// @return The current address list length.
     function addresslistLength() public view returns (uint256) {
         return _addresslistLengthCheckpoints.latest();
     }
 
-    /// @notice Updates the address list by adding or removing members.
-    /// @param _members The member addresses to be updated.
-    /// @param _enabled Whether to add or remove members from the address list.
-    function _updateAddresslist(address[] calldata _members, bool _enabled) internal {
-        _addresslistLengthCheckpoints.push(
-            _enabled ? _uncheckedAdd : _uncheckedSub,
-            _members.length
-        );
+    /// @notice Internal function to add new addresses to the address list.
+    /// @param _newAddresses The new addresses to be added.
+    function _addAddresses(address[] calldata _newAddresses) internal {
+        for (uint256 i = 0; i < _newAddresses.length; ) {
+            if (isListed(_newAddresses[i])) {
+                revert InvalidAddresslistUpdate(_newAddresses[i]);
+            }
 
-        for (uint256 i = 0; i < _members.length; ) {
-            _addresslistCheckpoints[_members[i]].push(_enabled ? 1 : 0);
+            // Mark the address as listed
+            _addresslistCheckpoints[_newAddresses[i]].push(1);
 
             unchecked {
                 ++i;
             }
         }
+        _addresslistLengthCheckpoints.push(_uncheckedAdd, _newAddresses.length);
+    }
+
+    /// @notice Internal function to remove existing addresses from the address list.
+    /// @param _exitingAddresses The existing addresses to be removed.
+    function _removeAddresses(address[] calldata _exitingAddresses) internal {
+        for (uint256 i = 0; i < _exitingAddresses.length; ) {
+            if (!isListed(_exitingAddresses[i])) {
+                revert InvalidAddresslistUpdate(_exitingAddresses[i]);
+            }
+
+            // Mark the address as not listed
+            _addresslistCheckpoints[_exitingAddresses[i]].push(0);
+
+            unchecked {
+                ++i;
+            }
+        }
+        _addresslistLengthCheckpoints.push(_uncheckedSub, _exitingAddresses.length);
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

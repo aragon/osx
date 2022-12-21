@@ -57,7 +57,9 @@ contract Multisig is
         this.addAddresses.selector ^
             this.removeAddresses.selector ^
             this.isListed.selector ^
+            this.isListedAtBlock.selector ^
             this.addresslistLength.selector ^
+            this.addresslistLengthAtBlock.selector ^
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
@@ -112,7 +114,7 @@ contract Multisig is
         __PluginUUPSUpgradeable_init(_dao);
 
         // add member addresses to the address list
-        _updateAddresslist(_members, true);
+        _addAddresses(_members);
         _updateMinApprovals(_minApprovals);
 
         emit AddressesAdded({members: _members});
@@ -162,7 +164,7 @@ contract Multisig is
         external
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
-        _updateAddresslist(_members, true);
+        _addAddresses(_members);
 
         emit AddressesAdded({members: _members});
     }
@@ -173,13 +175,13 @@ contract Multisig is
         external
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
+        _removeAddresses(_members);
+
         // Check if the new addresslist has become shorter than the current minimum number of approvals required.
-        uint256 newAddresslistLength = addresslistLength() - _members.length;
+        uint256 newAddresslistLength = addresslistLength();
         if (newAddresslistLength < minApprovals_) {
             revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
         }
-
-        _updateAddresslist(_members, false);
 
         emit AddressesRemoved({members: _members});
     }
@@ -198,7 +200,7 @@ contract Multisig is
     ) external returns (uint256 id) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isListed(_msgSender(), snapshotBlock)) {
+        if (!isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -349,7 +351,7 @@ contract Multisig is
             return false;
         }
 
-        if (!isListed(_account, proposal_.parameters.snapshotBlock)) {
+        if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
             // The approver has no voting power.
             return false;
         }
