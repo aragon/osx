@@ -102,19 +102,24 @@ export function _handleProposalCreated(
 }
 
 export function handleVoteCast(event: VoteCast): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-  let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = AddresslistVotingVote.load(voterProposalId);
-  if (!voterProposalEntity) {
-    voterProposalEntity = new AddresslistVotingVote(voterProposalId);
-    voterProposalEntity.voter = event.params.voter.toHexString();
-    voterProposalEntity.proposal = proposalId;
+  const member = event.params.voter.toHexString();
+  const pluginId = event.address.toHexString();
+  const memberId = pluginId + '_' + member;
+  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let voterVoteId = member + '_' + proposalId;
+
+  let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
+  if (!voterProposalVoteEntity) {
+    voterProposalVoteEntity = new AddresslistVotingVote(voterVoteId);
+    voterProposalVoteEntity.voter = memberId;
+    voterProposalVoteEntity.proposal = proposalId;
   }
-  voterProposalEntity.voteOption = VOTER_OPTIONS.get(event.params.voteOption);
-  voterProposalEntity.votingPower = event.params.votingPower;
-  voterProposalEntity.createdAt = event.block.timestamp;
-  voterProposalEntity.save();
+  voterProposalVoteEntity.voteOption = VOTER_OPTIONS.get(
+    event.params.voteOption
+  );
+  voterProposalVoteEntity.votingPower = event.params.votingPower;
+  voterProposalVoteEntity.createdAt = event.block.timestamp;
+  voterProposalVoteEntity.save();
 
   // update count
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
@@ -211,12 +216,15 @@ export function handleVotingSettingsUpdated(
 export function handleAddressesAdded(event: AddressesAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index];
-    let voterEntity = AddresslistVotingVoter.load(member.toHexString());
+    const member = members[index].toHexString();
+    const pluginId = event.address.toHexString();
+    const memberId = pluginId + '_' + member;
+
+    let voterEntity = AddresslistVotingVoter.load(memberId);
     if (!voterEntity) {
-      voterEntity = new AddresslistVotingVoter(member.toHexString());
-      voterEntity.address = member.toHexString();
-      voterEntity.plugin = event.address.toHexString();
+      voterEntity = new AddresslistVotingVoter(memberId);
+      voterEntity.address = member;
+      voterEntity.plugin = pluginId;
       voterEntity.save();
     }
   }
@@ -225,10 +233,13 @@ export function handleAddressesAdded(event: AddressesAdded): void {
 export function handleAddressesRemoved(event: AddressesRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index];
-    let voterEntity = AddresslistVotingVoter.load(member.toHexString());
+    const member = members[index].toHexString();
+    const pluginId = event.address.toHexString();
+    const memberId = pluginId + '_' + member;
+
+    let voterEntity = AddresslistVotingVoter.load(memberId);
     if (voterEntity) {
-      store.remove('AddresslistVotingVoter', member.toHexString());
+      store.remove('AddresslistVotingVoter', memberId);
     }
   }
 }
