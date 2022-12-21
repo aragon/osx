@@ -9,7 +9,7 @@ import {PluginUUPSUpgradeable} from "./PluginUUPSUpgradeable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 import {IProposal} from "./IProposal.sol";
 
-abstract contract GovernancePluginUUPSUpgradeable is GovernanceBase, PluginUUPSUpgradeable {
+abstract contract GovernancePluginUUPSUpgradeable is PluginUUPSUpgradeable, GovernanceBase {
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.

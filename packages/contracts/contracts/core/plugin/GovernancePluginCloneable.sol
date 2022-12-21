@@ -7,7 +7,7 @@ import {PluginCloneable} from "./PluginCloneable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 import {IProposal} from "./IProposal.sol";
 
-abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
+abstract contract GovernancePluginCloneable is PluginCloneable, GovernanceBase {
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.

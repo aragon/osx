@@ -7,7 +7,7 @@ import {Plugin} from "./Plugin.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 import {IProposal} from "./IProposal.sol";
 
-abstract contract GovernancePlugin is GovernanceBase, Plugin {
+abstract contract GovernancePlugin is Plugin, GovernanceBase {
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     constructor(IDAO _dao) Plugin(_dao) {}
