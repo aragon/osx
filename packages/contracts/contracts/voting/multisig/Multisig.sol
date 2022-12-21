@@ -174,7 +174,7 @@ contract Multisig is
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
         // Check if the new addresslist has become shorter than the current minimum number of approvals required.
-        uint256 newAddresslistLength = addresslistLength(0) - _members.length;
+        uint256 newAddresslistLength = addresslistLength() - _members.length;
         if (newAddresslistLength < minApprovals_) {
             revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
         }
@@ -210,7 +210,7 @@ contract Multisig is
         proposal_.open = true;
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.minApprovals = minApprovals_;
-        proposal_.tally.addresslistLength = addresslistLength(snapshotBlock); // TODO redundant?
+        proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO redundant?
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {
@@ -283,7 +283,7 @@ contract Multisig is
     /// @notice Internal function to update the minimal approval parameter.
     /// @param _minApprovals The new minimal approval value.
     function _updateMinApprovals(uint256 _minApprovals) internal virtual {
-        uint256 addresslistLength_ = addresslistLength(0);
+        uint256 addresslistLength_ = addresslistLength();
 
         if (_minApprovals > addresslistLength_) {
             revert MinApprovalsOutOfBounds({limit: addresslistLength_, actual: _minApprovals});

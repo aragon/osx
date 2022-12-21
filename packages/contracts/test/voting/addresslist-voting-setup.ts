@@ -77,7 +77,8 @@ describe('AddresslistVotingSetup', function () {
       'function addAddresses(address[])',
       'function removeAddresses(address[])',
       'function isListed(address,uint256) returns (bool)',
-      'function addresslistLength(uint256) returns (uint256)',
+      'function addresslistLength() returns (uint256)',
+      'function addresslistLengthAtBlock(uint256) returns (uint256)',
       'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
     ]);
 
@@ -209,7 +210,9 @@ describe('AddresslistVotingSetup', function () {
       await ethers.provider.send('evm_mine', []);
 
       expect(
-        await addresslistVotingContract.addresslistLength(latestBlock.number)
+        await addresslistVotingContract.addresslistLengthAtBlock(
+          latestBlock.number
+        )
       ).to.be.equal(defaultMembers.length);
       expect(
         await addresslistVotingContract.isListed(

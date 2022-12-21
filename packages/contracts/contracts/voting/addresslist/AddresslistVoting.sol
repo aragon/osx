@@ -19,6 +19,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             this.removeAddresses.selector ^
             this.isListed.selector ^
             this.addresslistLength.selector ^
+            this.addresslistLengthAtBlock.selector ^
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
@@ -102,7 +103,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minParticipation = minParticipation();
 
-        proposal_.tally.totalVotingPower = addresslistLength(snapshotBlock);
+        proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock);
 
         unchecked {
             for (uint256 i = 0; i < _actions.length; i++) {

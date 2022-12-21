@@ -166,7 +166,7 @@ describe('Multisig', function () {
       ).to.be.revertedWith(
         customError(
           'MinApprovalsOutOfBounds',
-          (await multisig.addresslistLength(0)) - 1,
+          (await multisig.addresslistLength()) - 1,
           minApprovals
         )
       );
@@ -184,7 +184,7 @@ describe('Multisig', function () {
       ).to.be.revertedWith(
         customError(
           'MinApprovalsOutOfBounds',
-          (await multisig.addresslistLength(0)) - 1,
+          (await multisig.addresslistLength()) - 1,
           minApprovals
         )
       );
