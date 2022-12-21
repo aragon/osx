@@ -341,7 +341,7 @@ type AdminPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
-  adminstrator: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
+  adminstrators: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
 }
 
 type Adminstrator @entity {
@@ -369,4 +369,53 @@ type AdminProposal implements Proposal @entity {
   plugin: AdminPlugin!
   proposalId: BigInt!
   adminstrator: Adminstrator!
+}
+
+# Multisig
+
+type MultisigPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  minApprovals: BigInt!
+  proposalCount: BigInt
+  proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
+  members: [MultisigVoter!]! @derivedFrom(field: "plugin")
+}
+
+type MultisigVoter @entity {
+  id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [MultisigVoterProposal!]! @derivedFrom(field: "voter")
+  plugin: MultisigPlugin!
+}
+
+type MultisigVoterProposal @entity(immutable: true) {
+  "VoterProposal for Many-to-Many"
+  id: ID! # voter + proposal
+  voter: MultisigVoter!
+  proposal: MultisigProposal!
+  createdAt: BigInt!
+}
+
+type MultisigProposal implements Proposal @entity {
+  id: ID! # package + proposalId
+  dao: Dao!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  plugin: MultisigPlugin!
+  proposalId: BigInt!
+  creator: Bytes!
+  metadata: String
+  createdAt: BigInt!
+  creationBlockNumber: BigInt!
+  open: Boolean!
+  snapshotBlock: BigInt!
+  minApprovals: BigInt!
+  addresslistLength: BigInt!
+  approvals: BigInt
+  executable: Boolean
+  executed: Boolean!
+  executionDate: BigInt
+  executionBlockNumber: BigInt
+  voters: [MultisigVoterProposal!]! @derivedFrom(field: "proposal")
 }

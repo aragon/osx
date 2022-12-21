@@ -190,6 +190,35 @@ templates:
           handler: handleAddressesAdded
         - event: AddressesRemoved(address[])
           handler: handleAddressesRemoved
+  # Multisig (package)
+  - name: Multisig
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: Multisig
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/multisig/multisig.ts
+      entities:
+        - Dao
+      abis:
+        - name: Multisig
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
+      eventHandlers:
+        - event: AddressesAdded(address[])
+          handler: handleAddressesAdded
+        - event: AddressesRemoved(address[])
+          handler: handleAddressesRemoved
+        - event: Approved(indexed uint256,indexed address)
+          handler: handleApproved
+        - event: MinApprovalUpdated(uint256)
+          handler: handleMinApprovalUpdated
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
     # admin (package)
   - name: Admin
     kind: ethereum/contract
