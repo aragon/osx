@@ -221,7 +221,7 @@ contract Multisig is
         }
 
         if (_approve_) {
-            approve(id, _tryExecution); // TODO Will msg.Sender be wrong here? Probably yes. Test and fix for all other voting classes as well.
+            approve(proposalId, _tryExecution);
         }
     }
 
