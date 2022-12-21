@@ -337,7 +337,7 @@ abstract contract MajorityVotingBase is
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
-        external
+        public
         view
         returns (
             bool open,
