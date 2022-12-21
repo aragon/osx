@@ -5,9 +5,7 @@ pragma solidity 0.8.10;
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
-
-import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
-import {GovernancePluginCloneable} from "../GovernancePluginCloneable.sol";
+import {GovernancePluginCloneable} from "../../core/plugin/GovernancePluginCloneable.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.

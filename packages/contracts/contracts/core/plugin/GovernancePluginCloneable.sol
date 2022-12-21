@@ -2,12 +2,15 @@
 
 pragma solidity 0.8.10;
 
-import {PluginCloneable} from "../core/plugin/PluginCloneable.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IProposal} from "./IProposal.sol";
+import {IDAO} from "../IDAO.sol";
+import {PluginCloneable} from "./PluginCloneable.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
+import {IProposal} from "./IProposal.sol";
 
-abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
+/// @title GovernancePluginCloneable
+/// @author Aragon Association - 2022
+/// @notice An abstract, non-upgradeable contract to inherit from when creating a governance plugin being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
+abstract contract GovernancePluginCloneable is PluginCloneable, GovernanceBase {
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.

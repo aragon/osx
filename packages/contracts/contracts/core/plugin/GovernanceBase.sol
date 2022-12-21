@@ -4,9 +4,12 @@ pragma solidity 0.8.10;
 
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {IDAO} from "../core/IDAO.sol";
+import {IDAO} from "../IDAO.sol";
 import {IProposal} from "./IProposal.sol";
 
+/// @title GovernanceBase
+/// @author Aragon Association - 2022
+/// @notice An abstract base contract defining the traits and internal functionality of a governance plugin.
 abstract contract GovernanceBase is IProposal {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -14,7 +17,7 @@ abstract contract GovernanceBase is IProposal {
     CountersUpgradeable.Counter private proposalCounter;
 
     /// @inheritdoc IProposal
-    function proposalCount() external view returns (uint256) {
+    function proposalCount() public view returns (uint256) {
         return proposalCounter.current();
     }
 
@@ -40,6 +43,6 @@ abstract contract GovernanceBase is IProposal {
 
     /// @notice Internal function to execute a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
-    /// @param _actions The array of actions.
+    /// @param _actions The array of actions to be executed.
     function _executeProposal(uint256 _proposalId, IDAO.Action[] memory _actions) internal virtual;
 }

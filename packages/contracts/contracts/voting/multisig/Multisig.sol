@@ -2,13 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {GovernancePluginUUPSUpgradeable} from "../GovernancePluginUUPSUpgradeable.sol";
+import {GovernancePluginUUPSUpgradeable} from "../../core/plugin/GovernancePluginUUPSUpgradeable.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
@@ -22,8 +21,6 @@ contract Multisig is
     Addresslist,
     GovernancePluginUUPSUpgradeable
 {
-    using CheckpointsUpgradeable for CheckpointsUpgradeable.History;
-
     /// @notice A container for proposal-related information.
     /// @param executed Wheter the proposal is executed or not.
     /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
@@ -272,7 +269,7 @@ contract Multisig is
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
-        external
+        public
         view
         returns (
             bool open,

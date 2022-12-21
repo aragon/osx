@@ -3,10 +3,9 @@
 pragma solidity 0.8.10;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title TokenVoting
@@ -14,8 +13,6 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is MajorityVotingBase {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
         this.getVotingToken.selector ^ this.initialize.selector;

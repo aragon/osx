@@ -7,7 +7,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {GovernancePluginUUPSUpgradeable} from "../GovernancePluginUUPSUpgradeable.sol";
+import {GovernancePluginUUPSUpgradeable} from "../../core/plugin/GovernancePluginUUPSUpgradeable.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
@@ -337,7 +337,7 @@ abstract contract MajorityVotingBase is
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     function getProposal(uint256 _proposalId)
-        external
+        public
         view
         returns (
             bool open,

@@ -2,6 +2,9 @@
 
 pragma solidity 0.8.10;
 
+/// @title IPlugin
+/// @author Aragon Association - 2022
+/// @notice An interface defining the traits of a plugin.
 interface IPlugin {
     enum PluginType {
         UUPS,

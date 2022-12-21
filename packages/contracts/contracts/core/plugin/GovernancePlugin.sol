@@ -2,12 +2,15 @@
 
 pragma solidity 0.8.10;
 
-import {Plugin} from "../core/plugin/Plugin.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IProposal} from "./IProposal.sol";
+import {IDAO} from "../IDAO.sol";
+import {Plugin} from "./Plugin.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
+import {IProposal} from "./IProposal.sol";
 
-abstract contract GovernancePlugin is GovernanceBase, Plugin {
+/// @title GovernancePlugin
+/// @author Aragon Association - 2022
+/// @notice An abstract, non-upgradeable inherit from when creating a governance plugin being deployed via the `new` keyword.
+abstract contract GovernancePlugin is Plugin, GovernanceBase {
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     constructor(IDAO _dao) Plugin(_dao) {}
