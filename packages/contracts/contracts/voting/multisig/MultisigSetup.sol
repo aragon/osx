@@ -95,7 +95,7 @@ contract MultisigSetup is PluginSetup {
         bytes calldata
     ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        permissions = new PermissionLib.ItemMultiTarget[](3);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.ItemMultiTarget(
