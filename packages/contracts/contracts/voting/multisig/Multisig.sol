@@ -91,14 +91,6 @@ contract Multisig is
     /// @param actual The actual value.
     error MinApprovalsOutOfBounds(uint256 limit, uint256 actual);
 
-    /// @notice Emitted when new members are added to the address list.
-    /// @param members The array of member addresses to be added.
-    event AddressesAdded(address[] members);
-
-    /// @notice Emitted when members are removed from the address list.
-    /// @param members The array of member addresses to be removed.
-    event AddressesRemoved(address[] members);
-
     /// @notice Emitted when the multisig settings are updated.
     /// @param minApprovals The minimum approvals value.
     event MinApprovalUpdated(uint256 minApprovals);

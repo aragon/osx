@@ -25,14 +25,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
         keccak256("MODIFY_ADDRESSLIST_PERMISSION");
 
-    /// @notice Emitted when new members are added to the address list.
-    /// @param members The array of member addresses to be added.
-    event AddressesAdded(address[] members);
-
-    /// @notice Emitted when members are removed from the address list.
-    /// @param members The array of member addresses to be removed.
-    event AddressesRemoved(address[] members);
-
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.

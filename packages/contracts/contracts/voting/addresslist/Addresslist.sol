@@ -21,6 +21,14 @@ abstract contract Addresslist is TimeHelpers {
     /// @notice The checkpointed history of the length of the address list.
     CheckpointsUpgradeable.History private _addresslistLengthCheckpoints;
 
+    /// @notice Emitted when new members are added to the address list.
+    /// @param members The array of member addresses to be added.
+    event AddressesAdded(address[] members);
+
+    /// @notice Emitted when members are removed from the address list.
+    /// @param members The array of member addresses to be removed.
+    event AddressesRemoved(address[] members);
+
     /// @notice Checks if an account is on the address list at given block number.
     /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
