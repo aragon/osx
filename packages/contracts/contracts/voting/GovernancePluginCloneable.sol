@@ -2,19 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-
 import {PluginCloneable} from "../core/plugin/PluginCloneable.sol";
 import {IDAO} from "../core/IDAO.sol";
 import {IProposal} from "./IProposal.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 
 abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    /// @notice The incremental ID for proposals and executions.
-    CountersUpgradeable.Counter private proposalCounter;
-
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
@@ -27,28 +20,6 @@ abstract contract GovernancePluginCloneable is GovernanceBase, PluginCloneable {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IProposal).interfaceId || super.supportsInterface(interfaceId);
-    }
-
-    /// @inheritdoc IProposal
-    function proposalCount() external view returns (uint256) {
-        return proposalCounter.current();
-    }
-
-    /// @inheritdoc GovernanceBase
-    function _createProposal(
-        address _creator,
-        bytes calldata _metadata,
-        IDAO.Action[] calldata _actions
-    ) internal virtual override returns (uint256 proposalId) {
-        proposalId = proposalCounter.current();
-        proposalCounter.increment();
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _creator,
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @inheritdoc GovernanceBase

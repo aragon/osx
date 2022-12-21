@@ -2,19 +2,12 @@
 
 pragma solidity 0.8.10;
 
-import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
-
 import {Plugin} from "../core/plugin/Plugin.sol";
 import {IDAO} from "../core/IDAO.sol";
 import {IProposal} from "./IProposal.sol";
 import {GovernanceBase} from "./GovernanceBase.sol";
 
 abstract contract GovernancePlugin is GovernanceBase, Plugin {
-    using Counters for Counters.Counter;
-
-    /// @notice The incremental ID for proposals and executions.
-    Counters.Counter private proposalCounter;
-
     /// @notice Constructs the plugin by storing the associated DAO.
     /// @param _dao The DAO contract.
     constructor(IDAO _dao) Plugin(_dao) {}
@@ -24,28 +17,6 @@ abstract contract GovernancePlugin is GovernanceBase, Plugin {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IProposal).interfaceId || super.supportsInterface(interfaceId);
-    }
-
-    /// @inheritdoc IProposal
-    function proposalCount() external view returns (uint256) {
-        return proposalCounter.current();
-    }
-
-    /// @inheritdoc GovernanceBase
-    function _createProposal(
-        address _creator,
-        bytes calldata _metadata,
-        IDAO.Action[] calldata _actions
-    ) internal virtual override returns (uint256 proposalId) {
-        proposalId = proposalCounter.current();
-        proposalCounter.increment();
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _creator,
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @inheritdoc GovernanceBase
