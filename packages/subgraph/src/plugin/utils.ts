@@ -151,7 +151,8 @@ export function addPlugin(daoId: string, plugin: Address): void {
   if (
     TokenVotingInterfaceSuppoted ||
     addresslistInterfaceSuppoted ||
-    adminInterfaceSupported
+    adminInterfaceSupported ||
+    multisigInterfaceSupported
   ) {
     let daoPluginEntityId = daoId + '_' + plugin.toHexString();
     let daoPluginEntity = new DaoPlugin(daoPluginEntityId);
