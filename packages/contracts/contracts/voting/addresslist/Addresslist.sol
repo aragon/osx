@@ -63,7 +63,7 @@ abstract contract Addresslist is TimeHelpers {
     /// @notice Internal function to add new addresses to the address list.
     /// @param _newAddresses The new addresses to be added.
     function _addAddresses(address[] calldata _newAddresses) internal {
-        for (uint256 i = 0; i < _newAddresses.length; ) {
+        for (uint256 i; i < _newAddresses.length; ) {
             if (isListed(_newAddresses[i])) {
                 revert InvalidAddresslistUpdate(_newAddresses[i]);
             }
@@ -81,7 +81,7 @@ abstract contract Addresslist is TimeHelpers {
     /// @notice Internal function to remove existing addresses from the address list.
     /// @param _exitingAddresses The existing addresses to be removed.
     function _removeAddresses(address[] calldata _exitingAddresses) internal {
-        for (uint256 i = 0; i < _exitingAddresses.length; ) {
+        for (uint256 i; i < _exitingAddresses.length; ) {
             if (!isListed(_exitingAddresses[i])) {
                 revert InvalidAddresslistUpdate(_exitingAddresses[i]);
             }
