@@ -347,7 +347,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         uint256 _proposalId,
         address _approver,
         bool _tryExecution
-    ) internal {
+    ) internal virtual {
         Proposal storage proposal_ = proposals[_proposalId];
 
         proposal_.tally.approvals += 1;
