@@ -107,6 +107,7 @@ describe('Admin plugin', function () {
     it('supports admin address plugin interface', async () => {
       const iface = new ethers.utils.Interface([
         'function initialize(address  _dao)',
+        'function proposalCount()',
         'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions)',
       ]);
 
