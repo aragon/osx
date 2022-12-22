@@ -92,7 +92,7 @@ describe('AddresslistVoting', function () {
     dao.grant(
       voting.address,
       signers[0].address,
-      ethers.utils.id('MODIFY_ADDRESSLIST_PERMISSION')
+      ethers.utils.id('UPDATE_ADDRESSES_PERMISSION')
     );
   });
 

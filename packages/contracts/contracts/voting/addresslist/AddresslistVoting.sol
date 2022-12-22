@@ -24,8 +24,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
-    bytes32 public constant MODIFY_ADDRESSLIST_PERMISSION_ID =
-        keccak256("MODIFY_ADDRESSLIST_PERMISSION");
+    bytes32 public constant UPDATE_ADDRESSES_PERMISSION_ID =
+        keccak256("UPDATE_ADDRESSES_PERMISSION");
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -57,7 +57,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     /// @dev This functin is used during the plugin initialization.
     function addAddresses(address[] calldata _members)
         external
-        auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
+        auth(UPDATE_ADDRESSES_PERMISSION_ID)
     {
         _addAddresses(_members);
 
@@ -68,7 +68,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members)
         external
-        auth(MODIFY_ADDRESSLIST_PERMISSION_ID)
+        auth(UPDATE_ADDRESSES_PERMISSION_ID)
     {
         _removeAddresses(_members);
 
