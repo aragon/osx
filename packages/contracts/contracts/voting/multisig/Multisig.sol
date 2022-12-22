@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.10;
 
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
@@ -16,7 +14,7 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUpgradeable {
+contract Multisig is PluginUUPSUpgradeable, Addresslist {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// @notice A container for proposal-related information.
@@ -143,13 +141,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId)
-        public
-        view
-        virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
 
