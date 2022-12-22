@@ -60,8 +60,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         auth(UPDATE_ADDRESSES_PERMISSION_ID)
     {
         _addAddresses(_members);
-
-        emit AddressesAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
@@ -71,8 +69,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         auth(UPDATE_ADDRESSES_PERMISSION_ID)
     {
         _removeAddresses(_members);
-
-        emit AddressesRemoved({members: _members});
     }
 
     /// @inheritdoc MajorityVotingBase

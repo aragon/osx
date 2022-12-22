@@ -76,6 +76,8 @@ abstract contract Addresslist is TimeHelpers {
             }
         }
         _addresslistLengthCheckpoints.push(_uncheckedAdd, _newAddresses.length);
+
+        emit AddressesAdded({members: _newAddresses});
     }
 
     /// @notice Internal function to remove existing addresses from the address list.
@@ -94,6 +96,8 @@ abstract contract Addresslist is TimeHelpers {
             }
         }
         _addresslistLengthCheckpoints.push(_uncheckedSub, _exitingAddresses.length);
+
+        emit AddressesRemoved({members: _exitingAddresses});
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
