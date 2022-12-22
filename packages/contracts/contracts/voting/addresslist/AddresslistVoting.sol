@@ -40,7 +40,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
         // add member addresses to the address list
         _addAddresses(_members);
-        emit AddressesAdded({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
