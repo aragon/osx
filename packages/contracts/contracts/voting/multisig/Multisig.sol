@@ -362,7 +362,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
 
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
-    function execute(uint256 _proposalId) public {
+    function execute(uint256 _proposalId) public virtual {
         if (!_canExecute(_proposalId)) {
             revert ProposalExecutionForbidden(_proposalId);
         }
