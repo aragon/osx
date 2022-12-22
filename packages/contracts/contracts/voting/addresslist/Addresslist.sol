@@ -20,7 +20,7 @@ abstract contract Addresslist is TimeHelpers {
     /// @notice The checkpointed history of the length of the address list.
     CheckpointsUpgradeable.History private _addresslistLengthCheckpoints;
 
-    /// @notice Thrown when the address list update is invalid, which can be cause by the addition of an existing member or removal of a non-existing member.
+    /// @notice Thrown when the address list update is invalid, which can be caused by the addition of an existing member or removal of a non-existing member.
     /// @param member The array of member addresses to be added.
     error InvalidAddresslistUpdate(address member);
 
