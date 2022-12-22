@@ -213,13 +213,13 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @notice Creates a new majority voting proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
-    /// @param _approve_ If true, the sender will approve the proposal.
+    /// @param _approveProposal If `true`, the sender will approve the proposal.
     /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @return proposalId The ID of the proposal.
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
-        bool _approve_,
+        bool _approveProposal,
         bool _tryExecution
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
@@ -247,7 +247,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
 
         _incrementProposalCount();
 
-        if (_approve_) {
+        if (_approveProposal) {
             approve(proposalId, _tryExecution);
         }
 
