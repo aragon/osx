@@ -124,11 +124,11 @@ export function addPlugin(daoId: string, plugin: Address): void {
   // TODO: rethink this once the market place is ready
   let contract = ERC165Contract.bind(plugin);
 
-  let TokenVotingInterfaceSuppoted = supportsInterface(
+  let TokenVotingInterfaceSupported = supportsInterface(
     contract,
     TOKEN_VOTING_INTERFACE
   );
-  let addresslistInterfaceSuppoted = supportsInterface(
+  let addresslistInterfaceSupported = supportsInterface(
     contract,
     ADDRESSLIST_VOTING_INTERFACE
   );
@@ -138,9 +138,9 @@ export function addPlugin(daoId: string, plugin: Address): void {
     MULTISIG_INTERFACE
   );
 
-  if (TokenVotingInterfaceSuppoted) {
+  if (TokenVotingInterfaceSupported) {
     createTokenVotingPlugin(plugin, daoId);
-  } else if (addresslistInterfaceSuppoted) {
+  } else if (addresslistInterfaceSupported) {
     createAddresslistVotingPlugin(plugin, daoId);
   } else if (adminInterfaceSupported) {
     createAdminPlugin(plugin, daoId);
@@ -149,8 +149,8 @@ export function addPlugin(daoId: string, plugin: Address): void {
   }
 
   if (
-    TokenVotingInterfaceSuppoted ||
-    addresslistInterfaceSuppoted ||
+    TokenVotingInterfaceSupported ||
+    addresslistInterfaceSupported ||
     adminInterfaceSupported ||
     multisigInterfaceSupported
   ) {
