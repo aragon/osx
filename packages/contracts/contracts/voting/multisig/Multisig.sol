@@ -386,7 +386,12 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
     /// @param _proposalId The ID of the proposal.
     /// @param _account The account to check.
     /// @return Returns `true` if the given account can approve on a certain proposal and `false` otherwise.
-    function _canApprove(uint256 _proposalId, address _account) internal view returns (bool) {
+    function _canApprove(uint256 _proposalId, address _account)
+        internal
+        view
+        virtual
+        returns (bool)
+    {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (!_isProposalOpen(proposal_)) {
