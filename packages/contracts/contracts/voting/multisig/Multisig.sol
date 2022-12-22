@@ -58,6 +58,7 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
             this.isListedAtBlock.selector ^
             this.addresslistLength.selector ^
             this.addresslistLengthAtBlock.selector ^
+            this.proposalCount.selector ^
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.

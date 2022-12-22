@@ -235,8 +235,7 @@ abstract contract MajorityVotingBase is
         return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
-    /// @notice Returns the proposal count determining the next proposal ID.
-    /// @return The proposal count.
+    /// @inheritdoc IMajorityVoting
     function proposalCount() public view virtual returns (uint256) {
         return proposalCounter.current();
     }
