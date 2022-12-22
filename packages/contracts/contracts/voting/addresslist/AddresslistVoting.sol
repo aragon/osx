@@ -172,7 +172,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        if (!_isVoteOpen(proposal_)) {
+        if (!_isProposalOpen(proposal_)) {
             // The proposal vote hasn't started or has already ended.
             return false;
         } else if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {

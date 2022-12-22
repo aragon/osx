@@ -353,7 +353,7 @@ abstract contract MajorityVotingBase is
     {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        open = _isVoteOpen(proposal_);
+        open = _isProposalOpen(proposal_);
         executed = proposal_.executed;
         parameters = proposal_.parameters;
         tally = proposal_.tally;
@@ -430,7 +430,7 @@ abstract contract MajorityVotingBase is
             return false;
         }
 
-        if (_isVoteOpen(proposal_)) {
+        if (_isProposalOpen(proposal_)) {
             // Early execution
             return
                 proposal_.parameters.votingMode == VotingMode.EarlyExecution &&
@@ -446,7 +446,7 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to check if a proposal vote is still open.
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
-    function _isVoteOpen(Proposal storage proposal_) internal view virtual returns (bool) {
+    function _isProposalOpen(Proposal storage proposal_) internal view virtual returns (bool) {
         uint64 currentTime = getTimestamp64();
 
         return
