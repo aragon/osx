@@ -316,6 +316,14 @@ contract Multisig is Initializable, ERC165Upgradeable, Addresslist, PluginUUPSUp
         actions = proposal_.actions;
     }
 
+    /// @notice Returns whether the account has approved the proposal. Note, that this does not check if the account is listed.
+    /// @param _proposalId The ID of the proposal.
+    /// @param _account The account address to be checked.
+    /// @return The vote option cast by a voter for a certain proposal.
+    function hasApproved(uint256 _proposalId, address _account) public view returns (bool) {
+        return proposals[_proposalId].approvers[_account];
+    }
+
     /// @notice Internal function to update the minimal approval parameter.
     /// @param _minApprovals The new minimal approval value.
     function _updateMinApprovals(uint256 _minApprovals) internal virtual {

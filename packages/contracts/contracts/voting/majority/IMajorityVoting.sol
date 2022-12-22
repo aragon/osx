@@ -96,8 +96,8 @@ interface IMajorityVoting {
     /// - was executed, or
     /// - the voter doesn't have voting powers.
     /// @param _proposalId The proposal Id.
-    /// @param _account The address of the voter to check.
-    /// @return bool Returns true if the voter is allowed to vote.
+    /// @param _account The account address to be checked.
+    /// @return bool Returns true if the account is allowed to vote.
     ///@dev The function assumes the queried proposal exists.
     function canVote(uint256 _proposalId, address _account) external view returns (bool);
 
@@ -121,8 +121,12 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal to be executed.
     function execute(uint256 _proposalId) external;
 
-    /// @notice Returns the vote option stored for a voter for a proposal vote.
+    /// @notice Returns whether the account has voted for the proposal.  Note, that this does not check if the account has voting power.
     /// @param _proposalId The ID of the proposal.
+    /// @param _account The account address to be checked.
     /// @return The vote option cast by a voter for a certain proposal.
-    function getVoteOption(uint256 _proposalId, address _voter) external view returns (VoteOption);
+    function getVoteOption(uint256 _proposalId, address _account)
+        external
+        view
+        returns (VoteOption);
 }
