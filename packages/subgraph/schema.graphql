@@ -256,7 +256,7 @@ type TokenVotingProposal implements Proposal @entity {
   yes: BigInt
   no: BigInt
   abstain: BigInt
-  voteCount: BigInt
+  castedVotingPower: BigInt
   totalVotingPower: BigInt!
 
   voters: [TokenVotingVote!]! @derivedFrom(field: "proposal")
@@ -321,7 +321,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   abstain: BigInt
   yes: BigInt
   no: BigInt
-  voteCount: BigInt
+  castedVotingPower: BigInt
   totalVotingPower: BigInt!
 
   voters: [AddresslistVotingVote!]! @derivedFrom(field: "proposal")

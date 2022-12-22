@@ -264,7 +264,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'AddresslistVotingProposal',
     proposal.id,
-    'voteCount',
+    'castedVotingPower',
     '1'
   );
 
@@ -316,7 +316,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'AddresslistVotingProposal',
     proposal.id,
-    'voteCount',
+    'castedVotingPower',
     '2'
   );
 

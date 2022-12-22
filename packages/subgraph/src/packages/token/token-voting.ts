@@ -63,6 +63,7 @@ export function _handleProposalCreated(
     proposalEntity.abstain = tally.abstain;
     proposalEntity.yes = tally.yes;
     proposalEntity.no = tally.no;
+
     proposalEntity.totalVotingPower = tally.totalVotingPower;
 
     // Actions
@@ -145,19 +146,19 @@ export function handleVoteCast(event: VoteCast): void {
       let abstain = tally.abstain;
       let yes = tally.yes;
       let no = tally.no;
-      let voteCount = yes.plus(no.plus(abstain));
+      let castedVotingPower = yes.plus(no.plus(abstain));
 
       proposalEntity.yes = yes;
       proposalEntity.no = no;
       proposalEntity.abstain = abstain;
-      proposalEntity.voteCount = voteCount;
+      proposalEntity.castedVotingPower = castedVotingPower;
 
       // check if the current vote results meet the conditions for the proposal to pass:
       // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
       // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
       // expect a number between 0 and 100
-      let currentParticipation = voteCount
+      let currentParticipation = castedVotingPower
         .times(BigInt.fromI32(100))
         .div(proposalEntity.totalVotingPower);
 
