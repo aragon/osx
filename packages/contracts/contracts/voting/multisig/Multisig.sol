@@ -261,7 +261,16 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
             revert ApprovalCastForbidden(_proposalId, approver);
         }
 
-        _approve(_proposalId, approver, _tryExecution);
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        proposal_.tally.approvals += 1;
+        proposal_.approvers[approver] = true;
+
+        emit Approved({proposalId: _proposalId, approver: approver});
+
+        if (_tryExecution && _canExecute(_proposalId)) {
+            _execute(_proposalId);
+        }
     }
 
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
@@ -331,26 +340,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         }
 
         minApprovals_ = _minApprovals;
-    }
-
-    /// @notice Internal function to approve and, optionally, execute the proposal.
-    /// @param _proposalId The ID of the proposal.
-    /// @param _tryExecution If `true`, execution is tried after the approval cast. The call does not revert if execution is not possible.
-    function _approve(
-        uint256 _proposalId,
-        address _approver,
-        bool _tryExecution
-    ) internal virtual {
-        Proposal storage proposal_ = proposals[_proposalId];
-
-        proposal_.tally.approvals += 1;
-        proposal_.approvers[_approver] = true;
-
-        emit Approved({proposalId: _proposalId, approver: _approver});
-
-        if (_tryExecution && _canExecute(_proposalId)) {
-            _execute(_proposalId);
-        }
     }
 
     /// @notice Executes a proposal.
