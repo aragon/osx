@@ -13,8 +13,8 @@ import {
   Action,
   MultisigPlugin,
   MultisigProposal,
-  MultisigVoter,
-  MultisigVoterProposal
+  MultisigApprover,
+  MultisigProposalApprover
 } from '../../../generated/schema';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -100,15 +100,17 @@ export function handleApproved(event: Approved): void {
   const memberId = pluginId + '_' + member;
 
   let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
-  let voterProposalId = member + '_' + proposalId;
-  let voterProposalEntity = MultisigVoterProposal.load(voterProposalId);
-  if (!voterProposalEntity) {
-    voterProposalEntity = new MultisigVoterProposal(voterProposalId);
-    voterProposalEntity.voter = memberId;
-    voterProposalEntity.proposal = proposalId;
+  let approverProposalId = member + '_' + proposalId;
+  let approverProposalEntity = MultisigProposalApprover.load(
+    approverProposalId
+  );
+  if (!approverProposalEntity) {
+    approverProposalEntity = new MultisigProposalApprover(approverProposalId);
+    approverProposalEntity.approver = memberId;
+    approverProposalEntity.proposal = proposalId;
   }
-  voterProposalEntity.createdAt = event.block.timestamp;
-  voterProposalEntity.save();
+  approverProposalEntity.createdAt = event.block.timestamp;
+  approverProposalEntity.save();
 
   // update count
   let proposalEntity = MultisigProposal.load(proposalId);
@@ -182,12 +184,12 @@ export function handleAddressesAdded(event: AddressesAdded): void {
     const pluginId = event.address.toHexString();
     const memberId = pluginId + '_' + member;
 
-    let voterEntity = MultisigVoter.load(memberId);
-    if (!voterEntity) {
-      voterEntity = new MultisigVoter(memberId);
-      voterEntity.address = member;
-      voterEntity.plugin = pluginId;
-      voterEntity.save();
+    let approverEntity = MultisigApprover.load(memberId);
+    if (!approverEntity) {
+      approverEntity = new MultisigApprover(memberId);
+      approverEntity.address = member;
+      approverEntity.plugin = pluginId;
+      approverEntity.save();
     }
   }
 }
@@ -199,9 +201,9 @@ export function handleAddressesRemoved(event: AddressesRemoved): void {
     const pluginId = event.address.toHexString();
     const memberId = pluginId + '_' + member;
 
-    const voterEntity = MultisigVoter.load(memberId);
-    if (voterEntity) {
-      store.remove('MultisigVoter', memberId);
+    const approverEntity = MultisigApprover.load(memberId);
+    if (approverEntity) {
+      store.remove('MultisigApprover', memberId);
     }
   }
 }

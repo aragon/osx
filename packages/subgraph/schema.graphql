@@ -380,26 +380,26 @@ type MultisigPlugin implements IPlugin @entity {
   minApprovals: BigInt
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
-  members: [MultisigVoter!]! @derivedFrom(field: "plugin")
+  members: [MultisigApprover!]! @derivedFrom(field: "plugin")
 }
 
-type MultisigVoter @entity {
+type MultisigApprover @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [MultisigVoterProposal!]! @derivedFrom(field: "voter")
+  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
   plugin: MultisigPlugin!
 }
 
-type MultisigVoterProposal @entity(immutable: true) {
-  "VoterProposal for Many-to-Many"
-  id: ID! # voter + proposal
-  voter: MultisigVoter!
+type MultisigProposalApprover @entity(immutable: true) {
+  "ApproverProposal for Many-to-Many"
+  id: ID! # approver + proposal
+  approver: MultisigApprover!
   proposal: MultisigProposal!
   createdAt: BigInt!
 }
 
 type MultisigProposal implements Proposal @entity {
-  id: ID! # package + proposalId
+  id: ID! # plugin + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: MultisigPlugin!
@@ -417,5 +417,5 @@ type MultisigProposal implements Proposal @entity {
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
-  voters: [MultisigVoterProposal!]! @derivedFrom(field: "proposal")
+  approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
 }
