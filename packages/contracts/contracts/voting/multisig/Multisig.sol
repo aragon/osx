@@ -135,7 +135,6 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         _addAddresses(_members);
         _updateMinApprovals(_minApprovals);
 
-        emit AddressesAdded({members: _members});
         emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
 
@@ -183,8 +182,6 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
     {
         _addAddresses(_members);
-
-        emit AddressesAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new addresslist length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
@@ -200,8 +197,6 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         if (newAddresslistLength < minApprovals_) {
             revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
         }
-
-        emit AddressesRemoved({members: _members});
     }
 
     /// @notice Creates a new majority voting proposal.
