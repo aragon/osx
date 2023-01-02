@@ -54,7 +54,7 @@ contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
 
     /// @notice Adds new members to the address list.
     /// @param _members The addresses of members to be added.
-    /// @dev This functin is used during the plugin initialization.
+    /// @dev This function is used during the plugin initialization.
     function addAddresses(address[] calldata _members)
         external
         auth(UPDATE_ADDRESSES_PERMISSION_ID)
