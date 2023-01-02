@@ -2007,6 +2007,10 @@ async function updateHelper(
   } else {
     expect(upgradedEvent).to.not.equal(undefined);
     expect(newImpl).to.equal(upgradedEvent.args.implementation);
+
+     // ensure that the logic address was also correctly modified on the proxy.
+     const proxyContract = await ethers.getContractAt("PluginUUPSUpgradeable", proxy);
+     expect(await proxyContract.getImplementationAddress()).to.equal(newImpl); 
   }
 
   return {updatedHelpers, permissions, initData};
