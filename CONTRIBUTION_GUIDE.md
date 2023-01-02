@@ -2,7 +2,7 @@
 
 ---
 
-Thank you for being interested in contributing to Aragon! 🎉  We’re excited to have you built this vision with us.
+Thank you for being interested in contributing to Aragon! 🎉  We’re excited to have you building this vision with us.
 
 There are many ways to contribute, from writing tutorials or blog posts and improving the documentation, to submitting bug reports, feature requests or writing code which can be incorporated into the project.
 
