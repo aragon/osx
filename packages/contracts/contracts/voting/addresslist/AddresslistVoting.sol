@@ -168,17 +168,21 @@ contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
     function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
+        // The proposal vote hasn't started or has already ended.
         if (!_isProposalOpen(proposal_)) {
-            // The proposal vote hasn't started or has already ended.
             return false;
-        } else if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
-            // The voter has no voting power.
+        }
+
+        // The voter has no voting power.
+        if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
             return false;
-        } else if (
+        }
+
+        // The voter has already voted but vote replacment is not allowed.
+        if (
             proposal_.voters[_account] != VoteOption.None &&
             proposal_.parameters.votingMode != VotingMode.VoteReplacement
         ) {
-            // The voter has already voted but vote replacment is not allowed.
             return false;
         }
 
