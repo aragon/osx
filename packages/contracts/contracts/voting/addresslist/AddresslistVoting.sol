@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.10;
 
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 import {IDAO} from "../../core/IDAO.sol";
@@ -14,6 +16,8 @@ import {Addresslist} from "./Addresslist.sol";
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
+    using SafeCast for uint256;
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
         this.addAddresses.selector ^
@@ -80,7 +84,7 @@ contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1;
+        uint64 snapshotBlock = block.number.toUint64() - 1;
 
         if (minProposerVotingPower() != 0 && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());

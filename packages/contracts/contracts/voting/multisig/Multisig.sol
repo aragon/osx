@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.10;
 
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 
@@ -17,6 +18,7 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeCast for uint256;
 
     /// @notice A container for proposal-related information.
     /// @param executed Wheter the proposal is executed or not.
@@ -211,7 +213,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         bool _approveProposal,
         bool _tryExecution
     ) external returns (uint256 proposalId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1;
+        uint64 snapshotBlock = block.number.toUint64() - 1;
 
         if (!isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());

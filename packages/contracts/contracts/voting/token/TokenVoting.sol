@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
@@ -13,6 +14,8 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is MajorityVotingBase {
+    using SafeCast for uint256;
+    
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
         this.getVotingToken.selector ^ this.initialize.selector;
@@ -61,7 +64,7 @@ contract TokenVoting is MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1;
+        uint64 snapshotBlock = block.number.toUint64() - 1;
 
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
