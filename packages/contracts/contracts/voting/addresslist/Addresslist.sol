@@ -35,33 +35,38 @@ abstract contract Addresslist {
     /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
     /// @return Whether the account is listed at the specified block number.
-    function isListedAtBlock(address _account, uint256 _blockNumber) public view returns (bool) {
+    function isListedAtBlock(address _account, uint256 _blockNumber)
+        public
+        view
+        virtual
+        returns (bool)
+    {
         return _addresslistCheckpoints[_account].getAtBlock(_blockNumber) == 1;
     }
 
     /// @notice Checks if an account is currently on the address list.
     /// @param _account The account address being checked.
     /// @return Whether the account is currently listed.
-    function isListed(address _account) public view returns (bool) {
+    function isListed(address _account) public view virtual returns (bool) {
         return _addresslistCheckpoints[_account].latest() == 1;
     }
 
     /// @notice Returns the length of the address list at a specific block number.
     /// @param _blockNumber The specific block to get the count from. If `0`, then the latest checkpoint value is returned.
     /// @return The address list length at the specified block number.
-    function addresslistLengthAtBlock(uint256 _blockNumber) public view returns (uint256) {
+    function addresslistLengthAtBlock(uint256 _blockNumber) public view virtual returns (uint256) {
         return _addresslistLengthCheckpoints.getAtBlock(_blockNumber);
     }
 
     /// @notice Returns the current length of the address list.
     /// @return The current address list length.
-    function addresslistLength() public view returns (uint256) {
+    function addresslistLength() public view virtual returns (uint256) {
         return _addresslistLengthCheckpoints.latest();
     }
 
     /// @notice Internal function to add new addresses to the address list.
     /// @param _newAddresses The new addresses to be added.
-    function _addAddresses(address[] calldata _newAddresses) internal {
+    function _addAddresses(address[] calldata _newAddresses) internal virtual {
         for (uint256 i; i < _newAddresses.length; ) {
             if (isListed(_newAddresses[i])) {
                 revert InvalidAddresslistUpdate(_newAddresses[i]);
@@ -81,7 +86,7 @@ abstract contract Addresslist {
 
     /// @notice Internal function to remove existing addresses from the address list.
     /// @param _exitingAddresses The existing addresses to be removed.
-    function _removeAddresses(address[] calldata _exitingAddresses) internal {
+    function _removeAddresses(address[] calldata _exitingAddresses) internal virtual {
         for (uint256 i; i < _exitingAddresses.length; ) {
             if (!isListed(_exitingAddresses[i])) {
                 revert InvalidAddresslistUpdate(_exitingAddresses[i]);
