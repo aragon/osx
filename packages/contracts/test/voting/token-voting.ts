@@ -18,6 +18,7 @@ import {
   MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {BigNumber} from 'ethers';
 
 const {deployMockContract} = waffle;
 
@@ -979,7 +980,7 @@ describe('TokenVoting', function () {
     });
   });
 
-  describe('ProposalParameterss for different use cases', async () => {
+  describe('Different configurations:', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
         votingSettings.minParticipation = pct16(25);
@@ -1106,6 +1107,89 @@ describe('TokenVoting', function () {
         );
         expect(await voting.canExecute(id)).to.equal(true);
 
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          votingSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+    });
+
+    describe('An edge case with >0% support and >=0% participation required in early execution mode', async () => {
+      beforeEach(async () => {
+        votingSettings.supportThreshold = pct16(0);
+        votingSettings.minParticipation = pct16(0);
+
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+
+        // set voting power to 100
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(
+          totalVotingPower
+        );
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+      });
+
+      it('does not execute with 0 votes', async () => {
+        // does not execute early
+        advanceIntoVoteTime(startDate, endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+        // worst case support can be calculated without throwing an error even if nobody has voted
+        expect(await voting.worstCaseSupport(id)).to.be.eq(
+          votingSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        // does not execute normally
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+
+        await expect(voting.support(id)).to.be.revertedWith(
+          customError('ZeroValueNotAllowed')
+        );
+        await expect(voting.canExecute(id)).to.be.revertedWith(
+          customError('ZeroValueNotAllowed')
+        );
+      });
+
+      it('executes if participation and support are met', async () => {
+        // executes early
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          votingSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+
+        // executes normally
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(

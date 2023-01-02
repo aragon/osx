@@ -6,6 +6,7 @@ import {DAO} from '../../typechain';
 import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {BigNumber} from 'ethers';
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
@@ -90,6 +91,43 @@ describe('Multisig', function () {
       await expect(
         multisig.initialize(dao.address, minApprovals, addresslist(5))
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('updateMinApprovals: ', async () => {
+    beforeEach(async () => {
+      minApprovals = 1;
+      await multisig.initialize(dao.address, minApprovals, addresslist(3));
+    });
+
+    it('reverts for a minimum approval of 0', async () => {
+      await expect(multisig.updateMinApprovals(0)).to.be.revertedWith(
+        customError('MinApprovalsOutOfBounds', 1, 0)
+      );
+    });
+
+    it('reverts if minimum approval is larger than the address list length', async () => {
+      let addresslistLength: BigNumber = await multisig.addresslistLength();
+      await expect(
+        multisig.updateMinApprovals(addresslistLength.add(1))
+      ).to.be.revertedWith(
+        customError(
+          'MinApprovalsOutOfBounds',
+          addresslistLength,
+          addresslistLength.add(1)
+        )
+      );
+    });
+
+    it('changes the minimum approval parameter', async () => {
+      let addresslistLength: BigNumber = await multisig.addresslistLength();
+
+      expect(await multisig.minApprovals()).to.not.eq(addresslistLength);
+
+      await expect(multisig.updateMinApprovals(addresslistLength)).to.not.be
+        .reverted;
+
+      expect(await multisig.minApprovals()).to.eq(addresslistLength);
     });
   });
 
@@ -295,6 +333,7 @@ describe('Multisig', function () {
     });
 
     it('reverts if minimal approval is not met yet', async () => {
+      expect(await multisig.approvals(id)).to.eq(0);
       await expect(multisig.execute(id)).to.be.revertedWith(
         customError('ProposalExecutionForbidden', id)
       );
