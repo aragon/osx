@@ -19,7 +19,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// @notice A container for proposal-related information.
-    /// @param executed Wheter the proposal is executed or not.
+    /// @param executed Whether the proposal is executed or not.
     /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
     /// @param tally The approve tally of the proposal.
     /// @param approvers The approves casted by the approvers.
