@@ -9,7 +9,6 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
@@ -55,7 +54,6 @@ abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
     ERC165Upgradeable,
-    TimeHelpers,
     PluginUUPSUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;

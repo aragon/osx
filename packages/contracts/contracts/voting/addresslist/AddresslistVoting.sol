@@ -2,10 +2,8 @@
 
 pragma solidity 0.8.10;
 
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
-import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
@@ -15,8 +13,8 @@ import {Addresslist} from "./Addresslist.sol";
 /// @author Aragon Association - 2021-2022.
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
-    using SafeCast for uint256;
+contract AddresslistVoting is Addresslist, MajorityVotingBase {
+    using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADDRESSLIST_VOTING_INTERFACE_ID =
