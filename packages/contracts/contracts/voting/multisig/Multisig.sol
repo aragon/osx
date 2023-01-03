@@ -80,7 +80,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     mapping(uint256 => Proposal) internal proposals;
 
     /// @notice The current plugin settings
-    PluginSettings pluginSettings;
+    PluginSettings public pluginSettings;
 
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
@@ -238,7 +238,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isListedAtBlock(_msgSender(), snapshotBlock) && pluginSettings.onlyListed) {
+        if (pluginSettings.onlyListed && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
