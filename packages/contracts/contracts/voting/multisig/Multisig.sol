@@ -147,13 +147,13 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Returns the proposal count determining the next proposal ID.
     /// @return The proposal count.
-    function proposalCount() public view virtual returns (uint256) {
+    function proposalCount() public view returns (uint256) {
         return proposalCounter.current();
     }
 
     /// @notice Returns the support threshold parameter stored in the voting settings.
     /// @return The support threshold parameter.
-    function minApprovals() public view virtual returns (uint256) {
+    function minApprovals() public view returns (uint256) {
         return minApprovals_;
     }
 
@@ -327,7 +327,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Internal function to update the minimal approval parameter.
     /// @param _minApprovals The new minimal approval value.
-    function _updateMinApprovals(uint256 _minApprovals) internal virtual {
+    function _updateMinApprovals(uint256 _minApprovals) internal {
         uint256 addresslistLength_ = addresslistLength();
 
         if (_minApprovals > addresslistLength_) {
@@ -343,7 +343,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
-    function execute(uint256 _proposalId) public virtual {
+    function execute(uint256 _proposalId) public {
         if (!_canExecute(_proposalId)) {
             revert ProposalExecutionForbidden(_proposalId);
         }
@@ -367,12 +367,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     /// @param _proposalId The ID of the proposal.
     /// @param _account The account to check.
     /// @return Returns `true` if the given account can approve on a certain proposal and `false` otherwise.
-    function _canApprove(uint256 _proposalId, address _account)
-        internal
-        view
-        virtual
-        returns (bool)
-    {
+    function _canApprove(uint256 _proposalId, address _account) internal view returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         if (!_isProposalOpen(proposal_)) {
@@ -396,7 +391,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @return Returns `true` if the proposal can be executed and `false` otherwise.
-    function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
+    function _canExecute(uint256 _proposalId) internal view returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // Verify that the proposal has not been executed already.
@@ -410,12 +405,12 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     /// @notice Internal function to check if a proposal vote is still open.
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
-    function _isProposalOpen(Proposal storage proposal_) internal view virtual returns (bool) {
+    function _isProposalOpen(Proposal storage proposal_) internal view returns (bool) {
         return proposal_.open && !proposal_.executed;
     }
 
     /// @notice Internal function to increments the proposal count by one.
-    function _incrementProposalCount() internal virtual {
+    function _incrementProposalCount() internal {
         return proposalCounter.increment();
     }
 
