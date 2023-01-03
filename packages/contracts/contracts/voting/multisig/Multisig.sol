@@ -259,7 +259,10 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
         Proposal storage proposal_ = proposals[_proposalId];
 
-        proposal_.tally.approvals += 1;
+        unchecked {
+            proposal_.tally.approvals += 1;
+        }
+
         proposal_.approvers[approver] = true;
 
         emit Approved({proposalId: _proposalId, approver: approver});
