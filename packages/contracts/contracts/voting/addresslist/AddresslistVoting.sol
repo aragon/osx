@@ -114,7 +114,9 @@ contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
 
         _incrementProposalCount();
 
-        vote(proposalId, _voteOption, _tryEarlyExecution);
+        if (_voteOption != VoteOption.None) {
+            vote(proposalId, _voteOption, _tryEarlyExecution);
+        }
 
         emit ProposalCreated({
             proposalId: proposalId,
