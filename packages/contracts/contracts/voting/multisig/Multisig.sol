@@ -64,7 +64,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
 
-    /// @notice The minimum approval parameter.
+    /// @notice The minimum approvals parameter.
     uint256 private minApprovals_;
 
     /// @notice The incremental ID for proposals and executions.
