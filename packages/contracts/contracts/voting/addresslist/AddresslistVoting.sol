@@ -80,7 +80,10 @@ contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1;
+        uint64 snapshotBlock;
+        unchecked {
+            snapshotBlock = getBlockNumber64() - 1;
+        }
 
         if (minProposerVotingPower() != 0 && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
