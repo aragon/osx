@@ -84,7 +84,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @notice A container for proposal-related information.
-    /// @param executed Wheter the proposal is executed or not.
+    /// @param executed Whether the proposal is executed or not.
     /// @param parameters The proposal parameters at the time of the proposal creation.
     /// @param tally The vote tally of the proposal.
     /// @param voters The votes casted by the voters.

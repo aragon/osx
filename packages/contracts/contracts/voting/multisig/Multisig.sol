@@ -43,7 +43,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice A container for the proposal tally.
     /// @param approvals The number of approvals casted.
-    /// @param addresslistLength The length of the .
+    /// @param addresslistLength The length of the addresslist.
     struct Tally {
         uint256 approvals;
         uint256 addresslistLength;

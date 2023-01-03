@@ -183,7 +183,7 @@ contract AddresslistVoting is TimeHelpers, Addresslist, MajorityVotingBase {
             return false;
         }
 
-        // The voter has already voted but vote replacment is not allowed.
+        // The voter has already voted but vote replacement is not allowed.
         if (
             proposal_.voters[_account] != VoteOption.None &&
             proposal_.parameters.votingMode != VotingMode.VoteReplacement
