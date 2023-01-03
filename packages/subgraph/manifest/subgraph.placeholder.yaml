@@ -219,6 +219,8 @@ templates:
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
+        - event: PluginSettingsUpdated(bool)
+          handler: handlePluginSettingsUpdated
     # admin (package)
   - name: Admin
     kind: ethereum/contract

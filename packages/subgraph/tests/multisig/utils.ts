@@ -8,7 +8,8 @@ import {
   ProposalExecuted,
   MinApprovalUpdated,
   AddressesAdded,
-  AddressesRemoved
+  AddressesRemoved,
+  PluginSettingsUpdated
 } from '../../generated/templates/Multisig/Multisig';
 import {
   ADDRESS_ONE,
@@ -170,6 +171,25 @@ export function createNewAddressesRemovedEvent(
   newAddressesRemovedEvent.parameters.push(usersParam);
 
   return newAddressesRemovedEvent;
+}
+
+export function createNewPluginSettingsUpdatedEvent(
+  onlyListed: boolean,
+  contractAddress: string
+): PluginSettingsUpdated {
+  let newProposalSettingsUpdatedEvent = changetype<PluginSettingsUpdated>(newMockEvent());
+
+  newProposalSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newProposalSettingsUpdatedEvent.parameters = [];
+
+  let onlyListedParam = new ethereum.EventParam(
+    'onlyListed',
+    ethereum.Value.fromBoolean(onlyListed)
+  );
+
+  newProposalSettingsUpdatedEvent.parameters.push(onlyListedParam);
+
+  return newProposalSettingsUpdatedEvent;
 }
 
 // calls

@@ -25,7 +25,7 @@ contract MultisigSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
-        return "(uint256 minApprovals, address[] members)";
+        return "(uint256 minApprovals, address[] members, tuple(bool onlyListed))";
     }
 
     /// @inheritdoc IPluginSetup
@@ -40,12 +40,22 @@ contract MultisigSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
-        (uint256 minApprovals, address[] memory members) = abi.decode(_data, (uint256, address[]));
+        (
+            uint256 minApprovals,
+            address[] memory members,
+            Multisig.PluginSettings memory pluginSettings
+        ) = abi.decode(_data, (uint256, address[], Multisig.PluginSettings));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             address(multisigBase),
-            abi.encodeWithSelector(Multisig.initialize.selector, dao, minApprovals, members)
+            abi.encodeWithSelector(
+                Multisig.initialize.selector,
+                dao,
+                minApprovals,
+                members,
+                pluginSettings
+            )
         );
 
         // Prepare helpers

@@ -49,6 +49,12 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         uint256 addresslistLength;
     }
 
+    /// @notice A container for the plugin settings
+    /// @param onlyListed Whether only members in the addresslist can create a proposal
+    struct PluginSettings {
+        bool onlyListed;
+    }
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MULTISIG_INTERFACE_ID =
         this.addAddresses.selector ^
@@ -72,6 +78,9 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
+
+    /// @notice The current plugin settings
+    PluginSettings pluginSettings;
 
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
@@ -120,6 +129,10 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
+    /// @notice Emitted when the plugin settings are set
+    /// @param onlyListed Whether only members in the addresslist can create a proposal
+    event PluginSettingsUpdated(bool onlyListed);
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -127,13 +140,16 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     function initialize(
         IDAO _dao,
         uint256 _minApprovals,
-        address[] calldata _members
+        address[] calldata _members,
+        PluginSettings calldata _pluginSettings
     ) public initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
         // add member addresses to the address list
         _addAddresses(_members);
         _updateMinApprovals(_minApprovals);
+
+        _updatePluginSettings(_pluginSettings);
 
         emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
@@ -199,6 +215,15 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         }
     }
 
+    /// @notice Updates the plugin settings
+    /// @param _pluginSettings The new settings
+    function updatePluginSettings(PluginSettings calldata _pluginSettings)
+        external
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
+    {
+        _updatePluginSettings(_pluginSettings);
+    }
+
     /// @notice Creates a new majority voting proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
@@ -213,7 +238,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
-        if (!isListedAtBlock(_msgSender(), snapshotBlock)) {
+        if (!isListedAtBlock(_msgSender(), snapshotBlock) && pluginSettings.onlyListed) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -414,6 +439,12 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     /// @notice Internal function to increments the proposal count by one.
     function _incrementProposalCount() internal virtual {
         return proposalCounter.increment();
+    }
+
+    /// @notice Internal function to update the plugin settings
+    function _updatePluginSettings(PluginSettings calldata _pluginSettings) internal {
+        pluginSettings = _pluginSettings;
+        emit PluginSettingsUpdated({onlyListed: _pluginSettings.onlyListed});
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

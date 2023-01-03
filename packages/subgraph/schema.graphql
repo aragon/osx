@@ -381,6 +381,9 @@ type MultisigPlugin implements IPlugin @entity {
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
   members: [MultisigApprover!]! @derivedFrom(field: "plugin")
+  
+  # plugin settings
+  onlyListed: Boolean!
 }
 
 type MultisigApprover @entity {
