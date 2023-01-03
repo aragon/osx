@@ -336,8 +336,8 @@ abstract contract MajorityVotingBase is
 
     /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.
-    /// @return open Wheter the proposal is open or not.
-    /// @return executed Wheter the proposal is executed or not.
+    /// @return open Whether the proposal is open or not.
+    /// @return executed Whether the proposal is executed or not.
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
