@@ -136,63 +136,35 @@ describe('Multisig', function () {
       minApprovals = 1;
       await multisig.initialize(dao.address, minApprovals, addresslist(1));
 
-      const block1 = await ethers.provider.getBlock('latest');
-      await ethers.provider.send('evm_mine', []);
-      expect(
-        await multisig.isListedAtBlock(signers[9].address, block1.number)
-      ).to.equal(false);
+      expect(await multisig.isListed(signers[9].address)).to.equal(false);
     });
 
     it('should add new members to the address list', async () => {
       minApprovals = 1;
       await multisig.initialize(dao.address, minApprovals, addresslist(1));
 
-      const block1 = await ethers.provider.getBlock('latest');
-      await ethers.provider.send('evm_mine', []);
-      expect(
-        await multisig.isListedAtBlock(signers[0].address, block1.number)
-      ).to.equal(true);
-      expect(
-        await multisig.isListedAtBlock(signers[1].address, block1.number)
-      ).to.equal(false);
+      expect(await multisig.isListed(signers[0].address)).to.equal(true);
+      expect(await multisig.isListed(signers[1].address)).to.equal(false);
 
       // add a new member
       await multisig.addAddresses([signers[1].address]);
 
-      const block2 = await ethers.provider.getBlock('latest');
-      await ethers.provider.send('evm_mine', []);
-      expect(
-        await multisig.isListedAtBlock(signers[0].address, block2.number)
-      ).to.equal(true);
-      expect(
-        await multisig.isListedAtBlock(signers[1].address, block2.number)
-      ).to.equal(true);
+      expect(await multisig.isListed(signers[0].address)).to.equal(true);
+      expect(await multisig.isListed(signers[1].address)).to.equal(true);
     });
 
     it('should remove users from the address list', async () => {
       minApprovals = 1;
       await multisig.initialize(dao.address, minApprovals, addresslist(2));
 
-      const block1 = await ethers.provider.getBlock('latest');
-      await ethers.provider.send('evm_mine', []);
-      expect(
-        await multisig.isListedAtBlock(signers[0].address, block1.number)
-      ).to.equal(true);
-      expect(
-        await multisig.isListedAtBlock(signers[1].address, block1.number)
-      ).to.equal(true);
+      expect(await multisig.isListed(signers[0].address)).to.equal(true);
+      expect(await multisig.isListed(signers[1].address)).to.equal(true);
 
       // remove an existing member
       await multisig.removeAddresses([signers[1].address]);
 
-      const block2 = await ethers.provider.getBlock('latest');
-      await ethers.provider.send('evm_mine', []);
-      expect(
-        await multisig.isListedAtBlock(signers[0].address, block2.number)
-      ).to.equal(true);
-      expect(
-        await multisig.isListedAtBlock(signers[1].address, block2.number)
-      ).to.equal(false);
+      expect(await multisig.isListed(signers[0].address)).to.equal(true);
+      expect(await multisig.isListed(signers[1].address)).to.equal(false);
     });
 
     it('reverts if the address list would become empty', async () => {
