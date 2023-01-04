@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {BigNumber} from 'ethers';
 
 import {DAO} from '../../typechain';
 import {
@@ -140,10 +141,19 @@ describe('Multisig', function () {
     });
 
     it('should not allow to set minApprovals larger than the address list length', async () => {
-      multisigSettings.minApprovals = 6;
+      let addresslistLength = (await multisig.addresslistLength()).toNumber();
+
+      multisigSettings.minApprovals = addresslistLength + 1;
+
       await expect(
         multisig.updateMultisigSettings(multisigSettings)
-      ).to.be.revertedWith(customError('MinApprovalsOutOfBounds', 5, 6));
+      ).to.be.revertedWith(
+        customError(
+          'MinApprovalsOutOfBounds',
+          addresslistLength,
+          multisigSettings.minApprovals
+        )
+      );
     });
 
     it('should not allow to set minApprovals would be set to 0', async () => {
