@@ -5,10 +5,10 @@ pragma solidity 0.8.10;
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
@@ -54,10 +54,10 @@ abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
     ERC165Upgradeable,
-    TimeHelpers,
     PluginUUPSUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeCastUpgradeable for uint256;
 
     /// @notice The different voting modes available.
     /// @param Standard In standard mode, early execution and vote replacement are disabled.
@@ -455,7 +455,7 @@ abstract contract MajorityVotingBase is
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
     function _isProposalOpen(Proposal storage proposal_) internal view virtual returns (bool) {
-        uint64 currentTime = getTimestamp64();
+        uint64 currentTime = block.timestamp.toUint64();
 
         return
             proposal_.parameters.startDate <= currentTime &&
@@ -522,8 +522,8 @@ abstract contract MajorityVotingBase is
         virtual
         returns (uint64 startDate, uint64 endDate)
     {
-        uint64 currentTimestamp = getTimestamp64();
-
+        uint64 currentTimestamp = block.timestamp.toUint64();
+        
         if (_start == 0) {
             startDate = currentTimestamp;
         } else {

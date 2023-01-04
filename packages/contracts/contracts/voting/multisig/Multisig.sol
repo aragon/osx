@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.10;
 
+import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
@@ -15,8 +15,9 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
+contract Multisig is PluginUUPSUpgradeable, Addresslist {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeCastUpgradeable for uint256;
 
     /// @notice A container for proposal-related information.
     /// @param executed Whether the proposal is executed or not.
@@ -211,7 +212,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         bool _approveProposal,
         bool _tryExecution
     ) external returns (uint256 proposalId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1;
+        uint64 snapshotBlock = block.number.toUint64() - 1;
 
         if (!isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
