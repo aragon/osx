@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+- Ignores `None` votes from addresslist voting and token voting
+
 ## 0.5.0-alpha
 
 On 2022-12-09 15:16:22
