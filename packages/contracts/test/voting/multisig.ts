@@ -389,7 +389,7 @@ describe('Multisig', function () {
       ).to.equal(id);
     });
 
-    describe.only('canApprove:', async () => {
+    describe('canApprove:', async () => {
       it('returns false if the proposal is already executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
@@ -457,8 +457,28 @@ describe('Multisig', function () {
           multisigSettings.minApprovals
         );
 
-        expect(await multisig.canExecute(id)).to.equal(true);
+        expect(await multisig.canExecute(id)).to.be.true;
         await expect(multisig.execute(id)).to.not.be.reverted;
+      });
+
+      it('executes if the minimum approval is met and can be called by an unlisted accounts', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+        await multisig.connect(signers[2]).approve(id, false);
+
+        const proposal = await multisig.getProposal(id);
+
+        expect(proposal.parameters.minApprovals).to.equal(
+          multisigSettings.minApprovals
+        );
+        expect(await multisig.approvals(id)).to.be.eq(
+          multisigSettings.minApprovals
+        );
+
+        expect(await multisig.canExecute(id)).to.be.true;
+        expect(await multisig.isListed(signers[9].address)).to.be.false; // signers[9] is not listed
+        await expect(multisig.connect(signers[9]).execute(id)).to.not.be
+          .reverted;
       });
 
       it('executes if the minimum approval is met when voting with the `tryExecution` option', async () => {
