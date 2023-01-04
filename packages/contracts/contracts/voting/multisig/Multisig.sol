@@ -416,7 +416,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         return proposalCounter.increment();
     }
 
-    /// @notice Internal function to update the plugin settings
+    /// @notice Internal function to update the plugin settings.
     function _updateMultisigSettings(MultisigSettings calldata _multisigSettings) internal {
         uint256 addresslistLength_ = addresslistLength();
 
