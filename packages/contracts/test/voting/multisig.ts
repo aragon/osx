@@ -84,7 +84,7 @@ describe('Multisig', function () {
     return addresses;
   }
 
-  describe('initialize: ', async () => {
+  describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
       await multisig.initialize(dao.address, minApprovals, addresslist(5));
 
@@ -94,7 +94,7 @@ describe('Multisig', function () {
     });
   });
 
-  describe('updateMinApprovals: ', async () => {
+  describe('updateMinApprovals:', async () => {
     beforeEach(async () => {
       minApprovals = 1;
       await multisig.initialize(dao.address, minApprovals, addresslist(3));
@@ -131,7 +131,7 @@ describe('Multisig', function () {
     });
   });
 
-  describe('Addresslisting members: ', async () => {
+  describe('Addresslisting members:', async () => {
     it('should return false, if a user is not listed', async () => {
       minApprovals = 1;
       await multisig.initialize(dao.address, minApprovals, addresslist(1));
@@ -229,21 +229,17 @@ describe('Multisig', function () {
     });
   });
 
-  describe('Proposal creation', async () => {
+  describe('createProposal:', async () => {
     beforeEach(async () => {
       minApprovals = 1;
+
+      await multisig.initialize(dao.address, minApprovals, addresslist(1)); // signers[0] is listed
     });
 
     it('reverts if the user is not allowed to create a proposal', async () => {
-      await multisig.initialize(
-        dao.address,
-        minApprovals,
-        addresslist(1) // signers[0] is listed
-      );
-
       await expect(
         multisig
-          .connect(signers[1])
+          .connect(signers[1]) // not listed
           .createProposal(dummyMetadata, [], false, false)
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[1].address)
@@ -257,8 +253,6 @@ describe('Multisig', function () {
     });
 
     it('creates a proposal successfully and does not approve if not specified', async () => {
-      await multisig.initialize(dao.address, minApprovals, addresslist(1));
-
       expect(
         await multisig.createProposal(dummyMetadata, dummyActions, false, false)
       )
@@ -286,8 +280,6 @@ describe('Multisig', function () {
     });
 
     it('creates a proposal successfully and approves if specified', async () => {
-      await multisig.initialize(dao.address, minApprovals, addresslist(1));
-
       expect(
         await multisig.createProposal(dummyMetadata, dummyActions, true, false)
       )
@@ -307,10 +299,10 @@ describe('Multisig', function () {
     });
   });
 
-  describe('Proposal + Execute:', async () => {
+  context('Approving and executing proposals', async () => {
     beforeEach(async () => {
+      minApprovals = 3;
       await multisig.initialize(dao.address, minApprovals, addresslist(10));
-
       expect(
         (
           await multisig.createProposal(
@@ -323,90 +315,93 @@ describe('Multisig', function () {
       ).to.equal(id);
     });
 
-    it('reverts when approving multiple times', async () => {
-      await multisig.approve(id, true);
+    describe('approve:', async () => {
+      it('reverts when approving multiple times', async () => {
+        await multisig.approve(id, true);
 
-      // Try to vote again
-      await expect(multisig.approve(id, true)).to.be.revertedWith(
-        customError('ApprovalCastForbidden', id, signers[0].address)
-      );
-    });
+        // Try to vote again
+        await expect(multisig.approve(id, true)).to.be.revertedWith(
+          customError('ApprovalCastForbidden', id, signers[0].address)
+        );
+      });
 
-    it('reverts if minimal approval is not met yet', async () => {
-      expect(await multisig.approvals(id)).to.eq(0);
-      await expect(multisig.execute(id)).to.be.revertedWith(
-        customError('ProposalExecutionForbidden', id)
-      );
-    });
+      it('reverts if minimal approval is not met yet', async () => {
+        expect(await multisig.approvals(id)).to.eq(0);
+        await expect(multisig.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
 
-    it('approves with the msg.sender address', async () => {
-      let tx = await multisig.connect(signers[0]).approve(id, false);
+      it('approves with the msg.sender address', async () => {
+        let tx = await multisig.connect(signers[0]).approve(id, false);
 
-      const event = await findEvent(tx, 'Approved');
-      expect(event.args.proposalId).to.eq(id);
-      expect(event.args.approver).to.not.eq(multisig.address);
-      expect(event.args.approver).to.eq(signers[0].address);
-
-      const prop = await multisig.getProposal(id);
-      expect(prop.tally.approvals).to.equal(1);
-    });
-
-    it('executes if the minimum approval is met', async () => {
-      await multisig.connect(signers[0]).approve(id, false);
-      await multisig.connect(signers[1]).approve(id, false);
-      await multisig.connect(signers[2]).approve(id, false);
-
-      const proposal = await multisig.getProposal(id);
-
-      expect(proposal.parameters.minApprovals).to.equal(minApprovals);
-      expect(await multisig.approvals(id)).to.be.eq(minApprovals);
-
-      expect(await multisig.canExecute(id)).to.equal(true);
-      await expect(multisig.execute(id)).to.not.be.reverted;
-    });
-
-    it('executes  if the minimum approval is met when voting with the `tryExecution` option', async () => {
-      await multisig.connect(signers[0]).approve(id, true);
-
-      expect(await multisig.canExecute(id)).to.equal(false);
-
-      // `tryExecution` is turned on but the vote is not decided yet
-      let tx = await multisig.connect(signers[1]).approve(id, true);
-      expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
-      expect(await multisig.canExecute(id)).to.equal(false);
-
-      // `tryExecution` is turned off and the vote is decided
-      tx = await multisig.connect(signers[2]).approve(id, false);
-      expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
-      // `tryEarlyExecution` is turned on and the vote is decided
-      tx = await multisig.connect(signers[3]).approve(id, true);
-      {
-        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
-
-        expect(event.args.actor).to.equal(multisig.address);
-        expect(event.args.callId).to.equal(id);
-        expect(event.args.actions.length).to.equal(1);
-        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
-        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
-        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
-        expect(event.args.execResults).to.deep.equal(['0x']);
+        const event = await findEvent(tx, 'Approved');
+        expect(event.args.proposalId).to.eq(id);
+        expect(event.args.approver).to.not.eq(multisig.address);
+        expect(event.args.approver).to.eq(signers[0].address);
 
         const prop = await multisig.getProposal(id);
-        expect(prop.executed).to.equal(true);
-      }
+        expect(prop.tally.approvals).to.equal(1);
+      });
+    });
+    describe('execute:', async () => {
+      it('executes if the minimum approval is met', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+        await multisig.connect(signers[2]).approve(id, false);
 
-      // check for the `ProposalExecuted` event in the voting contract
-      {
-        const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
-        expect(event.args.proposalId).to.equal(id);
-      }
+        const proposal = await multisig.getProposal(id);
 
-      // calling execute again should fail
-      await expect(multisig.execute(id)).to.be.revertedWith(
-        customError('ProposalExecutionForbidden', id)
-      );
+        expect(proposal.parameters.minApprovals).to.equal(minApprovals);
+        expect(await multisig.approvals(id)).to.be.eq(minApprovals);
+
+        expect(await multisig.canExecute(id)).to.equal(true);
+        await expect(multisig.execute(id)).to.not.be.reverted;
+      });
+
+      it('executes  if the minimum approval is met when voting with the `tryExecution` option', async () => {
+        await multisig.connect(signers[0]).approve(id, true);
+
+        expect(await multisig.canExecute(id)).to.equal(false);
+
+        // `tryExecution` is turned on but the vote is not decided yet
+        let tx = await multisig.connect(signers[1]).approve(id, true);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        expect(await multisig.canExecute(id)).to.equal(false);
+
+        // `tryExecution` is turned off and the vote is decided
+        tx = await multisig.connect(signers[2]).approve(id, false);
+        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+
+        // `tryEarlyExecution` is turned on and the vote is decided
+        tx = await multisig.connect(signers[3]).approve(id, true);
+        {
+          const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+          expect(event.args.actor).to.equal(multisig.address);
+          expect(event.args.callId).to.equal(id);
+          expect(event.args.actions.length).to.equal(1);
+          expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+          expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+          expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+          expect(event.args.execResults).to.deep.equal(['0x']);
+
+          const prop = await multisig.getProposal(id);
+          expect(prop.executed).to.equal(true);
+        }
+
+        // check for the `ProposalExecuted` event in the voting contract
+        {
+          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          expect(event.args.proposalId).to.equal(id);
+        }
+
+        // calling execute again should fail
+        await expect(multisig.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
     });
   });
 });
