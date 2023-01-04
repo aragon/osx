@@ -297,6 +297,16 @@ describe('Multisig', function () {
 
       expect(proposal.tally.approvals).to.equal(1);
     });
+
+    it('increases the proposal count', async () => {
+      expect(await multisig.proposalCount()).to.equal(0);
+
+      await multisig.createProposal(dummyMetadata, dummyActions, true, false);
+      expect(await multisig.proposalCount()).to.equal(1);
+
+      await multisig.createProposal(dummyMetadata, dummyActions, true, false);
+      expect(await multisig.proposalCount()).to.equal(2);
+    });
   });
 
   context('Approving and executing proposals', async () => {
