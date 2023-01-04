@@ -375,7 +375,7 @@ describe('Multisig', function () {
   context('Approving and executing proposals', async () => {
     beforeEach(async () => {
       multisigSettings.minApprovals = 3;
-      await multisig.initialize(dao.address, addresslist(10), multisigSettings);
+      await multisig.initialize(dao.address, addresslist(5), multisigSettings);
 
       expect(
         (
@@ -387,6 +387,29 @@ describe('Multisig', function () {
           )
         ).value
       ).to.equal(id);
+    });
+
+    describe.only('canApprove:', async () => {
+      it('returns false if the proposal is already executed', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+        expect(await multisig.connect(signers[2]).approve(id, true))
+          .to.emit(dao.address, 'Executed')
+          .to.emit(multisig.address, 'ProposalExecuted');
+
+        expect(await multisig.canApprove(id, signers[3].address)).to.be.false;
+      });
+
+      it('returns false if the approver is not listed', async () => {
+        expect(await multisig.isListed(signers[9].address)).to.be.false;
+
+        expect(await multisig.canApprove(id, signers[9].address)).to.be.false;
+      });
+
+      it('returns false if the approver has already approved', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        expect(await multisig.canApprove(id, signers[0].address)).to.be.false;
+      });
     });
 
     describe('approve:', async () => {
