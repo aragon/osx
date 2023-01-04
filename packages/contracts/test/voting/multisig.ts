@@ -390,7 +390,7 @@ describe('Multisig', function () {
     });
 
     describe('canApprove:', async () => {
-      it('returns false if the proposal is already executed', async () => {
+      it('returns `false` if the proposal is already executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
         expect(await multisig.connect(signers[2]).approve(id, true))
@@ -400,15 +400,19 @@ describe('Multisig', function () {
         expect(await multisig.canApprove(id, signers[3].address)).to.be.false;
       });
 
-      it('returns false if the approver is not listed', async () => {
+      it('returns `false` if the approver is not listed', async () => {
         expect(await multisig.isListed(signers[9].address)).to.be.false;
 
         expect(await multisig.canApprove(id, signers[9].address)).to.be.false;
       });
 
-      it('returns false if the approver has already approved', async () => {
+      it('returns `false` if the approver has already approved', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         expect(await multisig.canApprove(id, signers[0].address)).to.be.false;
+      });
+
+      it('returns `false` if the approver is listed', async () => {
+        expect(await multisig.canApprove(id, signers[0].address)).to.be.true;
       });
     });
 
