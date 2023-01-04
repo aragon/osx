@@ -92,6 +92,24 @@ describe('Multisig', function () {
         multisig.initialize(dao.address, minApprovals, addresslist(5))
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
+
+    it('adds the initial addresses to the address list', async () => {
+      expect(await multisig.addresslistLength()).to.equal(0);
+
+      minApprovals = 2;
+      await multisig.initialize(dao.address, minApprovals, addresslist(2));
+      expect(await multisig.addresslistLength()).to.equal(2);
+      expect(await multisig.isListed(signers[0].address)).to.equal(true);
+      expect(await multisig.isListed(signers[1].address)).to.equal(true);
+    });
+
+    it('sets the `minApprovals` value', async () => {
+      expect(await multisig.minApprovals()).to.equal(0);
+
+      minApprovals = 2;
+      await multisig.initialize(dao.address, minApprovals, addresslist(2));
+      expect(await multisig.minApprovals()).to.equal(minApprovals);
+    });
   });
 
   describe('updateMinApprovals:', async () => {
