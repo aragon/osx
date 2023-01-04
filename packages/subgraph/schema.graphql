@@ -377,12 +377,12 @@ type MultisigPlugin implements IPlugin @entity {
   "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
-  minApprovals: BigInt
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
   members: [MultisigApprover!]! @derivedFrom(field: "plugin")
   
-  # plugin settings
+  # multisig settings
+  minApprovals: BigInt
   onlyListed: Boolean!
 }
 

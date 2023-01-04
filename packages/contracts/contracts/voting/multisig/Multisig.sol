@@ -128,7 +128,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @notice Emitted when the plugin settings are set.
     /// @param onlyListed Whether only listed addresses can create a proposal.
     /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
-    event MultisigSettingsUpdated(bool onlyListed, uint256 minApprovals);
+    event MultisigSettingsUpdated(bool onlyListed, uint256 indexed minApprovals);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

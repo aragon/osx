@@ -6,9 +6,8 @@ import {
   handleApproved,
   handleProposalExecuted,
   handleAddressesRemoved,
-  handleMinApprovalUpdated,
   _handleProposalCreated,
-  handlePluginSettingsUpdated
+  handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
 import {MultisigPlugin, MultisigApprover} from '../../generated/schema';
 import {
@@ -33,11 +32,10 @@ import {
   createNewProposalExecutedEvent,
   createNewAddressesRemovedEvent,
   createNewProposalCreatedEvent,
-  createNewMinApprovalUpdatedEvent,
   getProposalCountCall,
   createMultisigProposalEntityState,
   createGetProposalCall,
-  createNewPluginSettingsUpdatedEvent
+  createNewMultisigSettingsUpdatedEvent
 } from './utils';
 
 let proposalId = '0';
@@ -287,27 +285,6 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handleVotingSettingsUpdated) mappings with mock event', () => {
-  // create state
-  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
-  let multisigPlugin = new MultisigPlugin(entityID);
-  multisigPlugin.minApprovals = BigInt.fromString(THREE);
-  multisigPlugin.onlyListed = false;
-  multisigPlugin.save();
-
-  // create event
-  let event = createNewMinApprovalUpdatedEvent(THREE, CONTRACT_ADDRESS);
-
-  // handle event
-  handleMinApprovalUpdated(event);
-
-  // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'id', entityID);
-  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', THREE);
-
-  clearStore();
-});
-
 test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -388,31 +365,36 @@ test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handlePluginSettingsUpdated) mappings with mock event', () => {
+test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', () => {
   // create state
   let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
   let multisigPlugin = new MultisigPlugin(entityID);
   multisigPlugin.onlyListed = false;
-  multisigPlugin.save()
+  multisigPlugin.save();
 
   // create event
-  let event = createNewPluginSettingsUpdatedEvent(true, CONTRACT_ADDRESS);
+  let event = createNewMultisigSettingsUpdatedEvent(
+    true,
+    '5',
+    CONTRACT_ADDRESS
+  );
 
   // handle event
-  handlePluginSettingsUpdated(event);
+  handleMultisigSettingsUpdated(event);
 
   // checks
   assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'true');
+  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '5');
 
   // create event
-  event = createNewPluginSettingsUpdatedEvent(false, CONTRACT_ADDRESS);
+  event = createNewMultisigSettingsUpdatedEvent(false, '4', CONTRACT_ADDRESS);
 
   // handle event
-  handlePluginSettingsUpdated(event);
+  handleMultisigSettingsUpdated(event);
 
   // checks
   assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'false');
+  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '4');
 
   clearStore();
-  
-})
+});
