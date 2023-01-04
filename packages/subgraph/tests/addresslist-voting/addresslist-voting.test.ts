@@ -355,7 +355,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
   let event = createNewVoteCastEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
-    '0', // yes
+    '0', // none
     '1', // votingPower
     CONTRACT_ADDRESS
   );
