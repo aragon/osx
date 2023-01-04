@@ -387,7 +387,7 @@ type MultisigPlugin implements IPlugin @entity {
 }
 
 type MultisigApprover @entity {
-  id: ID! # address
+  id: ID! # plugin_address + member_address
   address: String # address as string to facilitate filtering by address on the UI
   proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
   plugin: MultisigPlugin!

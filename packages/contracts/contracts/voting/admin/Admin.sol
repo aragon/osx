@@ -62,7 +62,7 @@ contract Admin is PluginCloneable {
     }
 
     /// @notice Creates and executes a new proposal.
-    /// @param _metadata The metadata of the proposal..
+    /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions to be executed.
     function executeProposal(bytes calldata _metadata, IDAO.Action[] calldata _actions)
         external

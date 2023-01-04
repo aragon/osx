@@ -19,7 +19,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     /// @notice A container for proposal-related information.
-    /// @param executed Wheter the proposal is executed or not.
+    /// @param executed Whether the proposal is executed or not.
     /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
     /// @param tally The approve tally of the proposal.
     /// @param approvers The approves casted by the approvers.
@@ -43,7 +43,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice A container for the proposal tally.
     /// @param approvals The number of approvals casted.
-    /// @param addresslistLength The length of the .
+    /// @param addresslistLength The length of the addresslist.
     struct Tally {
         uint256 approvals;
         uint256 addresslistLength;
@@ -70,7 +70,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
 
-    /// @notice The minimum approval parameter.
+    /// @notice The minimum approvals parameter.
     uint256 private minApprovals_;
 
     /// @notice The incremental ID for proposals and executions.
@@ -200,7 +200,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
         _addAddresses(_members);
     }
 
-    /// @notice Removes existing members from the address list. Previously, it checks if the new addresslist length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
+    /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
     function removeAddresses(address[] calldata _members)
         external
@@ -208,7 +208,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     {
         _removeAddresses(_members);
 
-        // Check if the new addresslist has become shorter than the current minimum number of approvals required.
+        // Check if the new address list has become shorter than the current minimum number of approvals required.
         uint256 newAddresslistLength = addresslistLength();
         if (newAddresslistLength < minApprovals_) {
             revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
@@ -284,7 +284,10 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
         Proposal storage proposal_ = proposals[_proposalId];
 
-        proposal_.tally.approvals += 1;
+        unchecked {
+            proposal_.tally.approvals += 1;
+        }
+
         proposal_.approvers[approver] = true;
 
         emit Approved({proposalId: _proposalId, approver: approver});
@@ -314,8 +317,8 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.
-    /// @return open Wheter the proposal is open or not.
-    /// @return executed Wheter the proposal is executed or not.
+    /// @return open Whether the proposal is open or not.
+    /// @return executed Whether the proposal is executed or not.
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
