@@ -55,7 +55,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param minApprovals The minimum approvals parameter.
     struct MultisigSettings {
         bool onlyListed;
-        uint256 minApprovals;
+        uint16 minApprovals;
     }
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -158,18 +158,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @return The proposal count.
     function proposalCount() public view returns (uint256) {
         return proposalCounter.current();
-    }
-
-    /// @notice Returns the support threshold parameter stored in the voting settings.
-    /// @return The support threshold parameter.
-    function minApprovals() public view virtual returns (uint256) {
-        return multisigSettings.minApprovals;
-    }
-
-    /// @notice Whether only listed addresses can create a proposal.
-    /// @return true if only listed members are allowed to create a proposal.
-    function onlyListed() public view virtual returns (bool) {
-        return multisigSettings.onlyListed;
     }
 
     /// @notice Returns the number of approvals,

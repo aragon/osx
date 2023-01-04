@@ -418,7 +418,9 @@ describe('Multisig', function () {
         onlyListed,
         minApprovals,
       });
-      expect(await multisig.minApprovals()).to.be.eq(minApprovals);
+      expect((await multisig.multisigSettings()).minApprovals).to.be.eq(
+        minApprovals
+      );
     });
 
     it('should set the right onlyListed during initialization', async () => {
@@ -426,7 +428,9 @@ describe('Multisig', function () {
         onlyListed,
         minApprovals,
       });
-      expect(await multisig.onlyListed()).to.be.eq(onlyListed);
+      expect((await multisig.multisigSettings()).onlyListed).to.be.eq(
+        onlyListed
+      );
     });
 
     it('should emit MultisigSettingsUpdated during initialization', async () => {

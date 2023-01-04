@@ -25,7 +25,7 @@ contract MultisigSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
-        return "(address[] members, tuple(bool onlyListed, uint256 minApprovals))";
+        return "(address[] members, tuple(bool onlyListed, uint16 minApprovals))";
     }
 
     /// @inheritdoc IPluginSetup
