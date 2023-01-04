@@ -22,8 +22,13 @@ contract PermissionManager is Initializable {
     /// @notice A special address encoding if a permission is allowed.
     address internal constant ALLOW_FLAG = address(2);
 
+    struct PermissionSetting {
+        uint counter;
+        mapping(address => bool) tracker;
+    }
+
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
-    mapping(bytes32 => address) internal permissionsHashed;
+    mapping(bytes32 => PermissionSetting) internal permissionsHashed;
 
     /// @notice A mapping storing frozen permissions as hashes (i.e., `frozenPermissionHash(where, permissionId)`) and their status (`true` = frozen (immutable), `false` = not frozen (mutable)).
     mapping(bytes32 => bool) internal frozenPermissionsHashed;
@@ -196,7 +201,40 @@ contract PermissionManager is Initializable {
     /// @notice Processes bulk items on the permission manager.
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
-    function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
+    function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items, address pluginAddress) external {
+        bool revertOnDuplication;
+        // Means this was called from DAO Through actions which means it's not PSP
+        if(msg.sender == address(this)) {
+            // hence we should revert on duplication not to increase counter !
+            // we only should increase/decrease counter for plugin install/uninstall/update
+            // The reason is if we increase in this case, malicious member would make it succeed and even when
+            // one plugin is installed only, it would reach counter 2 which means uninstalling the plugin wouldn't revoke
+            // the permission.
+            revertOnDuplication = true;
+        } else {
+            // It's called externally (could be PSP or some extra )
+            // if it's some extra, that extra would need to have 
+            //    * ROOT_PERMISSION on dao or (If this, we increase/decrease)
+            //    * ROOT_PERMISSION on every single item.where(If this, we increase decrease as this is mostly the same as above)
+            // We increase here, because if this was called externally, we trust it as proposal was not needed and
+            // that user wouldn't try to fuck it up. But it could still possible that that trustworthy user
+            // tries to pass the same permission which would get us in the same spot as in the above with counter 2.
+            // Hence here we do the following. we trust supportsInterface to not be hacked as even if this succeeds maliciously,
+            // caller would still need to be ROOT below. So, trust worthy user wouldn't try to hack it.
+            // `call` is needed to detect and not fail if supportsInterface not exists.
+            if(msg.sender.supportsInterface(psp)){
+                revertOnDuplication = false;
+            }else {
+                revertOnDuplication = true;
+            }
+        }
+
+        // The only problem remaining is if the same plugin's install and update contains the same permission in which case
+        // counter would end up 2. Solution could be bulkOnMultiTarget receives the identifier(plugin setup or address)
+        // and in that case, PSP would tell us it tries to grant again 2nd time for the same plugin setup hence wouldn't increase
+        // counter.
+
+
         for (uint256 i = 0; i < items.length; ) {
             PermissionLib.ItemMultiTarget memory item = items[i];
 
@@ -204,9 +242,9 @@ contract PermissionManager is Initializable {
             _auth(item.where, ROOT_PERMISSION_ID);
 
             if (item.operation == PermissionLib.Operation.Grant) {
-                _grant(item.where, item.who, item.permissionId);
+                _grant(item.where, item.who, item.permissionId, revertOnDuplication);
             } else if (item.operation == PermissionLib.Operation.Revoke) {
-                _revoke(item.where, item.who, item.permissionId);
+                _revoke(item.where, item.who, item.permissionId, revertOnDuplication);
             } else if (item.operation == PermissionLib.Operation.Freeze) {
                 _freeze(item.where, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.GrantWithOracle) {
@@ -214,7 +252,8 @@ contract PermissionManager is Initializable {
                     item.where,
                     item.who,
                     item.permissionId,
-                    IPermissionOracle(item.oracle)
+                    IPermissionOracle(item.oracle),
+                    revertOnDuplication
                 );
             }
 
@@ -277,7 +316,9 @@ contract PermissionManager is Initializable {
         address _where,
         address _who,
         bytes32 _permissionId,
-        IPermissionOracle _oracle
+        IPermissionOracle _oracle,
+        bool revertOnDuplication,
+        address pluginAddress
     ) internal {
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
             revert AnyAddressDisallowedForWhoAndWhere();
@@ -299,16 +340,29 @@ contract PermissionManager is Initializable {
         }
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
+        return permHash;
+        
 
-        if (permissionsHashed[permHash] != UNSET_FLAG) {
-            revert PermissionAlreadyGranted({
-                where: _where,
-                who: _who,
-                permissionId: _permissionId
-            });
-        }
-        permissionsHashed[permHash] = address(_oracle);
+        // if (permissionsHashed[permHash].counter == 0) {
+        //     permissionsHashed[permHash].counter = 1;
+        //     if(pluginAddress != address(0)) {
+        //         permissionsHashed[permHash].callers[pluginAddress] = true;
+        //     }
+        // } else {
+        //     if(revertOnDuplication) {
+        //         revert PermissionAlreadyGranted({
+        //             where: _where,
+        //             who: _who,
+        //             permissionId: _permissionId
+        //         });
+        //     }
 
+        //     if(!permissionsHashed[permHash].callers[pluginAddress]) {
+        //         permissionsHashed[permHash].counter++;
+        //         permissionsHashed[permHash].callers[pluginAddress] = true;
+        //     }
+        // }        
+``
         emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
     }
 
