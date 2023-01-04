@@ -78,7 +78,7 @@ contract Multisig is TimeHelpers, PluginUUPSUpgradeable, Addresslist {
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice The current plugin settings
+    /// @notice The current plugin settings.
     MultisigSettings public multisigSettings;
 
     /// @notice Thrown when a sender is not allowed to create a proposal.
