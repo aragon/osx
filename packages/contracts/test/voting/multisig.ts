@@ -3,10 +3,15 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO} from '../../typechain';
-import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {
+  findEvent,
+  DAO_EVENTS,
+  VOTING_EVENTS,
+  MULTISIG_EVENTS,
+} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-import {BigNumber} from 'ethers';
+import {MultisigSettings} from '../test-utils/voting';
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
@@ -14,8 +19,7 @@ describe('Multisig', function () {
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
-
-  let minApprovals: number;
+  let multisigSettings: MultisigSettings;
 
   const id = 0;
 
@@ -53,7 +57,10 @@ describe('Multisig', function () {
   });
 
   beforeEach(async () => {
-    minApprovals = 3;
+    multisigSettings = {
+      minApprovals: 3,
+      onlyListed: true,
+    };
 
     const MultisigFactory = new ethers.ContractFactory(
       mergedAbi,
@@ -86,80 +93,84 @@ describe('Multisig', function () {
 
   describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await multisig.initialize(dao.address, minApprovals, addresslist(5));
+      await multisig.initialize(dao.address, addresslist(5), multisigSettings);
 
       await expect(
-        multisig.initialize(dao.address, minApprovals, addresslist(5))
+        multisig.initialize(dao.address, addresslist(5), multisigSettings)
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
 
     it('adds the initial addresses to the address list', async () => {
       expect(await multisig.addresslistLength()).to.equal(0);
 
-      minApprovals = 2;
-      await multisig.initialize(dao.address, minApprovals, addresslist(2));
+      multisigSettings.minApprovals = 2;
+      await multisig.initialize(dao.address, addresslist(2), multisigSettings);
+
       expect(await multisig.addresslistLength()).to.equal(2);
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
     });
 
-    it('sets the `minApprovals` value', async () => {
-      expect(await multisig.minApprovals()).to.equal(0);
+    it('should set the `minApprovals`', async () => {
+      await multisig.initialize(dao.address, addresslist(5), multisigSettings);
+      expect((await multisig.multisigSettings()).minApprovals).to.be.eq(
+        multisigSettings.minApprovals
+      );
+    });
 
-      minApprovals = 2;
-      await multisig.initialize(dao.address, minApprovals, addresslist(2));
-      expect(await multisig.minApprovals()).to.equal(minApprovals);
+    it('should set `onlyListed`', async () => {
+      await multisig.initialize(dao.address, addresslist(5), multisigSettings);
+      expect((await multisig.multisigSettings()).onlyListed).to.be.eq(
+        multisigSettings.onlyListed
+      );
+    });
+
+    it('should emit `MultisigSettingsUpdated` during initialization', async () => {
+      await expect(
+        multisig.initialize(dao.address, addresslist(5), multisigSettings)
+      )
+        .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
+        .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
     });
   });
 
-  describe('updateMinApprovals:', async () => {
+  describe('updateMultisigSettings:', async () => {
     beforeEach(async () => {
-      minApprovals = 1;
-      await multisig.initialize(dao.address, minApprovals, addresslist(3));
+      await multisig.initialize(dao.address, addresslist(5), multisigSettings);
     });
 
-    it('reverts for a minimum approval of 0', async () => {
-      await expect(multisig.updateMinApprovals(0)).to.be.revertedWith(
-        customError('MinApprovalsOutOfBounds', 1, 0)
-      );
-    });
-
-    it('reverts if minimum approval is larger than the address list length', async () => {
-      let addresslistLength: BigNumber = await multisig.addresslistLength();
+    it('should not allow to set minApprovals larger than the address list length', async () => {
+      multisigSettings.minApprovals = 6;
       await expect(
-        multisig.updateMinApprovals(addresslistLength.add(1))
-      ).to.be.revertedWith(
-        customError(
-          'MinApprovalsOutOfBounds',
-          addresslistLength,
-          addresslistLength.add(1)
-        )
-      );
+        multisig.updateMultisigSettings(multisigSettings)
+      ).to.be.revertedWith(customError('MinApprovalsOutOfBounds', 5, 6));
     });
 
-    it('changes the minimum approval parameter', async () => {
-      let addresslistLength: BigNumber = await multisig.addresslistLength();
+    it('should not allow to set minApprovals would be set to 0', async () => {
+      multisigSettings.minApprovals = 0;
+      await expect(
+        multisig.updateMultisigSettings(multisigSettings)
+      ).to.be.revertedWith(customError('MinApprovalsOutOfBounds', 1, 0));
+    });
 
-      expect(await multisig.minApprovals()).to.not.eq(addresslistLength);
-
-      await expect(multisig.updateMinApprovals(addresslistLength)).to.not.be
-        .reverted;
-
-      expect(await multisig.minApprovals()).to.eq(addresslistLength);
+    it('should emit MultisigSettingsUpdated when updateMutlsigSettings gets called', async () => {
+      await expect(multisig.updateMultisigSettings(multisigSettings))
+        .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
+        .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
     });
   });
 
   describe('Addresslisting members:', async () => {
     it('should return false, if a user is not listed', async () => {
-      minApprovals = 1;
-      await multisig.initialize(dao.address, minApprovals, addresslist(1));
+      multisigSettings.minApprovals = 1;
+      await multisig.initialize(dao.address, addresslist(1), multisigSettings);
 
       expect(await multisig.isListed(signers[9].address)).to.equal(false);
     });
 
     it('should add new members to the address list', async () => {
-      minApprovals = 1;
-      await multisig.initialize(dao.address, minApprovals, addresslist(1));
+      multisigSettings.minApprovals = 1;
+      await multisig.initialize(dao.address, addresslist(1), multisigSettings);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(false);
@@ -172,8 +183,8 @@ describe('Multisig', function () {
     });
 
     it('should remove users from the address list', async () => {
-      minApprovals = 1;
-      await multisig.initialize(dao.address, minApprovals, addresslist(2));
+      multisigSettings.minApprovals = 1;
+      await multisig.initialize(dao.address, addresslist(2), multisigSettings);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
@@ -186,8 +197,8 @@ describe('Multisig', function () {
     });
 
     it('reverts if the address list would become empty', async () => {
-      minApprovals = 1;
-      await multisig.initialize(dao.address, minApprovals, addresslist(1));
+      multisigSettings.minApprovals = 1;
+      await multisig.initialize(dao.address, addresslist(1), multisigSettings);
 
       await expect(
         multisig.removeAddresses([signers[0].address])
@@ -195,14 +206,14 @@ describe('Multisig', function () {
         customError(
           'MinApprovalsOutOfBounds',
           (await multisig.addresslistLength()) - 1,
-          minApprovals
+          multisigSettings.minApprovals
         )
       );
     });
 
     it('reverts if the address list would become shorter than the current minimum approval parameter requires', async () => {
-      minApprovals = 2;
-      await multisig.initialize(dao.address, minApprovals, addresslist(3));
+      multisigSettings.minApprovals = 2;
+      await multisig.initialize(dao.address, addresslist(3), multisigSettings);
 
       await expect(multisig.removeAddresses([signers[1].address])).to.not.be
         .reverted;
@@ -213,7 +224,7 @@ describe('Multisig', function () {
         customError(
           'MinApprovalsOutOfBounds',
           (await multisig.addresslistLength()) - 1,
-          minApprovals
+          multisigSettings.minApprovals
         )
       );
     });
@@ -221,88 +232,141 @@ describe('Multisig', function () {
 
   describe('createProposal:', async () => {
     beforeEach(async () => {
-      minApprovals = 1;
-
-      await multisig.initialize(dao.address, minApprovals, addresslist(1)); // signers[0] is listed
+      multisigSettings.minApprovals = 1;
     });
 
-    it('reverts if the user is not allowed to create a proposal', async () => {
-      await expect(
-        multisig
-          .connect(signers[1]) // not listed
-          .createProposal(dummyMetadata, [], false, false)
-      ).to.be.revertedWith(
-        customError('ProposalCreationForbidden', signers[1].address)
-      );
+    context('`onlyListed` is set to `false`:', async () => {
+      beforeEach(async () => {
+        multisigSettings.onlyListed = false;
 
-      await expect(
-        multisig
-          .connect(signers[0])
-          .createProposal(dummyMetadata, [], false, false)
-      ).to.not.be.reverted;
+        await multisig.initialize(
+          dao.address,
+          addresslist(1), // signers[0] is listed
+          multisigSettings
+        );
+      });
+
+      it('creates a proposal when unlisted accounts are allowed', async () => {
+        expect(
+          await multisig
+            .connect(signers[1])
+            .createProposal(dummyMetadata, dummyActions, false, false)
+        )
+          .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
+          .withArgs(id, signers[0].address, dummyMetadata);
+      });
     });
 
-    it('creates a proposal successfully and does not approve if not specified', async () => {
-      expect(
-        await multisig.createProposal(dummyMetadata, dummyActions, false, false)
-      )
-        .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata);
+    context('`onlyListed` is set to `true`:', async () => {
+      beforeEach(async () => {
+        multisigSettings.onlyListed = true;
 
-      const block = await ethers.provider.getBlock('latest');
+        await multisig.initialize(
+          dao.address,
+          addresslist(1), // signers[0] is listed
+          multisigSettings
+        );
+      });
 
-      const proposal = await multisig.getProposal(id);
-      expect(proposal.executed).to.equal(false);
-      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
-      expect(proposal.parameters.minApprovals).to.equal(minApprovals);
+      it('reverts if the user is not on the list and only listed accounts can create proposals', async () => {
+        await expect(
+          multisig
+            .connect(signers[1]) // not listed
+            .createProposal(dummyMetadata, [], false, false)
+        ).to.be.revertedWith(
+          customError('ProposalCreationForbidden', signers[1].address)
+        );
 
-      expect(proposal.tally.approvals).to.equal(0);
-      expect(proposal.tally.addresslistLength).to.equal(1);
+        await expect(
+          multisig
+            .connect(signers[0])
+            .createProposal(dummyMetadata, [], false, false)
+        ).to.not.be.reverted;
+      });
 
-      expect(await multisig.canApprove(id, signers[0].address)).to.equal(true);
-      expect(await multisig.canApprove(id, signers[1].address)).to.equal(false);
-      expect(await multisig.canApprove(1, signers[0].address)).to.equal(false);
+      it('creates a proposal successfully and does not approve if not specified', async () => {
+        expect(
+          await multisig.createProposal(
+            dummyMetadata,
+            dummyActions,
+            false,
+            false
+          )
+        )
+          .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
+          .withArgs(id, signers[0].address, dummyMetadata);
 
-      expect(proposal.actions.length).to.equal(1);
-      expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
-      expect(proposal.actions[0].value).to.equal(dummyActions[0].value);
-      expect(proposal.actions[0].data).to.equal(dummyActions[0].data);
-    });
+        const block = await ethers.provider.getBlock('latest');
 
-    it('creates a proposal successfully and approves if specified', async () => {
-      expect(
-        await multisig.createProposal(dummyMetadata, dummyActions, true, false)
-      )
-        .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata)
-        .to.emit(multisig, 'Approved')
-        .withArgs(id, signers[0].address);
+        const proposal = await multisig.getProposal(id);
+        expect(proposal.executed).to.equal(false);
+        expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
+        expect(proposal.parameters.minApprovals).to.equal(
+          multisigSettings.minApprovals
+        );
 
-      const block = await ethers.provider.getBlock('latest');
-      const proposal = await multisig.getProposal(id);
-      expect(proposal.open).to.equal(true);
-      expect(proposal.executed).to.equal(false);
-      expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
-      expect(proposal.parameters.minApprovals).to.equal(minApprovals);
+        expect(proposal.tally.approvals).to.equal(0);
+        expect(proposal.tally.addresslistLength).to.equal(1);
 
-      expect(proposal.tally.approvals).to.equal(1);
-    });
+        expect(await multisig.canApprove(id, signers[0].address)).to.equal(
+          true
+        );
+        expect(await multisig.canApprove(id, signers[1].address)).to.equal(
+          false
+        );
+        expect(await multisig.canApprove(1, signers[0].address)).to.equal(
+          false
+        );
 
-    it('increases the proposal count', async () => {
-      expect(await multisig.proposalCount()).to.equal(0);
+        expect(proposal.actions.length).to.equal(1);
+        expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
+        expect(proposal.actions[0].value).to.equal(dummyActions[0].value);
+        expect(proposal.actions[0].data).to.equal(dummyActions[0].data);
+      });
 
-      await multisig.createProposal(dummyMetadata, dummyActions, true, false);
-      expect(await multisig.proposalCount()).to.equal(1);
+      it('creates a proposal successfully and approves if specified', async () => {
+        expect(
+          await multisig.createProposal(
+            dummyMetadata,
+            dummyActions,
+            true,
+            false
+          )
+        )
+          .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
+          .withArgs(id, signers[0].address, dummyMetadata)
+          .to.emit(multisig, 'Approved')
+          .withArgs(id, signers[0].address);
 
-      await multisig.createProposal(dummyMetadata, dummyActions, true, false);
-      expect(await multisig.proposalCount()).to.equal(2);
+        const block = await ethers.provider.getBlock('latest');
+        const proposal = await multisig.getProposal(id);
+        expect(proposal.open).to.equal(true);
+        expect(proposal.executed).to.equal(false);
+        expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
+        expect(proposal.parameters.minApprovals).to.equal(
+          multisigSettings.minApprovals
+        );
+
+        expect(proposal.tally.approvals).to.equal(1);
+      });
+
+      it('increases the proposal count', async () => {
+        expect(await multisig.proposalCount()).to.equal(0);
+
+        await multisig.createProposal(dummyMetadata, dummyActions, true, false);
+        expect(await multisig.proposalCount()).to.equal(1);
+
+        await multisig.createProposal(dummyMetadata, dummyActions, true, false);
+        expect(await multisig.proposalCount()).to.equal(2);
+      });
     });
   });
 
   context('Approving and executing proposals', async () => {
     beforeEach(async () => {
-      minApprovals = 3;
-      await multisig.initialize(dao.address, minApprovals, addresslist(10));
+      multisigSettings.minApprovals = 3;
+      await multisig.initialize(dao.address, addresslist(10), multisigSettings);
+
       expect(
         (
           await multisig.createProposal(
@@ -353,8 +417,12 @@ describe('Multisig', function () {
 
         const proposal = await multisig.getProposal(id);
 
-        expect(proposal.parameters.minApprovals).to.equal(minApprovals);
-        expect(await multisig.approvals(id)).to.be.eq(minApprovals);
+        expect(proposal.parameters.minApprovals).to.equal(
+          multisigSettings.minApprovals
+        );
+        expect(await multisig.approvals(id)).to.be.eq(
+          multisigSettings.minApprovals
+        );
 
         expect(await multisig.canExecute(id)).to.equal(true);
         await expect(multisig.execute(id)).to.not.be.reverted;

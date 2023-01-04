@@ -6,8 +6,8 @@ import {
   handleApproved,
   handleProposalExecuted,
   handleAddressesRemoved,
-  handleMinApprovalUpdated,
-  _handleProposalCreated
+  _handleProposalCreated,
+  handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
 import {MultisigPlugin, MultisigApprover} from '../../generated/schema';
 import {
@@ -32,10 +32,10 @@ import {
   createNewProposalExecutedEvent,
   createNewAddressesRemovedEvent,
   createNewProposalCreatedEvent,
-  createNewMinApprovalUpdatedEvent,
   getProposalCountCall,
   createMultisigProposalEntityState,
-  createGetProposalCall
+  createGetProposalCall,
+  createNewMultisigSettingsUpdatedEvent
 } from './utils';
 
 let proposalId = '0';
@@ -47,6 +47,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     Address.fromString(CONTRACT_ADDRESS).toHexString()
   );
   multisigPlugin.minApprovals = BigInt.fromString(THREE);
+  multisigPlugin.onlyListed = false;
   multisigPlugin.save();
 
   // create calls
@@ -284,26 +285,6 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handleVotingSettingsUpdated) mappings with mock event', () => {
-  // create state
-  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
-  let multisigPlugin = new MultisigPlugin(entityID);
-  multisigPlugin.minApprovals = BigInt.fromString(THREE);
-  multisigPlugin.save();
-
-  // create event
-  let event = createNewMinApprovalUpdatedEvent(THREE, CONTRACT_ADDRESS);
-
-  // handle event
-  handleMinApprovalUpdated(event);
-
-  // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'id', entityID);
-  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', THREE);
-
-  clearStore();
-});
-
 test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
@@ -339,7 +320,7 @@ test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (AddressesRemoved) mappings with mock event', () => {
+test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
@@ -380,6 +361,40 @@ test('Run Multisig (AddressesRemoved) mappings with mock event', () => {
   // checks
   assert.fieldEquals('MultisigApprover', memberId1, 'id', memberId1);
   assert.notInStore('MultisigApprover', memberId2);
+
+  clearStore();
+});
+
+test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', () => {
+  // create state
+  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
+  let multisigPlugin = new MultisigPlugin(entityID);
+  multisigPlugin.onlyListed = false;
+  multisigPlugin.save();
+
+  // create event
+  let event = createNewMultisigSettingsUpdatedEvent(
+    true,
+    '5',
+    CONTRACT_ADDRESS
+  );
+
+  // handle event
+  handleMultisigSettingsUpdated(event);
+
+  // checks
+  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'true');
+  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '5');
+
+  // create event
+  event = createNewMultisigSettingsUpdatedEvent(false, '4', CONTRACT_ADDRESS);
+
+  // handle event
+  handleMultisigSettingsUpdated(event);
+
+  // checks
+  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'false');
+  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '4');
 
   clearStore();
 });

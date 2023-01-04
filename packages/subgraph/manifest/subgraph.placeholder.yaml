@@ -213,12 +213,12 @@ templates:
           handler: handleAddressesRemoved
         - event: Approved(indexed uint256,indexed address)
           handler: handleApproved
-        - event: MinApprovalUpdated(uint256)
-          handler: handleMinApprovalUpdated
         - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
+        - event: MultisigSettingsUpdated(bool,indexed uint256)
+          handler: handleMultisigSettingsUpdated
     # admin (package)
   - name: Admin
     kind: ethereum/contract

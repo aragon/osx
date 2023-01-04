@@ -1,4 +1,4 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
+import { dataSource, store } from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -7,7 +7,7 @@ import {
   AddressesRemoved,
   Multisig,
   Approved,
-  MinApprovalUpdated
+  MultisigSettingsUpdated
 } from '../../../generated/templates/Multisig/Multisig';
 import {
   Action,
@@ -169,14 +169,6 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleMinApprovalUpdated(event: MinApprovalUpdated): void {
-  let packageEntity = MultisigPlugin.load(event.address.toHexString());
-  if (packageEntity) {
-    packageEntity.minApprovals = event.params.minApprovals;
-    packageEntity.save();
-  }
-}
-
 export function handleAddressesAdded(event: AddressesAdded): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
@@ -205,5 +197,14 @@ export function handleAddressesRemoved(event: AddressesRemoved): void {
     if (approverEntity) {
       store.remove('MultisigApprover', memberId);
     }
+  }
+}
+
+export function handleMultisigSettingsUpdated(event: MultisigSettingsUpdated): void {
+  let packageEntity = MultisigPlugin.load(event.address.toHexString());
+  if (packageEntity) {
+    packageEntity.onlyListed = event.params.onlyListed;
+    packageEntity.minApprovals = event.params.minApprovals;
+    packageEntity.save();
   }
 }

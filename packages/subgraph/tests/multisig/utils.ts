@@ -6,9 +6,9 @@ import {
   ProposalCreated,
   Approved,
   ProposalExecuted,
-  MinApprovalUpdated,
   AddressesAdded,
-  AddressesRemoved
+  AddressesRemoved,
+  MultisigSettingsUpdated
 } from '../../generated/templates/Multisig/Multisig';
 import {
   ADDRESS_ONE,
@@ -19,7 +19,6 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  ONE,
   TWO
 } from '../constants';
 
@@ -113,27 +112,6 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewMinApprovalUpdatedEvent(
-  minApprovals: string,
-  contractAddress: string
-): MinApprovalUpdated {
-  let newMinApprovalUpdatedEvent = changetype<MinApprovalUpdated>(
-    newMockEvent()
-  );
-
-  newMinApprovalUpdatedEvent.address = Address.fromString(contractAddress);
-  newMinApprovalUpdatedEvent.parameters = [];
-
-  let minApprovalsParam = new ethereum.EventParam(
-    'minApprovals',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(minApprovals))
-  );
-
-  newMinApprovalUpdatedEvent.parameters.push(minApprovalsParam);
-
-  return newMinApprovalUpdatedEvent;
-}
-
 export function createNewAddressesAddedEvent(
   addresses: Address[],
   contractAddress: string
@@ -170,6 +148,34 @@ export function createNewAddressesRemovedEvent(
   newAddressesRemovedEvent.parameters.push(usersParam);
 
   return newAddressesRemovedEvent;
+}
+
+export function createNewMultisigSettingsUpdatedEvent(
+  onlyListed: boolean,
+  minApprovals: string,
+  contractAddress: string
+): MultisigSettingsUpdated {
+  let newProposalSettingsUpdatedEvent = changetype<MultisigSettingsUpdated>(
+    newMockEvent()
+  );
+
+  newProposalSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newProposalSettingsUpdatedEvent.parameters = [];
+
+  let onlyListedParam = new ethereum.EventParam(
+    'onlyListed',
+    ethereum.Value.fromBoolean(onlyListed)
+  );
+
+  let minApprovalsParam = new ethereum.EventParam(
+    'minApprovals',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minApprovals))
+  );
+
+  newProposalSettingsUpdatedEvent.parameters.push(onlyListedParam);
+  newProposalSettingsUpdatedEvent.parameters.push(minApprovalsParam);
+
+  return newProposalSettingsUpdatedEvent;
 }
 
 // calls
