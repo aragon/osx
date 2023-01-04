@@ -354,6 +354,7 @@ describe('Multisig', function () {
         expect(prop.tally.approvals).to.equal(1);
       });
     });
+
     describe('execute:', async () => {
       it('executes if the minimum approval is met', async () => {
         await multisig.connect(signers[0]).approve(id, false);
@@ -369,7 +370,7 @@ describe('Multisig', function () {
         await expect(multisig.execute(id)).to.not.be.reverted;
       });
 
-      it('executes  if the minimum approval is met when voting with the `tryExecution` option', async () => {
+      it('executes if the minimum approval is met when voting with the `tryExecution` option', async () => {
         await multisig.connect(signers[0]).approve(id, true);
 
         expect(await multisig.canExecute(id)).to.equal(false);
