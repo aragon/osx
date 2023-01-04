@@ -11,8 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the `Multisig` plugin and setup contract.
 - Added a `VotingMode` enumeration to specify if the vote should be conducted in `Standard`, `EarlyExecution`, or `VoteReplacement` mode.
-- Added `Admin` plugin.
+- Added the `Admin` plugin and setup contract.
 - Added NFT compatibility by using OpenZepplin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
 - Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
   to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
@@ -23,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Abstracted the `Addresslist` to be used by `AddresslistVoting` and `Multisig`.
+- Changed the order of the `_voteOption` and `_tryEarlyExecution` in `MajorityVoting`.
 - The plugin-wide settings are now stored in a `private` `VotingSettings` struct and made available through getters.
 - Structured the `getProposal` return data by adding a `struct ProposalParameters` and `struct Tally`.
 - Bounded `minDuration` between one hour and one year and prevent integer overflows during the start date calculation (HAL-03, HAL-04).

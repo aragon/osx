@@ -1,22 +1,21 @@
-import {BigInt, dataSource, store} from '@graphprotocol/graph-ts';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 import {
-  VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  VotingSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
-  AddresslistVoting
-} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
+  Multisig,
+  Approved,
+  MinApprovalUpdated
+} from '../../../generated/templates/Multisig/Multisig';
 import {
   Action,
-  AddresslistVotingPlugin,
-  AddresslistVotingProposal,
-  AddresslistVotingVoter,
-  AddresslistVotingVote
+  MultisigPlugin,
+  MultisigProposal,
+  MultisigApprover,
+  MultisigProposalApprover
 } from '../../../generated/schema';
-import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -34,7 +33,7 @@ export function _handleProposalCreated(
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
-  let proposalEntity = new AddresslistVotingProposal(proposalId);
+  let proposalEntity = new MultisigProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
   proposalEntity.proposalId = event.params.proposalId;
@@ -43,7 +42,7 @@ export function _handleProposalCreated(
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
 
-  let contract = AddresslistVoting.bind(event.address);
+  let contract = Multisig.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
@@ -52,19 +51,13 @@ export function _handleProposalCreated(
 
     // ProposalParameters
     let parameters = vote.value.value2;
-    proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
-    proposalEntity.supportThreshold = parameters.supportThreshold;
-    proposalEntity.minParticipation = parameters.minParticipation;
-    proposalEntity.startDate = parameters.startDate;
-    proposalEntity.endDate = parameters.endDate;
+    proposalEntity.minApprovals = parameters.minApprovals;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // Tally
     let tally = vote.value.value3;
-    proposalEntity.abstain = tally.abstain;
-    proposalEntity.yes = tally.yes;
-    proposalEntity.no = tally.no;
-    proposalEntity.totalVotingPower = tally.totalVotingPower;
+    proposalEntity.approvals = tally.approvals;
+    proposalEntity.addresslistLength = tally.addresslistLength;
 
     // Actions
     let actions = vote.value.value4;
@@ -91,7 +84,7 @@ export function _handleProposalCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
+  let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
@@ -101,66 +94,42 @@ export function _handleProposalCreated(
   }
 }
 
-export function handleVoteCast(event: VoteCast): void {
-  const member = event.params.voter.toHexString();
+export function handleApproved(event: Approved): void {
+  const member = event.params.approver.toHexString();
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
-  let voterVoteId = member + '_' + proposalId;
 
-  let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
-  if (!voterProposalVoteEntity) {
-    voterProposalVoteEntity = new AddresslistVotingVote(voterVoteId);
-    voterProposalVoteEntity.voter = memberId;
-    voterProposalVoteEntity.proposal = proposalId;
-  }
-  voterProposalVoteEntity.voteOption = VOTER_OPTIONS.get(
-    event.params.voteOption
+  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let approverProposalId = member + '_' + proposalId;
+  let approverProposalEntity = MultisigProposalApprover.load(
+    approverProposalId
   );
-  voterProposalVoteEntity.votingPower = event.params.votingPower;
-  voterProposalVoteEntity.createdAt = event.block.timestamp;
-  voterProposalVoteEntity.save();
+  if (!approverProposalEntity) {
+    approverProposalEntity = new MultisigProposalApprover(approverProposalId);
+    approverProposalEntity.approver = memberId;
+    approverProposalEntity.proposal = proposalId;
+  }
+  approverProposalEntity.createdAt = event.block.timestamp;
+  approverProposalEntity.save();
 
   // update count
-  let proposalEntity = AddresslistVotingProposal.load(proposalId);
+  let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = AddresslistVoting.bind(event.address);
+    let contract = Multisig.bind(event.address);
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
+      let parameters = proposal.value.value2;
       let tally = proposal.value.value3;
 
-      let abstain = tally.abstain;
-      let yes = tally.yes;
-      let no = tally.no;
-      let castedVotingPower = yes.plus(no.plus(abstain));
+      proposalEntity.approvals = tally.approvals;
 
-      proposalEntity.yes = yes;
-      proposalEntity.no = no;
-      proposalEntity.abstain = abstain;
-      proposalEntity.castedVotingPower = castedVotingPower;
-
-      // check if the current vote results meet the conditions for the proposal to pass:
-      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
-      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
-
-      // expect a number between 0 and 100
-      let currentParticipation = castedVotingPower
-        .times(BigInt.fromI32(100))
-        .div(proposalEntity.totalVotingPower);
-
-      let worstCaseSupport = yes
-        .times(BigInt.fromI32(100))
-        .div(proposalEntity.totalVotingPower.minus(abstain));
+      // check if the current total number of approvals meet the conditions for the proposal to pass:
+      // - approvals >= minApprovals
+      let executable = tally.approvals.ge(parameters.minApprovals);
 
       // set the executable param
-      proposalEntity.executable =
-        worstCaseSupport.gt(
-          proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
-        ) &&
-        currentParticipation.ge(
-          proposalEntity.minParticipation.div(BigInt.fromString(TEN_POWER_16))
-        );
+      proposalEntity.executable = executable;
       proposalEntity.save();
     }
   }
@@ -169,8 +138,9 @@ export function handleVoteCast(event: VoteCast): void {
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-  let proposalEntity = AddresslistVotingProposal.load(proposalId);
+  let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
+    proposalEntity.open = false;
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
@@ -178,7 +148,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 
   // update actions
-  let contract = AddresslistVoting.bind(event.address);
+  let contract = Multisig.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);
   if (!proposal.reverted) {
     let actions = proposal.value.value4;
@@ -199,47 +169,41 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleVotingSettingsUpdated(
-  event: VotingSettingsUpdated
-): void {
-  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
+export function handleMinApprovalUpdated(event: MinApprovalUpdated): void {
+  let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.votingMode = VOTING_MODES.get(event.params.votingMode);
-    packageEntity.supportThreshold = event.params.supportThreshold;
-    packageEntity.minParticipation = event.params.minParticipation;
-    packageEntity.minDuration = event.params.minDuration;
-    packageEntity.minProposerVotingPower = event.params.minProposerVotingPower;
+    packageEntity.minApprovals = event.params.minApprovals;
     packageEntity.save();
   }
 }
 
 export function handleAddressesAdded(event: AddressesAdded): void {
-  let members = event.params.members;
+  const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
     const pluginId = event.address.toHexString();
     const memberId = pluginId + '_' + member;
 
-    let voterEntity = AddresslistVotingVoter.load(memberId);
-    if (!voterEntity) {
-      voterEntity = new AddresslistVotingVoter(memberId);
-      voterEntity.address = member;
-      voterEntity.plugin = pluginId;
-      voterEntity.save();
+    let approverEntity = MultisigApprover.load(memberId);
+    if (!approverEntity) {
+      approverEntity = new MultisigApprover(memberId);
+      approverEntity.address = member;
+      approverEntity.plugin = pluginId;
+      approverEntity.save();
     }
   }
 }
 
 export function handleAddressesRemoved(event: AddressesRemoved): void {
-  let members = event.params.members;
+  const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
     const pluginId = event.address.toHexString();
     const memberId = pluginId + '_' + member;
 
-    let voterEntity = AddresslistVotingVoter.load(memberId);
-    if (voterEntity) {
-      store.remove('AddresslistVotingVoter', memberId);
+    const approverEntity = MultisigApprover.load(memberId);
+    if (approverEntity) {
+      store.remove('MultisigApprover', memberId);
     }
   }
 }

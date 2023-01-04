@@ -9,25 +9,26 @@ import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.
-/// @notice The admin address governance plugin giving execution permission on the DAO to a single address
+/// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
 contract Admin is PluginCloneable {
     using Counters for Counters.Counter;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =
-        this.initialize.selector ^ this.executeProposal.selector;
+        this.initialize.selector ^ this.proposalCount.selector ^ this.executeProposal.selector;
 
     /// @notice The ID of the permission required to call the `executeProposal` function.
     bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID =
         keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
     /// @notice The incremental ID for proposals and executions.
-    Counters.Counter internal proposalId;
+    Counters.Counter private proposalCounter;
 
     /// @notice Emitted when a proposal is created.
-    /// @param proposalId  The ID of the proposal.
+    /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the proposal.
-    /// @param metadata The IPFS hash pointing to the proposal metadata.
+    /// @param metadata The metadata of the proposal.
+    /// @param actions The actions that will be executed if the proposal passes.
     event ProposalCreated(
         uint256 indexed proposalId,
         address indexed creator,
@@ -36,8 +37,8 @@ contract Admin is PluginCloneable {
     );
 
     /// @notice Emitted when a proposal is executed.
-    /// @param proposalId  The ID of the proposal.
-    /// @param execResults The bytes array resulting from the vote execution in the associated DAO.
+    /// @param proposalId The ID of the proposal.
+    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
     /// @notice Initializes the contract.
@@ -48,32 +49,36 @@ contract Admin is PluginCloneable {
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
         return interfaceId == ADMIN_ADDRESS_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
+    /// @notice Returns the proposal count determining the next proposal ID.
+    /// @return The proposal count.
+    function proposalCount() public view returns (uint256) {
+        return proposalCounter.current();
+    }
+
     /// @notice Creates and executes a new proposal.
-    /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
+    /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions to be executed.
-    function executeProposal(bytes calldata _proposalMetadata, IDAO.Action[] calldata _actions)
+    function executeProposal(bytes calldata _metadata, IDAO.Action[] calldata _actions)
         external
         auth(EXECUTE_PROPOSAL_PERMISSION_ID)
-        returns (bytes[] memory)
     {
-        // Increment proposalId
-        proposalId.increment();
+        uint256 proposalId = proposalCounter.current();
+        proposalCounter.increment();
 
-        // Execute
-        bytes[] memory execResults = dao.execute(proposalId.current(), _actions);
+        bytes[] memory execResults = dao.execute(proposalId, _actions);
 
-        // Create proposal
-        emit ProposalCreated(proposalId.current(), _msgSender(), _proposalMetadata, _actions);
-
-        // Execute proposal
-        emit ProposalExecuted(proposalId.current(), execResults);
-
-        return execResults;
+        emit ProposalCreated({
+            proposalId: proposalId,
+            creator: _msgSender(),
+            metadata: _metadata,
+            actions: _actions
+        });
+        emit ProposalExecuted({proposalId: proposalId, execResults: execResults});
     }
 }

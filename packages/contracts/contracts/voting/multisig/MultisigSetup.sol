@@ -6,28 +6,26 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
-import {AddresslistVoting} from "./AddresslistVoting.sol";
+import {Multisig} from "./Multisig.sol";
 
-/// @title AddresslistVotingSetup
+/// @title MultisigSetup
 /// @author Aragon Association - 2022
-/// @notice The setup contract of the `AddresslistVoting` plugin.
-contract AddresslistVotingSetup is PluginSetup {
-    /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
-    AddresslistVoting private immutable addresslistVotingBase;
+/// @notice The setup contract of the `Multisig` plugin.
+contract MultisigSetup is PluginSetup {
+    /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
+    Multisig private immutable multisigBase;
 
     /// @notice The address zero to be used as oracle address for permissions.
     address private constant NO_ORACLE = address(0);
 
-    /// @notice The contract constructor, that deployes the `AddresslistVoting` plugin logic contract.
+    /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
     constructor() {
-        addresslistVotingBase = new AddresslistVoting();
+        multisigBase = new Multisig();
     }
 
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)";
+        return "(uint256 minApprovals, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -41,26 +39,20 @@ contract AddresslistVotingSetup is PluginSetup {
     {
         IDAO dao = IDAO(_dao);
 
-        // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
-        (MajorityVotingBase.VotingSettings memory votingSettings, address[] memory members) = abi
-            .decode(_data, (MajorityVotingBase.VotingSettings, address[]));
+        // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
+        (uint256 minApprovals, address[] memory members) = abi.decode(_data, (uint256, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
-            address(addresslistVotingBase),
-            abi.encodeWithSelector(
-                AddresslistVoting.initialize.selector,
-                dao,
-                votingSettings,
-                members
-            )
+            address(multisigBase),
+            abi.encodeWithSelector(Multisig.initialize.selector, dao, minApprovals, members)
         );
 
         // Prepare helpers
         (helpers); // silence the warning.
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        permissions = new PermissionLib.ItemMultiTarget[](3);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -69,7 +61,7 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
+            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -77,19 +69,11 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
-        );
-
-        permissions[2] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Grant,
-            plugin,
-            _dao,
-            NO_ORACLE,
-            addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
+            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[3] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
@@ -111,7 +95,7 @@ contract AddresslistVotingSetup is PluginSetup {
         bytes calldata
     ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        permissions = new PermissionLib.ItemMultiTarget[](3);
 
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -119,7 +103,7 @@ contract AddresslistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
+            multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -127,18 +111,10 @@ contract AddresslistVotingSetup is PluginSetup {
             _plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
+            multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
-            PermissionLib.Operation.Revoke,
-            _plugin,
-            _dao,
-            NO_ORACLE,
-            addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
-        );
-
-        permissions[3] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
@@ -149,6 +125,6 @@ contract AddresslistVotingSetup is PluginSetup {
 
     /// @inheritdoc IPluginSetup
     function getImplementationAddress() external view returns (address) {
-        return address(addresslistVotingBase);
+        return address(multisigBase);
     }
 }

@@ -4,8 +4,8 @@ pragma solidity 0.8.10;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title TokenVoting
@@ -39,8 +39,8 @@ contract TokenVoting is MajorityVotingBase {
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param _interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param _interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return _interfaceId == TOKEN_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
@@ -52,14 +52,14 @@ contract TokenVoting is MajorityVotingBase {
         return votingToken;
     }
 
-    /// @inheritdoc IMajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
-        bytes calldata _proposalMetadata,
+        bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _tryEarlyExecution,
-        VoteOption _voteOption
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
         uint64 snapshotBlock = getBlockNumber64() - 1;
 
@@ -70,9 +70,9 @@ contract TokenVoting is MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount++;
+        proposalId = proposalCount();
 
-        // Create the proposal
+        // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
 
         (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
@@ -86,19 +86,25 @@ contract TokenVoting is MajorityVotingBase {
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                proposal_.actions.push(_actions[i]);
+        for (uint256 i; i < _actions.length; ) {
+            proposal_.actions.push(_actions[i]);
+            unchecked {
+                ++i;
             }
+        }
+
+        _incrementProposalCount();
+
+        if (_voteOption != VoteOption.None) {
+            vote(proposalId, _voteOption, _tryEarlyExecution);
         }
 
         emit ProposalCreated({
             proposalId: proposalId,
             creator: _msgSender(),
-            metadata: _proposalMetadata
+            metadata: _metadata,
+            actions: _actions
         });
-
-        vote(proposalId, _voteOption, _tryEarlyExecution);
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -147,20 +153,24 @@ contract TokenVoting is MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
+    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        if (!_isVoteOpen(proposal_)) {
-            // The proposal vote hasn't started or has already ended.
+        // The proposal vote hasn't started or has already ended.
+        if (!_isProposalOpen(proposal_)) {
             return false;
-        } else if (votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock) == 0) {
-            // The voter has no voting power.
+        }
+
+        // The voter has no voting power.
+        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotBlock) == 0) {
             return false;
-        } else if (
-            proposal_.voters[_voter] != VoteOption.None &&
+        }
+
+        // The voter has already voted but vote replacment is not allowed.
+        if (
+            proposal_.voters[_account] != VoteOption.None &&
             proposal_.parameters.votingMode != VotingMode.VoteReplacement
         ) {
-            // The voter has already voted but vote replacment is not allowed.
             return false;
         }
 

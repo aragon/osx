@@ -19,7 +19,7 @@ import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol"
 import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
 import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
 /// @title TokenVotingSetup
@@ -109,13 +109,13 @@ contract TokenVotingSetup is PluginSetup {
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
         // and the required helpers
         (
-            IMajorityVoting.VotingSettings memory votingSettings,
+            MajorityVotingBase.VotingSettings memory votingSettings,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
         ) = abi.decode(
                 _data,
-                (IMajorityVoting.VotingSettings, TokenSettings, GovernanceERC20.MintSettings)
+                (MajorityVotingBase.VotingSettings, TokenSettings, GovernanceERC20.MintSettings)
             );
 
         // Check mint setting.

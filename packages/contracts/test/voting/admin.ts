@@ -107,7 +107,8 @@ describe('Admin plugin', function () {
     it('supports admin address plugin interface', async () => {
       const iface = new ethers.utils.Interface([
         'function initialize(address  _dao)',
-        'function executeProposal(bytes _proposalMetadata, tuple(address,uint256,bytes)[] _actions)',
+        'function proposalCount()',
+        'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions)',
       ]);
 
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -159,7 +160,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly emits the ProposalCreated event', async () => {
-      const currentExpectedProposalId = 1;
+      const currentExpectedProposalId = 0;
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
@@ -179,7 +180,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly emits the `ProposalExecuted` event', async () => {
-      const currentExpectedProposalId = 1;
+      const currentExpectedProposalId = 0;
       const expectedDummyResults = ['0x'];
 
       await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
@@ -188,7 +189,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly increments the proposal ID', async () => {
-      const currentExpectedProposalId = 1;
+      const currentExpectedProposalId = 0;
 
       await plugin.executeProposal(dummyMetadata, dummyActions);
 

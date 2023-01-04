@@ -256,7 +256,7 @@ type TokenVotingProposal implements Proposal @entity {
   yes: BigInt
   no: BigInt
   abstain: BigInt
-  voteCount: BigInt
+  castedVotingPower: BigInt
   totalVotingPower: BigInt!
 
   voters: [TokenVotingVote!]! @derivedFrom(field: "proposal")
@@ -321,7 +321,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   abstain: BigInt
   yes: BigInt
   no: BigInt
-  voteCount: BigInt
+  castedVotingPower: BigInt
   totalVotingPower: BigInt!
 
   voters: [AddresslistVotingVote!]! @derivedFrom(field: "proposal")
@@ -341,7 +341,7 @@ type AdminPlugin implements IPlugin @entity {
   id: ID!
   daos: [DaoPlugin!] @derivedFrom(field: "plugin")
   proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
-  adminstrator: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
+  adminstrators: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
 }
 
 type Adminstrator @entity {
@@ -369,4 +369,53 @@ type AdminProposal implements Proposal @entity {
   plugin: AdminPlugin!
   proposalId: BigInt!
   adminstrator: Adminstrator!
+}
+
+# Multisig
+
+type MultisigPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  minApprovals: BigInt
+  proposalCount: BigInt
+  proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
+  members: [MultisigApprover!]! @derivedFrom(field: "plugin")
+}
+
+type MultisigApprover @entity {
+  id: ID! # plugin_address + member_address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
+  plugin: MultisigPlugin!
+}
+
+type MultisigProposalApprover @entity(immutable: true) {
+  "ApproverProposal for Many-to-Many"
+  id: ID! # approver + proposal
+  approver: MultisigApprover!
+  proposal: MultisigProposal!
+  createdAt: BigInt!
+}
+
+type MultisigProposal implements Proposal @entity {
+  id: ID! # plugin + proposalId
+  dao: Dao!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  plugin: MultisigPlugin!
+  proposalId: BigInt!
+  creator: Bytes!
+  metadata: String
+  createdAt: BigInt!
+  creationBlockNumber: BigInt!
+  open: Boolean!
+  snapshotBlock: BigInt!
+  minApprovals: BigInt!
+  addresslistLength: BigInt!
+  approvals: BigInt
+  executable: Boolean
+  executed: Boolean!
+  executionDate: BigInt
+  executionBlockNumber: BigInt
+  approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
 }
