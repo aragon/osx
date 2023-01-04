@@ -19,7 +19,6 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  ONE,
   TWO
 } from '../constants';
 
@@ -156,7 +155,9 @@ export function createNewMultisigSettingsUpdatedEvent(
   minApprovals: string,
   contractAddress: string
 ): MultisigSettingsUpdated {
-  let newProposalSettingsUpdatedEvent = changetype<MultisigSettingsUpdated>(newMockEvent());
+  let newProposalSettingsUpdatedEvent = changetype<MultisigSettingsUpdated>(
+    newMockEvent()
+  );
 
   newProposalSettingsUpdatedEvent.address = Address.fromString(contractAddress);
   newProposalSettingsUpdatedEvent.parameters = [];
@@ -165,9 +166,10 @@ export function createNewMultisigSettingsUpdatedEvent(
     'onlyListed',
     ethereum.Value.fromBoolean(onlyListed)
   );
+
   let minApprovalsParam = new ethereum.EventParam(
     'minApprovals',
-    ethereum.Value.fromString(minApprovals)
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minApprovals))
   );
 
   newProposalSettingsUpdatedEvent.parameters.push(onlyListedParam);
