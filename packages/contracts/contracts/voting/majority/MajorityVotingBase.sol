@@ -5,10 +5,10 @@ pragma solidity 0.8.10;
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {TimeHelpers} from "../../utils/TimeHelpers.sol";
 
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
@@ -54,10 +54,10 @@ abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
     ERC165Upgradeable,
-    TimeHelpers,
     PluginUUPSUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeCastUpgradeable for uint256;
 
     /// @notice The different voting modes available.
     /// @param Standard In standard mode, early execution and vote replacement are disabled.
@@ -245,7 +245,7 @@ abstract contract MajorityVotingBase is
         uint256 _proposalId,
         VoteOption _voteOption,
         bool _tryEarlyExecution
-    ) public {
+    ) public virtual {
         address account = _msgSender();
 
         if (!_canVote(_proposalId, account)) {
@@ -255,7 +255,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function execute(uint256 _proposalId) public {
+    function execute(uint256 _proposalId) public virtual {
         if (!_canExecute(_proposalId)) {
             revert ProposalExecutionForbidden(_proposalId);
         }
@@ -263,17 +263,22 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoteOption(uint256 _proposalId, address _voter) public view returns (VoteOption) {
+    function getVoteOption(uint256 _proposalId, address _voter)
+        public
+        view
+        virtual
+        returns (VoteOption)
+    {
         return proposals[_proposalId].voters[_voter];
     }
 
     /// @inheritdoc IMajorityVoting
-    function canVote(uint256 _proposalId, address _voter) public view returns (bool) {
+    function canVote(uint256 _proposalId, address _voter) public view virtual returns (bool) {
         return _canVote(_proposalId, _voter);
     }
 
     /// @inheritdoc IMajorityVoting
-    function canExecute(uint256 _proposalId) public view returns (bool) {
+    function canExecute(uint256 _proposalId) public view virtual returns (bool) {
         return _canExecute(_proposalId);
     }
 
@@ -344,6 +349,7 @@ abstract contract MajorityVotingBase is
     function getProposal(uint256 _proposalId)
         public
         view
+        virtual
         returns (
             bool open,
             bool executed,
@@ -365,6 +371,7 @@ abstract contract MajorityVotingBase is
     /// @param _votingSettings The new voting settings.
     function updateVotingSettings(VotingSettings calldata _votingSettings)
         external
+        virtual
         auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
     {
         _updateVotingSettings(_votingSettings);
@@ -448,7 +455,7 @@ abstract contract MajorityVotingBase is
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
     function _isProposalOpen(Proposal storage proposal_) internal view virtual returns (bool) {
-        uint64 currentTime = getTimestamp64();
+        uint64 currentTime = block.timestamp.toUint64();
 
         return
             proposal_.parameters.startDate <= currentTime &&
@@ -460,7 +467,7 @@ abstract contract MajorityVotingBase is
     /// @param _value The value.
     /// @param _total The total.
     /// @return returns The relative value as a percentage.
-    function _calculatePct(uint256 _value, uint256 _total) internal pure returns (uint256) {
+    function _calculatePct(uint256 _value, uint256 _total) internal pure virtual returns (uint256) {
         if (_total == 0) {
             revert ZeroValueNotAllowed();
         }
@@ -515,8 +522,8 @@ abstract contract MajorityVotingBase is
         virtual
         returns (uint64 startDate, uint64 endDate)
     {
-        uint64 currentTimestamp = getTimestamp64();
-
+        uint64 currentTimestamp = block.timestamp.toUint64();
+        
         if (_start == 0) {
             startDate = currentTimestamp;
         } else {
