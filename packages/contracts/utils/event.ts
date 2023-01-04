@@ -28,3 +28,8 @@ export const DAO_EVENTS = {
   TRUSTED_FORWARDER_SET: 'TrustedForwarderSet',
   SIGNATURE_VALIDATOR_SET: 'SignatureValidatorSet',
 };
+
+export const ADDRESSLIST_EVENTS = {
+  ADDRESSES_ADDED: 'AddressesAdded',
+  ADDRESSES_REMOVED: 'AddressesRemoved',
+};
