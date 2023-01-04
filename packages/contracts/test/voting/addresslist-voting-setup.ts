@@ -69,7 +69,7 @@ describe('AddresslistVotingSetup', function () {
     ]);
   });
 
-  it('creates addresslist voting base with the correct interface', async () => {
+  it('creates address list voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('AddresslistVoting');
     const addresslistVotingContract = factory.attach(implementationAddress);
 

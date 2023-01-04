@@ -292,7 +292,9 @@ describe('AddresslistVoting', function () {
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata);
+        .withArgs(id, signers[0].address, dummyMetadata)
+        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST)
+        .withArgs(id, signers[0].address, VoteOption.None, 1);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -419,7 +421,20 @@ describe('AddresslistVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.Abstain, false)
+        ).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.None, false)
+        ).to.be.revertedWith(
           customError('VoteCastForbidden', id, signers[0].address)
         );
       });
@@ -586,7 +601,20 @@ describe('AddresslistVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.Abstain, false)
+        ).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.None, false)
+        ).to.be.revertedWith(
           customError('VoteCastForbidden', id, signers[0].address)
         );
       });
@@ -742,6 +770,12 @@ describe('AddresslistVoting', function () {
         expect((await voting.getProposal(id)).tally.yes).to.equal(0);
         expect((await voting.getProposal(id)).tally.no).to.equal(0);
         expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
+
+        await voting.vote(id, VoteOption.None, false);
+        await voting.vote(id, VoteOption.None, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
       });
 
       it('cannot early execute', async () => {

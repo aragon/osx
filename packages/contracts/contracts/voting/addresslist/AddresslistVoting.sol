@@ -56,7 +56,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
     /// @notice Adds new members to the address list.
     /// @param _members The addresses of members to be added.
-    /// @dev This functin is used during the plugin initialization.
+    /// @dev This function is used during the plugin initialization.
     function addAddresses(address[] calldata _members)
         external
         auth(UPDATE_ADDRESSES_PERMISSION_ID)
@@ -82,7 +82,10 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock = block.number.toUint64() - 1;
+        uint64 snapshotBlock;
+        unchecked {
+            snapshotBlock = block.number.toUint64() - 1;
+        }
 
         if (minProposerVotingPower() != 0 && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
@@ -113,7 +116,9 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
         _incrementProposalCount();
 
-        vote(proposalId, _voteOption, _tryEarlyExecution);
+        if (_voteOption != VoteOption.None) {
+            vote(proposalId, _voteOption, _tryEarlyExecution);
+        }
 
         emit ProposalCreated({
             proposalId: proposalId,
@@ -170,17 +175,21 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
+        // The proposal vote hasn't started or has already ended.
         if (!_isProposalOpen(proposal_)) {
-            // The proposal vote hasn't started or has already ended.
             return false;
-        } else if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
-            // The voter has no voting power.
+        }
+
+        // The voter has no voting power.
+        if (!isListedAtBlock(_account, proposal_.parameters.snapshotBlock)) {
             return false;
-        } else if (
+        }
+
+        // The voter has already voted but vote replacement is not allowed.
+        if (
             proposal_.voters[_account] != VoteOption.None &&
             proposal_.parameters.votingMode != VotingMode.VoteReplacement
         ) {
-            // The voter has already voted but vote replacment is not allowed.
             return false;
         }
 
