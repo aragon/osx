@@ -109,6 +109,7 @@ function createMultisigPlugin(plugin: Address, daoId: string): void {
   let packageEntity = MultisigPlugin.load(plugin.toHexString());
   if (!packageEntity) {
     packageEntity = new MultisigPlugin(plugin.toHexString());
+    packageEntity.onlyListed = false;
 
     // Create template
     let context = new DataSourceContext();

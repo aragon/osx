@@ -50,6 +50,14 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         uint256 addresslistLength;
     }
 
+    /// @notice A container for the plugin settings.
+    /// @param onlyListed Whether only listed addresses can create a proposal.
+    /// @param minApprovals The minimum approvals parameter.
+    struct MultisigSettings {
+        bool onlyListed;
+        uint16 minApprovals;
+    }
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant MULTISIG_INTERFACE_ID =
         this.addAddresses.selector ^
@@ -65,14 +73,14 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
 
-    /// @notice The minimum approvals parameter.
-    uint256 private minApprovals_;
-
     /// @notice The incremental ID for proposals and executions.
     CountersUpgradeable.Counter private proposalCounter;
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
+
+    /// @notice The current plugin settings.
+    MultisigSettings public multisigSettings;
 
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
@@ -94,10 +102,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param limit The maximal value.
     /// @param actual The actual value.
     error MinApprovalsOutOfBounds(uint256 limit, uint256 actual);
-
-    /// @notice Emitted when the multisig settings are updated.
-    /// @param minApprovals The minimum approvals value.
-    event MinApprovalUpdated(uint256 minApprovals);
 
     /// @notice Emitted when an proposal is approve by an approver.
     /// @param proposalId The ID of the proposal.
@@ -121,22 +125,26 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
 
+    /// @notice Emitted when the plugin settings are set.
+    /// @param onlyListed Whether only listed addresses can create a proposal.
+    /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
+    event MultisigSettingsUpdated(bool onlyListed, uint256 indexed minApprovals);
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    // /// @param _majorityVotingSettings The majority voting settings.
+    /// @param _multisigSettings The multisig settings.
     function initialize(
         IDAO _dao,
-        uint256 _minApprovals,
-        address[] calldata _members
+        address[] calldata _members,
+        MultisigSettings calldata _multisigSettings
     ) public initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
         // add member addresses to the address list
         _addAddresses(_members);
-        _updateMinApprovals(_minApprovals);
 
-        emit MinApprovalUpdated({minApprovals: _minApprovals});
+        _updateMultisigSettings(_multisigSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -152,28 +160,11 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         return proposalCounter.current();
     }
 
-    /// @notice Returns the support threshold parameter stored in the voting settings.
-    /// @return The support threshold parameter.
-    function minApprovals() public view returns (uint256) {
-        return minApprovals_;
-    }
-
     /// @notice Returns the number of approvals,
     /// @param _proposalId The ID of the proposal.
     /// @return The number of approvals.
     function approvals(uint256 _proposalId) public view returns (uint256) {
         return proposals[_proposalId].tally.approvals;
-    }
-
-    /// @notice Updates the minimal approval parameter.
-    /// @param _minApprovals The new minimal approval value.
-    function updateMinApprovals(uint256 _minApprovals)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
-        _updateMinApprovals(_minApprovals);
-
-        emit MinApprovalUpdated({minApprovals: _minApprovals});
     }
 
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
@@ -195,9 +186,19 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
         // Check if the new address list has become shorter than the current minimum number of approvals required.
         uint256 newAddresslistLength = addresslistLength();
+        uint256 minApprovals_ = multisigSettings.minApprovals;
         if (newAddresslistLength < minApprovals_) {
             revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
         }
+    }
+
+    /// @notice Updates the plugin settings.
+    /// @param _multisigSettings The new settings.
+    function updateMultisigSettings(MultisigSettings calldata _multisigSettings)
+        external
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
+    {
+        _updateMultisigSettings(_multisigSettings);
     }
 
     /// @notice Creates a new majority voting proposal.
@@ -214,7 +215,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = block.number.toUint64() - 1;
 
-        if (!isListedAtBlock(_msgSender(), snapshotBlock)) {
+        if (multisigSettings.onlyListed && !isListedAtBlock(_msgSender(), snapshotBlock)) {
             revert ProposalCreationForbidden(_msgSender());
         }
 
@@ -225,7 +226,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
         proposal_.open = true;
         proposal_.parameters.snapshotBlock = snapshotBlock;
-        proposal_.parameters.minApprovals = minApprovals_;
+        proposal_.parameters.minApprovals = multisigSettings.minApprovals;
         proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
 
         for (uint256 i; i < _actions.length; ) {
@@ -326,22 +327,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         return proposals[_proposalId].approvers[_account];
     }
 
-    /// @notice Internal function to update the minimal approval parameter.
-    /// @param _minApprovals The new minimal approval value.
-    function _updateMinApprovals(uint256 _minApprovals) internal {
-        uint256 addresslistLength_ = addresslistLength();
-
-        if (_minApprovals > addresslistLength_) {
-            revert MinApprovalsOutOfBounds({limit: addresslistLength_, actual: _minApprovals});
-        }
-
-        if (_minApprovals < 1) {
-            revert MinApprovalsOutOfBounds({limit: 1, actual: _minApprovals});
-        }
-
-        minApprovals_ = _minApprovals;
-    }
-
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
     function execute(uint256 _proposalId) public {
@@ -415,8 +400,30 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         return proposalCounter.increment();
     }
 
+    /// @notice Internal function to update the plugin settings.
+    function _updateMultisigSettings(MultisigSettings calldata _multisigSettings) internal {
+        uint256 addresslistLength_ = addresslistLength();
+
+        if (_multisigSettings.minApprovals > addresslistLength_) {
+            revert MinApprovalsOutOfBounds({
+                limit: addresslistLength_,
+                actual: _multisigSettings.minApprovals
+            });
+        }
+
+        if (_multisigSettings.minApprovals < 1) {
+            revert MinApprovalsOutOfBounds({limit: 1, actual: _multisigSettings.minApprovals});
+        }
+
+        multisigSettings = _multisigSettings;
+        emit MultisigSettingsUpdated({
+            onlyListed: _multisigSettings.onlyListed,
+            minApprovals: _multisigSettings.minApprovals
+        });
+    }
+
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[47] private __gap;
+    uint256[46] private __gap;
 }

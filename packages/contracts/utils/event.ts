@@ -19,6 +19,10 @@ export const VOTING_EVENTS = {
   PROPOSAL_EXECUTED: 'ProposalExecuted',
 };
 
+export const MULTISIG_EVENTS = {
+  MULTISIG_SETTINGS_UPDATED: 'MultisigSettingsUpdated'
+}
+
 export const DAO_EVENTS = {
   METADATA_SET: 'MetadataSet',
   EXECUTED: 'Executed',

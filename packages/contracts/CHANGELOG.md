@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added test related to `resolver` in `ens-subdomain-registry.ts`.
 - Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
 - Added more tests for the `PluginSetupProcessor`.
+- Added `PluginSettings` to the `Multisig` plugin
+- Added `onlyListed` to the `PluginSettings` of the `Multisig` plugin.
 
 ### Changed
 
