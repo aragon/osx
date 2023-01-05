@@ -166,7 +166,7 @@ describe('Multisig', function () {
       ).to.be.revertedWith(customError('MinApprovalsOutOfBounds', 1, 0));
     });
 
-    it('should emit MultisigSettingsUpdated when updateMutlsigSettings gets called', async () => {
+    it('should emit `MultisigSettingsUpdated` when `updateMutlsigSettings` gets called', async () => {
       await expect(multisig.updateMultisigSettings(multisigSettings))
         .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
@@ -493,7 +493,7 @@ describe('Multisig', function () {
     });
 
     describe('canExecute:', async () => {
-      it('returns false if the proposal is already executed', async () => {
+      it('returns `false` if the proposal is already executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
         await multisig.connect(signers[2]).approve(id, true);
@@ -503,7 +503,7 @@ describe('Multisig', function () {
         expect(await multisig.canExecute(id)).to.be.false;
       });
 
-      it('returns true if the proposal can be executed', async () => {
+      it('returns `true` if the proposal can be executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
         await multisig.connect(signers[2]).approve(id, false);
