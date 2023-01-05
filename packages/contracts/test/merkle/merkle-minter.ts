@@ -57,7 +57,7 @@ describe('MerkleDistributor', function () {
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
     );
-    distributorBase = await MerkleDistributor.deploy();
+    distributorBase = await deployWithProxy(MerkleDistributor);
 
     const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
     minter = await deployWithProxy(MerkleMinter);

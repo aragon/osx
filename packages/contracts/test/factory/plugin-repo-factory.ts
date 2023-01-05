@@ -65,7 +65,7 @@ describe('PluginRepoFactory: ', function () {
 
   beforeEach(async function () {
     // DAO
-    managingDao = (await deployNewDAO(ownerAddress)) as DAO;
+    managingDao = await deployNewDAO(ownerAddress);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
