@@ -11,7 +11,11 @@ import {
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-import {MultisigSettings} from '../test-utils/voting';
+
+export type MultisigSettings = {
+  minApprovals: number;
+  onlyListed: boolean;
+};
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
