@@ -4,9 +4,8 @@ pragma solidity 0.8.10;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
@@ -25,7 +24,7 @@ contract PluginRepo is
     UUPSUpgradeable,
     PermissionManager
 {
-    using Address for address;
+    using AddressUpgradeable for address;
 
     struct Version {
         uint16[3] semanticVersion;
@@ -77,6 +76,11 @@ contract PluginRepo is
     /// @param semanticVersion The semantic version number.
     event VersionCreated(uint256 versionId, uint16[3] semanticVersion);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initializes the contract by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - initializing the permission manager
@@ -104,7 +108,7 @@ contract PluginRepo is
         // NOTE: also checks if _pluginSetup is a contract and reverts if not.
         bytes memory data = _pluginSetup.functionCall(
             abi.encodeWithSelector(
-                ERC165.supportsInterface.selector,
+                ERC165Upgradeable.supportsInterface.selector,
                 type(IPluginSetup).interfaceId
             )
         );
@@ -134,7 +138,7 @@ contract PluginRepo is
         uint256 versionIndex = nextVersionIndex;
         nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
         versions[versionIndex] = Version(_newSemanticVersion, _pluginSetup, _contentURI);
-        versionIndexForSemantic[semanticVersionHash(_newSemanticVersion)] = versionIndex;
+        versionIndexForSemantic[_semanticVersionHash(_newSemanticVersion)] = versionIndex;
         versionIndexForPluginSetup[_pluginSetup] = versionIndex;
 
         emit VersionCreated(versionIndex, _newSemanticVersion);
@@ -185,7 +189,7 @@ contract PluginRepo is
             bytes memory contentURI
         )
     {
-        return getVersionById(versionIndexForSemantic[semanticVersionHash(_semanticVersion)]);
+        return getVersionById(versionIndexForSemantic[_semanticVersionHash(_semanticVersion)]);
     }
 
     /// @notice Gets the version information associated with a version index.
@@ -243,7 +247,7 @@ contract PluginRepo is
     /// @notice Generates a hash from a semantic version number.
     /// @param semanticVersion The semantic version number.
     /// @return bytes32 The hash of the semantic version number.
-    function semanticVersionHash(uint16[3] memory semanticVersion) internal pure returns (bytes32) {
+    function _semanticVersionHash(uint16[3] memory semanticVersion) internal pure returns (bytes32) {
         return
             keccak256(abi.encodePacked(semanticVersion[0], semanticVersion[1], semanticVersion[2]));
     }

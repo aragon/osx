@@ -71,8 +71,8 @@ interface IMajorityVoting {
     /// @notice Creates a new vote.
     /// @param _proposalMetadata The IPFS hash pointing to the proposal metadata.
     /// @param _actions The actions that will be executed after vote passes.
-    /// @param _startDate The start date of the vote. If 0, uses current timestamp.
-    /// @param _endDate The end date of the vote. If 0, uses `_start` + `minDuration`.
+    /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
+    /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
     /// @param _executeIfDecided An option to enable automatic execution on the last required vote.
     /// @param _choice The vote choice to cast on creation.
     /// @return voteId The ID of the vote.

@@ -7,6 +7,7 @@ import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
+import {deployWithProxy} from '../test-utils/proxy';
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
@@ -52,7 +53,7 @@ describe('DAO', function () {
     ownerAddress = await signers[0].getAddress();
 
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
+    dao = await deployWithProxy(DAO);
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');

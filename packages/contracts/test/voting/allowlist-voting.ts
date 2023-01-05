@@ -3,8 +3,15 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AllowlistVoting, DAOMock} from '../../typechain';
-import {VoteOption, VOTING_EVENTS, pct16} from '../test-utils/voting';
+import {
+  VoteOption,
+  VOTING_EVENTS,
+  pct16,
+  ONE_HOUR,
+  MAX_UINT64,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('AllowlistVoting', function () {
   let signers: SignerWithAddress[];
@@ -33,7 +40,8 @@ describe('AllowlistVoting', function () {
 
   beforeEach(async () => {
     const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
-    voting = await AllowlistVoting.deploy();
+
+    voting = await deployWithProxy(AllowlistVoting);
   });
 
   function initializeVoting(
@@ -53,9 +61,9 @@ describe('AllowlistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeVoting(1, 2, 3, []);
+      await initializeVoting(1, 2, ONE_HOUR, []);
 
-      await expect(initializeVoting(1, 2, 3, [])).to.be.revertedWith(
+      await expect(initializeVoting(1, 2, ONE_HOUR, [])).to.be.revertedWith(
         ERRORS.ALREADY_INITIALIZED
       );
     });
@@ -63,7 +71,7 @@ describe('AllowlistVoting', function () {
 
   describe('AllowlistingUsers: ', async () => {
     beforeEach(async () => {
-      await initializeVoting(1, 2, 3, []);
+      await initializeVoting(1, 2, ONE_HOUR, []);
     });
     it('should return false, if user is not allowed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
@@ -107,10 +115,10 @@ describe('AllowlistVoting', function () {
   });
 
   describe('StartVote', async () => {
-    let minDuration = 3;
+    let minDuration = ONE_HOUR;
 
     beforeEach(async () => {
-      await initializeVoting(1, 2, 3, [ownerAddress]);
+      await initializeVoting(1, 2, ONE_HOUR, [ownerAddress]);
     });
 
     it('reverts if user is not allowed to create a vote', async () => {
@@ -123,11 +131,11 @@ describe('AllowlistVoting', function () {
       );
     });
 
-    it('reverts if vote duration is less than minDuration', async () => {
+    it('reverts if the start date is set smaller than the current date', async () => {
       const block = await ethers.provider.getBlock('latest');
-      const current = block.timestamp;
-      const startDate = block.timestamp;
-      const endDate = startDate + (minDuration - 1);
+      const currentDate = block.timestamp;
+      const startDate = currentDate - 1;
+      const endDate = 0; // startDate + minDuration
       await expect(
         voting.createVote(
           '0x00',
@@ -138,13 +146,45 @@ describe('AllowlistVoting', function () {
           VoteOption.None
         )
       ).to.be.revertedWith(
-        customError(
-          'VoteTimesInvalid',
-          current + 1, // TODO hacky
+        customError('DateOutOfBounds', currentDate + 1, startDate)
+      );
+    });
+
+    it('reverts if the start date is after the latest start date', async () => {
+      const latestStartDate = MAX_UINT64.sub(minDuration);
+      const startDate = latestStartDate.add(1);
+      const endDate = 0; // startDate + minDuration
+      await expect(
+        voting.createVote(
+          '0x00',
+          [],
           startDate,
           endDate,
-          minDuration
+          false,
+          VoteOption.None
         )
+      ).to.be.revertedWith(
+        'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
+      );
+    });
+
+    it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
+      const block = await ethers.provider.getBlock('latest');
+      const currentTime = block.timestamp;
+      const startDate = currentTime + 1;
+      const earliestEndDate = startDate + minDuration;
+      const endDate = earliestEndDate - 1;
+      await expect(
+        voting.createVote(
+          '0x00',
+          [],
+          startDate,
+          endDate,
+          false,
+          VoteOption.None
+        )
+      ).to.be.revertedWith(
+        customError('DateOutOfBounds', earliestEndDate, endDate)
       );
     });
 
@@ -219,7 +259,7 @@ describe('AllowlistVoting', function () {
   });
 
   describe('Vote + Execute:', async () => {
-    let minDuration = 500;
+    let minDuration = ONE_HOUR;
     let supportRequired = pct16(29);
     let minimumQuorom = pct16(19);
     const id = 0; // voteId

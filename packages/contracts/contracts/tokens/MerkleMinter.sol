@@ -34,6 +34,11 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     /// @inheritdoc IMerkleMinter
     IMerkleDistributor public override distributorBase;
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @inheritdoc IMerkleMinter
     function initialize(
         IDAO _dao,

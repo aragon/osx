@@ -39,6 +39,11 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     /// @param amount The amount to be claimed.
     error TokenClaimInvalid(uint256 index, address to, uint256 amount);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @inheritdoc IMerkleDistributor
     function initialize(
         IDAO _dao,

@@ -25,6 +25,11 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @param name The DAO name.
     event DAORegistered(address indexed dao, address indexed creator, string name);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initializes the contract.
     /// @param _managingDao the managing DAO address.
     function initialize(IDAO _managingDao, ENSSubdomainRegistrar _subdomainRegistrar)

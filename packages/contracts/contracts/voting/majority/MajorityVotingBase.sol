@@ -50,15 +50,15 @@ abstract contract MajorityVotingBase is
     /// @param actual The actual value.
     error VoteParticipationExceeded(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the selected vote times are not allowed.
-    /// @param current The maximal value.
-    /// @param start The start date of the vote as a unix timestamp.
-    /// @param end The end date of the vote as a unix timestamp.
-    /// @param minDuration The minimal duration of the vote in seconds.
-    error VoteTimesInvalid(uint64 current, uint64 start, uint64 end, uint64 minDuration);
+    /// @notice Thrown if a date is out of bounds.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error DateOutOfBounds(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the selected vote duration is zero
-    error VoteDurationZero();
+    /// @notice Thrown if the minimal duration value is out of bounds.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error MinDurationOutOfBounds(uint64 limit, uint64 actual);
 
     /// @notice Thrown if a voter is not allowed to cast a vote.
     /// @param voteId The ID of the vote.
@@ -203,7 +203,7 @@ abstract contract MajorityVotingBase is
     /// @param _voteId The ID of the vote.
     function _execute(uint256 _voteId) internal virtual {
         votes[_voteId].executed = true;
-        
+
         bytes[] memory execResults = dao.execute(_voteId, votes[_voteId].actions);
 
         emit VoteExecuted(_voteId, execResults);
@@ -297,13 +297,52 @@ abstract contract MajorityVotingBase is
             revert VoteParticipationExceeded({limit: PCT_BASE, actual: _participationRequiredPct});
         }
 
-        if (_minDuration == 0) {
-            revert VoteDurationZero();
+        if (_minDuration < 60 minutes) {
+            revert MinDurationOutOfBounds({limit: 60 minutes, actual: _minDuration});
+        }
+
+        if (_minDuration > 365 days) {
+            revert MinDurationOutOfBounds({limit: 365 days, actual: _minDuration});
         }
 
         participationRequiredPct = _participationRequiredPct;
         supportRequiredPct = _supportRequiredPct;
         minDuration = _minDuration;
+    }
+
+    /// @notice Validates and returns the proposal vote dates.
+    /// @param _start The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
+    /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
+    /// @return startDate The validated start date of the proposal vote.
+    /// @return endDate The validated end date of the proposal vote.
+    function _validateVoteDates(uint64 _start, uint64 _end)
+        internal
+        view
+        returns (uint64 startDate, uint64 endDate)
+    {
+        uint64 currentTimestamp = getTimestamp64();
+
+        if (_start == 0) {
+            startDate = currentTimestamp;
+        } else {
+            startDate = _start;
+
+            if (startDate < currentTimestamp) {
+                revert DateOutOfBounds({limit: currentTimestamp, actual: startDate});
+            }
+        }
+
+        uint64 earliestEndDate = startDate + minDuration; // Since `minDuration` is limited to 1 year, `startDate + minDuration` can only overflow if the `startDate` is after `type(uint64).max - minDuration`. In this case, the proposal creation will revert and another date can be picked.
+
+        if (_end == 0) {
+            endDate = earliestEndDate;
+        } else {
+            endDate = _end;
+
+            if (endDate < earliestEndDate) {
+                revert DateOutOfBounds({limit: earliestEndDate, actual: endDate});
+            }
+        }
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

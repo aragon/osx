@@ -122,7 +122,7 @@ contract TokenFactory {
         // Grant the permission to mint to the token factory (`address(this)`).
         _managingDao.grant(token, address(this), tokenMintPermission);
 
-        for (uint256 i = 0; i < _mintConfig.receivers.length; i++) {
+        for (uint256 i; i < _mintConfig.receivers.length; ++i) {
             // allow minting to treasury
             address receiver = _mintConfig.receivers[i] == address(0)
                 ? address(_managingDao)

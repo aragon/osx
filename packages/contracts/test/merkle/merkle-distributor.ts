@@ -7,7 +7,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import {deployWithProxy} from '../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
+import {deployNewDAO} from '../test-utils/dao';
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
@@ -24,8 +26,7 @@ describe('MerkleDistributor', function () {
 
     // create a DAO
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize('0x', wallet0, ethers.constants.AddressZero);
+    dao = await deployNewDAO(wallet0);
 
     const TestERC20 = await ethers.getContractFactory('TestERC20');
     token = await TestERC20.deploy('FOO', 'FOO', 0); // mint 0 FOO tokens
@@ -33,18 +34,14 @@ describe('MerkleDistributor', function () {
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
     );
-    distributor = await MerkleDistributor.deploy();
+    distributor = await deployWithProxy(MerkleDistributor);
   });
 
   describe('general', () => {
     const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
     beforeEach(async () => {
-      await distributor.initialize(
-        dao.address,
-        token.address,
-        ZERO_BYTES32
-      );
+      await distributor.initialize(dao.address, token.address, ZERO_BYTES32);
     });
 
     describe('#token', () => {

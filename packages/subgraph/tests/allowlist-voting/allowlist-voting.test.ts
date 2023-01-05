@@ -38,6 +38,7 @@ import {
   createAllowlistProposalEntityState
 } from './utils';
 
+const ONE_HOUR = '3600';
 let voteId = '0';
 let startDate = '1644851000';
 let endDate = '1644852000';
@@ -242,7 +243,7 @@ test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () =
   erc20VotingPackage.save();
 
   // create event
-  let event = createNewConfigUpdatedEvent('2', '1', '3600', VOTING_ADDRESS);
+  let event = createNewConfigUpdatedEvent('2', '1', ONE_HOUR, VOTING_ADDRESS);
 
   // handle event
   handleConfigUpdated(event);
@@ -256,7 +257,7 @@ test('Run Allowlist Voting (handleConfigUpdated) mappings with mock event', () =
     '2'
   );
   assert.fieldEquals('AllowlistPackage', entityID, 'supportRequiredPct', '1');
-  assert.fieldEquals('AllowlistPackage', entityID, 'minDuration', '3600');
+  assert.fieldEquals('AllowlistPackage', entityID, 'minDuration', ONE_HOUR);
 
   clearStore();
 });

@@ -23,6 +23,12 @@ contract ERC20Voting is MajorityVotingBase {
     /// @notice Thrown if the voting power is zero
     error NoVotingPower();
 
+    /// @dev Used to disallow initializing implementation contract by attacker for extra safety.
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -77,32 +83,19 @@ contract ERC20Voting is MajorityVotingBase {
 
         voteId = votesLength++;
 
-        // Calculate the start and end time of the vote
-        uint64 currentTimestamp = getTimestamp64();
-
-        if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + minDuration;
-
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
-            revert VoteTimesInvalid({
-                current: currentTimestamp,
-                start: _startDate,
-                end: _endDate,
-                minDuration: minDuration
-            });
-
         // Create the vote
         Vote storage vote_ = votes[voteId];
-        vote_.startDate = _startDate;
-        vote_.endDate = _endDate;
+        (vote_.startDate, vote_.endDate) = _validateVoteDates(_startDate, _endDate);
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = votingPower;
         vote_.snapshotBlock = snapshotBlock;
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                vote_.actions.push(_actions[i]);
+        for (uint256 i; i < _actions.length; ) {
+            vote_.actions.push(_actions[i]);
+
+            unchecked {
+                ++i;
             }
         }
 

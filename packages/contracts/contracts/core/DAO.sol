@@ -5,9 +5,9 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 import "./component/CallbackHandler.sol";
@@ -27,8 +27,8 @@ contract DAO is
     PermissionManager,
     CallbackHandler
 {
-    using SafeERC20 for ERC20;
-    using Address for address;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using AddressUpgradeable for address;
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_DAO_PERMISSION_ID = keccak256("UPGRADE_DAO_PERMISSION");
@@ -73,6 +73,11 @@ contract DAO is
 
     /// @notice Thrown if a native token withdraw fails.
     error NativeTokenWithdrawFailed();
+
+    /// @dev Used to disallow initializing implementation contract by attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice Initializes the DAO by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
@@ -146,7 +151,7 @@ contract DAO is
     {
         bytes[] memory execResults = new bytes[](_actions.length);
 
-        for (uint256 i = 0; i < _actions.length;) {
+        for (uint256 i; i < _actions.length;) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );
@@ -156,7 +161,7 @@ contract DAO is
             execResults[i] = response;
 
             unchecked {
-                i++;
+                ++i;
             }
         }
 
@@ -180,7 +185,7 @@ contract DAO is
             if (msg.value != 0)
                 revert NativeTokenDepositAmountMismatch({expected: 0, actual: msg.value});
 
-            ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
+            IERC20Upgradeable(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
         emit Deposited(msg.sender, _token, _amount, _reference);
@@ -199,7 +204,7 @@ contract DAO is
             (bool ok, ) = _to.call{value: _amount}("");
             if (!ok) revert NativeTokenWithdrawFailed();
         } else {
-            ERC20(_token).safeTransfer(_to, _amount);
+            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
         }
 
         emit Withdrawn(_token, _to, _amount, _reference);

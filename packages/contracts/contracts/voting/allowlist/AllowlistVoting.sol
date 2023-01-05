@@ -46,6 +46,11 @@ contract AllowlistVoting is MajorityVotingBase {
     /// @param users The array of user addresses to be removed.
     event UsersRemoved(address[] users);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -121,34 +126,21 @@ contract AllowlistVoting is MajorityVotingBase {
             revert VoteCreationForbidden(_msgSender());
         }
 
-        // calculate start and end time for the vote
-        uint64 currentTimestamp = getTimestamp64();
-
-        if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + minDuration;
-
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
-            revert VoteTimesInvalid({
-                current: currentTimestamp,
-                start: _startDate,
-                end: _endDate,
-                minDuration: minDuration
-            });
-
         voteId = votesLength++;
 
         // create a vote.
         Vote storage vote_ = votes[voteId];
-        vote_.startDate = _startDate;
-        vote_.endDate = _endDate;
+        (vote_.startDate, vote_.endDate) = _validateVoteDates(_startDate, _endDate);
         vote_.snapshotBlock = snapshotBlock;
         vote_.supportRequiredPct = supportRequiredPct;
         vote_.participationRequiredPct = participationRequiredPct;
         vote_.votingPower = allowedUserCount(snapshotBlock);
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                vote_.actions.push(_actions[i]);
+        for (uint256 i; i < _actions.length; ) {
+            vote_.actions.push(_actions[i]);
+
+            unchecked {
+                ++i;
             }
         }
 
@@ -227,8 +219,12 @@ contract AllowlistVoting is MajorityVotingBase {
     function _updateAllowedUsers(address[] calldata _users, bool _enabled) internal {
         _allowlistLengthCheckpoints.push(_enabled ? _uncheckedAdd : _uncheckedSub, _users.length);
 
-        for (uint256 i = 0; i < _users.length; i++) {
+        for (uint256 i; i < _users.length; ) {
             _allowedAddressesCheckpoints[_users[i]].push(_enabled ? 1 : 0);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
