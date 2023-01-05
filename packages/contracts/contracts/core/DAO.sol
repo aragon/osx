@@ -30,25 +30,25 @@ contract DAO is
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
 
+    /// @notice The ID of the permission required to call the `execute` function.
+    bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
+
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_DAO_PERMISSION_ID = keccak256("UPGRADE_DAO_PERMISSION");
 
     /// @notice The ID of the permission required to call the `setMetadata` function.
     bytes32 public constant SET_METADATA_PERMISSION_ID = keccak256("SET_METADATA_PERMISSION");
 
-    /// @notice The ID of the permission required to call the `execute` function.
-    bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
-
     /// @notice The ID of the permission required to call the `withdraw` function.
     bytes32 public constant WITHDRAW_PERMISSION_ID = keccak256("WITHDRAW_PERMISSION");
-
-    /// @notice The ID of the permission required to call the `setSignatureValidator` function.
-    bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
-        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
 
     /// @notice The ID of the permission required to call the `setTrustedForwarder` function.
     bytes32 public constant SET_TRUSTED_FORWARDER_PERMISSION_ID =
         keccak256("SET_TRUSTED_FORWARDER_PERMISSION");
+
+    /// @notice The ID of the permission required to call the `setSignatureValidator` function.
+    bytes32 public constant SET_SIGNATURE_VALIDATOR_PERMISSION_ID =
+        keccak256("SET_SIGNATURE_VALIDATOR_PERMISSION");
 
     /// @notice The ID of the permission required to call the `registerStandardCallback` function.
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
@@ -98,6 +98,23 @@ contract DAO is
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
         __PermissionManager_init(_initialOwner);
+    }
+
+    /// @inheritdoc PermissionManager
+    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
+        internal
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        return
+            _permissionId == EXECUTE_PERMISSION_ID ||
+            _permissionId == UPGRADE_DAO_PERMISSION_ID ||
+            _permissionId == SET_METADATA_PERMISSION_ID ||
+            _permissionId == WITHDRAW_PERMISSION_ID ||
+            _permissionId == SET_SIGNATURE_VALIDATOR_PERMISSION_ID ||
+            _permissionId == REGISTER_STANDARD_CALLBACK_PERMISSION_ID;
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).

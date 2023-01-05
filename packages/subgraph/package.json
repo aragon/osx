@@ -1,6 +1,6 @@
 {
   "name": "@aragon/core-subgraph",
-  "version": "0.4.0-alpha",
+  "version": "0.5.0-alpha",
   "description": "Aragon V2 Subgraph",
   "homepage": "https://github.com/aragon/core",
   "license": "MIT",
@@ -14,7 +14,7 @@
     "deploy:local": "LOCAL=true scripts/deploy-subgraph.sh",
     "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
     "stop:dev": "docker-compose -f docker/docker-compose.yml down",
-    "test": "rm -r tests/.bin/**; graph test",
+    "test": "graph test -r",
     "coverage": "graph test -c"
   },
   "devDependencies": {

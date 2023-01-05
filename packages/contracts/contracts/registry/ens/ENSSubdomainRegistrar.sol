@@ -30,21 +30,21 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @notice The address of the ENS resolver resolving the names to an address.
     address public resolver;
 
-    /// @notice Thrown if the registrar is not authorized and is neither the domain node owner nor an approved operator of the domain node owner.
-    /// @param nodeOwner The node owner.
-    /// @param here The address of this registry.
-    error UnauthorizedRegistrar(address nodeOwner, address here);
-
     /// @notice Thrown if the subnode is already registered.
     /// @param subnode The subnode namehash.
     /// @param nodeOwner The node owner address.
     error AlreadyRegistered(bytes32 subnode, address nodeOwner);
 
+    /// @notice Thrown if node's resolver is invalid.
+    /// @param node The node namehash.
+    /// @param resolver The node resolver address.
+    error InvalidResolver(bytes32 node, address resolver);
+    
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the component by
     /// - checking that the contract is the domain node owner or an approved operator
     /// - initializing the underlying component
@@ -58,18 +58,18 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
         ENS _ens,
         bytes32 _node
     ) external initializer {
-        address nodeOwner = _ens.owner(_node); // The `initializer` modifier acts as a re-entrancy guard so doing an external calls early is ok.
-
-        // This contract must either be the domain node owner or an approved operator of the node owner.
-        if (nodeOwner != address(this) && !_ens.isApprovedForAll(nodeOwner, address(this))) {
-            revert UnauthorizedRegistrar({nodeOwner: nodeOwner, here: address(this)});
-        }
-
         __DaoAuthorizableUpgradeable_init(_managingDao);
 
         ens = _ens;
         node = _node;
-        resolver = ens.resolver(_node);
+
+        address nodeResolver = ens.resolver(_node);
+
+        if (nodeResolver == address(0)) {
+            revert InvalidResolver({node: _node, resolver: nodeResolver});
+        }
+
+        resolver = nodeResolver;
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
@@ -82,6 +82,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     {}
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
+    /// @dev It reverts with no message if this contract isn't the owner nor an approved operator for the given node.
     /// @param _label The labelhash of the subdomain name.
     /// @param _targetAddress The address to which the subdomain resolves.
     function registerSubnode(bytes32 _label, address _targetAddress)
@@ -102,11 +103,15 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
 
     /// @notice Sets the default resolver contract address that the subdomains being registered will use.
     /// @param _resolver The resolver contract to be used.
-    function setDefaultResolver(Resolver _resolver)
+    function setDefaultResolver(address _resolver)
         external
         auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID)
     {
-        resolver = address(_resolver);
+        if (_resolver == address(0)) {
+            revert InvalidResolver({node: node, resolver: _resolver});
+        }
+
+        resolver = _resolver;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

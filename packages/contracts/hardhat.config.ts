@@ -56,6 +56,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     currency: 'USD',
   },
   etherscan: {
@@ -73,7 +74,7 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   docgen: {
-    outputDir: 'docs/generated',
+    outputDir: 'docs/core/03-reference-guide',
     theme: 'markdown',
     pages: 'files',
     templates: 'docs/templates',

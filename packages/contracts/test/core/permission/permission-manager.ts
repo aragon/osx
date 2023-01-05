@@ -4,9 +4,16 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {PermissionManagerTest, PermissionOracleMock} from '../../../typechain';
 import {customError} from '../../test-utils/custom-error-helper';
+import {DeployTestPermissionOracle} from '../../test-utils/oracles';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');
 const ADMIN_PERMISSION_ID = ethers.utils.id('ADMIN_PERMISSION');
+const RESTRICTED_PERMISSIONS_FOR_ANY_ADDR = [
+  ROOT_PERMISSION_ID,
+  ethers.utils.id('TEST_PERMISSION_1'),
+  ethers.utils.id('TEST_PERMISSION_2'),
+];
+
 const UNSET_FLAG = ethers.utils.getAddress(
   '0x0000000000000000000000000000000000000000'
 );
@@ -15,9 +22,9 @@ const ALLOW_FLAG = ethers.utils.getAddress(
 );
 
 const addressZero = ethers.constants.AddressZero;
-const ANY_ADDR = "0xffffffffffffffffffffffffffffffffffffffff";
+const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 
-enum Operation {
+export enum Operation {
   Grant,
   Revoke,
   Freeze,
@@ -89,20 +96,31 @@ describe('Core: PermissionManager', function () {
       expect(permission).to.be.equal(ALLOW_FLAG);
     });
 
-    it('reverts if the `ROOT_PERMISSION_ID permission is granted with `_who = ANY_ADDR`', async () => {
+    it('reverts if both `_who = ANY_ADDR` and `_where == ANY_ADDR', async () => {
       await expect(
-        pm.grant(pm.address, ANY_ADDR, ROOT_PERMISSION_ID)
-      ).to.be.revertedWith(
-        customError('RootPermissionForAnyAddressDisallowed')
-      );
+        pm.grant(ANY_ADDR, ANY_ADDR, ROOT_PERMISSION_ID)
+      ).to.be.revertedWith(customError('AnyAddressDisallowedForWhoAndWhere'));
     });
 
-    it('reverts if the `ROOT_PERMISSION_ID permission is granted with `where = ANY_ADDR`', async () => {
+    it('reverts if permissionId is restricted and `_who = ANY_ADDR` or `_where = ANY_ADDR`', async () => {
+      for (let i = 0; i < RESTRICTED_PERMISSIONS_FOR_ANY_ADDR.length; i++) {
+        await expect(
+          pm.grant(pm.address, ANY_ADDR, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[i])
+        ).to.be.revertedWith(customError('PermissionsForAnyAddressDisallowed'));
+        await expect(
+          pm.grant(ANY_ADDR, pm.address, RESTRICTED_PERMISSIONS_FOR_ANY_ADDR[i])
+        ).to.be.revertedWith(customError('PermissionsForAnyAddressDisallowed'));
+      }
+    });
+
+    it('reverts if permissionId is not restricted and`_who = ANY_ADDR` or `_where = ANY_ADDR` and oracle is not present', async () => {
       await expect(
-        pm.grant(ANY_ADDR, pm.address, ROOT_PERMISSION_ID)
-      ).to.be.revertedWith(
-        customError('RootPermissionForAnyAddressDisallowed')
-      );
+        pm.grant(pm.address, ANY_ADDR, ADMIN_PERMISSION_ID)
+      ).to.be.revertedWith(customError('OracleNotPresentForAnyAddress'));
+
+      await expect(
+        pm.grant(ANY_ADDR, pm.address, ADMIN_PERMISSION_ID)
+      ).to.be.revertedWith(customError('OracleNotPresentForAnyAddress'));
     });
 
     it('should emit Granted', async () => {
@@ -195,6 +213,26 @@ describe('Core: PermissionManager', function () {
       ).to.emit(pm, 'Granted');
     });
 
+    it('should emit Granted when oracle is present and `who = ANY_ADDR` or `where = ANY_ADDR`', async () => {
+      await expect(
+        pm.grantWithOracle(
+          pm.address,
+          ANY_ADDR,
+          ADMIN_PERMISSION_ID,
+          pm.address // not oracle, but enough for the call to succeed.
+        )
+      ).to.emit(pm, 'Granted');
+
+      await expect(
+        pm.grantWithOracle(
+          ANY_ADDR,
+          pm.address,
+          ADMIN_PERMISSION_ID,
+          pm.address // not oracle, but enough for the call to succeed.
+        )
+      ).to.emit(pm, 'Granted');
+    });
+
     it('should revert with already granted', async () => {
       await pm.grantWithOracle(
         pm.address,
@@ -217,6 +255,17 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID
         )
       );
+    });
+
+    it('should revert when oracle is not present for `who = ANY_ADDR` or `where = ANY_ADDR` and permissionId is not restricted', async () => {
+      await expect(
+        pm.grantWithOracle(
+          pm.address,
+          ANY_ADDR,
+          ADMIN_PERMISSION_ID,
+          ALLOW_FLAG
+        )
+      ).to.be.revertedWith(customError('OracleNotPresentForAnyAddress'));
     });
 
     it('should revert if frozen', async () => {
@@ -447,9 +496,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('reverts if `_where` is `ANY_ADDR`', async () => {
-      await expect(
-        pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWith(
+      await expect(pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)).to.be.revertedWith(
         customError('FreezeOnAnyAddressDisallowed')
       );
     });
@@ -865,26 +912,33 @@ describe('Core: PermissionManager', function () {
 
     it('should return true for permissions granted to any address on a specific target contract using the `ANY_ADDR` flag', async () => {
       const anyAddr = await pm.getAnyAddr();
-      await pm.grant(pm.address, anyAddr, ADMIN_PERMISSION_ID);
-      const isGranted = await pm.callStatic.isGranted(
+      const oracle = await DeployTestPermissionOracle();
+      await pm.grantWithOracle(
         pm.address,
-        otherSigner.address,
+        anyAddr,
         ADMIN_PERMISSION_ID,
-        []
+        oracle.address
       );
-      expect(isGranted).to.be.equal(true);
-    });
-
-    it('should return true for permissions granted to a specifc address on any target contract using the `ANY_ADDR` flag', async () => {
-      const anyAddr = await pm.getAnyAddr();
-      await pm.grant(anyAddr, otherSigner.address, ADMIN_PERMISSION_ID);
-      const isGranted = await pm.callStatic.isGranted(
+      await pm.grantWithOracle(
+        anyAddr,
         pm.address,
-        otherSigner.address,
         ADMIN_PERMISSION_ID,
-        []
+        oracle.address
       );
-      expect(isGranted).to.be.equal(true);
+      const isGranted_1 = await pm.callStatic.isGranted(
+        pm.address,
+        anyAddr,
+        ADMIN_PERMISSION_ID,
+        oracle.address
+      );
+      const isGranted_2 = await pm.callStatic.isGranted(
+        pm.address,
+        anyAddr,
+        ADMIN_PERMISSION_ID,
+        oracle.address
+      );
+      expect(isGranted_1).to.be.equal(true);
+      expect(isGranted_2).to.be.equal(true);
     });
 
     it('should be callable by anyone', async () => {
@@ -930,10 +984,7 @@ describe('Core: PermissionManager', function () {
     let permissionOracle: PermissionOracleMock;
 
     beforeEach(async () => {
-      const aclOracleFactory = await ethers.getContractFactory(
-        'PermissionOracleMock'
-      );
-      permissionOracle = await aclOracleFactory.deploy();
+      permissionOracle = await DeployTestPermissionOracle();
     });
 
     it('should call IPermissionOracle.isGranted', async () => {

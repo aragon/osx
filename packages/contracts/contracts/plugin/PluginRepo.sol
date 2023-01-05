@@ -12,6 +12,7 @@ import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
+import {isValidBumpStrict, BumpInvalid} from "./SemanticVersioning.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -50,11 +51,6 @@ contract PluginRepo is
     /// @notice A mapping between the `PluginSetup` contract addresses and the version index.
     mapping(address => uint256) internal versionIndexForPluginSetup;
 
-    /// @notice Thrown if a semantic version number bump is invalid.
-    /// @param currentVersion The current semantic version number.
-    /// @param nextVersion The next semantic version number.
-    error InvalidBump(uint16[3] currentVersion, uint16[3] nextVersion);
-
     /// @notice Thrown if version does not exist.
     /// @param versionIndex The index of the version.
     error VersionIndexDoesNotExist(uint256 versionIndex);
@@ -74,7 +70,14 @@ contract PluginRepo is
     /// @notice Emitted when a new version is created.
     /// @param versionId The version index.
     /// @param semanticVersion The semantic version number.
-    event VersionCreated(uint256 versionId, uint16[3] semanticVersion);
+    /// @param pluginSetup The address of the plugin setup contract.
+    /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
+    event VersionCreated(
+        uint256 versionId,
+        uint16[3] semanticVersion,
+        address indexed pluginSetup,
+        bytes contentURI
+    );
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -128,8 +131,8 @@ contract PluginRepo is
             currentSemanticVersion = currentVersion.semanticVersion;
         }
 
-        if (!isValidBump(currentSemanticVersion, _newSemanticVersion)) {
-            revert InvalidBump({
+        if (!isValidBumpStrict(currentSemanticVersion, _newSemanticVersion)) {
+            revert BumpInvalid({
                 currentVersion: currentSemanticVersion,
                 nextVersion: _newSemanticVersion
             });
@@ -141,7 +144,7 @@ contract PluginRepo is
         versionIndexForSemantic[_semanticVersionHash(_newSemanticVersion)] = versionIndex;
         versionIndexForPluginSetup[_pluginSetup] = versionIndex;
 
-        emit VersionCreated(versionIndex, _newSemanticVersion);
+        emit VersionCreated(versionIndex, _newSemanticVersion, _pluginSetup, _contentURI);
     }
 
     /// @notice Gets the version information of the latest version.
@@ -217,33 +220,6 @@ contract PluginRepo is
         return nextVersionIndex - 1;
     }
 
-    /// @notice Checks if a version bump is valid.
-    /// @param _oldVersion The old semantic version number.
-    /// @param _newVersion The new semantic version number.
-    /// @return bool Returns true if the bump is valid.
-    function isValidBump(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
-        public
-        pure
-        returns (bool)
-    {
-        bool hasBumped;
-        uint256 i = 0;
-        while (i < 3) {
-            if (hasBumped) {
-                if (_newVersion[i] != 0) {
-                    return false;
-                }
-            } else if (_newVersion[i] != _oldVersion[i]) {
-                if (_oldVersion[i] > _newVersion[i] || _newVersion[i] - _oldVersion[i] != 1) {
-                    return false;
-                }
-                hasBumped = true;
-            }
-            i = _uncheckedIncrement(i);
-        }
-        return hasBumped;
-    }
-
     /// @notice Generates a hash from a semantic version number.
     /// @param semanticVersion The semantic version number.
     /// @return bytes32 The hash of the semantic version number.
@@ -262,8 +238,8 @@ contract PluginRepo is
     {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IPluginRepo).interfaceId ||

@@ -1,25 +1,29 @@
-import { Address, Bytes, store } from '@graphprotocol/graph-ts';
+import {Address, Bytes, store} from '@graphprotocol/graph-ts';
 
 import {
-  DAO as DAOContract,
   MetadataSet,
   Executed,
   Deposited,
   NativeTokenDeposited,
   Granted,
   Frozen,
-  Revoked
+  Revoked,
+  Withdrawn,
+  TrustedForwarderSet,
+  SignatureValidatorSet,
+  StandardCallbackRegistered
 } from '../../generated/templates/DaoTemplate/DAO';
 import {
   Dao,
   ContractPermissionId,
   Permission,
-  VaultTransfer
+  VaultTransfer,
+  StandardCallback
 } from '../../generated/schema';
 
-import { ADDRESS_ZERO } from '../utils/constants';
-import { handleERC20Token, updateBalance } from '../utils/tokens';
-import { addPackage, decodeWithdrawParams, removePackage } from './utils';
+import {ADDRESS_ZERO} from '../utils/constants';
+import {handleERC20Token, updateBalance} from '../utils/tokens';
+import {decodeWithdrawParams} from './utils';
 
 export function handleMetadataSet(event: MetadataSet): void {
   let daoId = event.address.toHexString();
@@ -66,9 +70,8 @@ export function handleDeposited(event: Deposited): void {
   entity.reference = event.params._reference;
   entity.transaction = event.transaction.hash.toHexString();
   entity.createdAt = event.block.timestamp;
-  entity.type = "Deposit";
+  entity.type = 'Deposit';
   entity.save();
-
 }
 
 export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
@@ -102,7 +105,7 @@ export function handleNativeTokenDeposited(event: NativeTokenDeposited): void {
   entity.reference = 'Eth deposit';
   entity.transaction = event.transaction.hash.toHexString();
   entity.createdAt = event.block.timestamp;
-  entity.type = "Deposit";
+  entity.type = 'Deposit';
   entity.save();
 }
 
@@ -162,7 +165,13 @@ export function handleExecuted(event: Executed): void {
         '_' +
         event.transactionLogIndex.toHexString() +
         '_' +
-        index.toString();
+        withdrawParams.to.toHexString() +
+        '_' +
+        withdrawParams.amount.toString() +
+        '_' +
+        tokenId +
+        '_' +
+        withdrawParams.reference;
 
       let vaultWithdrawEntity = new VaultTransfer(withdrawId);
       vaultWithdrawEntity.dao = daoId;
@@ -173,7 +182,7 @@ export function handleExecuted(event: Executed): void {
       vaultWithdrawEntity.proposal = proposalId;
       vaultWithdrawEntity.transaction = event.transaction.hash.toHexString();
       vaultWithdrawEntity.createdAt = event.block.timestamp;
-      vaultWithdrawEntity.type = "Withdraw";
+      vaultWithdrawEntity.type = 'Withdraw';
       vaultWithdrawEntity.save();
     }
   }
@@ -211,17 +220,6 @@ export function handleGranted(event: Granted): void {
   permissionEntity.actor = event.params.here;
   permissionEntity.oracle = event.params.oracle;
   permissionEntity.save();
-
-  // Package
-  let daoContract = DAOContract.bind(event.address);
-  // TODO: perhaps hardcoding exec contractPermissionId will be more efficient.
-  let executionContractPermissionId = daoContract.try_EXECUTE_PERMISSION_ID();
-  if (
-    !executionContractPermissionId.reverted &&
-    event.params.permissionId == executionContractPermissionId.value
-  ) {
-    addPackage(daoId, event.params.who);
-  }
 }
 
 export function handleRevoked(event: Revoked): void {
@@ -235,18 +233,6 @@ export function handleRevoked(event: Revoked): void {
   let permissionEntity = Permission.load(permissionId);
   if (permissionEntity) {
     store.remove('Permission', permissionId);
-  }
-
-  // Package
-  // TODO: rethink this once the market place is ready
-  let daoId = event.address.toHexString();
-  let daoContract = DAOContract.bind(event.address);
-  let executionContractPermissionId = daoContract.try_EXECUTE_PERMISSION_ID();
-  if (
-    !executionContractPermissionId.reverted &&
-    event.params.permissionId == executionContractPermissionId.value
-  ) {
-    removePackage(daoId, event.params.who.toHexString());
   }
 }
 
@@ -269,4 +255,87 @@ export function handleFrozen(event: Frozen): void {
   }
   contractPermissionIdEntity.frozen = true;
   contractPermissionIdEntity.save();
+}
+
+export function handleWithdrawn(event: Withdrawn): void {
+  let daoId = event.address.toHexString();
+  let token = event.params.token;
+  let tokenId = handleERC20Token(token);
+  let withdrawnId =
+    daoId +
+    '_' +
+    event.transaction.hash.toHexString() +
+    '_' +
+    event.transactionLogIndex.toHexString() +
+    '_' +
+    event.params.to.toHexString() +
+    '_' +
+    event.params.amount.toString() +
+    '_' +
+    tokenId +
+    '_' +
+    event.params._reference;
+  let balanceId = `${daoId}_${token.toHexString()}`;
+
+  let entity = VaultTransfer.load(withdrawnId);
+  if (entity) {
+    return;
+  }
+
+  updateBalance(
+    balanceId,
+    event.address,
+    token,
+    event.params.amount,
+    false,
+    event.block.timestamp
+  );
+
+  entity = new VaultTransfer(withdrawnId);
+  entity.dao = daoId;
+  entity.token = tokenId;
+  entity.sender = event.address;
+  entity.to = event.params.to;
+  entity.amount = event.params.amount;
+  entity.reference = event.params._reference;
+  entity.transaction = event.transaction.hash.toHexString();
+  entity.createdAt = event.block.timestamp;
+  entity.type = 'Withdraw';
+  entity.save();
+}
+
+export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {
+  let daoId = event.address.toHexString();
+  let entity = Dao.load(daoId);
+  if (entity) {
+    entity.trustedForwarder = event.params.forwarder;
+    entity.save();
+  }
+}
+
+export function handleSignatureValidatorSet(
+  event: SignatureValidatorSet
+): void {
+  let daoId = event.address.toHexString();
+  let entity = Dao.load(daoId);
+  if (entity) {
+    entity.signatureValidator = event.params.signatureValidator;
+    entity.save();
+  }
+}
+
+export function handleStandardCallbackRegistered(
+  event: StandardCallbackRegistered
+): void {
+  let daoId = event.address.toHexString();
+  let entityId = `${daoId}_${event.params.interfaceId.toHexString()}`;
+  let entity = StandardCallback.load(entityId);
+  if (!entity) {
+    entity = new StandardCallback(entityId);
+    entity.dao = daoId;
+  }
+  entity.interfaceId = event.params.interfaceId;
+  entity.callbackSelector = event.params.callbackSelector;
+  entity.magicNumber = event.params.magicNumber;
+  entity.save();
 }

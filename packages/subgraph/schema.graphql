@@ -2,11 +2,24 @@
 
 # Token
 
-type ERC20Token @entity {
+interface Token {
+  id: ID! # use address as id
+  name: String
+  symbol: String
+}
+
+type ERC20Token implements Token @entity(immutable: true) {
   id: ID! # use address as id
   name: String
   symbol: String
   decimals: BigInt
+}
+
+type ERC721Token implements Token @entity(immutable: true) {
+  id: ID! # use address as id
+  name: String
+  symbol: String
+  baseURI: String
 }
 
 type Balance @entity {
@@ -21,7 +34,7 @@ type Balance @entity {
 
 # ACL
 
-type ContractPermissionId @entity {
+type ContractPermissionId @entity(immutable: true) {
   id: ID! # where + permissionId
   dao: Dao!
   where: Bytes!
@@ -29,7 +42,7 @@ type ContractPermissionId @entity {
   frozen: Boolean!
 }
 
-type Permission @entity {
+type Permission @entity(immutable: true) {
   "no need to store granted as we can delete permission when revoked"
   id: ID! # where + permissionId + who
   dao: Dao!
@@ -59,7 +72,7 @@ enum TransferType {
   Deposit
 }
 
-type VaultTransfer @entity {
+type VaultTransfer @entity(immutable: true) {
   id: ID!
   dao: Dao!
   token: ERC20Token
@@ -71,6 +84,14 @@ type VaultTransfer @entity {
   proposal: Proposal
   createdAt: BigInt!
   type: TransferType!
+}
+
+type StandardCallback @entity {
+  id: ID!
+  dao: Dao!
+  interfaceId: Bytes!
+  callbackSelector: Bytes!
+  magicNumber: Bytes!
 }
 
 # Dao
@@ -87,27 +108,77 @@ type Dao @entity {
   balances: [Balance!] @derivedFrom(field: "dao")
   contractPermissionIds: [ContractPermissionId!]! @derivedFrom(field: "dao")
   permissions: [Permission!]! @derivedFrom(field: "dao")
-  packages: [DaoPackage!] @derivedFrom(field: "dao")
+  plugins: [DaoPlugin!] @derivedFrom(field: "dao")
   proposals: [Proposal!] @derivedFrom(field: "dao")
+  "TODO: remove or rename to `plugins` once plugins are seperated from the core"
+  corePlugins: [Plugin!] @derivedFrom(field: "dao")
+  trustedForwarder: Bytes
+  signatureValidator: Bytes
+  standardCallbacks: [StandardCallback!] @derivedFrom(field: "dao")
 }
 
-# Packages
+# Plugins
 
-type DaoPackage @entity {
-  id: ID! # Dao + Package
-  pkg: Package!
+type PluginSetup @entity(immutable: true) {
+  id: ID! # contract address
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
+  installations: [Plugin!]! @derivedFrom(field: "pluginSetup")
+}
+
+type PluginVersion @entity(immutable: true) {
+  id: ID! # pluginRepo + version index
+  pluginRepo: PluginRepo!
+  semanticVersion: [BigInt!]!
+  pluginSetup: PluginSetup!
+  contentURI: Bytes!
+}
+
+type PluginRepo @entity(immutable: true) {
+  id: ID! # address
+  name: String!
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+}
+
+type PluginHelper @entity(immutable: true) {
+  id: ID! # address
+  plugin: Plugin!
+}
+
+type Plugin @entity {
+  "TODO: should do `implements IPlugin` once plugin is seperated from core"
+  id: ID! # address
+  dao: Dao!
+  pluginSetup: PluginSetup!
+  data: Bytes!
+  helpers: [PluginHelper!]! @derivedFrom(field: "plugin")
+  state: PluginState!
+  sender: String!
+}
+
+enum PluginState {
+  InstallationPrepared
+  Installed
+  UpdatePrepared
+  UninstallPrepared
+  Uninstalled
+}
+
+type DaoPlugin @entity {
+  id: ID! # Dao + Plugin
+  plugin: IPlugin!
   dao: Dao!
 }
 
-interface Package {
+interface IPlugin {
   id: ID! # address
-  daos: [DaoPackage!] @derivedFrom(field: "pkg")
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
 }
 
+### Entities below should move to there respective subgraph once plugin is seperated from core
 # Proposal
 
 interface Proposal {
-  id: ID! # package + voteId
+  id: ID! # package + proposalId
   dao: Dao!
   creator: Bytes!
   metadata: String
@@ -125,114 +196,229 @@ enum VoteOption {
   No
 }
 
-# ERC20Voting
-
-type ERC20VotingPackage implements Package @entity {
-  id: ID!
-  daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  proposals: [ERC20VotingProposal!]! @derivedFrom(field: "pkg")
-  supportRequiredPct: BigInt
-  participationRequiredPct: BigInt
-  minDuration: BigInt
-  votesLength: BigInt
-  token: ERC20Token
-  members: [ERC20VotingVoter!]! @derivedFrom(field: "pkg")
+enum VotingMode {
+  Standard
+  EarlyExecution
+  VoteReplacement
 }
 
-type ERC20VotingVoter @entity {
+# TokenVoting
+
+type TokenVotingPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugins once plugin is seperated from core"
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposals: [TokenVotingProposal!]! @derivedFrom(field: "plugin")
+  votingMode: VotingMode
+  supportThreshold: BigInt
+  minParticipation: BigInt
+  minDuration: BigInt
+  minProposerVotingPower: BigInt
+  proposalCount: BigInt
+  token: Token
+  members: [TokenVotingVoter!]! @derivedFrom(field: "plugin")
+}
+
+type TokenVotingVoter @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [ERC20Vote!]! @derivedFrom(field: "voter")
-  pkg: ERC20VotingPackage!
+  proposals: [TokenVotingVote!]! @derivedFrom(field: "voter")
+  plugin: TokenVotingPlugin!
   lastUpdated: BigInt
 }
 
-type ERC20Vote @entity {
+type TokenVotingVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
-  voter: ERC20VotingVoter!
-  proposal: ERC20VotingProposal!
-  vote: VoteOption!
-  weight: BigInt!
+  voter: TokenVotingVoter!
+  proposal: TokenVotingProposal!
+  voteOption: VoteOption!
+  votingPower: BigInt!
   createdAt: BigInt!
 }
 
-type ERC20VotingProposal implements Proposal @entity {
-  id: ID! # package + voteId
+type TokenVotingProposal implements Proposal @entity {
+  id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: ERC20VotingPackage!
-  voteId: BigInt!
+  plugin: TokenVotingPlugin!
+  proposalId: BigInt!
   creator: Bytes!
   metadata: String
+
+  votingMode: VotingMode!
+  supportThreshold: BigInt!
+  minParticipation: BigInt!
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
-  supportRequiredPct: BigInt!
-  participationRequiredPct: BigInt!
+
   yes: BigInt
   no: BigInt
   abstain: BigInt
-  voteCount: BigInt
-  votingPower: BigInt!
-  voters: [ERC20Vote!]! @derivedFrom(field: "proposal")
+  castedVotingPower: BigInt
+  totalVotingPower: BigInt!
+
+  voters: [TokenVotingVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  creationBlockNumber: BigInt!
   executable: Boolean
+  executionDate: BigInt
+  executionBlockNumber: BigInt
 }
 
-# AllowlistVoting
+# AddresslistVoting
 
-type AllowlistPackage implements Package @entity {
+type AddresslistVotingPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
   id: ID!
-  daos: [DaoPackage!] @derivedFrom(field: "pkg")
-  proposals: [AllowlistProposal!]! @derivedFrom(field: "pkg")
-  supportRequiredPct: BigInt
-  participationRequiredPct: BigInt
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposals: [AddresslistVotingProposal!]! @derivedFrom(field: "plugin")
+  votingMode: VotingMode
+  supportThreshold: BigInt
+  minParticipation: BigInt
   minDuration: BigInt
-  votesLength: BigInt
-  members: [AllowlistVoter!]! @derivedFrom(field: "pkg")
+  minProposerVotingPower: BigInt
+  proposalCount: BigInt
+  members: [AddresslistVotingVoter!]! @derivedFrom(field: "plugin")
 }
 
-type AllowlistVoter @entity {
+type AddresslistVotingVoter @entity {
   id: ID! # address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [AllowlistVote!]! @derivedFrom(field: "voter")
-  pkg: AllowlistPackage!
+  proposals: [AddresslistVotingVote!]! @derivedFrom(field: "voter")
+  plugin: AddresslistVotingPlugin!
 }
 
-type AllowlistVote @entity {
+type AddresslistVotingVote @entity {
   "VoterProposal for Many-to-Many"
   id: ID! # voter + proposal
-  voter: AllowlistVoter!
-  proposal: AllowlistProposal!
-  vote: VoteOption!
-  weight: BigInt!
+  voter: AddresslistVotingVoter!
+  proposal: AddresslistVotingProposal!
+  voteOption: VoteOption!
+  votingPower: BigInt!
   createdAt: BigInt!
 }
 
-type AllowlistProposal implements Proposal @entity {
-  id: ID! # package + voteId
+type AddresslistVotingProposal implements Proposal @entity {
+  id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
-  pkg: AllowlistPackage!
-  voteId: BigInt!
+  plugin: AddresslistVotingPlugin!
+  proposalId: BigInt!
   creator: Bytes!
   metadata: String
+
+  votingMode: VotingMode!
+  supportThreshold: BigInt!
+  minParticipation: BigInt!
   startDate: BigInt!
   endDate: BigInt!
   snapshotBlock: BigInt!
-  supportRequiredPct: BigInt!
-  participationRequired: BigInt!
-  votingPower: BigInt!
+
+  abstain: BigInt
   yes: BigInt
   no: BigInt
-  abstain: BigInt
-  voteCount: BigInt
-  voters: [AllowlistVote!]! @derivedFrom(field: "proposal")
+  castedVotingPower: BigInt
+  totalVotingPower: BigInt!
+
+  voters: [AddresslistVotingVote!]! @derivedFrom(field: "proposal")
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  creationBlockNumber: BigInt!
   executable: Boolean
+  executionDate: BigInt
+  executionBlockNumber: BigInt
+}
+
+# Admin (plugin)
+
+type AdminPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposals: [AdminProposal!]! @derivedFrom(field: "plugin")
+  adminstrators: [AdminstratorAdminPlugin!]! @derivedFrom(field: "plugin")
+}
+
+type Adminstrator @entity {
+  id: ID! # address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [AdminProposal!]! @derivedFrom(field: "adminstrator")
+  plugins: [AdminstratorAdminPlugin!]! @derivedFrom(field: "administrator")
+}
+
+type AdminstratorAdminPlugin @entity {
+  "for Many-to-Many"
+  id: ID! # Adminstrator + plugin
+  administrator: Adminstrator!
+  plugin: AdminPlugin!
+}
+
+type AdminProposal implements Proposal @entity {
+  id: ID! # plugin + proposalId
+  dao: Dao!
+  creator: Bytes! # Adminstrator address
+  metadata: String
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  executed: Boolean!
+  createdAt: BigInt!
+  plugin: AdminPlugin!
+  proposalId: BigInt!
+  adminstrator: Adminstrator!
+}
+
+# Multisig
+
+type MultisigPlugin implements IPlugin @entity {
+  "TODO: attributes should be appended to Plugin once plugin is seperated from core"
+  id: ID!
+  daos: [DaoPlugin!] @derivedFrom(field: "plugin")
+  proposalCount: BigInt
+  proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
+  members: [MultisigApprover!]! @derivedFrom(field: "plugin")
+  
+  # multisig settings
+  minApprovals: BigInt
+  onlyListed: Boolean!
+}
+
+type MultisigApprover @entity {
+  id: ID! # plugin_address + member_address
+  address: String # address as string to facilitate filtering by address on the UI
+  proposals: [MultisigProposalApprover!]! @derivedFrom(field: "approver")
+  plugin: MultisigPlugin!
+}
+
+type MultisigProposalApprover @entity(immutable: true) {
+  "ApproverProposal for Many-to-Many"
+  id: ID! # approver + proposal
+  approver: MultisigApprover!
+  proposal: MultisigProposal!
+  createdAt: BigInt!
+}
+
+type MultisigProposal implements Proposal @entity {
+  id: ID! # plugin + proposalId
+  dao: Dao!
+  actions: [Action!]! @derivedFrom(field: "proposal")
+  plugin: MultisigPlugin!
+  proposalId: BigInt!
+  creator: Bytes!
+  metadata: String
+  createdAt: BigInt!
+  creationBlockNumber: BigInt!
+  open: Boolean!
+  snapshotBlock: BigInt!
+  minApprovals: BigInt!
+  addresslistLength: BigInt!
+  approvals: BigInt
+  executable: Boolean
+  executed: Boolean!
+  executionDate: BigInt
+  executionBlockNumber: BigInt
+  approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
 }

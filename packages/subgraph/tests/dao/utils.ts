@@ -9,7 +9,11 @@ import {
   Granted,
   Revoked,
   Frozen,
-  Executed
+  Executed,
+  Withdrawn,
+  TrustedForwarderSet,
+  SignatureValidatorSet,
+  StandardCallbackRegistered
 } from '../../generated/templates/DaoTemplate/DAO';
 
 // events
@@ -31,6 +35,48 @@ export function createNewMetadataSetEvent(
   newMetadataSetEvent.parameters.push(metadataParam);
 
   return newMetadataSetEvent;
+}
+
+export function createTrustedForwarderSetEvent(
+  trustedForwarder: string,
+  contractAddress: string
+): TrustedForwarderSet {
+  let newTrustedForwarderSetEvent = changetype<TrustedForwarderSet>(
+    newMockEvent()
+  );
+
+  newTrustedForwarderSetEvent.address = Address.fromString(contractAddress);
+  newTrustedForwarderSetEvent.parameters = [];
+
+  let trustedForwarderParam = new ethereum.EventParam(
+    'trustedForwarder',
+    ethereum.Value.fromAddress(Address.fromString(trustedForwarder))
+  );
+
+  newTrustedForwarderSetEvent.parameters.push(trustedForwarderParam);
+
+  return newTrustedForwarderSetEvent;
+}
+
+export function createSignatureValidatorSetEvent(
+  signatureValidator: string,
+  contractAddress: string
+): SignatureValidatorSet {
+  let newSignatureValidatorSetEvent = changetype<SignatureValidatorSet>(
+    newMockEvent()
+  );
+
+  newSignatureValidatorSetEvent.address = Address.fromString(contractAddress);
+  newSignatureValidatorSetEvent.parameters = [];
+
+  let trustedForwarderParam = new ethereum.EventParam(
+    'signatureValidator',
+    ethereum.Value.fromAddress(Address.fromString(signatureValidator))
+  );
+
+  newSignatureValidatorSetEvent.parameters.push(trustedForwarderParam);
+
+  return newSignatureValidatorSetEvent;
 }
 
 export function createNewNativeTokenDepositedEvent(
@@ -95,11 +141,47 @@ export function createNewDepositedEvent(
   return newEvent;
 }
 
+export function createNewWithdrawnEvent(
+  token: string,
+  to: string,
+  amount: string,
+  reference: string,
+  contractAddress: string
+): Withdrawn {
+  let newEvent = changetype<Withdrawn>(newMockEvent());
+  newEvent.address = Address.fromString(contractAddress);
+  newEvent.parameters = [];
+
+  let tokenParam = new ethereum.EventParam(
+    'token',
+    ethereum.Value.fromAddress(Address.fromString(token))
+  );
+  let toParam = new ethereum.EventParam(
+    'to',
+    ethereum.Value.fromAddress(Address.fromString(to))
+  );
+  let amountParam = new ethereum.EventParam(
+    'amount',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(amount))
+  );
+  let referenceParam = new ethereum.EventParam(
+    '_reference',
+    ethereum.Value.fromString(reference)
+  );
+
+  newEvent.parameters.push(tokenParam);
+  newEvent.parameters.push(toParam);
+  newEvent.parameters.push(amountParam);
+  newEvent.parameters.push(referenceParam);
+
+  return newEvent;
+}
+
 export function createNewGrantedEvent(
   contractPermissionId: Bytes,
   actor: string,
-  who: string,
   where: string,
+  who: string,
   oracle: string,
   contractAddress: string
 ): Granted {
@@ -116,13 +198,13 @@ export function createNewGrantedEvent(
     'actor',
     ethereum.Value.fromAddress(Address.fromString(actor))
   );
-  let whoParam = new ethereum.EventParam(
-    'who',
-    ethereum.Value.fromAddress(Address.fromString(who))
-  );
   let whereParam = new ethereum.EventParam(
     'where',
     ethereum.Value.fromAddress(Address.fromString(where))
+  );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
   );
   let oracleParam = new ethereum.EventParam(
     'oracle',
@@ -131,8 +213,8 @@ export function createNewGrantedEvent(
 
   newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
-  newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
+  newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(oracleParam);
 
   return newGrantedEvent;
@@ -141,8 +223,8 @@ export function createNewGrantedEvent(
 export function createNewRevokedEvent(
   contractPermissionId: Bytes,
   actor: string,
-  who: string,
   where: string,
+  who: string,
   contractAddress: string
 ): Revoked {
   let newGrantedEvent = changetype<Revoked>(newMockEvent());
@@ -158,19 +240,19 @@ export function createNewRevokedEvent(
     'actor',
     ethereum.Value.fromAddress(Address.fromString(actor))
   );
-  let whoParam = new ethereum.EventParam(
-    'who',
-    ethereum.Value.fromAddress(Address.fromString(who))
-  );
   let whereParam = new ethereum.EventParam(
     'where',
     ethereum.Value.fromAddress(Address.fromString(where))
   );
+  let whoParam = new ethereum.EventParam(
+    'who',
+    ethereum.Value.fromAddress(Address.fromString(who))
+  );
 
   newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
-  newGrantedEvent.parameters.push(whoParam);
   newGrantedEvent.parameters.push(whereParam);
+  newGrantedEvent.parameters.push(whoParam);
 
   return newGrantedEvent;
 }
@@ -243,6 +325,43 @@ export function createNewExecutedEvent(
   return newExecutedEvent;
 }
 
+export function createStandardCallbackRegisteredEvent(
+  interfaceId: string,
+  callbackSelector: string,
+  magicNumber: string,
+  contractAddress: string
+): StandardCallbackRegistered {
+  let newStandardCallbackEvent = changetype<StandardCallbackRegistered>(
+    newMockEvent()
+  );
+
+  newStandardCallbackEvent.address = Address.fromString(contractAddress);
+  newStandardCallbackEvent.parameters = [];
+
+  let interfaceIdParam = new ethereum.EventParam(
+    'interfaceId',
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
+  );
+
+  let callbackSelectorParam = new ethereum.EventParam(
+    'callbackSelector',
+    ethereum.Value.fromFixedBytes(
+      Bytes.fromHexString(callbackSelector) as Bytes
+    )
+  );
+
+  let magicNumberParam = new ethereum.EventParam(
+    'magicNumber',
+    ethereum.Value.fromFixedBytes(Bytes.fromHexString(magicNumber) as Bytes)
+  );
+
+  newStandardCallbackEvent.parameters.push(interfaceIdParam);
+  newStandardCallbackEvent.parameters.push(callbackSelectorParam);
+  newStandardCallbackEvent.parameters.push(magicNumberParam);
+
+  return newStandardCallbackEvent;
+}
+
 // calls
 
 export function getBalanceOf(
@@ -284,27 +403,27 @@ export function getEXECUTE_PERMISSION_IDreverted(
     .reverts();
 }
 
-export function getSupportRequiredPct(
+export function getSupportThreshold(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'supportRequiredPct',
-    'supportRequiredPct():(uint64)'
+    'supportThreshold',
+    'supportThreshold():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getParticipationRequiredPct(
+export function getMinimalParticipation(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'participationRequiredPct',
-    'participationRequiredPct():(uint64)'
+    'minParticipation',
+    'minParticipation():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -320,11 +439,14 @@ export function getMinDuration(contractAddress: string, returns: BigInt): void {
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getVotesLength(contractAddress: string, returns: BigInt): void {
+export function getProposalCount(
+  contractAddress: string,
+  returns: BigInt
+): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'votesLength',
-    'votesLength():(uint256)'
+    'proposalCount',
+    'proposalCount():(uint256)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -347,8 +469,8 @@ export function getIsUserAllowed(
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'isAllowed',
-    'isAllowed(address,uint256):(bool)'
+    'isListed',
+    'isListedAtBlock(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),

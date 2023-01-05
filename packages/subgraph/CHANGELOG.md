@@ -7,23 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
-## 0.4.0-alpha
-On 2022-10-07 15:20:00
+### Changed
+- Ignores `None` votes from addresslist voting and token voting
+
+## 0.5.0-alpha
+
+On 2022-12-09 15:16:22
+
 ### Added
+
+- Added support for the `AdminPlugin`.
+- Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
+- Adds support for `PluginRepo`, `PluginRegistry` and `PluginSetupProcessor`
+- Added `Withdrawn`, `TrustedForwarderSet`, `StandardCallbackRegistered` and `handleStandardCallbackRegistered` events handling to `DaoTemplate`
+- Added support for the new `PluginSettingsUpdated` event of the `Multisig` plugin
+
+### Changed
+
+- Unified naming of the `MajorityVoting` related variables and functions as well as reordering of the function arguments.
+- Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
+- Renamed *package to *plugin.
+- Renamed Allowlist to Addresslist.
+- Improved test recompilation.
+- Marks some entity as immutable.
+- Fixes calcuation crash in erc20 voting, when no votes were cast
+- Added the field `onlyListed` to the `MultisigPlugin` type
+
+## 0.4.0-alpha
+
+On 2022-10-07 15:20:00
+
+### Added
+
 - `executable` property to `ERC20VotingProposal` and `AllowlistProposal`.
 
 ## 0.2.1-alpha
+
 On 2022-10-03 10:38:36
 
 ### Added
 
+- Added an `ERC721Token` entity and `Token` interface to be used by `TokenVotingPlugin`.
 - Added `members` to `ERC20VotingPackage`.
 - Added `lastUpdated` to `ERC20VotingVoter`.
-- added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
-- addes type field to `VaultTransfer` to differntiate between deposits and withdraws
+- Added `voteCount` to both `ERC20VotingProposal` and `AllowlistProposal`.
+- Added type field to `VaultTransfer` to differentiate between deposits and withdraws
 
 ### Changed
 
+- Renamed contracts, events, and parameters in `MajorityVoting`:
+  - `ERC20Voting` to `TokenVoting`
+  - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`
+  - `VoteCreated` and `VoteExecuted` to `ProposalCreated` and `ProposalExecuted`
+  - `voteId` to `proposalId`
 - Changed `users` to `members` in `AllowlistPackage`.
 - Adapted subgraph names according to the renaming of the contracts.
 - Updated `manifest`, `registry`, `registry.test`.
@@ -32,7 +68,6 @@ On 2022-10-03 10:38:36
 - Refactored `deposits` and `withdraws` into one field `transfers`.
 - Refactored `VaultWithdraw` and `VaultDeposit` into one type `VaultTransfer`.
 - Removes not null enforcing `Proposal.metadata`.
-
 
 ## v0.2.0-alpha
 

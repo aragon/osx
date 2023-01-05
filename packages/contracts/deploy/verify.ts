@@ -1,73 +1,144 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {TASK_ETHERSCAN_VERIFY} from 'hardhat-deploy';
 
 import {verifyContract} from '../utils/etherscan';
+import {getContractAddress} from './helpers';
+
+function shouldInclude(deployedContracts: any, deployment: any, deployed: any) {
+  if (deployment.includes('_Proxy')) {
+    return false;
+  }
+
+  if (deployed.args[0]) {
+    if (
+      deployedContracts[`${deployment}_Implementation`] &&
+      deployed.args[0] ==
+        deployedContracts[`${deployment}_Implementation`].address
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  console.log('\nVerifying contracts');
+
   const {deployments, ethers, run} = hre;
 
-  console.log('Verifying registry and factories contracts');
+  const minutesDelay = 180000; // 3 minutes - Etherscan needs some time to process before trying to verify.
 
   console.log(
-    'Waiting for 3 minutes so Etherscan is aware of contracts before verifying'
-  );
-  await delay(180000); // 3 minutes - Etherscan needs some time to process before trying to verify.
-  console.log('Starting to verify now');
-
-  await run(TASK_ETHERSCAN_VERIFY, {
-    license: 'GPL-3.0',
-    solcInput: true,
-  });
-
-  const RegistryContract = await ethers.getContractAt(
-    'DAORegistry',
-    (
-      await deployments.get('DAORegistry')
-    ).address
+    `Waiting for ${
+      minutesDelay / 60000
+    } minutes, so Etherscan is aware of contracts before verifying`
   );
 
+  // await delay(minutesDelay);
+
+  // Prepare contracts and addresses
+  const managingDAOAddress = await getContractAddress('DAO', hre);
+
+  // Prepare verify Array
+  // So each verify is fired in a secuence
+  // and await results
+  const verifyObjArray: {address: string; args: any[any]}[] = [];
+
+  console.log(`Reading deployments for netwrok: ${hre.network.name}`);
+  const deployedContracts = await deployments.all();
+
+  for (const deployment in deployedContracts) {
+    const deployed = deployedContracts[deployment];
+
+    if (shouldInclude(deployedContracts, deployment, deployed)) {
+      verifyObjArray.push({
+        address: deployed.address,
+        args: deployed.args,
+      });
+    }
+  }
+
+  // Get the bases that are not deployed directly, but deployed via other contracts
   const DAOFactoryContract = await ethers.getContractAt(
     'DAOFactory',
     (
       await deployments.get('DAOFactory')
     ).address
   );
+  const daoBase = await DAOFactoryContract.daoBase();
+  verifyObjArray.push({address: daoBase, args: []});
 
-  const TokenFactoryContract = await ethers.getContractAt(
-    'TokenFactory',
+  const AddresslistVotingSetupContract = await ethers.getContractAt(
+    'AddresslistVotingSetup',
     (
-      await deployments.get('TokenFactory')
+      await deployments.get('AddresslistVotingSetup')
     ).address
   );
+  const addresslistVotingBase =
+    await AddresslistVotingSetupContract.getImplementationAddress();
+  verifyObjArray.push({address: addresslistVotingBase, args: []});
 
-  console.log('Verifying main contracts');
+  const TokenVotingSetupContract = await ethers.getContractAt(
+    'TokenVotingSetup',
+    (
+      await deployments.get('TokenVotingSetup')
+    ).address
+  );
+  const tokenVotingBase =
+    await TokenVotingSetupContract.getImplementationAddress();
+  verifyObjArray.push({address: tokenVotingBase, args: []});
 
-  await verifyContract(RegistryContract.address, []);
-  await verifyContract(TokenFactoryContract.address, []);
-  await verifyContract(DAOFactoryContract.address, [
-    RegistryContract.address,
-    TokenFactoryContract.address,
-  ]);
+  const governanceERC20Base =
+    await TokenVotingSetupContract.governanceERC20Base();
+  verifyObjArray.push({
+    address: governanceERC20Base,
+    args: [ethers.constants.AddressZero, '', ''],
+  });
 
-  console.log('Verifying base contracts');
-
-  const daoBase = await DAOFactoryContract.daoBase();
-  const governanceERC20Base = await TokenFactoryContract.governanceERC20Base();
   const governanceWrappedERC20Base =
-    await TokenFactoryContract.governanceWrappedERC20Base();
-  const merkleMinterBase = await TokenFactoryContract.merkleMinterBase();
-  const distributorBase = await TokenFactoryContract.distributorBase();
+    await TokenVotingSetupContract.governanceWrappedERC20Base();
+  verifyObjArray.push({
+    address: governanceWrappedERC20Base,
+    args: [ethers.constants.AddressZero, '', ''],
+  });
 
-  await verifyContract(daoBase, []);
-  await verifyContract(governanceERC20Base, []);
-  await verifyContract(governanceWrappedERC20Base, []);
-  await verifyContract(merkleMinterBase, []);
-  await verifyContract(distributorBase, []);
+  const merkleMinterBase = await TokenVotingSetupContract.merkleMinterBase();
+  verifyObjArray.push({address: merkleMinterBase, args: []});
+
+  const distributorBase = await TokenVotingSetupContract.distributorBase();
+  verifyObjArray.push({address: distributorBase, args: []});
+
+  const PluginRepoFactoryContract = await ethers.getContractAt(
+    'PluginRepoFactory',
+    (
+      await deployments.get('PluginRepoFactory')
+    ).address
+  );
+  const pluginRepoBase = await PluginRepoFactoryContract.pluginRepoBase();
+  verifyObjArray.push({address: pluginRepoBase, args: []});
+
+  console.log('Starting to verify now ... .. .');
+
+  for (let index = 0; index < verifyObjArray.length; index++) {
+    const element = verifyObjArray[index];
+
+    console.log(
+      `Verifying address ${element.address} with constructor argument ${element.args}.`
+    );
+    await verifyContract(element.address, element.args);
+
+    // Etherscan Max rate limit is 1/5s,
+    // use 6s just to be safe.
+    console.log(
+      `Delaying 6s, so we dont reach Etherscan's Max rate limit of 1/5s.`
+    );
+    delay(6000);
+  }
 };
 export default func;
 func.tags = ['Verify'];

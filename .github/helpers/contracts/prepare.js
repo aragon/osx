@@ -15,11 +15,12 @@ async function main(ref) {
     }
   }
 
-  console.log(
-    `::set-output name=environment::${isTestnet ? 'staging' : 'production'}`
+  await fs.appendFile(
+    process.env.GITHUB_OUTPUT,
+    `environment=${
+      isTestnet ? 'staging' : 'production'
+    }\nmatrix=${JSON.stringify(matrix)}\n`
   );
-  console.log(`::set-output name=tags::${isTestnet ? 'Registry' : ''}`);
-  console.log(`::set-output name=matrix::${JSON.stringify(matrix)}`);
 }
 
 main(process.argv[2]);

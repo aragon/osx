@@ -2,7 +2,7 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from './proxy';
 
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
 import {
   DAO,
   ENSSubdomainRegistrar,
@@ -15,37 +15,12 @@ export async function deployENSSubdomainRegistrar(
   managingDao: DAO,
   domain: string
 ): Promise<ENSSubdomainRegistrar> {
-  const ENSRegistry = await ethers.getContractFactory('ENSRegistry');
-  const PublicResolver = await ethers.getContractFactory('PublicResolver');
+  const deployer = await owner.getAddress();
+  const ens = await setupENS(deployer, domain);
+
   const ENSSubdomainRegistrar = await ethers.getContractFactory(
     'ENSSubdomainRegistrar'
   );
-
-  // Deploy the ENSRegistry
-  let ens = await ENSRegistry.deploy();
-  await ens.deployed();
-
-  // Deploy the Resolver
-  let resolver = await PublicResolver.deploy(
-    ens.address,
-    ethers.constants.AddressZero
-  );
-  await resolver.deployed();
-
-  // Register subdomains in the reverse order
-  let domainNamesReversed = domain.split('.');
-  domainNamesReversed.push(''); //add the root domain
-  domainNamesReversed = domainNamesReversed.reverse();
-
-  for (let i = 0; i < domainNamesReversed.length - 1; i++) {
-    await ens.setSubnodeRecord(
-      ensDomainHash(domainNamesReversed[i]),
-      ensLabelHash(domainNamesReversed[i + 1]),
-      await owner.getAddress(),
-      resolver.address,
-      0
-    );
-  }
 
   // Deploy the ENS and approve the subdomain registrar
   const ensSubdomainRegistrar = await deployWithProxy<ENSSubdomainRegistrar>(
@@ -62,7 +37,7 @@ export async function deployENSSubdomainRegistrar(
   return ensSubdomainRegistrar;
 }
 
-async function setupResolver(
+export async function setupResolver(
   ens: ENSRegistry,
   resolver: PublicResolver,
   owner: SignerWithAddress

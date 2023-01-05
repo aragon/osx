@@ -12,7 +12,7 @@ import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployNewPluginRepo} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
+import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {deployWithProxy} from '../test-utils/proxy';
 
 const EVENTS = {

@@ -3,27 +3,10 @@ import {
   BigInt,
   ByteArray,
   Bytes,
-  DataSourceContext,
-  ethereum,
-  store
+  ethereum
 } from '@graphprotocol/graph-ts';
 
-import {ERC20Voting as ERC20VotingContract} from '../../generated/templates/ERC20Voting/ERC20Voting';
-import {AllowlistVoting as AllowlistVotingContract} from '../../generated/templates/AllowlistVoting/AllowlistVoting';
-import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {ERC20Voting, AllowlistVoting} from '../../generated/templates';
-import {
-  DaoPackage,
-  ERC20VotingPackage,
-  AllowlistPackage
-} from '../../generated/schema';
-import {handleERC20Token} from '../utils/tokens';
-import {
-  ADDRESS_ZERO,
-  ERC20_VOTING_INTERFACE,
-  ALLOWLIST_VOTING_INTERFACE
-} from '../utils/constants';
-import {supportsInterface} from '../utils/erc165';
+import {ADDRESS_ZERO} from '../utils/constants';
 
 class WithdrawParams {
   token: Address = Address.fromString(ADDRESS_ZERO);
@@ -83,96 +66,4 @@ export function decodeWithdrawParams(data: ByteArray): WithdrawParams {
   withdrawParams.amount = amountBigInt;
   withdrawParams.reference = referenceBytes.toString();
   return withdrawParams;
-}
-
-function createErc20VotingPackage(who: Address, daoId: string): void {
-  let packageEntity = ERC20VotingPackage.load(who.toHexString());
-  if (!packageEntity) {
-    packageEntity = new ERC20VotingPackage(who.toHexString());
-    let contract = ERC20VotingContract.bind(who);
-    let supportRequiredPct = contract.try_supportRequiredPct();
-    let participationRequiredPct = contract.try_participationRequiredPct();
-    let minDuration = contract.try_minDuration();
-    let token = contract.try_getVotingToken();
-
-    packageEntity.supportRequiredPct = supportRequiredPct.reverted
-      ? null
-      : supportRequiredPct.value;
-    packageEntity.participationRequiredPct = participationRequiredPct.reverted
-      ? null
-      : participationRequiredPct.value;
-    packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
-
-    packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
-
-    // Create template
-    let context = new DataSourceContext();
-    context.setString('daoAddress', daoId);
-    ERC20Voting.createWithContext(who, context);
-
-    packageEntity.save();
-  }
-}
-
-function createAllowlistVotingPackage(who: Address, daoId: string): void {
-  let packageEntity = AllowlistPackage.load(who.toHexString());
-  if (!packageEntity) {
-    packageEntity = new AllowlistPackage(who.toHexString());
-    let contract = AllowlistVotingContract.bind(who);
-    let supportRequiredPct = contract.try_supportRequiredPct();
-    let participationRequiredPct = contract.try_participationRequiredPct();
-    let minDuration = contract.try_minDuration();
-
-    packageEntity.supportRequiredPct = supportRequiredPct.reverted
-      ? null
-      : supportRequiredPct.value;
-    packageEntity.participationRequiredPct = participationRequiredPct.reverted
-      ? null
-      : participationRequiredPct.value;
-    packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
-
-    // Create template
-    let context = new DataSourceContext();
-    context.setString('daoAddress', daoId);
-    AllowlistVoting.createWithContext(who, context);
-
-    packageEntity.save();
-  }
-}
-
-export function addPackage(daoId: string, who: Address): void {
-  // package
-  // TODO: rethink this once the market place is ready
-  let contract = ERC165Contract.bind(who);
-
-  let ERC20VotingInterfaceSuppoted = supportsInterface(
-    contract,
-    ERC20_VOTING_INTERFACE
-  );
-  let allowlistInterfaceSuppoted = supportsInterface(
-    contract,
-    ALLOWLIST_VOTING_INTERFACE
-  );
-
-  if (ERC20VotingInterfaceSuppoted) {
-    createErc20VotingPackage(who, daoId);
-  } else if (allowlistInterfaceSuppoted) {
-    createAllowlistVotingPackage(who, daoId);
-  }
-
-  if (ERC20VotingInterfaceSuppoted || allowlistInterfaceSuppoted) {
-    let daoPackageEntityId = daoId + '_' + who.toHexString();
-    let daoPackageEntity = new DaoPackage(daoPackageEntityId);
-    daoPackageEntity.pkg = who.toHexString();
-    daoPackageEntity.dao = daoId;
-    daoPackageEntity.save();
-  }
-}
-
-export function removePackage(daoId: string, who: string): void {
-  let daoPackageEntityId = daoId + '_' + who;
-  let daoPackageEntity = DaoPackage.load(daoPackageEntityId);
-  if (daoPackageEntity) {
-    store.remove('DaoPackage', daoPackageEntityId);
-  }
 }

@@ -15,8 +15,26 @@
     "TokenFactory": "0x9DE8341f7369DcEC25Fd085dC55F5BbD8e279891"
   },
   "goerli": {
-    "DAOFactory": "0x8B4Ca38524fCeCbD5acA39C7cd2f3B762B1d91Bf",
-    "Registry": "0x2B8C4DD137104d1E869105cd0106e7D9EF955BfE",
-    "TokenFactory": "0xE0b582144d9347e849Ab91780f904d4002c55E05"
+    "DAOFactory": "0xe2B374c59DefCAC4eEe432D1457349D5C60d4eaB",
+    "DAO": "0xf01D2c896cE96a5832bcB001b94eFd663eDcaaE1",
+    "DAORegistry": "0xA95650e066801FD8296D1B1C734D95e29D90B79E",
+    "DAORegistry_Implementation": "0xF4433059cb12E224EF33510a3bE3329c8c750fD8",
+    "DAORegistry_Proxy": "0xA95650e066801FD8296D1B1C734D95e29D90B79E",
+    "DAO_ENSSubdomainRegistrar": "0xb57cC2d56A036f0C1Da0A7d04463390638fC0d6F",
+    "DAO_ENSSubdomainRegistrar_Implementation": "0x0F65298cE952dd70d8091CA763c2b99C81dcaF7c",
+    "DAO_ENSSubdomainRegistrar_Proxy": "0xb57cC2d56A036f0C1Da0A7d04463390638fC0d6F",
+    "DAO_Implementation": "0x20b5D9c428886Fd7125DeF2C34d1eBD49D95C8D6",
+    "DAO_Proxy": "0xf01D2c896cE96a5832bcB001b94eFd663eDcaaE1",
+    "PluginRepoFactory": "0x19765Bd7AE2166fb9153d248F879F57f4062e271",
+    "PluginRepoRegistry": "0x35F0CA4B13C101aa19bBf54E0ddaa4c723FAa56C",
+    "PluginRepoRegistry_Implementation": "0xE64436E389c4E995847c62b679fCe58Cb21337Df",
+    "PluginRepoRegistry_Proxy": "0x35F0CA4B13C101aa19bBf54E0ddaa4c723FAa56C",
+    "PluginSetupProcessor": "0xA57f171A2fe4B71F993d3518A86965Ee849a860A",
+    "Plugin_ENSSubdomainRegistrar": "0xFdB98b110f8c8a5a79F903304014fC726b3f2A75",
+    "Plugin_ENSSubdomainRegistrar_Implementation": "0x636416cd599da0890B7013e8bc1aA1F53cF37B9e",
+    "Plugin_ENSSubdomainRegistrar_Proxy": "0xFdB98b110f8c8a5a79F903304014fC726b3f2A75",
+    "AddresslistVotingSetup": "0x3a43B0994c6105E81c949bcB333A56dC4A354E9A",
+    "AdminSetup": "0xa3a33C600ea0bF965ecbaf874cDC1EE7c0B2D7ee",
+    "TokenVotingSetup": "0xDD17348A1C689336024CC79003c2EB54CbD908f2"
   }
 }

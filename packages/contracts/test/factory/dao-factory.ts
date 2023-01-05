@@ -5,7 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAORegistry,
   PluginSetupProcessor,
-  PluginSetupV1Mock,
+  PluginUUPSUpgradeableSetupV1Mock,
   PluginRepoRegistry,
 } from '../../typechain';
 
@@ -16,7 +16,8 @@ import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
 } from '../test-utils/repo';
-import {findEvent} from '../test-utils/event';
+import {findEvent} from '../../utils/event';
+import {getMergedABI} from '../../utils/abi';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
 
@@ -93,12 +94,12 @@ describe('DAOFactory: ', function () {
 
   let psp: PluginSetupProcessor;
   let pluginRepoRegistry: PluginRepoRegistry;
-  let pluginSetupV1Mock: PluginSetupV1Mock;
+  let pluginSetupV1Mock: PluginUUPSUpgradeableSetupV1Mock;
   let pluginRepoFactory: any;
   let pluginSetupMockRepoAddress: any;
   let daoRegistry: DAORegistry;
   let daoSettings: any;
-  let pluginSettings: any;
+  let votingSettings: any;
 
   let signers: SignerWithAddress[];
   let ownerAddress: string;
@@ -106,44 +107,16 @@ describe('DAOFactory: ', function () {
   let mergedABI: any;
   let daoFactoryBytecode: any;
 
-  async function getMergedABI() {
-    // @ts-ignore
-    const DAOFactoryArtifact = await hre.artifacts.readArtifact('DAOFactory');
-    // @ts-ignore
-    const RegistryArtifact = await hre.artifacts.readArtifact('DAORegistry');
-    // @ts-ignore
-    const PluginSetupProcessorArtifact = await hre.artifacts.readArtifact(
-      'PluginSetupProcessor'
-    );
-    // @ts-ignore
-    const DaoArtifact = await hre.artifacts.readArtifact('DAO');
-
-    const _merged = [
-      ...DAOFactoryArtifact.abi,
-      ...RegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...DaoArtifact.abi.filter((f: any) => f.type === 'event'),
-      ...PluginSetupProcessorArtifact.abi.filter(
-        (f: any) => f.type === 'event'
-      ),
-    ];
-
-    // remove duplicated events
-    const merged = _merged.filter(
-      (value, index, self) =>
-        index === self.findIndex(event => event.name === value.name)
-    );
-
-    return {
-      abi: merged,
-      bytecode: DAOFactoryArtifact.bytecode,
-    };
-  }
-
   before(async () => {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const {abi, bytecode} = await getMergedABI();
+    const {abi, bytecode} = await getMergedABI(
+      // @ts-ignore
+      hre,
+      'DAOFactory',
+      ['DAORegistry', 'PluginSetupProcessor', 'DAO']
+    );
 
     mergedABI = abi;
     daoFactoryBytecode = bytecode;
@@ -221,12 +194,12 @@ describe('DAOFactory: ', function () {
 
     // Create and register a plugin on the `PluginRepoRegistry`.
     // PluginSetupV1
-    const PluginSetupV1Mock = await ethers.getContractFactory(
-      'PluginSetupV1Mock'
+    const PluginUUPSUpgradeableSetupV1Mock = await ethers.getContractFactory(
+      'PluginUUPSUpgradeableSetupV1Mock'
     );
-    pluginSetupV1Mock = await PluginSetupV1Mock.deploy();
+    pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      'PluginSetupV1Mock',
+      'PluginUUPSUpgradeableSetupV1Mock',
       [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',
@@ -242,7 +215,7 @@ describe('DAOFactory: ', function () {
       metadata: daoDummyMetadata,
     };
 
-    pluginSettings = {
+    votingSettings = {
       pluginSetup: pluginSetupV1Mock.address,
       pluginSetupRepo: pluginSetupMockRepoAddress,
       data: EMPTY_DATA,
@@ -256,7 +229,7 @@ describe('DAOFactory: ', function () {
   });
 
   it('correctly creates a DAO with one plugin', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
     const {dao, plugin, helpers, permissions} =
       await extractInfoFromCreateDaoTx(tx);
 
@@ -295,7 +268,7 @@ describe('DAOFactory: ', function () {
   });
 
   it('revokes all temporarly granted permissions', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = await ethers.getContractFactory('DAO');
@@ -303,15 +276,15 @@ describe('DAOFactory: ', function () {
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
-      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, psp.address, dao);
+      .withArgs(ROOT_PERMISSION_ID, daoFactory.address, dao, psp.address);
 
     await expect(tx)
       .to.emit(daoContract, EVENTS.Revoked)
       .withArgs(
         APPLY_INSTALLATION_PERMISSION_ID,
         daoFactory.address,
-        daoFactory.address,
-        psp.address
+        psp.address,
+        daoFactory.address
       );
 
     await expect(tx)
@@ -319,13 +292,13 @@ describe('DAOFactory: ', function () {
       .withArgs(
         ROOT_PERMISSION_ID,
         daoFactory.address,
-        daoFactory.address,
-        dao
+        dao,
+        daoFactory.address
       );
   });
 
   it('emits events containing all the correct permissions to be set in the created DAO', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = await ethers.getContractFactory('DAO');

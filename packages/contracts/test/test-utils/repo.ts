@@ -5,11 +5,15 @@ import {
   PluginRepoFactory,
   PluginSetupV1Mock,
   PluginRepo,
+  PluginUUPSUpgradeableSetupV1Mock
 } from '../../typechain';
 import {deployWithProxy} from './proxy';
+import {getMergedABI} from '../../utils/abi';
 
-export async function deployMockPluginSetup(): Promise<PluginSetupV1Mock> {
-  const PluginSetupMock = await ethers.getContractFactory('PluginSetupV1Mock');
+export async function deployMockPluginSetup(): Promise<PluginUUPSUpgradeableSetupV1Mock> {
+  const PluginSetupMock = await ethers.getContractFactory(
+    'PluginUUPSUpgradeableSetupV1Mock'
+  );
   const pluginSetupMockContract = await PluginSetupMock.deploy();
 
   return pluginSetupMockContract;
@@ -28,31 +32,18 @@ export async function deployNewPluginRepo(
 export async function deployPluginRepoFactory(
   signers: any,
   pluginRepoRegistry: PluginRepoRegistry
-): Promise<PluginRepoFactory> {
-  // @ts-ignore
-  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoRegistry'
-  );
-  // @ts-ignore
-  const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoFactory'
-  );
-
-  const _merged = [
-    ...PluginRepoFactoryArtifact.abi,
-    ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-  ];
-
-  // remove duplicated events
-  const mergedAbi = _merged.filter(
-    (value, index, self) =>
-      index === self.findIndex(event => event.name === value.name)
+): Promise<any> {
+  const {abi, bytecode} = await getMergedABI(
+    // @ts-ignore
+    hre,
+    'PluginRepoFactory',
+    ['PluginRepoRegistry']
   );
 
   // PluginRepoFactory
   const PluginRepoFactory = new ethers.ContractFactory(
-    mergedAbi,
-    PluginRepoFactoryArtifact.bytecode,
+    abi,
+    bytecode,
     signers[0]
   );
 

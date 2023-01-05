@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {PluginRepoRegistry, DAO} from '../../typechain';
 
 import {customError} from '../test-utils/custom-error-helper';
 import {
@@ -10,6 +9,9 @@ import {
 } from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {deployNewDAO} from '../test-utils/dao';
+
+import {PluginRepoRegistry, DAO} from '../../typechain';
+import {getMergedABI} from '../../utils/abi';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -36,25 +38,6 @@ async function getPluginRepoRegistryEvents(tx: any) {
   };
 }
 
-async function getMergedABI() {
-  // @ts-ignore
-  const PluginRepoRegistryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoRegistry'
-  );
-  // @ts-ignore
-  const PluginRepoFactoryArtifact = await hre.artifacts.readArtifact(
-    'PluginRepoFactory'
-  );
-
-  return {
-    abi: [
-      ...PluginRepoFactoryArtifact.abi,
-      ...PluginRepoRegistryArtifact.abi.filter((f: any) => f.type === 'event'),
-    ],
-    bytecode: PluginRepoFactoryArtifact.bytecode,
-  };
-}
-
 describe('PluginRepoFactory: ', function () {
   let signers: SignerWithAddress[];
   let pluginRepoRegistry: PluginRepoRegistry;
@@ -69,7 +52,12 @@ describe('PluginRepoFactory: ', function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
-    const {abi, bytecode} = await getMergedABI();
+    const {abi, bytecode} = await getMergedABI(
+      // @ts-ignore
+      hre,
+      'PluginRepoFactory',
+      ['PluginRepoRegistry']
+    );
 
     mergedABI = abi;
     pluginRepoFactoryBytecode = bytecode;
@@ -178,7 +166,7 @@ describe('PluginRepoFactory: ', function () {
         contentURI,
         ownerAddress
       )
-    ).to.be.revertedWith('InvalidBump([0, 0, 0], [0, 0, 0])');
+    ).to.be.revertedWith('BumpInvalid([0, 0, 0], [0, 0, 0])');
   });
 
   it('create new pluginRepo with version', async () => {

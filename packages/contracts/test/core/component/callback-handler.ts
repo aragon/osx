@@ -44,17 +44,6 @@ describe('CallbackHandler', function () {
     callbackHandlerMockHelper = await CallbackHandlerHelper.deploy(dao.address);
   });
 
-  it('emits the `StandardCallbackRegistered` event', async () => {
-    await expect(
-      dao.registerStandardCallback(
-        beefInterfaceId,
-        callbackSelector,
-        magicNumber
-      )
-    )
-      .to.emit(dao, EVENTS.STANDARD_CALLBACK_REGISTERED)
-      .withArgs(beefInterfaceId, callbackSelector, magicNumber);
-  });
 
   it('reverts for an unknown callback function signature', async () => {
     // we don't register `callbackSelector` here
@@ -66,6 +55,18 @@ describe('CallbackHandler', function () {
     ).to.be.revertedWith(
       customError('UnkownCallback', callbackSelector, unregisteredNumberReturn)
     );
+  });
+
+  it('emits the `StandardCallbackRegistered` event', async () => {
+    await expect(
+      dao.registerStandardCallback(
+        beefInterfaceId,
+        callbackSelector,
+        magicNumber
+      )
+    )
+      .to.emit(dao, EVENTS.STANDARD_CALLBACK_REGISTERED)
+      .withArgs(beefInterfaceId, callbackSelector, magicNumber);
   });
 
   it('returns the correct magic number from the `_handleCallback` assembly code', async () => {

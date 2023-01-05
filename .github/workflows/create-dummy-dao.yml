@@ -43,24 +43,25 @@ jobs:
         with:
           ref: ${{ inputs.last_commit }}
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
+          cache: 'yarn'
           node-version: 16
       - name: Install dependencies
         run: yarn install --pure-lockfile
       - name: Compile
         run: cd packages/contracts && yarn run build
-      - name: create Dummy DAOs erc20
-        run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: create Dummy DAOs allowlist
+      - name: create Dummy DAOs token
+        run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }} token
+      - name: create Dummy DAOs addresslist
         run: node .github/helpers/contracts/dummy-dao/createDao.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
-      - name: Deposit to Erc20 DAO
-        run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: Deposit to Allowlist DAO
+      - name: Deposit to TokenVoting DAO
+        run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }} token
+      - name: Deposit to AddresslistVoting DAO
         run: node .github/helpers/contracts/dummy-dao/deposit.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
-      - name: Proposal of Erc20
-        run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }} erc20
-      - name: Proposal of Allowlist
+      - name: Proposal of TokenVoting
+        run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }} token
+      - name: Proposal of AddresslistVoting
         run: node .github/helpers/contracts/dummy-dao/proposal.js ${{matrix.network}} ${{ secrets.ETH_KEY }}
       - uses: actions/upload-artifact@v2
         with:

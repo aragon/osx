@@ -49,7 +49,10 @@ describe('MerkleDistributor', function () {
     managingDao = await deployNewDAO(ownerAddress);
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
-    token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV');
+    token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV', {
+      receivers: [],
+      amounts: [],
+    });
 
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'

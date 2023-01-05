@@ -5,8 +5,8 @@ const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
 
 const networks = require('../../../../packages/contracts/networks.json');
-const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json');
-const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
+const TokenVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json');
+const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 
@@ -14,7 +14,7 @@ async function vote() {
   const args = process.argv.slice(2);
   const networkName = args[0];
   const privKey = args[1];
-  const isERC20Voting = args[2];
+  const isTokenVoting = args[2];
   const provider = new ethers.providers.JsonRpcProvider(
     networks[networkName].url
   );
@@ -22,21 +22,21 @@ async function vote() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].address;
   const votingAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].voting;
 
   let overrides = await gas.setGasOverride(provider);
 
   // initiate Voting contract
   let VotingContract;
-  if (isERC20Voting === 'erc20') {
+  if (isTokenVoting === 'token') {
     VotingContract = new ethers.Contract(
       votingAddress,
-      Erc20VotingJson.abi,
+      TokenVotingJson.abi,
       signer
     );
   } else {
@@ -64,15 +64,15 @@ async function vote() {
 
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].additionalVote
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
     ].additionalVote = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+    isTokenVoting === 'token' ? 'TokenVoting' : 'AddresslistVoting'
   ].additionalVote = resultObj;
 
   //write file

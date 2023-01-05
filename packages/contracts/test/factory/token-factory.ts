@@ -40,13 +40,22 @@ describe('Core: TokenFactory', () => {
     const GovernanceBaseFactory = await smock.mock<GovernanceERC20__factory>(
       'GovernanceERC20'
     );
-    governanceBase = await GovernanceBaseFactory.deploy(ethers.constants.AddressZero, "name", "symbol");
+    governanceBase = await GovernanceBaseFactory.deploy(
+      ethers.constants.AddressZero,
+      'name',
+      'symbol',
+      {receivers: [], amounts: []}
+    );
 
     const GovernanceWrappedBaseFactory =
       await smock.mock<GovernanceWrappedERC20__factory>(
         'GovernanceWrappedERC20'
       );
-    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(ethers.constants.AddressZero, "name", "symbol");
+    governanceWrappedBase = await GovernanceWrappedBaseFactory.deploy(
+      ethers.constants.AddressZero,
+      'name',
+      'symbol'
+    );
 
     const MerkleMinterBaseFactory = await smock.mock<MerkleMinter__factory>(
       'MerkleMinter'
@@ -110,13 +119,14 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const tx = await tokenFactory.callStatic.createToken(
-        dao.address,
-        config,
-        mintConfig
-      );
+      const [wrappedToken, merkleMinter] =
+        await tokenFactory.callStatic.createToken(
+          dao.address,
+          config,
+          mintConfig
+        );
 
-      expect(tx[0]).not.to.be.eq(governanceWrappedBase.address);
+      expect(wrappedToken).not.to.be.eq(governanceWrappedBase.address);
     });
 
     it('should return MerkleMinter with 0x0', async () => {
@@ -250,8 +260,10 @@ describe('Core: TokenFactory', () => {
         symbol: 'FT',
       };
 
+      const mintAddress = '0x0000000000000000000000000000000000000001';
+
       const mintConfig: MintConfig = {
-        receivers: ['0x0000000000000000000000000000000000000000'],
+        receivers: [mintAddress],
         amounts: [1],
       };
 
@@ -273,7 +285,7 @@ describe('Core: TokenFactory', () => {
         .to.emit(erc20Contract, 'Transfer')
         .withArgs(
           '0x0000000000000000000000000000000000000000',
-          dao.address,
+          mintConfig.receivers[0],
           mintConfig.amounts[0]
         );
     });
@@ -290,34 +302,24 @@ describe('Core: TokenFactory', () => {
         amounts: [1],
       };
 
-      const tx = await tokenFactory.callStatic.createToken(
+      const [token, merkleMinter] = await tokenFactory.callStatic.createToken(
         dao.address,
         config,
         mintConfig
       );
 
       expect(dao.grant).to.have.been.calledWith(
-        tx[0],
-        tokenFactory.address,
-        MINT_PERMISSION_ID
-      );
-      expect(dao.revoke).to.have.been.calledWith(
-        tx[0],
-        tokenFactory.address,
-        MINT_PERMISSION_ID
-      );
-      expect(dao.grant).to.have.been.calledWith(
-        tx[0],
+        token,
         dao.address,
         MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
-        tx[0],
-        tx[1],
+        token,
+        merkleMinter,
         MINT_PERMISSION_ID
       );
       expect(dao.grant).to.have.been.calledWith(
-        tx[1],
+        merkleMinter,
         dao.address,
         MERKLE_MINT_PERMISSION_ID
       );

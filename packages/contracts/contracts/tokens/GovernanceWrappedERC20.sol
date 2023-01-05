@@ -18,7 +18,7 @@ import {IDAO} from "../core/IDAO.sol";
 
 /// @title GovernanceWrappedERC20
 /// @author Aragon Association
-/// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`.
+/// @notice Wraps an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token by inheriting from `ERC20WrapperUpgradeable` and allows to use it for voting by inheriting from `ERC20VotesUpgradeable`. The latter is compatible with [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) interface.
 /// The contract also supports meta transactions. To use an `amount` of underlying tokens for voting, the token owner has to
 /// 1. call `approve` for the tokens to be used by this contract
 /// 2. call `depositFor` to wrap them, which safely transfers the underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens to the contract and mints wrapped [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens.
@@ -57,8 +57,8 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IGovernanceWrappedERC20).interfaceId ||

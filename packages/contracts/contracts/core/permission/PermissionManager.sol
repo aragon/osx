@@ -58,32 +58,41 @@ contract PermissionManager is Initializable {
     /// @notice Thrown if a freeze happens on ANY_ADDR.
     error FreezeOnAnyAddressDisallowed();
 
+    /// @notice thrown when WHO or WHERE is ANY_ADDR, but oracle is not present.
+    error OracleNotPresentForAnyAddress();
+
+    /// @notice thrown when WHO or WHERE is ANY_ADDR and permissionId is ROOT/EXECUTE
+    error PermissionsForAnyAddressDisallowed();
+
+    /// @notice thrown when WHO and WHERE are both ANY_ADDR
+    error AnyAddressDisallowedForWhoAndWhere();
+
     // Events
 
     /// @notice Emitted when a permission `permission` is granted in the context `here` to the address `who` for the contract `where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is granted.
-    /// @param who The address (EOA or contract) receiving the permission.
     /// @param where The address of the target contract for which `who` receives permission.
+    /// @param who The address (EOA or contract) receiving the permission.
     /// @param oracle The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionOracle` to be used.
     event Granted(
         bytes32 indexed permissionId,
         address indexed here,
-        address indexed who,
         address where,
+        address indexed who,
         IPermissionOracle oracle
     );
 
     /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `who` for the contract `where`.
     /// @param permissionId The permission identifier.
     /// @param here The address of the context in which the permission is revoked.
-    /// @param who The address (EOA or contract) losing the permission.
     /// @param where The address of the target contract for which `who` loses permission
+    /// @param who The address (EOA or contract) losing the permission.
     event Revoked(
         bytes32 indexed permissionId,
         address indexed here,
-        address indexed who,
-        address where
+        address where,
+        address indexed who
     );
 
     /// @notice Emitted when a `permission` is made frozen to the address `here` by the contract `where`.
@@ -270,8 +279,19 @@ contract PermissionManager is Initializable {
         bytes32 _permissionId,
         IPermissionOracle _oracle
     ) internal {
-        if (_permissionId == ROOT_PERMISSION_ID && (_who == ANY_ADDR || _where == ANY_ADDR)) {
-            revert RootPermissionForAnyAddressDisallowed();
+        if (_where == ANY_ADDR && _who == ANY_ADDR) {
+            revert AnyAddressDisallowedForWhoAndWhere();
+        }
+
+        if (_where == ANY_ADDR || _who == ANY_ADDR) {
+            bool isRestricted = isPermissionRestrictedForAnyAddr(_permissionId);
+            if (_permissionId == ROOT_PERMISSION_ID || isRestricted) {
+                revert PermissionsForAnyAddressDisallowed();
+            }
+
+            if (address(_oracle) == ALLOW_FLAG) {
+                revert OracleNotPresentForAnyAddress();
+            }
         }
 
         if (isFrozen(_where, _permissionId)) {
@@ -289,7 +309,7 @@ contract PermissionManager is Initializable {
         }
         permissionsHashed[permHash] = address(_oracle);
 
-        emit Granted(_permissionId, msg.sender, _who, _where, _oracle);
+        emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager.
@@ -315,7 +335,7 @@ contract PermissionManager is Initializable {
         }
         permissionsHashed[permHash] = UNSET_FLAG;
 
-        emit Revoked(_permissionId, msg.sender, _who, _where);
+        emit Revoked(_permissionId, msg.sender, _where, _who);
     }
 
     /// @notice This method is used in the public `freeze` method of the permission manager.
@@ -404,6 +424,20 @@ contract PermissionManager is Initializable {
         returns (bytes32)
     {
         return keccak256(abi.encodePacked("IMMUTABLE", _where, _permissionId));
+    }
+
+    /// @notice Decides if the granting permissionId is restricted when `_who = ANY_ADDR` or `_where = ANY_ADDR`.
+    /// @dev by default, every permission is unrestricted and it's the derived contract's responsibility to override it. NOTE: ROOT_PERMISSION_ID is included and not required to set it again.
+    /// @param _permissionId The permission identifier.
+    /// @return bool Whether ot not permissionId is restricted.
+    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
+        internal
+        view
+        virtual
+        returns (bool)
+    {
+        (_permissionId); // silence the warning.
+        return false;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

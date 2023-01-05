@@ -26,7 +26,67 @@ dataSources:
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
-      file: ./src/registry.ts
+      file: ./src/registries/daoRegistry.ts
+  - kind: ethereum/contract
+    name: PluginRepoRegistry
+    network: {{network}}
+    source:
+      abi: PluginRepoRegistry
+      address: '{{dataSources.PluginRepoRegistry.address}}'
+      startBlock: {{dataSources.PluginRepoRegistry.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - PluginRepo
+      abis:        
+        - name: PluginRepoRegistry
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json
+      eventHandlers:
+        - event: PluginRepoRegistered(string,address)
+          handler: handlePluginRepoRegistered
+      file: ./src/registries/pluginRepoRegistry.ts
+  - kind: ethereum/contract
+    name: PluginSetupProcessor
+    network: {{network}}
+    source:
+      abi: PluginSetupProcessor
+      address: '{{dataSources.PluginSetupProcessor.address}}'
+      startBlock: {{dataSources.PluginSetupProcessor.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Plugin
+        - PluginContractPermissionId
+        - PluginGrantedPermission
+      abis:        
+        - name: PluginSetupProcessor
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginSetupProcessor.sol/PluginSetupProcessor.json
+        - name: ERC20
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
+        - name: ERC165
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
+        - name: TokenVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
+        - name: AddresslistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+      eventHandlers:
+        - event: InstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+          handler: handleInstallationPrepared
+        - event: InstallationApplied(indexed address,indexed address)
+          handler: handleInstallationApplied
+        - event: UpdatePrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[],bytes)
+          handler: handleUpdatePrepared
+        - event: UpdateApplied(indexed address,indexed address)
+          handler: handleUpdateApplied
+        - event: UninstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+          handler: handleUninstallationPrepared
+        - event: UninstallationApplied(indexed address,indexed address)
+          handler: handleUninstallationApplied
+      file: ./src/plugin/pluginSetupProcessor.ts
 # templates
 templates:
   # DAO
@@ -47,10 +107,10 @@ templates:
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC165
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
-        - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
-        - name: AllowlistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+        - name: TokenVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
+        - name: AddresslistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
       eventHandlers:
@@ -62,63 +122,140 @@ templates:
           handler: handleNativeTokenDeposited
         - event: Executed(indexed address,uint256,(address,uint256,bytes)[],bytes[])
           handler: handleExecuted
-        - event: Granted(indexed bytes32,indexed address,indexed address,address,address)
+        - event: Granted(indexed bytes32,indexed address,address,indexed address,address)
           handler: handleGranted
-        - event: Revoked(indexed bytes32,indexed address,indexed address,address)
+        - event: Revoked(indexed bytes32,indexed address,address,indexed address)
           handler: handleRevoked
         - event: Frozen(indexed bytes32,indexed address,address)
           handler: handleFrozen
-  # ERC20Voting (package)
-  - name: ERC20Voting
+        - event: Withdrawn(indexed address,indexed address,uint256,string)
+          handler: handleWithdrawn
+        - event: TrustedForwarderSet(address)
+          handler: handleTrustedForwarderSet
+        - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
+          handler: handleStandardCallbackRegistered(address)
+        - event: SignatureValidatorSet(address)
+          handler: handleSignatureValidatorSet
+  # TokenVoting (package)
+  - name: TokenVoting
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: ERC20Voting
+      abi: TokenVoting
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/erc20/erc20-voting.ts
+      file: ./src/packages/token/token-voting.ts
       entities:
         - Dao
       abis:
-        - name: ERC20Voting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json
+        - name: TokenVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: VoteExecuted(indexed uint256,bytes[])
-          handler: handleVoteExecuted
-        - event: VoteCreated(indexed uint256,indexed address,bytes)
-          handler: handleVoteCreated
-        - event: ConfigUpdated(uint64,uint64,uint64)
-          handler: handleConfigUpdated
-  # AllowlistVoting (package)
-  - name: AllowlistVoting
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+        - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+          handler: handleVotingSettingsUpdated
+  # AddresslistVoting (package)
+  - name: AddresslistVoting
     kind: ethereum/contract
     network: {{network}}
     source:
-      abi: AllowlistVoting
+      abi: AddresslistVoting
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/packages/allowlist/allowlist-voting.ts
+      file: ./src/packages/addresslist/addresslist-voting.ts
       entities:
         - Dao
       abis:
-        - name: AllowlistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json
+        - name: AddresslistVoting
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: VoteExecuted(indexed uint256,bytes[])
-          handler: handleVoteExecuted
-        - event: VoteCreated(indexed uint256,indexed address,bytes)
-          handler: handleVoteCreated
-        - event: ConfigUpdated(uint64,uint64,uint64)
-          handler: handleConfigUpdated
-        - event: UsersAdded(address[])
-          handler: handleUsersAdded
-        - event: UsersRemoved(address[])
-          handler: handleUsersRemoved
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+        - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+          handler: handleVotingSettingsUpdated
+        - event: AddressesAdded(address[])
+          handler: handleAddressesAdded
+        - event: AddressesRemoved(address[])
+          handler: handleAddressesRemoved
+  # Multisig (package)
+  - name: Multisig
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: Multisig
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/multisig/multisig.ts
+      entities:
+        - Dao
+      abis:
+        - name: Multisig
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
+      eventHandlers:
+        - event: AddressesAdded(address[])
+          handler: handleAddressesAdded
+        - event: AddressesRemoved(address[])
+          handler: handleAddressesRemoved
+        - event: Approved(indexed uint256,indexed address)
+          handler: handleApproved
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
+        - event: MultisigSettingsUpdated(bool,indexed uint256)
+          handler: handleMultisigSettingsUpdated
+    # admin (package)
+  - name: Admin
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: Admin
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/admin/admin.ts
+      entities:
+        - Dao
+      abis:
+        - name: Admin
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
+      eventHandlers:
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+  # PluginRepo
+  - name: PluginRepoTemplate
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: PluginRepo
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/plugin/pluginRepo.ts
+      entities:
+        - PluginRepo
+      abis:
+        - name: PluginRepo
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginRepo.sol/PluginRepo.json
+      eventHandlers:
+        - event: VersionCreated(uint256,uint16[3],indexed address,bytes)
+          handler: handleVersionCreated

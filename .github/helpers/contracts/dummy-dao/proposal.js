@@ -5,8 +5,8 @@ const IPFS = require('ipfs-http-client');
 const {ethers} = require('ethers');
 
 const networks = require('../../../../packages/contracts/networks.json');
-const Erc20VotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/erc20/ERC20Voting.sol/ERC20Voting.json');
-const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/allowlist/AllowlistVoting.sol/AllowlistVoting.json');
+const TokenVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json');
+const AllowVotingJson = require('../../../../packages/contracts/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json');
 const dummyDaos = require('../../../../dummy_daos.json');
 const gas = require('./estimateGas');
 
@@ -18,7 +18,7 @@ async function proposal() {
   const args = process.argv.slice(2);
   const networkName = args[0];
   const privKey = args[1];
-  const isERC20Voting = args[2];
+  const isTokenVoting = args[2] === 'token';
   const provider = new ethers.providers.JsonRpcProvider(
     networks[networkName].url
   );
@@ -26,19 +26,18 @@ async function proposal() {
 
   const daoAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].address;
   const votingAddress =
     dummyDaos[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].voting;
 
   // metadata
   const metadataObj = {
-    name:
-      isERC20Voting === 'erc20'
-        ? 'ERC20Voting Dummy Proposal'
-        : 'AllowlistVoting Dummy Proposal',
+    name: isTokenVoting
+      ? 'TokenVoting Dummy Proposal'
+      : 'AddresslistVoting Dummy Proposal',
     description: 'Dummy withdraw proposal for QA and testing purposes...',
     links: [
       {label: 'link01', url: 'https://link.01'},
@@ -64,7 +63,7 @@ async function proposal() {
 
   const deposits =
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].deposits;
 
   const deposit = deposits[getRandomInt(deposits.length)];
@@ -87,10 +86,10 @@ async function proposal() {
 
   // initiate Voting contract
   let VotingContract;
-  if (isERC20Voting === 'erc20') {
+  if (isTokenVoting) {
     VotingContract = new ethers.Contract(
       votingAddress,
-      Erc20VotingJson.abi,
+      TokenVotingJson.abi,
       signer
     );
   } else {
@@ -101,7 +100,7 @@ async function proposal() {
     );
   }
 
-  let proposalTx = await VotingContract.createVote(
+  let proposalTx = await VotingContract.createProposal(
     metadata,
     actions,
     0,
@@ -124,15 +123,15 @@ async function proposal() {
   // edit or add property
   if (
     !content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].proposal
   ) {
     content[networkName].dao[
-      isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+      isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
     ].proposal = {};
   }
   content[networkName].dao[
-    isERC20Voting === 'erc20' ? 'ERC20Voting' : 'AllowlistVoting'
+    isTokenVoting ? 'TokenVoting' : 'AddresslistVoting'
   ].proposal = resultObj;
 
   //write file

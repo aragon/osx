@@ -1,13 +1,18 @@
-import {expect} from 'chai';
-import hre, {ethers} from 'hardhat';
+import chai, {expect} from 'chai';
+import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20} from '../../typechain';
+import {DAO, GovernanceERC20, DAO__factory} from '../../typechain';
+import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
+
+chai.use(smock.matchers);
+
+const abiCoder = ethers.utils.defaultAbiCoder;
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
@@ -17,7 +22,6 @@ const dummyMetadata2 = '0x0002';
 const EVENTS = {
   MetadataSet: 'MetadataSet',
   TrustedForwarderSet: 'TrustedForwarderSet',
-  ConfigUpdated: 'ConfigUpdated',
   DAOCreated: 'DAOCreated',
   Granted: 'Granted',
   Revoked: 'Revoked',
@@ -26,6 +30,7 @@ const EVENTS = {
   Executed: 'Executed',
   NativeTokenDeposited: 'NativeTokenDeposited',
   SignatureValidatorSet: 'SignatureValidatorSet',
+  StandardCallbackRegistered: 'StandardCallbackRegistered',
 };
 
 const PERMISSION_IDS = {
@@ -40,6 +45,9 @@ const PERMISSION_IDS = {
     'SET_TRUSTED_FORWARDER_PERMISSION'
   ),
   MINT_PERMISSION_ID: ethers.utils.id('MINT_PERMISSION'),
+  REGISTER_STANDARD_CALLBACK_PERMISSION_ID: ethers.utils.id(
+    'REGISTER_STANDARD_CALLBACK_PERMISSION'
+  ),
 };
 
 describe('DAO', function () {
@@ -57,7 +65,10 @@ describe('DAO', function () {
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
-    token = await Token.deploy(dao.address, 'GOV', 'GOV');
+    token = await Token.deploy(dao.address, 'GOV', 'GOV', {
+      receivers: [],
+      amounts: [],
+    });
 
     // Grant permissions
     await Promise.all([
@@ -90,6 +101,11 @@ describe('DAO', function () {
         dao.address,
         ownerAddress,
         PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
+      ),
+      dao.grant(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       ),
       dao.grant(token.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
     ]);
@@ -202,22 +218,75 @@ describe('DAO', function () {
       let tx = await dao.execute(0, dummyActions);
       let rc = await tx.wait();
 
-      const {actor, callId, actions, execResults} = dao.interface.parseLog(
-        rc.logs[0]
-      ).args;
+      const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-      expect(actor).to.equal(ownerAddress);
-      expect(callId).to.equal(0);
-      expect(actions.length).to.equal(1);
-      expect(actions[0].to).to.equal(dummyActions[0].to);
-      expect(actions[0].value).to.equal(dummyActions[0].value);
-      expect(actions[0].data).to.equal(dummyActions[0].data);
-      expect(execResults).to.deep.equal(expectedDummyResults);
+      expect(event.args.actor).to.equal(ownerAddress);
+      expect(event.args.callId).to.equal(0);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.execResults).to.deep.equal(expectedDummyResults);
+    });
+
+    it('reverts if one of the actions failed', async () => {
+      const ActionExecuteFactory = await smock.mock('ActionExecute');
+      const actionExecute = await ActionExecuteFactory.deploy();
+
+      await expect(
+        dao.execute(0, [
+          {
+            to: actionExecute.address,
+            data: '0x0000',
+            value: 0,
+          },
+        ])
+      ).to.be.revertedWith(customError('ActionFailed'));
     });
   });
 
   describe('deposit:', async () => {
     const amount = ethers.utils.parseEther('1.23');
+
+    it('reverts if amount is zero', async () => {
+      await expect(
+        dao.deposit(ethers.constants.AddressZero, 0, 'ref')
+      ).to.be.revertedWith(customError('ZeroAmount'));
+    });
+
+    it('reverts if passed amount does not match native amount value', async () => {
+      const options = {value: amount};
+      const passedAmount = ethers.utils.parseEther('1.22');
+
+      await expect(
+        dao.deposit(ethers.constants.AddressZero, passedAmount, 'ref', options)
+      ).to.be.revertedWith(
+        customError('NativeTokenDepositAmountMismatch', passedAmount, amount)
+      );
+    });
+
+    it('reverts if ERC20 and native tokens are deposited at the same time', async () => {
+      const options = {value: amount};
+      await token.mint(ownerAddress, amount);
+
+      await expect(
+        dao.deposit(token.address, amount, 'ref', options)
+      ).to.be.revertedWith(
+        customError('NativeTokenDepositAmountMismatch', 0, amount)
+      );
+    });
+
+    it('reverts when tries to deposit ERC20 token while sender does not have token amount', async () => {
+      await expect(dao.deposit(token.address, amount, 'ref')).to.be.reverted;
+    });
+
+    it('reverts when tries to deposit ERC20 token while sender does not have approved token transfer', async () => {
+      await token.mint(ownerAddress, amount);
+
+      await expect(
+        dao.deposit(token.address, amount, 'ref')
+      ).to.be.revertedWith('ERC20: insufficient allowance');
+    });
 
     it('deposits native tokens into the DAO', async () => {
       const options = {value: amount};
@@ -248,17 +317,6 @@ describe('DAO', function () {
 
       // holds amount now
       expect(await token.balanceOf(dao.address)).to.equal(amount);
-    });
-
-    it('throws an error if ERC20 and native tokens are deposited at the same time', async () => {
-      const options = {value: amount};
-      await token.mint(ownerAddress, amount);
-
-      await expect(
-        dao.deposit(token.address, amount, 'ref', options)
-      ).to.be.revertedWith(
-        customError('NativeTokenDepositAmountMismatch', 0, amount)
-      );
     });
   });
 
@@ -356,6 +414,69 @@ describe('DAO', function () {
     });
   });
 
+  describe('registerStandardCallback:', async () => {
+    it('reverts if `REGISTER_STANDARD_CALLBACK_PERMISSION` is not granted', async () => {
+      await dao.revoke(
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
+      );
+
+      await expect(
+        dao.registerStandardCallback('0x00000001', '0x00000001', '0x00000001')
+      ).to.be.revertedWith(
+        customError(
+          'Unauthorized',
+          dao.address,
+          dao.address,
+          ownerAddress,
+          PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
+        )
+      );
+    });
+
+    it('correctly emits selector and interface id', async () => {
+      // The below id (Real usecase example)
+      // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
+      // callbackSelector (onERC721Received.selector)
+      const id = '0x150b7a02';
+      await expect(
+        dao.registerStandardCallback('0x00000001', '0x00000002', '0x00000001')
+      )
+        .to.emit(dao, EVENTS.StandardCallbackRegistered)
+        .withArgs('0x00000001', '0x00000002', '0x00000001');
+    });
+
+    it('correctly sets callback selector and interface and can call later', async () => {
+      // (Real usecase example)
+      // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
+      // callbackSelector (onERC721Received.selector)
+      const id = '0x150b7a02';
+
+      // onERC721Received selector doesn't exist, so it should fail..
+      await expect(
+        signers[0].sendTransaction({
+          to: dao.address,
+          data: id,
+        })
+      ).to.be.revertedWith(
+        customError('UnkownCallback', id, `0x${'00'.repeat(32)}`)
+      );
+
+      // register onERC721Received selector
+      await dao.registerStandardCallback(id, id, id);
+
+      let onERC721ReceivedReturned = await ethers.provider.call({
+        to: dao.address,
+        data: id,
+      });
+
+      // TODO: ethers utils pads zero to the left. we need to pad to the right.
+      expect(onERC721ReceivedReturned).to.equal(id + '00'.repeat(28));
+      expect(await dao.supportsInterface(id)).to.equal(true);
+    });
+  });
+
   describe('receive:', async () => {
     const amount = ethers.utils.parseEther('1.23');
 
@@ -427,6 +548,58 @@ describe('DAO', function () {
       expect(
         await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
       ).to.be.eq('0x41424344');
+    });
+  });
+
+  describe.only('ERC1967', async () => {
+    it('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+      const initData = iface.encodeFunctionData('initialize', [
+        dummyMetadata1,
+        ownerAddress,
+        dummyAddress1,
+      ]);
+
+      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
+      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
+
+      const daoProxyContract = dao.attach(erc1967Proxy.address);
+
+      await expect(daoProxyContract.upgradeTo(dao.address)).to.be.revertedWith(
+        customError(
+          'Unauthorized',
+          daoProxyContract.address,
+          daoProxyContract.address,
+          ownerAddress,
+          PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
+        )
+      );
+    });
+
+    it('successfuly updates DAO contract', async () => {
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+      const initData = iface.encodeFunctionData('initialize', [
+        dummyMetadata1,
+        ownerAddress,
+        dummyAddress1,
+      ]);
+
+      // function start here
+      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
+      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
+
+      const daoProxyContract = dao.attach(erc1967Proxy.address);
+
+      await daoProxyContract.grant(
+        daoProxyContract.address,
+        ownerAddress,
+        PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
+      );
+
+      await dao.attach(erc1967Proxy.address).upgradeTo(dao.address);
+
+      await expect(dao.attach(erc1967Proxy.address).upgradeTo(dao.address)).to
+        .not.be.reverted;
     });
   });
 });

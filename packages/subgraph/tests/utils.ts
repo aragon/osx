@@ -35,7 +35,7 @@ export function createTokenCalls(
   ]);
 }
 
-export function createDummyAcctions(
+export function createDummyActions(
   address: string,
   value: string,
   data: string
@@ -49,42 +49,74 @@ export function createDummyAcctions(
   return [tuple];
 }
 
-export function createGetVoteCall(
+export function createGetProposalCall(
   contractAddress: string,
-  voteId: string,
+  proposalId: string,
   open: boolean,
   executed: boolean,
+
+  votingMode: string,
+  supportThreshold: string,
+  minParticipation: string,
   startDate: string,
   endDate: string,
   snapshotBlock: string,
-  supportRequired: string,
-  participationRequired: string,
-  votingPower: string,
+
+  abstain: string,
   yes: string,
   no: string,
-  abstain: string,
+  totalVotingPower: string,
+
   actions: ethereum.Tuple[]
 ): void {
+  let parameters = new ethereum.Tuple();
+
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingMode))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThreshold))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(minParticipation))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock))
+  );
+
+  let tally = new ethereum.Tuple();
+
+  tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(abstain)));
+  tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yes)));
+  tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(no)));
+  tally.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(totalVotingPower))
+  );
+
   createMockedFunction(
     Address.fromString(contractAddress),
-    'getVote',
-    'getVote(uint256):(bool,bool,uint64,uint64,uint64,uint64,uint64,uint256,uint256,uint256,uint256,(address,uint256,bytes)[])'
+    'getProposal',
+    'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
   )
-    .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteId))])
+    .withArgs([
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
+    ])
     .returns([
       ethereum.Value.fromBoolean(open),
       ethereum.Value.fromBoolean(executed),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportRequired)),
-      ethereum.Value.fromUnsignedBigInt(
-        BigInt.fromString(participationRequired)
-      ),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(votingPower)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yes)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(no)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(abstain)),
+
+      // ProposalParameters
+      ethereum.Value.fromTuple(parameters),
+
+      // Tally
+      ethereum.Value.fromTuple(tally),
+
       ethereum.Value.fromTupleArray(actions)
     ]);
 }

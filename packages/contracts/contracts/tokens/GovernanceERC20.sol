@@ -11,11 +11,11 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../core/IDAO.sol";
-import {IERC20MintableUpgradeable} from './IERC20MintableUpgradeable.sol';
+import {IERC20MintableUpgradeable} from "./IERC20MintableUpgradeable.sol";
 
 /// @title GovernanceERC20
 /// @author Aragon Association
-/// @notice An [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
+/// @notice An [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token that can be used for voting and is managed by a DAO.
 contract GovernanceERC20 is
     IERC20MintableUpgradeable,
     Initializable,
@@ -25,35 +25,53 @@ contract GovernanceERC20 is
 {
     /// @notice The permission identifier to mint new tokens
     bytes32 public constant MINT_PERMISSION_ID = keccak256("MINT_PERMISSION");
-    
+
+    struct MintSettings {
+        address[] receivers;
+        uint256[] amounts;
+    }
+
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
+    /// @param _mintSettings The initial mint settings
     constructor(
         IDAO _dao,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        MintSettings memory _mintSettings
     ) {
-        initialize(_dao, _name, _symbol);
+        initialize(_dao, _name, _symbol, _mintSettings);
     }
 
     /// @notice Initializes the GovernanceERC20.
     /// @param _dao The managing DAO.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
+    /// @param _mintSettings The token mint settings struct containing the `receivers` and `amounts`.
+    /// @dev The lengths of `receivers` and `amounts` must match.
     function initialize(
         IDAO _dao,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        MintSettings memory _mintSettings
     ) public initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
+
+        for (uint256 i; i < _mintSettings.receivers.length; ) {
+            _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC20Upgradeable).interfaceId ||
@@ -84,5 +102,4 @@ contract GovernanceERC20 is
             _delegate(to, to);
         }
     }
-
 }
