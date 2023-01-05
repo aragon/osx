@@ -8,7 +8,7 @@ import {
   DAO,
 } from '../../../../typechain';
 import {customError} from '../../../test-utils/custom-error-helper';
-import { deployNewDAO } from '../../../test-utils/dao';
+import {deployNewDAO} from '../../../test-utils/dao';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 
