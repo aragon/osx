@@ -7,10 +7,10 @@ type DeployOptions = {
 };
 
 // Used to deploy the implementation with the ERC1967 Proxy behind it.
-// Designed this way as It might be desirable to avoid OpenZeppelin upgrades package
-// later on and this way, all will be needed is to change this function.
-// NOTE: To avoid lots of changes in the whole test codebase, deployWithProxy
-// won't automatically call initialize and it's the caller's responsibility to do so.
+// It is designed this way, because it might be desirable to avoid the OpenZeppelin upgrades package.
+// In the future, this function might get replaced.
+// NOTE: To avoid lots of changes in the whole test codebase, `deployWithProxy`
+// won't automatically call `initialize` and it's the caller's responsibility to do so.
 export async function deployWithProxy<T>(
   contractFactory: ContractFactory,
   options: DeployOptions = {}
