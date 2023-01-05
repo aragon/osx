@@ -556,9 +556,7 @@ describe('ERC20VotingSetup', function () {
       const MerkleMinterFactory = await ethers.getContractFactory(
         'MerkleMinter'
       );
-      const merkleMinter = (await deployWithProxy(
-        MerkleMinterFactory
-      )) as MerkleMinter;
+      const merkleMinter = await deployWithProxy<MerkleMinter>(MerkleMinterFactory);
       await merkleMinter.initialize(
         targetDao.address,
         token.address,

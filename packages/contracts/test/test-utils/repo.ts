@@ -19,7 +19,7 @@ export async function deployNewPluginRepo(
   ownerAddress: any
 ): Promise<PluginRepo> {
   const PluginRepo = await ethers.getContractFactory('PluginRepo');
-  const newPluginRepo = (await deployWithProxy(PluginRepo)) as PluginRepo;
+  const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
   await newPluginRepo.initialize(ownerAddress);
 
   return newPluginRepo;
@@ -67,15 +67,11 @@ export async function deployPluginRepoRegistry(
   managingDao: any,
   ensSubdomainRegistrar: any
 ): Promise<PluginRepoRegistry> {
-  let pluginRepoRegistry: PluginRepoRegistry;
-
   const PluginRepoRegistry = await ethers.getContractFactory(
     'PluginRepoRegistry'
   );
 
-  pluginRepoRegistry = (await deployWithProxy(
-    PluginRepoRegistry
-  )) as PluginRepoRegistry;
+  let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(PluginRepoRegistry);
 
   await pluginRepoRegistry.initialize(
     managingDao.address,

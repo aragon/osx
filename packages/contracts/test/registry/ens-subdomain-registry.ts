@@ -67,9 +67,9 @@ async function setupENS(
   let dao = await deployNewDAO(await owner.getAddress());
 
   // Deploy the registrar
-  let registrar = (await deployWithProxy(
+  let registrar = await deployWithProxy<ENSSubdomainRegistrar>(
     ENSSubdomainRegistrar
-  )) as ENSSubdomainRegistrar;
+  );
 
   return [ens, resolver, dao, registrar];
 }

@@ -53,7 +53,7 @@ describe('DAO', function () {
     ownerAddress = await signers[0].getAddress();
 
     const DAO = await ethers.getContractFactory('DAO');
-    dao = (await deployWithProxy(DAO)) as DAO;
+    dao = await deployWithProxy(DAO);
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');

@@ -41,7 +41,7 @@ describe('AllowlistVoting', function () {
   beforeEach(async () => {
     const AllowlistVoting = await ethers.getContractFactory('AllowlistVoting');
 
-    voting = (await deployWithProxy(AllowlistVoting)) as AllowlistVoting;
+    voting = await deployWithProxy(AllowlistVoting);
   });
 
   function initializeVoting(

@@ -162,7 +162,7 @@ describe('DAOFactory: ', function () {
 
     // DAO Registry
     const DAORegistry = await ethers.getContractFactory('DAORegistry');
-    daoRegistry = (await deployWithProxy(DAORegistry)) as DAORegistry;
+    daoRegistry = await deployWithProxy(DAORegistry);
     await daoRegistry.initialize(
       managingDao.address,
       ensSubdomainRegistrar.address

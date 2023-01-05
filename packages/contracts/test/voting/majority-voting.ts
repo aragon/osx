@@ -26,9 +26,7 @@ describe('MajorityVotingMock', function () {
       'MajorityVotingMock'
     );
 
-    votingBase = (await deployWithProxy(
-      MajorityVotingBase
-    )) as MajorityVotingMock;
+    votingBase = await deployWithProxy(MajorityVotingBase);
   });
 
   function initializeMock(

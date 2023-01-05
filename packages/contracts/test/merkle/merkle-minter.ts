@@ -57,7 +57,7 @@ describe('MerkleDistributor', function () {
     distributorBase = await MerkleDistributor.deploy();
 
     const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
-    minter = (await deployWithProxy(MerkleMinter)) as MerkleMinter;
+    minter = await deployWithProxy(MerkleMinter);
 
     await minter.initialize(
       managingDao.address,

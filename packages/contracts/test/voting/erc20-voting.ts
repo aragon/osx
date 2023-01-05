@@ -45,7 +45,7 @@ describe('ERC20Voting', function () {
 
     const ERC20Voting = await ethers.getContractFactory('ERC20Voting');
 
-    voting = (await deployWithProxy(ERC20Voting)) as ERC20Voting;
+    voting = await deployWithProxy(ERC20Voting);
   });
 
   function initializeVoting(

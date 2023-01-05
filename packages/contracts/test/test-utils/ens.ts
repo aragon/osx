@@ -48,9 +48,9 @@ export async function deployENSSubdomainRegistrar(
   }
 
   // Deploy the ENS and approve the subdomain registrar
-  const ensSubdomainRegistrar = (await deployWithProxy(
+  const ensSubdomainRegistrar = await deployWithProxy<ENSSubdomainRegistrar>(
     ENSSubdomainRegistrar
-  )) as ENSSubdomainRegistrar;
+  );
   await ens
     .connect(owner)
     .setApprovalForAll(ensSubdomainRegistrar.address, true);

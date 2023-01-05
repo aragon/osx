@@ -58,9 +58,7 @@ describe('PluginRepoRegistry', function () {
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
-    pluginRepoRegistry = (await deployWithProxy(
-      PluginRepoRegistry
-    )) as PluginRepoRegistry;
+    pluginRepoRegistry = await deployWithProxy(PluginRepoRegistry);
 
     await pluginRepoRegistry.initialize(
       managingDAO.address,

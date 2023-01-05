@@ -32,9 +32,9 @@ describe('InterfaceBasedRegistry', function () {
       'InterfaceBasedRegistryMock'
     );
 
-    interfaceBasedRegistryMock = (await deployWithProxy(
+    interfaceBasedRegistryMock = await deployWithProxy(
       InterfaceBasedRegistryMock
-    )) as InterfaceBasedRegistryMock;
+    );
 
     // Let the interface registry register `DAO` contracts for testing purposes
     await interfaceBasedRegistryMock.initialize(dao.address);

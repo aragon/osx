@@ -36,7 +36,7 @@ describe('CallbackHandler', function () {
       'CallbackHandlerMockHelper'
     );
 
-    dao = await deployWithProxy(DAO) as DAO;
+    dao = await deployWithProxy(DAO);
 
     dao.initialize('0x', owner, ethers.constants.AddressZero);
     dao.grant(dao.address, owner, REGISTER_STANDARD_CALLBACK_PERMISSION_ID);
