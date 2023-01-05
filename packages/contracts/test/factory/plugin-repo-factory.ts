@@ -103,14 +103,14 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    managingDao.grant(
+    await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    managingDao.grant(
+    await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
@@ -118,7 +118,7 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
-    managingDao.revoke(
+    await managingDao.revoke(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
       REGISTER_PLUGIN_REPO_PERMISSION_ID
