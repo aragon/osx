@@ -463,7 +463,7 @@ describe('Multisig', function () {
         expect(await multisig.canApprove(id, signers[0].address)).to.be.false;
       });
 
-      it('returns `false` if the approver is listed', async () => {
+      it('returns `true` if the approver is listed', async () => {
         expect(await multisig.canApprove(id, signers[0].address)).to.be.true;
       });
     });
