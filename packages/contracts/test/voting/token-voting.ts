@@ -1138,7 +1138,7 @@ describe('TokenVoting', function () {
       });
     });
 
-    describe('An edge case with >0% support and >=0% participation required in early execution mode', async () => {
+    describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` and early execution mode activated', async () => {
       beforeEach(async () => {
         votingSettings.supportThreshold = pct16(0);
         votingSettings.minParticipation = pct16(0);
