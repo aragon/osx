@@ -446,6 +446,26 @@ describe('Multisig', function () {
       });
     });
 
+    describe('canExecute:', async () => {
+      it('returns false if the proposal is already executed', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+        expect(await multisig.connect(signers[2]).approve(id, true))
+          .to.emit(dao.address, 'Executed')
+          .to.emit(multisig.address, 'ProposalExecuted');
+
+        expect(await multisig.canExecute(id)).to.be.false;
+      });
+
+      it('returns true if the proposal can be executed', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+        await multisig.connect(signers[2]).approve(id, false);
+
+        expect(await multisig.canExecute(id)).to.be.true;
+      });
+    });
+
     describe('execute:', async () => {
       it('executes if the minimum approval is met', async () => {
         await multisig.connect(signers[0]).approve(id, false);
