@@ -481,6 +481,8 @@ describe('Multisig', function () {
       });
 
       it('approves with the msg.sender address', async () => {
+        expect((await multisig.getProposal(id)).tally.approvals).to.equal(0);
+
         let tx = await multisig.connect(signers[0]).approve(id, false);
 
         const event = await findEvent(tx, 'Approved');
@@ -488,8 +490,7 @@ describe('Multisig', function () {
         expect(event.args.approver).to.not.eq(multisig.address);
         expect(event.args.approver).to.eq(signers[0].address);
 
-        const prop = await multisig.getProposal(id);
-        expect(prop.tally.approvals).to.equal(1);
+        expect((await multisig.getProposal(id)).tally.approvals).to.equal(1);
       });
     });
 
