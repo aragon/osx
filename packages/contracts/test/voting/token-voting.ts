@@ -4,7 +4,12 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import {DAO} from '../../typechain';
-import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {
+  findEvent,
+  DAO_EVENTS,
+  VOTING_EVENTS,
+  PROPOSAL_EVENTS,
+} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {
   VoteOption,
@@ -18,7 +23,6 @@ import {
   MAX_UINT64,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-import {BigNumber} from 'ethers';
 
 const {deployMockContract} = waffle;
 
@@ -309,20 +313,27 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-      expect(
-        await voting.createProposal(
-          dummyMetadata,
-          dummyActions,
-          0,
-          0,
-          VoteOption.None,
-          false
-        )
-      )
-        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata)
-        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.None, 1);
+      let tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        0,
+        VoteOption.None,
+        false
+      );
+
+      await expect(tx)
+        .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST);
+
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      expect(event.args.proposalId).to.equal(id);
+      expect(event.args.creator).to.equal(signers[0].address);
+      expect(event.args.metadata).to.equal(dummyMetadata);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -363,20 +374,28 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-      expect(
-        await voting.createProposal(
-          dummyMetadata,
-          dummyActions,
-          0,
-          0,
-          VoteOption.Yes,
-          false
-        )
-      )
-        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata)
+      let tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        0,
+        VoteOption.Yes,
+        false
+      );
+
+      await expect(tx)
+        .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      expect(event.args.proposalId).to.equal(id);
+      expect(event.args.creator).to.equal(signers[0].address);
+      expect(event.args.metadata).to.equal(dummyMetadata);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -640,7 +659,7 @@ describe('TokenVoting', function () {
 
         await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-        expect(await voting.connect(signers[0]).vote(id, VoteOption.Yes, false))
+        await expect(voting.connect(signers[0]).vote(id, VoteOption.Yes, false))
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
           .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
@@ -650,7 +669,7 @@ describe('TokenVoting', function () {
         expect(proposal.tally.no).to.equal(0);
         expect(proposal.tally.abstain).to.equal(0);
 
-        expect(await voting.connect(signers[1]).vote(id, VoteOption.No, false))
+        await expect(voting.connect(signers[1]).vote(id, VoteOption.No, false))
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
           .withArgs(id, signers[1].address, VoteOption.No, 1);
 
@@ -659,8 +678,8 @@ describe('TokenVoting', function () {
         expect(proposal.tally.no).to.equal(1);
         expect(proposal.tally.abstain).to.equal(0);
 
-        expect(
-          await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false)
+        await expect(
+          voting.connect(signers[2]).vote(id, VoteOption.Abstain, false)
         )
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
           .withArgs(id, signers[2].address, VoteOption.Abstain, 1);
@@ -813,7 +832,7 @@ describe('TokenVoting', function () {
 
         // check for the `ProposalExecuted` event in the voting contract
         {
-          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
         }
 

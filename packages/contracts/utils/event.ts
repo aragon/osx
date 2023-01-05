@@ -22,8 +22,6 @@ export const PROPOSAL_EVENTS = {
 export const VOTING_EVENTS = {
   VOTING_SETTINGS_UPDATED: 'VotingSettingsUpdated',
   VOTE_CAST: 'VoteCast',
-  PROPOSAL_CREATED: 'ProposalCreated',
-  PROPOSAL_EXECUTED: 'ProposalExecuted',
 };
 
 export const MULTISIG_EVENTS = {

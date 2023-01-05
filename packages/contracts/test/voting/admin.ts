@@ -164,9 +164,7 @@ describe('Admin plugin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      await expect(
-        await plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.emit(plugin, EVENTS.ProposalCreated);
+      await expect(tx).to.emit(plugin, EVENTS.ProposalCreated);
 
       const event = await findEvent(tx, EVENTS.ProposalCreated);
 
