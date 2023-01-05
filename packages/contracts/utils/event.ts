@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 export async function findEvent(tx: any, eventName: string) {
   const {events} = await tx.wait();
   const event = events.find(({event}: {event: any}) => event === eventName);
@@ -12,6 +14,11 @@ export async function filterEvents(tx: any, eventName: string) {
   return event;
 }
 
+export const PROPOSAL_EVENTS = {
+  PROPOSAL_CREATED: 'ProposalCreated',
+  PROPOSAL_EXECUTED: 'ProposalExecuted',
+};
+
 export const VOTING_EVENTS = {
   VOTING_SETTINGS_UPDATED: 'VotingSettingsUpdated',
   VOTE_CAST: 'VoteCast',
@@ -20,8 +27,9 @@ export const VOTING_EVENTS = {
 };
 
 export const MULTISIG_EVENTS = {
-  MULTISIG_SETTINGS_UPDATED: 'MultisigSettingsUpdated'
-}
+  MULTISIG_SETTINGS_UPDATED: 'MultisigSettingsUpdated',
+  APPROVED: 'Approved',
+};
 
 export const DAO_EVENTS = {
   METADATA_SET: 'MetadataSet',

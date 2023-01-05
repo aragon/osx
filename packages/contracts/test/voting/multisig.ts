@@ -7,6 +7,7 @@ import {
   findEvent,
   DAO_EVENTS,
   VOTING_EVENTS,
+  PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
@@ -292,6 +293,22 @@ describe('Multisig', function () {
       expect(proposalId0).to.not.equal(proposalId1);
     });
 
+    it('emits the `ProposalCreated` event', async () => {
+      await multisig.initialize(
+        dao.address,
+        addresslist(1), // signers[0] is listed
+        multisigSettings
+      );
+
+      await expect(
+        multisig
+          .connect(signers[0])
+          .createProposal(dummyMetadata, [], false, false)
+      )
+        .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .withArgs(id, signers[0].address, dummyMetadata, []);
+    });
+
     context('`onlyListed` is set to `false`:', async () => {
       beforeEach(async () => {
         multisigSettings.onlyListed = false;
@@ -304,13 +321,13 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal when unlisted accounts are allowed', async () => {
-        expect(
-          await multisig
-            .connect(signers[1])
-            .createProposal(dummyMetadata, dummyActions, false, false)
+        await expect(
+          multisig
+            .connect(signers[1]) // not listed
+            .createProposal(dummyMetadata, [], false, false)
         )
-          .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
-          .withArgs(id, signers[0].address, dummyMetadata);
+          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .withArgs(id, signers[1].address, dummyMetadata, []);
       });
     });
 
@@ -342,16 +359,9 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
-        expect(
-          await multisig.createProposal(
-            dummyMetadata,
-            dummyActions,
-            false,
-            false
-          )
-        )
-          .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
-          .withArgs(id, signers[0].address, dummyMetadata);
+        await expect(multisig.createProposal(dummyMetadata, [], false, false))
+          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .withArgs(id, signers[0].address, dummyMetadata, []);
 
         const block = await ethers.provider.getBlock('latest');
 
@@ -361,9 +371,9 @@ describe('Multisig', function () {
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
-
         expect(proposal.tally.approvals).to.equal(0);
         expect(proposal.tally.addresslistLength).to.equal(1);
+        expect(proposal.actions.length).to.equal(0);
 
         expect(await multisig.canApprove(id, signers[0].address)).to.equal(
           true
@@ -374,25 +384,13 @@ describe('Multisig', function () {
         expect(await multisig.canApprove(1, signers[0].address)).to.equal(
           false
         );
-
-        expect(proposal.actions.length).to.equal(1);
-        expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
-        expect(proposal.actions[0].value).to.equal(dummyActions[0].value);
-        expect(proposal.actions[0].data).to.equal(dummyActions[0].data);
       });
 
       it('creates a proposal successfully and approves if specified', async () => {
-        expect(
-          await multisig.createProposal(
-            dummyMetadata,
-            dummyActions,
-            true,
-            false
-          )
-        )
-          .to.emit(multisig, VOTING_EVENTS.PROPOSAL_CREATED)
-          .withArgs(id, signers[0].address, dummyMetadata)
-          .to.emit(multisig, 'Approved')
+        await expect(multisig.createProposal(dummyMetadata, [], true, false))
+          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+          .withArgs(id, signers[0].address, dummyMetadata, [])
+          .to.emit(multisig, MULTISIG_EVENTS.APPROVED)
           .withArgs(id, signers[0].address);
 
         const block = await ethers.provider.getBlock('latest');
@@ -440,9 +438,9 @@ describe('Multisig', function () {
       it('returns `false` if the proposal is already executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
-        expect(await multisig.connect(signers[2]).approve(id, true))
-          .to.emit(dao.address, 'Executed')
-          .to.emit(multisig.address, 'ProposalExecuted');
+        await multisig.connect(signers[2]).approve(id, true);
+
+        expect((await multisig.getProposal(id)).executed).to.be.true;
 
         expect(await multisig.canApprove(id, signers[3].address)).to.be.false;
       });
@@ -498,9 +496,9 @@ describe('Multisig', function () {
       it('returns false if the proposal is already executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
-        expect(await multisig.connect(signers[2]).approve(id, true))
-          .to.emit(dao.address, 'Executed')
-          .to.emit(multisig.address, 'ProposalExecuted');
+        await multisig.connect(signers[2]).approve(id, true);
+
+        expect((await multisig.getProposal(id)).executed).to.be.true;
 
         expect(await multisig.canExecute(id)).to.be.false;
       });
@@ -509,6 +507,8 @@ describe('Multisig', function () {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
         await multisig.connect(signers[2]).approve(id, false);
+
+        expect((await multisig.getProposal(id)).executed).to.be.false;
 
         expect(await multisig.canExecute(id)).to.be.true;
       });
@@ -587,7 +587,7 @@ describe('Multisig', function () {
 
         // check for the `ProposalExecuted` event in the voting contract
         {
-          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
         }
 
@@ -595,6 +595,27 @@ describe('Multisig', function () {
         await expect(multisig.execute(id)).to.be.revertedWith(
           customError('ProposalExecutionForbidden', id)
         );
+      });
+
+      it('emits the `ProposalExecuted` and `Executed` events', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+        await multisig.connect(signers[2]).approve(id, false);
+
+        await expect(await multisig.connect(signers[3]).execute(id))
+          .to.emit(dao, DAO_EVENTS.EXECUTED)
+          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+          .to.not.emit(multisig, MULTISIG_EVENTS.APPROVED);
+      });
+
+      it('emits the `Approved`, `ProposalExecuted`, and `Executed` events if execute is called inside the `approve` method', async () => {
+        await multisig.connect(signers[0]).approve(id, false);
+        await multisig.connect(signers[1]).approve(id, false);
+
+        await expect(await multisig.connect(signers[2]).approve(id, true))
+          .to.emit(dao, DAO_EVENTS.EXECUTED)
+          .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
+          .to.emit(multisig, MULTISIG_EVENTS.APPROVED);
       });
     });
   });
