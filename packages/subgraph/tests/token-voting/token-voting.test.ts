@@ -226,7 +226,12 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // participation    :  33%
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'false');
   // check vote count
-  assert.fieldEquals('TokenVotingProposal', proposal.id, 'voteCount', '1');
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    proposal.id,
+    'castedVotingPower',
+    '1'
+  );
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
@@ -266,8 +271,59 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   // participation    :  67%
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'executable', 'true');
 
-  assert.fieldEquals('TokenVotingProposal', proposal.id, 'voteCount', '2');
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    proposal.id,
+    'castedVotingPower',
+    '2'
+  );
 
+  clearStore();
+});
+
+test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option "None"', () => {
+  // create state
+  let proposal = createTokenVotingProposalEntityState();
+
+  // create calls
+  createGetProposalCall(
+    CONTRACT_ADDRESS,
+    PROPOSAL_ID,
+    true,
+    false,
+
+    // ProposalParameters
+    VOTING_MODE,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    // Tally
+    '0', // abstain
+    '0', // yes
+    '0', // no
+    TOTAL_VOTING_POWER,
+
+    actions
+  );
+
+  // create event
+  let event = createNewVoteCastEvent(
+    PROPOSAL_ID,
+    ADDRESS_ONE,
+    '0', // none
+    '1', // votingPower
+    CONTRACT_ADDRESS
+  );
+
+  handleVoteCast(event);
+
+  // checks
+  let entityID = ADDRESS_ONE + '_' + proposal.id;
+  assert.notInStore('TokenVotingVoter', entityID);
+  
   clearStore();
 });
 

@@ -139,8 +139,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[0].address)
@@ -153,8 +153,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.not.be.reverted;
     });
@@ -177,8 +177,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[0].address)
@@ -191,8 +191,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.not.be.reverted;
     });
@@ -206,7 +206,7 @@ describe('TokenVoting', function () {
 
       await governanceErc20Mock.mock.getPastTotalSupply.returns(0);
       await expect(
-        voting.createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+        voting.createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.be.revertedWith(customError('NoVotingPower'));
     });
 
@@ -230,8 +230,8 @@ describe('TokenVoting', function () {
           [],
           startDateInThePast,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError(
@@ -262,8 +262,8 @@ describe('TokenVoting', function () {
           [],
           tooLateStartDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
@@ -290,8 +290,8 @@ describe('TokenVoting', function () {
           [],
           startDate,
           tooEarlyEndDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
@@ -314,16 +314,19 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata);
+        .withArgs(id, signers[0].address, dummyMetadata)
+        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST)
+        .withArgs(id, signers[0].address, VoteOption.None, 1);
 
       const block = await ethers.provider.getBlock('latest');
 
       const proposal = await voting.getProposal(id);
+
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
       expect(proposal.parameters.supportThreshold).to.equal(
@@ -365,8 +368,8 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
@@ -416,8 +419,8 @@ describe('TokenVoting', function () {
           dummyActions,
           startDate,
           endDate,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       ).to.be.revertedWith(
         customError('VoteCastForbidden', id, signers[0].address)
@@ -431,8 +434,8 @@ describe('TokenVoting', function () {
             dummyActions,
             startDate,
             endDate,
-            false,
-            VoteOption.None
+            VoteOption.None,
+            false
           )
         ).value
       ).to.equal(id);
@@ -440,7 +443,7 @@ describe('TokenVoting', function () {
   });
 
   describe('Proposal + Execute:', async () => {
-    context('Vote Replacement', async () => {
+    context('Standard Mode', async () => {
       beforeEach(async () => {
         votingSettings.votingMode = VotingMode.Standard;
 
@@ -463,8 +466,8 @@ describe('TokenVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -478,7 +481,20 @@ describe('TokenVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.Abstain, false)
+        ).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.None, false)
+        ).to.be.revertedWith(
           customError('VoteCastForbidden', id, signers[0].address)
         );
       });
@@ -591,8 +607,8 @@ describe('TokenVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -662,7 +678,20 @@ describe('TokenVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.Abstain, false)
+        ).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.None, false)
+        ).to.be.revertedWith(
           customError('VoteCastForbidden', id, signers[0].address)
         );
       });
@@ -785,7 +814,6 @@ describe('TokenVoting', function () {
         {
           const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
-          expect(event.args.execResults).to.deep.equal(['0x']);
         }
 
         // calling execute again should fail
@@ -826,8 +854,8 @@ describe('TokenVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -856,6 +884,12 @@ describe('TokenVoting', function () {
         expect((await voting.getProposal(id)).tally.yes).to.equal(0);
         expect((await voting.getProposal(id)).tally.no).to.equal(0);
         expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
+
+        await voting.vote(id, VoteOption.None, false);
+        await voting.vote(id, VoteOption.None, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
       });
 
       it('cannot early execute', async () => {
@@ -967,8 +1001,8 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         );
       });
 

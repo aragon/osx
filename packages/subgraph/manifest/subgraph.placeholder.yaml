@@ -157,7 +157,7 @@ templates:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes)
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -182,7 +182,7 @@ templates:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes)
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -190,6 +190,35 @@ templates:
           handler: handleAddressesAdded
         - event: AddressesRemoved(address[])
           handler: handleAddressesRemoved
+  # Multisig (package)
+  - name: Multisig
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: Multisig
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/packages/multisig/multisig.ts
+      entities:
+        - Dao
+      abis:
+        - name: Multisig
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
+      eventHandlers:
+        - event: AddressesAdded(address[])
+          handler: handleAddressesAdded
+        - event: AddressesRemoved(address[])
+          handler: handleAddressesRemoved
+        - event: Approved(indexed uint256,indexed address)
+          handler: handleApproved
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
+        - event: ProposalExecuted(indexed uint256,bytes[])
+          handler: handleProposalExecuted
+        - event: MultisigSettingsUpdated(bool,indexed uint256)
+          handler: handleMultisigSettingsUpdated
     # admin (package)
   - name: Admin
     kind: ethereum/contract
@@ -207,10 +236,10 @@ templates:
         - name: Admin
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
       eventHandlers:
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
-          handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
+        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+          handler: handleProposalCreated
   # PluginRepo
   - name: PluginRepoTemplate
     kind: ethereum/contract

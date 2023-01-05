@@ -10,12 +10,12 @@ contract MajorityVotingMock is MajorityVotingBase {
     }
 
     function createProposal(
-        bytes calldata, /* _proposalMetadata */
+        bytes calldata, /* _metadata */
         IDAO.Action[] calldata, /* _actions */
         uint64, /* _startDate */
         uint64, /* _endDate */
-        bool, /* _tryEarlyExecution */
-        VoteOption /* _voteOption */
+        VoteOption, /* _voteOption */
+        bool /* _tryEarlyExecution */
     ) external pure override returns (uint256 proposalId) {
         return 0;
     }

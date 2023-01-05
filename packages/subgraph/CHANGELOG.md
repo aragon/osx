@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+- Ignores `None` votes from addresslist voting and token voting
+
 ## 0.5.0-alpha
 
 On 2022-12-09 15:16:22
@@ -17,6 +20,7 @@ On 2022-12-09 15:16:22
 - Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
 - Adds support for `PluginRepo`, `PluginRegistry` and `PluginSetupProcessor`
 - Added `Withdrawn`, `TrustedForwarderSet`, `StandardCallbackRegistered` and `handleStandardCallbackRegistered` events handling to `DaoTemplate`
+- Added support for the new `PluginSettingsUpdated` event of the `Multisig` plugin
 
 ### Changed
 
@@ -27,6 +31,7 @@ On 2022-12-09 15:16:22
 - Improved test recompilation.
 - Marks some entity as immutable.
 - Fixes calcuation crash in erc20 voting, when no votes were cast
+- Added the field `onlyListed` to the `MultisigPlugin` type
 
 ## 0.4.0-alpha
 

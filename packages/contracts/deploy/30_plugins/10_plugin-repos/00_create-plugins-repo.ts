@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
-  // AddresslistVoting
+  // AddresslistVotingSetup
   await createPluginRepo(
     hre,
     'AddresslistVoting',
@@ -30,6 +30,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // AdminSetup
   await createPluginRepo(hre, 'Admin', 'AdminSetup', [1, 0, 0], '0x');
+
+  // MultisigSetup
+  await createPluginRepo(hre, 'Multisig', 'MultisigSetup', [1, 0, 0], '0x');
 };
 export default func;
 func.tags = ['Create_Register_Plugins'];

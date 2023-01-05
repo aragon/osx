@@ -27,8 +27,8 @@ const prepareInstallationDataTypes = [
 ];
 
 // Permissions
-const MODIFY_ADDRESSLIST_PERMISSION_ID = ethers.utils.id(
-  'MODIFY_ADDRESSLIST_PERMISSION'
+const UPDATE_ADDRESSES_PERMISSION_ID = ethers.utils.id(
+  'UPDATE_ADDRESSES_PERMISSION'
 );
 const UPDATE_VOTING_SETTINGS_PERMISSION_ID = ethers.utils.id(
   'UPDATE_VOTING_SETTINGS_PERMISSION'
@@ -69,15 +69,17 @@ describe('AddresslistVotingSetup', function () {
     ]);
   });
 
-  it('creates addresslist voting base with the correct interface', async () => {
+  it('creates address list voting base with the correct interface', async () => {
     const factory = await ethers.getContractFactory('AddresslistVoting');
     const addresslistVotingContract = factory.attach(implementationAddress);
 
     const iface = new ethers.utils.Interface([
       'function addAddresses(address[])',
       'function removeAddresses(address[])',
-      'function isListed(address,uint256) returns (bool)',
-      'function addresslistLength(uint256) returns (uint256)',
+      'function isListed(address) returns (bool)',
+      'function isListedAtBlock(address,uint256) returns (bool)',
+      'function addresslistLength() returns (uint256)',
+      'function addresslistLengthAtBlock(uint256) returns (uint256)',
       'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
     ]);
 
@@ -144,7 +146,7 @@ describe('AddresslistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          MODIFY_ADDRESSLIST_PERMISSION_ID,
+          UPDATE_ADDRESSES_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -209,10 +211,12 @@ describe('AddresslistVotingSetup', function () {
       await ethers.provider.send('evm_mine', []);
 
       expect(
-        await addresslistVotingContract.addresslistLength(latestBlock.number)
+        await addresslistVotingContract.addresslistLengthAtBlock(
+          latestBlock.number
+        )
       ).to.be.equal(defaultMembers.length);
       expect(
-        await addresslistVotingContract.isListed(
+        await addresslistVotingContract.isListedAtBlock(
           defaultMembers[0],
           latestBlock.number
         )
@@ -248,7 +252,7 @@ describe('AddresslistVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          MODIFY_ADDRESSLIST_PERMISSION_ID,
+          UPDATE_ADDRESSES_PERMISSION_ID,
         ],
         [
           Operation.Revoke,

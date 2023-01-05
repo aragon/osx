@@ -39,6 +39,7 @@ import {
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
+  MULTISIG_INTERFACE,
   TOKEN_VOTING_INTERFACE
 } from '../../src/utils/constants';
 import {createTokenCalls} from '../utils';
@@ -105,6 +106,7 @@ test('InstallationApplied event (existent plugin)', function() {
   getSupportsInterface(pluginId, TOKEN_VOTING_INTERFACE, true);
   getSupportsInterface(pluginId, ADDRESSLIST_VOTING_INTERFACE, false);
   getSupportsInterface(pluginId, ADMIN_INTERFACE, false);
+  getSupportsInterface(pluginId, MULTISIG_INTERFACE, false);
 
   // handle
   handleInstallationApplied(appliedEvent);

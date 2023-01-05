@@ -109,9 +109,7 @@ To learn more about the architecture of the system, visit the section explaining
 
 | Contract                  | Description                                                                | Relationship                                                    |
 | :------------------------ | :------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| `InterfaceBasedRegistry ` | An ERC165 interface based registry for contracts.                          | used by `DAORegistry`, `PluginRepoRegistry`                     |
-| `TimeHelpers`             | Returns `block.number` and `block.timestamp` as `uint64` values.           | used by `MajorityVotingBase`                                    |
-| `Uint256Helpers`          | Converts `uint256` to `uint64`.                                            | used by`TimeHelpers`                                            |
+| `InterfaceBasedRegistry ` | An ERC165 interface based registry for contracts.                          | used by `DAORegistry`, `PluginRepoRegistry`                     |                                    |
 | `auth`                    | Provides a free function to be used in the `DaoAuthorizable` base classes. | used by `DaoAuthorizableBase`, `DaoAuthorizableBaseUpgradeable` |
 | `Proxy`                   | Provides a convenience function to create an UUPS proxy.                   | used by`DAOFactory`, `PluginRepoFactory`                        |
 | `UncheckedMath`           | Provides convenience functions for unchecked math operations.              | used by `PluginRepo`, `AddresslistVoting`                       |

@@ -264,7 +264,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'AddresslistVotingProposal',
     proposal.id,
-    'voteCount',
+    'castedVotingPower',
     '1'
   );
 
@@ -316,10 +316,56 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   assert.fieldEquals(
     'AddresslistVotingProposal',
     proposal.id,
-    'voteCount',
+    'castedVotingPower',
     '2'
   );
 
+  clearStore();
+});
+
+test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote option "None"', () => {
+  // create state
+  let proposal = createAddresslistVotingProposalEntityState();
+
+  // create calls
+  createGetProposalCall(
+    CONTRACT_ADDRESS,
+    PROPOSAL_ID,
+    true,
+    false,
+
+    // ProposalParameters
+    VOTING_MODE,
+    SUPPORT_THRESHOLD,
+    MIN_PARTICIPATION,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    // Tally
+    '0', // abstain
+    '0', // yes
+    '0', // no
+    TOTAL_VOTING_POWER,
+
+    actions
+  );
+
+  // create event
+  let event = createNewVoteCastEvent(
+    PROPOSAL_ID,
+    ADDRESS_ONE,
+    '0', // none
+    '1', // votingPower
+    CONTRACT_ADDRESS
+  );
+
+  handleVoteCast(event);
+
+  // checks
+  let entityID = ADDRESS_ONE + '_' + proposal.id;
+  assert.notInStore('AddresslistVotingVote', entityID);
+  
   clearStore();
 });
 

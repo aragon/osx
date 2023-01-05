@@ -107,6 +107,11 @@ export function handleVoteCast(event: VoteCast): void {
   const memberId = pluginId + '_' + member;
   let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
   let voterVoteId = member + '_' + proposalId;
+  let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
+
+  if (voteOption === 'None') {
+    return;
+  }
 
   let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
   if (!voterProposalVoteEntity) {
@@ -114,9 +119,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalVoteEntity.voter = memberId;
     voterProposalVoteEntity.proposal = proposalId;
   }
-  voterProposalVoteEntity.voteOption = VOTER_OPTIONS.get(
-    event.params.voteOption
-  );
+  voterProposalVoteEntity.voteOption = voteOption;
   voterProposalVoteEntity.votingPower = event.params.votingPower;
   voterProposalVoteEntity.createdAt = event.block.timestamp;
   voterProposalVoteEntity.save();
@@ -133,19 +136,19 @@ export function handleVoteCast(event: VoteCast): void {
       let abstain = tally.abstain;
       let yes = tally.yes;
       let no = tally.no;
-      let voteCount = yes.plus(no.plus(abstain));
+      let castedVotingPower = yes.plus(no.plus(abstain));
 
       proposalEntity.yes = yes;
       proposalEntity.no = no;
       proposalEntity.abstain = abstain;
-      proposalEntity.voteCount = voteCount;
+      proposalEntity.castedVotingPower = castedVotingPower;
 
       // check if the current vote results meet the conditions for the proposal to pass:
       // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
       // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
       // expect a number between 0 and 100
-      let currentParticipation = voteCount
+      let currentParticipation = castedVotingPower
         .times(BigInt.fromI32(100))
         .div(proposalEntity.totalVotingPower);
 

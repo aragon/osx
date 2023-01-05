@@ -92,7 +92,7 @@ describe('AddresslistVoting', function () {
     dao.grant(
       voting.address,
       signers[0].address,
-      ethers.utils.id('MODIFY_ADDRESSLIST_PERMISSION')
+      ethers.utils.id('UPDATE_ADDRESSES_PERMISSION')
     );
   });
 
@@ -120,12 +120,12 @@ describe('AddresslistVoting', function () {
     beforeEach(async () => {
       await voting.initialize(dao.address, votingSettings, addresslist(0));
     });
-    it('should return false, if user is not allowed', async () => {
+    it('should return false, if user is not listed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(signers[0].address, block1.number)).to.equal(
-        false
-      );
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block1.number)
+      ).to.equal(false);
     });
 
     it('should add new users in the address list', async () => {
@@ -134,11 +134,11 @@ describe('AddresslistVoting', function () {
       const block = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
 
-      expect(await voting.isListed(signers[0].address, block.number)).to.equal(
-        true
-      );
-      expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
-      expect(await voting.isListed(signers[1].address, 0)).to.equal(true);
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block.number)
+      ).to.equal(true);
+      expect(await voting.isListed(signers[0].address)).to.equal(true);
+      expect(await voting.isListed(signers[1].address)).to.equal(true);
     });
 
     it('should remove users from the address list', async () => {
@@ -146,19 +146,19 @@ describe('AddresslistVoting', function () {
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(signers[0].address, block1.number)).to.equal(
-        true
-      );
-      expect(await voting.isListed(signers[0].address, 0)).to.equal(true);
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block1.number)
+      ).to.equal(true);
+      expect(await voting.isListed(signers[0].address)).to.equal(true);
 
       await voting.removeAddresses(addresslist(1));
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
-      expect(await voting.isListed(signers[0].address, block2.number)).to.equal(
-        false
-      );
-      expect(await voting.isListed(signers[0].address, 0)).to.equal(false);
+      expect(
+        await voting.isListedAtBlock(signers[0].address, block2.number)
+      ).to.equal(false);
+      expect(await voting.isListed(signers[0].address)).to.equal(false);
     });
   });
 
@@ -175,7 +175,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[1].address)
       );
@@ -183,7 +183,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.not.be.reverted;
     });
 
@@ -199,7 +199,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.be.revertedWith(
         customError('ProposalCreationForbidden', signers[1].address)
       );
@@ -207,7 +207,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, 0, false, VoteOption.None)
+          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
       ).to.not.be.reverted;
     });
 
@@ -224,8 +224,8 @@ describe('AddresslistVoting', function () {
           [],
           startDateInThePast,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError(
@@ -249,8 +249,8 @@ describe('AddresslistVoting', function () {
           [],
           tooLateStartDate,
           endDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
@@ -270,8 +270,8 @@ describe('AddresslistVoting', function () {
           [],
           startDate,
           tooEarlyEndDate,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       ).to.be.revertedWith(
         customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
@@ -287,12 +287,14 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata);
+        .withArgs(id, signers[0].address, dummyMetadata)
+        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST)
+        .withArgs(id, signers[0].address, VoteOption.None, 1);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -332,8 +334,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       )
         .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
@@ -369,8 +371,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           startDate,
           endDate,
-          false,
-          VoteOption.Yes
+          VoteOption.Yes,
+          false
         )
       ).to.be.revertedWith(
         customError('VoteCastForbidden', id, signers[0].address)
@@ -384,8 +386,8 @@ describe('AddresslistVoting', function () {
             dummyActions,
             startDate,
             endDate,
-            false,
-            VoteOption.None
+            VoteOption.None,
+            false
           )
         ).value
       ).to.equal(id);
@@ -406,8 +408,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -419,7 +421,20 @@ describe('AddresslistVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.Abstain, false)
+        ).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.None, false)
+        ).to.be.revertedWith(
           customError('VoteCastForbidden', id, signers[0].address)
         );
       });
@@ -530,8 +545,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -586,7 +601,20 @@ describe('AddresslistVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
+        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
         await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.Abstain, false)
+        ).to.be.revertedWith(
+          customError('VoteCastForbidden', id, signers[0].address)
+        );
+        await expect(
+          voting.vote(id, VoteOption.None, false)
+        ).to.be.revertedWith(
           customError('VoteCastForbidden', id, signers[0].address)
         );
       });
@@ -685,7 +713,6 @@ describe('AddresslistVoting', function () {
         {
           const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
-          expect(event.args.execResults).to.deep.equal(['0x']);
         }
 
         // calling execute again should fail
@@ -716,8 +743,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
@@ -743,6 +770,12 @@ describe('AddresslistVoting', function () {
         expect((await voting.getProposal(id)).tally.yes).to.equal(0);
         expect((await voting.getProposal(id)).tally.no).to.equal(0);
         expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
+
+        await voting.vote(id, VoteOption.None, false);
+        await voting.vote(id, VoteOption.None, false);
+        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
+        expect((await voting.getProposal(id)).tally.no).to.equal(0);
+        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
       });
 
       it('cannot early execute', async () => {
@@ -851,8 +884,8 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
-          false,
-          VoteOption.None
+          VoteOption.None,
+          false
         );
       });
 
@@ -986,8 +1019,8 @@ describe('AddresslistVoting', function () {
               dummyActions,
               startDate,
               endDate,
-              false,
-              VoteOption.None
+              VoteOption.None,
+              false
             )
           ).value
         ).to.equal(id);
