@@ -7,9 +7,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
-import { deployWithProxy } from '../test-utils/proxy';
+import {deployWithProxy} from '../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
-import { deployNewDAO } from '../test-utils/dao';
+import {deployNewDAO} from '../test-utils/dao';
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
@@ -34,18 +34,16 @@ describe('MerkleDistributor', function () {
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
     );
-    distributor = await deployWithProxy(MerkleDistributor) as MerkleDistributor;
+    distributor = (await deployWithProxy(
+      MerkleDistributor
+    )) as MerkleDistributor;
   });
 
   describe('general', () => {
     const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
     beforeEach(async () => {
-      await distributor.initialize(
-        dao.address,
-        token.address,
-        ZERO_BYTES32
-      );
+      await distributor.initialize(dao.address, token.address, ZERO_BYTES32);
     });
 
     describe('#token', () => {

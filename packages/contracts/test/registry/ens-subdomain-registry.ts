@@ -11,7 +11,7 @@ import {
 } from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
 import {ensDomainHash, ensLabelHash} from '../../utils/ensHelpers';
-import { deployNewDAO } from '../test-utils/dao';
+import {deployNewDAO} from '../test-utils/dao';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -64,10 +64,12 @@ async function setupENS(
   await setupResolver(ens, resolver, owner);
 
   // Deploy the managing DAO
-  let dao = await deployNewDAO(await owner.getAddress())
+  let dao = await deployNewDAO(await owner.getAddress());
 
   // Deploy the registrar
-  let registrar = await deployWithProxy(ENSSubdomainRegistrar) as ENSSubdomainRegistrar;
+  let registrar = (await deployWithProxy(
+    ENSSubdomainRegistrar
+  )) as ENSSubdomainRegistrar;
 
   return [ens, resolver, dao, registrar];
 }
