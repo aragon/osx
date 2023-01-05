@@ -245,6 +245,54 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 1;
     });
 
+    it('increments the proposal counter', async () => {
+      await multisig.initialize(
+        dao.address,
+        addresslist(1), // signers[0] is listed
+        multisigSettings
+      );
+
+      expect(await multisig.proposalCount()).to.equal(0);
+
+      await expect(
+        multisig.createProposal(dummyMetadata, dummyActions, false, false)
+      ).to.not.be.reverted;
+
+      expect(await multisig.proposalCount()).to.equal(1);
+    });
+
+    it('creates unique proposal IDs for each proposal', async () => {
+      await multisig.initialize(
+        dao.address,
+        addresslist(1), // signers[0] is listed
+        multisigSettings
+      );
+      await ethers.provider.send('evm_mine', []);
+
+      let proposalId0 = await multisig.callStatic.createProposal(
+        dummyMetadata,
+        dummyActions,
+        false,
+        false
+      );
+      // create a new proposal for the proposalCounter to be incremented
+      await expect(
+        multisig.createProposal(dummyMetadata, dummyActions, false, false)
+      ).to.not.be.reverted;
+
+      let proposalId1 = await multisig.callStatic.createProposal(
+        dummyMetadata,
+        dummyActions,
+        false,
+        false
+      );
+
+      expect(proposalId0).to.equal(0); // To be removed when proposal ID is generated as a hash.
+      expect(proposalId1).to.equal(1); // To be removed when proposal ID is generated as a hash.
+
+      expect(proposalId0).to.not.equal(proposalId1);
+    });
+
     context('`onlyListed` is set to `false`:', async () => {
       beforeEach(async () => {
         multisigSettings.onlyListed = false;
