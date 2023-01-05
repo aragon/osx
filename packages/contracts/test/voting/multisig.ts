@@ -159,7 +159,7 @@ describe('Multisig', function () {
       );
     });
 
-    it('should not allow to set minApprovals would be set to 0', async () => {
+    it('should not allow to set `minApprovals` to 0', async () => {
       multisigSettings.minApprovals = 0;
       await expect(
         multisig.updateMultisigSettings(multisigSettings)
