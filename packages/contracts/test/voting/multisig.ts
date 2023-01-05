@@ -602,7 +602,7 @@ describe('Multisig', function () {
         await multisig.connect(signers[1]).approve(id, false);
         await multisig.connect(signers[2]).approve(id, false);
 
-        await expect(await multisig.connect(signers[3]).execute(id))
+        await expect(multisig.connect(signers[3]).execute(id))
           .to.emit(dao, DAO_EVENTS.EXECUTED)
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.not.emit(multisig, MULTISIG_EVENTS.APPROVED);
@@ -612,7 +612,7 @@ describe('Multisig', function () {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
 
-        await expect(await multisig.connect(signers[2]).approve(id, true))
+        await expect(multisig.connect(signers[2]).approve(id, true))
           .to.emit(dao, DAO_EVENTS.EXECUTED)
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.emit(multisig, MULTISIG_EVENTS.APPROVED);

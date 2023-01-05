@@ -174,7 +174,7 @@ describe('Admin plugin', function () {
       const currentExpectedProposalId = 0;
       const expectedDummyResults = ['0x'];
 
-      await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
         .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
         .withArgs(currentExpectedProposalId, expectedDummyResults);
     });
