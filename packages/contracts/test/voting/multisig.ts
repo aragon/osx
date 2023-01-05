@@ -173,14 +173,16 @@ describe('Multisig', function () {
     });
   });
 
-  describe('Addresslisting members:', async () => {
+  describe('isListed:', async () => {
     it('should return false, if a user is not listed', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(dao.address, addresslist(1), multisigSettings);
 
       expect(await multisig.isListed(signers[9].address)).to.equal(false);
     });
+  });
 
+  describe('addAddresses:', async () => {
     it('should add new members to the address list', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(dao.address, addresslist(1), multisigSettings);
@@ -194,7 +196,9 @@ describe('Multisig', function () {
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
     });
+  });
 
+  describe('removeAddresses:', async () => {
     it('should remove users from the address list', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(dao.address, addresslist(2), multisigSettings);
