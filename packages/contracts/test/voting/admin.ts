@@ -3,20 +3,13 @@ import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {DAO} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
-import {findEvent} from '../../utils/event';
+import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
-import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {BigNumber} from 'ethers';
 
 chai.use(smock.matchers);
-
-const EVENTS = {
-  ProposalCreated: 'ProposalCreated',
-  ProposalExecuted: 'ProposalExecuted',
-};
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -164,9 +157,9 @@ describe('Admin plugin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      await expect(tx).to.emit(plugin, EVENTS.ProposalCreated);
+      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
-      const event = await findEvent(tx, EVENTS.ProposalCreated);
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       expect(event.args.proposalId).to.equal(currentExpectedProposalId);
       expect(event.args.creator).to.equal(ownerAddress);
@@ -182,7 +175,7 @@ describe('Admin plugin', function () {
       const expectedDummyResults = ['0x'];
 
       await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
-        .to.emit(plugin, EVENTS.ProposalExecuted)
+        .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
         .withArgs(currentExpectedProposalId, expectedDummyResults);
     });
 
@@ -195,9 +188,9 @@ describe('Admin plugin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      await expect(tx).to.emit(plugin, EVENTS.ProposalCreated);
+      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
-      const event = await findEvent(tx, EVENTS.ProposalCreated);
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
