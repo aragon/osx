@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {BigNumber} from 'ethers';
 
 import {DAO} from '../../typechain';
 import {
