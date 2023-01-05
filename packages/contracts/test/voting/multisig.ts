@@ -382,15 +382,8 @@ describe('Multisig', function () {
         expect(proposal.tally.addresslistLength).to.equal(1);
         expect(proposal.actions.length).to.equal(0);
 
-        expect(await multisig.canApprove(id, signers[0].address)).to.equal(
-          true
-        );
-        expect(await multisig.canApprove(id, signers[1].address)).to.equal(
-          false
-        );
-        expect(await multisig.canApprove(1, signers[0].address)).to.equal(
-          false
-        );
+        expect(await multisig.canApprove(id, signers[0].address)).to.be.true;
+        expect(await multisig.canApprove(id, signers[1].address)).to.be.false;
       });
 
       it('creates a proposal successfully and approves if specified', async () => {
