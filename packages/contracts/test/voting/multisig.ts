@@ -6,7 +6,6 @@ import {DAO} from '../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
-  VOTING_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
 } from '../../utils/event';
