@@ -48,13 +48,6 @@ describe.only('Admin plugin', function () {
       ['DAO']
     ));
 
-    dummyActions = [
-      {
-        to: ownerAddress,
-        data: '0x0000',
-        value: 0,
-      },
-    ];
     dummyMetadata = ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes('0x123456789')
     );
@@ -67,6 +60,14 @@ describe.only('Admin plugin', function () {
   });
 
   beforeEach(async () => {
+    dummyActions = [
+      {
+        to: ownerAddress,
+        data: '0x0000',
+        value: 0,
+      },
+    ];
+
     const AdminFactory = new ethers.ContractFactory(
       mergedAbi,
       adminFactoryBytecode,
@@ -209,19 +210,18 @@ describe.only('Admin plugin', function () {
     });
 
     it("calls the DAO's execute function correctly", async () => {
-      const proposalId = 1;
-
-      const dummyActions2 = [...dummyActions, {
-        value: 1,
-        to: await signers[1].getAddress()
-      }]
+      const proposalId = 0;
+      
+      // Change action.
+      dummyActions[0].to = await signers[2].getAddress()
+      
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
       expect(daoImplementation.execute).has.been.calledWith(BigNumber.from(proposalId), [
         [
-          dummyActions2[0].to,
-          BigNumber.from(dummyActions2[0].value),
-          dummyActions2[0].data,
+          dummyActions[0].to,
+          BigNumber.from(dummyActions[0].value),
+          dummyActions[0].data,
         ],
       ]);
     });
