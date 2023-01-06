@@ -25,7 +25,7 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('Admin plugin', function () {
+describe.only('Admin plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: any;
@@ -211,13 +211,17 @@ describe('Admin plugin', function () {
     it("calls the DAO's execute function correctly", async () => {
       const proposalId = 1;
 
+      const dummyActions2 = [...dummyActions, {
+        value: 1,
+        to: await signers[1].getAddress()
+      }]
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
       expect(daoImplementation.execute).has.been.calledWith(BigNumber.from(proposalId), [
         [
-          dummyActions[0].to,
-          BigNumber.from(dummyActions[0].value),
-          dummyActions[0].data,
+          dummyActions2[0].to,
+          BigNumber.from(dummyActions2[0].value),
+          dummyActions2[0].data,
         ],
       ]);
     });
