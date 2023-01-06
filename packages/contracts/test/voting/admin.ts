@@ -1,18 +1,12 @@
-import chai, {expect} from 'chai';
-import {smock} from '@defi-wonderland/smock';
+import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {DAO} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
-import {findEvent} from '../../utils/event';
+import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {BigNumber} from 'ethers';
-import { deployWithProxy } from '../test-utils/proxy';
-
-chai.use(smock.matchers);
 
 const EVENTS = {
   ProposalCreated: 'ProposalCreated',
@@ -29,7 +23,6 @@ describe('Admin plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: any;
-  let daoImplementation: any;
   let ownerAddress: string;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -48,18 +41,6 @@ describe('Admin plugin', function () {
       ['DAO']
     ));
 
-    dummyMetadata = ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes('0x123456789')
-    );
-
-    const DAO = await smock.mock('DAO');
-    daoImplementation = await DAO.deploy();
-    // @ts-ignore
-    dao = await deployWithProxy<DAO>(DAO);
-    await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
-  });
-
-  beforeEach(async () => {
     dummyActions = [
       {
         to: ownerAddress,
@@ -67,7 +48,14 @@ describe('Admin plugin', function () {
         value: 0,
       },
     ];
+    dummyMetadata = ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes('0x123456789')
+    );
 
+    dao = await deployNewDAO(ownerAddress);
+  });
+
+  beforeEach(async () => {
     const AdminFactory = new ethers.ContractFactory(
       mergedAbi,
       adminFactoryBytecode,
@@ -209,21 +197,29 @@ describe('Admin plugin', function () {
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
 
-    it("calls the DAO's execute function correctly", async () => {
-      const proposalId = 0;
-      
-      // Change action.
-      dummyActions[0].to = await signers[2].getAddress()
-      
-      await plugin.executeProposal(dummyMetadata, dummyActions);
+    it("calls the DAO's execute function correctly with proposalId", async () => {
+      {
+        const proposalId = 0;
 
-      expect(daoImplementation.execute).has.been.calledWith(BigNumber.from(proposalId), [
-        [
-          dummyActions[0].to,
-          BigNumber.from(dummyActions[0].value),
-          dummyActions[0].data,
-        ],
-      ]);
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+        expect(event.args.actor).to.equal(plugin.address);
+        expect(event.args.callId).to.equal(proposalId);
+        expect(event.args.actions.length).to.equal(1);
+        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      }
+
+      {
+        const proposalId = 1;
+
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+        expect(event.args.callId).to.equal(proposalId);
+      }
     });
   });
 });
