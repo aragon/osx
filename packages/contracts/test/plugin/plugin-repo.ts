@@ -56,7 +56,9 @@ describe('PluginRepo', function () {
   it('cannot create invalid first version', async function () {
     await expect(
       pluginRepo.createVersion([1, 1, 0], pluginSetupMock.address, emptyBytes)
-    ).to.be.revertedWith('BumpInvalid([0, 0, 0], [1, 1, 0])');
+    )
+      .to.be.revertedWithCustomError(pluginRepo, 'BumpInvalid')
+      .withArgs([0, 0, 0], [1, 1, 0]);
   });
 
   it('cannot create version with unsupported interface contract', async function () {
@@ -69,12 +71,9 @@ describe('PluginRepo', function () {
         contractNotBeingAPluginSetup.address,
         emptyBytes
       )
-    ).to.be.revertedWith(
-      customError(
-        'InvalidPluginSetupInterface',
-        contractNotBeingAPluginSetup.address
-      )
-    );
+    )
+      .to.be.revertedWithCustomError(pluginRepo, 'InvalidPluginSetupInterface')
+      .withArgs(contractNotBeingAPluginSetup.address);
   });
 
   it('cannot create version with random address', async function () {
@@ -141,14 +140,16 @@ describe('PluginRepo', function () {
     it('fails when version bump is invalid', async () => {
       await expect(
         pluginRepo.createVersion([1, 2, 0], initialPluginSetup, initialContent)
-      ).to.be.revertedWith('BumpInvalid([1, 0, 0], [1, 2, 0])');
+      )
+        .to.be.revertedWithCustomError(pluginRepo, 'BumpInvalid')
+        .withArgs([1, 0, 0], [1, 2, 0]);
     });
 
     it('fails if requesting version 0', async () => {
       const versionIdx = 0;
-      await expect(pluginRepo.getVersionById(versionIdx)).to.be.revertedWith(
-        customError('VersionIndexDoesNotExist', versionIdx)
-      );
+      await expect(pluginRepo.getVersionById(versionIdx))
+        .to.be.revertedWithCustomError(pluginRepo, 'VersionIndexDoesNotExist')
+        .withArgs(versionIdx);
     });
 
     context('adding new version', () => {

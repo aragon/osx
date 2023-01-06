@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AddresslistMock} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {ADDRESSLIST_EVENTS} from '../../utils/event';
 
 describe('AddresslistMock', function () {
@@ -178,9 +177,9 @@ describe('AddresslistMock', function () {
       // try to add signer[1] and signer[2], the latter of which is currently listed
       await expect(
         addresslist.addAddresses([signers[1].address, signers[2].address])
-      ).to.be.revertedWith(
-        customError('InvalidAddresslistUpdate', signers[2].address)
-      );
+      )
+        .to.be.revertedWithCustomError(addresslist, 'InvalidAddresslistUpdate')
+        .withArgs(signers[2].address);
 
       // Verify that the address list has not changed
       await ethers.provider.send('evm_mine', []);
@@ -192,9 +191,9 @@ describe('AddresslistMock', function () {
     it('reverts if the array of new addresses to be added contains an address multiple times', async () => {
       await expect(
         addresslist.addAddresses([signers[0].address, signers[0].address])
-      ).to.be.revertedWith(
-        customError('InvalidAddresslistUpdate', signers[0].address)
-      );
+      )
+        .to.be.revertedWithCustomError(addresslist, 'InvalidAddresslistUpdate')
+        .withArgs(signers[0].address);
     });
   });
 
@@ -239,9 +238,9 @@ describe('AddresslistMock', function () {
       // try to remove signer[1] and signer[2], the latter of which is currently not listed
       await expect(
         addresslist.removeAddresses([signers[1].address, signers[2].address])
-      ).to.be.revertedWith(
-        customError('InvalidAddresslistUpdate', signers[2].address)
-      );
+      )
+        .to.be.revertedWithCustomError(addresslist, 'InvalidAddresslistUpdate')
+        .withArgs(signers[2].address);
 
       // Verify that the address list has not changed
       await ethers.provider.send('evm_mine', []);
@@ -256,9 +255,9 @@ describe('AddresslistMock', function () {
 
       await expect(
         addresslist.removeAddresses([signers[0].address, signers[0].address])
-      ).to.be.revertedWith(
-        customError('InvalidAddresslistUpdate', signers[0].address)
-      );
+      )
+        .to.be.revertedWithCustomError(addresslist, 'InvalidAddresslistUpdate')
+        .withArgs(signers[0].address);
     });
   });
 });

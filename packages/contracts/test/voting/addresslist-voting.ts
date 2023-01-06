@@ -21,7 +21,8 @@ import {
   ONE_HOUR,
   MAX_UINT64,
 } from '../test-utils/voting';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {ERRORS} from '../test-utils/custom-error-helper';
+import {addresses} from '../test-utils/addresses';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -101,29 +102,19 @@ describe('AddresslistVoting', function () {
     );
   });
 
-  function addresslist(length: number): string[] {
-    let addresses: string[] = [];
-
-    for (let i = 0; i < length; i++) {
-      const addr = signers[i].address;
-      addresses.push(addr);
-    }
-    return addresses;
-  }
-
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(0));
+      await voting.initialize(dao.address, votingSettings, await addresses(0));
 
       await expect(
-        voting.initialize(dao.address, votingSettings, addresslist(0))
+        voting.initialize(dao.address, votingSettings, await addresses(0))
       ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(0));
+      await voting.initialize(dao.address, votingSettings, await addresses(0));
     });
     it('should return false, if user is not listed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
@@ -147,7 +138,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should remove users from the address list', async () => {
-      await voting.addAddresses(addresslist(1));
+      await voting.addAddresses(await addresses(1));
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -156,7 +147,7 @@ describe('AddresslistVoting', function () {
       ).to.equal(true);
       expect(await voting.isListed(signers[0].address)).to.equal(true);
 
-      await voting.removeAddresses(addresslist(1));
+      await voting.removeAddresses(await addresses(1));
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -174,16 +165,16 @@ describe('AddresslistVoting', function () {
       await voting.initialize(
         dao.address,
         votingSettings,
-        addresslist(1) // signers[0] is listed
+        await addresses(1) // signers[0] is listed
       );
 
       await expect(
         voting
           .connect(signers[1])
           .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
-      ).to.be.revertedWith(
-        customError('ProposalCreationForbidden', signers[1].address)
-      );
+      )
+        .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+        .withArgs(signers[1].address);
 
       await expect(
         voting
@@ -198,16 +189,16 @@ describe('AddresslistVoting', function () {
       await voting.initialize(
         dao.address,
         votingSettings,
-        addresslist(1) // signers[0] is listed
+        await addresses(1) // signers[0] is listed
       );
 
       await expect(
         voting
           .connect(signers[1])
           .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
-      ).to.be.revertedWith(
-        customError('ProposalCreationForbidden', signers[1].address)
-      );
+      )
+        .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
+        .withArgs(signers[1].address);
 
       await expect(
         voting
@@ -217,7 +208,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the start date is set smaller than the current date', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(1));
+      await voting.initialize(dao.address, votingSettings, await addresses(1));
 
       const currentDate = await getTime();
       const startDateInThePast = currentDate - 1;
@@ -232,17 +223,16 @@ describe('AddresslistVoting', function () {
           VoteOption.None,
           false
         )
-      ).to.be.revertedWith(
-        customError(
-          'DateOutOfBounds',
+      )
+        .to.be.revertedWithCustomError(voting, 'DateOutOfBounds')
+        .withArgs(
           currentDate + 1, // await takes one second
           startDateInThePast
-        )
-      );
+        );
     });
 
     it('reverts if the start date is after the latest start date', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(1));
+      await voting.initialize(dao.address, votingSettings, await addresses(1));
 
       const latestStartDate = MAX_UINT64.sub(votingSettings.minDuration);
       const tooLateStartDate = latestStartDate.add(1);
@@ -257,13 +247,11 @@ describe('AddresslistVoting', function () {
           VoteOption.None,
           false
         )
-      ).to.be.revertedWith(
-        'panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)'
-      );
+      ).to.be.revertedWithPanic(0x11);
     });
 
     it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(1));
+      await voting.initialize(dao.address, votingSettings, await addresses(1));
 
       const startDate = (await getTime()) + 1;
       const earliestEndDate = startDate + votingSettings.minDuration;
@@ -278,13 +266,13 @@ describe('AddresslistVoting', function () {
           VoteOption.None,
           false
         )
-      ).to.be.revertedWith(
-        customError('DateOutOfBounds', earliestEndDate, tooEarlyEndDate)
-      );
+      )
+        .to.be.revertedWithCustomError(voting, 'DateOutOfBounds')
+        .withArgs(earliestEndDate, tooEarlyEndDate);
     });
 
     it('should create a proposal successfully, but not vote', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(1));
+      await voting.initialize(dao.address, votingSettings, await addresses(1));
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -338,7 +326,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal and cast a vote immediately', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(1));
+      await voting.initialize(dao.address, votingSettings, await addresses(1));
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -380,7 +368,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts creation if the creator tries to vote before the start date', async () => {
-      await voting.initialize(dao.address, votingSettings, addresslist(1));
+      await voting.initialize(dao.address, votingSettings, await addresses(1));
 
       expect(await getTime()).to.be.lessThan(startDate);
 
@@ -394,9 +382,9 @@ describe('AddresslistVoting', function () {
           VoteOption.Yes,
           false
         )
-      ).to.be.revertedWith(
-        customError('VoteCastForbidden', id, signers[0].address)
-      );
+      )
+        .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+        .withArgs(id, signers[0].address);
 
       // Works if the vote option is 'None'
       expect(
@@ -419,7 +407,11 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         votingSettings.votingMode = VotingMode.Standard;
 
-        await voting.initialize(dao.address, votingSettings, addresslist(10));
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          await addresses(10)
+        );
 
         expect(
           (
@@ -441,22 +433,18 @@ describe('AddresslistVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
-        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
-        await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
-        await expect(
-          voting.vote(id, VoteOption.Abstain, false)
-        ).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
-        await expect(
-          voting.vote(id, VoteOption.None, false)
-        ).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
+        await expect(voting.vote(id, VoteOption.Yes, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+        await expect(voting.vote(id, VoteOption.No, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+        await expect(voting.vote(id, VoteOption.Abstain, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
       });
 
       it('cannot early execute', async () => {
@@ -546,9 +534,9 @@ describe('AddresslistVoting', function () {
       it('reverts if vote is not decided yet', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await expect(voting.execute(id)).to.be.revertedWith(
-          customError('ProposalExecutionForbidden', id)
-        );
+        await expect(voting.execute(id))
+          .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
+          .withArgs(id);
       });
     });
 
@@ -556,7 +544,11 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         votingSettings.votingMode = VotingMode.EarlyExecution;
 
-        await voting.initialize(dao.address, votingSettings, addresslist(10));
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          await addresses(10)
+        );
 
         expect(
           (
@@ -577,9 +569,9 @@ describe('AddresslistVoting', function () {
 
         expect(await voting.canVote(id, signers[0].address)).to.equal(false);
 
-        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
+        await expect(voting.vote(id, VoteOption.Yes, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
       });
 
       it('increases the yes, no, and abstain count and emits correct events', async () => {
@@ -621,22 +613,18 @@ describe('AddresslistVoting', function () {
         await voting.vote(id, VoteOption.Yes, false);
 
         // Try to replace the vote
-        await expect(voting.vote(id, VoteOption.Yes, false)).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
-        await expect(voting.vote(id, VoteOption.No, false)).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
-        await expect(
-          voting.vote(id, VoteOption.Abstain, false)
-        ).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
-        await expect(
-          voting.vote(id, VoteOption.None, false)
-        ).to.be.revertedWith(
-          customError('VoteCastForbidden', id, signers[0].address)
-        );
+        await expect(voting.vote(id, VoteOption.Yes, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+        await expect(voting.vote(id, VoteOption.No, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+        await expect(voting.vote(id, VoteOption.Abstain, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
       });
 
       it('can execute early if participation is large enough', async () => {
@@ -736,17 +724,17 @@ describe('AddresslistVoting', function () {
         }
 
         // calling execute again should fail
-        await expect(voting.execute(id)).to.be.revertedWith(
-          customError('ProposalExecutionForbidden', id)
-        );
+        await expect(voting.execute(id))
+          .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
+          .withArgs(id);
       });
 
       it('reverts if vote is not decided yet', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await expect(voting.execute(id)).to.be.revertedWith(
-          customError('ProposalExecutionForbidden', id)
-        );
+        await expect(voting.execute(id))
+          .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
+          .withArgs(id);
       });
     });
 
@@ -754,7 +742,11 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         votingSettings.votingMode = VotingMode.VoteReplacement;
 
-        await voting.initialize(dao.address, votingSettings, addresslist(10));
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          await addresses(10)
+        );
 
         expect(
           (
@@ -885,9 +877,9 @@ describe('AddresslistVoting', function () {
       it('reverts if vote is not decided yet', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await expect(voting.execute(id)).to.be.revertedWith(
-          customError('ProposalExecutionForbidden', id)
-        );
+        await expect(voting.execute(id))
+          .to.be.revertedWithCustomError(voting, 'ProposalExecutionForbidden')
+          .withArgs(id);
       });
     });
   });
@@ -897,7 +889,11 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         votingSettings.minParticipation = pct16(25);
 
-        await voting.initialize(dao.address, votingSettings, addresslist(10));
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          await addresses(10)
+        );
 
         await voting.createProposal(
           dummyMetadata,
@@ -1031,7 +1027,11 @@ describe('AddresslistVoting', function () {
       beforeEach(async () => {
         votingSettings.minParticipation = pct16(75);
 
-        await voting.initialize(dao.address, votingSettings, addresslist(10));
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          await addresses(10)
+        );
         expect(
           (
             await voting.createProposal(
@@ -1226,7 +1226,11 @@ describe('AddresslistVoting', function () {
         votingSettings.supportThreshold = pct16(0);
         votingSettings.minParticipation = pct16(0);
 
-        await voting.initialize(dao.address, votingSettings, addresslist(10));
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          await addresses(10)
+        );
 
         await voting.createProposal(
           dummyMetadata,
@@ -1258,11 +1262,13 @@ describe('AddresslistVoting', function () {
           votingSettings.minParticipation
         );
 
-        await expect(voting.support(id)).to.be.revertedWith(
-          customError('ZeroValueNotAllowed')
+        await expect(voting.support(id)).to.be.revertedWithCustomError(
+          voting,
+          'ZeroValueNotAllowed'
         );
-        await expect(voting.canExecute(id)).to.be.revertedWith(
-          customError('ZeroValueNotAllowed')
+        await expect(voting.canExecute(id)).to.be.revertedWithCustomError(
+          voting,
+          'ZeroValueNotAllowed'
         );
       });
 

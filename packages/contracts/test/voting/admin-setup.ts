@@ -69,9 +69,13 @@ describe('AdminSetup', function () {
       await expect(
         adminSetup.prepareInstallation(
           targetDao.address,
-          minimum_data.substring(0, minimum_data.length - 1)
+          minimum_data.substring(0, minimum_data.length - 2)
         )
       ).to.be.reverted;
+
+      await expect(
+        adminSetup.prepareInstallation(targetDao.address, minimum_data)
+      ).to.not.be.reverted;
     });
 
     it('reverts if encoded address in `_data` is zero', async () => {
@@ -79,7 +83,9 @@ describe('AdminSetup', function () {
 
       await expect(
         adminSetup.prepareInstallation(targetDao.address, dataWithAddressZero)
-      ).to.be.revertedWith(customError('AdminAddressInvalid', AddressZero));
+      )
+        .to.be.revertedWithCustomError(adminSetup, 'AdminAddressInvalid')
+        .withArgs(AddressZero);
     });
 
     it('correctly returns plugin, helpers and permissions', async () => {

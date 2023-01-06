@@ -227,9 +227,9 @@ describe('DAOFactory: ', function () {
   });
 
   it('reverts if no plugin is provided', async () => {
-    await expect(daoFactory.createDao(daoSettings, [])).to.be.revertedWith(
-      customError('NoPluginProvided')
-    );
+    await expect(
+      daoFactory.createDao(daoSettings, [])
+    ).to.be.revertedWithCustomError(daoFactory, 'NoPluginProvided');
   });
 
   it('correctly creates a DAO with one plugin', async () => {

@@ -8,6 +8,7 @@ import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
+import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
 
 chai.use(smock.matchers);
 
@@ -131,15 +132,14 @@ describe('DAO', function () {
         PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       );
 
-      await expect(dao.setTrustedForwarder(dummyAddress2)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(dao.setTrustedForwarder(dummyAddress2))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('sets a new trusted forwarder', async () => {
@@ -162,15 +162,14 @@ describe('DAO', function () {
         PERMISSION_IDS.SET_METADATA_PERMISSION_ID
       );
 
-      await expect(dao.setMetadata(dummyMetadata1)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(dao.setMetadata(dummyMetadata1))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_METADATA_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('sets new metadata via an event', async () => {
@@ -197,15 +196,14 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(dao.execute(0, dummyActions))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.EXECUTE_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('executes an array of actions', async () => {
@@ -241,7 +239,7 @@ describe('DAO', function () {
             value: 0,
           },
         ])
-      ).to.be.revertedWith(customError('ActionFailed'));
+      ).to.be.revertedWithCustomError(dao, 'ActionFailed');
     });
   });
 
@@ -251,7 +249,7 @@ describe('DAO', function () {
     it('reverts if amount is zero', async () => {
       await expect(
         dao.deposit(ethers.constants.AddressZero, 0, 'ref')
-      ).to.be.revertedWith(customError('ZeroAmount'));
+      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
     });
 
     it('reverts if passed amount does not match native amount value', async () => {
@@ -260,20 +258,18 @@ describe('DAO', function () {
 
       await expect(
         dao.deposit(ethers.constants.AddressZero, passedAmount, 'ref', options)
-      ).to.be.revertedWith(
-        customError('NativeTokenDepositAmountMismatch', passedAmount, amount)
-      );
+      )
+        .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
+        .withArgs(passedAmount, amount);
     });
 
     it('reverts if ERC20 and native tokens are deposited at the same time', async () => {
       const options = {value: amount};
       await token.mint(ownerAddress, amount);
 
-      await expect(
-        dao.deposit(token.address, amount, 'ref', options)
-      ).to.be.revertedWith(
-        customError('NativeTokenDepositAmountMismatch', 0, amount)
-      );
+      await expect(dao.deposit(token.address, amount, 'ref', options))
+        .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
+        .withArgs(0, amount);
     });
 
     it('reverts when tries to deposit ERC20 token while sender does not have token amount', async () => {
@@ -341,15 +337,14 @@ describe('DAO', function () {
 
       await expect(
         dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.WITHDRAW_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('withdraws native tokens if DAO balance is high enough', async () => {
@@ -384,7 +379,7 @@ describe('DAO', function () {
           amount.add(1),
           'ref'
         )
-      ).to.be.revertedWith(customError('NativeTokenWithdrawFailed'));
+      ).to.be.revertedWithCustomError(dao, 'NativeTokenWithdrawFailed');
     });
 
     it('withdraws ERC20 if DAO balance is high enough', async () => {
@@ -410,7 +405,7 @@ describe('DAO', function () {
     it('throws an error if the amount is 0', async () => {
       await expect(
         dao.withdraw(token.address, ownerAddress, 0, 'ref')
-      ).to.be.revertedWith(customError('ZeroAmount'));
+      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
     });
   });
 
@@ -424,15 +419,14 @@ describe('DAO', function () {
 
       await expect(
         dao.registerStandardCallback('0x00000001', '0x00000001', '0x00000001')
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('correctly emits selector and interface id', async () => {
@@ -459,9 +453,9 @@ describe('DAO', function () {
           to: dao.address,
           data: id,
         })
-      ).to.be.revertedWith(
-        customError('UnkownCallback', id, `0x${'00'.repeat(32)}`)
-      );
+      )
+        .to.be.revertedWithCustomError(dao, 'UnkownCallback')
+        .withArgs(id, UNREGISTERED_INTERFACE_RETURN);
 
       // register onERC721Received selector
       await dao.registerStandardCallback(id, id, id);
@@ -511,13 +505,20 @@ describe('DAO', function () {
       ).to.be.eq('0x00000000');
     });
 
-    it('should allow only SET_SIGNATURE_VALIDATOR_PERMISSION_ID to set validator', async () => {
+    it('should allow only `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` to set validator', async () => {
       const signers = await ethers.getSigners();
       await expect(
         dao
           .connect(signers[2])
           .setSignatureValidator(ethers.Wallet.createRandom().address)
-      ).to.be.revertedWith('');
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
+          dao.address,
+          dao.address,
+          signers[2].address,
+          PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
+        );
     });
 
     it('should set validator and emits event', async () => {
@@ -565,15 +566,14 @@ describe('DAO', function () {
 
       const daoProxyContract = dao.attach(erc1967Proxy.address);
 
-      await expect(daoProxyContract.upgradeTo(dao.address)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(daoProxyContract.upgradeTo(dao.address))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           daoProxyContract.address,
           daoProxyContract.address,
           ownerAddress,
           PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('successfuly updates DAO contract', async () => {

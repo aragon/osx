@@ -42,11 +42,10 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @dev This is required for the UUPS upgradability pattern.
     /// @param _managingDao The interface of the DAO managing the components permissions.
     /// @param _targetInterfaceId The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface id of the contracts to be registered.
-    function __InterfaceBasedRegistry_init(IDAO _managingDao, bytes4 _targetInterfaceId)
-        internal
-        virtual
-        onlyInitializing
-    {
+    function __InterfaceBasedRegistry_init(
+        IDAO _managingDao,
+        bytes4 _targetInterfaceId
+    ) internal virtual onlyInitializing {
         __DaoAuthorizableUpgradeable_init(_managingDao);
 
         targetInterfaceId = _targetInterfaceId;
@@ -54,12 +53,9 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_REGISTRY_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(UPGRADE_REGISTRY_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(UPGRADE_REGISTRY_PERMISSION_ID) {}
 
     /// @notice Register an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract address.
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar.

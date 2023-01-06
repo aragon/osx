@@ -131,7 +131,12 @@ describe('TokenVotingSetup', function () {
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
-      ).to.be.revertedWith(customError('MintArrayLengthMismatch', 1, 0));
+      )
+        .to.be.revertedWithCustomError(
+          tokenVotingSetup,
+          'MintArrayLengthMismatch'
+        )
+        .withArgs(1, 0);
     });
 
     it('fails if passed token address is not a contract', async () => {
@@ -144,7 +149,9 @@ describe('TokenVotingSetup', function () {
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
-      ).to.be.revertedWith(customError('TokenNotContract', tokenAddress));
+      )
+        .to.be.revertedWithCustomError(tokenVotingSetup, 'TokenNotContract')
+        .withArgs(tokenAddress);
     });
 
     it('fails if passed token address is not ERC20', async () => {
@@ -157,7 +164,9 @@ describe('TokenVotingSetup', function () {
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
-      ).to.be.revertedWith(customError('TokenNotERC20', tokenAddress));
+      )
+        .to.be.revertedWithCustomError(tokenVotingSetup, 'TokenNotERC20')
+        .withArgs(tokenAddress);
     });
 
     it('correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied', async () => {
@@ -444,7 +453,12 @@ describe('TokenVotingSetup', function () {
           [],
           EMPTY_DATA
         )
-      ).to.be.revertedWith(customError('WrongHelpersArrayLength', 0));
+      )
+        .to.be.revertedWithCustomError(
+          tokenVotingSetup,
+          'WrongHelpersArrayLength'
+        )
+        .withArgs(0);
 
       await expect(
         tokenVotingSetup.prepareUninstallation(
@@ -453,7 +467,12 @@ describe('TokenVotingSetup', function () {
           [AddressZero, AddressZero, AddressZero],
           EMPTY_DATA
         )
-      ).to.be.revertedWith(customError('WrongHelpersArrayLength', 3));
+      )
+        .to.be.revertedWithCustomError(
+          tokenVotingSetup,
+          'WrongHelpersArrayLength'
+        )
+        .withArgs(3);
     });
 
     it('correctly returns permissions, when the required number of helpers is supplied', async () => {

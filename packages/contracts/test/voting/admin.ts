@@ -5,7 +5,7 @@ import {ethers} from 'hardhat';
 
 import {getMergedABI} from '../../utils/abi';
 import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {ERRORS} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {BigNumber} from 'ethers';
 
@@ -118,17 +118,14 @@ describe('Admin plugin', function () {
     it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
       await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
 
-      await expect(
-        plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           plugin.address,
           EXECUTE_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {
@@ -138,18 +135,15 @@ describe('Admin plugin', function () {
         EXECUTE_PROPOSAL_PERMISSION_ID
       );
 
-      await expect(
-        plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.be.revertedWithCustomError(plugin, 'DaoUnauthorized')
+        .withArgs(
           dao.address,
           plugin.address,
           plugin.address,
           ownerAddress,
           EXECUTE_PROPOSAL_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('correctly emits the ProposalCreated event', async () => {
