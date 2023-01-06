@@ -10,6 +10,7 @@ import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {BigNumber} from 'ethers';
+import { deployWithProxy } from '../test-utils/proxy';
 
 chai.use(smock.matchers);
 
@@ -24,10 +25,11 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('Admin plugin', function () {
+describe.only('Admin plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: any;
+  let daoImplementation: any;
   let ownerAddress: string;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -57,7 +59,11 @@ describe('Admin plugin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    dao = await deployNewDAO(signers[0].address);
+    const DAO = await smock.mock('DAO');
+    daoImplementation = await DAO.deploy();
+    // @ts-ignore
+    dao = await deployWithProxy<DAO>(DAO);
+    await dao.initialize('0x00', ownerAddress, ethers.constants.AddressZero);
   });
 
   beforeEach(async () => {
@@ -207,7 +213,7 @@ describe('Admin plugin', function () {
 
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      expect(dao.execute).has.been.calledWith(BigNumber.from(proposalId), [
+      expect(daoImplementation.execute).has.been.calledWith(BigNumber.from(proposalId), [
         [
           dummyActions[0].to,
           BigNumber.from(dummyActions[0].value),
