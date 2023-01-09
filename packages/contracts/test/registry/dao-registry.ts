@@ -82,9 +82,7 @@ describe('DAORegistry', function () {
   });
 
   it('Should register a new DAO successfully', async function () {
-    await expect(
-      await daoRegistry.register(targetDao.address, ownerAddress, daoName)
-    )
+    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
       .to.emit(daoRegistry, EVENTS.DAORegistered)
       .withArgs(targetDao.address, ownerAddress, daoName);
 

@@ -4,6 +4,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {AddresslistMock} from '../../typechain';
 import {customError} from '../test-utils/custom-error-helper';
+import {ADDRESSLIST_EVENTS} from '../../utils/event';
 
 describe('AddresslistMock', function () {
   let signers: SignerWithAddress[];
@@ -162,6 +163,13 @@ describe('AddresslistMock', function () {
       expect(await addresslist.addresslistLength()).to.equal(2);
     });
 
+    it('emits the `AddressesAdded` event', async () => {
+      let addresses = [signers[0].address, signers[1].address];
+      await expect(addresslist.addAddresses(addresses))
+        .to.emit(addresslist, ADDRESSLIST_EVENTS.ADDRESSES_ADDED)
+        .withArgs(addresses);
+    });
+
     it('reverts if an address was listed already', async () => {
       await addresslist.addAddresses([signers[0].address, signers[2].address]);
       await ethers.provider.send('evm_mine', []);
@@ -199,15 +207,28 @@ describe('AddresslistMock', function () {
       expect(await addresslist.isListed(signers[1].address)).to.equal(true);
       expect(await addresslist.addresslistLength()).to.equal(2);
 
-      await addresslist.removeAddresses([
-        signers[0].address,
-        signers[1].address,
-      ]);
+      await expect(
+        addresslist.removeAddresses([signers[0].address, signers[1].address])
+      )
+        .to.emit(addresslist, ADDRESSLIST_EVENTS.ADDRESSES_REMOVED)
+        .withArgs([signers[0].address, signers[1].address]);
+
       await ethers.provider.send('evm_mine', []);
 
       expect(await addresslist.isListed(signers[0].address)).to.equal(false);
       expect(await addresslist.isListed(signers[1].address)).to.equal(false);
       expect(await addresslist.addresslistLength()).to.equal(0);
+    });
+
+    it('emits the `AddressesRemoved` event', async () => {
+      let addresses = [signers[0].address, signers[1].address];
+
+      await addresslist.addAddresses(addresses);
+      await ethers.provider.send('evm_mine', []);
+
+      await expect(addresslist.removeAddresses(addresses))
+        .to.emit(addresslist, ADDRESSLIST_EVENTS.ADDRESSES_REMOVED)
+        .withArgs(addresses);
     });
 
     it('reverts removal if an address is not listed', async () => {

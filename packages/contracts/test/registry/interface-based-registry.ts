@@ -128,7 +128,7 @@ describe('InterfaceBasedRegistry', function () {
         false
       );
 
-      await expect(await interfaceBasedRegistryMock.register(dao.address))
+      await expect(interfaceBasedRegistryMock.register(dao.address))
         .to.emit(interfaceBasedRegistryMock, EVENTS.Registered)
         .withArgs(dao.address);
 

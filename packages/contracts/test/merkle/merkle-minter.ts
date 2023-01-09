@@ -89,8 +89,8 @@ describe('MerkleDistributor', function () {
       );
 
       // execute merkleMint and listen for the event containing the cloned address
-      expect(
-        await minter.merkleMint(
+      await expect(
+        minter.merkleMint(
           merkleRoot,
           totalAmount,
           dummyMerkleTreeStorageLink,
