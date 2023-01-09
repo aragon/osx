@@ -101,9 +101,14 @@ interface IMajorityVoting {
     /// - the voter doesn't have voting powers.
     /// @param _proposalId The proposal Id.
     /// @param _account The account address to be checked.
+    /// @param  _voteOption Whether the voter abstains, supports or opposes the proposal.
     /// @return bool Returns true if the account is allowed to vote.
     /// @dev The function assumes the queried proposal exists.
-    function canVote(uint256 _proposalId, address _account) external view returns (bool);
+    function canVote(
+        uint256 _proposalId,
+        address _account,
+        VoteOption _voteOption
+    ) external view returns (bool);
 
     /// @notice Checks if a proposal can be executed.
     /// @param _proposalId The ID of the proposal to be checked.
@@ -113,13 +118,9 @@ interface IMajorityVoting {
     /// @notice Votes for a vote option and, optionally, executes the proposal.
     /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
-    /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param  _voteOption Whether the voter abstains, supports or opposes the proposal.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    function vote(
-        uint256 _proposalId,
-        VoteOption _voteOption,
-        bool _tryEarlyExecution
-    ) external;
+    function vote(uint256 _proposalId, VoteOption _voteOption, bool _tryEarlyExecution) external;
 
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
@@ -129,8 +130,8 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal.
     /// @param _account The account address to be checked.
     /// @return The vote option cast by a voter for a certain proposal.
-    function getVoteOption(uint256 _proposalId, address _account)
-        external
-        view
-        returns (VoteOption);
+    function getVoteOption(
+        uint256 _proposalId,
+        address _account
+    ) external view returns (VoteOption);
 }

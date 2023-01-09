@@ -15,7 +15,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
-    
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
         this.getVotingToken.selector ^ this.initialize.selector;
@@ -156,11 +156,19 @@ contract TokenVoting is MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
+    function _canVote(
+        uint256 _proposalId,
+        address _account,
+        VoteOption _voteOption
+    ) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // The proposal vote hasn't started or has already ended.
         if (!_isProposalOpen(proposal_)) {
+            return false;
+        }
+
+        if (_voteOption == VoteOption.None) {
             return false;
         }
 

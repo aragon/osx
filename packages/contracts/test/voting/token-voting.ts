@@ -391,7 +391,9 @@ describe('TokenVoting', function () {
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
-      expect(await voting.canVote(1, signers[0].address)).to.equal(false);
+      expect(
+        await voting.canVote(1, signers[0].address, VoteOption.Yes)
+      ).to.equal(false);
 
       expect(proposal.actions.length).to.equal(1);
       expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
@@ -469,7 +471,7 @@ describe('TokenVoting', function () {
         )
       )
         .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-        .withArgs(id, signers[0].address);
+        .withArgs(id, signers[0].address, VoteOption.Yes);
 
       // Works if the vote option is 'None'
       expect(
@@ -532,7 +534,7 @@ describe('TokenVoting', function () {
 
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('reverts on vote replacement', async () => {
@@ -543,16 +545,16 @@ describe('TokenVoting', function () {
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Yes);
         await expect(voting.vote(id, VoteOption.No, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.No);
         await expect(voting.vote(id, VoteOption.Abstain, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Abstain);
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('cannot early execute', async () => {
@@ -666,7 +668,7 @@ describe('TokenVoting', function () {
 
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Yes);
       });
 
       it('should not be able to vote if user has 0 token', async () => {
@@ -676,7 +678,7 @@ describe('TokenVoting', function () {
           voting.connect(signers[19]).vote(id, VoteOption.Yes, false)
         )
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[19].address);
+          .withArgs(id, signers[19].address, VoteOption.Yes);
       });
 
       it('increases the yes, no, and abstain count and emits correct events', async () => {
@@ -718,7 +720,7 @@ describe('TokenVoting', function () {
 
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('reverts on vote replacement', async () => {
@@ -729,16 +731,16 @@ describe('TokenVoting', function () {
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Yes);
         await expect(voting.vote(id, VoteOption.No, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.No);
         await expect(voting.vote(id, VoteOption.Abstain, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Abstain);
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('can execute early if participation is large enough', async () => {
@@ -896,7 +898,7 @@ describe('TokenVoting', function () {
 
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('should allow vote replacement but not double-count votes by the same address', async () => {
@@ -922,7 +924,7 @@ describe('TokenVoting', function () {
 
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('cannot early execute', async () => {
