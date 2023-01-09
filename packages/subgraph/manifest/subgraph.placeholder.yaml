@@ -120,7 +120,7 @@ templates:
           handler: handleDeposited
         - event: NativeTokenDeposited(address,uint256)
           handler: handleNativeTokenDeposited
-        - event: Executed(indexed address,uint256,(address,uint256,bytes)[],bytes[])
+        - event: Executed(indexed address,indexed bytes32,(address,uint256,bytes)[],bytes[])
           handler: handleExecuted
         - event: Granted(indexed bytes32,indexed address,address,indexed address,address)
           handler: handleGranted
@@ -153,11 +153,11 @@ templates:
         - name: TokenVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
-        - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
+        - event: VoteCast(indexed bytes32,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed bytes32,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed bytes32,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -178,11 +178,11 @@ templates:
         - name: AddresslistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
-        - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
+        - event: VoteCast(indexed bytes32,indexed address,uint8,uint256)
           handler: handleVoteCast
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed bytes32,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed bytes32,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -211,11 +211,11 @@ templates:
           handler: handleAddressesAdded
         - event: AddressesRemoved(address[])
           handler: handleAddressesRemoved
-        - event: Approved(indexed uint256,indexed address)
+        - event: Approved(indexed bytes32,indexed address)
           handler: handleApproved
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed bytes32,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed bytes32,bytes[])
           handler: handleProposalExecuted
         - event: MultisigSettingsUpdated(bool,indexed uint256)
           handler: handleMultisigSettingsUpdated
@@ -236,9 +236,9 @@ templates:
         - name: Admin
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
       eventHandlers:
-        - event: ProposalExecuted(indexed uint256,bytes[])
+        - event: ProposalExecuted(indexed bytes32,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed bytes32,indexed address,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
   # PluginRepo
   - name: PluginRepoTemplate

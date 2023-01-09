@@ -13,7 +13,6 @@ import {
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
-  PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
   VOTING_MODE,
@@ -41,7 +40,7 @@ export function createNewProposalCreatedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let creatorParam = new ethereum.EventParam(
     'creator',
@@ -73,7 +72,7 @@ export function createNewVoteCastEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let voterParam = new ethereum.EventParam(
     'voter',
@@ -109,7 +108,7 @@ export function createNewProposalExecutedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let execResultsParam = new ethereum.EventParam(
     'execResults',
@@ -223,11 +222,10 @@ export function getProposalCountCall(
 // state
 
 export function createAddresslistVotingProposalEntityState(
-  entityID: string = PROPOSAL_ENTITY_ID,
+  entityID: string = PROPOSAL_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
-  proposalId: string = PROPOSAL_ID,
 
   open: boolean = true,
   executed: boolean = false,
@@ -248,7 +246,6 @@ export function createAddresslistVotingProposalEntityState(
   let addresslistProposal = new AddresslistVotingProposal(entityID);
   addresslistProposal.dao = Address.fromString(dao).toHexString();
   addresslistProposal.plugin = Address.fromString(pkg).toHexString();
-  addresslistProposal.proposalId = BigInt.fromString(proposalId);
   addresslistProposal.creator = Address.fromString(creator);
 
   addresslistProposal.open = open;

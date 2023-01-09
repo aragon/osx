@@ -102,10 +102,10 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(bytes32):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(proposalId))
     ])
     .returns([
       ethereum.Value.fromBoolean(open),

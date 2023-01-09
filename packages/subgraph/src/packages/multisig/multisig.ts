@@ -1,4 +1,4 @@
-import { dataSource, store } from '@graphprotocol/graph-ts';
+import {dataSource, store} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -30,13 +30,11 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let proposalId = event.params.proposalId.toHexString();
 
   let proposalEntity = new MultisigProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
@@ -65,11 +63,7 @@ export function _handleProposalCreated(
       const action = actions[index];
 
       let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
+        event.params.proposalId.toHexString() + '_' + index.toString();
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -99,7 +93,7 @@ export function handleApproved(event: Approved): void {
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
 
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let proposalId = event.params.proposalId.toHexString();
   let approverProposalId = member + '_' + proposalId;
   let approverProposalEntity = MultisigProposalApprover.load(
     approverProposalId
@@ -136,8 +130,7 @@ export function handleApproved(event: Approved): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let proposalId = event.params.proposalId.toHexString();
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.open = false;
@@ -153,12 +146,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   if (!proposal.reverted) {
     let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
+      let actionId = proposalId + '_' + index.toString();
 
       let actionEntity = Action.load(actionId);
       if (actionEntity) {
@@ -200,7 +188,9 @@ export function handleAddressesRemoved(event: AddressesRemoved): void {
   }
 }
 
-export function handleMultisigSettingsUpdated(event: MultisigSettingsUpdated): void {
+export function handleMultisigSettingsUpdated(
+  event: MultisigSettingsUpdated
+): void {
   let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;

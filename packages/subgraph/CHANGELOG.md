@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Ignores `None` votes from addresslist voting and token voting
+- Changes proposal ID to be used directly from the event (contracts generate them now uniquely per contract)
+- Action ids consist now of `proposalID + action index`
+
+### Removed
+- Removes `proposalId` field from proposals because the `id` field is used
 
 ## 0.5.0-alpha
 

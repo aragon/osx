@@ -23,7 +23,6 @@ import {
   ONE,
   TWO,
   THREE,
-  PROPOSAL_ENTITY_ID
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -38,7 +37,6 @@ import {
   createNewMultisigSettingsUpdatedEvent
 } from './utils';
 
-let proposalId = '0';
 let actions = createDummyActions(DAO_TOKEN_ADDRESS, '0', '0x00000000');
 
 test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
@@ -54,7 +52,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   getProposalCountCall(CONTRACT_ADDRESS, '1');
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    proposalId,
+    PROPOSAL_ID,
     true,
     false,
 
@@ -71,7 +69,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
 
   // create event
   let event = createNewProposalCreatedEvent(
-    proposalId,
+    PROPOSAL_ID,
     ADDRESS_ONE,
     STRING_DATA,
     actions,
@@ -81,47 +79,43 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    BigInt.fromString(proposalId).toHexString();
+
   let packageId = Address.fromString(CONTRACT_ADDRESS).toHexString();
 
   // checks
-  assert.fieldEquals('MultisigProposal', entityID, 'id', entityID);
-  assert.fieldEquals('MultisigProposal', entityID, 'dao', DAO_ADDRESS);
-  assert.fieldEquals('MultisigProposal', entityID, 'plugin', packageId);
-  assert.fieldEquals('MultisigProposal', entityID, 'proposalId', proposalId);
-  assert.fieldEquals('MultisigProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals('MultisigProposal', entityID, 'metadata', STRING_DATA);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'id', PROPOSAL_ID);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'dao', DAO_ADDRESS);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'plugin', packageId);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'creator', ADDRESS_ONE);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'metadata', STRING_DATA);
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    PROPOSAL_ID,
     'createdAt',
     event.block.timestamp.toString()
   );
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    PROPOSAL_ID,
     'creationBlockNumber',
     event.block.number.toString()
   );
-  assert.fieldEquals('MultisigProposal', entityID, 'open', 'true');
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'open', 'true');
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    PROPOSAL_ID,
     'snapshotBlock',
     SNAPSHOT_BLOCK
   );
-  assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'minApprovals', ONE);
   assert.fieldEquals(
     'MultisigProposal',
-    entityID,
+    PROPOSAL_ID,
     'addresslistLength',
     TOTAL_VOTING_POWER
   );
-  assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
-  assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'approvals', ONE);
+  assert.fieldEquals('MultisigProposal', PROPOSAL_ID, 'executed', 'false');
 
   // check MultisigPlugin
   assert.fieldEquals(
@@ -137,7 +131,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
 test('Run Multisig (handleApproved) mappings with mock event', () => {
   // create state
   let proposal = createMultisigProposalEntityState(
-    PROPOSAL_ENTITY_ID,
+    PROPOSAL_ID,
     DAO_ADDRESS,
     CONTRACT_ADDRESS,
     ADDRESS_ONE
@@ -146,7 +140,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
-    proposalId,
+    PROPOSAL_ID,
     true,
     false,
 
@@ -244,14 +238,14 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
   // create state
   createMultisigProposalEntityState(
-    PROPOSAL_ENTITY_ID,
+    PROPOSAL_ID,
     DAO_ADDRESS,
     CONTRACT_ADDRESS,
     ADDRESS_ONE
   );
 
   // create event
-  let event = createNewProposalExecutedEvent('0', CONTRACT_ADDRESS);
+  let event = createNewProposalExecutedEvent(PROPOSAL_ID, CONTRACT_ADDRESS);
 
   // handle event
   handleProposalExecuted(event);
@@ -259,25 +253,25 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
   // checks
   assert.fieldEquals(
     'MultisigProposal',
-    PROPOSAL_ENTITY_ID,
+    PROPOSAL_ID,
     'id',
-    PROPOSAL_ENTITY_ID
+    PROPOSAL_ID
   );
   assert.fieldEquals(
     'MultisigProposal',
-    PROPOSAL_ENTITY_ID,
+    PROPOSAL_ID,
     'executed',
     'true'
   );
   assert.fieldEquals(
     'MultisigProposal',
-    PROPOSAL_ENTITY_ID,
+    PROPOSAL_ID,
     'executionDate',
     event.block.timestamp.toString()
   );
   assert.fieldEquals(
     'MultisigProposal',
-    PROPOSAL_ENTITY_ID,
+    PROPOSAL_ID,
     'executionBlockNumber',
     event.block.number.toString()
   );
@@ -367,8 +361,8 @@ test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
 
 test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', () => {
   // create state
-  let entityID = Address.fromString(CONTRACT_ADDRESS).toHexString();
-  let multisigPlugin = new MultisigPlugin(entityID);
+  let PROPOSAL_ID = Address.fromString(CONTRACT_ADDRESS).toHexString();
+  let multisigPlugin = new MultisigPlugin(PROPOSAL_ID);
   multisigPlugin.onlyListed = false;
   multisigPlugin.save();
 
@@ -383,8 +377,8 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'true');
-  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '5');
+  assert.fieldEquals('MultisigPlugin', PROPOSAL_ID, 'onlyListed', 'true');
+  assert.fieldEquals('MultisigPlugin', PROPOSAL_ID, 'minApprovals', '5');
 
   // create event
   event = createNewMultisigSettingsUpdatedEvent(false, '4', CONTRACT_ADDRESS);
@@ -393,8 +387,8 @@ test('Run Multisig (handleMultisigSettingsUpdated) mappings with mock event', ()
   handleMultisigSettingsUpdated(event);
 
   // checks
-  assert.fieldEquals('MultisigPlugin', entityID, 'onlyListed', 'false');
-  assert.fieldEquals('MultisigPlugin', entityID, 'minApprovals', '4');
+  assert.fieldEquals('MultisigPlugin', PROPOSAL_ID, 'onlyListed', 'false');
+  assert.fieldEquals('MultisigPlugin', PROPOSAL_ID, 'minApprovals', '4');
 
   clearStore();
 });

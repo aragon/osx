@@ -24,17 +24,13 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-
+  let proposalId = event.params.proposalId.toHexString();
   let pluginId = event.address.toHexString();
-
   let adminstratorAddress = event.params.creator;
 
   let proposalEntity = new AdminProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = pluginId;
-  proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = adminstratorAddress;
   proposalEntity.metadata = metadata;
   proposalEntity.executed = false;
@@ -63,11 +59,7 @@ export function _handleProposalCreated(
     const action = actions[index];
 
     let actionId =
-      event.address.toHexString() +
-      '_' +
-      event.params.proposalId.toHexString() +
-      '_' +
-      index.toString();
+      event.params.proposalId.toHexString() + '_' + index.toString();
 
     let actionEntity = new Action(actionId);
     actionEntity.to = action.to;
@@ -82,8 +74,7 @@ export function _handleProposalCreated(
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let proposalId = event.params.proposalId.toHexString();
   let proposalEntity = AdminProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;

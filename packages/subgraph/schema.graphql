@@ -178,7 +178,7 @@ interface IPlugin {
 # Proposal
 
 interface Proposal {
-  id: ID! # package + proposalId
+  id: ID! # proposalId
   dao: Dao!
   creator: Bytes!
   metadata: String
@@ -238,11 +238,10 @@ type TokenVotingVote @entity {
 }
 
 type TokenVotingProposal implements Proposal @entity {
-  id: ID! # package + proposalId
+  id: ID! # proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: TokenVotingPlugin!
-  proposalId: BigInt!
   creator: Bytes!
   metadata: String
 
@@ -303,11 +302,10 @@ type AddresslistVotingVote @entity {
 }
 
 type AddresslistVotingProposal implements Proposal @entity {
-  id: ID! # package + proposalId
+  id: ID! # proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: AddresslistVotingPlugin!
-  proposalId: BigInt!
   creator: Bytes!
   metadata: String
 
@@ -359,7 +357,7 @@ type AdminstratorAdminPlugin @entity {
 }
 
 type AdminProposal implements Proposal @entity {
-  id: ID! # plugin + proposalId
+  id: ID! # proposalId
   dao: Dao!
   creator: Bytes! # Adminstrator address
   metadata: String
@@ -367,7 +365,6 @@ type AdminProposal implements Proposal @entity {
   executed: Boolean!
   createdAt: BigInt!
   plugin: AdminPlugin!
-  proposalId: BigInt!
   adminstrator: Adminstrator!
 }
 
@@ -402,11 +399,10 @@ type MultisigProposalApprover @entity(immutable: true) {
 }
 
 type MultisigProposal implements Proposal @entity {
-  id: ID! # plugin + proposalId
+  id: ID! # proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
   plugin: MultisigPlugin!
-  proposalId: BigInt!
   creator: Bytes!
   metadata: String
   createdAt: BigInt!

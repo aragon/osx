@@ -15,9 +15,8 @@ export const ONE = '1';
 export const TWO = '2';
 export const THREE = '3';
 
-export const PROPOSAL_ID = ZERO;
-export const PROPOSAL_ENTITY_ID =
-  Address.fromString(CONTRACT_ADDRESS).toHexString() + '_0x' + PROPOSAL_ID;
+export const PROPOSAL_ID = 
+  `${CONTRACT_ADDRESS.toLowerCase()}${'0'.repeat(24)}`;
 
 export const STRING_DATA = 'Some String Data ...';
 

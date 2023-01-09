@@ -22,7 +22,7 @@ export function createNewProposalCreatedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let creatorParam = new ethereum.EventParam(
     'creator',
@@ -59,7 +59,7 @@ export function createProposalExecutedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
 
   let execResultsBytesArray = new Array<Bytes>();

@@ -19,7 +19,8 @@ import {
   STRING_DATA,
   HALF_ETH,
   ADDRESS_ZERO,
-  CONTRACT_ADDRESS
+  CONTRACT_ADDRESS,
+  PROPOSAL_ID
 } from '../constants';
 import {createDummyActions, createTokenCalls} from '../utils';
 import {
@@ -330,9 +331,6 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   let daoEntity = Address.fromString(DAO_ADDRESS).toHexString();
   createDaoEntityState(daoEntity, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
-  let proposalId =
-    Address.fromHexString(CONTRACT_ADDRESS).toHexString() + '_' + '0x0';
-
   createTokenVotingProposalEntityState();
 
   // create token calls
@@ -345,7 +343,7 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   let actions = createDummyActions(DAO_ADDRESS, '0', callData);
   let event = createNewExecutedEvent(
     Address.fromHexString(CONTRACT_ADDRESS).toHexString(),
-    '0',
+    PROPOSAL_ID,
     actions,
     [Bytes.fromUTF8('')],
     Address.fromHexString(DAO_ADDRESS).toHexString()
@@ -399,7 +397,7 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
     'reference',
     Bytes.fromUTF8(STRING_DATA).toString()
   );
-  assert.fieldEquals('VaultTransfer', entityID, 'proposal', proposalId);
+  assert.fieldEquals('VaultTransfer', entityID, 'proposal', PROPOSAL_ID);
   assert.fieldEquals(
     'VaultTransfer',
     entityID,

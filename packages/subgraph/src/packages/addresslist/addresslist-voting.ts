@@ -31,13 +31,10 @@ export function _handleProposalCreated(
   daoId: string,
   metadata: string
 ): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-
+  let proposalId = event.params.proposalId.toHexString();
   let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
-  proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
@@ -72,11 +69,7 @@ export function _handleProposalCreated(
       const action = actions[index];
 
       let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
+        event.params.proposalId.toHexString() + '_' + index.toString();
 
       let actionEntity = new Action(actionId);
       actionEntity.to = action.to;
@@ -105,7 +98,7 @@ export function handleVoteCast(event: VoteCast): void {
   const member = event.params.voter.toHexString();
   const pluginId = event.address.toHexString();
   const memberId = pluginId + '_' + member;
-  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let proposalId = event.params.proposalId.toHexString();
   let voterVoteId = member + '_' + proposalId;
   let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
 
@@ -170,8 +163,7 @@ export function handleVoteCast(event: VoteCast): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecuted): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
+  let proposalId = event.params.proposalId.toHexString();
   let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
@@ -186,12 +178,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   if (!proposal.reverted) {
     let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
-      let actionId =
-        event.address.toHexString() +
-        '_' +
-        event.params.proposalId.toHexString() +
-        '_' +
-        index.toString();
+      let actionId = proposalId + '_' + index.toString();
 
       let actionEntity = Action.load(actionId);
       if (actionEntity) {

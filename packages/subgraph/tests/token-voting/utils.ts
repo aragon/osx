@@ -11,7 +11,6 @@ import {TokenVotingProposal} from '../../generated/schema';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
-  PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
   VOTING_MODE,
@@ -39,7 +38,7 @@ export function createNewProposalCreatedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let creatorParam = new ethereum.EventParam(
     'creator',
@@ -71,7 +70,7 @@ export function createNewVoteCastEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let voterParam = new ethereum.EventParam(
     'voter',
@@ -107,7 +106,7 @@ export function createNewProposalExecutedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let execResultsParam = new ethereum.EventParam(
     'execResults',
@@ -183,11 +182,10 @@ export function getProposalCountCall(
 // state
 
 export function createTokenVotingProposalEntityState(
-  entityID: string = PROPOSAL_ENTITY_ID,
+  entityID: string = PROPOSAL_ID,
   dao: string = DAO_ADDRESS,
   pkg: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
-  proposalId: string = PROPOSAL_ID,
 
   open: boolean = true,
   executed: boolean = false,
@@ -208,7 +206,6 @@ export function createTokenVotingProposalEntityState(
   let tokenVotingProposal = new TokenVotingProposal(entityID);
   tokenVotingProposal.dao = Address.fromString(dao).toHexString();
   tokenVotingProposal.plugin = Address.fromString(pkg).toHexString();
-  tokenVotingProposal.proposalId = BigInt.fromString(proposalId);
   tokenVotingProposal.creator = Address.fromString(creator);
 
   tokenVotingProposal.open = open;
