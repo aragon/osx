@@ -4,7 +4,12 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import ERC20Governance from '../../artifacts/contracts/tokens/GovernanceERC20.sol/GovernanceERC20.json';
 import {DAO} from '../../typechain';
-import {findEvent, DAO_EVENTS, VOTING_EVENTS} from '../../utils/event';
+import {
+  findEvent,
+  DAO_EVENTS,
+  VOTING_EVENTS,
+  PROPOSAL_EVENTS,
+} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {
   VoteOption,
@@ -308,20 +313,27 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-      expect(
-        await voting.createProposal(
-          dummyMetadata,
-          dummyActions,
-          0,
-          0,
-          VoteOption.None,
-          false
-        )
-      )
-        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata)
-        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.None, 1);
+      let tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        0,
+        VoteOption.None,
+        false
+      );
+
+      await expect(tx)
+        .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
+        .to.not.emit(voting, VOTING_EVENTS.VOTE_CAST);
+
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      expect(event.args.proposalId).to.equal(id);
+      expect(event.args.creator).to.equal(signers[0].address);
+      expect(event.args.metadata).to.equal(dummyMetadata);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -362,20 +374,28 @@ describe('TokenVoting', function () {
       await governanceErc20Mock.mock.getPastTotalSupply.returns(1);
       await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-      expect(
-        await voting.createProposal(
-          dummyMetadata,
-          dummyActions,
-          0,
-          0,
-          VoteOption.Yes,
-          false
-        )
-      )
-        .to.emit(voting, VOTING_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata)
+      let tx = await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        0,
+        VoteOption.Yes,
+        false
+      );
+
+      await expect(tx)
+        .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
         .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
+      expect(event.args.proposalId).to.equal(id);
+      expect(event.args.creator).to.equal(signers[0].address);
+      expect(event.args.metadata).to.equal(dummyMetadata);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -639,7 +659,7 @@ describe('TokenVoting', function () {
 
         await governanceErc20Mock.mock.getPastVotes.returns(1);
 
-        expect(await voting.connect(signers[0]).vote(id, VoteOption.Yes, false))
+        await expect(voting.connect(signers[0]).vote(id, VoteOption.Yes, false))
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
           .withArgs(id, signers[0].address, VoteOption.Yes, 1);
 
@@ -649,7 +669,7 @@ describe('TokenVoting', function () {
         expect(proposal.tally.no).to.equal(0);
         expect(proposal.tally.abstain).to.equal(0);
 
-        expect(await voting.connect(signers[1]).vote(id, VoteOption.No, false))
+        await expect(voting.connect(signers[1]).vote(id, VoteOption.No, false))
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
           .withArgs(id, signers[1].address, VoteOption.No, 1);
 
@@ -658,8 +678,8 @@ describe('TokenVoting', function () {
         expect(proposal.tally.no).to.equal(1);
         expect(proposal.tally.abstain).to.equal(0);
 
-        expect(
-          await voting.connect(signers[2]).vote(id, VoteOption.Abstain, false)
+        await expect(
+          voting.connect(signers[2]).vote(id, VoteOption.Abstain, false)
         )
           .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
           .withArgs(id, signers[2].address, VoteOption.Abstain, 1);
@@ -812,7 +832,7 @@ describe('TokenVoting', function () {
 
         // check for the `ProposalExecuted` event in the voting contract
         {
-          const event = await findEvent(tx, VOTING_EVENTS.PROPOSAL_EXECUTED);
+          const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_EXECUTED);
           expect(event.args.proposalId).to.equal(id);
         }
 
@@ -979,7 +999,7 @@ describe('TokenVoting', function () {
     });
   });
 
-  describe('ProposalParameterss for different use cases', async () => {
+  describe('Different configurations:', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
         votingSettings.minParticipation = pct16(25);
@@ -1106,6 +1126,89 @@ describe('TokenVoting', function () {
         );
         expect(await voting.canExecute(id)).to.equal(true);
 
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+        expect(await voting.support(id)).to.be.gt(
+          votingSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+      });
+    });
+
+    describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` and early execution mode activated', async () => {
+      beforeEach(async () => {
+        votingSettings.supportThreshold = pct16(0);
+        votingSettings.minParticipation = pct16(0);
+
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+
+        // set voting power to 100
+        await governanceErc20Mock.mock.getPastTotalSupply.returns(
+          totalVotingPower
+        );
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+      });
+
+      it('does not execute with 0 votes', async () => {
+        // does not execute early
+        advanceIntoVoteTime(startDate, endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+        // worst case support can be calculated without throwing an error even if nobody has voted
+        expect(await voting.worstCaseSupport(id)).to.be.eq(
+          votingSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(false);
+
+        // does not execute normally
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+
+        await expect(voting.support(id)).to.be.revertedWith(
+          customError('ZeroValueNotAllowed')
+        );
+        await expect(voting.canExecute(id)).to.be.revertedWith(
+          customError('ZeroValueNotAllowed')
+        );
+      });
+
+      it('executes if participation and support are met', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await governanceErc20Mock.mock.getPastVotes.returns(1);
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        // Check if the proposal can execute early
+        expect(await voting.participation(id)).to.be.gte(
+          votingSettings.minParticipation
+        );
+        expect(await voting.worstCaseSupport(id)).to.be.gt(
+          votingSettings.supportThreshold
+        );
+        expect(await voting.canExecute(id)).to.equal(true);
+
+        // Check if the proposal can execute normally
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(

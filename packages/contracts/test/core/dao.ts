@@ -148,7 +148,7 @@ describe('DAO', function () {
     });
 
     it('emits an event containing the address', async () => {
-      expect(await dao.setTrustedForwarder(dummyAddress2))
+      await expect(dao.setTrustedForwarder(dummyAddress2))
         .to.emit(dao, EVENTS.TrustedForwarderSet)
         .withArgs(dummyAddress2);
     });
@@ -174,7 +174,7 @@ describe('DAO', function () {
     });
 
     it('sets new metadata via an event', async () => {
-      expect(await dao.setMetadata(dummyMetadata2))
+      await expect(dao.setMetadata(dummyMetadata2))
         .to.emit(dao, EVENTS.MetadataSet)
         .withArgs(dummyMetadata2);
     });
@@ -294,8 +294,8 @@ describe('DAO', function () {
       // is empty at the beginning
       expect(await ethers.provider.getBalance(dao.address)).to.equal(0);
 
-      expect(
-        await dao.deposit(ethers.constants.AddressZero, amount, 'ref', options)
+      await expect(
+        dao.deposit(ethers.constants.AddressZero, amount, 'ref', options)
       )
         .to.emit(dao, EVENTS.Deposited)
         .withArgs(ownerAddress, ethers.constants.AddressZero, amount, 'ref');
@@ -311,7 +311,7 @@ describe('DAO', function () {
       // is empty at the beginning
       expect(await token.balanceOf(dao.address)).to.equal(0);
 
-      expect(await dao.deposit(token.address, amount, 'ref'))
+      await expect(dao.deposit(token.address, amount, 'ref'))
         .to.emit(dao, EVENTS.Deposited)
         .withArgs(ownerAddress, token.address, amount, 'ref');
 
@@ -355,8 +355,8 @@ describe('DAO', function () {
     it('withdraws native tokens if DAO balance is high enough', async () => {
       const receiverBalance = await signers[1].getBalance();
 
-      expect(
-        await dao.withdraw(
+      await expect(
+        dao.withdraw(
           ethers.constants.AddressZero,
           signers[1].address,
           amount,
@@ -390,8 +390,8 @@ describe('DAO', function () {
     it('withdraws ERC20 if DAO balance is high enough', async () => {
       const receiverBalance = await token.balanceOf(signers[1].address);
 
-      expect(
-        await dao.withdraw(token.address, signers[1].address, amount, 'ref')
+      await expect(
+        dao.withdraw(token.address, signers[1].address, amount, 'ref')
       )
         .to.emit(dao, EVENTS.Withdrawn)
         .withArgs(token.address, signers[1].address, amount, 'ref');
@@ -487,7 +487,7 @@ describe('DAO', function () {
       expect(await ethers.provider.getBalance(dao.address)).to.equal(0);
 
       // Send a transaction
-      expect(await signers[0].sendTransaction({to: dao.address, value: amount}))
+      await expect(signers[0].sendTransaction({to: dao.address, value: amount}))
         .to.emit(dao, EVENTS.NativeTokenDeposited)
         .withArgs(ownerAddress, amount);
 
@@ -526,7 +526,7 @@ describe('DAO', function () {
 
       expect(await dao.signatureValidator()).to.be.eq(validatorAddress);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(dao, EVENTS.SignatureValidatorSet)
         .withArgs(validatorAddress);
     });
