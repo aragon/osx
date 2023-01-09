@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {DAO, DAORegistry, ENSSubdomainRegistrar} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';

@@ -11,7 +11,6 @@ import {
   ONE_HOUR,
   ONE_YEAR,
 } from '../test-utils/voting';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -55,7 +54,7 @@ describe('MajorityVotingMock', function () {
 
       await expect(
         votingBase.initializeMock(dao.address, votingSettings)
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
   });
 

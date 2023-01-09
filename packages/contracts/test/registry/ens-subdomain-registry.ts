@@ -8,7 +8,6 @@ import {
   PublicResolver,
   ENSRegistry,
 } from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 
 import {setupResolver} from '../test-utils/ens';

@@ -7,7 +7,6 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../typechain';
 import {deployMockPluginSetup} from '../test-utils/repo';
-import {customError} from '../test-utils/custom-error-helper';
 
 const emptyBytes = '0x00';
 

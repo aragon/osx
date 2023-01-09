@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {PermissionManagerTest, PermissionOracleMock} from '../../../typechain';
-import {customError} from '../../test-utils/custom-error-helper';
 import {DeployTestPermissionOracle} from '../../test-utils/oracles';
 
 const ROOT_PERMISSION_ID = ethers.utils.id('ROOT_PERMISSION');

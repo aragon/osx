@@ -5,7 +5,6 @@ import {ethers} from 'hardhat';
 
 import {getMergedABI} from '../../utils/abi';
 import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
-import {ERRORS} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {BigNumber} from 'ethers';
 
@@ -80,7 +79,7 @@ describe('Admin plugin', function () {
       await initializePlugin();
 
       await expect(initializePlugin()).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
+        'Initializable: contract is already initialized'
       );
     });
   });

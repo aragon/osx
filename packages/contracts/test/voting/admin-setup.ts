@@ -2,7 +2,6 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {AdminSetup} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';

@@ -20,7 +20,6 @@ import {
   DAO,
 } from '../../typechain';
 
-import {customError} from '../test-utils/custom-error-helper';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 import {deployNewDAO} from '../test-utils/dao';

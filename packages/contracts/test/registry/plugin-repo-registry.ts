@@ -8,7 +8,6 @@ import {
   ENSSubdomainRegistrar,
   PluginRepoRegistry,
 } from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployNewPluginRepo} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';

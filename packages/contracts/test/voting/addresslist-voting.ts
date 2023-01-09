@@ -21,7 +21,6 @@ import {
   ONE_HOUR,
   MAX_UINT64,
 } from '../test-utils/voting';
-import {ERRORS} from '../test-utils/custom-error-helper';
 import {addresses} from '../test-utils/addresses';
 
 describe('AddresslistVoting', function () {
@@ -108,7 +107,7 @@ describe('AddresslistVoting', function () {
 
       await expect(
         voting.initialize(dao.address, votingSettings, await addresses(0))
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
   });
 

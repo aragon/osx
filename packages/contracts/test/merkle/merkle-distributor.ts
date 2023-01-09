@@ -6,7 +6,6 @@ import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 
 describe('MerkleDistributor', function () {

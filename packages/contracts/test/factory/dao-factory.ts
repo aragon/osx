@@ -10,7 +10,6 @@ import {
 } from '../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployPluginSetupProcessor} from '../test-utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,

@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {ERC20, TokenVotingSetup} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';

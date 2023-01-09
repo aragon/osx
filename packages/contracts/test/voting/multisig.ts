@@ -10,7 +10,6 @@ import {
   MULTISIG_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {ERRORS} from '../test-utils/custom-error-helper';
 import {addresses} from '../test-utils/addresses';
 
 export type MultisigSettings = {
@@ -96,7 +95,7 @@ describe('Multisig', function () {
 
       await expect(
         multisig.initialize(dao.address, await addresses(5), multisigSettings)
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Initializable: contract is already initialized');
     });
 
     it('adds the initial addresses to the address list', async () => {
