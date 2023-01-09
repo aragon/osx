@@ -15,6 +15,7 @@ import {
   VotingMode,
   ONE_HOUR,
   MAX_UINT64,
+  getProposalId,
 } from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
@@ -28,9 +29,9 @@ describe('AddresslistVoting', function () {
   let startDate: number;
   let endDate: number;
   let votingSettings: VotingSettings;
+  let id: string;
 
   const startOffset = 10;
-  const id = 0;
 
   let mergedAbi: any;
   let addresslistVotingFactoryBytecode: any;
@@ -75,6 +76,7 @@ describe('AddresslistVoting', function () {
       signers[0]
     );
     voting = await AddresslistVotingFactory.deploy();
+    id = getProposalId(voting.address, '0x0');
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -312,7 +314,12 @@ describe('AddresslistVoting', function () {
 
       expect(await voting.canVote(id, signers[0].address)).to.equal(true);
       expect(await voting.canVote(id, signers[1].address)).to.equal(false);
-      expect(await voting.canVote(1, signers[0].address)).to.equal(false);
+      expect(
+        await voting.canVote(
+          getProposalId(voting.address, '0x1'),
+          signers[0].address
+        )
+      ).to.equal(false);
 
       expect(proposal.actions.length).to.equal(1);
       expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
@@ -374,18 +381,14 @@ describe('AddresslistVoting', function () {
       );
 
       // Works if the vote option is 'None'
-      expect(
-        (
-          await voting.createProposal(
-            dummyMetadata,
-            dummyActions,
-            startDate,
-            endDate,
-            VoteOption.None,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        startDate,
+        endDate,
+        VoteOption.None,
+        false
+      );
     });
   });
 
@@ -396,18 +399,14 @@ describe('AddresslistVoting', function () {
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
       });
 
       it('reverts on vote replacement', async () => {
@@ -533,18 +532,14 @@ describe('AddresslistVoting', function () {
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
       });
 
       it('does not allow voting, when the vote has not started yet', async () => {
@@ -731,18 +726,14 @@ describe('AddresslistVoting', function () {
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
 
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
       });
 
       it('should allow vote replacement but not double-count votes by the same address', async () => {
@@ -1007,18 +998,15 @@ describe('AddresslistVoting', function () {
         votingSettings.minParticipation = pct16(75);
 
         await voting.initialize(dao.address, votingSettings, addresslist(10));
-        expect(
-          (
-            await voting.createProposal(
-              dummyMetadata,
-              dummyActions,
-              startDate,
-              endDate,
-              VoteOption.None,
-              false
-            )
-          ).value
-        ).to.equal(id);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          startDate,
+          endDate,
+          VoteOption.None,
+          false
+        );
       });
 
       it('does not execute if support is high enough but participation is too low', async () => {

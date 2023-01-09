@@ -61,7 +61,7 @@ interface IMajorityVoting {
     /// @param voteOption The vote option chosen.
     /// @param votingPower The voting power behind this vote.
     event VoteCast(
-        uint256 indexed proposalId,
+        bytes32 indexed proposalId,
         address indexed voter,
         VoteOption voteOption,
         uint256 votingPower
@@ -78,21 +78,25 @@ interface IMajorityVoting {
     /// @notice Returns the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote.
     /// @param _proposalId The ID of the proposal.
     /// @return The support value.
-    function support(uint256 _proposalId) external view returns (uint256);
+    function support(bytes32 _proposalId) external view returns (uint256);
 
     /// @notice Returns the worst case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote.
     /// @param _proposalId The ID of the proposal.
     /// @return The worst case support value.
-    function worstCaseSupport(uint256 _proposalId) external view returns (uint256);
+    function worstCaseSupport(bytes32 _proposalId) external view returns (uint256);
 
     /// @notice Returns the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote.
     /// @param _proposalId The ID of the proposal.
     /// @return The participation value.
-    function participation(uint256 _proposalId) external view returns (uint256);
+    function participation(bytes32 _proposalId) external view returns (uint256);
 
     /// @notice Returns the proposal count determining the next proposal ID.
     /// @return The proposal count.
     function proposalCount() external view returns (uint256);
+
+    /// @notice Returns the proposalId for a given proposal count
+    /// return The proposalId
+    function proposalId(uint256 _proposalCount) external view returns (bytes32);
 
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
     /// - has not started,
@@ -103,12 +107,12 @@ interface IMajorityVoting {
     /// @param _account The account address to be checked.
     /// @return bool Returns true if the account is allowed to vote.
     /// @dev The function assumes the queried proposal exists.
-    function canVote(uint256 _proposalId, address _account) external view returns (bool);
+    function canVote(bytes32 _proposalId, address _account) external view returns (bool);
 
     /// @notice Checks if a proposal can be executed.
     /// @param _proposalId The ID of the proposal to be checked.
     /// @return True if the proposal can be executed, false otherwise.
-    function canExecute(uint256 _proposalId) external view returns (bool);
+    function canExecute(bytes32 _proposalId) external view returns (bool);
 
     /// @notice Votes for a vote option and, optionally, executes the proposal.
     /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
@@ -116,20 +120,20 @@ interface IMajorityVoting {
     /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function vote(
-        uint256 _proposalId,
+        bytes32 _proposalId,
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external;
 
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
-    function execute(uint256 _proposalId) external;
+    function execute(bytes32 _proposalId) external;
 
     /// @notice Returns whether the account has voted for the proposal.  Note, that this does not check if the account has voting power.
     /// @param _proposalId The ID of the proposal.
     /// @param _account The account address to be checked.
     /// @return The vote option cast by a voter for a certain proposal.
-    function getVoteOption(uint256 _proposalId, address _account)
+    function getVoteOption(bytes32 _proposalId, address _account)
         external
         view
         returns (VoteOption);

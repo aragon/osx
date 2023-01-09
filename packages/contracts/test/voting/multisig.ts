@@ -12,6 +12,7 @@ import {
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
+import {getProposalId} from '../test-utils/voting';
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
@@ -23,7 +24,7 @@ describe('Multisig', function () {
   let minApprovals: number;
   let onlyListed: boolean;
 
-  const id = 0;
+  let id: string;
 
   let mergedAbi: any;
   let multisigFactoryBytecode: any;
@@ -62,6 +63,7 @@ describe('Multisig', function () {
       signers[0]
     );
     multisig = await MultisigFactory.deploy();
+    id = getProposalId(multisig.address, '0x0');
 
     dao.grant(
       dao.address,
@@ -281,7 +283,12 @@ describe('Multisig', function () {
 
       expect(await multisig.canApprove(id, signers[0].address)).to.equal(true);
       expect(await multisig.canApprove(id, signers[1].address)).to.equal(false);
-      expect(await multisig.canApprove(1, signers[0].address)).to.equal(false);
+      expect(
+        await multisig.canApprove(
+          getProposalId(multisig.address, '0x1'),
+          signers[0].address
+        )
+      ).to.equal(false);
 
       expect(proposal.actions.length).to.equal(1);
       expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
@@ -321,16 +328,7 @@ describe('Multisig', function () {
         minApprovals,
       });
 
-      expect(
-        (
-          await multisig.createProposal(
-            dummyMetadata,
-            dummyActions,
-            false,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await multisig.createProposal(dummyMetadata, dummyActions, false, false);
     });
 
     it('reverts when approving multiple times', async () => {

@@ -57,3 +57,11 @@ export async function advanceAfterVoteEnd(endDate: number) {
   await advanceTimeTo(endDate);
   expect(await getTime()).to.be.greaterThanOrEqual(endDate);
 }
+
+// proposalNumber has to be in hex
+export function getProposalId(address: string, proposalNumber: string) {
+  proposalNumber = proposalNumber.replace('0x', '');
+  return `${address.toLowerCase()}${'0'.repeat(
+    24 - proposalNumber.length
+  )}${proposalNumber.toLowerCase()}`;
+}

@@ -38,7 +38,7 @@ abstract contract IDAO {
     /// @param callId The id of the call. The definition of the value of callId is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
-    function execute(uint256 callId, Action[] memory _actions)
+    function execute(bytes32 callId, Action[] memory _actions)
         external
         virtual
         returns (bytes[] memory);
@@ -50,7 +50,7 @@ abstract contract IDAO {
     ///      A `Plugin` implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed.
     /// @param execResults Array with the results of the executed actions.
-    event Executed(address indexed actor, uint256 callId, Action[] actions, bytes[] execResults);
+    event Executed(address indexed actor, bytes32 callId, Action[] actions, bytes[] execResults);
 
     /// @notice Emitted when a standard callback is registered.
     /// @param interfaceId The ID of the interface.

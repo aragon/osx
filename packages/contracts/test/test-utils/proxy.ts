@@ -1,5 +1,5 @@
 import {ContractFactory} from 'ethers';
-import {upgrades} from 'hardhat';
+import {upgrades,artifacts} from 'hardhat';
 
 type DeployOptions = {
   constructurArgs?: unknown[];

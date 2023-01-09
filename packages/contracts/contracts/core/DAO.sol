@@ -160,7 +160,7 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function execute(uint256 callId, Action[] calldata _actions)
+    function execute(bytes32 callId, Action[] calldata _actions)
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
