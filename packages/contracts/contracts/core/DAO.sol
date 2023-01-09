@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
+import {getIndex, setIndex} from "../utils/BitMap.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021
@@ -54,11 +55,17 @@ contract DAO is
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
+    /// @notice Only allows 256 actions to execute per tx.
+    uint256 internal constant MAX_ACTIONS = 256;
+
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
+
+    /// @notice Thrown if action length is more than MAX_ACTIONS.
+    error TooManyActions();
 
     /// @notice Thrown if action execution has failed.
     error ActionFailed();
@@ -155,20 +162,33 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function execute(uint256 callId, Action[] calldata _actions)
+    function execute(uint256 callId, Action[] calldata _actions, uint256 allowFailureMap)
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
         returns (bytes[] memory)
     {
+        if(_actions.length > MAX_ACTIONS) {
+            revert TooManyActions();
+        }
+
         bytes[] memory execResults = new bytes[](_actions.length);
+        uint256 failureMap;
 
         for (uint256 i = 0; i < _actions.length;) {
             (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
                 _actions[i].data
             );
 
-            if (!success) revert ActionFailed();
+            if (!success && !getIndex(allowFailureMap, i))  {
+                revert ActionFailed();
+            }
+
+            // If it comes here, it means the action was whitelisted, but failed
+            // for which we need to store that it failed.
+            if(!success) {
+                failureMap = setIndex(failureMap, i);
+            }
 
             execResults[i] = response;
 
@@ -177,7 +197,7 @@ contract DAO is
             }
         }
 
-        emit Executed(msg.sender, callId, _actions, execResults);
+        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
 
         return execResults;
     }

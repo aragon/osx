@@ -36,13 +36,13 @@ contract DAOMock is IDAO, PermissionManager {
         bytes calldata /* _metadata */
     ) external override {}
 
-    function execute(uint256 callId, Action[] memory _actions)
+    function execute(uint256 callId, Action[] memory _actions, uint256 allowFailureMap) // TODO: 123
         external
         override
         returns (bytes[] memory)
     {
         bytes[] memory results;
-        emit Executed(msg.sender, callId, _actions, results);
+        emit Executed(msg.sender, callId, _actions, 0, results); // TODO: 123
         return results;
     }
 

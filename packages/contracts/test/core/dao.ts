@@ -2,8 +2,16 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20, DAO__factory} from '../../typechain';
+import {
+  DAO,
+  GovernanceERC20,
+  DAO__factory,
+  ActionExecute__factory,
+  IDAO,
+} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
+import {setIndex, unsetIndex, getIndex} from '../test-utils/bitmap';
+
 import {ERRORS, customError} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
@@ -17,6 +25,7 @@ const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
+const MAX_ACTIONS = 256;
 
 const EVENTS = {
   MetadataSet: 'MetadataSet',
@@ -48,6 +57,26 @@ const PERMISSION_IDS = {
     'REGISTER_STANDARD_CALLBACK_PERMISSION'
   ),
 };
+
+async function getActions() {
+  const ActionExecuteFactory = await ethers.getContractFactory('ActionExecute');
+  let ActionExecute = await ActionExecuteFactory.deploy();
+  const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
+  const functionData = iface.encodeFunctionData('setTest');
+
+  return {
+    failAction: {
+      to: ActionExecute.address,
+      data: iface.encodeFunctionData('fail'),
+      value: 0,
+    },
+    succeedAction: {
+      to: ActionExecute.address,
+      data: iface.encodeFunctionData('setTest'),
+      value: 0,
+    },
+  };
+}
 
 describe('DAO', function () {
   let signers: SignerWithAddress[];
@@ -180,7 +209,15 @@ describe('DAO', function () {
     });
   });
 
-  describe('execute:', async () => {
+  describe.only('execute:', async () => {
+    let succeedAction: any;
+    let failAction: any;
+    before(async () => {
+      let actions = await getActions();
+      succeedAction = actions.succeedAction;
+      failAction = actions.failAction;
+    });
+
     const dummyActions = [
       {
         to: dummyAddress1,
@@ -197,7 +234,7 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
+      await expect(dao.execute(0, [succeedAction], 0)).to.be.revertedWith(
         customError(
           'Unauthorized',
           dao.address,
@@ -208,14 +245,88 @@ describe('DAO', function () {
       );
     });
 
+    it('reverts if array of actions is too big', async () => {
+      let actions = [];
+      for (let i = 0; i < MAX_ACTIONS; i++) {
+        actions[i] = succeedAction;
+      }
+
+      await expect(dao.execute(0, actions, 0)).to.not.be.reverted;
+
+      // add one more to make sure it fails
+      actions[MAX_ACTIONS] = failAction;
+
+      await expect(dao.execute(0, actions, 0)).to.be.revertedWith(
+        customError('TooManyActions')
+      );
+    });
+
+    it("reverts if action is fallable and allowFailureMap doesn't include it", async () => {
+      await expect(dao.execute(0, [failAction], 0)).to.be.revertedWith(
+        customError('ActionFailed')
+      );
+    });
+
+    it('succeeds if action is fallable but allowFailureMap allows it', async () => {
+      let num = ethers.BigNumber.from(0);
+      num = setIndex(0, num);
+      await expect(dao.execute(0, [failAction], num)).to.not.be.reverted;
+    });
+
+    it('only succeeds if failing action index is set in the failuremap', async () => {
+      let allowFailureMap = ethers.BigNumber.from(0);
+      let actions = [];
+
+      // Some random indexes less than MAX_ACTIONS
+      let succeedActionIndexes = [17, 99, 120];
+
+      // The loop constructs an array of actions out of which
+      // only 3 will be succeeded. For every action,
+      // it adds it in the allowFailureMap to make sure tx never fails.
+      for (let i = 0; i < MAX_ACTIONS; i++) {
+        actions[i] = succeedActionIndexes.includes(i)
+          ? succeedAction
+          : failAction;
+
+        allowFailureMap = setIndex(i, allowFailureMap);
+      }
+
+      // If the below call not fails, means allowFailureMap is correct.
+      let tx = await dao.execute(0, actions, allowFailureMap);
+      let event = await findEvent(tx, EVENTS.Executed);
+
+      expect(event.args.actor).to.equal(ownerAddress);
+      expect(event.args.callId).to.equal(0);
+
+      // construct the failureMap which only has those
+      // bits set at indexes where actions failed
+      let failureMap = ethers.BigNumber.from(0);
+      for (let i = 0; i < MAX_ACTIONS; i++) {
+        if (!succeedActionIndexes.includes(i)) {
+          failureMap = setIndex(i, failureMap);
+        }
+      }
+      expect(event.args.failureMap).to.equal(failureMap);
+
+      // TODO: compare it with `ActionExecute:Revert`
+      // expect(event.args.execResults[0]).to.equal("")
+
+      // lets remove one of the action from allowFailureMap
+      // to see tx will actually revert.
+      allowFailureMap = unsetIndex(250, allowFailureMap);
+      await expect(dao.execute(0, actions, allowFailureMap)).to.be.revertedWith(
+        customError('ActionFailed')
+      );
+    });
+
     it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions)).to.deep.equal(
+      expect(await dao.callStatic.execute(0, dummyActions, 0)).to.deep.equal(
         expectedDummyResults
       );
     });
 
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(0, dummyActions);
+      let tx = await dao.execute(0, dummyActions, 0);
       let rc = await tx.wait();
 
       const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
@@ -227,21 +338,6 @@ describe('DAO', function () {
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
       expect(event.args.execResults).to.deep.equal(expectedDummyResults);
-    });
-
-    it('reverts if one of the actions failed', async () => {
-      const ActionExecuteFactory = await smock.mock('ActionExecute');
-      const actionExecute = await ActionExecuteFactory.deploy();
-
-      await expect(
-        dao.execute(0, [
-          {
-            to: actionExecute.address,
-            data: '0x0000',
-            value: 0,
-          },
-        ])
-      ).to.be.revertedWith(customError('ActionFailed'));
     });
   });
 

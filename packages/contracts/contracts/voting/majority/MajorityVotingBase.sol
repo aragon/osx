@@ -416,7 +416,7 @@ abstract contract MajorityVotingBase is
         Proposal storage proposal_ = proposals[_proposalId];
         proposal_.executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, proposal_.actions);
+        bytes[] memory execResults = dao.execute(_proposalId, proposal_.actions, 0); // TODO: 123
         emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 

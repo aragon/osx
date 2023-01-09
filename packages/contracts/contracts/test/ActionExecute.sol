@@ -9,4 +9,9 @@ contract ActionExecute {
     function setTest() public {
         test = true;
     }
+
+    function fail() public pure {
+        revert("ActionExecute:Revert");
+    }
+    
 }
