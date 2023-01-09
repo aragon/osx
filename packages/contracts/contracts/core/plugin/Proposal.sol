@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
-import "./GovernanceBase.sol";
+import "./ProposalBase.sol";
 
 /// @title Proposal
 /// @author Aragon Association - 2022
