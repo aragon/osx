@@ -50,7 +50,7 @@ abstract contract IDAO {
     ///      A `Plugin` implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed.
     /// @param execResults Array with the results of the executed actions.
-    event Executed(address indexed actor, bytes32 callId, Action[] actions, bytes[] execResults);
+    event Executed(address indexed actor, bytes32 indexed callId, Action[] actions, bytes[] execResults);
 
     /// @notice Emitted when a standard callback is registered.
     /// @param interfaceId The ID of the interface.

@@ -45,22 +45,16 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   // handle event
   _handleProposalCreated(event, DAO_ADDRESS, STRING_DATA);
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    BigInt.fromString(PROPOSAL_ID).toHexString();
-
   // checks
-  assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AdminProposal', entityID, 'dao', DAO_ADDRESS);
-  assert.fieldEquals('AdminProposal', entityID, 'plugin', pluginId);
-  assert.fieldEquals('AdminProposal', entityID, 'proposalId', PROPOSAL_ID);
-  assert.fieldEquals('AdminProposal', entityID, 'creator', ADDRESS_ONE);
-  assert.fieldEquals('AdminProposal', entityID, 'metadata', STRING_DATA);
-  assert.fieldEquals('AdminProposal', entityID, 'executed', 'false');
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'id', PROPOSAL_ID);
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'dao', DAO_ADDRESS);
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'plugin', pluginId);
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'creator', ADDRESS_ONE);
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'metadata', STRING_DATA);
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'executed', 'false');
   assert.fieldEquals(
     'AdminProposal',
-    entityID,
+    PROPOSAL_ID,
     'createdAt',
     event.block.timestamp.toString()
   );
@@ -89,17 +83,11 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   let adminPlugin = new AdminPlugin(pluginId);
   adminPlugin.save();
 
-  let entityID =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    BigInt.fromString(PROPOSAL_ID).toHexString();
-
   let adminstratorAddress = Address.fromString(ADDRESS_ONE);
 
-  let adminProposal = new AdminProposal(entityID);
+  let adminProposal = new AdminProposal(PROPOSAL_ID);
   adminProposal.dao = DAO_ADDRESS;
   adminProposal.plugin = pluginId;
-  adminProposal.proposalId = BigInt.fromString(PROPOSAL_ID);
   adminProposal.creator = adminstratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
@@ -107,13 +95,13 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.adminstrator = adminstratorAddress.toHexString();
   adminProposal.save();
 
-  const actionId = CONTRACT_ADDRESS + '_' + PROPOSAL_ID + '_' + PROPOSAL_ID;
+  const actionId = PROPOSAL_ID + '_0x00000000000000000000000000000000';
   let action = new Action(actionId);
   action.to = Address.fromString(ADDRESS_TWO);
   action.value = BigInt.fromString(actionValue);
   action.data = Bytes.fromHexString(actionData);
   action.dao = DAO_ADDRESS;
-  action.proposal = entityID;
+  action.proposal = PROPOSAL_ID;
   action.save();
 
   // create event
@@ -127,8 +115,8 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   handleProposalExecuted(event);
 
   // checks
-  assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
-  assert.fieldEquals('AdminProposal', entityID, 'executed', 'true');
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'id', PROPOSAL_ID);
+  assert.fieldEquals('AdminProposal', PROPOSAL_ID, 'executed', 'true');
 
   clearStore();
 });

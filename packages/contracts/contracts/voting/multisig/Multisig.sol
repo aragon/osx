@@ -114,7 +114,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param metadata The metadata of the proposal.
     /// @param actions The actions that will be executed if the proposal passes.
     event ProposalCreated(
-        bytes32 proposalId,
+        bytes32 indexed proposalId,
         address indexed creator,
         bytes metadata,
         IDAO.Action[] actions
@@ -123,7 +123,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId The ID of the proposal.
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(bytes32 proposalId, bytes[] execResults);
+    event ProposalExecuted(bytes32 indexed proposalId, bytes[] execResults);
 
     /// @notice Emitted when the plugin settings are set.
     /// @param onlyListed Whether only listed addresses can create a proposal.

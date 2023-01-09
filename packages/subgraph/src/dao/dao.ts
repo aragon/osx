@@ -152,10 +152,7 @@ export function handleExecuted(event: Executed): void {
         );
       }
 
-      let proposalId =
-        event.params.actor.toHexString() +
-        '_' +
-        event.params.callId.toHexString();
+      let proposalId = event.params.callId.toHexString();
 
       // create a withdraw entity
       let withdrawId =

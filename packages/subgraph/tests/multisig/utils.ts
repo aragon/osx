@@ -13,7 +13,6 @@ import {
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,
-  PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
   SNAPSHOT_BLOCK,
@@ -38,7 +37,7 @@ export function createNewProposalCreatedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let creatorParam = new ethereum.EventParam(
     'creator',
@@ -73,7 +72,7 @@ export function createNewApprovedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let approverParam = new ethereum.EventParam(
     'approver',
@@ -99,7 +98,7 @@ export function createNewProposalExecutedEvent(
 
   let proposalIdParam = new ethereum.EventParam(
     'proposalId',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(proposalId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(proposalId))
   );
   let execResultsParam = new ethereum.EventParam(
     'execResults',
@@ -226,10 +225,10 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(uint256,uint64),(uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(bytes32):(bool,bool,(uint256,uint64),(uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(proposalId))
     ])
     .returns([
       ethereum.Value.fromBoolean(open),
@@ -248,11 +247,10 @@ export function createGetProposalCall(
 // state
 
 export function createMultisigProposalEntityState(
-  entityID: string = PROPOSAL_ENTITY_ID,
+  entityID: string = PROPOSAL_ID,
   dao: string = DAO_ADDRESS,
   plugin: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
-  proposalId: string = PROPOSAL_ID,
   minApprovals: string = TWO,
   open: boolean = true,
   executed: boolean = false,
@@ -268,7 +266,6 @@ export function createMultisigProposalEntityState(
   let multisigProposal = new MultisigProposal(entityID);
   multisigProposal.dao = Address.fromString(dao).toHexString();
   multisigProposal.plugin = Address.fromString(plugin).toHexString();
-  multisigProposal.proposalId = BigInt.fromString(proposalId);
   multisigProposal.creator = Address.fromString(creator);
   multisigProposal.open = open;
   multisigProposal.executed = executed;
