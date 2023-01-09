@@ -97,7 +97,7 @@ describe('DAOFactory: ', function () {
   let pluginSetupMockRepoAddress: any;
   let daoRegistry: DAORegistry;
   let daoSettings: any;
-  let pluginSettings: any;
+  let votingSettings: any;
 
   let signers: SignerWithAddress[];
   let ownerAddress: string;
@@ -218,7 +218,7 @@ describe('DAOFactory: ', function () {
       metadata: daoDummyMetadata,
     };
 
-    pluginSettings = {
+    votingSettings = {
       pluginSetup: pluginSetupV1Mock.address,
       pluginSetupRepo: pluginSetupMockRepoAddress,
       data: EMPTY_DATA,
@@ -232,7 +232,7 @@ describe('DAOFactory: ', function () {
   });
 
   it('correctly creates a DAO with one plugin', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
     const {dao, plugin, helpers, permissions} =
       await extractInfoFromCreateDaoTx(tx);
 
@@ -271,7 +271,7 @@ describe('DAOFactory: ', function () {
   });
 
   it('revokes all temporarly granted permissions', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = await ethers.getContractFactory('DAO');
@@ -301,7 +301,7 @@ describe('DAOFactory: ', function () {
   });
 
   it('emits events containing all the correct permissions to be set in the created DAO', async () => {
-    const tx = await daoFactory.createDao(daoSettings, [pluginSettings]);
+    const tx = await daoFactory.createDao(daoSettings, [votingSettings]);
     const {dao} = await extractInfoFromCreateDaoTx(tx);
 
     const factory = await ethers.getContractFactory('DAO');

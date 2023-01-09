@@ -4,7 +4,13 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {MajorityVotingMock, DAO} from '../../typechain';
 import {VOTING_EVENTS} from '../../utils/event';
-import {pct16} from '../test-utils/voting';
+import {
+  VotingSettings,
+  VotingMode,
+  pct16,
+  ONE_HOUR,
+  ONE_YEAR,
+} from '../test-utils/voting';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 
 describe('MajorityVotingMock', function () {
@@ -12,6 +18,7 @@ describe('MajorityVotingMock', function () {
   let votingBase: MajorityVotingMock;
   let dao: DAO;
   let ownerAddress: string;
+  let votingSettings: VotingSettings;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -23,6 +30,14 @@ describe('MajorityVotingMock', function () {
   });
 
   beforeEach(async () => {
+    votingSettings = {
+      votingMode: VotingMode.EarlyExecution,
+      supportThreshold: pct16(50),
+      minParticipation: pct16(20),
+      minDuration: ONE_HOUR,
+      minProposerVotingPower: 0,
+    };
+
     const MajorityVotingBase = await ethers.getContractFactory(
       'MajorityVotingMock'
     );
@@ -30,65 +45,87 @@ describe('MajorityVotingMock', function () {
     dao.grant(
       votingBase.address,
       ownerAddress,
-      ethers.utils.id('CHANGE_VOTE_SETTINGS_PERMISSION')
+      ethers.utils.id('UPDATE_VOTING_SETTINGS_PERMISSION')
     );
   });
-
-  function initializeMock(
-    totalSupportThresholdPct: any,
-    relativeSupportThresholdPct: any,
-    minDuration: any
-  ) {
-    return votingBase.initializeMock(
-      dao.address,
-      totalSupportThresholdPct,
-      relativeSupportThresholdPct,
-      minDuration
-    );
-  }
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await initializeMock(1, 2, 3);
+      await votingBase.initializeMock(dao.address, votingSettings);
 
-      await expect(initializeMock(1, 2, 3)).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
-      );
-    });
-
-    it('reverts if min duration is 0', async () => {
-      await expect(initializeMock(1, 2, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
-      );
+      await expect(
+        votingBase.initializeMock(dao.address, votingSettings)
+      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
     });
   });
 
-  describe('changeVoteConfig: ', async () => {
+  describe('validateAndSetSettings: ', async () => {
     beforeEach(async () => {
-      await initializeMock(1, 2, 3);
+      await votingBase.initializeMock(dao.address, votingSettings);
     });
-    it('reverts if settings are invalid', async () => {
+    it('reverts if the support threshold specified exceeds 100%', async () => {
+      votingSettings.supportThreshold = pct16(1000);
       await expect(
-        votingBase.changeVoteSettings(1, pct16(1000), 3)
+        votingBase.updateVotingSettings(votingSettings)
       ).to.be.revertedWith(
-        customError('PercentageExceeds100', pct16(100), pct16(1000))
-      );
-
-      await expect(
-        votingBase.changeVoteSettings(pct16(1000), 2, 3)
-      ).to.be.revertedWith(
-        customError('PercentageExceeds100', pct16(100), pct16(1000))
-      );
-
-      await expect(votingBase.changeVoteSettings(1, 2, 0)).to.be.revertedWith(
-        customError('VoteDurationZero')
+        customError(
+          'PercentageExceeds100',
+          pct16(100),
+          votingSettings.supportThreshold
+        )
       );
     });
 
-    it('should change the settings successfully', async () => {
-      expect(await votingBase.changeVoteSettings(2, 4, 8))
-        .to.emit(votingBase, VOTING_EVENTS.VOTE_SETTINGS_UPDATED)
-        .withArgs(2, 4, 8);
+    it('reverts if the participation threshold specified exceeds 100%', async () => {
+      votingSettings.minParticipation = pct16(1000);
+
+      await expect(
+        votingBase.updateVotingSettings(votingSettings)
+      ).to.be.revertedWith(
+        customError(
+          'PercentageExceeds100',
+          pct16(100),
+          votingSettings.minParticipation
+        )
+      );
+    });
+
+    it('reverts if the minimal duration is shorter than one hour', async () => {
+      votingSettings.minDuration = ONE_HOUR - 1;
+      await expect(
+        votingBase.updateVotingSettings(votingSettings)
+      ).to.be.revertedWith(
+        customError(
+          'MinDurationOutOfBounds',
+          ONE_HOUR,
+          votingSettings.minDuration
+        )
+      );
+    });
+
+    it('reverts if the minimal duration is longer than one year', async () => {
+      votingSettings.minDuration = ONE_YEAR + 1;
+      await expect(
+        votingBase.updateVotingSettings(votingSettings)
+      ).to.be.revertedWith(
+        customError(
+          'MinDurationOutOfBounds',
+          ONE_YEAR,
+          votingSettings.minDuration
+        )
+      );
+    });
+
+    it('should change the voting settings successfully', async () => {
+      await expect(votingBase.updateVotingSettings(votingSettings))
+        .to.emit(votingBase, VOTING_EVENTS.VOTING_SETTINGS_UPDATED)
+        .withArgs(
+          votingSettings.votingMode,
+          votingSettings.supportThreshold,
+          votingSettings.minParticipation,
+          votingSettings.minDuration,
+          votingSettings.minProposerVotingPower
+        );
     });
   });
 });

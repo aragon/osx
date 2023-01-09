@@ -403,27 +403,27 @@ export function getEXECUTE_PERMISSION_IDreverted(
     .reverts();
 }
 
-export function getSupportRequiredPct(
+export function getSupportThreshold(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'relativeSupportThresholdPct',
-    'relativeSupportThresholdPct():(uint64)'
+    'supportThreshold',
+    'supportThreshold():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
 }
 
-export function getParticipationRequiredPct(
+export function getMinimalParticipation(
   contractAddress: string,
   returns: BigInt
 ): void {
   createMockedFunction(
     Address.fromString(contractAddress),
-    'totalSupportThresholdPct',
-    'totalSupportThresholdPct():(uint64)'
+    'minParticipation',
+    'minParticipation():(uint64)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -470,7 +470,7 @@ export function getIsUserAllowed(
   createMockedFunction(
     Address.fromString(contractAddress),
     'isListed',
-    'isListed(address,uint256):(bool)'
+    'isListedAtBlock(address,uint256):(bool)'
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),

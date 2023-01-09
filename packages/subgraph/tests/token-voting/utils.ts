@@ -2,10 +2,10 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {
-  VoteSettingsUpdated,
+  VotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  ProposalExecuted,
+  ProposalExecuted
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {TokenVotingProposal} from '../../generated/schema';
 import {
@@ -13,14 +13,15 @@ import {
   DAO_ADDRESS,
   PROPOSAL_ENTITY_ID,
   PROPOSAL_ID,
-  VOTING_ADDRESS,
-  CREATED_AT,
-  END_DATE,
-  MIN_SUPPORT,
-  MIN_TURNOUT,
-  SNAPSHOT_BLOCK,
+  CONTRACT_ADDRESS,
+  VOTING_MODE,
+  SUPPORT_THRESHOLD,
+  MIN_PARTICIPATION,
   START_DATE,
-  VOTING_POWER,
+  END_DATE,
+  SNAPSHOT_BLOCK,
+  TOTAL_VOTING_POWER,
+  CREATED_AT
 } from '../constants';
 
 // events
@@ -59,7 +60,7 @@ export function createNewProposalCreatedEvent(
 export function createNewVoteCastEvent(
   proposalId: string,
   voter: string,
-  choice: string,
+  voteOption: string,
   votingPower: string,
   contractAddress: string
 ): VoteCast {
@@ -76,19 +77,19 @@ export function createNewVoteCastEvent(
     'voter',
     ethereum.Value.fromAddress(Address.fromString(voter))
   );
-  let choiceParam = new ethereum.EventParam(
-    'choice',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(choice))
+  let voteOptionParam = new ethereum.EventParam(
+    'voteOption',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(voteOption))
   );
-  let stakeParam = new ethereum.EventParam(
+  let votingPowerParam = new ethereum.EventParam(
     'votingPower',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(votingPower))
   );
 
   createProposalCastEvent.parameters.push(proposalIdParam);
   createProposalCastEvent.parameters.push(voterParam);
-  createProposalCastEvent.parameters.push(choiceParam);
-  createProposalCastEvent.parameters.push(stakeParam);
+  createProposalCastEvent.parameters.push(voteOptionParam);
+  createProposalCastEvent.parameters.push(votingPowerParam);
 
   return createProposalCastEvent;
 }
@@ -119,39 +120,49 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewVoteSettingsUpdatedEvent(
-  relativeSupportThresholdPct: string,
-  totalSupportThresholdPct: string,
+export function createNewVotingSettingsUpdatedEvent(
+  votingMode: string,
+  supportThreshold: string,
+  minParticipation: string,
   minDuration: string,
+  minProposerVotingPower: string,
   contractAddress: string
-): VoteSettingsUpdated {
-  let newVoteSettingsUpdatedEvent = changetype<VoteSettingsUpdated>(
+): VotingSettingsUpdated {
+  let newVotingSettingsUpdatedEvent = changetype<VotingSettingsUpdated>(
     newMockEvent()
   );
 
-  newVoteSettingsUpdatedEvent.address = Address.fromString(contractAddress);
-  newVoteSettingsUpdatedEvent.parameters = [];
+  newVotingSettingsUpdatedEvent.address = Address.fromString(contractAddress);
+  newVotingSettingsUpdatedEvent.parameters = [];
 
-  let totalSupportThresholdPctParam = new ethereum.EventParam(
-    'totalSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(BigInt.fromString(totalSupportThresholdPct))
+  let votingModeParam = new ethereum.EventParam(
+    'votingMode',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(votingMode))
   );
-  let relativeSupportThresholdPctParam = new ethereum.EventParam(
-    'relativeSupportThresholdPct',
-    ethereum.Value.fromSignedBigInt(
-      BigInt.fromString(relativeSupportThresholdPct)
-    )
+  let supportThresholdParam = new ethereum.EventParam(
+    'supportThreshold',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(supportThreshold))
+  );
+  let minParticipationParam = new ethereum.EventParam(
+    'minParticipation',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minParticipation))
   );
   let minDurationParam = new ethereum.EventParam(
     'minDuration',
     ethereum.Value.fromSignedBigInt(BigInt.fromString(minDuration))
   );
+  let minProposerVotingPowerParam = new ethereum.EventParam(
+    'minProposerVotingPower',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(minProposerVotingPower))
+  );
 
-  newVoteSettingsUpdatedEvent.parameters.push(totalSupportThresholdPctParam);
-  newVoteSettingsUpdatedEvent.parameters.push(relativeSupportThresholdPctParam);
-  newVoteSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newVotingSettingsUpdatedEvent.parameters.push(votingModeParam);
+  newVotingSettingsUpdatedEvent.parameters.push(supportThresholdParam);
+  newVotingSettingsUpdatedEvent.parameters.push(minParticipationParam);
+  newVotingSettingsUpdatedEvent.parameters.push(minDurationParam);
+  newVotingSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
 
-  return newVoteSettingsUpdatedEvent;
+  return newVotingSettingsUpdatedEvent;
 }
 
 // calls
@@ -174,19 +185,25 @@ export function getProposalCountCall(
 export function createTokenVotingProposalEntityState(
   entityID: string = PROPOSAL_ENTITY_ID,
   dao: string = DAO_ADDRESS,
-  pkg: string = VOTING_ADDRESS,
+  pkg: string = CONTRACT_ADDRESS,
   creator: string = ADDRESS_ONE,
   proposalId: string = PROPOSAL_ID,
+
+  open: boolean = true,
+  executed: boolean = false,
+
+  votingMode: string = VOTING_MODE,
+  supportThreshold: string = SUPPORT_THRESHOLD,
+  minParticipation: string = MIN_PARTICIPATION,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
-  relativeSupportThresholdPct: string = MIN_SUPPORT,
-  totalSupportThresholdPct: string = MIN_TURNOUT,
-  totalVotingPower: string = VOTING_POWER,
+
+  totalVotingPower: string = TOTAL_VOTING_POWER,
+
   createdAt: string = CREATED_AT,
-  open: boolean = true,
-  executable: boolean = false,
-  executed: boolean = false
+  creationBlockNumber: BigInt = new BigInt(0),
+  executable: boolean = false
 ): TokenVotingProposal {
   let tokenVotingProposal = new TokenVotingProposal(entityID);
   tokenVotingProposal.dao = Address.fromString(dao).toHexString();
@@ -194,20 +211,22 @@ export function createTokenVotingProposalEntityState(
   tokenVotingProposal.proposalId = BigInt.fromString(proposalId);
   tokenVotingProposal.creator = Address.fromString(creator);
 
+  tokenVotingProposal.open = open;
+  tokenVotingProposal.executed = executed;
+
+  tokenVotingProposal.votingMode = votingMode;
+  tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
+  tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
   tokenVotingProposal.startDate = BigInt.fromString(startDate);
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
-  tokenVotingProposal.relativeSupportThresholdPct = BigInt.fromString(
-    relativeSupportThresholdPct
-  );
-  tokenVotingProposal.totalSupportThresholdPct = BigInt.fromString(
-    totalSupportThresholdPct
-  );
+
   tokenVotingProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
-  tokenVotingProposal.open = open;
-  tokenVotingProposal.executable = executable;
-  tokenVotingProposal.executed = executed;
+
   tokenVotingProposal.createdAt = BigInt.fromString(createdAt);
+  tokenVotingProposal.creationBlockNumber = creationBlockNumber;
+  tokenVotingProposal.executable = executable;
+
   tokenVotingProposal.save();
 
   return tokenVotingProposal;

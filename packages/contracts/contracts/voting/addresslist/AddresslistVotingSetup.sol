@@ -6,6 +6,7 @@ import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup
@@ -26,7 +27,7 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(uint64 totalSupportThresholdPct, uint64 relativeSupportThresholdPct, uint64 minDuration, address[] allowed)";
+            "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)";
     }
 
     /// @inheritdoc IPluginSetup
@@ -37,12 +38,8 @@ contract AddresslistVotingSetup is PluginSetup {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
-        (
-            uint64 totalSupportThresholdPct,
-            uint64 relativeSupportThresholdPct,
-            uint64 minDuration,
-            address[] memory allowed
-        ) = abi.decode(_data, (uint64, uint64, uint64, address[]));
+        (MajorityVotingBase.VotingSettings memory votingSettings, address[] memory members) = abi
+            .decode(_data, (MajorityVotingBase.VotingSettings, address[]));
 
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
@@ -50,15 +47,13 @@ contract AddresslistVotingSetup is PluginSetup {
             abi.encodeWithSelector(
                 AddresslistVoting.initialize.selector,
                 dao,
-                totalSupportThresholdPct,
-                relativeSupportThresholdPct,
-                minDuration,
-                allowed
+                votingSettings,
+                members
             )
         );
 
         // Prepare helpers
-        address[] memory helpers = new address[](0);
+        (helpers); // silence the warning.
 
         // Prepare permissions
         PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](4);
@@ -70,7 +65,7 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -78,7 +73,7 @@ contract AddresslistVotingSetup is PluginSetup {
             plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(
@@ -124,7 +119,7 @@ contract AddresslistVotingSetup is PluginSetup {
             _payload.plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.MODIFY_ADDRESSLIST_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
         permissions[1] = PermissionLib.ItemMultiTarget(
@@ -132,7 +127,7 @@ contract AddresslistVotingSetup is PluginSetup {
             _payload.plugin,
             _dao,
             NO_ORACLE,
-            addresslistVotingBase.CHANGE_VOTE_SETTINGS_PERMISSION_ID()
+            addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.ItemMultiTarget(

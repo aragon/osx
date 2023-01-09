@@ -3,9 +3,10 @@
 pragma solidity 0.8.10;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
+import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title TokenVoting
@@ -13,6 +14,8 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is MajorityVotingBase {
+    using SafeCastUpgradeable for uint256;
+    
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant TOKEN_VOTING_INTERFACE_ID =
         this.getVotingToken.selector ^ this.initialize.selector;
@@ -26,30 +29,21 @@ contract TokenVoting is MajorityVotingBase {
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
-    /// @param _totalSupportThresholdPct The total support threshold in percent.
-    /// @param _relativeSupportThresholdPct The relative support threshold in percent.
-    /// @param _minDuration The minimal duration of a vote.
+    /// @param _votingSettings The voting settings.
     /// @param _token The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token used for voting.
     function initialize(
         IDAO _dao,
-        uint64 _totalSupportThresholdPct,
-        uint64 _relativeSupportThresholdPct,
-        uint64 _minDuration,
+        VotingSettings calldata _votingSettings,
         IVotesUpgradeable _token
     ) public initializer {
-        __MajorityVotingBase_init(
-            _dao,
-            _totalSupportThresholdPct,
-            _relativeSupportThresholdPct,
-            _minDuration
-        );
+        __MajorityVotingBase_init(_dao, _votingSettings);
 
         votingToken = _token;
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param _interfaceId The ID of the interace.
-    /// @return bool Returns true if the interface is supported.
+    /// @param _interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return _interfaceId == TOKEN_VOTING_INTERFACE_ID || super.supportsInterface(_interfaceId);
     }
@@ -61,101 +55,129 @@ contract TokenVoting is MajorityVotingBase {
         return votingToken;
     }
 
-    /// @inheritdoc IMajorityVoting
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
-        bytes calldata _proposalMetadata,
+        bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         uint64 _startDate,
         uint64 _endDate,
-        bool _executeIfDecided,
-        VoteOption _choice
+        VoteOption _voteOption,
+        bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock = getBlockNumber64() - 1;
+        uint64 snapshotBlock = block.number.toUint64() - 1;
 
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
 
-        proposalId = proposalCount++;
+        if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
+            revert ProposalCreationForbidden(_msgSender());
+        }
 
-        // Calculate the start and end time of the vote
-        uint64 currentTimestamp = getTimestamp64();
+        proposalId = proposalCount();
 
-        if (_startDate == 0) _startDate = currentTimestamp;
-        if (_endDate == 0) _endDate = _startDate + minDuration;
-
-        if (_endDate - _startDate < minDuration || _startDate < currentTimestamp)
-            revert VotingPeriodInvalid({
-                current: currentTimestamp,
-                start: _startDate,
-                end: _endDate,
-                minDuration: minDuration
-            });
-
-        // Create the proposal
+        // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
-        proposal_.startDate = _startDate;
-        proposal_.endDate = _endDate;
-        proposal_.relativeSupportThresholdPct = relativeSupportThresholdPct;
-        proposal_.totalSupportThresholdPct = totalSupportThresholdPct;
-        proposal_.totalVotingPower = totalVotingPower;
-        proposal_.snapshotBlock = snapshotBlock;
 
-        unchecked {
-            for (uint256 i = 0; i < _actions.length; i++) {
-                proposal_.actions.push(_actions[i]);
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
+            _startDate,
+            _endDate
+        );
+        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.votingMode = votingMode();
+        proposal_.parameters.supportThreshold = supportThreshold();
+        proposal_.parameters.minParticipation = minParticipation();
+
+        proposal_.tally.totalVotingPower = totalVotingPower;
+
+        for (uint256 i; i < _actions.length; ) {
+            proposal_.actions.push(_actions[i]);
+            unchecked {
+                ++i;
             }
         }
 
-        emit ProposalCreated(proposalId, _msgSender(), _proposalMetadata);
+        _incrementProposalCount();
 
-        vote(proposalId, _choice, _executeIfDecided);
+        if (_voteOption != VoteOption.None) {
+            vote(proposalId, _voteOption, _tryEarlyExecution);
+        }
+
+        emit ProposalCreated({
+            proposalId: proposalId,
+            creator: _msgSender(),
+            metadata: _metadata,
+            actions: _actions
+        });
     }
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
         uint256 _proposalId,
-        VoteOption _choice,
+        VoteOption _voteOption,
         address _voter,
-        bool _executesIfDecided
+        bool _tryEarlyExecution
     ) internal override {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // This could re-enter, though we can assume the governance token is not malicious
-        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.snapshotBlock);
+        uint256 votingPower = votingToken.getPastVotes(_voter, proposal_.parameters.snapshotBlock);
         VoteOption state = proposal_.voters[_voter];
 
         // If voter had previously voted, decrease count
         if (state == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes - votingPower;
+            proposal_.tally.yes = proposal_.tally.yes - votingPower;
         } else if (state == VoteOption.No) {
-            proposal_.no = proposal_.no - votingPower;
+            proposal_.tally.no = proposal_.tally.no - votingPower;
         } else if (state == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain - votingPower;
+            proposal_.tally.abstain = proposal_.tally.abstain - votingPower;
         }
 
         // write the updated/new vote for the voter.
-        if (_choice == VoteOption.Yes) {
-            proposal_.yes = proposal_.yes + votingPower;
-        } else if (_choice == VoteOption.No) {
-            proposal_.no = proposal_.no + votingPower;
-        } else if (_choice == VoteOption.Abstain) {
-            proposal_.abstain = proposal_.abstain + votingPower;
+        if (_voteOption == VoteOption.Yes) {
+            proposal_.tally.yes = proposal_.tally.yes + votingPower;
+        } else if (_voteOption == VoteOption.No) {
+            proposal_.tally.no = proposal_.tally.no + votingPower;
+        } else if (_voteOption == VoteOption.Abstain) {
+            proposal_.tally.abstain = proposal_.tally.abstain + votingPower;
         }
 
-        proposal_.voters[_voter] = _choice;
+        proposal_.voters[_voter] = _voteOption;
 
-        emit VoteCast(_proposalId, _voter, uint8(_choice), votingPower);
+        emit VoteCast({
+            proposalId: _proposalId,
+            voter: _voter,
+            voteOption: _voteOption,
+            votingPower: votingPower
+        });
 
-        if (_executesIfDecided && _canExecute(_proposalId)) {
+        if (_tryEarlyExecution && _canExecute(_proposalId)) {
             _execute(_proposalId);
         }
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _voter) internal view override returns (bool) {
+    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
-        return
-            _isVoteOpen(proposal_) && votingToken.getPastVotes(_voter, proposal_.snapshotBlock) > 0;
+
+        // The proposal vote hasn't started or has already ended.
+        if (!_isProposalOpen(proposal_)) {
+            return false;
+        }
+
+        // The voter has no voting power.
+        if (votingToken.getPastVotes(_account, proposal_.parameters.snapshotBlock) == 0) {
+            return false;
+        }
+
+        // The voter has already voted but vote replacment is not allowed.
+        if (
+            proposal_.voters[_account] != VoteOption.None &&
+            proposal_.parameters.votingMode != VotingMode.VoteReplacement
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

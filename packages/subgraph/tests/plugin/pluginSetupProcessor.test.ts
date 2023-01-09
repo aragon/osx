@@ -30,14 +30,16 @@ import {Plugin} from '../../generated/schema';
 import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 import {
   getMinDuration,
-  getParticipationRequiredPct,
-  getSupportRequiredPct,
+  getMinimalParticipation,
+  getSupportThreshold,
   getSupportsInterface,
   getProposalCount,
   getVotingToken
 } from '../dao/utils';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
+  ADMIN_INTERFACE,
+  MULTISIG_INTERFACE,
   TOKEN_VOTING_INTERFACE
 } from '../../src/utils/constants';
 import {createTokenCalls} from '../utils';
@@ -95,14 +97,16 @@ test('InstallationApplied event (existent plugin)', function() {
   let appliedEvent = createInstallationAppliedEvent(DAO_ADDRESS, pluginId);
 
   // launch calls
-  getSupportRequiredPct(pluginId, BigInt.fromString(ONE_ETH));
-  getParticipationRequiredPct(pluginId, BigInt.fromString(ONE_ETH));
+  getSupportThreshold(pluginId, BigInt.fromString(ONE_ETH));
+  getMinimalParticipation(pluginId, BigInt.fromString(ONE_ETH));
   getMinDuration(pluginId, BigInt.fromString(ONE_ETH));
   getProposalCount(pluginId, BigInt.fromString(ONE_ETH));
   createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
   getVotingToken(pluginId, DAO_TOKEN_ADDRESS);
   getSupportsInterface(pluginId, TOKEN_VOTING_INTERFACE, true);
   getSupportsInterface(pluginId, ADDRESSLIST_VOTING_INTERFACE, false);
+  getSupportsInterface(pluginId, ADMIN_INTERFACE, false);
+  getSupportsInterface(pluginId, MULTISIG_INTERFACE, false);
 
   // handle
   handleInstallationApplied(appliedEvent);

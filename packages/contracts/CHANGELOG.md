@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## v0.4.0-alpha
+
 ### Added
 
+- Added the `Multisig` plugin and setup contract.
+- Added a `VotingMode` enumeration to specify if the vote should be conducted in `Standard`, `EarlyExecution`, or `VoteReplacement` mode.
+- Added the `Admin` plugin and setup contract.
 - Added NFT compatibility by using OpenZepplin's `IVotesUpgradeable` interface in `ERC20Voting` and renaming the contract to `TokenVoting`.
 - Added extra check in `PermissionManager` to disallow giving DAO specific permissions to ANY_ADDR + giving any other permissions
   to ANY_ADDR unless oracle is passed. Also, freeze can only be used when where is not ANY_ADDR.
@@ -16,21 +21,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added test related to `resolver` in `ens-subdomain-registry.ts`.
 - Added `_checkUpdateValidity` method to `PluginSetupProcessor` to prevent updates to the same or earlier versions that would lead to double initialization.
 - Added more tests for the `PluginSetupProcessor`.
+- Added `PluginSettings` to the `Multisig` plugin
+- Added `onlyListed` to the `PluginSettings` of the `Multisig` plugin.
 
 ### Changed
 
+- Abstracted the `Addresslist` to be used by `AddresslistVoting` and `Multisig`.
+- Changed the order of the `_voteOption` and `_tryEarlyExecution` in `MajorityVoting`.
+- The plugin-wide settings are now stored in a `private` `VotingSettings` struct and made available through getters.
+- Structured the `getProposal` return data by adding a `struct ProposalParameters` and `struct Tally`.
+- Bounded `minDuration` between one hour and one year and prevent integer overflows during the start date calculation (HAL-03, HAL-04).
+- Changed `MajorityVoting` to use `minParticipation` and unified the parameter order.
+- Fixed the early execution criterion in `MajorityVoting` by calculating the `worstCaseSupport` quantity.
 - Renamed the names of folders, files, contracts, events, functions, and parameters in `MajorityVoting` to match with the SDK and Subgraph naming:
   - `AllowlistVoting` to `AddresslistVoting` and `allowlist` to `addresslist`
   - `VoteCreated` and `VoteExecuted` to `ProposalCreated` and `ProposalExecuted`
   - `voteId` to `proposalId`
   - `user` to `member`
 - Fixed inheritance incompatibility with OZ contracts for `Plugin`, `PluginCloneable`, and `PluginUUPSUpgradeable`.
-- Fixed and clarified the execution logic of `MajorityVoting` by replacing participation with total support and emitted an error if the vote creator tries to vote before the start date.
+- Throw an error in `MajorityVoting` if the vote creator tries to vote before the start date.
 - Refactored mocks for `PluginUUPSUpgradeable` and `PluginCloneable` and the respective setups.
 - Moved `event.ts` from `/test/test-utils/` to `/utils/`.
 
 ### Removed
 
+- Remove empty helpers array initialization in `AddresslistVotingSetup`.
 - Removed the redundant base class `DaoAuthorizableBaseUpgradeable`.
 - Removed `isApprovedForAll` check from initialize function of `ENSSubdomainRegistrar.sol`.
 - Removed test related to `isApprovedForAll` in `ens-subdomain-registry.ts`.

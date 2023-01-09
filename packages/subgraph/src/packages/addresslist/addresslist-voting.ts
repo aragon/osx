@@ -4,19 +4,19 @@ import {
   VoteCast,
   ProposalCreated,
   ProposalExecuted,
-  VoteSettingsUpdated,
+  VotingSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
-  Addresslist
-} from '../../../generated/templates/Addresslist/Addresslist';
+  AddresslistVoting
+} from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   Action,
-  AddresslistPlugin,
-  AddresslistProposal,
-  AddresslistVoter,
-  AddresslistVote
+  AddresslistVotingPlugin,
+  AddresslistVotingProposal,
+  AddresslistVotingVoter,
+  AddresslistVotingVote
 } from '../../../generated/schema';
-import {TEN_POWER_16, VOTER_STATE} from '../../utils/constants';
+import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -34,29 +34,40 @@ export function _handleProposalCreated(
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
 
-  let proposalEntity = new AddresslistProposal(proposalId);
+  let proposalEntity = new AddresslistVotingProposal(proposalId);
   proposalEntity.dao = daoId;
   proposalEntity.plugin = event.address.toHexString();
   proposalEntity.proposalId = event.params.proposalId;
   proposalEntity.creator = event.params.creator;
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
+  proposalEntity.creationBlockNumber = event.block.number;
 
-  let contract = Addresslist.bind(event.address);
+  let contract = AddresslistVoting.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.open = vote.value.value0;
     proposalEntity.executed = vote.value.value1;
-    proposalEntity.startDate = vote.value.value2;
-    proposalEntity.endDate = vote.value.value3;
-    proposalEntity.snapshotBlock = vote.value.value4;
-    proposalEntity.relativeSupportThresholdPct = vote.value.value5;
-    proposalEntity.totalSupportThresholdPct = vote.value.value6;
-    proposalEntity.totalVotingPower = vote.value.value7;
 
-    // actions
-    let actions = vote.value.value11;
+    // ProposalParameters
+    let parameters = vote.value.value2;
+    proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
+    proposalEntity.supportThreshold = parameters.supportThreshold;
+    proposalEntity.minParticipation = parameters.minParticipation;
+    proposalEntity.startDate = parameters.startDate;
+    proposalEntity.endDate = parameters.endDate;
+    proposalEntity.snapshotBlock = parameters.snapshotBlock;
+
+    // Tally
+    let tally = vote.value.value3;
+    proposalEntity.abstain = tally.abstain;
+    proposalEntity.yes = tally.yes;
+    proposalEntity.no = tally.no;
+    proposalEntity.totalVotingPower = tally.totalVotingPower;
+
+    // Actions
+    let actions = vote.value.value4;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -80,7 +91,7 @@ export function _handleProposalCreated(
   proposalEntity.save();
 
   // update vote length
-  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
+  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
     let voteLength = contract.try_proposalCount();
     if (!voteLength.reverted) {
@@ -91,59 +102,67 @@ export function _handleProposalCreated(
 }
 
 export function handleVoteCast(event: VoteCast): void {
-  let proposalId =
-    event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-  let voterProposalId = event.params.voter.toHexString() + '_' + proposalId;
-  let voterProposalEntity = AddresslistVote.load(voterProposalId);
-  if (!voterProposalEntity) {
-    voterProposalEntity = new AddresslistVote(voterProposalId);
-    voterProposalEntity.voter = event.params.voter.toHexString();
-    voterProposalEntity.proposal = proposalId;
+  const member = event.params.voter.toHexString();
+  const pluginId = event.address.toHexString();
+  const memberId = pluginId + '_' + member;
+  let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
+  let voterVoteId = member + '_' + proposalId;
+  let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
+
+  if (voteOption === 'None') {
+    return;
   }
-  voterProposalEntity.vote = VOTER_STATE.get(event.params.choice);
-  voterProposalEntity.weight = event.params.votingPower;
-  voterProposalEntity.createdAt = event.block.timestamp;
-  voterProposalEntity.save();
+
+  let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
+  if (!voterProposalVoteEntity) {
+    voterProposalVoteEntity = new AddresslistVotingVote(voterVoteId);
+    voterProposalVoteEntity.voter = memberId;
+    voterProposalVoteEntity.proposal = proposalId;
+  }
+  voterProposalVoteEntity.voteOption = voteOption;
+  voterProposalVoteEntity.votingPower = event.params.votingPower;
+  voterProposalVoteEntity.createdAt = event.block.timestamp;
+  voterProposalVoteEntity.save();
 
   // update count
-  let proposalEntity = AddresslistProposal.load(proposalId);
+  let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
-    let contract = Addresslist.bind(event.address);
-    let vote = contract.try_getProposal(event.params.proposalId);
-    if (!vote.reverted) {
-      let voteCount = vote.value.value8.plus(
-        vote.value.value9.plus(vote.value.value10)
-      );
-      let yes = vote.value.value8;
-      proposalEntity.yes = yes;
-      proposalEntity.no = vote.value.value9;
-      proposalEntity.abstain = vote.value.value10;
-      proposalEntity.voteCount = voteCount;
+    let contract = AddresslistVoting.bind(event.address);
+    let proposal = contract.try_getProposal(event.params.proposalId);
 
-      // check if the current vote results meet
-      // the conditions for the proposal to pass:
-      // - total support    :  N_yes / N_total >= total support threshold
-      // - relative support :  N_yes / (N_yes + N_no) >= relative support threshold
+    if (!proposal.reverted) {
+      let tally = proposal.value.value3;
+
+      let abstain = tally.abstain;
+      let yes = tally.yes;
+      let no = tally.no;
+      let castedVotingPower = yes.plus(no.plus(abstain));
+
+      proposalEntity.yes = yes;
+      proposalEntity.no = no;
+      proposalEntity.abstain = abstain;
+      proposalEntity.castedVotingPower = castedVotingPower;
+
+      // check if the current vote results meet the conditions for the proposal to pass:
+      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
+      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
       // expect a number between 0 and 100
-      // where 0.35 => 35
-      let currentParticipation = voteCount
+      let currentParticipation = castedVotingPower
         .times(BigInt.fromI32(100))
         .div(proposalEntity.totalVotingPower);
-      // expect a number between 0 and 100
-      // where 0.35 => 35
-      let currentSupport = yes.times(BigInt.fromI32(100)).div(voteCount);
+
+      let worstCaseSupport = yes
+        .times(BigInt.fromI32(100))
+        .div(proposalEntity.totalVotingPower.minus(abstain));
+
       // set the executable param
       proposalEntity.executable =
-        currentParticipation.ge(
-          proposalEntity.totalSupportThresholdPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+        worstCaseSupport.gt(
+          proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
         ) &&
-        currentSupport.ge(
-          proposalEntity.relativeSupportThresholdPct.div(
-            BigInt.fromString(TEN_POWER_16)
-          )
+        currentParticipation.ge(
+          proposalEntity.minParticipation.div(BigInt.fromString(TEN_POWER_16))
         );
       proposalEntity.save();
     }
@@ -153,17 +172,19 @@ export function handleVoteCast(event: VoteCast): void {
 export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalId =
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
-  let proposalEntity = AddresslistProposal.load(proposalId);
+  let proposalEntity = AddresslistVotingProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executionDate = event.block.timestamp;
+    proposalEntity.executionBlockNumber = event.block.number;
     proposalEntity.save();
   }
 
   // update actions
-  let contract = Addresslist.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
-  if (!vote.reverted) {
-    let actions = vote.value.value10;
+  let contract = AddresslistVoting.bind(event.address);
+  let proposal = contract.try_getProposal(event.params.proposalId);
+  if (!proposal.reverted) {
+    let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
@@ -181,14 +202,16 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
-  let packageEntity = AddresslistPlugin.load(event.address.toHexString());
+export function handleVotingSettingsUpdated(
+  event: VotingSettingsUpdated
+): void {
+  let packageEntity = AddresslistVotingPlugin.load(event.address.toHexString());
   if (packageEntity) {
-    packageEntity.totalSupportThresholdPct =
-      event.params.totalSupportThresholdPct;
-    packageEntity.relativeSupportThresholdPct =
-      event.params.relativeSupportThresholdPct;
+    packageEntity.votingMode = VOTING_MODES.get(event.params.votingMode);
+    packageEntity.supportThreshold = event.params.supportThreshold;
+    packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
+    packageEntity.minProposerVotingPower = event.params.minProposerVotingPower;
     packageEntity.save();
   }
 }
@@ -196,12 +219,15 @@ export function handleVoteSettingsUpdated(event: VoteSettingsUpdated): void {
 export function handleAddressesAdded(event: AddressesAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index];
-    let voterEntity = AddresslistVoter.load(member.toHexString());
+    const member = members[index].toHexString();
+    const pluginId = event.address.toHexString();
+    const memberId = pluginId + '_' + member;
+
+    let voterEntity = AddresslistVotingVoter.load(memberId);
     if (!voterEntity) {
-      voterEntity = new AddresslistVoter(member.toHexString());
-      voterEntity.address = member.toHexString();
-      voterEntity.plugin = event.address.toHexString();
+      voterEntity = new AddresslistVotingVoter(memberId);
+      voterEntity.address = member;
+      voterEntity.plugin = pluginId;
       voterEntity.save();
     }
   }
@@ -210,10 +236,13 @@ export function handleAddressesAdded(event: AddressesAdded): void {
 export function handleAddressesRemoved(event: AddressesRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
-    const member = members[index];
-    let voterEntity = AddresslistVoter.load(member.toHexString());
+    const member = members[index].toHexString();
+    const pluginId = event.address.toHexString();
+    const memberId = pluginId + '_' + member;
+
+    let voterEntity = AddresslistVotingVoter.load(memberId);
     if (voterEntity) {
-      store.remove('AddresslistVoter', member.toHexString());
+      store.remove('AddresslistVotingVoter', memberId);
     }
   }
 }

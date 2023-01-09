@@ -19,7 +19,7 @@ import {
   STRING_DATA,
   HALF_ETH,
   ADDRESS_ZERO,
-  VOTING_ADDRESS
+  CONTRACT_ADDRESS
 } from '../constants';
 import {createDummyActions, createTokenCalls} from '../utils';
 import {
@@ -331,7 +331,7 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
   createDaoEntityState(daoEntity, ADDRESS_ONE, DAO_TOKEN_ADDRESS);
 
   let proposalId =
-    Address.fromHexString(VOTING_ADDRESS).toHexString() + '_' + '0x0';
+    Address.fromHexString(CONTRACT_ADDRESS).toHexString() + '_' + '0x0';
 
   createTokenVotingProposalEntityState();
 
@@ -344,7 +344,7 @@ test('Run dao (handleExecuted) for Token mappings with mock event', () => {
     '0x4f0656320000000000000000000000006b175474e89094c44da98b954eedeac495271d0f0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000014536f6d6520537472696e672044617461202e2e2e000000000000000000000000';
   let actions = createDummyActions(DAO_ADDRESS, '0', callData);
   let event = createNewExecutedEvent(
-    Address.fromHexString(VOTING_ADDRESS).toHexString(),
+    Address.fromHexString(CONTRACT_ADDRESS).toHexString(),
     '0',
     actions,
     [Bytes.fromUTF8('')],

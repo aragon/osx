@@ -1,37 +1,47 @@
 import {Address, DataSourceContext, store} from '@graphprotocol/graph-ts';
 
 import {TokenVoting as TokenVotingContract} from '../../generated/templates/TokenVoting/TokenVoting';
-import {Addresslist as AddresslistContract} from '../../generated/templates/Addresslist/Addresslist';
+import {AddresslistVoting as AddresslistVotingContract} from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {ERC165 as ERC165Contract} from '../../generated/templates/DaoTemplate/ERC165';
-import {TokenVoting, Addresslist} from '../../generated/templates';
+import {
+  TokenVoting,
+  AddresslistVoting,
+  Admin,
+  Multisig
+} from '../../generated/templates';
 import {
   DaoPlugin,
   TokenVotingPlugin,
-  AddresslistPlugin
+  AddresslistVotingPlugin,
+  AdminPlugin,
+  MultisigPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
   TOKEN_VOTING_INTERFACE,
-  ADDRESSLIST_VOTING_INTERFACE
+  ADDRESSLIST_VOTING_INTERFACE,
+  ADMIN_INTERFACE,
+  VOTING_MODES,
+  MULTISIG_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 
-function createTokenVotingPlugin(who: Address, daoId: string): void {
-  let packageEntity = TokenVotingPlugin.load(who.toHexString());
+function createTokenVotingPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = TokenVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
-    packageEntity = new TokenVotingPlugin(who.toHexString());
-    let contract = TokenVotingContract.bind(who);
-    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
-    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
+    packageEntity = new TokenVotingPlugin(plugin.toHexString());
+    let contract = TokenVotingContract.bind(plugin);
+    let supportThreshold = contract.try_supportThreshold();
+    let minParticipation = contract.try_minParticipation();
     let minDuration = contract.try_minDuration();
     let token = contract.try_getVotingToken();
 
-    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
+    packageEntity.supportThreshold = supportThreshold.reverted
       ? null
-      : relativeSupportThresholdPct.value;
-    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
+      : supportThreshold.value;
+    packageEntity.minParticipation = minParticipation.reverted
       ? null
-      : totalSupportThresholdPct.value;
+      : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
 
     packageEntity.token = token.reverted ? null : handleERC20Token(token.value);
@@ -39,69 +49,122 @@ function createTokenVotingPlugin(who: Address, daoId: string): void {
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    TokenVoting.createWithContext(who, context);
+    TokenVoting.createWithContext(plugin, context);
 
     packageEntity.save();
   }
 }
 
-function createAddresslistPlugin(who: Address, daoId: string): void {
-  let packageEntity = AddresslistPlugin.load(who.toHexString());
+function createAddresslistVotingPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = AddresslistVotingPlugin.load(plugin.toHexString());
   if (!packageEntity) {
-    packageEntity = new AddresslistPlugin(who.toHexString());
-    let contract = AddresslistContract.bind(who);
-    let relativeSupportThresholdPct = contract.try_relativeSupportThresholdPct();
-    let totalSupportThresholdPct = contract.try_totalSupportThresholdPct();
-    let minDuration = contract.try_minDuration();
+    packageEntity = new AddresslistVotingPlugin(plugin.toHexString());
+    let contract = AddresslistVotingContract.bind(plugin);
 
-    packageEntity.relativeSupportThresholdPct = relativeSupportThresholdPct.reverted
+    let votingMode = contract.try_votingMode();
+    let supportThreshold = contract.try_supportThreshold();
+    let minParticipation = contract.try_minParticipation();
+    let minDuration = contract.try_minDuration();
+    let minProposerVotingPower = contract.try_minProposerVotingPower();
+
+    packageEntity.votingMode = votingMode.reverted
       ? null
-      : relativeSupportThresholdPct.value;
-    packageEntity.totalSupportThresholdPct = totalSupportThresholdPct.reverted
+      : VOTING_MODES.get(votingMode.value);
+    packageEntity.supportThreshold = supportThreshold.reverted
       ? null
-      : totalSupportThresholdPct.value;
+      : supportThreshold.value;
+    packageEntity.minParticipation = minParticipation.reverted
+      ? null
+      : minParticipation.value;
     packageEntity.minDuration = minDuration.reverted ? null : minDuration.value;
+
+    packageEntity.minProposerVotingPower = minProposerVotingPower.reverted
+      ? null
+      : minProposerVotingPower.value;
 
     // Create template
     let context = new DataSourceContext();
     context.setString('daoAddress', daoId);
-    Addresslist.createWithContext(who, context);
+    AddresslistVoting.createWithContext(plugin, context);
 
     packageEntity.save();
   }
 }
 
-export function addPlugin(daoId: string, who: Address): void {
+function createAdminPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = AdminPlugin.load(plugin.toHexString());
+  if (!packageEntity) {
+    packageEntity = new AdminPlugin(plugin.toHexString());
+
+    // Create template
+    let context = new DataSourceContext();
+    context.setString('daoAddress', daoId);
+    Admin.createWithContext(plugin, context);
+
+    packageEntity.save();
+  }
+}
+
+function createMultisigPlugin(plugin: Address, daoId: string): void {
+  let packageEntity = MultisigPlugin.load(plugin.toHexString());
+  if (!packageEntity) {
+    packageEntity = new MultisigPlugin(plugin.toHexString());
+    packageEntity.onlyListed = false;
+
+    // Create template
+    let context = new DataSourceContext();
+    context.setString('daoAddress', daoId);
+    Multisig.createWithContext(plugin, context);
+
+    packageEntity.save();
+  }
+}
+
+export function addPlugin(daoId: string, plugin: Address): void {
   // package
   // TODO: rethink this once the market place is ready
-  let contract = ERC165Contract.bind(who);
+  let contract = ERC165Contract.bind(plugin);
 
-  let TokenVotingInterfaceSuppoted = supportsInterface(
+  let TokenVotingInterfaceSupported = supportsInterface(
     contract,
     TOKEN_VOTING_INTERFACE
   );
-  let addresslistInterfaceSuppoted = supportsInterface(
+  let addresslistInterfaceSupported = supportsInterface(
     contract,
     ADDRESSLIST_VOTING_INTERFACE
   );
+  let adminInterfaceSupported = supportsInterface(contract, ADMIN_INTERFACE);
+  let multisigInterfaceSupported = supportsInterface(
+    contract,
+    MULTISIG_INTERFACE
+  );
 
-  if (TokenVotingInterfaceSuppoted) {
-    createTokenVotingPlugin(who, daoId);
-  } else if (addresslistInterfaceSuppoted) {
-    createAddresslistPlugin(who, daoId);
+  if (TokenVotingInterfaceSupported) {
+    createTokenVotingPlugin(plugin, daoId);
+  } else if (addresslistInterfaceSupported) {
+    createAddresslistVotingPlugin(plugin, daoId);
+  } else if (adminInterfaceSupported) {
+    createAdminPlugin(plugin, daoId);
+  } else if (multisigInterfaceSupported) {
+    createMultisigPlugin(plugin, daoId);
   }
 
-  if (TokenVotingInterfaceSuppoted || addresslistInterfaceSuppoted) {
-    let daoPluginEntityId = daoId + '_' + who.toHexString();
+  if (
+    TokenVotingInterfaceSupported ||
+    addresslistInterfaceSupported ||
+    adminInterfaceSupported ||
+    multisigInterfaceSupported
+  ) {
+    let daoPluginEntityId = daoId + '_' + plugin.toHexString();
     let daoPluginEntity = new DaoPlugin(daoPluginEntityId);
-    daoPluginEntity.plugin = who.toHexString();
+    daoPluginEntity.plugin = plugin.toHexString();
     daoPluginEntity.dao = daoId;
     daoPluginEntity.save();
   }
 }
 
-export function removePlugin(daoId: string, who: string): void {
-  let daoPluginEntityId = daoId + '_' + who;
+export function removePlugin(daoId: string, plugin: string): void {
+  let daoPluginEntityId = daoId + '_' + plugin;
   let daoPluginEntity = DaoPlugin.load(daoPluginEntityId);
   if (daoPluginEntity) {
     store.remove('DaoPlugin', daoPluginEntityId);

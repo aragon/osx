@@ -1,8 +1,9 @@
 import {ethers} from 'hardhat';
 import {findEvent} from '../../utils/event';
-import { getMergedABI } from '../../utils/abi'
+import {getMergedABI} from '../../utils/abi';
 import {PluginSetupProcessor, PluginRepoRegistry} from '../../typechain';
 import {BytesLike, utils, constants} from 'ethers';
+import {Operation} from '../core/permission/permission-manager';
 
 export async function deployPluginSetupProcessor(
   managingDao: any,
@@ -21,21 +22,14 @@ export async function deployPluginSetupProcessor(
     abi,
     bytecode,
     (await ethers.getSigners())[0]
-  )
+  );
 
-  psp = await PluginSetupProcessor.deploy(
+  psp = (await PluginSetupProcessor.deploy(
     managingDao.address,
     pluginRepoRegistry.address
-  ) as PluginSetupProcessor;
+  )) as PluginSetupProcessor;
 
   return psp;
-}
-
-export enum Operation {
-  Grant,
-  Revoke,
-  Freeze,
-  GrantWithOracle,
 }
 
 export type PermissionOperation = {

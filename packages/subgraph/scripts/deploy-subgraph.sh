@@ -5,7 +5,7 @@ then
   export $(cat .env | sed 's/#.*//g' | xargs)
 fi
 
-if [ -z "$NETWORK_NAME" ] || [ -z "$THEGRAPH_USERNAME" ] || [ -z "$SUBGRAPH_NAME" ] || [ -z "$GRAPH_KEY" ]
+if [ -z "$NETWORK_NAME" ] || [ -z "$SUBGRAPH_NAME" ] || [ -z "$GRAPH_KEY" ] || [ -z "$SUBGRAPH_VERSION" ]
 then
     echo "env variables are not set properly, exiting..."
     exit -1
@@ -26,11 +26,11 @@ graph codegen
 
 if [ "$NETWORK_NAME" == 'localhost' ]
 then
-  NETWORK_NAME='rinkeby'
+  NETWORK_NAME='goerli'
 fi
 
 # Prepare subgraph name
-FULLNAME=$THEGRAPH_USERNAME/$THEGRAPH_USERNAME-$SUBGRAPH_NAME-$NETWORK_NAME
+FULLNAME=$SUBGRAPH_NAME-$NETWORK_NAME
 if [ "$STAGING" ]; then
   FULLNAME=$FULLNAME-staging
 fi
@@ -45,7 +45,8 @@ then
         --node http://localhost:8020
 else
     graph deploy $FULLNAME \
-        --product hosted-service \
+        --version-label $SUBGRAPH_VERSION \
+        --node https://app.satsuma.xyz/api/subgraphs/deploy \
         --deploy-key $GRAPH_KEY > deploy-output.txt
 
     SUBGRAPH_ID=$(grep "Build completed:" deploy-output.txt | grep -oE "Qm[a-zA-Z0-9]{44}")
