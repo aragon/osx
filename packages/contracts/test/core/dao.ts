@@ -197,7 +197,12 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
+      await expect(
+        dao.execute(
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+          dummyActions
+        )
+      ).to.be.revertedWith(
         customError(
           'Unauthorized',
           dao.address,
@@ -209,19 +214,27 @@ describe('DAO', function () {
     });
 
     it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions)).to.deep.equal(
-        expectedDummyResults
-      );
+      expect(
+        await dao.callStatic.execute(
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+          dummyActions
+        )
+      ).to.deep.equal(expectedDummyResults);
     });
 
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(0, dummyActions);
+      let tx = await dao.execute(
+        '0x0000000000000000000000000000000000000000000000000000000000000000',
+        dummyActions
+      );
       let rc = await tx.wait();
 
       const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
       expect(event.args.actor).to.equal(ownerAddress);
-      expect(event.args.callId).to.equal(0);
+      expect(event.args.callId).to.equal(
+        '0x0000000000000000000000000000000000000000000000000000000000000000'
+      );
       expect(event.args.actions.length).to.equal(1);
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -234,13 +247,16 @@ describe('DAO', function () {
       const actionExecute = await ActionExecuteFactory.deploy();
 
       await expect(
-        dao.execute(0, [
-          {
-            to: actionExecute.address,
-            data: '0x0000',
-            value: 0,
-          },
-        ])
+        dao.execute(
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+          [
+            {
+              to: actionExecute.address,
+              data: '0x0000',
+              value: 0,
+            },
+          ]
+        )
       ).to.be.revertedWith(customError('ActionFailed'));
     });
   });

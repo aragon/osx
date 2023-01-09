@@ -30,7 +30,7 @@ contract Admin is PluginCloneable {
     /// @param metadata The metadata of the proposal.
     /// @param actions The actions that will be executed if the proposal passes.
     event ProposalCreated(
-        uint256 indexed proposalId,
+        bytes32 indexed proposalId,
         address indexed creator,
         bytes metadata,
         IDAO.Action[] actions
@@ -39,7 +39,13 @@ contract Admin is PluginCloneable {
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId The ID of the proposal.
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
+    event ProposalExecuted(bytes32 indexed proposalId, bytes[] execResults);
+
+    /// @notice Thrown if the proposalCount is higher than max of uint96
+    /// @dev The proposalID consists of (20 bytes contract address + 12 bytes counter). uint96 is the same as bytes12
+    /// @param limit The limit proposalCount is allowed to have
+    /// @param actual The count for which the proposalID should have been generated
+    error ProposalCountOutOfBounds(uint256 limit, uint256 actual);
 
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
@@ -61,6 +67,16 @@ contract Admin is PluginCloneable {
         return proposalCounter.current();
     }
 
+    /// @notice Returns the proposalId for a given proposal count
+    /// @dev The proposalID consists of (20 bytes contract address + 12 bytes counter). uint96 is the same as bytes12
+    /// @return The proposalId
+    function proposalId(uint256 _proposalCount) public view returns (bytes32) {
+        if(type(uint96).max < _proposalCount) {
+            revert ProposalCountOutOfBounds({limit: type(uint96).max, actual: _proposalCount});
+        }
+        return bytes32(bytes20(address(this))) | bytes32(_proposalCount);
+    }
+
     /// @notice Creates and executes a new proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions to be executed.
@@ -68,17 +84,17 @@ contract Admin is PluginCloneable {
         external
         auth(EXECUTE_PROPOSAL_PERMISSION_ID)
     {
-        uint256 proposalId = proposalCounter.current();
+        bytes32 proposalId_ = proposalId(proposalCounter.current());
         proposalCounter.increment();
 
-        bytes[] memory execResults = dao.execute(proposalId, _actions);
+        bytes[] memory execResults = dao.execute(proposalId_, _actions);
 
         emit ProposalCreated({
-            proposalId: proposalId,
+            proposalId: proposalId_,
             creator: _msgSender(),
             metadata: _metadata,
             actions: _actions
         });
-        emit ProposalExecuted({proposalId: proposalId, execResults: execResults});
+        emit ProposalExecuted({proposalId: proposalId_, execResults: execResults});
     }
 }

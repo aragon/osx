@@ -81,7 +81,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         uint64 _endDate,
         VoteOption _voteOption,
         bool _tryEarlyExecution
-    ) external override returns (uint256 proposalId) {
+    ) external override returns (bytes32 proposalId_) {
         uint64 snapshotBlock;
         unchecked {
             snapshotBlock = block.number.toUint64() - 1;
@@ -91,10 +91,10 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount();
+        proposalId_ = proposalId(proposalCount());
 
         // Store proposal related information
-        Proposal storage proposal_ = proposals[proposalId];
+        Proposal storage proposal_ = proposals[proposalId_];
 
         (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
             _startDate,
@@ -117,11 +117,11 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         _incrementProposalCount();
 
         if (_voteOption != VoteOption.None) {
-            vote(proposalId, _voteOption, _tryEarlyExecution);
+            vote(proposalId_, _voteOption, _tryEarlyExecution);
         }
 
         emit ProposalCreated({
-            proposalId: proposalId,
+            proposalId: proposalId_,
             creator: _msgSender(),
             metadata: _metadata,
             actions: _actions
@@ -130,7 +130,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
     /// @inheritdoc MajorityVotingBase
     function _vote(
-        uint256 _proposalId,
+        bytes32 _proposalId,
         VoteOption _voteOption,
         address _voter,
         bool _tryEarlyExecution
@@ -172,7 +172,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
+    function _canVote(bytes32 _proposalId, address _account) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // The proposal vote hasn't started or has already ended.

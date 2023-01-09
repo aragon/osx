@@ -8,6 +8,7 @@ import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {BigNumber} from 'ethers';
+import {getProposalId} from '../test-utils/voting';
 
 chai.use(smock.matchers);
 
@@ -153,7 +154,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly emits the ProposalCreated event', async () => {
-      const currentExpectedProposalId = 0;
+      const currentExpectedProposalId = getProposalId(plugin.address, '0x0');
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
@@ -171,7 +172,7 @@ describe('Admin plugin', function () {
     });
 
     it('correctly emits the `ProposalExecuted` event', async () => {
-      const currentExpectedProposalId = 0;
+      const currentExpectedProposalId = getProposalId(plugin.address, '0x0');
       const expectedDummyResults = ['0x'];
 
       await expect(plugin.executeProposal(dummyMetadata, dummyActions))
@@ -180,11 +181,9 @@ describe('Admin plugin', function () {
     });
 
     it('correctly increments the proposal ID', async () => {
-      const currentExpectedProposalId = 0;
-
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      const nextExpectedProposalId = currentExpectedProposalId + 1;
+      const nextExpectedProposalId = getProposalId(plugin.address, '0x1');
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
@@ -196,7 +195,7 @@ describe('Admin plugin', function () {
     });
 
     it("calls the DAO's execute function correctly", async () => {
-      const proposalId = 1;
+      const proposalId = getProposalId(plugin.address, '0x1');
 
       await plugin.executeProposal(dummyMetadata, dummyActions);
 

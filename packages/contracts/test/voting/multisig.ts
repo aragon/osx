@@ -25,7 +25,7 @@ describe('Multisig', function () {
   let dummyMetadata: string;
   let multisigSettings: MultisigSettings;
 
-  const id = 0;
+  let id: string;
 
   let mergedAbi: any;
   let multisigFactoryBytecode: any;
@@ -72,6 +72,7 @@ describe('Multisig', function () {
       signers[0]
     );
     multisig = await MultisigFactory.deploy();
+    id = getProposalId(multisig.address, '0x0');
 
     dao.grant(
       dao.address,
@@ -422,16 +423,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 3;
       await multisig.initialize(dao.address, addresslist(5), multisigSettings);
 
-      expect(
-        (
-          await multisig.createProposal(
-            dummyMetadata,
-            dummyActions,
-            false,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await multisig.createProposal(dummyMetadata, dummyActions, false, false);
     });
 
     describe('canApprove:', async () => {

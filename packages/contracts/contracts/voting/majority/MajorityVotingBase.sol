@@ -136,7 +136,7 @@ abstract contract MajorityVotingBase is
     uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
     /// @notice A mapping between proposal IDs and proposal information.
-    mapping(uint256 => Proposal) internal proposals;
+    mapping(bytes32 => Proposal) internal proposals;
 
     /// @notice The incremental ID for proposals and executions.
     CountersUpgradeable.Counter private proposalCounter;
@@ -173,11 +173,17 @@ abstract contract MajorityVotingBase is
     /// - the account doesn't have voting powers.
     /// @param proposalId The ID of the proposal.
     /// @param account The address of the _account.
-    error VoteCastForbidden(uint256 proposalId, address account);
+    error VoteCastForbidden(bytes32 proposalId, address account);
 
     /// @notice Thrown if the proposal execution is forbidden.
     /// @param proposalId The ID of the proposal.
-    error ProposalExecutionForbidden(uint256 proposalId);
+    error ProposalExecutionForbidden(bytes32 proposalId);
+
+    /// @notice Thrown if the proposalCount is higher than max of uint96
+    /// @dev The proposalID consists of (20 bytes contract address + 12 bytes counter). uint96 is the same as bytes12
+    /// @param limit The limit proposalCount is allowed to have
+    /// @param actual The count for which the proposalID should have been generated
+    error ProposalCountOutOfBounds(uint256 limit, uint256 actual);
 
     /// @notice Emitted when the voting settings are updated.
     /// @param votingMode A parameter to select the vote mode.
@@ -199,7 +205,7 @@ abstract contract MajorityVotingBase is
     /// @param metadata The metadata of the proposal.
     /// @param actions The actions that will be executed if the proposal passes.
     event ProposalCreated(
-        uint256 indexed proposalId,
+        bytes32 indexed proposalId,
         address indexed creator,
         bytes metadata,
         IDAO.Action[] actions
@@ -208,7 +214,7 @@ abstract contract MajorityVotingBase is
     /// @notice Emitted when a proposal is executed.
     /// @param proposalId The ID of the proposal.
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
+    event ProposalExecuted(bytes32 indexed proposalId, bytes[] execResults);
 
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -241,8 +247,17 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
+    /// @dev The proposalID consists of (20 bytes contract address + 12 bytes counter). uint96 is the same as bytes12
+    function proposalId(uint256 _proposalCount) public view virtual returns (bytes32) {
+        if(type(uint96).max < _proposalCount) {
+            revert ProposalCountOutOfBounds({limit: type(uint96).max, actual: _proposalCount});
+        }
+        return bytes32(bytes20(address(this))) | bytes32(_proposalCount);
+    }
+
+    /// @inheritdoc IMajorityVoting
     function vote(
-        uint256 _proposalId,
+        bytes32 _proposalId,
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) public virtual {
@@ -255,7 +270,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function execute(uint256 _proposalId) public virtual {
+    function execute(bytes32 _proposalId) public virtual {
         if (!_canExecute(_proposalId)) {
             revert ProposalExecutionForbidden(_proposalId);
         }
@@ -263,7 +278,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoteOption(uint256 _proposalId, address _voter)
+    function getVoteOption(bytes32 _proposalId, address _voter)
         public
         view
         virtual
@@ -273,24 +288,24 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function canVote(uint256 _proposalId, address _voter) public view virtual returns (bool) {
+    function canVote(bytes32 _proposalId, address _voter) public view virtual returns (bool) {
         return _canVote(_proposalId, _voter);
     }
 
     /// @inheritdoc IMajorityVoting
-    function canExecute(uint256 _proposalId) public view virtual returns (bool) {
+    function canExecute(bytes32 _proposalId) public view virtual returns (bool) {
         return _canExecute(_proposalId);
     }
 
     /// @inheritdoc IMajorityVoting
-    function support(uint256 _proposalId) public view virtual returns (uint256) {
+    function support(bytes32 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return _calculatePct(proposal_.tally.yes, proposal_.tally.yes + proposal_.tally.no);
     }
 
     /// @inheritdoc IMajorityVoting
-    function worstCaseSupport(uint256 _proposalId) public view virtual returns (uint256) {
+    function worstCaseSupport(bytes32 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return
@@ -301,7 +316,7 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function participation(uint256 _proposalId) public view virtual returns (uint256) {
+    function participation(bytes32 _proposalId) public view virtual returns (uint256) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return
@@ -346,7 +361,7 @@ abstract contract MajorityVotingBase is
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    function getProposal(uint256 _proposalId)
+    function getProposal(bytes32 _proposalId)
         public
         view
         virtual
@@ -392,7 +407,7 @@ abstract contract MajorityVotingBase is
         uint64 _endDate,
         VoteOption _voteOption,
         bool _tryEarlyExecution
-    ) external virtual returns (uint256 proposalId);
+    ) external virtual returns (bytes32 proposalId);
 
     /// @notice Internal function to increments the proposal count by one.
     function _incrementProposalCount() internal virtual {
@@ -404,7 +419,7 @@ abstract contract MajorityVotingBase is
     /// @param _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
-        uint256 _proposalId,
+        bytes32 _proposalId,
         VoteOption _voteOption,
         address _voter,
         bool _tryEarlyExecution
@@ -412,7 +427,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
-    function _execute(uint256 _proposalId) internal virtual {
+    function _execute(bytes32 _proposalId) internal virtual {
         Proposal storage proposal_ = proposals[_proposalId];
         proposal_.executed = true;
 
@@ -424,13 +439,13 @@ abstract contract MajorityVotingBase is
     /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
     /// @return Returns `true` if the given voter can vote on a certain proposal and `false` otherwise.
-    function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
+    function _canVote(bytes32 _proposalId, address _voter) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @return True if the proposal can be executed, false otherwise.
     /// @dev Threshold and minimal values are compared with `>` and `>=` comparators, respectively.
-    function _canExecute(uint256 _proposalId) internal view virtual returns (bool) {
+    function _canExecute(bytes32 _proposalId) internal view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // Verify that the vote has not been executed already.
