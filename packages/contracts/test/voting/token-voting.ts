@@ -117,25 +117,25 @@ describe('TokenVoting', function () {
   });
 
   async function setBalances(
-    receivers: string[],
-    amounts: number[],
+    balances: {receiver: string; amount: number}[],
     totalSupply: number
   ) {
-    expect(receivers.length).to.equal(amounts.length);
-
-    let summedAmounts = amounts.reduce((a, b) => a + b, 0);
+    let summedAmounts = balances.reduce((acc, obj) => acc + obj.amount, 0);
 
     expect(summedAmounts).to.be.lte(totalSupply);
 
-    // Mint the difference between `totalSupply` and `summedAmounts` to `address(0)`
+    // Mint the difference between `totalSupply` and `summedAmounts` to `0xdead....`
     if (summedAmounts < totalSupply) {
-      receivers.push(`0x${'dead'.repeat(10)}`);
-      amounts.push(totalSupply - summedAmounts);
+      balances.push({
+        receiver: `0x${'dead'.repeat(10)}`,
+        amount: totalSupply - summedAmounts,
+      });
     }
 
-    for (let i = 0; i < receivers.length; i++) {
-      await governanceErc20Mock.setBalance(receivers[i], amounts[i]);
-    }
+    const promises = balances.map(balance =>
+      governanceErc20Mock.setBalance(balance.receiver, balance.amount)
+    );
+    await Promise.all(promises);
   }
 
   describe('initialize: ', async () => {
@@ -158,7 +158,7 @@ describe('TokenVoting', function () {
 
   describe('Proposal creation', async () => {
     beforeEach(async () => {
-      await setBalances([signers[0].address], [1], 1);
+      await setBalances([{receiver: signers[0].address, amount: 1}], 1);
     });
 
     it('reverts if the user is not allowed to create a proposal', async () => {
@@ -201,8 +201,12 @@ describe('TokenVoting', function () {
       votingSettings.minProposerVotingPower = 123;
 
       await setBalances(
-        [signers[1].address],
-        [votingSettings.minProposerVotingPower],
+        [
+          {
+            receiver: signers[1].address,
+            amount: votingSettings.minProposerVotingPower,
+          },
+        ],
         1 + votingSettings.minProposerVotingPower
       );
 
@@ -487,11 +491,17 @@ describe('TokenVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     beforeEach(async () => {
-      await setBalances(
-        await addresses(12),
-        Array(9).fill(10).concat([5, 4, 1]),
-        100
-      );
+      const receivers = await addresses(12);
+      const amounts = Array(9).fill(10).concat([5, 4, 1]);
+
+      const balances = receivers.map((receiver, i) => {
+        return {
+          receiver: receiver,
+          amount: amounts[i],
+        };
+      });
+
+      await setBalances(balances, 100);
     });
 
     context('Standard Mode', async () => {
@@ -1025,7 +1035,16 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        await setBalances(await addresses(10), Array(10).fill(10), 100);
+        const receivers = await addresses(10);
+        const amounts = Array(10).fill(10);
+        const balances = receivers.map((receiver, i) => {
+          return {
+            receiver: receiver,
+            amount: amounts[i],
+          };
+        });
+
+        await setBalances(balances, 100);
 
         await voting.createProposal(
           dummyMetadata,
@@ -1160,7 +1179,7 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        await setBalances([signers[0].address], [1], 100);
+        await setBalances([{receiver: signers[0].address, amount: 1}], 100);
 
         await voting.createProposal(
           dummyMetadata,
