@@ -2,24 +2,46 @@
 
 pragma solidity 0.8.10;
 
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-
 import {IDAO} from "../IDAO.sol";
-import {IProposal} from "./IProposal.sol";
 
-/// @title GovernanceBase
+/// @title ProposalBase
 /// @author Aragon Association - 2022
-/// @notice An abstract base contract defining the traits and internal functionality of a governance plugin.
-abstract contract GovernanceBase is IProposal {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
+/// @notice An abstract base contract defining the traits and internal functionality to create and execute proposals.
+abstract contract ProposalBase {
+    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
+    bytes4 internal constant PROPOSAL_INTERFACE_ID =
+        this.proposalCount.selector ^ this.incrementProposalCounter.selector;
 
-    /// @notice The incremental ID for proposals and executions.
-    CountersUpgradeable.Counter private proposalCounter;
+    /// @notice Emitted when a proposal is created.
+    /// @param proposalId The ID of the proposal.
+    /// @param creator  The creator of the proposal.
+    /// @param metadata The metadata of the proposal.
+    /// @param actions The actions that will be executed if the proposal passes.
+    event ProposalCreated(
+        uint256 indexed proposalId,
+        address indexed creator,
+        bytes metadata,
+        IDAO.Action[] actions
+    );
 
-    /// @inheritdoc IProposal
-    function proposalCount() public view returns (uint256) {
-        return proposalCounter.current();
+    /// @notice Emitted when a proposal is executed.
+    /// @param proposalId The ID of the proposal.
+    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
+    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
+
+    /// @notice Checks if this or the parent contract supports an interface by its ID.
+    /// @param interfaceId The ID of the interface.
+    /// @return bool Returns `true` if the interface is supported.
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+        return interfaceId == PROPOSAL_INTERFACE_ID;
     }
+
+    /// @notice Returns the proposal count determining the next proposal ID.
+    /// @return The proposal count.
+    function proposalCount() public view virtual returns (uint256);
+
+    /// @notice Returns the proposal count determining the next proposal ID.
+    function incrementProposalCounter() public virtual;
 
     /// @notice Internal function to create a proposal.
     /// @param _metadata The the proposal metadata.
@@ -30,8 +52,8 @@ abstract contract GovernanceBase is IProposal {
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions
     ) internal virtual returns (uint256 proposalId) {
-        proposalId = proposalCounter.current();
-        proposalCounter.increment();
+        proposalId = proposalCount();
+        incrementProposalCounter();
 
         emit ProposalCreated({
             proposalId: proposalId,
@@ -44,5 +66,12 @@ abstract contract GovernanceBase is IProposal {
     /// @notice Internal function to execute a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
     /// @param _actions The array of actions to be executed.
-    function _executeProposal(uint256 _proposalId, IDAO.Action[] memory _actions) internal virtual;
+    function _executeProposal(
+        IDAO _dao,
+        uint256 _proposalId,
+        IDAO.Action[] memory _actions
+    ) internal virtual {
+        bytes[] memory execResults = _dao.execute(_proposalId, _actions);
+        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+    }
 }

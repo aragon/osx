@@ -3,10 +3,10 @@
 pragma solidity 0.8.10;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
-import {GovernancePluginUUPSUpgradeable} from "../../core/plugin/GovernancePluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
@@ -15,8 +15,7 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is GovernancePluginUUPSUpgradeable, Addresslist {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
+contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     using SafeCastUpgradeable for uint256;
 
     /// @notice A container for proposal-related information.
@@ -66,15 +65,11 @@ contract Multisig is GovernancePluginUUPSUpgradeable, Addresslist {
             this.isListedAtBlock.selector ^
             this.addresslistLength.selector ^
             this.addresslistLengthAtBlock.selector ^
-            this.proposalCount.selector ^
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
-
-    /// @notice The incremental ID for proposals and executions.
-    CountersUpgradeable.Counter private proposalCounter;
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
@@ -133,8 +128,13 @@ contract Multisig is GovernancePluginUUPSUpgradeable, Addresslist {
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public view virtual override(PluginUUPSUpgradeable, ProposalBase) returns (bool) {
+        return
+            _interfaceId == MULTISIG_INTERFACE_ID ||
+            ProposalBase.supportsInterface(_interfaceId) ||
+            PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
 
     /// @notice Returns the number of approvals,
@@ -312,7 +312,7 @@ contract Multisig is GovernancePluginUUPSUpgradeable, Addresslist {
         proposal_.open = false;
         proposal_.executed = true;
 
-        _executeProposal(_proposalId, proposals[_proposalId].actions);
+        _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 
     /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists. //TODO is this assumption relevant?

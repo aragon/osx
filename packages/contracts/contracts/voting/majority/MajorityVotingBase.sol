@@ -4,12 +4,11 @@ pragma solidity 0.8.10;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {GovernancePluginUUPSUpgradeable} from "../../core/plugin/GovernancePluginUUPSUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
@@ -54,9 +53,9 @@ abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
     ERC165Upgradeable,
-    GovernancePluginUUPSUpgradeable
+    PluginUUPSUpgradeable,
+    ProposalUpgradeable
 {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
 
     /// @notice The different voting modes available.
@@ -198,7 +197,7 @@ abstract contract MajorityVotingBase is
         IDAO _dao,
         VotingSettings calldata _votingSettings
     ) internal onlyInitializing {
-        __GovernancePluginUUPSUpgradeable_init(_dao);
+        __PluginUUPSUpgradeable_init(_dao);
         _updateVotingSettings(_votingSettings);
     }
 
@@ -211,10 +210,13 @@ abstract contract MajorityVotingBase is
         public
         view
         virtual
-        override(ERC165Upgradeable, GovernancePluginUUPSUpgradeable)
+        override(ERC165Upgradeable, PluginUUPSUpgradeable, ProposalBase)
         returns (bool)
     {
-        return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
+        return
+            interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
+            ProposalBase.supportsInterface(interfaceId) ||
+            PluginUUPSUpgradeable.supportsInterface(interfaceId);
     }
 
     /// @inheritdoc IMajorityVoting
