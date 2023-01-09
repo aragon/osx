@@ -11,7 +11,7 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
 contract Admin is PluginCloneable, Proposal {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =
+    bytes4 internal constant ADMIN_INTERFACE_ID =
         this.initialize.selector ^ this.executeProposal.selector;
 
     /// @notice The ID of the permission required to call the `executeProposal` function.
@@ -32,7 +32,7 @@ contract Admin is PluginCloneable, Proposal {
         bytes4 interfaceId
     ) public view override(PluginCloneable, ProposalBase) returns (bool) {
         return
-            interfaceId == ADMIN_ADDRESS_INTERFACE_ID ||
+            interfaceId == ADMIN_INTERFACE_ID ||
             ProposalBase.supportsInterface(interfaceId) ||
             PluginCloneable.supportsInterface(interfaceId);
     }

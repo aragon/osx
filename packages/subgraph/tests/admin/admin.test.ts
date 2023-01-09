@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, Bytes, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 import {AdminPlugin, Action, AdminProposal} from '../../generated/schema';
 

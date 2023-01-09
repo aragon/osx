@@ -1,4 +1,4 @@
-import {dataSource, log} from '@graphprotocol/graph-ts';
+import {dataSource} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
