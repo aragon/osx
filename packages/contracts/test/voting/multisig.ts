@@ -515,6 +515,14 @@ describe('Multisig', function () {
     });
 
     describe('canExecute:', async () => {
+      it('returns `false` if the proposal has not reached the minimum approval yet', async () => {
+        expect(await multisig.approvals(id)).to.be.lt(
+          (await multisig.getProposal(id)).parameters.minApprovals
+        );
+
+        expect(await multisig.canExecute(id)).to.be.false;
+      });
+
       it('returns `false` if the proposal is already executed', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);
@@ -537,6 +545,12 @@ describe('Multisig', function () {
     });
 
     describe('execute:', async () => {
+      it('reverts if the minimum approval is not met', async () => {
+        await expect(multisig.execute(id)).to.be.revertedWith(
+          customError('ProposalExecutionForbidden', id)
+        );
+      });
+
       it('executes if the minimum approval is met', async () => {
         await multisig.connect(signers[0]).approve(id, false);
         await multisig.connect(signers[1]).approve(id, false);

@@ -107,6 +107,11 @@ export function handleVoteCast(event: VoteCast): void {
   const memberId = pluginId + '_' + member;
   let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
   let voterVoteId = member + '_' + proposalId;
+  let voteOption = VOTER_OPTIONS.get(event.params.voteOption);
+
+  if (voteOption === 'None') {
+    return;
+  }
 
   let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
   if (!voterProposalVoteEntity) {
@@ -114,9 +119,7 @@ export function handleVoteCast(event: VoteCast): void {
     voterProposalVoteEntity.voter = memberId;
     voterProposalVoteEntity.proposal = proposalId;
   }
-  voterProposalVoteEntity.voteOption = VOTER_OPTIONS.get(
-    event.params.voteOption
-  );
+  voterProposalVoteEntity.voteOption = voteOption;
   voterProposalVoteEntity.votingPower = event.params.votingPower;
   voterProposalVoteEntity.createdAt = event.block.timestamp;
   voterProposalVoteEntity.save();

@@ -1272,7 +1272,7 @@ describe('AddresslistVoting', function () {
       });
 
       it('executes if participation and support are met', async () => {
-        // executes early
+        // Check if the proposal can execute early
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
@@ -1285,7 +1285,7 @@ describe('AddresslistVoting', function () {
         );
         expect(await voting.canExecute(id)).to.equal(true);
 
-        // executes normally
+        // Check if the proposal can execute normally
         await advanceAfterVoteEnd(endDate);
 
         expect(await voting.participation(id)).to.be.gte(
