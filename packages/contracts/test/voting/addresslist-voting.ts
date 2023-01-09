@@ -440,6 +440,14 @@ describe('AddresslistVoting', function () {
         ).to.equal(id);
       });
 
+      it('reverts on voting None', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+      });
+
       it('reverts on vote replacement', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
@@ -613,6 +621,14 @@ describe('AddresslistVoting', function () {
         expect(proposal.tally.abstain).to.equal(1);
       });
 
+      it('reverts on voting None', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+      });
+
       it('reverts on vote replacement', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
@@ -763,6 +779,14 @@ describe('AddresslistVoting', function () {
         ).to.equal(id);
       });
 
+      it('reverts on voting None', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
+      });
+
       it('should allow vote replacement but not double-count votes by the same address', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
@@ -784,11 +808,9 @@ describe('AddresslistVoting', function () {
         expect((await voting.getProposal(id)).tally.no).to.equal(0);
         expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
 
-        await voting.vote(id, VoteOption.None, false);
-        await voting.vote(id, VoteOption.None, false);
-        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
-        expect((await voting.getProposal(id)).tally.no).to.equal(0);
-        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address);
       });
 
       it('cannot early execute', async () => {
