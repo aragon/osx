@@ -173,7 +173,7 @@ abstract contract MajorityVotingBase is
     /// - the account doesn't have voting powers.
     /// @param proposalId The ID of the proposal.
     /// @param account The address of the _account.
-    /// @param voteOption The vote option that could not be casted.
+    /// @param voteOption The chosen vote option.
     error VoteCastForbidden(uint256 proposalId, address account, VoteOption voteOption);
 
     /// @notice Thrown if the proposal execution is forbidden.
@@ -385,7 +385,7 @@ abstract contract MajorityVotingBase is
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _voteOption The vote voteOption to cast on creation.
+    /// @param _voteOption The chosen vote option to be casted on proposal creation.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @return proposalId The ID of the proposal.
     function createProposal(
@@ -404,7 +404,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
-    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param _voteOption The chosen vote option to be casted on the proposal vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
         uint256 _proposalId,

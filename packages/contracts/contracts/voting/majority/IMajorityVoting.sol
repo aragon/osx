@@ -58,7 +58,7 @@ interface IMajorityVoting {
     /// @notice Emitted when a vote is cast by a voter.
     /// @param proposalId The ID of the proposal.
     /// @param voter The voter casting the vote.
-    /// @param voteOption The vote option chosen.
+    /// @param voteOption The casted vote option.
     /// @param votingPower The voting power behind this vote.
     event VoteCast(
         uint256 indexed proposalId,
@@ -118,7 +118,7 @@ interface IMajorityVoting {
     /// @notice Votes for a vote option and, optionally, executes the proposal.
     /// @dev `_voteOption`, 1 -> abstain, 2 -> yes, 3 -> no
     /// @param _proposalId The ID of the proposal.
-    /// @param  _voteOption Whether the voter abstains, supports or opposes the proposal.
+    /// @param _voteOption The chosen vote option.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function vote(uint256 _proposalId, VoteOption _voteOption, bool _tryEarlyExecution) external;
 
