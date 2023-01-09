@@ -57,19 +57,17 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     /// @notice Adds new members to the address list.
     /// @param _members The addresses of members to be added.
     /// @dev This function is used during the plugin initialization.
-    function addAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_ADDRESSES_PERMISSION_ID)
-    {
+    function addAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _addAddresses(_members);
     }
 
     /// @notice Removes existing members from the address list.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_ADDRESSES_PERMISSION_ID)
-    {
+    function removeAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _removeAddresses(_members);
     }
 
@@ -91,7 +89,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount();
+        proposalId = _createProposal(_msgSender(), _metadata, _actions);
 
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
@@ -113,8 +111,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
                 ++i;
             }
         }
-
-        _incrementProposalCount();
 
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);

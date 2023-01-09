@@ -90,10 +90,6 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the proposal count determining the next proposal ID.
-    /// @return The proposal count.
-    function proposalCount() external view returns (uint256);
-
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
     /// - has not started,
     /// - has ended,
@@ -115,11 +111,7 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal.
     /// @param  _voteOption Whether voter abstains, supports or not supports to vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
-    function vote(
-        uint256 _proposalId,
-        VoteOption _voteOption,
-        bool _tryEarlyExecution
-    ) external;
+    function vote(uint256 _proposalId, VoteOption _voteOption, bool _tryEarlyExecution) external;
 
     /// @notice Executes a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
@@ -129,8 +121,8 @@ interface IMajorityVoting {
     /// @param _proposalId The ID of the proposal.
     /// @param _account The account address to be checked.
     /// @return The vote option cast by a voter for a certain proposal.
-    function getVoteOption(uint256 _proposalId, address _account)
-        external
-        view
-        returns (VoteOption);
+    function getVoteOption(
+        uint256 _proposalId,
+        address _account
+    ) external view returns (VoteOption);
 }

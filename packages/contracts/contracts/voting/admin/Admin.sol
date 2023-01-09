@@ -2,17 +2,15 @@
 
 pragma solidity 0.8.10;
 
-import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
+import {GovernancePluginCloneable} from "../../core/plugin/GovernancePluginCloneable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.
 /// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
-contract Admin is PluginCloneable {
-    using Counters for Counters.Counter;
-
+contract Admin is GovernancePluginCloneable {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADMIN_ADDRESS_INTERFACE_ID =
         this.initialize.selector ^ this.proposalCount.selector ^ this.executeProposal.selector;
@@ -21,31 +19,11 @@ contract Admin is PluginCloneable {
     bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID =
         keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
-    /// @notice The incremental ID for proposals and executions.
-    Counters.Counter private proposalCounter;
-
-    /// @notice Emitted when a proposal is created.
-    /// @param proposalId The ID of the proposal.
-    /// @param creator  The creator of the proposal.
-    /// @param metadata The metadata of the proposal.
-    /// @param actions The actions that will be executed if the proposal passes.
-    event ProposalCreated(
-        uint256 indexed proposalId,
-        address indexed creator,
-        bytes metadata,
-        IDAO.Action[] actions
-    );
-
-    /// @notice Emitted when a proposal is executed.
-    /// @param proposalId The ID of the proposal.
-    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
     function initialize(IDAO _dao) public initializer {
-        __PluginCloneable_init(_dao);
+        __GovernancePluginCloneable_init(_dao);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -55,30 +33,14 @@ contract Admin is PluginCloneable {
         return interfaceId == ADMIN_ADDRESS_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
-    /// @notice Returns the proposal count determining the next proposal ID.
-    /// @return The proposal count.
-    function proposalCount() public view returns (uint256) {
-        return proposalCounter.current();
-    }
-
     /// @notice Creates and executes a new proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions to be executed.
-    function executeProposal(bytes calldata _metadata, IDAO.Action[] calldata _actions)
-        external
-        auth(EXECUTE_PROPOSAL_PERMISSION_ID)
-    {
-        uint256 proposalId = proposalCounter.current();
-        proposalCounter.increment();
-
-        bytes[] memory execResults = dao.execute(proposalId, _actions);
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
-        emit ProposalExecuted({proposalId: proposalId, execResults: execResults});
+    function executeProposal(
+        bytes calldata _metadata,
+        IDAO.Action[] calldata _actions
+    ) external auth(EXECUTE_PROPOSAL_PERMISSION_ID) {
+        uint256 proposalId = _createProposal(_msgSender(), _metadata, _actions);
+        _executeProposal(proposalId, _actions);
     }
 }
