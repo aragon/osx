@@ -546,9 +546,9 @@ describe('Multisig', function () {
 
     describe('execute:', async () => {
       it('reverts if the minimum approval is not met', async () => {
-        await expect(multisig.execute(id)).to.be.revertedWith(
-          customError('ProposalExecutionForbidden', id)
-        );
+        await expect(multisig.execute(id))
+          .to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden')
+          .withArgs(id);
       });
 
       it('executes if the minimum approval is met', async () => {
