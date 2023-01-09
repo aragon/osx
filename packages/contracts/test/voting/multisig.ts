@@ -11,6 +11,7 @@ import {
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {getProposalId} from '../test-utils/voting';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -295,8 +296,8 @@ describe('Multisig', function () {
         false
       );
 
-      expect(proposalId0).to.equal(0); // To be removed when proposal ID is generated as a hash.
-      expect(proposalId1).to.equal(1); // To be removed when proposal ID is generated as a hash.
+      expect(proposalId0).to.equal(getProposalId(multisig.address, '0x0')); // To be removed when proposal ID is generated as a hash.
+      expect(proposalId1).to.equal(getProposalId(multisig.address, '0x1')); // To be removed when proposal ID is generated as a hash.
 
       expect(proposalId0).to.not.equal(proposalId1);
     });

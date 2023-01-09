@@ -195,11 +195,11 @@ describe('Admin plugin', function () {
     });
 
     it("calls the DAO's execute function correctly", async () => {
-      const proposalId = getProposalId(plugin.address, '0x1');
+      const proposalId = getProposalId(plugin.address, '0x0');
 
       await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      expect(dao.execute).has.been.calledWith(BigNumber.from(proposalId), [
+      expect(dao.execute).has.been.calledWith(proposalId, [
         [
           dummyActions[0].to,
           BigNumber.from(dummyActions[0].value),
