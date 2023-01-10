@@ -52,9 +52,6 @@ contract AddresslistVotingSetup is PluginSetup {
             )
         );
 
-        // Prepare helpers
-        (helpers); // silence the warning.
-
         // Prepare permissions
         PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](4);
 
@@ -94,7 +91,6 @@ contract AddresslistVotingSetup is PluginSetup {
         );
 
         preparedDependency.permissions = permissions;
-        preparedDependency.helpers = helpers;
     }
 
     /// @inheritdoc IPluginSetup

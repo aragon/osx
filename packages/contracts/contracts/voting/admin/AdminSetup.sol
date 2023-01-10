@@ -40,9 +40,7 @@ contract AdminSetup is PluginSetup {
     function prepareInstallation(address _dao, bytes memory _data)
         external
         returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            address plugin, PreparedDependency memory preparedDependency
         )
     {
         IDAO dao = IDAO(_dao);
@@ -60,11 +58,8 @@ contract AdminSetup is PluginSetup {
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(dao);
 
-        // Prepare helpers
-        (helpers); // silence the warning.
-
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](2);
+        PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](2);
 
         // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
         permissions[0] = PermissionLib.ItemMultiTarget(
@@ -83,6 +78,8 @@ contract AdminSetup is PluginSetup {
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
@@ -96,18 +93,16 @@ contract AdminSetup is PluginSetup {
     /// or the ones that have been granted are not revoked already,
     /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
     function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata,
-        bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+        address _dao, SetupPayload calldata _payload
+    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions) {
+        (actions);
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](1);
 
         permissions[0] = PermissionLib.ItemMultiTarget(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
