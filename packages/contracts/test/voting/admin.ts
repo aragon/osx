@@ -3,15 +3,10 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
 import {getMergedABI} from '../../utils/abi';
-import {findEvent, DAO_EVENTS} from '../../utils/event';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-
-const EVENTS = {
-  ProposalCreated: 'ProposalCreated',
-  ProposalExecuted: 'ProposalExecuted',
-};
+import {OZ_ERRORS} from '../test-utils/error';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -80,7 +75,7 @@ describe('Admin plugin', function () {
       await initializePlugin();
 
       await expect(initializePlugin()).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
+        OZ_ERRORS.ALREADY_INITIALIZED
       );
     });
   });
@@ -118,17 +113,14 @@ describe('Admin plugin', function () {
     it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
       await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
 
-      await expect(
-        plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           plugin.address,
           EXECUTE_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {
@@ -138,18 +130,15 @@ describe('Admin plugin', function () {
         EXECUTE_PROPOSAL_PERMISSION_ID
       );
 
-      await expect(
-        plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.be.revertedWithCustomError(plugin, 'DaoUnauthorized')
+        .withArgs(
           dao.address,
           plugin.address,
           plugin.address,
           ownerAddress,
           EXECUTE_PROPOSAL_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('correctly emits the ProposalCreated event', async () => {
@@ -157,11 +146,9 @@ describe('Admin plugin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      await expect(
-        await plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.emit(plugin, EVENTS.ProposalCreated);
+      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
-      const event = await findEvent(tx, EVENTS.ProposalCreated);
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       expect(event.args.proposalId).to.equal(currentExpectedProposalId);
       expect(event.args.creator).to.equal(ownerAddress);
@@ -176,8 +163,8 @@ describe('Admin plugin', function () {
       const currentExpectedProposalId = 0;
       const expectedDummyResults = ['0x'];
 
-      await expect(await plugin.executeProposal(dummyMetadata, dummyActions))
-        .to.emit(plugin, EVENTS.ProposalExecuted)
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
         .withArgs(currentExpectedProposalId, expectedDummyResults);
     });
 
@@ -190,9 +177,9 @@ describe('Admin plugin', function () {
 
       const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
 
-      await expect(tx).to.emit(plugin, EVENTS.ProposalCreated);
+      await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
-      const event = await findEvent(tx, EVENTS.ProposalCreated);
+      const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });

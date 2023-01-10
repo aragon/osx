@@ -11,7 +11,6 @@ import {
   DAO,
   GovernanceERC20,
 } from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
@@ -89,8 +88,8 @@ describe('MerkleDistributor', function () {
       );
 
       // execute merkleMint and listen for the event containing the cloned address
-      expect(
-        await minter.merkleMint(
+      await expect(
+        minter.merkleMint(
           merkleRoot,
           totalAmount,
           dummyMerkleTreeStorageLink,
@@ -121,16 +120,15 @@ describe('MerkleDistributor', function () {
           dummyMerkleTreeStorageLink,
           dummyMintingContext
         )
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      )
+        .to.be.revertedWithCustomError(minter, 'DaoUnauthorized')
+        .withArgs(
           managingDao.address,
           minter.address,
           minter.address,
           ownerAddress,
           MERKLE_MINT_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('does not mint if the minting permissionId on the token is missing', async () => {
@@ -147,16 +145,15 @@ describe('MerkleDistributor', function () {
           dummyMerkleTreeStorageLink,
           dummyMintingContext
         )
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      )
+        .to.be.revertedWithCustomError(minter, 'DaoUnauthorized')
+        .withArgs(
           managingDao.address,
           token.address,
           token.address,
           minter.address,
           MINT_PERMISSION_ID
-        )
-      );
+        );
     });
   });
 });

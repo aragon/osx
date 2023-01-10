@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {TestSharedPlugin, TestIdGatingOracle, DAO} from '../../../../typechain';
-import {customError} from '../../../test-utils/custom-error-helper';
 import {deployNewDAO} from '../../../test-utils/dao';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
@@ -13,11 +12,11 @@ const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
 describe('SharedPlugin', function () {
   let signers: SignerWithAddress[];
   let testPlugin: TestSharedPlugin;
-  let managingDAO: DAO;
+  let managingDao: DAO;
   let dao1: DAO;
   let dao2: DAO;
   let ownerAddress: string;
-  let expectedUnauthorizedError: string;
+  let expectedUnauthorizedErrorArguments: string[];
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
@@ -25,7 +24,7 @@ describe('SharedPlugin', function () {
 
     // Deploy the managing DAO and two other DAOs
     const DAO = await ethers.getContractFactory('DAO');
-    managingDAO = await deployNewDAO(ownerAddress);
+    managingDao = await deployNewDAO(ownerAddress);
     dao1 = await deployNewDAO(ownerAddress);
     dao2 = await deployNewDAO(ownerAddress);
 
@@ -34,16 +33,15 @@ describe('SharedPlugin', function () {
       'TestSharedPlugin'
     );
     testPlugin = await TestSharedPlugin.deploy();
-    await testPlugin.initialize(managingDAO.address);
+    await testPlugin.initialize(managingDao.address);
 
-    expectedUnauthorizedError = customError(
-      'DaoUnauthorized',
-      managingDAO.address,
+    expectedUnauthorizedErrorArguments = [
+      managingDao.address,
       testPlugin.address,
       testPlugin.address,
       ownerAddress,
-      ID_GATED_ACTION_PERMISSION_ID
-    );
+      ID_GATED_ACTION_PERMISSION_ID,
+    ];
   });
 
   it('increments IDs', async () => {
@@ -106,9 +104,9 @@ describe('SharedPlugin', function () {
       );
 
       // The call fails because no object with ID 1 exists
-      await expect(
-        testPlugin.callStatic.idGatedAction(nonExistingId)
-      ).to.be.revertedWith(customError('ObjectIdNotAssigned', nonExistingId));
+      await expect(testPlugin.callStatic.idGatedAction(nonExistingId))
+        .to.be.revertedWithCustomError(testPlugin, 'ObjectIdNotAssigned')
+        .withArgs(nonExistingId);
 
       // Create object with ID 0
       let tx = await testPlugin.createNewObject(dao1.address);
@@ -116,9 +114,9 @@ describe('SharedPlugin', function () {
       await ethers.provider.send('evm_mine', []);
 
       // The call still fails because no object with ID 1 exists
-      await expect(
-        testPlugin.callStatic.idGatedAction(nonExistingId)
-      ).to.be.revertedWith(customError('ObjectIdNotAssigned', nonExistingId));
+      await expect(testPlugin.callStatic.idGatedAction(nonExistingId))
+        .to.be.revertedWithCustomError(testPlugin, 'ObjectIdNotAssigned')
+        .withArgs(nonExistingId);
 
       // The call executes for the allowed ID 0
       await expect(testPlugin.callStatic.idGatedAction(allowedId)).to.not.be
@@ -160,9 +158,9 @@ describe('SharedPlugin', function () {
         .reverted;
 
       // The call fails if the ID differs
-      await expect(
-        testPlugin.callStatic.idGatedAction(existingButNotAllowedId)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.idGatedAction(existingButNotAllowedId))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
 
     it('reverts if the permission is missing', async () => {
@@ -177,9 +175,9 @@ describe('SharedPlugin', function () {
       await tx.wait();
       await ethers.provider.send('evm_mine', []);
 
-      await expect(
-        testPlugin.callStatic.idGatedAction(allowedId)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.idGatedAction(allowedId))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
 
     it('reverts if the permission is set in the wrong DAO', async () => {
@@ -202,9 +200,9 @@ describe('SharedPlugin', function () {
       await tx.wait();
       await ethers.provider.send('evm_mine', []);
 
-      await expect(
-        testPlugin.callStatic.idGatedAction(allowedId)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.idGatedAction(allowedId))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
 
     it('reverts if the object belongs to the wrong DAO', async () => {
@@ -227,9 +225,9 @@ describe('SharedPlugin', function () {
       await tx.wait();
       await ethers.provider.send('evm_mine', []);
 
-      await expect(
-        testPlugin.callStatic.idGatedAction(allowedId)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.idGatedAction(allowedId))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
   });
 });

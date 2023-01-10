@@ -2,7 +2,6 @@ import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {customError} from '../test-utils/custom-error-helper';
 import {
   deployMockPluginSetup,
   deployPluginRepoRegistry,
@@ -116,16 +115,15 @@ describe('PluginRepoFactory: ', function () {
 
     await expect(
       pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWith(
-      customError(
-        'DaoUnauthorized',
+    )
+      .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
+      .withArgs(
         managingDao.address,
         pluginRepoRegistry.address,
         pluginRepoRegistry.address,
         pluginRepoFactory.address,
         REGISTER_PLUGIN_REPO_PERMISSION_ID
-      )
-    );
+      );
   });
 
   it('fail to create new pluginRepo with empty name', async () => {
@@ -133,7 +131,7 @@ describe('PluginRepoFactory: ', function () {
 
     await expect(
       pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWith(customError('EmptyPluginRepoName'));
+    ).to.be.revertedWithCustomError(pluginRepoFactory, 'EmptyPluginRepoName');
   });
 
   it('create new pluginRepo', async () => {
@@ -154,19 +152,34 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
-    const initialSemanticVersion = [0, 0, 0];
+    const wrongInitialSemanticVersion = [0, 0, 0];
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
-    await expect(
-      pluginRepoFactory.createPluginRepoWithVersion(
+    // Get the contract to be deployed by calling `createPluginRepoWithVersion` with `callStatic`
+
+    const PluginRepo = await ethers.getContractFactory('PluginRepo');
+    const pluginRepoToBeCreated = PluginRepo.attach(
+      pluginRepoFactory.callStatic.createPluginRepoWithVersion(
         pluginRepoName,
-        initialSemanticVersion,
+        [1, 0, 0],
         pluginSetupAddress,
         contentURI,
         ownerAddress
       )
-    ).to.be.revertedWith('BumpInvalid([0, 0, 0], [0, 0, 0])');
+    );
+
+    await expect(
+      pluginRepoFactory.createPluginRepoWithVersion(
+        pluginRepoName,
+        wrongInitialSemanticVersion,
+        pluginSetupAddress,
+        contentURI,
+        ownerAddress
+      )
+    )
+      .to.be.revertedWithCustomError(pluginRepoToBeCreated, 'BumpInvalid')
+      .withArgs([0, 0, 0], [0, 0, 0]);
   });
 
   it('create new pluginRepo with version', async () => {

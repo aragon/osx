@@ -10,7 +10,6 @@ import {
 } from '../../typechain';
 
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployPluginSetupProcessor} from '../test-utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,
@@ -223,9 +222,9 @@ describe('DAOFactory: ', function () {
   });
 
   it('reverts if no plugin is provided', async () => {
-    await expect(daoFactory.createDao(daoSettings, [])).to.be.revertedWith(
-      customError('NoPluginProvided')
-    );
+    await expect(
+      daoFactory.createDao(daoSettings, [])
+    ).to.be.revertedWithCustomError(daoFactory, 'NoPluginProvided');
   });
 
   it('correctly creates a DAO with one plugin', async () => {

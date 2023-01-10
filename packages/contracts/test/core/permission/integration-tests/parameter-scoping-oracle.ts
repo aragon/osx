@@ -7,7 +7,6 @@ import {
   TestPlugin,
   DAO,
 } from '../../../../typechain';
-import {customError} from '../../../test-utils/custom-error-helper';
 import {deployNewDAO} from '../../../test-utils/dao';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
@@ -18,7 +17,7 @@ describe('TestParameterScopingOracle', function () {
   let testPlugin: TestPlugin;
   let managingDao: DAO;
   let ownerAddress: string;
-  let expectedUnauthorizedError: string;
+  let expectedUnauthorizedErrorArguments: string[];
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -46,14 +45,13 @@ describe('TestParameterScopingOracle', function () {
       parameterOracle.address
     );
 
-    expectedUnauthorizedError = customError(
-      'DaoUnauthorized',
+    expectedUnauthorizedErrorArguments = [
       managingDao.address,
       testPlugin.address,
       testPlugin.address,
       ownerAddress,
-      DO_SOMETHING_PERMISSION_ID
-    );
+      DO_SOMETHING_PERMISSION_ID,
+    ];
   });
 
   describe('oracle conditions:', async () => {
@@ -70,27 +68,27 @@ describe('TestParameterScopingOracle', function () {
       let param1 = 10;
       let param2 = 1;
 
-      await expect(
-        testPlugin.callStatic.subPermissioned(param1, param2)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.subPermissioned(param1, param2))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
 
     it('reverts if the first parameter is equal to the second', async () => {
       let param1 = 1;
       let param2 = 1;
 
-      await expect(
-        testPlugin.callStatic.addPermissioned(param1, param2)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.addPermissioned(param1, param2))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
 
     it('reverts if the first parameter is smaller than the second', async () => {
       let param1 = 1;
       let param2 = 10;
 
-      await expect(
-        testPlugin.callStatic.addPermissioned(param1, param2)
-      ).to.be.revertedWith(expectedUnauthorizedError);
+      await expect(testPlugin.callStatic.addPermissioned(param1, param2))
+        .to.be.revertedWithCustomError(testPlugin, 'DaoUnauthorized')
+        .withArgs(...expectedUnauthorizedErrorArguments);
     });
   });
 });
