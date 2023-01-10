@@ -490,9 +490,7 @@ describe('TokenVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     beforeEach(async () => {
-      const receivers = Array.from(Array(12).keys()).map(
-        i => signers[i].address
-      );
+      const receivers = signers.slice(0, 12).map(s => s.address);
       const amounts = Array(9).fill(10).concat([5, 4, 1]);
 
       const balances = receivers.map((receiver, i) => {

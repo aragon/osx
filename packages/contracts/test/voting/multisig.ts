@@ -103,14 +103,14 @@ describe('Multisig', function () {
     it('reverts if trying to re-initialize', async () => {
       await multisig.initialize(
         dao.address,
-        [0, 1, 2, 3, 4].map(i => signers[i].address),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
 
       await expect(
         multisig.initialize(
           dao.address,
-          [0, 1, 2, 3, 4].map(i => signers[i].address),
+          signers.slice(0, 5).map(s => s.address),
           multisigSettings
         )
       ).to.be.revertedWith('Initializable: contract is already initialized');
@@ -122,7 +122,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 2;
       await multisig.initialize(
         dao.address,
-        [0, 1].map(i => signers[i].address),
+        signers.slice(0, 2).map(s => s.address),
         multisigSettings
       );
 
@@ -134,7 +134,7 @@ describe('Multisig', function () {
     it('should set the `minApprovals`', async () => {
       await multisig.initialize(
         dao.address,
-        [0, 1, 2, 3, 4].map(i => signers[i].address),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
       expect((await multisig.multisigSettings()).minApprovals).to.be.eq(
@@ -145,7 +145,7 @@ describe('Multisig', function () {
     it('should set `onlyListed`', async () => {
       await multisig.initialize(
         dao.address,
-        [0, 1, 2, 3, 4].map(i => signers[i].address),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
       expect((await multisig.multisigSettings()).onlyListed).to.be.eq(
@@ -157,7 +157,7 @@ describe('Multisig', function () {
       await expect(
         multisig.initialize(
           dao.address,
-          [0, 1, 2, 3, 4].map(i => signers[i].address),
+          signers.slice(0, 5).map(s => s.address),
           multisigSettings
         )
       )
@@ -170,7 +170,7 @@ describe('Multisig', function () {
     beforeEach(async () => {
       await multisig.initialize(
         dao.address,
-        [0, 1, 2, 3, 4].map(i => signers[i].address),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
     });
@@ -237,7 +237,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
-        [0, 1].map(i => signers[i].address),
+        signers.slice(0, 2).map(s => s.address),
         multisigSettings
       );
 
@@ -271,7 +271,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 2;
       await multisig.initialize(
         dao.address,
-        [0, 1, 2].map(i => signers[i].address),
+        signers.slice(0, 3).map(s => s.address),
         multisigSettings
       );
 
@@ -462,7 +462,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 3;
       await multisig.initialize(
         dao.address,
-        [0, 1, 2, 3, 4].map(i => signers[i].address),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
 

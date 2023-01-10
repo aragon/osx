@@ -22,7 +22,6 @@ import {
   MAX_UINT64,
   voteWithSigners,
 } from '../test-utils/voting';
-import {addresses} from '../test-utils/addresses';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -424,7 +423,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
+          signers.slice(0, 10).map(s => s.address)
         );
 
         expect(
@@ -554,7 +553,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
+          signers.slice(0, 10).map(s => s.address)
         );
 
         expect(
@@ -747,7 +746,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
+          signers.slice(0, 10).map(s => s.address)
         );
 
         expect(
@@ -884,7 +883,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
+          signers.slice(0, 10).map(s => s.address)
         );
 
         await voting.createProposal(
@@ -1027,7 +1026,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
+          signers.slice(0, 10).map(s => s.address)
         );
         expect(
           (
@@ -1217,7 +1216,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
+          signers.slice(0, 10).map(s => s.address)
         );
 
         await voting.createProposal(
