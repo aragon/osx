@@ -207,7 +207,6 @@ describe('TokenVoting', function () {
           amount: votingSettings.minProposerVotingPower,
         },
       ]);
-      await setTotalSupply(1 + votingSettings.minProposerVotingPower);
 
       await voting.initialize(
         dao.address,
