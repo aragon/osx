@@ -464,7 +464,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Only allow to prepare if setupId has not been prepared before.
         // Note that the following check ensures that the same setupId can be prepared
-        // once again if the plugin was uninstalled and then installed..
+        // once again if the plugin was uninstalled and then installed.
         if (pluginState.blockNumber < pluginState.setupIds[newSetupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
