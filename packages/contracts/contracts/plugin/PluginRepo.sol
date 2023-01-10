@@ -43,7 +43,8 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
-    /// @notice Current latest release id(there can be maximum uint8 = 255 possibility).
+    /// @notice The ID of the latest release.
+    /// @dev The maximum release ID is 255 as it is later stored as an `uint8` inside `Version.tag`.
     uint256 public latestRelease;
 
     /// @notice increasing build numbers per release
