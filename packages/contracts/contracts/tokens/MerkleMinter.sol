@@ -79,7 +79,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
             address(distributorBase),
             abi.encodeWithSelector(
                 distributorBase.initialize.selector,
-                dao(),
+                dao,
                 IERC20Upgradeable(address(token)),
                 _merkleRoot
             )

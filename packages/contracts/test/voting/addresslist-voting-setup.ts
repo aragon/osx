@@ -192,7 +192,7 @@ describe('AddresslistVotingSetup', function () {
       );
       const latestBlock = await ethers.provider.getBlock('latest');
         
-      expect(await addresslistVotingContract.dao()).to.be.equal(targetDao.address);
+      expect(await addresslistVotingContract.getDAO()).to.be.equal(targetDao.address);
       expect(await addresslistVotingContract.minParticipation()).to.be.equal(
         defaultVotingSettings.minParticipation
       );
