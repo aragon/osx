@@ -86,7 +86,7 @@ contract PluginRepo is
     /// @param release the release number in which pluginSetup is found.
     /// @param build the build number of the release number in which pluginSetup is found.
     /// @param pluginSetup the plugin setup address.
-    error PluginSetupExistsInAnotherRelease(
+    error PluginSetupAlreadyInPreviousRelease(
         uint8 release,
         uint16 build,
         address pluginSetup
@@ -185,7 +185,7 @@ contract PluginRepo is
         // Make sure the same plugin setup wasn't used in previous releases.
         Version storage version = versions[latestTagHashForPluginSetup[_pluginSetup]];
         if (version.tag.release != 0 && version.tag.release != _release) {
-            revert PluginSetupExistsInAnotherRelease(
+            revert PluginSetupAlreadyInPreviousRelease(
                 version.tag.release,
                 version.tag.build,
                 _pluginSetup
