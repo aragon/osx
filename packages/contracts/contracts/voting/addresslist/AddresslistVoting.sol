@@ -182,6 +182,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             return false;
         }
 
+        // The voter votes `None` which is not allowed.
         if (_voteOption == VoteOption.None) {
             return false;
         }
