@@ -22,6 +22,7 @@ import {
   MAX_UINT64,
   voteWithSigners,
 } from '../test-utils/voting';
+import {OZ_ERRORS} from '../test-utils/error';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -103,12 +104,11 @@ describe('AddresslistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      let addrs = [];
       await voting.initialize(dao.address, votingSettings, []);
 
       await expect(
         voting.initialize(dao.address, votingSettings, [])
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
   });
 

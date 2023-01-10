@@ -5,6 +5,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {DAO, GovernanceERC20, DAO__factory} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {getInterfaceID} from '../test-utils/interfaces';
+import {OZ_ERRORS} from '../test-utils/error';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
@@ -115,7 +116,7 @@ describe('DAO', function () {
     it('reverts if trying to re-initialize', async () => {
       await expect(
         dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1)
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
     it('sets the trusted forwarder correctly', async () => {

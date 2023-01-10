@@ -11,7 +11,7 @@ import {
   MULTISIG_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {addresses} from '../test-utils/addresses';
+import {OZ_ERRORS} from '../test-utils/error';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -113,7 +113,7 @@ describe('Multisig', function () {
           signers.slice(0, 5).map(s => s.address),
           multisigSettings
         )
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
     it('adds the initial addresses to the address list', async () => {

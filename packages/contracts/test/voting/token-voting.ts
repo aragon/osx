@@ -27,6 +27,7 @@ import {
   MAX_UINT64,
   voteWithSigners,
 } from '../test-utils/voting';
+import {OZ_ERRORS} from '../test-utils/error';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -151,7 +152,7 @@ describe('TokenVoting', function () {
           votingSettings,
           governanceErc20Mock.address
         )
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
   });
 
