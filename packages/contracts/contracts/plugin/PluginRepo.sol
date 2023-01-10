@@ -246,7 +246,7 @@ contract PluginRepo is
         view
         returns (Version memory)
     {
-        Version memory version = versions[_tagHash];
+        Version storage version = versions[_tagHash];
 
         if (version.tag.release == 0) {
             revert VersionHashDoesNotExist(_tagHash);
