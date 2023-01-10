@@ -27,7 +27,6 @@ import {
   MAX_UINT64,
   voteWithSigners,
 } from '../test-utils/voting';
-import {addresses} from '../test-utils/addresses';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
