@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {DAO, DAORegistry, ENSSubdomainRegistrar} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
@@ -75,7 +74,7 @@ describe('DAORegistry', function () {
   it('reverts the registration if the DAO name is empty', async function () {
     await expect(
       daoRegistry.register(targetDao.address, ownerAddress, '')
-    ).to.be.revertedWith(customError('EmptyDaoName'));
+    ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoName');
   });
 
   it('Should register a new DAO successfully', async function () {
@@ -101,16 +100,15 @@ describe('DAORegistry', function () {
 
     await expect(
       daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
-    ).to.be.revertedWith(
-      customError(
-        'DaoUnauthorized',
+    )
+      .to.be.revertedWithCustomError(daoRegistry, 'DaoUnauthorized')
+      .withArgs(
         managingDao.address,
         daoRegistry.address,
         daoRegistry.address,
         ownerAddress,
         REGISTER_DAO_PERMISSION_ID
-      )
-    );
+      );
   });
 
   it('fails to register if DAO already exists', async function () {
@@ -120,11 +118,9 @@ describe('DAORegistry', function () {
       daoNameEnsLabelhash
     );
 
-    await expect(
-      daoRegistry.register(targetDao.address, ownerAddress, daoName)
-    ).to.be.revertedWith(
-      customError('ContractAlreadyRegistered', targetDao.address)
-    );
+    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
+      .to.be.revertedWithCustomError(daoRegistry, 'ContractAlreadyRegistered')
+      .withArgs(targetDao.address);
   });
 
   it('fails to register a DAO with the same name twice', async function () {
@@ -137,12 +133,8 @@ describe('DAORegistry', function () {
     // Try to register the the DAO name under the top level domain a second time
     await expect(
       daoRegistry.register(newTargetDao.address, otherOwnerAddress, daoName)
-    ).to.be.revertedWith(
-      customError(
-        'AlreadyRegistered',
-        daoDomainHash,
-        ensSubdomainRegistrar.address
-      )
-    );
+    )
+      .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
+      .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
   });
 });

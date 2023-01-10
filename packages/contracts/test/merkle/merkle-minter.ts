@@ -11,7 +11,6 @@ import {
   DAO,
   GovernanceERC20,
 } from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import BalanceTree from './src/balance-tree';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
@@ -124,16 +123,15 @@ describe('MerkleDistributor', function () {
           dummyMerkleTreeStorageLink,
           dummyMintingContext
         )
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      )
+        .to.be.revertedWithCustomError(minter, 'DaoUnauthorized')
+        .withArgs(
           managingDao.address,
           minter.address,
           minter.address,
           ownerAddress,
           MERKLE_MINT_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('does not mint if the minting permissionId on the token is missing', async () => {
@@ -150,16 +148,15 @@ describe('MerkleDistributor', function () {
           dummyMerkleTreeStorageLink,
           dummyMintingContext
         )
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      )
+        .to.be.revertedWithCustomError(minter, 'DaoUnauthorized')
+        .withArgs(
           managingDao.address,
           token.address,
           token.address,
           minter.address,
           MINT_PERMISSION_ID
-        )
-      );
+        );
     });
   });
 });

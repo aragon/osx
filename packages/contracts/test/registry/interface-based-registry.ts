@@ -3,7 +3,6 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO, InterfaceBasedRegistryMock} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 
 const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
 
@@ -48,11 +47,12 @@ describe('InterfaceBasedRegistry', function () {
     it('fail if registrant address is not a contract', async function () {
       const randomAddress = await signers[8].getAddress();
 
-      await expect(
-        interfaceBasedRegistryMock.register(randomAddress)
-      ).to.be.revertedWith(
-        customError('ContractAddressInvalid', randomAddress)
-      );
+      await expect(interfaceBasedRegistryMock.register(randomAddress))
+        .to.be.revertedWithCustomError(
+          interfaceBasedRegistryMock,
+          'ContractAddressInvalid'
+        )
+        .withArgs(randomAddress);
     });
 
     it('fail to register if the interface is not supported', async () => {
@@ -62,9 +62,12 @@ describe('InterfaceBasedRegistry', function () {
 
       await expect(
         interfaceBasedRegistryMock.register(contractNotBeingADao.address)
-      ).to.be.revertedWith(
-        customError('ContractInterfaceInvalid', contractNotBeingADao.address)
-      );
+      )
+        .to.be.revertedWithCustomError(
+          interfaceBasedRegistryMock,
+          'ContractInterfaceInvalid'
+        )
+        .withArgs(contractNotBeingADao.address);
     });
 
     it('fail to register if the contract does not support ERC165', async () => {
@@ -78,12 +81,12 @@ describe('InterfaceBasedRegistry', function () {
         interfaceBasedRegistryMock.register(
           contractThatDoesNotSupportERC165.address
         )
-      ).to.be.revertedWith(
-        customError(
-          'ContractERC165SupportInvalid',
-          contractThatDoesNotSupportERC165.address
+      )
+        .to.be.revertedWithCustomError(
+          interfaceBasedRegistryMock,
+          'ContractERC165SupportInvalid'
         )
-      );
+        .withArgs(contractThatDoesNotSupportERC165.address);
     });
 
     it('fail to register if the sender lacks the required permissionId', async () => {
@@ -93,18 +96,18 @@ describe('InterfaceBasedRegistry', function () {
         REGISTER_PERMISSION_ID
       );
 
-      await expect(
-        interfaceBasedRegistryMock.register(dao.address)
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      await expect(interfaceBasedRegistryMock.register(dao.address))
+        .to.be.revertedWithCustomError(
+          interfaceBasedRegistryMock,
+          'DaoUnauthorized'
+        )
+        .withArgs(
           dao.address,
           interfaceBasedRegistryMock.address,
           interfaceBasedRegistryMock.address,
           ownerAddress,
           REGISTER_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('fail to register if the contract is already registered', async () => {
@@ -112,11 +115,12 @@ describe('InterfaceBasedRegistry', function () {
       await interfaceBasedRegistryMock.register(dao.address);
 
       // try to register the same contract again
-      await expect(
-        interfaceBasedRegistryMock.register(dao.address)
-      ).to.be.revertedWith(
-        customError('ContractAlreadyRegistered', dao.address)
-      );
+      await expect(interfaceBasedRegistryMock.register(dao.address))
+        .to.be.revertedWithCustomError(
+          interfaceBasedRegistryMock,
+          'ContractAlreadyRegistered'
+        )
+        .withArgs(dao.address);
     });
 
     it('register a contract with known interface', async () => {
