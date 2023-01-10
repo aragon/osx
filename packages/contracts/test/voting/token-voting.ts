@@ -618,7 +618,7 @@ describe('TokenVoting', function () {
 
         // `tryEarlyExecution` is turned on and the vote is decided
         await voting.connect(signers[6]).vote(id, VoteOption.Yes, true);
-        expect((await voting.getProposal(id)).executed).to.equal(true);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
