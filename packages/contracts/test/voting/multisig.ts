@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO} from '../../typechain';
@@ -16,6 +17,19 @@ export type MultisigSettings = {
   minApprovals: number;
   onlyListed: boolean;
 };
+
+export async function approveWithSigners(
+  multisigContract: Contract,
+  proposalId: number,
+  signers: SignerWithAddress[],
+  signerIds: number[]
+) {
+  let promises = signerIds.map(i =>
+    multisigContract.connect(signers[i]).approve(proposalId, false)
+  );
+
+  await Promise.all(promises);
+}
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
@@ -458,10 +472,9 @@ describe('Multisig', function () {
 
     describe('canApprove:', async () => {
       it('returns `false` if the proposal is already executed', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, true);
+        await approveWithSigners(multisig, id, signers, [0, 1]);
 
+        await multisig.connect(signers[2]).approve(id, true);
         expect((await multisig.getProposal(id)).executed).to.be.true;
 
         expect(await multisig.canApprove(id, signers[3].address)).to.be.false;
@@ -524,8 +537,7 @@ describe('Multisig', function () {
       });
 
       it('returns `false` if the proposal is already executed', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1]);
         await multisig.connect(signers[2]).approve(id, true);
 
         expect((await multisig.getProposal(id)).executed).to.be.true;
@@ -534,9 +546,7 @@ describe('Multisig', function () {
       });
 
       it('returns `true` if the proposal can be executed', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         expect((await multisig.getProposal(id)).executed).to.be.false;
 
@@ -552,9 +562,7 @@ describe('Multisig', function () {
       });
 
       it('executes if the minimum approval is met', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         const proposal = await multisig.getProposal(id);
 
@@ -570,9 +578,7 @@ describe('Multisig', function () {
       });
 
       it('executes if the minimum approval is met and can be called by an unlisted accounts', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         const proposal = await multisig.getProposal(id);
 
@@ -634,9 +640,7 @@ describe('Multisig', function () {
       });
 
       it('emits the `ProposalExecuted` and `Executed` events', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         await expect(multisig.connect(signers[3]).execute(id))
           .to.emit(dao, DAO_EVENTS.EXECUTED)
@@ -645,8 +649,7 @@ describe('Multisig', function () {
       });
 
       it('emits the `Approved`, `ProposalExecuted`, and `Executed` events if execute is called inside the `approve` method', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1]);
 
         await expect(multisig.connect(signers[2]).approve(id, true))
           .to.emit(dao, DAO_EVENTS.EXECUTED)
