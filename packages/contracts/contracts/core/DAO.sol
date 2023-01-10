@@ -67,6 +67,9 @@ contract DAO is
     /// @notice Thrown if action length is more than MAX_ACTIONS.
     error TooManyActions();
 
+    /// @notice Thrown if Action succeeds, but was called on EOA.
+    error NotAContract();
+
     /// @notice Thrown if action execution has failed.
     error ActionFailed();
 
@@ -176,9 +179,18 @@ contract DAO is
         uint256 failureMap;
 
         for (uint256 i = 0; i < _actions.length;) {
-            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
+            address to = _actions[i].to;
+            (bool success, bytes memory response) = to.call{value: _actions[i].value}(
                 _actions[i].data
             );
+
+            if(success) {
+                // If the call succeeded, and returned response.length > 0, means it was a contract
+                // otherwise, it was called on a EOA, in which case we should fail it.
+                if(response.length == 0 && !to.isContract()) {
+                    revert NotAContract();
+                }
+            }
 
             if (!success && !getIndex(allowFailureMap, i))  {
                 revert ActionFailed();

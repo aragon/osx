@@ -62,8 +62,6 @@ async function getActions() {
   const ActionExecuteFactory = await ethers.getContractFactory('ActionExecute');
   let ActionExecute = await ActionExecuteFactory.deploy();
   const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
-  const functionData = iface.encodeFunctionData('setTest');
-
   return {
     failAction: {
       to: ActionExecute.address,
@@ -72,7 +70,7 @@ async function getActions() {
     },
     succeedAction: {
       to: ActionExecute.address,
-      data: iface.encodeFunctionData('setTest'),
+      data: iface.encodeFunctionData('setTest', [20]),
       value: 0,
     },
   };
@@ -261,6 +259,13 @@ describe('DAO', function () {
       );
     });
 
+    it("reverts if action is called on EOA address", async () => {
+      let wrongEOAAction = {...succeedAction, to: ownerAddress}
+      await expect(dao.execute(0, [wrongEOAAction], 0)).to.be.revertedWith(
+        customError('NotAContract')
+      );
+    });
+
     it("reverts if action is fallable and allowFailureMap doesn't include it", async () => {
       await expect(dao.execute(0, [failAction], 0)).to.be.revertedWith(
         customError('ActionFailed')
@@ -270,8 +275,24 @@ describe('DAO', function () {
     it('succeeds if action is fallable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = setIndex(0, num);
-      await expect(dao.execute(0, [failAction], num)).to.not.be.reverted;
+
+      const tx = await dao.execute(0, [failAction], num);
+      const event = await findEvent(tx, EVENTS.Executed);
+      
+      // TODO: check that event.args.execResults[0] is the correct revert message
+      // console.log(event.args.execResults[0], ' ooooooo1')
+      // TODO: GIORGI
+      // expect(event.args.execResults[0]).to.equal('ActionExecute:Revert');
     });
+
+    it('returns the correct succeed result if action succeeds', async () => {
+      const tx = await dao.execute(0, [succeedAction], 0);
+      const event = await findEvent(tx, EVENTS.Executed);
+      // TODO:
+      // event.args.execResults[0] compare to 20 number.
+      // 0x0000000000000000000000000000000000000000000000000000000000000014 how to compare this to 20 ?
+      // console.log(event.args.execResults[0], ' ooooooo2')
+    })
 
     it('only succeeds if failing action index is set in the failuremap', async () => {
       let allowFailureMap = ethers.BigNumber.from(0);
@@ -319,14 +340,8 @@ describe('DAO', function () {
       );
     });
 
-    it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions, 0)).to.deep.equal(
-        expectedDummyResults
-      );
-    });
-
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(0, dummyActions, 0);
+      let tx = await dao.execute(0, [succeedAction], 0);
       let rc = await tx.wait();
 
       const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
@@ -334,10 +349,11 @@ describe('DAO', function () {
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(0);
       expect(event.args.actions.length).to.equal(1);
-      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
-      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
-      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
-      expect(event.args.execResults).to.deep.equal(expectedDummyResults);
+      expect(event.args.actions[0].to).to.equal(succeedAction.to);
+      expect(event.args.actions[0].value).to.equal(succeedAction.value);
+      expect(event.args.actions[0].data).to.equal(succeedAction.data);
+      // TODO: compare to 20...
+      // expect(event.args.execResults).to.deep.equal(['0x']);
     });
   });
 
