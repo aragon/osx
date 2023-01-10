@@ -73,12 +73,12 @@ export async function voteWithSigners(
     votingContract.connect(signers[i]).vote(proposalId, VoteOption.Yes, false)
   );
 
-  promises.concat(
+  promises = promises.concat(
     signerIds.no.map(i =>
       votingContract.connect(signers[i]).vote(proposalId, VoteOption.No, false)
     )
   );
-  promises.concat(
+  promises = promises.concat(
     signerIds.abstain.map(i =>
       votingContract
         .connect(signers[i])
