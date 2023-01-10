@@ -156,7 +156,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply.
     /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
-    error SetupNotEligible(bytes32 setupId);
+    error SetupNotApplicable(bytes32 setupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -349,7 +349,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // This means applyInstallation was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
         if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotEligible(setupId);
+            revert SetupNotApplicable(setupId);
         }
 
         bytes32 newSetupId = _getSetupId(
@@ -501,7 +501,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // This means applyUpdate was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
         if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotEligible(setupId);
+            revert SetupNotApplicable(setupId);
         }
 
         // Once the applyUpdate is called and arguments are confirmed(including initData)
@@ -632,7 +632,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // This means applyUninstallation was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
         if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotEligible(setupId);
+            revert SetupNotApplicable(setupId);
         }
 
         pluginState.blockNumber = block.number;
