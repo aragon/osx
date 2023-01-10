@@ -222,7 +222,7 @@ contract PluginRepo is
 
     /// @notice get the latest version by plugin setup.
     /// @param _pluginSetup the plugin setup address
-    /// @return Version latest version that is binded to the _pluginSetup
+    /// @return Version latest version that is bound to the _pluginSetup
     function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
         return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
