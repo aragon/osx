@@ -79,7 +79,7 @@ contract PluginRepo is
     /// @notice Thrown if release id is by more than 1 to the previous release id.
     /// @param currentRelease the current latest release id.
     /// @param newRelease new release id dev is trying to push.
-    error ReleaseTooBig(uint256 currentRelease, uint256 newRelease);
+    error ReleaseIdIncrementInvalid(uint256 currentRelease, uint256 newRelease);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number in which pluginSetup is found.
@@ -174,7 +174,7 @@ contract PluginRepo is
 
         // Can't release 3 unless 2 is released.
         if (_release - latestRelease > 1) {
-            revert ReleaseTooBig(latestRelease, _release);
+            revert ReleaseIdIncrementInvalid(latestRelease, _release);
         }
 
         if (_release > latestRelease) {
