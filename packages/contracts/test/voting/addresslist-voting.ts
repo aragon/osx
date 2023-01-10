@@ -104,18 +104,20 @@ describe('AddresslistVoting', function () {
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(0));
+      let addrs = [];
+      await voting.initialize(dao.address, votingSettings, []);
 
       await expect(
-        voting.initialize(dao.address, votingSettings, await addresses(0))
+        voting.initialize(dao.address, votingSettings, [])
       ).to.be.revertedWith('Initializable: contract is already initialized');
     });
   });
 
   describe('Addresslisting members: ', async () => {
     beforeEach(async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(0));
+      await voting.initialize(dao.address, votingSettings, []);
     });
+
     it('should return false, if user is not listed', async () => {
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -138,7 +140,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('should remove users from the address list', async () => {
-      await voting.addAddresses(await addresses(1));
+      await voting.addAddresses([signers[0].address]);
 
       const block1 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -147,7 +149,7 @@ describe('AddresslistVoting', function () {
       ).to.equal(true);
       expect(await voting.isListed(signers[0].address)).to.equal(true);
 
-      await voting.removeAddresses(await addresses(1));
+      await voting.removeAddresses([signers[0].address]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -165,7 +167,7 @@ describe('AddresslistVoting', function () {
       await voting.initialize(
         dao.address,
         votingSettings,
-        await addresses(1) // signers[0] is listed
+        [signers[0].address] // signers[0] is listed
       );
 
       await expect(
@@ -189,7 +191,7 @@ describe('AddresslistVoting', function () {
       await voting.initialize(
         dao.address,
         votingSettings,
-        await addresses(1) // signers[0] is listed
+        [signers[0].address] // signers[0] is listed
       );
 
       await expect(
@@ -208,7 +210,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the start date is set smaller than the current date', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(1));
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
 
       const currentDate = await getTime();
       const startDateInThePast = currentDate - 1;
@@ -232,7 +236,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the start date is after the latest start date', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(1));
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
 
       const latestStartDate = MAX_UINT64.sub(votingSettings.minDuration);
       const tooLateStartDate = latestStartDate.add(1);
@@ -251,7 +257,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts if the end date is before the earliest end date so that min duration cannot be met', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(1));
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
 
       const startDate = (await getTime()) + 1;
       const earliestEndDate = startDate + votingSettings.minDuration;
@@ -272,7 +280,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal successfully, but not vote', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(1));
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -326,7 +336,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal and cast a vote immediately', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(1));
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -368,7 +380,9 @@ describe('AddresslistVoting', function () {
     });
 
     it('reverts creation if the creator tries to vote before the start date', async () => {
-      await voting.initialize(dao.address, votingSettings, await addresses(1));
+      await voting.initialize(dao.address, votingSettings, [
+        signers[0].address,
+      ]);
 
       expect(await getTime()).to.be.lessThan(startDate);
 
@@ -410,7 +424,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          await addresses(10)
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
         );
 
         expect(
@@ -540,7 +554,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          await addresses(10)
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
         );
 
         expect(
@@ -733,7 +747,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          await addresses(10)
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
         );
 
         expect(
@@ -870,7 +884,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          await addresses(10)
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
         );
 
         await voting.createProposal(
@@ -1013,7 +1027,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          await addresses(10)
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
         );
         expect(
           (
@@ -1203,7 +1217,7 @@ describe('AddresslistVoting', function () {
         await voting.initialize(
           dao.address,
           votingSettings,
-          await addresses(10)
+          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => signers[i].address)
         );
 
         await voting.createProposal(

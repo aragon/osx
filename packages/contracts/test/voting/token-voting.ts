@@ -490,7 +490,9 @@ describe('TokenVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     beforeEach(async () => {
-      const receivers = await addresses(12);
+      const receivers = Array.from(Array(12).keys()).map(
+        i => signers[i].address
+      );
       const amounts = Array(9).fill(10).concat([5, 4, 1]);
 
       const balances = receivers.map((receiver, i) => {
@@ -999,7 +1001,9 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        const receivers = await addresses(10);
+        const receivers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(
+          i => signers[i].address
+        );
         const amounts = Array(10).fill(10);
         const balances = receivers.map((receiver, i) => {
           return {
