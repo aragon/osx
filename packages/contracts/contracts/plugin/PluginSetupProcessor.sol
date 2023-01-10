@@ -38,13 +38,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 private constant EMPTY_ARRAY_ENCODED_HASH =
         bytes32(0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd);
 
-    struct PluginInformation {
+    struct PluginState {
         uint256 blockNumber;
         bytes32 currentSetupId;
         mapping(bytes32 => uint256) setupIds;
     }
 
-    mapping(bytes32 => PluginInformation) private states;
+    mapping(bytes32 => PluginState) private states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     struct PrepareInstall {
@@ -288,22 +288,22 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.Install
         );
 
-        PluginInformation storage pluginInformation = states[pluginId];
+        PluginState storage pluginState = states[pluginId];
 
         // Allow calling `prepareInstallation` only when
         // plugin was uninstalled or never been installed before.
-        if (pluginInformation.currentSetupId != bytes32(0)) {
+        if (pluginState.currentSetupId != bytes32(0)) {
             revert PluginAlreadyInstalled();
         }
 
         // Only allow to prepare if setupId has not been prepared before.
         // NOTE that if plugin was uninstalled, the same setupId can still
         // be prepared as blockNumber would end up being higher than setupId's blockNumber.
-        if (pluginInformation.blockNumber < pluginInformation.setupIds[setupId]) {
+        if (pluginState.blockNumber < pluginState.setupIds[setupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
-        pluginInformation.setupIds[setupId] = block.number;
+        pluginState.setupIds[setupId] = block.number;
 
         emit InstallationPrepared({
             sender: msg.sender,
@@ -328,7 +328,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     {
         bytes32 pluginId = _getPluginId(_dao, _params.plugin);
 
-        PluginInformation storage pluginInformation = states[pluginId];
+        PluginState storage pluginState = states[pluginId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -341,14 +341,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Allow calling `applyInstallation` only when
         // plugin was uninstalled or never been installed before.
-        if (pluginInformation.currentSetupId != bytes32(0)) {
+        if (pluginState.currentSetupId != bytes32(0)) {
             revert PluginAlreadyInstalled();
         }
 
         // If the plugin block number exceeds the setupId preparation block number,
         // This means applyInstallation was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginInformation.blockNumber >= pluginInformation.setupIds[setupId]) {
+        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
             revert SetupNotEligible(setupId);
         }
 
@@ -361,8 +361,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.None
         );
 
-        pluginInformation.currentSetupId = newSetupId;
-        pluginInformation.blockNumber = block.number;
+        pluginState.currentSetupId = newSetupId;
+        pluginState.blockNumber = block.number;
 
         _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
 
@@ -391,7 +391,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
 
-        PluginInformation storage pluginInformation = states[pluginId];
+        PluginState storage pluginState = states[pluginId];
 
         bytes32 currentHelpersHash = hHash(_params.setupPayload.currentHelpers);
 
@@ -406,9 +406,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // The following check implicitly confirms that plugin
         // is currently installed. Otherwise, currentSetupId wouldn't be set.
-        if (pluginInformation.currentSetupId != setupId) {
+        if (pluginState.currentSetupId != setupId) {
             revert InvalidSetupId({
-                currentSetupId: pluginInformation.currentSetupId,
+                currentSetupId: pluginState.currentSetupId,
                 setupId: setupId
             });
         }
@@ -465,11 +465,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Only allow to prepare if setupId has not been prepared before.
         // Note that the following check ensures that the same setupId can be prepared
         // once again if the plugin was uninstalled and then installed..
-        if (pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
+        if (pluginState.blockNumber < pluginState.setupIds[newSetupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
-        pluginInformation.setupIds[newSetupId] = block.number;
+        pluginState.setupIds[newSetupId] = block.number;
 
         // Avoid stack too deep.
         emitPrepareUpdateEvent(_dao, newSetupId, _params, preparedDependency, initData);
@@ -486,7 +486,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     {
         bytes32 pluginId = _getPluginId(_dao, _params.plugin);
 
-        PluginInformation storage pluginInformation = states[pluginId];
+        PluginState storage pluginState = states[pluginId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -500,7 +500,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // If the plugin block number exceeds the setupId preparation block number,
         // This means applyUpdate was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginInformation.blockNumber >= pluginInformation.setupIds[setupId]) {
+        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
             revert SetupNotEligible(setupId);
         }
 
@@ -517,8 +517,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.None
         );
 
-        pluginInformation.blockNumber = block.number;
-        pluginInformation.currentSetupId = newSetupId;
+        pluginState.blockNumber = block.number;
+        pluginState.currentSetupId = newSetupId;
 
         PluginRepo.Version memory version = _params.pluginSetupRef.pluginSetupRepo.getVersion(
             _params.pluginSetupRef.versionTag
@@ -549,7 +549,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     {
         bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
 
-        PluginInformation storage pluginInformation = states[pluginId];
+        PluginState storage pluginState = states[pluginId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -560,9 +560,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.None
         );
 
-        if (pluginInformation.currentSetupId != setupId) {
+        if (pluginState.currentSetupId != setupId) {
             revert InvalidSetupId({
-                currentSetupId: pluginInformation.currentSetupId,
+                currentSetupId: pluginState.currentSetupId,
                 setupId: setupId
             });
         }
@@ -588,11 +588,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Only allow to prepare if setupId has not been prepared before.
         // Note that the following check ensures that the same setupId can be prepared
         // once again if the plugin was uninstalled and then installed/updated..
-        if (pluginInformation.blockNumber < pluginInformation.setupIds[newSetupId]) {
+        if (pluginState.blockNumber < pluginState.setupIds[newSetupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
-        pluginInformation.setupIds[newSetupId] = block.number;
+        pluginState.setupIds[newSetupId] = block.number;
 
         emit UninstallationPrepared({
             sender: msg.sender,
@@ -617,7 +617,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     {
         bytes32 pluginId = _getPluginId(_dao, _params.plugin);
 
-        PluginInformation storage pluginInformation = states[pluginId];
+        PluginState storage pluginState = states[pluginId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -631,12 +631,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // If the plugin block number exceeds the setupId preparation block number,
         // This means applyUninstallation was already called on another setupId
         // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginInformation.blockNumber >= pluginInformation.setupIds[setupId]) {
+        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
             revert SetupNotEligible(setupId);
         }
 
-        pluginInformation.blockNumber = block.number;
-        pluginInformation.currentSetupId = bytes32(0);
+        pluginState.blockNumber = block.number;
+        pluginState.currentSetupId = bytes32(0);
 
         _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
 
