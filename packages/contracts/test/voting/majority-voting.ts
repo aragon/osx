@@ -11,7 +11,7 @@ import {
   ONE_HOUR,
   ONE_YEAR,
 } from '../test-utils/voting';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {OZ_ERRORS} from '../test-utils/error';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -55,7 +55,7 @@ describe('MajorityVotingMock', function () {
 
       await expect(
         votingBase.initializeMock(dao.address, votingSettings)
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
   });
 
@@ -65,55 +65,31 @@ describe('MajorityVotingMock', function () {
     });
     it('reverts if the support threshold specified exceeds 100%', async () => {
       votingSettings.supportThreshold = pct16(1000);
-      await expect(
-        votingBase.updateVotingSettings(votingSettings)
-      ).to.be.revertedWith(
-        customError(
-          'PercentageExceeds100',
-          pct16(100),
-          votingSettings.supportThreshold
-        )
-      );
+      await expect(votingBase.updateVotingSettings(votingSettings))
+        .to.be.revertedWithCustomError(votingBase, 'PercentageExceeds100')
+        .withArgs(pct16(100), votingSettings.supportThreshold);
     });
 
     it('reverts if the participation threshold specified exceeds 100%', async () => {
       votingSettings.minParticipation = pct16(1000);
 
-      await expect(
-        votingBase.updateVotingSettings(votingSettings)
-      ).to.be.revertedWith(
-        customError(
-          'PercentageExceeds100',
-          pct16(100),
-          votingSettings.minParticipation
-        )
-      );
+      await expect(votingBase.updateVotingSettings(votingSettings))
+        .to.be.revertedWithCustomError(votingBase, 'PercentageExceeds100')
+        .withArgs(pct16(100), votingSettings.minParticipation);
     });
 
     it('reverts if the minimal duration is shorter than one hour', async () => {
       votingSettings.minDuration = ONE_HOUR - 1;
-      await expect(
-        votingBase.updateVotingSettings(votingSettings)
-      ).to.be.revertedWith(
-        customError(
-          'MinDurationOutOfBounds',
-          ONE_HOUR,
-          votingSettings.minDuration
-        )
-      );
+      await expect(votingBase.updateVotingSettings(votingSettings))
+        .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
+        .withArgs(ONE_HOUR, votingSettings.minDuration);
     });
 
     it('reverts if the minimal duration is longer than one year', async () => {
       votingSettings.minDuration = ONE_YEAR + 1;
-      await expect(
-        votingBase.updateVotingSettings(votingSettings)
-      ).to.be.revertedWith(
-        customError(
-          'MinDurationOutOfBounds',
-          ONE_YEAR,
-          votingSettings.minDuration
-        )
-      );
+      await expect(votingBase.updateVotingSettings(votingSettings))
+        .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
+        .withArgs(ONE_YEAR, votingSettings.minDuration);
     });
 
     it('should change the voting settings successfully', async () => {

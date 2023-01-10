@@ -8,7 +8,6 @@ import {
   ENSSubdomainRegistrar,
   PluginRepoRegistry,
 } from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployNewPluginRepo} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
@@ -116,16 +115,15 @@ describe('PluginRepoRegistry', function () {
         pluginRepoName,
         newPluginRepo.address
       )
-    ).to.be.revertedWith(
-      customError(
-        'DaoUnauthorized',
+    )
+      .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
+      .withArgs(
         managingDAO.address,
         pluginRepoRegistry.address,
         pluginRepoRegistry.address,
         ownerAddress,
         REGISTER_PLUGIN_REPO_PERMISSION_ID
-      )
-    );
+      );
   });
 
   it('reverts the registration if the plugin repo already exists in the registry', async function () {
@@ -133,9 +131,12 @@ describe('PluginRepoRegistry', function () {
 
     await expect(
       pluginRepoRegistry.registerPluginRepo('repo-2', pluginRepo.address)
-    ).to.be.revertedWith(
-      customError('ContractAlreadyRegistered', pluginRepo.address)
-    );
+    )
+      .to.be.revertedWithCustomError(
+        pluginRepoRegistry,
+        'ContractAlreadyRegistered'
+      )
+      .withArgs(pluginRepo.address);
   });
 
   it("reverts the registration if the plugin repo's ENS name is already taken", async function () {
@@ -150,12 +151,8 @@ describe('PluginRepoRegistry', function () {
 
     await expect(
       pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address)
-    ).to.be.revertedWith(
-      customError(
-        'AlreadyRegistered',
-        pluginRepoNameDomainHash,
-        ensSubdomainRegistrar.address
-      )
-    );
+    )
+      .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
+      .withArgs(pluginRepoNameDomainHash, ensSubdomainRegistrar.address);
   });
 });

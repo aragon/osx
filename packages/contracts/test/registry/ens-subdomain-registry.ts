@@ -8,9 +8,8 @@ import {
   PublicResolver,
   ENSRegistry,
 } from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
-
+import {OZ_ERRORS} from '../test-utils/error';
 import {setupResolver} from '../test-utils/ens';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
@@ -279,13 +278,9 @@ describe('ENSSubdomainRegistrar', function () {
         registrar
           .connect(signers[1])
           .initialize(managingDao.address, ens.address, ensDomainHash('test2'))
-      ).to.be.revertedWith(
-        customError(
-          'InvalidResolver',
-          ensDomainHash('test2'),
-          ethers.constants.AddressZero
-        )
-      );
+      )
+        .to.be.revertedWithCustomError(registrar, 'InvalidResolver')
+        .withArgs(ensDomainHash('test2'), ethers.constants.AddressZero);
     });
 
     it('reverts on attempted subnode registration', async () => {
@@ -325,7 +320,7 @@ describe('ENSSubdomainRegistrar', function () {
             ens.address,
             ensDomainHash('foo')
           )
-        ).to.be.revertedWith('Initializable: contract is already initialized');
+        ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
       });
 
       it('reverts subnode registration if the calling address lacks permission of the managing DAO', async () => {
@@ -336,16 +331,15 @@ describe('ENSSubdomainRegistrar', function () {
           registrar
             .connect(signers[1])
             .registerSubnode(ensLabelHash('my'), targetAddress)
-        ).to.be.revertedWith(
-          customError(
-            'DaoUnauthorized',
+        )
+          .to.be.revertedWithCustomError(registrar, 'DaoUnauthorized')
+          .withArgs(
             managingDao.address,
             registrar.address,
             registrar.address,
             signers[1].address,
             REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it('reverts setting the resolver if the calling address lacks permission of the managing DAO', async () => {
@@ -354,16 +348,15 @@ describe('ENSSubdomainRegistrar', function () {
           registrar
             .connect(signers[1])
             .setDefaultResolver(ethers.constants.AddressZero)
-        ).to.be.revertedWith(
-          customError(
-            'DaoUnauthorized',
+        )
+          .to.be.revertedWithCustomError(registrar, 'DaoUnauthorized')
+          .withArgs(
             managingDao.address,
             registrar.address,
             registrar.address,
             signers[1].address,
             REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
-          )
-        );
+          );
       });
 
       describe('After granting permission to the calling address via the managing DAO', () => {
@@ -416,13 +409,9 @@ describe('ENSSubdomainRegistrar', function () {
                 ensLabelHash('my'),
                 await signers[2].getAddress()
               )
-          ).to.be.revertedWith(
-            customError(
-              'AlreadyRegistered',
-              ensDomainHash('my.test'),
-              registrar.address
-            )
-          );
+          )
+            .to.be.revertedWithCustomError(registrar, 'AlreadyRegistered')
+            .withArgs(ensDomainHash('my.test'), registrar.address);
         });
 
         it('reverts subnode registration if the subdomain was already registered before, also for the same caller', async () => {
@@ -441,13 +430,9 @@ describe('ENSSubdomainRegistrar', function () {
                 ensLabelHash('my'),
                 await signers[1].getAddress()
               )
-          ).to.be.revertedWith(
-            customError(
-              'AlreadyRegistered',
-              ensDomainHash('my.test'),
-              registrar.address
-            )
-          );
+          )
+            .to.be.revertedWithCustomError(registrar, 'AlreadyRegistered')
+            .withArgs(ensDomainHash('my.test'), registrar.address);
         });
 
         it('revert if invalid resolver is set', async () => {
@@ -455,13 +440,9 @@ describe('ENSSubdomainRegistrar', function () {
 
           await expect(
             registrar.connect(signers[1]).setDefaultResolver(newResolverAddr)
-          ).to.be.revertedWith(
-            customError(
-              'InvalidResolver',
-              ensDomainHash('test'),
-              newResolverAddr
-            )
-          );
+          )
+            .to.be.revertedWithCustomError(registrar, 'InvalidResolver')
+            .withArgs(ensDomainHash('test'), newResolverAddr);
         });
 
         it('sets the resolver correctly', async () => {

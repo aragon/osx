@@ -110,7 +110,7 @@ describe('AddresslistVotingSetup', function () {
       await expect(
         addresslistVotingSetup.prepareInstallation(
           targetDao.address,
-          defaultData.substring(0, defaultData.length - 1)
+          defaultData.substring(0, defaultData.length - 2)
         )
       ).to.be.reverted;
 

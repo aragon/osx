@@ -20,7 +20,6 @@ import {
   DAO,
 } from '../../typechain';
 
-import {customError} from '../test-utils/custom-error-helper';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 
 import {deployNewDAO} from '../test-utils/dao';
@@ -274,7 +273,7 @@ describe('Plugin Setup Processor', function () {
             pluginSetupRepoAddr,
             data
           )
-        ).to.be.revertedWith(customError('PluginRepoNonexistent'));
+        ).to.be.revertedWithCustomError(psp, 'PluginRepoNonexistent');
       });
 
       it('reverts if installation is already prepared', async () => {
@@ -304,7 +303,7 @@ describe('Plugin Setup Processor', function () {
             repoU.address,
             data2
           )
-        ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
+        ).to.be.revertedWithCustomError(psp, 'SetupAlreadyPrepared');
       });
 
       it('prepares an UUPS upgradeable plugin installation', async () => {
@@ -386,14 +385,13 @@ describe('Plugin Setup Processor', function () {
             plugin,
             permissions
           )
-        ).to.be.revertedWith(
-          customError(
-            'SetupApplicationUnauthorized',
+        )
+          .to.be.revertedWithCustomError(psp, 'SetupApplicationUnauthorized')
+          .withArgs(
             targetDao.address,
             ownerAddress,
             APPLY_INSTALLATION_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
@@ -421,15 +419,14 @@ describe('Plugin Setup Processor', function () {
             plugin,
             permissions
           )
-        ).to.be.revertedWith(
-          customError(
-            'Unauthorized',
+        )
+          .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
+          .withArgs(
             targetDao.address,
             permissions[0]['where'],
             psp.address,
             ROOT_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it('reverts if a `PluginSetup` contract returns the same plugin address multiple times across different setups', async () => {
@@ -477,7 +474,7 @@ describe('Plugin Setup Processor', function () {
             secondPreparation.plugin,
             secondPreparation.permissions
           )
-        ).to.be.revertedWith(customError('SetupAlreadyApplied'));
+        ).to.be.revertedWithCustomError(psp, 'SetupAlreadyApplied');
       });
 
       it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
@@ -505,7 +502,7 @@ describe('Plugin Setup Processor', function () {
             plugin,
             badPermissions
           )
-        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
+        ).to.be.revertedWithCustomError(psp, 'PermissionsHashMismatch');
       });
 
       it('reverts if the installation was not prepared', async () => {
@@ -533,7 +530,7 @@ describe('Plugin Setup Processor', function () {
             unpreparedPlugin,
             unPreparedPermissions
           )
-        ).to.be.revertedWith(customError('SetupNotPrepared'));
+        ).to.be.revertedWithCustomError(psp, 'SetupNotPrepared');
       });
 
       it('applies a prepared installation', async () => {
@@ -600,7 +597,7 @@ describe('Plugin Setup Processor', function () {
             [AddressZero],
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginRepoNonexistent'));
+        ).to.be.revertedWithCustomError(psp, 'PluginRepoNonexistent');
       });
 
       it('reverts if plugin is not applied yet', async () => {
@@ -621,7 +618,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('SetupNotApplied'));
+        ).to.be.revertedWithCustomError(psp, 'SetupNotApplied');
       });
 
       it('reverts if plugin uninstallation is already prepared', async () => {
@@ -647,7 +644,7 @@ describe('Plugin Setup Processor', function () {
             helpersUV1,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('SetupAlreadyPrepared'));
+        ).to.be.revertedWithCustomError(psp, 'SetupAlreadyPrepared');
       });
 
       it('prepares an UUPS upgradeable plugin uninstallation', async () => {
@@ -734,14 +731,13 @@ describe('Plugin Setup Processor', function () {
             helpersUV1,
             permissionsUV1
           )
-        ).to.be.revertedWith(
-          customError(
-            'SetupApplicationUnauthorized',
+        )
+          .to.be.revertedWithCustomError(psp, 'SetupApplicationUnauthorized')
+          .withArgs(
             targetDao.address,
             ownerAddress,
             APPLY_UNINSTALLATION_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
@@ -777,15 +773,14 @@ describe('Plugin Setup Processor', function () {
             helpersUV1,
             uninstallPermissionsV1
           )
-        ).to.be.revertedWith(
-          customError(
-            'Unauthorized',
+        )
+          .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
+          .withArgs(
             targetDao.address,
             uninstallPermissionsV1[0]['where'],
             psp.address,
             ROOT_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it('reverts if helpers do not match', async () => {
@@ -798,7 +793,7 @@ describe('Plugin Setup Processor', function () {
             [],
             []
           )
-        ).to.be.revertedWith(customError('HelpersHashMismatch'));
+        ).to.be.revertedWithCustomError(psp, 'HelpersHashMismatch');
       });
 
       it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
@@ -829,7 +824,7 @@ describe('Plugin Setup Processor', function () {
             returnedHelpers,
             badPermissions
           )
-        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
+        ).to.be.revertedWithCustomError(psp, 'PermissionsHashMismatch');
       });
 
       it('applies a prepared uninstallation', async () => {
@@ -913,7 +908,9 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('IPluginNotSupported', plugin));
+        )
+          .to.be.revertedWithCustomError(psp, 'IPluginNotSupported')
+          .withArgs(plugin);
       });
 
       it('reverts if plugin supports the `IPlugin` interface, but is non-upgradable', async () => {
@@ -938,9 +935,9 @@ describe('Plugin Setup Processor', function () {
             helpersUV1,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(
-          customError('PluginNonupgradeable', pluginCloneable)
-        );
+        )
+          .to.be.revertedWithCustomError(psp, 'PluginNonupgradeable')
+          .withArgs(pluginCloneable);
       });
 
       it('reverts if `PluginSetupRepo` do not exist on `PluginRepoRegistry`', async () => {
@@ -967,7 +964,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('PluginRepoNonexistent'));
+        ).to.be.revertedWithCustomError(psp, 'PluginRepoNonexistent');
       });
 
       it('revert if plugin is not applied', async () => {
@@ -993,7 +990,7 @@ describe('Plugin Setup Processor', function () {
             helpers,
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('SetupNotApplied'));
+        ).to.be.revertedWithCustomError(psp, 'SetupNotApplied');
       });
 
       it('reverts if helpers passed do not match', async () => {
@@ -1011,7 +1008,7 @@ describe('Plugin Setup Processor', function () {
             [],
             EMPTY_DATA
           )
-        ).to.be.revertedWith(customError('HelpersHashMismatch'));
+        ).to.be.revertedWithCustomError(psp, 'HelpersHashMismatch');
       });
 
       it('returns permissions and initData correctly', async () => {
@@ -1085,14 +1082,13 @@ describe('Plugin Setup Processor', function () {
             EMPTY_DATA,
             []
           )
-        ).to.be.revertedWith(
-          customError(
-            'SetupApplicationUnauthorized',
+        )
+          .to.be.revertedWithCustomError(psp, 'SetupApplicationUnauthorized')
+          .withArgs(
             targetDao.address,
             ownerAddress,
             APPLY_UPDATE_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it("reverts if PluginSetupProcessor does not have DAO's `ROOT_PERMISSION`", async () => {
@@ -1135,15 +1131,14 @@ describe('Plugin Setup Processor', function () {
             initDataV2,
             permissionsV2
           )
-        ).to.be.revertedWith(
-          customError(
-            'Unauthorized',
+        )
+          .to.be.revertedWithCustomError(targetDao, 'Unauthorized')
+          .withArgs(
             targetDao.address,
             permissionsV2[0]['where'],
             psp.address,
             ROOT_PERMISSION_ID
-          )
-        );
+          );
       });
 
       it('reverts if the plugin setup processor does not have the `UPGRADE_PLUGIN_PERMISSION_ID` permission', async () => {
@@ -1177,14 +1172,13 @@ describe('Plugin Setup Processor', function () {
             initDataV2,
             permissionsV2
           )
-        ).to.be.revertedWith(
-          customError(
-            'PluginProxyUpgradeFailed',
+        )
+          .to.be.revertedWithCustomError(psp, 'PluginProxyUpgradeFailed')
+          .withArgs(
             proxy,
             await setupUV2.callStatic.getImplementationAddress(),
             initDataV2
-          )
-        );
+          );
       });
 
       it('reverts if there is a mismatch between the permissions prepared and to be applied', async () => {
@@ -1218,7 +1212,7 @@ describe('Plugin Setup Processor', function () {
             initData,
             badPermissions
           )
-        ).to.be.revertedWith(customError('PermissionsHashMismatch'));
+        ).to.be.revertedWithCustomError(psp, 'PermissionsHashMismatch');
       });
     });
   });
@@ -2008,9 +2002,12 @@ async function updateHelper(
     expect(upgradedEvent).to.not.equal(undefined);
     expect(newImpl).to.equal(upgradedEvent.args.implementation);
 
-     // ensure that the logic address was also correctly modified on the proxy.
-     const proxyContract = await ethers.getContractAt("PluginUUPSUpgradeable", proxy);
-     expect(await proxyContract.getImplementationAddress()).to.equal(newImpl); 
+    // ensure that the logic address was also correctly modified on the proxy.
+    const proxyContract = await ethers.getContractAt(
+      'PluginUUPSUpgradeable',
+      proxy
+    );
+    expect(await proxyContract.getImplementationAddress()).to.equal(newImpl);
   }
 
   return {updatedHelpers, permissions, initData};
