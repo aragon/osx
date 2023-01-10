@@ -74,7 +74,7 @@ contract PluginRepo is
     error InvalidContractAddress(address invalidContract);
 
     /// @notice Thrown if release id is 0.
-    error ReleaseNull();
+    error ReleaseIdZeroNotAllowed();
 
     /// @notice Thrown if release id is by more than 1 to the previous release id.
     /// @param currentRelease the current latest release id.
@@ -169,7 +169,7 @@ contract PluginRepo is
         }
 
         if (_release == 0) {
-            revert ReleaseNull();
+            revert ReleaseIdZeroNotAllowed();
         }
 
         // Can't release 3 unless 2 is released.
