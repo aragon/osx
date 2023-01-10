@@ -129,18 +129,11 @@ describe('Core: PermissionManager', function () {
       ).to.emit(pm, 'Granted');
     });
 
-    it('should revert with already granted', async () => {
+    it('should not emit granted event if already granted', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
         pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWith(
-        customError(
-          'PermissionAlreadyGranted',
-          pm.address,
-          otherSigner.address,
-          ADMIN_PERMISSION_ID
-        )
-      );
+      ).to.not.emit(pm, 'Granted');
     });
 
     it('should revert if frozen', async () => {
@@ -233,7 +226,7 @@ describe('Core: PermissionManager', function () {
       ).to.emit(pm, 'Granted');
     });
 
-    it('should revert with already granted', async () => {
+    it('should not emit Granted with already granted', async () => {
       await pm.grantWithOracle(
         pm.address,
         otherSigner.address,
@@ -247,14 +240,7 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID,
           ALLOW_FLAG
         )
-      ).to.be.revertedWith(
-        customError(
-          'PermissionAlreadyGranted',
-          pm.address,
-          otherSigner.address,
-          ADMIN_PERMISSION_ID
-        )
-      );
+      ).to.not.emit(pm, 'Granted')
     });
 
     it('should revert when oracle is not present for `who = ANY_ADDR` or `where = ANY_ADDR` and permissionId is not restricted', async () => {
@@ -394,19 +380,12 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should revert if already revoked', async () => {
+    it('should not emit revoked if already revoked', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await expect(
         pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWith(
-        customError(
-          'PermissionAlreadyRevoked',
-          pm.address,
-          otherSigner.address,
-          ADMIN_PERMISSION_ID
-        )
-      );
+      ).to.not.emit(pm, 'Revoked');
     });
 
     it('should not allow', async () => {
@@ -457,12 +436,11 @@ describe('Core: PermissionManager', function () {
       );
     });
 
-    it('should revert if already frozen', async () => {
+    it('should not emit frozen if already frozen', async () => {
       await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      await expect(
-        pm.freeze(pm.address, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWith(
-        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
+      await expect(pm.freeze(pm.address, ADMIN_PERMISSION_ID)).to.not.emit(
+        pm,
+        'Frozen'
       );
     });
 
@@ -820,27 +798,34 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await expect(
-        pm.bulkOnSingleTarget(pm.address, bulkItems)
-      ).to.be.revertedWith(
-        customError('PermissionFrozen', pm.address, ADMIN_PERMISSION_ID)
+      await expect(pm.bulkOnSingleTarget(pm.address, bulkItems))
+        .to.emit(pm, 'Revoked')
+        .withArgs(
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address,
+          pm.address,
+          signers[1].address
+        )
+        .to.emit(pm, 'Granted')
+        .withArgs(
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address,
+          pm.address,
+          signers[2].address
+        )
+        .to.emit(pm, 'Frozen')
+        .withArgs(
+          ADMIN_PERMISSION_ID,
+          ownerSigner.address,
+          pm.address
+        );  
+      
+      // Even though the ADMIN_PERMISSION_ID becomes frozen, signers[2].address still has it granted.
+      expect(await pm.getAuthPermission(pm.address, signers[2].address, ADMIN_PERMISSION_ID)).to.be.equal(
+        ALLOW_FLAG
       );
-      expect(
-        await pm.getAuthPermission(
-          pm.address,
-          signers[1].address,
-          ADMIN_PERMISSION_ID
-        )
-      ).to.be.equal(ALLOW_FLAG);
-      expect(
-        await pm.getAuthPermission(
-          pm.address,
-          signers[2].address,
-          ADMIN_PERMISSION_ID
-        )
-      ).to.be.equal(UNSET_FLAG);
       expect(await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
-        false
+        true
       );
     });
 

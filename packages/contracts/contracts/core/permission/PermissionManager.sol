@@ -35,18 +35,6 @@ contract PermissionManager is Initializable {
     /// @param permissionId The permission identifier.
     error Unauthorized(address here, address where, address who, bytes32 permissionId);
 
-    /// @notice Thrown if a permission has been already granted.
-    /// @param where The address of the target contract to grant `who` permission to.
-    /// @param who The address (EOA or contract) to which the permission has already been granted.
-    /// @param permissionId The permission identifier.
-    error PermissionAlreadyGranted(address where, address who, bytes32 permissionId);
-
-    /// @notice Thrown if a permission has been already revoked.
-    /// @param where The address of the target contract to revoke `who`s permission from.
-    /// @param who The address (EOA or contract) from which the permission has already been revoked.
-    /// @param permissionId The permission identifier.
-    error PermissionAlreadyRevoked(address where, address who, bytes32 permissionId);
-
     /// @notice Thrown if a permission is frozen.
     /// @param where The address of the target contract for which the permission is frozen.
     /// @param permissionId The permission identifier.
@@ -300,16 +288,18 @@ contract PermissionManager is Initializable {
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
 
-        if (permissionsHashed[permHash] != UNSET_FLAG) {
-            revert PermissionAlreadyGranted({
-                where: _where,
-                who: _who,
-                permissionId: _permissionId
-            });
-        }
-        permissionsHashed[permHash] = address(_oracle);
+        if (permissionsHashed[permHash] == UNSET_FLAG) {
+            permissionsHashed[permHash] = address(_oracle);
 
-        emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
+            emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
+        } else {
+            // The same permission already set. Though, Oracles are different. 
+            // If we don't revert, caller will think that his tx succeeded with his oracle, horrible.
+            // If psp calls it, it's a MUST it should revert, but here is tricky problem. Even though, we revert in grant
+            // for such special case, what plugin setup of dev will do is revoke first, then grant with his new oracle.
+            // Pretty hard to review this by the users on UI. need
+            // Should we revert or put this responsibility 
+        }
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager.
@@ -326,16 +316,11 @@ contract PermissionManager is Initializable {
         }
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
-        if (permissionsHashed[permHash] == UNSET_FLAG) {
-            revert PermissionAlreadyRevoked({
-                where: _where,
-                who: _who,
-                permissionId: _permissionId
-            });
-        }
-        permissionsHashed[permHash] = UNSET_FLAG;
+        if (permissionsHashed[permHash] != UNSET_FLAG) {
+            permissionsHashed[permHash] = UNSET_FLAG;
 
-        emit Revoked(_permissionId, msg.sender, _where, _who);
+            emit Revoked(_permissionId, msg.sender, _where, _who);
+        }
     }
 
     /// @notice This method is used in the public `freeze` method of the permission manager.
@@ -347,13 +332,11 @@ contract PermissionManager is Initializable {
         }
 
         bytes32 frozenPermHash = frozenPermissionHash(_where, _permissionId);
-        if (frozenPermissionsHashed[frozenPermHash]) {
-            revert PermissionFrozen({where: _where, permissionId: _permissionId});
+        if (!frozenPermissionsHashed[frozenPermHash]) {
+            frozenPermissionsHashed[frozenPermHash] = true;
+
+            emit Frozen(_permissionId, msg.sender, _where);
         }
-
-        frozenPermissionsHashed[frozenPermHash] = true;
-
-        emit Frozen(_permissionId, msg.sender, _where);
     }
 
     /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was specified in the setup.
