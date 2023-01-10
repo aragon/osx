@@ -9,7 +9,7 @@ import {
   ENSRegistry,
 } from '../../typechain';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
-
+import {OZ_ERRORS} from '../test-utils/error';
 import {setupResolver} from '../test-utils/ens';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
@@ -320,7 +320,7 @@ describe('ENSSubdomainRegistrar', function () {
             ens.address,
             ensDomainHash('foo')
           )
-        ).to.be.revertedWith('Initializable: contract is already initialized');
+        ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
       });
 
       it('reverts subnode registration if the calling address lacks permission of the managing DAO', async () => {

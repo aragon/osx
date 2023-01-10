@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
@@ -24,8 +25,9 @@ import {
   VotingMode,
   ONE_HOUR,
   MAX_UINT64,
+  voteWithSigners,
 } from '../test-utils/voting';
-import {addresses} from '../test-utils/addresses';
+import {OZ_ERRORS} from '../test-utils/error';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -116,26 +118,24 @@ describe('TokenVoting', function () {
     );
   });
 
-  async function setBalances(
-    receivers: string[],
-    amounts: number[],
-    totalSupply: number
-  ) {
-    expect(receivers.length).to.equal(amounts.length);
+  async function setBalances(balances: {receiver: string; amount: number}[]) {
+    const promises = balances.map(balance =>
+      governanceErc20Mock.setBalance(balance.receiver, balance.amount)
+    );
+    await Promise.all(promises);
+  }
 
-    let summedAmounts = amounts.reduce((a, b) => a + b, 0);
+  async function setTotalSupply(totalSupply: number) {
+    await ethers.provider.send('evm_mine', []);
+    let block = await ethers.provider.getBlock('latest');
 
-    expect(summedAmounts).to.be.lte(totalSupply);
+    const currentTotalSupply: BigNumber =
+      await governanceErc20Mock.getPastTotalSupply(block.number - 1);
 
-    // Mint the difference between `totalSupply` and `summedAmounts` to `address(0)`
-    if (summedAmounts < totalSupply) {
-      receivers.push(`0x${'dead'.repeat(10)}`);
-      amounts.push(totalSupply - summedAmounts);
-    }
-
-    for (let i = 0; i < receivers.length; i++) {
-      await governanceErc20Mock.setBalance(receivers[i], amounts[i]);
-    }
+    await governanceErc20Mock.setBalance(
+      `0x${'0'.repeat(39)}1`, // address(1)
+      BigNumber.from(totalSupply).sub(currentTotalSupply)
+    );
   }
 
   describe('initialize: ', async () => {
@@ -152,13 +152,14 @@ describe('TokenVoting', function () {
           votingSettings,
           governanceErc20Mock.address
         )
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
   });
 
   describe('Proposal creation', async () => {
     beforeEach(async () => {
-      await setBalances([signers[0].address], [1], 1);
+      await setBalances([{receiver: signers[0].address, amount: 1}]);
+      await setTotalSupply(1);
     });
 
     it('reverts if the user is not allowed to create a proposal', async () => {
@@ -200,11 +201,12 @@ describe('TokenVoting', function () {
     it('reverts if the user is not allowed to create a proposal and minProposerPower > 1 is selected', async () => {
       votingSettings.minProposerVotingPower = 123;
 
-      await setBalances(
-        [signers[1].address],
-        [votingSettings.minProposerVotingPower],
-        1 + votingSettings.minProposerVotingPower
-      );
+      await setBalances([
+        {
+          receiver: signers[1].address,
+          amount: votingSettings.minProposerVotingPower,
+        },
+      ]);
 
       await voting.initialize(
         dao.address,
@@ -487,11 +489,18 @@ describe('TokenVoting', function () {
 
   describe('Proposal + Execute:', async () => {
     beforeEach(async () => {
-      await setBalances(
-        await addresses(12),
-        Array(9).fill(10).concat([5, 4, 1]),
-        100
-      );
+      const receivers = signers.slice(0, 12).map(s => s.address);
+      const amounts = Array(9).fill(10).concat([5, 4, 1]);
+
+      const balances = receivers.map((receiver, i) => {
+        return {
+          receiver: receiver,
+          amount: amounts[i],
+        };
+      });
+
+      await setBalances(balances);
+      await setTotalSupply(100);
     });
 
     context('Standard Mode', async () => {
@@ -541,12 +550,11 @@ describe('TokenVoting', function () {
       it('cannot early execute', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3, 4, 5], // 60 votes
+          no: [],
+          abstain: [],
+        });
 
         expect(await voting.worstCaseSupport(id)).to.be.gt(
           votingSettings.supportThreshold
@@ -560,13 +568,11 @@ describe('TokenVoting', function () {
       it('can execute normally if participation and support are met', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
-        await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
-        await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2], // 30 votes
+          no: [3, 4], // 20 votes
+          abstain: [5, 6], // 20 votes
+        });
 
         expect(await voting.worstCaseSupport(id)).to.be.lte(
           votingSettings.supportThreshold
@@ -588,38 +594,31 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
-      it('does not execute when voting with the `tryEarlyExecution` option', async () => {
+      it('does not execute early when voting with the `tryEarlyExecution` option', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3], // 40 votes
+          no: [],
+          abstain: [],
+        });
 
         expect(await voting.canExecute(id)).to.equal(false);
 
         // `tryEarlyExecution` is turned on but the vote is not decided yet
-        let tx = await voting
-          .connect(signers[4])
-          .vote(id, VoteOption.Yes, true);
-
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
         expect(await voting.canExecute(id)).to.equal(false);
 
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
         // `tryEarlyExecution` is turned off and the vote is decided
-        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         // `tryEarlyExecution` is turned on and the vote is decided
-        tx = await voting.connect(signers[6]).vote(id, VoteOption.Yes, true);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await voting.connect(signers[6]).vote(id, VoteOption.Yes, true);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
       it('reverts if vote is not decided yet', async () => {
@@ -728,12 +727,11 @@ describe('TokenVoting', function () {
 
       it('can execute early if participation is large enough', async () => {
         await advanceIntoVoteTime(startDate, endDate);
-
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3, 4], // 50 votes
+          no: [],
+          abstain: [],
+        });
 
         expect(await voting.worstCaseSupport(id)).to.be.lte(
           votingSettings.supportThreshold
@@ -766,20 +764,11 @@ describe('TokenVoting', function () {
       it('can execute normally if participation is large enough', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        // vote with 50 yes votes
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
-
-        // vote with 30 no votes
-        await voting.connect(signers[5]).vote(id, VoteOption.No, false);
-        await voting.connect(signers[6]).vote(id, VoteOption.No, false);
-        await voting.connect(signers[7]).vote(id, VoteOption.No, false);
-
-        // vote with 10 abstain votes
-        await voting.connect(signers[8]).vote(id, VoteOption.Abstain, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3, 4], // 50 yes
+          no: [5, 6, 7], // 30 votes
+          abstain: [8], // 10 votes
+        });
 
         // closes the vote
         await advanceAfterVoteEnd(endDate);
@@ -791,14 +780,11 @@ describe('TokenVoting', function () {
       it('cannot execute normally if participation is too low', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        // vote with 10 yes votes
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-
-        // vote with 5 no votes
-        await voting.connect(signers[9]).vote(id, VoteOption.No, false);
-
-        // vote with 4 abstain votes
-        await voting.connect(signers[10]).vote(id, VoteOption.Abstain, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0], // 10 votes
+          no: [9], //  5 votes
+          abstain: [10], // 4 votes
+        });
 
         // closes the vote
         await advanceAfterVoteEnd(endDate);
@@ -810,23 +796,26 @@ describe('TokenVoting', function () {
       it('executes the vote immediately when the vote is decided early and the tryEarlyExecution options is selected', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3], // 40 votes
+          no: [], // 0 votes
+          abstain: [], // 0 votes
+        });
 
         // `tryEarlyExecution` is turned on but the vote is not decided yet
-        let tx = await voting
-          .connect(signers[4])
-          .vote(id, VoteOption.Yes, true);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false);
 
         // `tryEarlyExecution` is turned off and the vote is decided
-        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(true);
 
         // `tryEarlyExecution` is turned on and the vote is decided
-        tx = await voting.connect(signers[6]).vote(id, VoteOption.Yes, true);
+        let tx = await voting
+          .connect(signers[6])
+          .vote(id, VoteOption.Yes, true);
         {
           const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
@@ -838,9 +827,7 @@ describe('TokenVoting', function () {
           expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
           expect(event.args.execResults).to.deep.equal(['0x']);
 
-          const vote = await voting.getProposal(id);
-
-          expect(vote.executed).to.equal(true);
+          expect((await voting.getProposal(id)).executed).to.equal(true);
         }
 
         // check for the `ProposalExecuted` event in the voting contract
@@ -919,12 +906,11 @@ describe('TokenVoting', function () {
       it('cannot early execute', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3, 4, 5], // 60 votes
+          no: [],
+          abstain: [],
+        });
 
         expect(await voting.worstCaseSupport(id)).to.be.gt(
           votingSettings.supportThreshold
@@ -938,15 +924,11 @@ describe('TokenVoting', function () {
       it('can execute normally if participation and support are met', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-
-        await voting.connect(signers[3]).vote(id, VoteOption.No, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.No, false);
-
-        await voting.connect(signers[5]).vote(id, VoteOption.Abstain, false);
-        await voting.connect(signers[6]).vote(id, VoteOption.Abstain, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2], // 30 votes
+          no: [3, 4], // 20 votes
+          abstain: [5, 6], // 20 votes
+        });
 
         expect(await voting.worstCaseSupport(id)).to.be.lte(
           votingSettings.supportThreshold
@@ -968,40 +950,31 @@ describe('TokenVoting', function () {
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
-      it('does not execute when voting with the `tryEarlyExecution` option', async () => {
+      it('does not execute early when voting with the `tryEarlyExecution` option', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
-
-        await voting.vote(id, VoteOption.Yes, false);
-        expect(await voting.canExecute(id)).to.equal(false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3], // 40 votes
+          no: [], // 0 votes
+          abstain: [], // 0 votes
+        });
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false); //
 
         // `tryEarlyExecution` is turned on but the vote is not decided yet
-        let tx = await voting
-          .connect(signers[11])
-          .vote(id, VoteOption.Yes, true);
-
-        expect(await voting.worstCaseSupport(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        await voting.connect(signers[4]).vote(id, VoteOption.Yes, true);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
         expect(await voting.canExecute(id)).to.equal(false);
 
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
-
         // `tryEarlyExecution` is turned off and the vote is decided
-        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined; // TODO use .to.emit
+        await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false);
 
-        // `tryEarlyExecution` is turned on and the vote is decided
-        tx = await voting.connect(signers[5]).vote(id, VoteOption.Yes, true);
-        expect(await findEvent(tx, DAO_EVENTS.EXECUTED)).to.be.undefined;
+        //// `tryEarlyExecution` is turned on and the vote is decided
+        await voting.connect(signers[6]).vote(id, VoteOption.Yes, true);
+        expect((await voting.getProposal(id)).executed).to.equal(false);
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
       it('reverts if vote is not decided yet', async () => {
@@ -1025,7 +998,19 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        await setBalances(await addresses(10), Array(10).fill(10), 100);
+        const receivers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(
+          i => signers[i].address
+        );
+        const amounts = Array(10).fill(10);
+        const balances = receivers.map((receiver, i) => {
+          return {
+            receiver: receiver,
+            amount: amounts[i],
+          };
+        });
+
+        await setBalances(balances);
+        await setTotalSupply(100);
 
         await voting.createProposal(
           dummyMetadata,
@@ -1064,9 +1049,11 @@ describe('TokenVoting', function () {
       it('does not execute if participation is high enough but support is too low', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.No, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0], // 10 votes
+          no: [1, 2], //  20 votes
+          abstain: [], // 0 votes
+        });
 
         expect(await voting.participation(id)).to.be.gte(
           votingSettings.minParticipation
@@ -1090,9 +1077,11 @@ describe('TokenVoting', function () {
       it('executes after the duration if participation and support are met', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2], // 30 votes
+          no: [], //  0 votes
+          abstain: [], // 0 votes
+        });
 
         expect(await voting.participation(id)).to.be.gte(
           votingSettings.minParticipation
@@ -1114,11 +1103,10 @@ describe('TokenVoting', function () {
       });
 
       it('executes early if participation and support are met and the vote outcome cannot change anymore', async () => {
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[3]).vote(id, VoteOption.Yes, false);
-        await voting.connect(signers[4]).vote(id, VoteOption.Yes, false);
+        const promises = [0, 1, 2, 3, 4].map(i =>
+          voting.connect(signers[i]).vote(id, VoteOption.Yes, false)
+        );
+        await Promise.all(promises);
 
         expect(await voting.participation(id)).to.be.gte(
           votingSettings.minParticipation
@@ -1160,7 +1148,8 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         );
 
-        await setBalances([signers[0].address], [1], 100);
+        await setBalances([{receiver: signers[0].address, amount: 1}]);
+        await setTotalSupply(100);
 
         await voting.createProposal(
           dummyMetadata,

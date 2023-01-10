@@ -2,11 +2,12 @@ import chai, {expect} from 'chai';
 import {smock} from '@defi-wonderland/smock';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
+import {BigNumber} from 'ethers';
 
 import {getMergedABI} from '../../utils/abi';
 import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {BigNumber} from 'ethers';
+import {OZ_ERRORS} from '../test-utils/error';
 
 chai.use(smock.matchers);
 
@@ -79,7 +80,7 @@ describe('Admin plugin', function () {
       await initializePlugin();
 
       await expect(initializePlugin()).to.be.revertedWith(
-        'Initializable: contract is already initialized'
+        OZ_ERRORS.ALREADY_INITIALIZED
       );
     });
   });

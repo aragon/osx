@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
+import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {DAO} from '../../typechain';
@@ -10,12 +11,25 @@ import {
   MULTISIG_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {addresses} from '../test-utils/addresses';
+import {OZ_ERRORS} from '../test-utils/error';
 
 export type MultisigSettings = {
   minApprovals: number;
   onlyListed: boolean;
 };
+
+export async function approveWithSigners(
+  multisigContract: Contract,
+  proposalId: number,
+  signers: SignerWithAddress[],
+  signerIds: number[]
+) {
+  let promises = signerIds.map(i =>
+    multisigContract.connect(signers[i]).approve(proposalId, false)
+  );
+
+  await Promise.all(promises);
+}
 
 describe('Multisig', function () {
   let signers: SignerWithAddress[];
@@ -89,13 +103,17 @@ describe('Multisig', function () {
     it('reverts if trying to re-initialize', async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(5),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
 
       await expect(
-        multisig.initialize(dao.address, await addresses(5), multisigSettings)
-      ).to.be.revertedWith('Initializable: contract is already initialized');
+        multisig.initialize(
+          dao.address,
+          signers.slice(0, 5).map(s => s.address),
+          multisigSettings
+        )
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
     it('adds the initial addresses to the address list', async () => {
@@ -104,7 +122,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 2;
       await multisig.initialize(
         dao.address,
-        await addresses(2),
+        signers.slice(0, 2).map(s => s.address),
         multisigSettings
       );
 
@@ -116,7 +134,7 @@ describe('Multisig', function () {
     it('should set the `minApprovals`', async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(5),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
       expect((await multisig.multisigSettings()).minApprovals).to.be.eq(
@@ -127,7 +145,7 @@ describe('Multisig', function () {
     it('should set `onlyListed`', async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(5),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
       expect((await multisig.multisigSettings()).onlyListed).to.be.eq(
@@ -137,7 +155,11 @@ describe('Multisig', function () {
 
     it('should emit `MultisigSettingsUpdated` during initialization', async () => {
       await expect(
-        multisig.initialize(dao.address, await addresses(5), multisigSettings)
+        multisig.initialize(
+          dao.address,
+          signers.slice(0, 5).map(s => s.address),
+          multisigSettings
+        )
       )
         .to.emit(multisig, MULTISIG_EVENTS.MULTISIG_SETTINGS_UPDATED)
         .withArgs(multisigSettings.onlyListed, multisigSettings.minApprovals);
@@ -148,7 +170,7 @@ describe('Multisig', function () {
     beforeEach(async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(5),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
     });
@@ -182,7 +204,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
-        await addresses(1),
+        [signers[0].address],
         multisigSettings
       );
 
@@ -195,7 +217,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
-        await addresses(1),
+        [signers[0].address],
         multisigSettings
       );
 
@@ -215,7 +237,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
-        await addresses(2),
+        signers.slice(0, 2).map(s => s.address),
         multisigSettings
       );
 
@@ -233,7 +255,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
-        await addresses(1),
+        [signers[0].address],
         multisigSettings
       );
 
@@ -249,7 +271,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 2;
       await multisig.initialize(
         dao.address,
-        await addresses(3),
+        signers.slice(0, 3).map(s => s.address),
         multisigSettings
       );
 
@@ -273,7 +295,7 @@ describe('Multisig', function () {
     it('increments the proposal counter', async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(1), // signers[0] is listed
+        [signers[0].address], // signers[0] is listed
         multisigSettings
       );
 
@@ -289,7 +311,7 @@ describe('Multisig', function () {
     it('creates unique proposal IDs for each proposal', async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(1), // signers[0] is listed
+        [signers[0].address], // signers[0] is listed
         multisigSettings
       );
       await ethers.provider.send('evm_mine', []);
@@ -321,7 +343,7 @@ describe('Multisig', function () {
     it('emits the `ProposalCreated` event', async () => {
       await multisig.initialize(
         dao.address,
-        await addresses(1), // signers[0] is listed
+        [signers[0].address], // signers[0] is listed
         multisigSettings
       );
 
@@ -340,7 +362,7 @@ describe('Multisig', function () {
 
         await multisig.initialize(
           dao.address,
-          await addresses(1), // signers[0] is listed
+          [signers[0].address], // signers[0] is listed
           multisigSettings
         );
       });
@@ -362,7 +384,7 @@ describe('Multisig', function () {
 
         await multisig.initialize(
           dao.address,
-          await addresses(1), // signers[0] is listed
+          [signers[0].address], // signers[0] is listed
           multisigSettings
         );
       });
@@ -440,7 +462,7 @@ describe('Multisig', function () {
       multisigSettings.minApprovals = 3;
       await multisig.initialize(
         dao.address,
-        await addresses(5),
+        signers.slice(0, 5).map(s => s.address),
         multisigSettings
       );
 
@@ -458,10 +480,9 @@ describe('Multisig', function () {
 
     describe('canApprove:', async () => {
       it('returns `false` if the proposal is already executed', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, true);
+        await approveWithSigners(multisig, id, signers, [0, 1]);
 
+        await multisig.connect(signers[2]).approve(id, true);
         expect((await multisig.getProposal(id)).executed).to.be.true;
 
         expect(await multisig.canApprove(id, signers[3].address)).to.be.false;
@@ -524,8 +545,7 @@ describe('Multisig', function () {
       });
 
       it('returns `false` if the proposal is already executed', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1]);
         await multisig.connect(signers[2]).approve(id, true);
 
         expect((await multisig.getProposal(id)).executed).to.be.true;
@@ -534,9 +554,7 @@ describe('Multisig', function () {
       });
 
       it('returns `true` if the proposal can be executed', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         expect((await multisig.getProposal(id)).executed).to.be.false;
 
@@ -552,9 +570,7 @@ describe('Multisig', function () {
       });
 
       it('executes if the minimum approval is met', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         const proposal = await multisig.getProposal(id);
 
@@ -570,9 +586,7 @@ describe('Multisig', function () {
       });
 
       it('executes if the minimum approval is met and can be called by an unlisted accounts', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         const proposal = await multisig.getProposal(id);
 
@@ -634,9 +648,7 @@ describe('Multisig', function () {
       });
 
       it('emits the `ProposalExecuted` and `Executed` events', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
-        await multisig.connect(signers[2]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1, 2]);
 
         await expect(multisig.connect(signers[3]).execute(id))
           .to.emit(dao, DAO_EVENTS.EXECUTED)
@@ -645,8 +657,7 @@ describe('Multisig', function () {
       });
 
       it('emits the `Approved`, `ProposalExecuted`, and `Executed` events if execute is called inside the `approve` method', async () => {
-        await multisig.connect(signers[0]).approve(id, false);
-        await multisig.connect(signers[1]).approve(id, false);
+        await approveWithSigners(multisig, id, signers, [0, 1]);
 
         await expect(multisig.connect(signers[2]).approve(id, true))
           .to.emit(dao, DAO_EVENTS.EXECUTED)
