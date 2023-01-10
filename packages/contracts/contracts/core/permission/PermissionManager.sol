@@ -43,6 +43,21 @@ contract PermissionManager is Initializable {
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
 
+    /// @notice Thrown if a permission has been already granted for different oracle.
+    /// @dev This makes sure that oracle on the same permission can not be overwriten by a different oracle.
+    /// @param where The address of the target contract to grant `who` permission to.
+    /// @param who The address (EOA or contract) to which the permission has already been granted.
+    /// @param permissionId The permission identifier.
+    /// @param currentOracle The current oracle set for permissionId
+    /// @param permissionId The new oracle it tries to set for permissionId
+    error PermissionAlreadyGrantedForDifferentOracle(
+        address where,
+        address who,
+        bytes32 permissionId,
+        address currentOracle,
+        address newOracle
+    );
+
     /// @notice Thrown if a freeze happens on ANY_ADDR.
     error FreezeOnAnyAddressDisallowed();
 
@@ -288,17 +303,27 @@ contract PermissionManager is Initializable {
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
 
-        if (permissionsHashed[permHash] == UNSET_FLAG) {
-            permissionsHashed[permHash] = address(_oracle);
+        address currentOracle = permissionsHashed[permHash];
+        address newOracle = address(_oracle);
+
+        // Means permHash is not currently set.
+        if (currentOracle == UNSET_FLAG) {
+            permissionsHashed[permHash] = newOracle;
 
             emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
-        } else {
-            // The same permission already set. Though, Oracles are different. 
-            // If we don't revert, caller will think that his tx succeeded with his oracle, horrible.
-            // If psp calls it, it's a MUST it should revert, but here is tricky problem. Even though, we revert in grant
-            // for such special case, what plugin setup of dev will do is revoke first, then grant with his new oracle.
-            // Pretty hard to review this by the users on UI. need
-            // Should we revert or put this responsibility 
+        } else if (currentOracle != newOracle) {
+            // Revert if the permHash is already granted, but uses different oracle.
+            // If we don't revert, we either should:
+            //   - allow overriding the oracle on the same permission
+            //     which could be confusing whoever granted the same permission first
+            //   - or do nothing and succeed silently which could be confusing for the caller.
+            revert PermissionAlreadyGrantedForDifferentOracle({
+                where: _where,
+                who: _who,
+                permissionId: _permissionId,
+                currentOracle: currentOracle,
+                newOracle: newOracle
+            });
         }
     }
 

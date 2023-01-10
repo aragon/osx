@@ -179,7 +179,7 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('grantWithOrpme', () => {
+  describe('grantWithOracle', () => {
     it('should add permission', async () => {
       await pm.grantWithOracle(
         pm.address,
@@ -226,7 +226,7 @@ describe('Core: PermissionManager', function () {
       ).to.emit(pm, 'Granted');
     });
 
-    it('should not emit Granted with already granted', async () => {
+    it('should not emit Granted with already granted with the same oracle or ALLOW_FLAG', async () => {
       await pm.grantWithOracle(
         pm.address,
         otherSigner.address,
@@ -240,7 +240,35 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID,
           ALLOW_FLAG
         )
-      ).to.not.emit(pm, 'Granted')
+      ).to.not.emit(pm, 'Granted');
+    });
+
+    it('reverts if tries to grant the same permission, but with different oracle', async () => {
+      await pm.grantWithOracle(
+        pm.address,
+        otherSigner.address,
+        ADMIN_PERMISSION_ID,
+        ALLOW_FLAG
+      );
+
+      const newOracle = ownerSigner.address; // different address from what we pass in the previous grantWithOracle
+      await expect(
+        pm.grantWithOracle(
+          pm.address,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          newOracle // different address from what we pass in the previous grantWithOracle
+        )
+      ).to.be.revertedWith(
+        customError(
+          'PermissionAlreadyGrantedForDifferentOracle',
+          pm.address,
+          otherSigner.address,
+          ADMIN_PERMISSION_ID,
+          ALLOW_FLAG,
+          newOracle
+        )
+      );
     });
 
     it('should revert when oracle is not present for `who = ANY_ADDR` or `where = ANY_ADDR` and permissionId is not restricted', async () => {
@@ -814,16 +842,16 @@ describe('Core: PermissionManager', function () {
           signers[2].address
         )
         .to.emit(pm, 'Frozen')
-        .withArgs(
-          ADMIN_PERMISSION_ID,
-          ownerSigner.address,
-          pm.address
-        );  
-      
+        .withArgs(ADMIN_PERMISSION_ID, ownerSigner.address, pm.address);
+
       // Even though the ADMIN_PERMISSION_ID becomes frozen, signers[2].address still has it granted.
-      expect(await pm.getAuthPermission(pm.address, signers[2].address, ADMIN_PERMISSION_ID)).to.be.equal(
-        ALLOW_FLAG
-      );
+      expect(
+        await pm.getAuthPermission(
+          pm.address,
+          signers[2].address,
+          ADMIN_PERMISSION_ID
+        )
+      ).to.be.equal(ALLOW_FLAG);
       expect(await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
         true
       );
