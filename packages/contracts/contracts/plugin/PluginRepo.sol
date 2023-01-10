@@ -257,7 +257,7 @@ contract PluginRepo is
     /// @notice Gets the total number of published versions per release.
     /// @param _release release id.
     /// @return The number of published versions in the release.
-    function versionCount(uint8 _release) public view returns (uint256) {
+    function buildCount(uint8 _release) public view returns (uint256) {
         return buildsPerRelease[_release];
     }
     
