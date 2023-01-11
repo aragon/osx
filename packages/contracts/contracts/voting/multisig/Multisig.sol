@@ -259,7 +259,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         proposal_.parameters.minApprovals = multisigSettings.minApprovals;
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
-        proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
+        proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock);
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

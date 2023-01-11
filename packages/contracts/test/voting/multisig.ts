@@ -12,6 +12,7 @@ import {
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {OZ_ERRORS} from '../test-utils/error';
+import {advanceTime, timestampIn} from '../test-utils/voting';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -98,20 +99,6 @@ describe('Multisig', function () {
       ethers.utils.id('UPDATE_MULTISIG_SETTINGS_PERMISSION')
     );
   });
-
-  function addresslist(length: number): string[] {
-    let addresses: string[] = [];
-
-    for (let i = 0; i < length; i++) {
-      const addr = signers[i].address;
-      addresses.push(addr);
-    }
-    return addresses;
-  }
-
-  async function timestampIn(durationInSec: number): Promise<number> {
-    return (await ethers.provider.getBlock('latest')).timestamp + durationInSec;
-  }
 
   describe('initialize:', async () => {
     it('reverts if trying to re-initialize', async () => {
@@ -630,8 +617,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
 
-        await ethers.provider.send('evm_increaseTime', [2000]);
-        await ethers.provider.send('evm_mine');
+        await advanceTime(2000);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
       });
@@ -648,8 +634,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
 
-        await ethers.provider.send('evm_increaseTime', [5000]);
-        await ethers.provider.send('evm_mine');
+        await advanceTime(5000);
 
         expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
       });
@@ -697,7 +682,7 @@ describe('Multisig', function () {
 
         await expect(multisig.approve(1, false)).to.be.reverted;
 
-        await ethers.provider.send('evm_increaseTime', [7000]);
+        await advanceTime(7000);
 
         await expect(multisig.approve(1, false)).to.not.be.reverted;
       });
@@ -711,12 +696,12 @@ describe('Multisig', function () {
           0,
           await timestampIn(5000)
         );
-        await ethers.provider.send('evm_increaseTime', [2000]);
+        await advanceTime(2000);
 
         await expect(multisig.connect(signers[1]).approve(1, false)).to.not.be
           .reverted;
 
-        await ethers.provider.send('evm_increaseTime', [10000]);
+        await advanceTime(10000);
 
         await expect(multisig.approve(1, false)).to.be.reverted;
       });
@@ -760,7 +745,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(1)).to.be.false;
 
-        await ethers.provider.send('evm_increaseTime', [2000]);
+        await advanceTime(2000);
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
@@ -778,7 +763,7 @@ describe('Multisig', function () {
           await timestampIn(5000)
         );
 
-        await ethers.provider.send('evm_increaseTime', [2000]);
+        await advanceTime(2000);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -786,8 +771,7 @@ describe('Multisig', function () {
 
         expect(await multisig.canExecute(1)).to.be.true;
 
-        await ethers.provider.send('evm_increaseTime', [5000]);
-        await ethers.provider.send('evm_mine');
+        await advanceTime(5000);
 
         expect(await multisig.canExecute(1)).to.be.false;
       });
@@ -908,7 +892,7 @@ describe('Multisig', function () {
 
         await expect(multisig.execute(1)).to.be.reverted;
 
-        await ethers.provider.send('evm_increaseTime', [2000]);
+        await advanceTime(2000);
 
         await multisig.connect(signers[0]).approve(1, false);
         await multisig.connect(signers[1]).approve(1, false);
@@ -930,7 +914,7 @@ describe('Multisig', function () {
         await multisig.connect(signers[1]).approve(1, false);
         await multisig.connect(signers[2]).approve(1, false);
 
-        await ethers.provider.send('evm_increaseTime', [10000]);
+        await advanceTime(10000);
         await expect(multisig.connect(signers[1]).execute(1)).to.be.reverted;
       });
     });
