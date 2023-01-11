@@ -34,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 - Abstracted the `Addresslist` to be used by `AddresslistVoting` and `Multisig`.
 - Changed the order of the `_voteOption` and `_tryEarlyExecution` in `MajorityVoting`.
 - The plugin-wide settings are now stored in a `private` `VotingSettings` struct and made available through getters.
