@@ -12,7 +12,12 @@ import {
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {OZ_ERRORS} from '../test-utils/error';
-import {advanceTime, timestampIn} from '../test-utils/voting';
+import {
+  advanceTime,
+  getTime,
+  setTimeForNextBlock,
+  timestampIn,
+} from '../test-utils/voting';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -559,6 +564,26 @@ describe('Multisig', function () {
         expect(await multisig.proposalCount()).to.equal(2);
       });
     });
+
+    it('should revert if startDate is < than now', async () => {
+      const timeStamp = (await getTime()) + 500;
+      await setTimeForNextBlock(timeStamp);
+      await expect(
+        multisig.createProposal(dummyMetadata, dummyActions, true, false, 5, 0)
+      )
+        .to.be.revertedWithCustomError(multisig, 'InvalidStartDate')
+        .withArgs(timeStamp, 5);
+    });
+
+    it('should revert if endDate is < than startDate', async () => {
+      const timeStamp = (await getTime()) + 500;
+      await setTimeForNextBlock(timeStamp);
+      await expect(
+        multisig.createProposal(dummyMetadata, dummyActions, true, false, 0, 5)
+      )
+        .to.be.revertedWithCustomError(multisig, 'InvalidEndDate')
+        .withArgs(timeStamp, 5);
+    });
   });
 
   context('Approving and executing proposals', async () => {
@@ -680,7 +705,10 @@ describe('Multisig', function () {
           await timestampIn(10000)
         );
 
-        await expect(multisig.approve(1, false)).to.be.reverted;
+        await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
+          multisig,
+          'ApprovalCastForbidden'
+        );
 
         await advanceTime(7000);
 
@@ -703,7 +731,10 @@ describe('Multisig', function () {
 
         await advanceTime(10000);
 
-        await expect(multisig.approve(1, false)).to.be.reverted;
+        await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
+          multisig,
+          'ApprovalCastForbidden'
+        );
       });
     });
 
@@ -890,7 +921,10 @@ describe('Multisig', function () {
           await timestampIn(5000)
         );
 
-        await expect(multisig.execute(1)).to.be.reverted;
+        await expect(multisig.execute(1)).to.be.revertedWithCustomError(
+          multisig,
+          'ProposalExecutionForbidden'
+        );
 
         await advanceTime(2000);
 
@@ -915,7 +949,9 @@ describe('Multisig', function () {
         await multisig.connect(signers[2]).approve(1, false);
 
         await advanceTime(10000);
-        await expect(multisig.connect(signers[1]).execute(1)).to.be.reverted;
+        await expect(
+          multisig.connect(signers[1]).execute(1)
+        ).to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden');
       });
     });
   });
