@@ -184,12 +184,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         repoRegistry = _repoRegistry;
     }
 
-
-
-    /// pluginA => helperA => DAO (EXECUTE_PERMISSION) +1  
-    /// pluginB => helperA => DAO (EXECUTE_PERMISSION) +1  
-    
-
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _pluginSetup The address of the `PluginSetup` contract.

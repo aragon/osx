@@ -574,8 +574,6 @@ describe('DAO', function () {
       await expect(dao.upgradeTo(dao.address)).to
         .not.be.reverted;
     });
-    it.skip('shouldn not update if new implementation is not UUPS compliant', async () => {
-      
-    });
+    it.skip('shouldn not update if new implementation is not UUPS compliant'); // TODO:Implement
   });
 });
