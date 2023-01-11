@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+### Changed
+
+- Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
+
+### Removed
+
 ## v0.4.0-alpha
 
 ### Added
