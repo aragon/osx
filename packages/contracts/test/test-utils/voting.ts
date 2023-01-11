@@ -88,3 +88,8 @@ export async function voteWithSigners(
 
   await Promise.all(promises);
 }
+
+export async function timestampIn(durationInSec: number): Promise<number> {
+  return (await ethers.provider.getBlock('latest')).timestamp + durationInSec;
+}
+
