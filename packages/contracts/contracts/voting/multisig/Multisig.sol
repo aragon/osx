@@ -36,8 +36,8 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @notice A container for the proposal parameters.
     /// @param minApprovals The number of approvals required.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
-    /// @param startDate The timestamp when the proposal starts
-    /// @param endDate The timestamp when the proposal expires
+    /// @param startDate The timestamp when the proposal starts.
+    /// @param endDate The timestamp when the proposal expires.
     struct ProposalParameters {
         uint256 minApprovals;
         uint64 snapshotBlock;
