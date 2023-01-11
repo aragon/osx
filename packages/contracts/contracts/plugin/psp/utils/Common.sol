@@ -33,6 +33,7 @@ function _getPluginId(address _dao, address _plugin) pure returns (bytes32) {
 /// @param _permissionHash The hash of the permission objects.
 /// @param _helperHash The hash of the helper contract addresses.
 /// @param _data data that is passed by the user or wdd.. GIORGI
+/// @param _preparationType Tells which PreparationType the plugin is in currently. Without this, it's possible to call applyUpdate even after applyInstallation is called.
 function _getSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionHash,
