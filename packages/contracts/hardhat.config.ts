@@ -68,6 +68,7 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumTestnet: process.env.ARBISCAN_KEY || '',
     },
+    customChains: []
   },
   namedAccounts: {
     deployer: 0,

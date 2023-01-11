@@ -213,7 +213,7 @@ templates:
           handler: handleAddressesRemoved
         - event: Approved(indexed uint256,indexed address)
           handler: handleApproved
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
