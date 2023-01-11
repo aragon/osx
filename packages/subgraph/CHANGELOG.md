@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.6.1-alpha
+On 2023-01-11 17:06:50
+
 ### Changed
 - Ignores `None` votes from addresslist voting and token voting
 - Updates `MULTISIG_INTERFACE`
