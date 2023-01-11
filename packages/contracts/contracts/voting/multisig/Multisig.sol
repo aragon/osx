@@ -240,10 +240,8 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
         if (_startDate == 0) {
             _startDate = block.timestamp.toUint64();
-        } else {
-            if (_startDate < block.timestamp.toUint64()) {
-                revert InvalidStartDate({limit: block.timestamp.toUint64(), actual: _startDate});
-            }
+        } else if (_startDate < block.timestamp.toUint64()) {
+            revert InvalidStartDate({limit: block.timestamp.toUint64(), actual: _startDate});
         }
 
         if (_endDate < _startDate) {
