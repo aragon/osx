@@ -449,6 +449,7 @@ describe('AddresslistVoting', function () {
       it('reverts on voting None', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
+        // Check that voting is possible but don't vote using `callStatic`
         expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
           .be.reverted;
 
@@ -635,6 +636,7 @@ describe('AddresslistVoting', function () {
       it('reverts on voting None', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
+        // Check that voting is possible but don't vote using `callStatic`
         expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
           .be.reverted;
 
@@ -796,6 +798,7 @@ describe('AddresslistVoting', function () {
       it('reverts on voting None', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
+        // Check that voting is possible but don't vote using `callStatic`
         expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
           .be.reverted;
 
