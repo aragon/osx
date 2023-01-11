@@ -21,8 +21,9 @@ abstract contract ProposalUpgradeable is ProposalBase {
     }
 
     /// @inheritdoc ProposalBase
-    function incrementProposalCounter() public override {
-        return proposalCounter.increment();
+    function createProposalId() internal override returns (uint256 proposalId) {
+        proposalId = proposalCount();
+        proposalCounter.increment();
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

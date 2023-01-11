@@ -9,8 +9,7 @@ import {IDAO} from "../IDAO.sol";
 /// @notice An abstract base contract defining the traits and internal functionality to create and execute proposals.
 abstract contract ProposalBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant PROPOSAL_INTERFACE_ID =
-        this.proposalCount.selector ^ this.incrementProposalCounter.selector;
+    bytes4 internal constant PROPOSAL_INTERFACE_ID = this.proposalCount.selector;
 
     /// @notice Emitted when a proposal is created.
     /// @param proposalId The ID of the proposal.
@@ -40,8 +39,9 @@ abstract contract ProposalBase {
     /// @return The proposal count.
     function proposalCount() public view virtual returns (uint256);
 
-    /// @notice Returns the proposal count determining the next proposal ID.
-    function incrementProposalCounter() public virtual;
+    /// @notice Creates a proposal ID.
+    /// @return The proposal ID.
+    function createProposalId() internal virtual returns (uint256);
 
     /// @notice Internal function to create a proposal.
     /// @param _metadata The the proposal metadata.
@@ -52,8 +52,7 @@ abstract contract ProposalBase {
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions
     ) internal virtual returns (uint256 proposalId) {
-        proposalId = proposalCount();
-        incrementProposalCounter();
+        proposalId = createProposalId();
 
         emit ProposalCreated({
             proposalId: proposalId,

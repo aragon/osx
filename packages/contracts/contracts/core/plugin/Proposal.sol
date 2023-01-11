@@ -21,7 +21,8 @@ abstract contract Proposal is ProposalBase {
     }
 
     /// @inheritdoc ProposalBase
-    function incrementProposalCounter() public override {
-        return proposalCounter.increment();
+    function createProposalId() internal override returns (uint256 proposalId) {
+        proposalId = proposalCount();
+        proposalCounter.increment();
     }
 }
