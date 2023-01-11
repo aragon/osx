@@ -19,7 +19,9 @@ import {
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
   CREATED_AT,
-  TWO
+  TWO,
+  START_DATE,
+  END_DATE
 } from '../constants';
 
 // events
@@ -27,6 +29,8 @@ import {
 export function createNewProposalCreatedEvent(
   proposalId: string,
   creator: string,
+  startDate: string,
+  endDate: string,
   metadata: string,
   actions: ethereum.Tuple[],
   contractAddress: string
@@ -44,6 +48,14 @@ export function createNewProposalCreatedEvent(
     'creator',
     ethereum.Value.fromAddress(Address.fromString(creator))
   );
+  let startDateParam = new ethereum.EventParam(
+    'startDate',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(startDate))
+  );
+  let endDateParam = new ethereum.EventParam(
+    'endDate',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate))
+  );
   let metadataParam = new ethereum.EventParam(
     'metadata',
     ethereum.Value.fromBytes(Bytes.fromUTF8(metadata))
@@ -55,6 +67,8 @@ export function createNewProposalCreatedEvent(
 
   createProposalCreatedEvent.parameters.push(proposalIdParam);
   createProposalCreatedEvent.parameters.push(creatorParam);
+  createProposalCreatedEvent.parameters.push(startDateParam);
+  createProposalCreatedEvent.parameters.push(endDateParam);
   createProposalCreatedEvent.parameters.push(metadataParam);
   createProposalCreatedEvent.parameters.push(actionsParam);
 
@@ -196,9 +210,10 @@ export function getProposalCountCall(
 export function createGetProposalCall(
   contractAddress: string,
   proposalId: string,
-  open: boolean,
   executed: boolean,
 
+  startDate: string,
+  endDate: string,
   minApprovals: string,
   snapshotBlock: string,
 
@@ -215,6 +230,12 @@ export function createGetProposalCall(
   parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock))
   );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate))
+  );
 
   let tally = new ethereum.Tuple();
 
@@ -226,13 +247,12 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(uint256,uint64),(uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,(uint256,uint64,uint64,uint64),(uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
     ])
     .returns([
-      ethereum.Value.fromBoolean(open),
       ethereum.Value.fromBoolean(executed),
 
       // ProposalParameters
@@ -254,7 +274,8 @@ export function createMultisigProposalEntityState(
   creator: string = ADDRESS_ONE,
   proposalId: string = PROPOSAL_ID,
   minApprovals: string = TWO,
-  open: boolean = true,
+  startDate: string = START_DATE,
+  endDate: string = END_DATE,
   executed: boolean = false,
 
   snapshotBlock: string = SNAPSHOT_BLOCK,
@@ -263,21 +284,20 @@ export function createMultisigProposalEntityState(
 
   createdAt: string = CREATED_AT,
   creationBlockNumber: BigInt = new BigInt(0),
-  executable: boolean = false
 ): MultisigProposal {
   let multisigProposal = new MultisigProposal(entityID);
   multisigProposal.dao = Address.fromString(dao).toHexString();
   multisigProposal.plugin = Address.fromString(plugin).toHexString();
   multisigProposal.proposalId = BigInt.fromString(proposalId);
   multisigProposal.creator = Address.fromString(creator);
-  multisigProposal.open = open;
+  multisigProposal.startDate = BigInt.fromString(startDate);
+  multisigProposal.endDate = BigInt.fromString(endDate);
   multisigProposal.executed = executed;
   multisigProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   multisigProposal.minApprovals = BigInt.fromString(minApprovals);
   multisigProposal.addresslistLength = BigInt.fromString(addresslistLength);
   multisigProposal.createdAt = BigInt.fromString(createdAt);
   multisigProposal.creationBlockNumber = creationBlockNumber;
-  multisigProposal.executable = executable;
 
   multisigProposal.save();
 

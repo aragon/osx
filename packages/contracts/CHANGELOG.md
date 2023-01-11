@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+- Adds `startDate` and `endDate` to Multisig proposals. Execution and approvals of proposals have now to be in the boundaries of these 2 dates.
+
+### Removed
+- Removes `open` parameter from Multisig proposals.
+
 ## 
 On 2023-01-10 16:39:12
 

@@ -26,7 +26,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param approvers The approves casted by the approvers.
     /// @param actions The actions to be executed when the proposal passes.
     struct Proposal {
-        bool open;
         bool executed;
         ProposalParameters parameters;
         Tally tally;
@@ -37,9 +36,13 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @notice A container for the proposal parameters.
     /// @param minApprovals The number of approvals required.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
+    /// @param startDate The timestamp when the proposal starts
+    /// @param endDate The timestamp when the proposal expires
     struct ProposalParameters {
         uint256 minApprovals;
         uint64 snapshotBlock;
+        uint64 startDate;
+        uint64 endDate;
     }
 
     /// @notice A container for the proposal tally.
@@ -103,6 +106,16 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param actual The actual value.
     error MinApprovalsOutOfBounds(uint256 limit, uint256 actual);
 
+    /// @notice Thrown if the start date is to small.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error InvalidStartDate(uint64 limit, uint64 actual);
+
+    /// @notice Thrown if the end date is to small.
+    /// @param limit The limit value.
+    /// @param actual The actual value.
+    error InvalidEndDate(uint64 limit, uint64 actual);
+
     /// @notice Emitted when an proposal is approve by an approver.
     /// @param proposalId The ID of the proposal.
     /// @param approver The approver casting the approve.
@@ -111,11 +124,15 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @notice Emitted when a proposal is created.
     /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the proposal.
+    /// @param startDate The timestamp when the proposal starts.
+    /// @param endDate The timestamp when the proposal ends.
     /// @param metadata The metadata of the proposal.
     /// @param actions The actions that will be executed if the proposal passes.
     event ProposalCreated(
         uint256 indexed proposalId,
         address indexed creator,
+        uint64 startDate,
+        uint64 endDate,
         bytes metadata,
         IDAO.Action[] actions
     );
@@ -211,7 +228,9 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
         bool _approveProposal,
-        bool _tryExecution
+        bool _tryExecution,
+        uint64 _startDate,
+        uint64 _endDate
     ) external returns (uint256 proposalId) {
         uint64 snapshotBlock = block.number.toUint64() - 1;
 
@@ -219,14 +238,27 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
             revert ProposalCreationForbidden(_msgSender());
         }
 
+        if (_startDate == 0) {
+            _startDate = block.timestamp.toUint64();
+        }
+
+        if (_startDate < block.timestamp.toUint64()) {
+            revert InvalidStartDate({limit: block.timestamp.toUint64(), actual: _startDate});
+        }
+
+        if (_endDate < _startDate) {
+            revert InvalidEndDate({limit: _startDate, actual: _endDate});
+        }
+
         proposalId = proposalCounter.current();
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
 
-        proposal_.open = true;
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.minApprovals = multisigSettings.minApprovals;
+        proposal_.parameters.startDate = _startDate;
+        proposal_.parameters.endDate = _endDate;
         proposal_.tally.addresslistLength = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
 
         for (uint256 i; i < _actions.length; ) {
@@ -245,6 +277,8 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         emit ProposalCreated({
             proposalId: proposalId,
             creator: _msgSender(),
+            startDate: _startDate,
+            endDate: _endDate,
             metadata: _metadata,
             actions: _actions
         });
@@ -294,7 +328,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.
-    /// @return open Whether the proposal is open or not.
     /// @return executed Whether the proposal is executed or not.
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
@@ -303,7 +336,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
         public
         view
         returns (
-            bool open,
             bool executed,
             ProposalParameters memory parameters,
             Tally memory tally,
@@ -312,7 +344,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        open = proposal_.open;
         executed = proposal_.executed;
         parameters = proposal_.parameters;
         tally = proposal_.tally;
@@ -342,7 +373,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     function _execute(uint256 _proposalId) internal {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        proposal_.open = false;
         proposal_.executed = true;
 
         bytes[] memory execResults = dao.execute(_proposalId, proposal_.actions);
@@ -380,7 +410,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     function _canExecute(uint256 _proposalId) internal view returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        // Verify that the proposal has not been executed already.
+        // Verify that the proposal has not been executed or expired.
         if (!_isProposalOpen(proposal_)) {
             return false;
         }
@@ -392,7 +422,11 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param proposal_ The proposal struct.
     /// @return True if the proposal vote is open, false otherwise.
     function _isProposalOpen(Proposal storage proposal_) internal view returns (bool) {
-        return proposal_.open && !proposal_.executed;
+        uint64 currentTimestamp64 = block.timestamp.toUint64();
+        return
+            !proposal_.executed &&
+            proposal_.parameters.startDate <= currentTimestamp64 &&
+            proposal_.parameters.endDate >= currentTimestamp64;
     }
 
     /// @notice Internal function to increments the proposal count by one.
