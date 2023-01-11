@@ -532,6 +532,9 @@ describe('TokenVoting', function () {
       it('reverts on voting None', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
+        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+          .be.reverted;
+
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
           .withArgs(id, signers[0].address, VoteOption.None);
@@ -718,6 +721,9 @@ describe('TokenVoting', function () {
       it('reverts on voting None', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
+        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+          .be.reverted;
+
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
           .withArgs(id, signers[0].address, VoteOption.None);
@@ -895,6 +901,9 @@ describe('TokenVoting', function () {
 
       it('reverts on voting None', async () => {
         await advanceIntoVoteTime(startDate, endDate);
+
+        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+          .be.reverted;
 
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
