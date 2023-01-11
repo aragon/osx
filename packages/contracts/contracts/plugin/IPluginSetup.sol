@@ -8,11 +8,9 @@ import {IDAO} from "../core/IDAO.sol";
 interface IPluginSetup {
     /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
-    /// @param actions The array of follow up actions that will be executed through dao once the plugin is installed/updated/uninstalled.
     struct PreparedDependency {
         address[] helpers;
         PermissionLib.ItemMultiTarget[] permissions;
-        IDAO.Action[] actions;
     }
 
     /// @param plugin The address of the `Plugin`.
@@ -62,10 +60,9 @@ interface IPluginSetup {
     /// @param _dao The address of the uninstalling DAO.
     /// @param _payload TOD:GIORGI how to add explanation ?
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
-    /// @param actions The array of follow up actions that will be executed through dao once the plugin is installed/updated/uninstalled.
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external
-        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions);
+        returns (PermissionLib.ItemMultiTarget[] memory permissions);
 
     /// @notice Returns the plugin's base implementation.
     /// @return address The address of the plugin implementation contract.

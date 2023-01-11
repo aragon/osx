@@ -94,8 +94,7 @@ contract AdminSetup is PluginSetup {
     /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
     function prepareUninstallation(
         address _dao, SetupPayload calldata _payload
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions) {
-        (actions);
+    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](1);
 

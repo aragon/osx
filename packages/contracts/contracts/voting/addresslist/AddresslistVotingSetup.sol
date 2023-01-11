@@ -102,10 +102,8 @@ contract AddresslistVotingSetup is PluginSetup {
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external
         view
-        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
-    {
-        (actions);
-        
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+    {        
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](4);
 

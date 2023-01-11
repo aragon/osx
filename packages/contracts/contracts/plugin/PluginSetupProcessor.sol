@@ -58,7 +58,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address plugin;
         PermissionLib.ItemMultiTarget[] permissions;
         bytes32 helpersHash;
-        IDAO.Action[] actions;
     }
 
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
@@ -76,7 +75,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes initData;
         PermissionLib.ItemMultiTarget[] permissions;
         bytes32 helpersHash;
-        IDAO.Action[] actions;
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
@@ -92,7 +90,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginSetupRef pluginSetupRef;
         address[] currentHelpers;
         PermissionLib.ItemMultiTarget[] permissions;
-        IDAO.Action[] actions;
     }
 
     /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
@@ -217,7 +214,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param versionTag The version tag of the plugin to used for install preparation.
     /// @param setupPayload TOD:GIORGI
     /// @param permissions The list of multi-targeted permission operations to be applied to the installing DAO.
-    /// @param actions The array of follow up actions that will be executed through dao once the plugin is uninstalled.
     event UninstallationPrepared(
         address indexed sender,
         address indexed dao,
@@ -225,8 +221,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginRepo indexed pluginSetupRepo,
         PluginRepo.Tag versionTag,
         IPluginSetup.SetupPayload setupPayload,
-        PermissionLib.ItemMultiTarget[] permissions,
-        IDAO.Action[] actions
+        PermissionLib.ItemMultiTarget[] permissions
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -283,7 +278,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(preparedDependency.permissions),
             hHash(preparedDependency.helpers),
-            aHash(preparedDependency.actions),
             bytes(""),
             PreparationType.Install
         );
@@ -334,7 +328,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(_params.permissions),
             _params.helpersHash,
-            aHash(_params.actions),
             bytes(""),
             PreparationType.Install
         );
@@ -356,7 +349,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             bytes32(0),
             _params.helpersHash,
-            bytes32(0),
             bytes(""),
             PreparationType.None
         );
@@ -364,7 +356,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         pluginState.currentSetupId = newSetupId;
         pluginState.blockNumber = block.number;
 
-        _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
+        // Process the permissions
+        // PSP on the dao should have ROOT permission
+        if (_params.permissions.length > 0) {
+            DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+        }
 
         emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
     }
@@ -399,7 +395,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PluginSetupRef(_params.currentVersionTag, _params.pluginSetupRepo),
             bytes32(0),
             currentHelpersHash,
-            bytes32(0),
             bytes(""),
             PreparationType.None
         );
@@ -432,7 +427,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
                 EMPTY_ARRAY_ENCODED_HASH,
                 currentHelpersHash,
-                EMPTY_ARRAY_ENCODED_HASH,
                 bytes(""),
                 PreparationType.Update
             );
@@ -456,7 +450,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
                 pHash(preparedDependency.permissions),
                 hHash(preparedDependency.helpers),
-                aHash(preparedDependency.actions),
                 initData,
                 PreparationType.Update
             );
@@ -492,7 +485,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(_params.permissions),
             _params.helpersHash,
-            aHash(_params.actions),
             _params.initData,
             PreparationType.Update
         );
@@ -512,7 +504,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             bytes32(0),
             _params.helpersHash,
-            bytes32(0),
             bytes(""),
             PreparationType.None
         );
@@ -532,7 +523,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _upgradeProxy(_params.plugin, newImplementation, _params.initData);
         }
 
-        _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
+        // Process the permissions
+        // PSP on the dao should have ROOT permission
+        if (_params.permissions.length > 0) {
+            DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+        }
 
         emit UpdateApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
     }
@@ -541,11 +536,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
-    /// @return actions The array of follow up actions that will be executed through dao once the plugin is installed/updated/uninstalled.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for
     function prepareUninstallation(address _dao, PrepareUninstall calldata _params)
         external
-        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
     {
         bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
 
@@ -555,7 +549,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             bytes32(0),
             hHash(_params.setupPayload.currentHelpers),
-            bytes32(0),
             bytes(""),
             PreparationType.None
         );
@@ -571,7 +564,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef.versionTag
         );
 
-        (permissions, actions) = PluginSetup(version.pluginSetup).prepareUninstallation(
+        permissions = PluginSetup(version.pluginSetup).prepareUninstallation(
             _dao,
             _params.setupPayload
         );
@@ -580,7 +573,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(permissions),
             bytes32(0),
-            aHash(actions),
             bytes(""),
             PreparationType.Uninstall
         );
@@ -601,8 +593,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pluginSetupRepo: _params.pluginSetupRef.pluginSetupRepo,
             versionTag: _params.pluginSetupRef.versionTag,
             setupPayload: _params.setupPayload,
-            permissions: permissions,
-            actions: actions
+            permissions: permissions
         });
     }
 
@@ -623,7 +614,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.pluginSetupRef,
             pHash(_params.permissions),
             bytes32(0),
-            aHash(_params.actions),
             bytes(""),
             PreparationType.Uninstall
         );
@@ -638,7 +628,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
         pluginState.blockNumber = block.number;
         pluginState.currentSetupId = bytes32(0);
 
-        _executeOnDAO(_dao, setupId, _params.permissions, _params.actions);
+        // Process the permissions
+        // PSP on the dao should have ROOT permission
+        if (_params.permissions.length > 0) {
+            DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+        }
 
         emit UninstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
     }
@@ -724,31 +718,4 @@ contract PluginSetupProcessor is DaoAuthorizable {
         });
     }
 
-    /// @notice Helper function to apply permissions + execute actions on the dao.
-    /// @param _dao The address of the DAO conducting the setup.
-    /// @param _setupId the setup id of the preparation object.
-    /// @param _permissions The permissions array
-    /// @param _actions The follow up actions that will be executed at the time of plugin installation/update.
-    function _executeOnDAO(
-        address _dao,
-        bytes32 _setupId,
-        PermissionLib.ItemMultiTarget[] calldata _permissions,
-        IDAO.Action[] calldata _actions
-    ) private {
-        DAO dao = DAO(payable(_dao));
-
-        // Process the permissions
-        // PSP on the dao should have ROOT permission
-        if (_permissions.length > 0) {
-            dao.bulkOnMultiTarget(_permissions);
-        }
-
-        // Process the actions
-        // Since PSP has ROOT permission, it can grant/revoke below permissions.
-        if (_actions.length > 0) {
-            dao.grant(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
-            dao.execute(uint256(_setupId), _actions);
-            dao.revoke(_dao, address(this), dao.EXECUTE_PERMISSION_ID());
-        }
-    }
 }

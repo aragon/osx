@@ -95,9 +95,7 @@ contract MultisigSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao, SetupPayload calldata _payload
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions) {
-        (actions);
-        
+    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {        
         // Prepare permissions
         permissions = new PermissionLib.ItemMultiTarget[](3);
 

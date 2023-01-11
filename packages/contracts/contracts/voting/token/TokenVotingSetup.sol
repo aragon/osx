@@ -238,10 +238,8 @@ contract TokenVotingSetup is PluginSetup {
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external
         view
-        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
-    {
-        (actions);
-        
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+    {        
         // Prepare permissions.
         uint256 helperLength = _payload.currentHelpers.length;
         if (helperLength != 1) {

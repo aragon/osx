@@ -43,9 +43,9 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
     {
-        (_dao, _payload, actions);
+        (_dao, _payload);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
 

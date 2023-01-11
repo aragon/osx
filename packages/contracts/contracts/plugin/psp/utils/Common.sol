@@ -38,7 +38,6 @@ function _getSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionHash,
     bytes32 _helperHash,
-    bytes32 _actionsHash,
     bytes memory _data,
     PreparationType _preparationType
 ) pure returns (bytes32) {
@@ -49,7 +48,6 @@ function _getSetupId(
                 _pluginSetupRef.pluginSetupRepo,
                 _permissionHash,
                 _helperHash,
-                _actionsHash,
                 keccak256(_data),
                 _preparationType
             )

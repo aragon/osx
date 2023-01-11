@@ -112,10 +112,8 @@ contract CounterV1PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions, IDAO.Action[] memory actions)
-    {
-        (actions);
-        
+        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+    {   
         permissions = new PermissionLib.ItemMultiTarget[](
             _payload.currentHelpers.length != 0 ? 3 : 2
         );
