@@ -56,8 +56,6 @@ export function _handleProposalCreated(
     proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
     proposalEntity.supportThreshold = parameters.supportThreshold;
     proposalEntity.minParticipation = parameters.minParticipation;
-    //proposalEntity.startDate = parameters.startDate;
-    //proposalEntity.endDate = parameters.endDate;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // Tally
