@@ -8,7 +8,7 @@ import "./ProposalBase.sol";
 
 /// @title Proposal
 /// @author Aragon Association - 2022
-/// @notice An abstract contract defining the traits and internal functionality to create and execute proposals for non-upgradeable contract.
+/// @notice An abstract contract defining the traits and internal functionality to create and execute proposals for non-upgradeable contracts.
 abstract contract Proposal is ProposalBase {
     using Counters for Counters.Counter;
 

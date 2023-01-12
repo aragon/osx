@@ -6,9 +6,9 @@ import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Cou
 
 import "./ProposalBase.sol";
 
-/// @title Proposal
+/// @title ProposalUgradeable
 /// @author Aragon Association - 2022
-/// @notice An abstract contract defining the traits and internal functionality to create and execute proposals for upgradeable contract.
+/// @notice An abstract contract defining the traits and internal functionality to create and execute proposals for upgradeable contracts.
 abstract contract ProposalUpgradeable is ProposalBase {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
