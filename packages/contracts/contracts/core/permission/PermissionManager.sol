@@ -49,7 +49,7 @@ contract PermissionManager is Initializable {
     /// @param who The address (EOA or contract) to which the permission has already been granted.
     /// @param permissionId The permission identifier.
     /// @param currentOracle The current oracle set for permissionId
-    /// @param permissionId The new oracle it tries to set for permissionId
+    /// @param newOracle The new oracle it tries to set for permissionId
     error PermissionAlreadyGrantedForDifferentOracle(
         address where,
         address who,
