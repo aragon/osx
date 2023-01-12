@@ -396,9 +396,7 @@ abstract contract MajorityVotingBase is
     function _execute(uint256 _proposalId) internal virtual {
         proposals[_proposalId].executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, proposals[_proposalId].actions);
-
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+        _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
