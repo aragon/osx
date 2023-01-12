@@ -1,15 +1,12 @@
-import chai, {expect} from 'chai';
-import {smock} from '@defi-wonderland/smock';
+import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
 import {getMergedABI} from '../../utils/abi';
-import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
-import {customError, ERRORS} from '../test-utils/custom-error-helper';
+import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
+import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
-import {BigNumber} from 'ethers';
-
-chai.use(smock.matchers);
+import {OZ_ERRORS} from '../test-utils/error';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -50,9 +47,7 @@ describe('Admin plugin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const mockDAOFactory = await smock.mock('DAO');
-    dao = await mockDAOFactory.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    dao = await deployNewDAO(ownerAddress);
   });
 
   beforeEach(async () => {
@@ -80,7 +75,7 @@ describe('Admin plugin', function () {
       await initializePlugin();
 
       await expect(initializePlugin()).to.be.revertedWith(
-        ERRORS.ALREADY_INITIALIZED
+        OZ_ERRORS.ALREADY_INITIALIZED
       );
     });
   });
@@ -118,17 +113,14 @@ describe('Admin plugin', function () {
     it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
       await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
 
-      await expect(
-        plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           plugin.address,
           EXECUTE_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('fails to call `executeProposal()` if `EXECUTE_PROPOSAL_PERMISSION_ID` is not granted for the admin address', async () => {
@@ -138,18 +130,15 @@ describe('Admin plugin', function () {
         EXECUTE_PROPOSAL_PERMISSION_ID
       );
 
-      await expect(
-        plugin.executeProposal(dummyMetadata, dummyActions)
-      ).to.be.revertedWith(
-        customError(
-          'DaoUnauthorized',
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+        .to.be.revertedWithCustomError(plugin, 'DaoUnauthorized')
+        .withArgs(
           dao.address,
           plugin.address,
           plugin.address,
           ownerAddress,
           EXECUTE_PROPOSAL_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('correctly emits the ProposalCreated event', async () => {
@@ -195,18 +184,29 @@ describe('Admin plugin', function () {
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
 
-    it("calls the DAO's execute function correctly", async () => {
-      const proposalId = 1;
+    it("calls the DAO's execute function correctly with proposalId", async () => {
+      {
+        const proposalId = 0;
 
-      await plugin.executeProposal(dummyMetadata, dummyActions);
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-      expect(dao.execute).has.been.calledWith(BigNumber.from(proposalId), [
-        [
-          dummyActions[0].to,
-          BigNumber.from(dummyActions[0].value),
-          dummyActions[0].data,
-        ],
-      ]);
+        expect(event.args.actor).to.equal(plugin.address);
+        expect(event.args.callId).to.equal(proposalId);
+        expect(event.args.actions.length).to.equal(1);
+        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      }
+
+      {
+        const proposalId = 1;
+
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+        expect(event.args.callId).to.equal(proposalId);
+      }
     });
   });
 });

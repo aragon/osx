@@ -1,10 +1,10 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import {ethers } from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {hexDataSlice, id} from 'ethers/lib/utils';
 
 import {DAO, CallbackHandlerMockHelper} from '../../../typechain';
-import {customError} from '../../test-utils/custom-error-helper';
+import {deployWithProxy} from '../../test-utils/proxy'
 
 const EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
@@ -19,7 +19,7 @@ const beefInterfaceId = '0xbeefbeef';
 const callbackSelector = hexDataSlice(id('callbackFunc()'), 0, 4); // 0x1eb2075a
 const magicNumber = `0x1${'0'.repeat(7)}`;
 const magicNumberReturn = `0x1${'0'.repeat(63)}`;
-const unregisteredNumberReturn = `0x${'0'.repeat(64)}`;
+export const UNREGISTERED_INTERFACE_RETURN = `0x${'0'.repeat(64)}`;
 
 describe('CallbackHandler', function () {
   let signers: SignerWithAddress[];
@@ -35,13 +35,13 @@ describe('CallbackHandler', function () {
       'CallbackHandlerMockHelper'
     );
 
-    dao = await DAO.deploy();
+    dao = await deployWithProxy(DAO);
+
     dao.initialize('0x', owner, ethers.constants.AddressZero);
     dao.grant(dao.address, owner, REGISTER_STANDARD_CALLBACK_PERMISSION_ID);
 
     callbackHandlerMockHelper = await CallbackHandlerHelper.deploy(dao.address);
   });
-
 
   it('reverts for an unknown callback function signature', async () => {
     // we don't register `callbackSelector` here
@@ -50,9 +50,9 @@ describe('CallbackHandler', function () {
         to: dao.address,
         data: callbackSelector,
       })
-    ).to.be.revertedWith(
-      customError('UnkownCallback', callbackSelector, unregisteredNumberReturn)
-    );
+    )
+      .to.be.revertedWithCustomError(dao, 'UnkownCallback')
+      .withArgs(callbackSelector, UNREGISTERED_INTERFACE_RETURN);
   });
 
   it('emits the `StandardCallbackRegistered` event', async () => {

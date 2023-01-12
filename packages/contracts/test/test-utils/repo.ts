@@ -2,8 +2,12 @@ import {ethers} from 'hardhat';
 
 import {
   PluginRepoRegistry,
-  PluginUUPSUpgradeableSetupV1Mock,
+  PluginRepoFactory,
+  PluginSetupV1Mock,
+  PluginRepo,
+  PluginUUPSUpgradeableSetupV1Mock
 } from '../../typechain';
+import {deployWithProxy} from './proxy';
 import {getMergedABI} from '../../utils/abi';
 
 export async function deployMockPluginSetup(): Promise<PluginUUPSUpgradeableSetupV1Mock> {
@@ -15,9 +19,11 @@ export async function deployMockPluginSetup(): Promise<PluginUUPSUpgradeableSetu
   return pluginSetupMockContract;
 }
 
-export async function deployNewPluginRepo(ownerAddress: any): Promise<any> {
+export async function deployNewPluginRepo(
+  ownerAddress: any
+): Promise<PluginRepo> {
   const PluginRepo = await ethers.getContractFactory('PluginRepo');
-  const newPluginRepo = await PluginRepo.deploy();
+  const newPluginRepo = await deployWithProxy<PluginRepo>(PluginRepo);
   await newPluginRepo.initialize(ownerAddress);
 
   return newPluginRepo;
@@ -41,9 +47,9 @@ export async function deployPluginRepoFactory(
     signers[0]
   );
 
-  const pluginRepoFactory = await PluginRepoFactory.deploy(
+  const pluginRepoFactory = (await PluginRepoFactory.deploy(
     pluginRepoRegistry.address
-  );
+  )) as PluginRepoFactory;
 
   return pluginRepoFactory;
 }
@@ -52,12 +58,12 @@ export async function deployPluginRepoRegistry(
   managingDao: any,
   ensSubdomainRegistrar: any
 ): Promise<PluginRepoRegistry> {
-  let pluginRepoRegistry: PluginRepoRegistry;
-
   const PluginRepoRegistry = await ethers.getContractFactory(
     'PluginRepoRegistry'
   );
-  pluginRepoRegistry = await PluginRepoRegistry.deploy();
+
+  let pluginRepoRegistry = await deployWithProxy<PluginRepoRegistry>(PluginRepoRegistry);
+
   await pluginRepoRegistry.initialize(
     managingDao.address,
     ensSubdomainRegistrar.address

@@ -2,7 +2,6 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
 import {AdminSetup} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
@@ -69,9 +68,13 @@ describe('AdminSetup', function () {
       await expect(
         adminSetup.prepareInstallation(
           targetDao.address,
-          minimum_data.substring(0, minimum_data.length - 1)
+          minimum_data.substring(0, minimum_data.length - 2)
         )
       ).to.be.reverted;
+
+      await expect(
+        adminSetup.prepareInstallation(targetDao.address, minimum_data)
+      ).to.not.be.reverted;
     });
 
     it('reverts if encoded address in `_data` is zero', async () => {
@@ -79,7 +82,9 @@ describe('AdminSetup', function () {
 
       await expect(
         adminSetup.prepareInstallation(targetDao.address, dataWithAddressZero)
-      ).to.be.revertedWith(customError('AdminAddressInvalid', AddressZero));
+      )
+        .to.be.revertedWithCustomError(adminSetup, 'AdminAddressInvalid')
+        .withArgs(AddressZero);
     });
 
     it('correctly returns plugin, helpers and permissions', async () => {

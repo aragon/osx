@@ -3,10 +3,11 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {ERC20, TokenVotingSetup} from '../../typechain';
-import {customError} from '../test-utils/custom-error-helper';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
+import {deployWithProxy} from '../test-utils/proxy';
+
 import {
   VotingSettings,
   VotingMode,
@@ -131,7 +132,12 @@ describe('TokenVotingSetup', function () {
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
-      ).to.be.revertedWith(customError('MintArrayLengthMismatch', 1, 0));
+      )
+        .to.be.revertedWithCustomError(
+          tokenVotingSetup,
+          'MintArrayLengthMismatch'
+        )
+        .withArgs(1, 0);
     });
 
     it('fails if passed token address is not a contract', async () => {
@@ -144,7 +150,9 @@ describe('TokenVotingSetup', function () {
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
-      ).to.be.revertedWith(customError('TokenNotContract', tokenAddress));
+      )
+        .to.be.revertedWithCustomError(tokenVotingSetup, 'TokenNotContract')
+        .withArgs(tokenAddress);
     });
 
     it('fails if passed token address is not ERC20', async () => {
@@ -157,7 +165,9 @@ describe('TokenVotingSetup', function () {
 
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, data)
-      ).to.be.revertedWith(customError('TokenNotERC20', tokenAddress));
+      )
+        .to.be.revertedWithCustomError(tokenVotingSetup, 'TokenNotERC20')
+        .withArgs(tokenAddress);
     });
 
     it('correctly returns plugin, helpers and permissions, when an ERC20 token address is supplied', async () => {
@@ -444,7 +454,12 @@ describe('TokenVotingSetup', function () {
           [],
           EMPTY_DATA
         )
-      ).to.be.revertedWith(customError('WrongHelpersArrayLength', 0));
+      )
+        .to.be.revertedWithCustomError(
+          tokenVotingSetup,
+          'WrongHelpersArrayLength'
+        )
+        .withArgs(0);
 
       await expect(
         tokenVotingSetup.prepareUninstallation(
@@ -453,7 +468,12 @@ describe('TokenVotingSetup', function () {
           [AddressZero, AddressZero, AddressZero],
           EMPTY_DATA
         )
-      ).to.be.revertedWith(customError('WrongHelpersArrayLength', 3));
+      )
+        .to.be.revertedWithCustomError(
+          tokenVotingSetup,
+          'WrongHelpersArrayLength'
+        )
+        .withArgs(3);
     });
 
     it('correctly returns permissions, when the required number of helpers is supplied', async () => {

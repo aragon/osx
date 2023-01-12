@@ -133,7 +133,7 @@ abstract contract MajorityVotingBase is
         keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
 
     /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
-    uint64 public constant PCT_BASE = 10**18; // 0% = 0; 1% = 10^16; 100% = 10^18
+    uint64 public constant PCT_BASE = 10 ** 18; // 0% = 0; 1% = 10^16; 100% = 10^18
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
@@ -163,7 +163,7 @@ abstract contract MajorityVotingBase is
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
 
-    /// @notice Thrown if zero is not allowed as a value
+    /// @notice Thrown if zero is not allowed as a value.
     error ZeroValueNotAllowed();
 
     /// @notice Thrown if an account is not allowed to cast a vote. This can be because the vote
@@ -173,7 +173,8 @@ abstract contract MajorityVotingBase is
     /// - the account doesn't have voting powers.
     /// @param proposalId The ID of the proposal.
     /// @param account The address of the _account.
-    error VoteCastForbidden(uint256 proposalId, address account);
+    /// @param voteOption The chosen vote option.
+    error VoteCastForbidden(uint256 proposalId, address account, VoteOption voteOption);
 
     /// @notice Thrown if the proposal execution is forbidden.
     /// @param proposalId The ID of the proposal.
@@ -214,10 +215,10 @@ abstract contract MajorityVotingBase is
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _votingSettings The voting settings.
-    function __MajorityVotingBase_init(IDAO _dao, VotingSettings calldata _votingSettings)
-        internal
-        onlyInitializing
-    {
+    function __MajorityVotingBase_init(
+        IDAO _dao,
+        VotingSettings calldata _votingSettings
+    ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
         _updateVotingSettings(_votingSettings);
     }
@@ -225,13 +226,9 @@ abstract contract MajorityVotingBase is
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, PluginUUPSUpgradeable) returns (bool) {
         return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
     }
 
@@ -248,8 +245,12 @@ abstract contract MajorityVotingBase is
     ) public virtual {
         address account = _msgSender();
 
-        if (!_canVote(_proposalId, account)) {
-            revert VoteCastForbidden({proposalId: _proposalId, account: account});
+        if (!_canVote(_proposalId, account, _voteOption)) {
+            revert VoteCastForbidden({
+                proposalId: _proposalId,
+                account: account,
+                voteOption: _voteOption
+            });
         }
         _vote(_proposalId, _voteOption, account, _tryEarlyExecution);
     }
@@ -263,18 +264,20 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoteOption(uint256 _proposalId, address _voter)
-        public
-        view
-        virtual
-        returns (VoteOption)
-    {
+    function getVoteOption(
+        uint256 _proposalId,
+        address _voter
+    ) public view virtual returns (VoteOption) {
         return proposals[_proposalId].voters[_voter];
     }
 
     /// @inheritdoc IMajorityVoting
-    function canVote(uint256 _proposalId, address _voter) public view virtual returns (bool) {
-        return _canVote(_proposalId, _voter);
+    function canVote(
+        uint256 _proposalId,
+        address _voter,
+        VoteOption _voteOption
+    ) public view virtual returns (bool) {
+        return _canVote(_proposalId, _voter, _voteOption);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -346,7 +349,9 @@ abstract contract MajorityVotingBase is
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    function getProposal(uint256 _proposalId)
+    function getProposal(
+        uint256 _proposalId
+    )
         public
         view
         virtual
@@ -369,11 +374,9 @@ abstract contract MajorityVotingBase is
 
     /// @notice Updates the voting settings.
     /// @param _votingSettings The new voting settings.
-    function updateVotingSettings(VotingSettings calldata _votingSettings)
-        external
-        virtual
-        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
-    {
+    function updateVotingSettings(
+        VotingSettings calldata _votingSettings
+    ) external virtual auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID) {
         _updateVotingSettings(_votingSettings);
     }
 
@@ -382,7 +385,7 @@ abstract contract MajorityVotingBase is
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _voteOption The vote voteOption to cast on creation.
+    /// @param _voteOption The chosen vote option to be casted on proposal creation.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @return proposalId The ID of the proposal.
     function createProposal(
@@ -401,7 +404,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
-    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param _voteOption The chosen vote option to be casted on the proposal vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
         uint256 _proposalId,
@@ -423,8 +426,13 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
+    /// @param  _voteOption Whether the voter abstains, supports or opposes the proposal.
     /// @return Returns `true` if the given voter can vote on a certain proposal and `false` otherwise.
-    function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
+    function _canVote(
+        uint256 _proposalId,
+        address _voter,
+        VoteOption _voteOption
+    ) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
@@ -516,14 +524,12 @@ abstract contract MajorityVotingBase is
     /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
     /// @return startDate The validated start date of the proposal vote.
     /// @return endDate The validated end date of the proposal vote.
-    function _validateProposalDates(uint64 _start, uint64 _end)
-        internal
-        view
-        virtual
-        returns (uint64 startDate, uint64 endDate)
-    {
+    function _validateProposalDates(
+        uint64 _start,
+        uint64 _end
+    ) internal view virtual returns (uint64 startDate, uint64 endDate) {
         uint64 currentTimestamp = block.timestamp.toUint64();
-        
+
         if (_start == 0) {
             startDate = currentTimestamp;
         } else {
@@ -546,7 +552,7 @@ abstract contract MajorityVotingBase is
             }
         }
     }
-
+    
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[46] private __gap;
 }

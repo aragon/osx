@@ -1,6 +1,7 @@
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
-import {BigNumber} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 export enum VoteOption {
   None,
@@ -56,4 +57,42 @@ export async function advanceIntoVoteTime(startDate: number, endDate: number) {
 export async function advanceAfterVoteEnd(endDate: number) {
   await advanceTimeTo(endDate);
   expect(await getTime()).to.be.greaterThanOrEqual(endDate);
+}
+
+export async function voteWithSigners(
+  votingContract: Contract,
+  proposalId: number,
+  signers: SignerWithAddress[],
+  signerIds: {
+    yes: number[];
+    no: number[];
+    abstain: number[];
+  }
+) {
+  let promises = signerIds.yes.map(i =>
+    votingContract.connect(signers[i]).vote(proposalId, VoteOption.Yes, false)
+  );
+
+  promises = promises.concat(
+    signerIds.no.map(i =>
+      votingContract.connect(signers[i]).vote(proposalId, VoteOption.No, false)
+    )
+  );
+  promises = promises.concat(
+    signerIds.abstain.map(i =>
+      votingContract
+        .connect(signers[i])
+        .vote(proposalId, VoteOption.Abstain, false)
+    )
+  );
+
+  await Promise.all(promises);
+}
+
+export async function timestampIn(durationInSec: number): Promise<number> {
+  return (await ethers.provider.getBlock('latest')).timestamp + durationInSec;
+}
+
+export async function setTimeForNextBlock(timestamp: number): Promise<void> {
+  await ethers.provider.send('evm_setNextBlockTimestamp', [timestamp])
 }

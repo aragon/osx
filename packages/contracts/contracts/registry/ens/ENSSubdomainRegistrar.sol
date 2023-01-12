@@ -5,9 +5,8 @@ pragma solidity 0.8.10;
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
-import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoAuthorizableUpgradeable} from "../../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
 /// @title ENSSubdomainRegistrar
@@ -40,6 +39,11 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @param node The node namehash.
     /// @param resolver The node resolver address.
     error InvalidResolver(bytes32 node, address resolver);
+    
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice Initializes the component by
     /// - checking that the contract is the domain node owner or an approved operator
