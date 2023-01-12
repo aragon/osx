@@ -67,6 +67,8 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
     'createdAt',
     event.block.timestamp.toString()
   );
+  assert.fieldEquals('AdminProposal', entityID, 'startDate', START_DATE);
+  assert.fieldEquals('AdminProposal', entityID, 'endDate', START_DATE);
 
   // check actions
   for (let index = 0; index < actions.length; index++) {
@@ -106,7 +108,9 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.creator = adminstratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
-  adminProposal.createdAt = BigInt.fromString(ONE_ETH);
+  adminProposal.createdAt = BigInt.fromString(START_DATE);
+  adminProposal.startDate = BigInt.fromString(START_DATE);
+  adminProposal.endDate = BigInt.fromString(START_DATE);
   adminProposal.adminstrator = adminstratorAddress.toHexString();
   adminProposal.save();
 
