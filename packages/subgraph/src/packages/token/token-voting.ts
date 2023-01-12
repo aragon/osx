@@ -41,6 +41,8 @@ export function _handleProposalCreated(
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
+  proposalEntity.startDate = event.params.startDate;
+  proposalEntity.endDate = event.params.endDate;
 
   let contract = TokenVoting.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);
@@ -54,8 +56,6 @@ export function _handleProposalCreated(
     proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
     proposalEntity.supportThreshold = parameters.supportThreshold;
     proposalEntity.minParticipation = parameters.minParticipation;
-    proposalEntity.startDate = parameters.startDate;
-    proposalEntity.endDate = parameters.endDate;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // Tally

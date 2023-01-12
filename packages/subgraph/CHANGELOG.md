@@ -10,20 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.6.2-alpha
 
 ### Added
-- Adds `startDate` and `endDate` fields to Multisig proposals
+
+- Added `startDate` and `endDate` to all `ProposalCreated` events.
+- Adds `startDate` and `endDate` fields to Multisig proposals.
 
 ### Changed
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 
 ## 0.6.1-alpha
+
 On 2023-01-11 17:06:50
 
 ### Changed
+
 - Ignores `None` votes from addresslist voting and token voting
 - Updates `MULTISIG_INTERFACE`
 
 ### Removed
-- Removes `open` and `executable` fields from Multisig proposals 
+
+- Removes `open` and `executable` fields from Multisig proposals
 
 ## 0.5.0-alpha
 

@@ -31,6 +31,8 @@ import {
 export function createNewProposalCreatedEvent(
   proposalId: string,
   creator: string,
+  startDate: string,
+  endDate: string,
   description: string,
   contractAddress: string
 ): ProposalCreated {
@@ -47,6 +49,14 @@ export function createNewProposalCreatedEvent(
     'creator',
     ethereum.Value.fromAddress(Address.fromString(creator))
   );
+  let startDateParam = new ethereum.EventParam(
+    'startDate',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(startDate))
+  );
+  let endDateParam = new ethereum.EventParam(
+    'endDate',
+    ethereum.Value.fromSignedBigInt(BigInt.fromString(endDate))
+  );
   let descriptionParam = new ethereum.EventParam(
     'description',
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
@@ -54,6 +64,8 @@ export function createNewProposalCreatedEvent(
 
   createProposalCreatedEvent.parameters.push(proposalIdParam);
   createProposalCreatedEvent.parameters.push(creatorParam);
+  createProposalCreatedEvent.parameters.push(startDateParam);
+  createProposalCreatedEvent.parameters.push(endDateParam);
   createProposalCreatedEvent.parameters.push(descriptionParam);
 
   return createProposalCreatedEvent;

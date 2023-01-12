@@ -90,10 +90,6 @@ interface IMajorityVoting {
     /// @return The participation value.
     function participation(uint256 _proposalId) external view returns (uint256);
 
-    /// @notice Returns the proposal count determining the next proposal ID.
-    /// @return The proposal count.
-    function proposalCount() external view returns (uint256);
-
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
     /// - has not started,
     /// - has ended,

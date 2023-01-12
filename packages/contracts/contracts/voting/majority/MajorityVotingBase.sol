@@ -4,12 +4,11 @@ pragma solidity 0.8.10;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
@@ -54,9 +53,9 @@ abstract contract MajorityVotingBase is
     IMajorityVoting,
     Initializable,
     ERC165Upgradeable,
-    PluginUUPSUpgradeable
+    PluginUUPSUpgradeable,
+    ProposalUpgradeable
 {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
 
     /// @notice The different voting modes available.
@@ -138,9 +137,6 @@ abstract contract MajorityVotingBase is
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
-    /// @notice The incremental ID for proposals and executions.
-    CountersUpgradeable.Counter private proposalCounter;
-
     /// @notice The struct storing the voting settings.
     VotingSettings private votingSettings;
 
@@ -194,23 +190,6 @@ abstract contract MajorityVotingBase is
         uint256 minProposerVotingPower
     );
 
-    /// @notice Emitted when a proposal is created.
-    /// @param proposalId The ID of the proposal.
-    /// @param creator  The creator of the proposal.
-    /// @param metadata The metadata of the proposal.
-    /// @param actions The actions that will be executed if the proposal passes.
-    event ProposalCreated(
-        uint256 indexed proposalId,
-        address indexed creator,
-        bytes metadata,
-        IDAO.Action[] actions
-    );
-
-    /// @notice Emitted when a proposal is executed.
-    /// @param proposalId The ID of the proposal.
-    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
     /// @notice Initializes the component to be used by inheriting contracts.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -228,13 +207,17 @@ abstract contract MajorityVotingBase is
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC165Upgradeable, PluginUUPSUpgradeable) returns (bool) {
-        return interfaceId == MAJORITY_VOTING_INTERFACE_ID || super.supportsInterface(interfaceId);
-    }
-
-    /// @inheritdoc IMajorityVoting
-    function proposalCount() public view virtual returns (uint256) {
-        return proposalCounter.current();
+    )
+        public
+        view
+        virtual
+        override(ERC165Upgradeable, PluginUUPSUpgradeable, ProposalBase)
+        returns (bool)
+    {
+        return
+            interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
+            ProposalBase.supportsInterface(interfaceId) ||
+            PluginUUPSUpgradeable.supportsInterface(interfaceId);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -397,11 +380,6 @@ abstract contract MajorityVotingBase is
         bool _tryEarlyExecution
     ) external virtual returns (uint256 proposalId);
 
-    /// @notice Internal function to increments the proposal count by one.
-    function _incrementProposalCount() internal virtual {
-        return proposalCounter.increment();
-    }
-
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _voteOption The chosen vote option to be casted on the proposal vote.
@@ -416,11 +394,9 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to execute a vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     function _execute(uint256 _proposalId) internal virtual {
-        Proposal storage proposal_ = proposals[_proposalId];
-        proposal_.executed = true;
+        proposals[_proposalId].executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, proposal_.actions);
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+        _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
@@ -552,7 +528,7 @@ abstract contract MajorityVotingBase is
             }
         }
     }
-    
+
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[46] private __gap;
+    uint256[47] private __gap;
 }

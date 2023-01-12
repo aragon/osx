@@ -1,5 +1,5 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
-import {Address, BigInt, Bytes, log} from '@graphprotocol/graph-ts';
+import {Address, BigInt, Bytes} from '@graphprotocol/graph-ts';
 
 import {AdminPlugin, Action, AdminProposal} from '../../generated/schema';
 
@@ -10,7 +10,8 @@ import {
   ONE_ETH,
   STRING_DATA,
   PROPOSAL_ID,
-  CONTRACT_ADDRESS
+  CONTRACT_ADDRESS,
+  START_DATE
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -37,6 +38,8 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   let event = createNewProposalCreatedEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
+    START_DATE,
+    START_DATE,
     STRING_DATA,
     actions,
     CONTRACT_ADDRESS
@@ -64,6 +67,8 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
     'createdAt',
     event.block.timestamp.toString()
   );
+  assert.fieldEquals('AdminProposal', entityID, 'startDate', START_DATE);
+  assert.fieldEquals('AdminProposal', entityID, 'endDate', START_DATE);
 
   // check actions
   for (let index = 0; index < actions.length; index++) {
@@ -103,7 +108,9 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.creator = adminstratorAddress;
   adminProposal.metadata = STRING_DATA;
   adminProposal.executed = false;
-  adminProposal.createdAt = BigInt.fromString(ONE_ETH);
+  adminProposal.createdAt = BigInt.fromString(START_DATE);
+  adminProposal.startDate = BigInt.fromString(START_DATE);
+  adminProposal.endDate = BigInt.fromString(START_DATE);
   adminProposal.adminstrator = adminstratorAddress.toHexString();
   adminProposal.save();
 

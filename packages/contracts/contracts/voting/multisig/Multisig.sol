@@ -3,11 +3,11 @@
 pragma solidity 0.8.10;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {IDAO} from "../../core/IDAO.sol";
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
+import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
+import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
+import {IDAO} from "../../core/IDAO.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
@@ -15,8 +15,7 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is PluginUUPSUpgradeable, Addresslist {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
+contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     using SafeCastUpgradeable for uint256;
 
     /// @notice A container for proposal-related information.
@@ -69,15 +68,11 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
             this.isListedAtBlock.selector ^
             this.addresslistLength.selector ^
             this.addresslistLengthAtBlock.selector ^
-            this.proposalCount.selector ^
             this.initialize.selector;
 
     /// @notice The ID of the permission required to call the `addAddresses` and `removeAddresses` functions.
     bytes32 public constant UPDATE_MULTISIG_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_MULTISIG_SETTINGS_PERMISSION");
-
-    /// @notice The incremental ID for proposals and executions.
-    CountersUpgradeable.Counter private proposalCounter;
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
@@ -121,27 +116,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @param approver The approver casting the approve.
     event Approved(uint256 indexed proposalId, address indexed approver);
 
-    /// @notice Emitted when a proposal is created.
-    /// @param proposalId The ID of the proposal.
-    /// @param creator  The creator of the proposal.
-    /// @param startDate The timestamp when the proposal starts.
-    /// @param endDate The timestamp when the proposal ends.
-    /// @param metadata The metadata of the proposal.
-    /// @param actions The actions that will be executed if the proposal passes.
-    event ProposalCreated(
-        uint256 indexed proposalId,
-        address indexed creator,
-        uint64 startDate,
-        uint64 endDate,
-        bytes metadata,
-        IDAO.Action[] actions
-    );
-
-    /// @notice Emitted when a proposal is executed.
-    /// @param proposalId The ID of the proposal.
-    /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
-    event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
     /// @notice Emitted when the plugin settings are set.
     /// @param onlyListed Whether only listed addresses can create a proposal.
     /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
@@ -167,14 +141,13 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == MULTISIG_INTERFACE_ID || super.supportsInterface(_interfaceId);
-    }
-
-    /// @notice Returns the proposal count determining the next proposal ID.
-    /// @return The proposal count.
-    function proposalCount() public view returns (uint256) {
-        return proposalCounter.current();
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public view virtual override(PluginUUPSUpgradeable, ProposalBase) returns (bool) {
+        return
+            _interfaceId == MULTISIG_INTERFACE_ID ||
+            ProposalBase.supportsInterface(_interfaceId) ||
+            PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
 
     /// @notice Returns the number of approvals,
@@ -186,19 +159,17 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
-    function addAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function addAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         _addAddresses(_members);
     }
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function removeAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         _removeAddresses(_members);
 
         // Check if the new address list has become shorter than the current minimum number of approvals required.
@@ -211,10 +182,9 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
     /// @notice Updates the plugin settings.
     /// @param _multisigSettings The new settings.
-    function updateMultisigSettings(MultisigSettings calldata _multisigSettings)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function updateMultisigSettings(
+        MultisigSettings calldata _multisigSettings
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         _updateMultisigSettings(_multisigSettings);
     }
 
@@ -248,7 +218,13 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
             revert InvalidEndDate({limit: _startDate, actual: _endDate});
         }
 
-        proposalId = proposalCounter.current();
+        proposalId = _createProposal({
+            _creator: _msgSender(),
+            _metadata: _metadata,
+            _startDate: _startDate,
+            _endDate: _endDate,
+            _actions: _actions
+        });
 
         // Create the proposal
         Proposal storage proposal_ = proposals[proposalId];
@@ -266,20 +242,9 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
             }
         }
 
-        _incrementProposalCount();
-
         if (_approveProposal) {
             approve(proposalId, _tryExecution);
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            startDate: _startDate,
-            endDate: _endDate,
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @notice Approves and, optionally, executes the proposal.
@@ -330,7 +295,9 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    function getProposal(uint256 _proposalId)
+    function getProposal(
+        uint256 _proposalId
+    )
         public
         view
         returns (
@@ -373,8 +340,7 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
 
         proposal_.executed = true;
 
-        bytes[] memory execResults = dao.execute(_proposalId, proposal_.actions);
-        emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
+        _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 
     /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists. //TODO is this assumption relevant?
@@ -427,11 +393,6 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
             proposal_.parameters.endDate >= currentTimestamp64;
     }
 
-    /// @notice Internal function to increments the proposal count by one.
-    function _incrementProposalCount() internal {
-        return proposalCounter.increment();
-    }
-
     /// @notice Internal function to update the plugin settings.
     function _updateMultisigSettings(MultisigSettings calldata _multisigSettings) internal {
         uint256 addresslistLength_ = addresslistLength();
@@ -457,5 +418,5 @@ contract Multisig is PluginUUPSUpgradeable, Addresslist {
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[46] private __gap;
+    uint256[48] private __gap;
 }

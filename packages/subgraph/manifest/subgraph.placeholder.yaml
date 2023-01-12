@@ -157,7 +157,7 @@ templates:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -182,7 +182,7 @@ templates:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -238,7 +238,7 @@ templates:
       eventHandlers:
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
   # PluginRepo
   - name: PluginRepoTemplate

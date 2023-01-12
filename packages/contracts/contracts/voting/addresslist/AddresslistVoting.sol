@@ -89,15 +89,21 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount();
+        proposalId = _createProposal({
+            _creator: _msgSender(),
+            _metadata: _metadata,
+            _startDate: _startDate,
+            _endDate: _endDate,
+            _actions: _actions
+        });
 
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
-            _startDate,
-            _endDate
-        );
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates({
+            _start: _startDate,
+            _end: _endDate
+        });
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
@@ -112,18 +118,9 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             }
         }
 
-        _incrementProposalCount();
-
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -206,5 +203,5 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[48] private __gap;
+    uint256[50] private __gap;
 }
