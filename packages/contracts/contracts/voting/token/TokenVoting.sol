@@ -64,7 +64,10 @@ contract TokenVoting is MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock = block.number.toUint64() - 1;
+        uint64 snapshotBlock;
+        unchecked {
+            snapshotBlock = block.number.toUint64() - 1;
+        }
 
         uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
         if (totalVotingPower == 0) revert NoVotingPower();
@@ -73,7 +76,13 @@ contract TokenVoting is MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount();
+        proposalId = _createProposal({
+            _creator: _msgSender(),
+            _metadata: _metadata,
+            _startDate: _startDate,
+            _endDate: _endDate,
+            _actions: _actions
+        });
 
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
@@ -96,18 +105,9 @@ contract TokenVoting is MajorityVotingBase {
             }
         }
 
-        _incrementProposalCount();
-
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @inheritdoc MajorityVotingBase
