@@ -6,7 +6,7 @@ import {IDAO} from "../IDAO.sol";
 
 /// @title ProposalBase
 /// @author Aragon Association - 2022
-/// @notice An abstract base xcontract defining the traits and internal functionality to create and execute proposals.
+/// @notice An abstract base contract defining the traits and internal functionality to create and execute proposals.
 abstract contract ProposalBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant PROPOSAL_INTERFACE_ID = this.proposalCount.selector;
