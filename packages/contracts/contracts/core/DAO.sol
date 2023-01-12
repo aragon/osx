@@ -71,7 +71,8 @@ contract DAO is
     error NotAContract();
 
     /// @notice Thrown if action execution has failed.
-    error ActionFailed();
+    /// @param index index of action in the array that failed.
+    error ActionFailed(uint256 index);
 
     /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
@@ -192,24 +193,17 @@ contract DAO is
                 _actions[i].data
             );
 
-            if (success) {
-                // If the call succeeded, and returned response.length > 0, means it was a contract
-                // otherwise, it was called on a EOA, in which case we should fail it.
-                if (response.length == 0 && !to.isContract()) {
-                    revert NotAContract();
+            if(!success) {
+                // If the call failed and wasn't allowed in allowFailureMap, revert.
+                if(!getIndex(allowFailureMap, i)) {
+                    revert ActionFailed(i);
                 }
-            }
 
-            if (!success && !getIndex(allowFailureMap, i)) {
-                revert ActionFailed();
-            }
-
-            // If it comes here, it means the action was whitelisted, but failed
-            // for which we need to store that it failed.
-            if (!success) {
+                // If the call failed, but was allowed in allowFailureMap, store that 
+                // this specific action has actually failed.
                 failureMap = setIndex(failureMap, i);
             }
-
+            
             execResults[i] = response;
 
             unchecked {

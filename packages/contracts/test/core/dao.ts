@@ -2,7 +2,13 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20} from '../../typechain';
+import {
+  DAO,
+  DAOFactory,
+  DAOFactory__factory,
+  DAO__factory,
+  GovernanceERC20,
+} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {setIndex, unsetIndex} from '../test-utils/bitmap';
 
@@ -224,17 +230,10 @@ describe('DAO', function () {
       );
     });
 
-    it('reverts if action is called on EOA address', async () => {
-      let wrongEOAAction = {...data.succeedAction, to: ownerAddress};
-      await expect(
-        dao.execute(0, [wrongEOAAction], 0)
-      ).to.be.revertedWithCustomError(dao, 'NotAContract');
-    });
-
     it("reverts if action is fallable and allowFailureMap doesn't include it", async () => {
-      await expect(
-        dao.execute(0, [data.failAction], 0)
-      ).to.be.revertedWithCustomError(dao, 'ActionFailed');
+      await expect(dao.execute(0, [data.failAction], 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(0);
     });
 
     it('succeeds if action is fallable but allowFailureMap allows it', async () => {
@@ -303,9 +302,9 @@ describe('DAO', function () {
       // lets remove one of the action from allowFailureMap
       // to see tx will actually revert.
       allowFailureMap = unsetIndex(2, allowFailureMap);
-      await expect(
-        dao.execute(0, actions, allowFailureMap)
-      ).to.be.revertedWithCustomError(dao, 'ActionFailed');
+      await expect(dao.execute(0, actions, allowFailureMap))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(2); // Since we unset the 2th action from failureMap, it should fail with that index.
     });
 
     it('emits an event afterwards', async () => {
@@ -320,6 +319,55 @@ describe('DAO', function () {
       expect(event.args.actions[0].value).to.equal(data.succeedAction.value);
       expect(event.args.actions[0].data).to.equal(data.succeedAction.data);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
+    });
+
+    it('should transfer native token(eth) to recipient with action', async () => {
+      const recipient = signers[1].address;
+      const currentBalance = await ethers.provider.getBalance(recipient);
+
+      // deposit some eth so it can later transfer
+      const depositAmount = ethers.utils.parseEther('1.23');
+      await dao.deposit(ethers.constants.AddressZero, depositAmount, 'ref', {
+        value: depositAmount,
+      });
+
+      const transferAction = {to: recipient, value: depositAmount, data: '0x'};
+      await dao.execute(0, [transferAction], 0);
+      const newBalance = await ethers.provider.getBalance(recipient);
+      expect(newBalance.sub(currentBalance)).to.equal(depositAmount);
+    });
+
+    it('should transfer ERC20 tokens to recipient with action', async () => {
+      const TokenFactory = await ethers.getContractFactory('TestERC20');
+      const token = await TokenFactory.deploy('name', 'symbol', 20);
+
+      await token.transfer(dao.address, 20);
+
+      const recipient = signers[1].address;
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const encoded = iface.encodeFunctionData('withdraw', [
+        token.address,
+        recipient,
+        20,
+        'ref',
+      ]);
+
+      await dao.grant(
+        dao.address,
+        dao.address,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
+      );
+
+      const transferAction = {to: dao.address, value: 0, data: encoded};
+
+      expect(await token.balanceOf(dao.address)).to.equal(20);
+      expect(await token.balanceOf(recipient)).to.equal(0);
+
+      await dao.execute(0, [transferAction], 0);
+      expect(await token.balanceOf(dao.address)).to.equal(0);
+      expect(await token.balanceOf(recipient)).to.equal(20);
     });
   });
 
