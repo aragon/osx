@@ -170,39 +170,43 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function execute(uint256 callId, Action[] calldata _actions, uint256 allowFailureMap)
+    function execute(
+        uint256 callId,
+        Action[] calldata _actions,
+        uint256 allowFailureMap
+    )
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
-        if(_actions.length > MAX_ACTIONS) {
+        if (_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
         }
 
         execResults = new bytes[](_actions.length);
 
-        for (uint256 i = 0; i < _actions.length;) {
+        for (uint256 i = 0; i < _actions.length; ) {
             address to = _actions[i].to;
             (bool success, bytes memory response) = to.call{value: _actions[i].value}(
                 _actions[i].data
             );
 
-            if(success) {
+            if (success) {
                 // If the call succeeded, and returned response.length > 0, means it was a contract
                 // otherwise, it was called on a EOA, in which case we should fail it.
-                if(response.length == 0 && !to.isContract()) {
+                if (response.length == 0 && !to.isContract()) {
                     revert NotAContract();
                 }
             }
 
-            if (!success && !getIndex(allowFailureMap, i))  {
+            if (!success && !getIndex(allowFailureMap, i)) {
                 revert ActionFailed();
             }
 
             // If it comes here, it means the action was whitelisted, but failed
             // for which we need to store that it failed.
-            if(!success) {
+            if (!success) {
                 failureMap = setIndex(failureMap, i);
             }
 
