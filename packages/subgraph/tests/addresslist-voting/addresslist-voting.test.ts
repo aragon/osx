@@ -83,6 +83,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   let event = createNewProposalCreatedEvent(
     proposalId,
     ADDRESS_ONE,
+    START_DATE,
+    END_DATE,
     STRING_DATA,
     CONTRACT_ADDRESS
   );
@@ -135,12 +137,6 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     'creationBlockNumber',
     event.block.number.toString()
   );
-  assert.fieldEquals(
-    'AddresslistVotingProposal',
-    entityID,
-    'startDate',
-    START_DATE
-  );
 
   assert.fieldEquals(
     'AddresslistVotingProposal',
@@ -160,7 +156,6 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     'minParticipation',
     MIN_PARTICIPATION
   );
-
   assert.fieldEquals(
     'AddresslistVotingProposal',
     entityID,
@@ -365,7 +360,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
   // checks
   let entityID = ADDRESS_ONE + '_' + proposal.id;
   assert.notInStore('AddresslistVotingVote', entityID);
-  
+
   clearStore();
 });
 

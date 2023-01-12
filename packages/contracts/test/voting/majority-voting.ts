@@ -11,6 +11,7 @@ import {
   ONE_HOUR,
   ONE_YEAR,
 } from '../test-utils/voting';
+import {deployWithProxy} from '../test-utils/proxy';
 import {OZ_ERRORS} from '../test-utils/error';
 
 describe('MajorityVotingMock', function () {
@@ -25,7 +26,7 @@ describe('MajorityVotingMock', function () {
     ownerAddress = await signers[0].getAddress();
 
     const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
+    dao = await deployWithProxy(DAO);
     await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
   });
 
@@ -42,7 +43,7 @@ describe('MajorityVotingMock', function () {
       'MajorityVotingMock'
     );
     votingBase = await MajorityVotingBase.deploy();
-    dao.grant(
+    await dao.grant(
       votingBase.address,
       ownerAddress,
       ethers.utils.id('UPDATE_VOTING_SETTINGS_PERMISSION')
@@ -90,6 +91,18 @@ describe('MajorityVotingMock', function () {
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'MinDurationOutOfBounds')
         .withArgs(ONE_YEAR, votingSettings.minDuration);
+    });
+
+    it('should change the voting settings successfully', async () => {
+      await expect(votingBase.updateVotingSettings(votingSettings))
+        .to.emit(votingBase, VOTING_EVENTS.VOTING_SETTINGS_UPDATED)
+        .withArgs(
+          votingSettings.votingMode,
+          votingSettings.supportThreshold,
+          votingSettings.minParticipation,
+          votingSettings.minDuration,
+          votingSettings.minProposerVotingPower
+        );
     });
 
     it('should change the voting settings successfully', async () => {

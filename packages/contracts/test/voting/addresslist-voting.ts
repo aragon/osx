@@ -22,6 +22,7 @@ import {
   MAX_UINT64,
   voteWithSigners,
 } from '../test-utils/voting';
+import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 
 describe('AddresslistVoting', function () {
@@ -62,13 +63,7 @@ describe('AddresslistVoting', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize(
-      '0x',
-      signers[0].address,
-      ethers.constants.AddressZero
-    );
+    dao = await deployNewDAO(signers[0].address);
   });
 
   beforeEach(async () => {
@@ -90,12 +85,12 @@ describe('AddresslistVoting', function () {
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
 
-    dao.grant(
+    await dao.grant(
       dao.address,
       voting.address,
       ethers.utils.id('EXECUTE_PERMISSION')
     );
-    dao.grant(
+    await dao.grant(
       voting.address,
       signers[0].address,
       ethers.utils.id('UPDATE_ADDRESSES_PERMISSION')
@@ -324,9 +319,15 @@ describe('AddresslistVoting', function () {
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
-      expect(await voting.canVote(id, signers[0].address)).to.equal(true);
-      expect(await voting.canVote(id, signers[1].address)).to.equal(false);
-      expect(await voting.canVote(1, signers[0].address)).to.equal(false);
+      expect(
+        await voting.canVote(id, signers[0].address, VoteOption.Yes)
+      ).to.equal(true);
+      expect(
+        await voting.canVote(id, signers[1].address, VoteOption.Yes)
+      ).to.equal(false);
+      expect(
+        await voting.canVote(1, signers[0].address, VoteOption.Yes)
+      ).to.equal(false);
 
       expect(proposal.actions.length).to.equal(1);
       expect(proposal.actions[0].to).to.equal(dummyActions[0].to);
@@ -397,7 +398,7 @@ describe('AddresslistVoting', function () {
         )
       )
         .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-        .withArgs(id, signers[0].address);
+        .withArgs(id, signers[0].address, VoteOption.Yes);
 
       // Works if the vote option is 'None'
       expect(
@@ -440,6 +441,18 @@ describe('AddresslistVoting', function () {
         ).to.equal(id);
       });
 
+      it('reverts on voting None', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        // Check that voting is possible but don't vote using `callStatic`
+        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+          .be.reverted;
+
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address, VoteOption.None);
+      });
+
       it('reverts on vote replacement', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
@@ -448,16 +461,16 @@ describe('AddresslistVoting', function () {
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Yes);
         await expect(voting.vote(id, VoteOption.No, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.No);
         await expect(voting.vote(id, VoteOption.Abstain, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Abstain);
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('cannot early execute', async () => {
@@ -573,11 +586,13 @@ describe('AddresslistVoting', function () {
       it('does not allow voting, when the vote has not started yet', async () => {
         expect(await getTime()).to.be.lessThan(startDate);
 
-        expect(await voting.canVote(id, signers[0].address)).to.equal(false);
+        expect(
+          await voting.canVote(id, signers[0].address, VoteOption.Yes)
+        ).to.equal(false);
 
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Yes);
       });
 
       it('increases the yes, no, and abstain count and emits correct events', async () => {
@@ -613,6 +628,18 @@ describe('AddresslistVoting', function () {
         expect(proposal.tally.abstain).to.equal(1);
       });
 
+      it('reverts on voting None', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        // Check that voting is possible but don't vote using `callStatic`
+        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+          .be.reverted;
+
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address, VoteOption.None);
+      });
+
       it('reverts on vote replacement', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
@@ -621,16 +648,16 @@ describe('AddresslistVoting', function () {
         // Try to replace the vote
         await expect(voting.vote(id, VoteOption.Yes, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Yes);
         await expect(voting.vote(id, VoteOption.No, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.No);
         await expect(voting.vote(id, VoteOption.Abstain, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.Abstain);
         await expect(voting.vote(id, VoteOption.None, false))
           .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
-          .withArgs(id, signers[0].address);
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('can execute early if participation is large enough', async () => {
@@ -763,6 +790,18 @@ describe('AddresslistVoting', function () {
         ).to.equal(id);
       });
 
+      it('reverts on voting None', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        // Check that voting is possible but don't vote using `callStatic`
+        expect(await voting.callStatic.vote(id, VoteOption.Yes, false)).to.not
+          .be.reverted;
+
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address, VoteOption.None);
+      });
+
       it('should allow vote replacement but not double-count votes by the same address', async () => {
         await advanceIntoVoteTime(startDate, endDate);
 
@@ -784,11 +823,9 @@ describe('AddresslistVoting', function () {
         expect((await voting.getProposal(id)).tally.no).to.equal(0);
         expect((await voting.getProposal(id)).tally.abstain).to.equal(1);
 
-        await voting.vote(id, VoteOption.None, false);
-        await voting.vote(id, VoteOption.None, false);
-        expect((await voting.getProposal(id)).tally.yes).to.equal(0);
-        expect((await voting.getProposal(id)).tally.no).to.equal(0);
-        expect((await voting.getProposal(id)).tally.abstain).to.equal(0);
+        await expect(voting.vote(id, VoteOption.None, false))
+          .to.be.revertedWithCustomError(voting, 'VoteCastForbidden')
+          .withArgs(id, signers[0].address, VoteOption.None);
       });
 
       it('cannot early execute', async () => {

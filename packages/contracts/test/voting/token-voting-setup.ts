@@ -6,6 +6,8 @@ import {ERC20, TokenVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
+import {deployWithProxy} from '../test-utils/proxy';
+
 import {
   VotingSettings,
   VotingMode,

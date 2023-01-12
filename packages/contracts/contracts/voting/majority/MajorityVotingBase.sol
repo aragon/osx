@@ -159,7 +159,7 @@ abstract contract MajorityVotingBase is
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
 
-    /// @notice Thrown if zero is not allowed as a value
+    /// @notice Thrown if zero is not allowed as a value.
     error ZeroValueNotAllowed();
 
     /// @notice Thrown if an account is not allowed to cast a vote. This can be because the vote
@@ -169,7 +169,8 @@ abstract contract MajorityVotingBase is
     /// - the account doesn't have voting powers.
     /// @param proposalId The ID of the proposal.
     /// @param account The address of the _account.
-    error VoteCastForbidden(uint256 proposalId, address account);
+    /// @param voteOption The chosen vote option.
+    error VoteCastForbidden(uint256 proposalId, address account, VoteOption voteOption);
 
     /// @notice Thrown if the proposal execution is forbidden.
     /// @param proposalId The ID of the proposal.
@@ -227,8 +228,12 @@ abstract contract MajorityVotingBase is
     ) public virtual {
         address account = _msgSender();
 
-        if (!_canVote(_proposalId, account)) {
-            revert VoteCastForbidden({proposalId: _proposalId, account: account});
+        if (!_canVote(_proposalId, account, _voteOption)) {
+            revert VoteCastForbidden({
+                proposalId: _proposalId,
+                account: account,
+                voteOption: _voteOption
+            });
         }
         _vote(_proposalId, _voteOption, account, _tryEarlyExecution);
     }
@@ -250,8 +255,12 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function canVote(uint256 _proposalId, address _voter) public view virtual returns (bool) {
-        return _canVote(_proposalId, _voter);
+    function canVote(
+        uint256 _proposalId,
+        address _voter,
+        VoteOption _voteOption
+    ) public view virtual returns (bool) {
+        return _canVote(_proposalId, _voter, _voteOption);
     }
 
     /// @inheritdoc IMajorityVoting
@@ -359,7 +368,7 @@ abstract contract MajorityVotingBase is
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
-    /// @param _voteOption The vote voteOption to cast on creation.
+    /// @param _voteOption The chosen vote option to be casted on proposal creation.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @return proposalId The ID of the proposal.
     function createProposal(
@@ -373,7 +382,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice Internal function to cast a vote. It assumes the queried vote exists.
     /// @param _proposalId The ID of the proposal.
-    /// @param _voteOption Whether voter abstains, supports or not supports to vote.
+    /// @param _voteOption The chosen vote option to be casted on the proposal vote.
     /// @param _tryEarlyExecution If `true`,  early execution is tried after the vote cast. The call does not revert if early execution is not possible.
     function _vote(
         uint256 _proposalId,
@@ -395,8 +404,13 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _voter The address of the voter to check.
+    /// @param  _voteOption Whether the voter abstains, supports or opposes the proposal.
     /// @return Returns `true` if the given voter can vote on a certain proposal and `false` otherwise.
-    function _canVote(uint256 _proposalId, address _voter) internal view virtual returns (bool);
+    function _canVote(
+        uint256 _proposalId,
+        address _voter,
+        VoteOption _voteOption
+    ) internal view virtual returns (bool);
 
     /// @notice Internal function to check if a proposal can be executed. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.

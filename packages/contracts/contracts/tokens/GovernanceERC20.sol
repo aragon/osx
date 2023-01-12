@@ -60,11 +60,11 @@ contract GovernanceERC20 is
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
 
-        for (uint256 i = 0; i < _mintSettings.receivers.length; ) {
+        for (uint256 i; i < _mintSettings.receivers.length; ) {
             _mint(_mintSettings.receivers[i], _mintSettings.amounts[i]);
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

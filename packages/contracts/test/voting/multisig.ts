@@ -11,7 +11,14 @@ import {
   MULTISIG_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
+import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
+import {
+  advanceTime,
+  getTime,
+  setTimeForNextBlock,
+  timestampIn,
+} from '../test-utils/voting';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -65,13 +72,7 @@ describe('Multisig', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize(
-      '0x',
-      signers[0].address,
-      ethers.constants.AddressZero
-    );
+    dao = await deployNewDAO(signers[0].address);
   });
 
   beforeEach(async () => {
@@ -302,7 +303,14 @@ describe('Multisig', function () {
       expect(await multisig.proposalCount()).to.equal(0);
 
       await expect(
-        multisig.createProposal(dummyMetadata, dummyActions, false, false)
+        multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          0,
+          await timestampIn(1000)
+        )
       ).to.not.be.reverted;
 
       expect(await multisig.proposalCount()).to.equal(1);
@@ -320,18 +328,29 @@ describe('Multisig', function () {
         dummyMetadata,
         dummyActions,
         false,
-        false
+        false,
+        0,
+        await timestampIn(1000)
       );
       // create a new proposal for the proposalCounter to be incremented
       await expect(
-        multisig.createProposal(dummyMetadata, dummyActions, false, false)
+        multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          0,
+          await timestampIn(1000)
+        )
       ).to.not.be.reverted;
 
       let proposalId1 = await multisig.callStatic.createProposal(
         dummyMetadata,
         dummyActions,
         false,
-        false
+        false,
+        0,
+        await timestampIn(1000)
       );
 
       expect(proposalId0).to.equal(0); // To be removed when proposal ID is generated as a hash.
@@ -347,13 +366,22 @@ describe('Multisig', function () {
         multisigSettings
       );
 
+      let startDate = await timestampIn(1000);
+      let endDate = await timestampIn(5000);
       await expect(
         multisig
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], false, false)
+          .createProposal(dummyMetadata, [], false, false, startDate, endDate)
       )
         .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
-        .withArgs(id, signers[0].address, dummyMetadata, []);
+        .withArgs(
+          id,
+          signers[0].address,
+          startDate,
+          endDate,
+          dummyMetadata,
+          []
+        );
     });
 
     context('`onlyListed` is set to `false`:', async () => {
@@ -368,13 +396,23 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal when unlisted accounts are allowed', async () => {
+        let startDate = await timestampIn(1000);
+        let endDate = await timestampIn(5000);
+
         await expect(
           multisig
             .connect(signers[1]) // not listed
-            .createProposal(dummyMetadata, [], false, false)
+            .createProposal(dummyMetadata, [], false, false, startDate, endDate)
         )
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
-          .withArgs(id, signers[1].address, dummyMetadata, []);
+          .withArgs(
+            id,
+            signers[1].address,
+            startDate,
+            endDate,
+            dummyMetadata,
+            []
+          );
       });
     });
 
@@ -393,7 +431,14 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[1]) // not listed
-            .createProposal(dummyMetadata, [], false, false)
+            .createProposal(
+              dummyMetadata,
+              [],
+              false,
+              false,
+              0,
+              await timestampIn(1000)
+            )
         )
           .to.be.revertedWithCustomError(multisig, 'ProposalCreationForbidden')
           .withArgs(signers[1].address);
@@ -401,14 +446,42 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[0])
-            .createProposal(dummyMetadata, [], false, false)
+            .createProposal(
+              dummyMetadata,
+              [],
+              false,
+              false,
+              0,
+              await timestampIn(1000)
+            )
         ).to.not.be.reverted;
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
-        await expect(multisig.createProposal(dummyMetadata, [], false, false))
+        let startDate = await timestampIn(1000);
+        let endDate = await timestampIn(5000);
+
+        await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
+
+        await expect(
+          multisig.createProposal(
+            dummyMetadata,
+            [],
+            false,
+            false,
+            startDate,
+            endDate
+          )
+        )
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
-          .withArgs(id, signers[0].address, dummyMetadata, []);
+          .withArgs(
+            id,
+            signers[0].address,
+            startDate,
+            endDate,
+            dummyMetadata,
+            []
+          );
 
         const block = await ethers.provider.getBlock('latest');
 
@@ -418,6 +491,8 @@ describe('Multisig', function () {
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
+        expect(proposal.parameters.startDate).to.equal(startDate);
+        expect(proposal.parameters.endDate).to.equal(endDate);
         expect(proposal.tally.approvals).to.equal(0);
         expect(proposal.tally.addresslistLength).to.equal(1);
         expect(proposal.actions.length).to.equal(0);
@@ -427,33 +502,82 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and approves if specified', async () => {
-        await expect(multisig.createProposal(dummyMetadata, [], true, false))
+        let startDate = await timestampIn(3000);
+        let endDate = await timestampIn(5000);
+
+        await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
+
+        await expect(
+          multisig.createProposal(dummyMetadata, [], true, false, 0, endDate)
+        )
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
-          .withArgs(id, signers[0].address, dummyMetadata, [])
+          .withArgs(
+            id,
+            signers[0].address,
+            startDate,
+            endDate,
+            dummyMetadata,
+            []
+          )
           .to.emit(multisig, MULTISIG_EVENTS.APPROVED)
           .withArgs(id, signers[0].address);
 
         const block = await ethers.provider.getBlock('latest');
+
         const proposal = await multisig.getProposal(id);
-        expect(proposal.open).to.equal(true);
         expect(proposal.executed).to.equal(false);
         expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
-
+        expect(proposal.parameters.startDate).to.equal(startDate);
+        expect(proposal.parameters.endDate).to.equal(endDate);
         expect(proposal.tally.approvals).to.equal(1);
       });
 
       it('increases the proposal count', async () => {
         expect(await multisig.proposalCount()).to.equal(0);
 
-        await multisig.createProposal(dummyMetadata, dummyActions, true, false);
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          true,
+          false,
+          0,
+          await timestampIn(5000)
+        );
         expect(await multisig.proposalCount()).to.equal(1);
 
-        await multisig.createProposal(dummyMetadata, dummyActions, true, false);
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          true,
+          false,
+          0,
+          await timestampIn(5000)
+        );
         expect(await multisig.proposalCount()).to.equal(2);
       });
+    });
+
+    it('should revert if startDate is < than now', async () => {
+      const timeStamp = (await getTime()) + 500;
+      await setTimeForNextBlock(timeStamp);
+      await expect(
+        multisig.createProposal(dummyMetadata, dummyActions, true, false, 5, 0)
+      )
+        .to.be.revertedWithCustomError(multisig, 'InvalidStartDate')
+        .withArgs(timeStamp, 5);
+    });
+
+    it('should revert if endDate is < than startDate', async () => {
+      const timeStamp = (await getTime()) + 500;
+      await setTimeForNextBlock(timeStamp);
+      await expect(
+        multisig.createProposal(dummyMetadata, dummyActions, true, false, 0, 5)
+      )
+        .to.be.revertedWithCustomError(multisig, 'InvalidEndDate')
+        .withArgs(timeStamp, 5);
     });
   });
 
@@ -466,16 +590,14 @@ describe('Multisig', function () {
         multisigSettings
       );
 
-      expect(
-        (
-          await multisig.createProposal(
-            dummyMetadata,
-            dummyActions,
-            false,
-            false
-          )
-        ).value
-      ).to.equal(id);
+      await multisig.createProposal(
+        dummyMetadata,
+        dummyActions,
+        false,
+        false,
+        0,
+        await timestampIn(1000)
+      );
     });
 
     describe('canApprove:', async () => {
@@ -501,6 +623,40 @@ describe('Multisig', function () {
 
       it('returns `true` if the approver is listed', async () => {
         expect(await multisig.canApprove(id, signers[0].address)).to.be.true;
+      });
+
+      it("returns `false` if the proposal hasn't started yet", async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          await timestampIn(2000),
+          await timestampIn(5000)
+        );
+
+        expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
+
+        await advanceTime(2000);
+
+        expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
+      });
+
+      it('returns `false` if the proposal has ended', async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          0,
+          await timestampIn(5000)
+        );
+
+        expect(await multisig.canApprove(1, signers[0].address)).to.be.true;
+
+        await advanceTime(5000);
+
+        expect(await multisig.canApprove(1, signers[0].address)).to.be.false;
       });
     });
 
@@ -533,6 +689,48 @@ describe('Multisig', function () {
 
         expect((await multisig.getProposal(id)).tally.approvals).to.equal(1);
       });
+
+      it("reverts if the proposal hasn't started yet", async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          await timestampIn(5000),
+          await timestampIn(10000)
+        );
+
+        await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
+          multisig,
+          'ApprovalCastForbidden'
+        );
+
+        await advanceTime(7000);
+
+        await expect(multisig.approve(1, false)).to.not.be.reverted;
+      });
+
+      it('reverts if the proposal has ended', async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          0,
+          await timestampIn(5000)
+        );
+        await advanceTime(2000);
+
+        await expect(multisig.connect(signers[1]).approve(1, false)).to.not.be
+          .reverted;
+
+        await advanceTime(10000);
+
+        await expect(multisig.approve(1, false)).to.be.revertedWithCustomError(
+          multisig,
+          'ApprovalCastForbidden'
+        );
+      });
     });
 
     describe('canExecute:', async () => {
@@ -559,6 +757,49 @@ describe('Multisig', function () {
         expect((await multisig.getProposal(id)).executed).to.be.false;
 
         expect(await multisig.canExecute(id)).to.be.true;
+      });
+
+      it("returns `false` if the proposal hasn't started yet", async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          await timestampIn(1000),
+          await timestampIn(10000)
+        );
+
+        expect(await multisig.canExecute(1)).to.be.false;
+
+        await advanceTime(2000);
+        await multisig.connect(signers[0]).approve(1, false);
+        await multisig.connect(signers[1]).approve(1, false);
+        await multisig.connect(signers[2]).approve(1, false);
+
+        expect(await multisig.canExecute(1)).to.be.true;
+      });
+
+      it('returns `false` if the proposal has ended', async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          0,
+          await timestampIn(5000)
+        );
+
+        await advanceTime(2000);
+
+        await multisig.connect(signers[0]).approve(1, false);
+        await multisig.connect(signers[1]).approve(1, false);
+        await multisig.connect(signers[2]).approve(1, false);
+
+        expect(await multisig.canExecute(1)).to.be.true;
+
+        await advanceTime(5000);
+
+        expect(await multisig.canExecute(1)).to.be.false;
       });
     });
 
@@ -663,6 +904,49 @@ describe('Multisig', function () {
           .to.emit(dao, DAO_EVENTS.EXECUTED)
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
           .to.emit(multisig, MULTISIG_EVENTS.APPROVED);
+      });
+
+      it("reverts if the proposal hasn't started yet", async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          await timestampIn(1000),
+          await timestampIn(5000)
+        );
+
+        await expect(multisig.execute(1)).to.be.revertedWithCustomError(
+          multisig,
+          'ProposalExecutionForbidden'
+        );
+
+        await advanceTime(2000);
+
+        await multisig.connect(signers[0]).approve(1, false);
+        await multisig.connect(signers[1]).approve(1, false);
+        await multisig.connect(signers[2]).approve(1, false);
+
+        await expect(multisig.execute(1)).to.not.be.reverted;
+      });
+
+      it('reverts if the proposal has ended', async () => {
+        await multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          false,
+          false,
+          0,
+          await timestampIn(5000)
+        );
+        await multisig.connect(signers[0]).approve(1, false);
+        await multisig.connect(signers[1]).approve(1, false);
+        await multisig.connect(signers[2]).approve(1, false);
+
+        await advanceTime(10000);
+        await expect(
+          multisig.connect(signers[1]).execute(1)
+        ).to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden');
       });
     });
   });

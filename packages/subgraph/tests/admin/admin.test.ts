@@ -10,7 +10,8 @@ import {
   ONE_ETH,
   STRING_DATA,
   PROPOSAL_ID,
-  CONTRACT_ADDRESS
+  CONTRACT_ADDRESS,
+  START_DATE
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -37,6 +38,8 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   let event = createNewProposalCreatedEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
+    START_DATE,
+    START_DATE,
     STRING_DATA,
     actions,
     CONTRACT_ADDRESS

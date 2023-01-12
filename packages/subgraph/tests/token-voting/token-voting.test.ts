@@ -74,6 +74,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   let event = createNewProposalCreatedEvent(
     proposalId,
     ADDRESS_ONE,
+    START_DATE,
+    END_DATE,
     STRING_DATA,
     CONTRACT_ADDRESS
   );
@@ -323,7 +325,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
   // checks
   let entityID = ADDRESS_ONE + '_' + proposal.id;
   assert.notInStore('TokenVotingVoter', entityID);
-  
+
   clearStore();
 });
 

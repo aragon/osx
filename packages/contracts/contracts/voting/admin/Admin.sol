@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.10;
 
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {Proposal, ProposalBase} from "../../core/plugin/Proposal.sol";
 import {IDAO} from "../../core/IDAO.sol";
@@ -10,6 +12,8 @@ import {IDAO} from "../../core/IDAO.sol";
 /// @author Aragon Association - 2022.
 /// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
 contract Admin is PluginCloneable, Proposal {
+    using SafeCast for uint256;
+
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant ADMIN_INTERFACE_ID =
         this.initialize.selector ^ this.executeProposal.selector;
@@ -44,7 +48,15 @@ contract Admin is PluginCloneable, Proposal {
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions
     ) external auth(EXECUTE_PROPOSAL_PERMISSION_ID) {
-        uint256 proposalId = _createProposal(_msgSender(), _metadata, _actions);
+        uint64 currentTimestamp64 = block.timestamp.toUint64();
+
+        uint256 proposalId = _createProposal({
+            _creator: _msgSender(),
+            _metadata: _metadata,
+            _startDate: currentTimestamp64,
+            _endDate: currentTimestamp64,
+            _actions: _actions
+        });
         _executeProposal(dao, proposalId, _actions);
     }
 }

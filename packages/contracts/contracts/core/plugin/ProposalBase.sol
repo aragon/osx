@@ -6,7 +6,7 @@ import {IDAO} from "../IDAO.sol";
 
 /// @title ProposalBase
 /// @author Aragon Association - 2022
-/// @notice An abstract base contract defining the traits and internal functionality to create and execute proposals.
+/// @notice An abstract base xcontract defining the traits and internal functionality to create and execute proposals.
 abstract contract ProposalBase {
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
     bytes4 internal constant PROPOSAL_INTERFACE_ID = this.proposalCount.selector;
@@ -14,11 +14,15 @@ abstract contract ProposalBase {
     /// @notice Emitted when a proposal is created.
     /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the proposal.
+    /// @param startDate The start date of the proposal in seconds.
+    /// @param endDate The end date of the proposal in seconds.
     /// @param metadata The metadata of the proposal.
     /// @param actions The actions that will be executed if the proposal passes.
     event ProposalCreated(
         uint256 indexed proposalId,
         address indexed creator,
+        uint64 startDate,
+        uint64 endDate,
         bytes metadata,
         IDAO.Action[] actions
     );
@@ -45,11 +49,15 @@ abstract contract ProposalBase {
 
     /// @notice Internal function to create a proposal.
     /// @param _metadata The the proposal metadata.
+    /// @param _startDate The start date of the proposal in seconds.
+    /// @param _endDate The end date of the proposal in seconds.
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @return proposalId The ID of the proposal.
     function _createProposal(
         address _creator,
         bytes calldata _metadata,
+        uint64 _startDate,
+        uint64 _endDate,
         IDAO.Action[] calldata _actions
     ) internal virtual returns (uint256 proposalId) {
         proposalId = createProposalId();
@@ -58,6 +66,8 @@ abstract contract ProposalBase {
             proposalId: proposalId,
             creator: _creator,
             metadata: _metadata,
+            startDate: _startDate,
+            endDate: _endDate,
             actions: _actions
         });
     }

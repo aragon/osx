@@ -76,7 +76,13 @@ contract TokenVoting is MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = _createProposal(_msgSender(), _metadata, _actions);
+        proposalId = _createProposal({
+            _creator: _msgSender(),
+            _metadata: _metadata,
+            _startDate: _startDate,
+            _endDate: _endDate,
+            _actions: _actions
+        });
 
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
@@ -102,13 +108,6 @@ contract TokenVoting is MajorityVotingBase {
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -157,11 +156,20 @@ contract TokenVoting is MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
+    function _canVote(
+        uint256 _proposalId,
+        address _account,
+        VoteOption _voteOption
+    ) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // The proposal vote hasn't started or has already ended.
         if (!_isProposalOpen(proposal_)) {
+            return false;
+        }
+
+        // The voter votes `None` which is not allowed.
+        if (_voteOption == VoteOption.None) {
             return false;
         }
 

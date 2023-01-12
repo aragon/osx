@@ -1,6 +1,6 @@
 {
   "name": "@aragon/core-contracts",
-  "version": "0.4.0-alpha",
+  "version": "0.6.0-alpha",
   "description": "Aragon V2 DAO Framework",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -37,6 +37,7 @@
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.4",
+    "@openzeppelin/hardhat-upgrades": "^1.21.0",
     "@rollup/plugin-json": "^4.1.0",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
