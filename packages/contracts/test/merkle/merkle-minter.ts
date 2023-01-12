@@ -12,6 +12,8 @@ import {
   GovernanceERC20,
 } from '../../typechain';
 import BalanceTree from './src/balance-tree';
+import {deployNewDAO} from '../test-utils/dao';
+import {deployWithProxy} from '../test-utils/proxy';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -19,7 +21,7 @@ const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
   let minter: MerkleMinter;
-  let distributor: MerkleDistributor;
+  let distributorBase: MerkleDistributor;
   let managingDao: DAO;
   let token: GovernanceERC20;
   let ownerAddress: string;
@@ -43,13 +45,7 @@ describe('MerkleDistributor', function () {
     totalAmount = amount0.add(amount1);
 
     // create a DAO
-    const DAO = await ethers.getContractFactory('DAO');
-    managingDao = await DAO.deploy();
-    await managingDao.initialize(
-      '0x',
-      ownerAddress,
-      ethers.constants.AddressZero
-    );
+    managingDao = await deployNewDAO(ownerAddress);
 
     const GovernanceERC20 = await ethers.getContractFactory('GovernanceERC20');
     token = await GovernanceERC20.deploy(managingDao.address, 'GOV', 'GOV', {
@@ -60,14 +56,15 @@ describe('MerkleDistributor', function () {
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
     );
-    distributor = await MerkleDistributor.deploy();
+    distributorBase = await MerkleDistributor.deploy();
 
     const MerkleMinter = await ethers.getContractFactory('MerkleMinter');
-    minter = await MerkleMinter.deploy();
+    minter = await deployWithProxy(MerkleMinter);
+
     await minter.initialize(
       managingDao.address,
       token.address,
-      distributor.address
+      distributorBase.address
     );
     await managingDao.grant(
       minter.address,

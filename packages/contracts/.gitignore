@@ -1,5 +1,6 @@
 .vscode/
 node_modules
+.openzeppelin
 .env
 coverage
 coverage.json

@@ -3,6 +3,7 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {TestSharedPlugin, TestIdGatingOracle, DAO} from '../../../../typechain';
+import {deployNewDAO} from '../../../test-utils/dao';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
   'ID_GATED_ACTION_PERMISSION'
@@ -23,16 +24,9 @@ describe('SharedPlugin', function () {
 
     // Deploy the managing DAO and two other DAOs
     const DAO = await ethers.getContractFactory('DAO');
-    managingDao = await DAO.deploy();
-    dao1 = await DAO.deploy();
-    dao2 = await DAO.deploy();
-    await managingDao.initialize(
-      '0x',
-      ownerAddress,
-      ethers.constants.AddressZero
-    );
-    await dao1.initialize('0x', ownerAddress, ethers.constants.AddressZero);
-    await dao2.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    managingDao = await deployNewDAO(ownerAddress);
+    dao1 = await deployNewDAO(ownerAddress);
+    dao2 = await deployNewDAO(ownerAddress);
 
     // Deploy the `TestSharedPlugin`
     const TestSharedPlugin = await ethers.getContractFactory(

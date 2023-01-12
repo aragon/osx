@@ -411,12 +411,12 @@ type MultisigProposal implements Proposal @entity {
   metadata: String
   createdAt: BigInt!
   creationBlockNumber: BigInt!
-  open: Boolean!
   snapshotBlock: BigInt!
   minApprovals: BigInt!
   addresslistLength: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
   approvals: BigInt
-  executable: Boolean
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt

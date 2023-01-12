@@ -1,15 +1,12 @@
-import chai, {expect} from 'chai';
-import {smock} from '@defi-wonderland/smock';
+import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
 
 import {getMergedABI} from '../../utils/abi';
-import {findEvent, PROPOSAL_EVENTS} from '../../utils/event';
+import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
+import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
-
-chai.use(smock.matchers);
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -50,9 +47,7 @@ describe('Admin plugin', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const mockDAOFactory = await smock.mock('DAO');
-    dao = await mockDAOFactory.deploy();
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    dao = await deployNewDAO(ownerAddress);
   });
 
   beforeEach(async () => {
@@ -189,18 +184,29 @@ describe('Admin plugin', function () {
       expect(event.args.proposalId).to.equal(nextExpectedProposalId);
     });
 
-    it("calls the DAO's execute function correctly", async () => {
-      const proposalId = 1;
+    it("calls the DAO's execute function correctly with proposalId", async () => {
+      {
+        const proposalId = 0;
 
-      await plugin.executeProposal(dummyMetadata, dummyActions);
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-      expect(dao.execute).has.been.calledWith(BigNumber.from(proposalId), [
-        [
-          dummyActions[0].to,
-          BigNumber.from(dummyActions[0].value),
-          dummyActions[0].data,
-        ],
-      ]);
+        expect(event.args.actor).to.equal(plugin.address);
+        expect(event.args.callId).to.equal(proposalId);
+        expect(event.args.actions.length).to.equal(1);
+        expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
+        expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
+        expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      }
+
+      {
+        const proposalId = 1;
+
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+
+        expect(event.args.callId).to.equal(proposalId);
+      }
     });
   });
 });

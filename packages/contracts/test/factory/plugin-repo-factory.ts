@@ -2,8 +2,12 @@ import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {deployMockPluginSetup} from '../test-utils/repo';
+import {
+  deployMockPluginSetup,
+  deployPluginRepoRegistry,
+} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+import {deployNewDAO} from '../test-utils/dao';
 
 import {PluginRepoRegistry, DAO} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
@@ -11,8 +15,6 @@ import {getMergedABI} from '../../utils/abi';
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
 };
-
-const zeroAddress = ethers.constants.AddressZero;
 
 const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
   'REGISTER_PLUGIN_REPO_PERMISSION'
@@ -62,9 +64,7 @@ describe('PluginRepoFactory: ', function () {
 
   beforeEach(async function () {
     // DAO
-    const DAO = await ethers.getContractFactory('DAO');
-    managingDao = await DAO.deploy();
-    await managingDao.initialize('0x00', ownerAddress, zeroAddress);
+    managingDao = await deployNewDAO(ownerAddress);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -74,14 +74,9 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // deploy and initialize PluginRepoRegistry
-    const PluginRepoRegistry = await ethers.getContractFactory(
-      'PluginRepoRegistry'
-    );
-
-    pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(
-      managingDao.address,
-      ensSubdomainRegistrar.address
+    pluginRepoRegistry = await deployPluginRepoRegistry(
+      managingDao,
+      ensSubdomainRegistrar
     );
 
     // deploy PluginRepoFactory
@@ -95,14 +90,14 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    managingDao.grant(
+    await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    managingDao.grant(
+    await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
@@ -110,7 +105,7 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
-    managingDao.revoke(
+    await managingDao.revoke(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
       REGISTER_PLUGIN_REPO_PERMISSION_ID

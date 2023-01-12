@@ -12,6 +12,7 @@ import {deployNewDAO} from '../test-utils/dao';
 import {deployNewPluginRepo} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
+import {deployWithProxy} from '../test-utils/proxy';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -56,7 +57,8 @@ describe('PluginRepoRegistry', function () {
     const PluginRepoRegistry = await ethers.getContractFactory(
       'PluginRepoRegistry'
     );
-    pluginRepoRegistry = await PluginRepoRegistry.deploy();
+    pluginRepoRegistry = await deployWithProxy(PluginRepoRegistry);
+
     await pluginRepoRegistry.initialize(
       managingDAO.address,
       ensSubdomainRegistrar.address
