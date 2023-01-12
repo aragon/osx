@@ -169,14 +169,13 @@ contract DAO is
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory)
+        returns (bytes[] memory execResults, uint256 failureMap)
     {
         if(_actions.length > MAX_ACTIONS) {
             revert TooManyActions();
         }
 
-        bytes[] memory execResults = new bytes[](_actions.length);
-        uint256 failureMap;
+        execResults = new bytes[](_actions.length);
 
         for (uint256 i = 0; i < _actions.length;) {
             address to = _actions[i].to;
@@ -211,7 +210,7 @@ contract DAO is
 
         emit Executed(msg.sender, callId, _actions, failureMap, execResults);
 
-        return execResults;
+        return (execResults, failureMap);
     }
 
     /// @inheritdoc IDAO

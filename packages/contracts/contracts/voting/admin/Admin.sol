@@ -71,7 +71,7 @@ contract Admin is PluginCloneable {
         uint256 proposalId = proposalCounter.current();
         proposalCounter.increment();
 
-        bytes[] memory execResults = dao.execute(proposalId, _actions, 0); // TODO: 123
+        (bytes[] memory execResults, ) = dao.execute(proposalId, _actions, 0);
 
         emit ProposalCreated({
             proposalId: proposalId,

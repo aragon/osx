@@ -39,11 +39,12 @@ abstract contract IDAO {
     /// @param _actions The array of actions.
     /// @param _allowFailureMap Allows to succeed tx even if the action might revert. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
+    /// @return uint256 The constructed failureMap which contains which actions have actually failed.
     function execute(
         uint256 callId,
         Action[] memory _actions,
         uint256 _allowFailureMap
-    ) external virtual returns (bytes[] memory);
+    ) external virtual returns (bytes[] memory, uint256);
 
     /// @notice Emitted when a proposal is executed.
     /// @param actor The address of the caller.
