@@ -22,6 +22,7 @@ import {
   MAX_UINT64,
   voteWithSigners,
 } from '../test-utils/voting';
+import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 
 describe('AddresslistVoting', function () {
@@ -62,13 +63,7 @@ describe('AddresslistVoting', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize(
-      '0x',
-      signers[0].address,
-      ethers.constants.AddressZero
-    );
+    dao = await deployNewDAO(signers[0].address);
   });
 
   beforeEach(async () => {
@@ -90,12 +85,12 @@ describe('AddresslistVoting', function () {
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
 
-    dao.grant(
+    await dao.grant(
       dao.address,
       voting.address,
       ethers.utils.id('EXECUTE_PERMISSION')
     );
-    dao.grant(
+    await dao.grant(
       voting.address,
       signers[0].address,
       ethers.utils.id('UPDATE_ADDRESSES_PERMISSION')

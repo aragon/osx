@@ -1,9 +1,10 @@
 import {expect} from 'chai';
-import {ethers} from 'hardhat';
+import {ethers } from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {hexDataSlice, id} from 'ethers/lib/utils';
 
 import {DAO, CallbackHandlerMockHelper} from '../../../typechain';
+import {deployWithProxy} from '../../test-utils/proxy'
 
 const EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
@@ -34,7 +35,8 @@ describe('CallbackHandler', function () {
       'CallbackHandlerMockHelper'
     );
 
-    dao = await DAO.deploy();
+    dao = await deployWithProxy(DAO);
+
     dao.initialize('0x', owner, ethers.constants.AddressZero);
     dao.grant(dao.address, owner, REGISTER_STANDARD_CALLBACK_PERMISSION_ID);
 

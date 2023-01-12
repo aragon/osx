@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import {deployWithProxy} from '../test-utils/proxy';
 
 import {
   ENSSubdomainRegistrar,
@@ -8,6 +9,7 @@ import {
   PublicResolver,
   ENSRegistry,
 } from '../../typechain';
+import {deployNewDAO} from '../test-utils/dao';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {OZ_ERRORS} from '../test-utils/error';
 import {setupResolver} from '../test-utils/ens';
@@ -15,8 +17,6 @@ import {setupResolver} from '../test-utils/ens';
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
-
-const DUMMY_METADATA = '0x';
 
 // Setup ENS with signers[0] owning the the ENS root node (''), the resolver node ('resolver'), the managing DAO, and the subdomain registrar
 async function setupENS(
@@ -42,15 +42,12 @@ async function setupENS(
   await setupResolver(ens, resolver, owner);
 
   // Deploy the managing DAO
-  let dao = await DAO.deploy();
-  await dao.initialize(
-    DUMMY_METADATA,
-    await owner.getAddress(),
-    ethers.constants.AddressZero
-  );
+  let dao = await deployNewDAO(await owner.getAddress());
 
   // Deploy the registrar
-  let registrar = await ENSSubdomainRegistrar.deploy();
+  let registrar = await deployWithProxy<ENSSubdomainRegistrar>(
+    ENSSubdomainRegistrar
+  );
 
   return [ens, resolver, dao, registrar];
 }

@@ -176,7 +176,7 @@ contract PermissionManager is Initializable {
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
-        for (uint256 i = 0; i < items.length; ) {
+        for (uint256 i; i < items.length; ) {
             PermissionLib.ItemSingleTarget memory item = items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
@@ -188,7 +188,7 @@ contract PermissionManager is Initializable {
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -197,7 +197,7 @@ contract PermissionManager is Initializable {
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
     function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
-        for (uint256 i = 0; i < items.length; ) {
+        for (uint256 i; i < items.length; ) {
             PermissionLib.ItemMultiTarget memory item = items[i];
 
             // TODO: Optimize
@@ -219,7 +219,7 @@ contract PermissionManager is Initializable {
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

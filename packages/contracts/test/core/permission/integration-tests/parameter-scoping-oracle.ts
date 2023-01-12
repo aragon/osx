@@ -7,6 +7,7 @@ import {
   TestPlugin,
   DAO,
 } from '../../../../typechain';
+import {deployNewDAO} from '../../../test-utils/dao';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 
@@ -23,13 +24,7 @@ describe('TestParameterScopingOracle', function () {
     ownerAddress = await signers[0].getAddress();
 
     // create a DAO
-    const DAO = await ethers.getContractFactory('DAO');
-    managingDao = await DAO.deploy();
-    await managingDao.initialize(
-      '0x',
-      ownerAddress,
-      ethers.constants.AddressZero
-    );
+    managingDao = await deployNewDAO(ownerAddress);
 
     // Deploy the component
     const TestPlugin = await ethers.getContractFactory('TestPlugin');

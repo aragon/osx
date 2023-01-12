@@ -17,6 +17,8 @@ import {
 } from '../test-utils/repo';
 import {findEvent} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
+import {deployNewDAO} from '../test-utils/dao';
+import {deployWithProxy} from '../test-utils/proxy';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -121,13 +123,7 @@ describe('DAOFactory: ', function () {
 
   beforeEach(async function () {
     // Managing DAO
-    const ManagingDAO = await ethers.getContractFactory('DAO');
-    managingDao = await ManagingDAO.deploy();
-    await managingDao.initialize(
-      '0x00',
-      ownerAddress,
-      ethers.constants.AddressZero
-    );
+    managingDao = await deployNewDAO(ownerAddress);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -138,7 +134,7 @@ describe('DAOFactory: ', function () {
 
     // DAO Registry
     const DAORegistry = await ethers.getContractFactory('DAORegistry');
-    daoRegistry = await DAORegistry.deploy();
+    daoRegistry = await deployWithProxy(DAORegistry);
     await daoRegistry.initialize(
       managingDao.address,
       ensSubdomainRegistrar.address

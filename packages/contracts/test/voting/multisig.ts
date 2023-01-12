@@ -11,6 +11,7 @@ import {
   MULTISIG_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
+import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 import {
   advanceTime,
@@ -71,13 +72,7 @@ describe('Multisig', function () {
       ethers.utils.toUtf8Bytes('0x123456789')
     );
 
-    const DAO = await ethers.getContractFactory('DAO');
-    dao = await DAO.deploy();
-    await dao.initialize(
-      '0x',
-      signers[0].address,
-      ethers.constants.AddressZero
-    );
+    dao = await deployNewDAO(signers[0].address);
   });
 
   beforeEach(async () => {

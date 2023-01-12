@@ -6,7 +6,7 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../typechain';
-import {deployMockPluginSetup} from '../test-utils/repo';
+import {deployMockPluginSetup, deployNewPluginRepo} from '../test-utils/repo';
 
 const emptyBytes = '0x00';
 
@@ -43,9 +43,7 @@ describe('PluginRepo', function () {
 
   beforeEach(async function () {
     // deploy a pluginRepo and initialize
-    const PluginRepo = await ethers.getContractFactory('PluginRepo');
-    pluginRepo = await PluginRepo.deploy();
-    await pluginRepo.initialize(ownerAddress);
+    pluginRepo = await deployNewPluginRepo(ownerAddress)
 
     // deploy pluging factory mock
     pluginSetupMock = await deployMockPluginSetup();
