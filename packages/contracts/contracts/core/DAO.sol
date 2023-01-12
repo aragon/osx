@@ -67,9 +67,6 @@ contract DAO is
     /// @notice Thrown if action length is more than MAX_ACTIONS.
     error TooManyActions();
 
-    /// @notice Thrown if Action succeeds, but was called on EOA.
-    error NotAContract();
-
     /// @notice Thrown if action execution has failed.
     /// @param index index of action in the array that failed.
     error ActionFailed(uint256 index);
