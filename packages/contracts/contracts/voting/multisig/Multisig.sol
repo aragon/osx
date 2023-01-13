@@ -38,7 +38,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @param startDate The timestamp when the proposal starts.
     /// @param endDate The timestamp when the proposal expires.
     struct ProposalParameters {
-        uint256 minApprovals;
+        uint16 minApprovals;
         uint64 snapshotBlock;
         uint64 startDate;
         uint64 endDate;
@@ -99,7 +99,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @notice Thrown if the minimal approvals value is out of bounds (less than 1 or greater than the number of members in the address list).
     /// @param limit The maximal value.
     /// @param actual The actual value.
-    error MinApprovalsOutOfBounds(uint256 limit, uint256 actual);
+    error MinApprovalsOutOfBounds(uint256 limit, uint16 actual);
 
     /// @notice Thrown if the start date is to small.
     /// @param limit The limit value.
@@ -119,7 +119,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @notice Emitted when the plugin settings are set.
     /// @param onlyListed Whether only listed addresses can create a proposal.
     /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
-    event MultisigSettingsUpdated(bool onlyListed, uint256 indexed minApprovals);
+    event MultisigSettingsUpdated(bool onlyListed, uint16 indexed minApprovals);
 
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
@@ -174,7 +174,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
         // Check if the new address list has become shorter than the current minimum number of approvals required.
         uint256 newAddresslistLength = addresslistLength();
-        uint256 minApprovals_ = multisigSettings.minApprovals;
+        uint16 minApprovals_ = multisigSettings.minApprovals;
         if (newAddresslistLength < minApprovals_) {
             revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
         }
