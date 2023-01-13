@@ -74,7 +74,7 @@ contract TokenVoting is MajorityVotingBase {
             snapshotBlock = block.number - 1;
         }
 
-        if (totalVotingPower(uint256(snapshotBlock)) == 0) {
+        if (totalVotingPower(snapshotBlock) == 0) {
             revert NoVotingPower();
         }
 
