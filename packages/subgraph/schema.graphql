@@ -387,7 +387,7 @@ type MultisigPlugin implements IPlugin @entity {
   members: [MultisigApprover!]! @derivedFrom(field: "plugin")
 
   # multisig settings
-  minApprovals: BigInt
+  minApprovals: Int!
   onlyListed: Boolean!
 }
 
@@ -419,7 +419,7 @@ type MultisigProposal implements Proposal @entity {
   endDate: BigInt!
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
-  minApprovals: BigInt!
+  minApprovals: Int!
   addresslistLength: BigInt!
   approvals: BigInt
   executed: Boolean!
