@@ -566,7 +566,7 @@ describe('Multisig', function () {
       await expect(
         multisig.createProposal(dummyMetadata, dummyActions, true, false, 5, 0)
       )
-        .to.be.revertedWithCustomError(multisig, 'InvalidStartDate')
+        .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
         .withArgs(timeStamp, 5);
     });
 
@@ -576,7 +576,7 @@ describe('Multisig', function () {
       await expect(
         multisig.createProposal(dummyMetadata, dummyActions, true, false, 0, 5)
       )
-        .to.be.revertedWithCustomError(multisig, 'InvalidEndDate')
+        .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
         .withArgs(timeStamp, 5);
     });
   });

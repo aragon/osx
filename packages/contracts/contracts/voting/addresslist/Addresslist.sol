@@ -35,12 +35,10 @@ abstract contract Addresslist {
     /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
     /// @return Whether the account is listed at the specified block number.
-    function isListedAtBlock(address _account, uint256 _blockNumber)
-        public
-        view
-        virtual
-        returns (bool)
-    {
+    function isListedAtBlock(
+        address _account,
+        uint256 _blockNumber
+    ) public view virtual returns (bool) {
         return _addresslistCheckpoints[_account].getAtBlock(_blockNumber) == 1;
     }
 
