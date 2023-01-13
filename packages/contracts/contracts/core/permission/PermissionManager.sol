@@ -35,18 +35,6 @@ contract PermissionManager is Initializable {
     /// @param permissionId The permission identifier.
     error Unauthorized(address here, address where, address who, bytes32 permissionId);
 
-    /// @notice Thrown if a permission has been already granted.
-    /// @param where The address of the target contract to grant `who` permission to.
-    /// @param who The address (EOA or contract) to which the permission has already been granted.
-    /// @param permissionId The permission identifier.
-    error PermissionAlreadyGranted(address where, address who, bytes32 permissionId);
-
-    /// @notice Thrown if a permission has been already revoked.
-    /// @param where The address of the target contract to revoke `who`s permission from.
-    /// @param who The address (EOA or contract) from which the permission has already been revoked.
-    /// @param permissionId The permission identifier.
-    error PermissionAlreadyRevoked(address where, address who, bytes32 permissionId);
-
     /// @notice Thrown if a permission is frozen.
     /// @param where The address of the target contract for which the permission is frozen.
     /// @param permissionId The permission identifier.
@@ -54,6 +42,21 @@ contract PermissionManager is Initializable {
 
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
+
+    /// @notice Thrown if a permission has been already granted for different oracle.
+    /// @dev This makes sure that oracle on the same permission can not be overwriten by a different oracle.
+    /// @param where The address of the target contract to grant `who` permission to.
+    /// @param who The address (EOA or contract) to which the permission has already been granted.
+    /// @param permissionId The permission identifier.
+    /// @param currentOracle The current oracle set for permissionId
+    /// @param newOracle The new oracle it tries to set for permissionId
+    error PermissionAlreadyGrantedForDifferentOracle(
+        address where,
+        address who,
+        bytes32 permissionId,
+        address currentOracle,
+        address newOracle
+    );
 
     /// @notice Thrown if a freeze happens on ANY_ADDR.
     error FreezeOnAnyAddressDisallowed();
@@ -300,16 +303,28 @@ contract PermissionManager is Initializable {
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
 
-        if (permissionsHashed[permHash] != UNSET_FLAG) {
-            revert PermissionAlreadyGranted({
+        address currentOracle = permissionsHashed[permHash];
+        address newOracle = address(_oracle);
+
+        // Means permHash is not currently set.
+        if (currentOracle == UNSET_FLAG) {
+            permissionsHashed[permHash] = newOracle;
+
+            emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
+        } else if (currentOracle != newOracle) {
+            // Revert if the permHash is already granted, but uses different oracle.
+            // If we don't revert, we either should:
+            //   - allow overriding the oracle on the same permission
+            //     which could be confusing whoever granted the same permission first
+            //   - or do nothing and succeed silently which could be confusing for the caller.
+            revert PermissionAlreadyGrantedForDifferentOracle({
                 where: _where,
                 who: _who,
-                permissionId: _permissionId
+                permissionId: _permissionId,
+                currentOracle: currentOracle,
+                newOracle: newOracle
             });
         }
-        permissionsHashed[permHash] = address(_oracle);
-
-        emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager.
@@ -326,16 +341,11 @@ contract PermissionManager is Initializable {
         }
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
-        if (permissionsHashed[permHash] == UNSET_FLAG) {
-            revert PermissionAlreadyRevoked({
-                where: _where,
-                who: _who,
-                permissionId: _permissionId
-            });
-        }
-        permissionsHashed[permHash] = UNSET_FLAG;
+        if (permissionsHashed[permHash] != UNSET_FLAG) {
+            permissionsHashed[permHash] = UNSET_FLAG;
 
-        emit Revoked(_permissionId, msg.sender, _where, _who);
+            emit Revoked(_permissionId, msg.sender, _where, _who);
+        }
     }
 
     /// @notice This method is used in the public `freeze` method of the permission manager.
@@ -347,13 +357,11 @@ contract PermissionManager is Initializable {
         }
 
         bytes32 frozenPermHash = frozenPermissionHash(_where, _permissionId);
-        if (frozenPermissionsHashed[frozenPermHash]) {
-            revert PermissionFrozen({where: _where, permissionId: _permissionId});
+        if (!frozenPermissionsHashed[frozenPermHash]) {
+            frozenPermissionsHashed[frozenPermHash] = true;
+
+            emit Frozen(_permissionId, msg.sender, _where);
         }
-
-        frozenPermissionsHashed[frozenPermHash] = true;
-
-        emit Frozen(_permissionId, msg.sender, _where);
     }
 
     /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was specified in the setup.
