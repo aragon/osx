@@ -247,7 +247,7 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,(uint256,uint64,uint64,uint64),(uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,(uint16,uint64,uint64,uint64),(uint16,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
@@ -283,7 +283,7 @@ export function createMultisigProposalEntityState(
   addresslistLength: string = TOTAL_VOTING_POWER,
 
   createdAt: string = CREATED_AT,
-  creationBlockNumber: BigInt = new BigInt(0),
+  creationBlockNumber: BigInt = new BigInt(0)
 ): MultisigProposal {
   let multisigProposal = new MultisigProposal(entityID);
   multisigProposal.dao = Address.fromString(dao).toHexString();

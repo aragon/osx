@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals`, and `Tally.approvals` from `uint256` to `uint16`.
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 
 ### Removed

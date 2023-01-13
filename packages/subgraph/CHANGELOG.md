@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds `startDate` and `endDate` fields to Multisig proposals.
 
 ### Changed
+
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals`, and `Tally.approvals` from `uint256` to `uint16`.
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 
 ## 0.6.1-alpha
