@@ -116,12 +116,10 @@ abstract contract MajorityVotingBase is
     /// @param abstain The number of abstain votes casted.
     /// @param yes The number of yes votes casted.
     /// @param no The number of no votes casted.
-    /// @param totalVotingPower The total voting power available at the block prior to the proposal creation.
     struct Tally {
         uint256 abstain;
         uint256 yes;
         uint256 no;
-        uint256 totalVotingPower;
     }
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -282,7 +280,7 @@ abstract contract MajorityVotingBase is
         return
             _calculatePct(
                 proposal_.tally.yes,
-                proposal_.tally.totalVotingPower - proposal_.tally.abstain
+                totalVotingPower(proposal_.parameters.snapshotBlock) - proposal_.tally.abstain
             );
     }
 
@@ -293,7 +291,7 @@ abstract contract MajorityVotingBase is
         return
             _calculatePct(
                 proposal_.tally.yes + proposal_.tally.no + proposal_.tally.abstain,
-                proposal_.tally.totalVotingPower
+                totalVotingPower(proposal_.parameters.snapshotBlock)
             );
     }
 
@@ -324,6 +322,11 @@ abstract contract MajorityVotingBase is
     function votingMode() public view virtual returns (VotingMode) {
         return votingSettings.votingMode;
     }
+
+    /// @notice Returns the total voting power checkpointed for a specific block number.
+    /// @param _blockNumber The block number.
+    /// @return The total voting power.
+    function totalVotingPower(uint256 _blockNumber) public view virtual returns (uint256);
 
     /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.

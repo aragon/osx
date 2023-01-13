@@ -320,6 +320,10 @@ describe('AddresslistVoting', function () {
       expect(proposal.tally.no).to.equal(0);
 
       expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(1);
+
+      expect(
         await voting.canVote(id, signers[0].address, VoteOption.Yes)
       ).to.equal(true);
       expect(
@@ -377,6 +381,11 @@ describe('AddresslistVoting', function () {
 
       expect(proposal.tally.yes).to.equal(1);
       expect(proposal.tally.no).to.equal(0);
+      expect(proposal.tally.abstain).to.equal(0);
+
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(1);
     });
 
     it('reverts creation if the creator tries to vote before the start date', async () => {

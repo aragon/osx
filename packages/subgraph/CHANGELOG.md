@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Changed indexing of `totalVotingPower` which is now obtained from the `snapshotBlock` and the public function `totalVotingPower(uint256 _blockNumber)`.
+
 ## 0.6.2-alpha
 
 ### Added
@@ -15,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds `startDate` and `endDate` fields to Multisig proposals.
 
 ### Changed
+
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 
 ## 0.6.1-alpha

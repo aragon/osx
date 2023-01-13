@@ -64,8 +64,6 @@ export function _handleProposalCreated(
     proposalEntity.yes = tally.yes;
     proposalEntity.no = tally.no;
 
-    proposalEntity.totalVotingPower = tally.totalVotingPower;
-
     // Actions
     let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
@@ -86,6 +84,11 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+
+    // totalVotingPower
+    proposalEntity.totalVotingPower = contract.try_totalVotingPower(
+      parameters.snapshotBlock
+    ).value;
   }
 
   proposalEntity.save();

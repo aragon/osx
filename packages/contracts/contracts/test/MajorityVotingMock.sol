@@ -20,6 +20,10 @@ contract MajorityVotingMock is MajorityVotingBase {
         return 0;
     }
 
+    function totalVotingPower(uint256 /* _blockNumber */) public pure override returns (uint256) {
+        return 0;
+    }
+
     function _vote(
         uint256 /* _proposalId */,
         VoteOption /* _voteOption */,

@@ -46,28 +46,27 @@ export function _handleProposalCreated(
   proposalEntity.endDate = event.params.endDate;
 
   let contract = AddresslistVoting.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
+  let proposal = contract.try_getProposal(event.params.proposalId);
 
-  if (!vote.reverted) {
-    proposalEntity.open = vote.value.value0;
-    proposalEntity.executed = vote.value.value1;
+  if (!proposal.reverted) {
+    proposalEntity.open = proposal.value.value0;
+    proposalEntity.executed = proposal.value.value1;
 
     // ProposalParameters
-    let parameters = vote.value.value2;
+    let parameters = proposal.value.value2;
     proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
     proposalEntity.supportThreshold = parameters.supportThreshold;
     proposalEntity.minParticipation = parameters.minParticipation;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // Tally
-    let tally = vote.value.value3;
+    let tally = proposal.value.value3;
     proposalEntity.abstain = tally.abstain;
     proposalEntity.yes = tally.yes;
     proposalEntity.no = tally.no;
-    proposalEntity.totalVotingPower = tally.totalVotingPower;
 
     // Actions
-    let actions = vote.value.value4;
+    let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -86,6 +85,11 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+
+    // totalVotingPower
+    proposalEntity.totalVotingPower = contract.try_totalVotingPower(
+      parameters.snapshotBlock
+    ).value;
   }
 
   proposalEntity.save();

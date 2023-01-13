@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed redundant storage of `totalVotingPower` in `ProposalParameters.Tally` in `TokenVoting` and `AddresslistVoting` and obtain it from `snapshotBlock` and `votingToken.getPastTotalSupply` and `addresslistLengthAtBlock` instead.
 - Removes `open` parameter from Multisig proposals.
 
 ## v0.4.0-alpha

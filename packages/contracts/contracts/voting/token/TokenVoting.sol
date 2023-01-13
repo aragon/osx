@@ -56,6 +56,11 @@ contract TokenVoting is MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
+    function totalVotingPower(uint256 _blockNumber) public view override returns (uint256) {
+        return votingToken.getPastTotalSupply(_blockNumber);
+    }
+
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
@@ -64,13 +69,14 @@ contract TokenVoting is MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock;
+        uint256 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number.toUint64() - 1;
+            snapshotBlock = block.number - 1;
         }
 
-        uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
-        if (totalVotingPower == 0) revert NoVotingPower();
+        if (totalVotingPower(uint256(snapshotBlock)) == 0) {
+            revert NoVotingPower();
+        }
 
         if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
             revert ProposalCreationForbidden(_msgSender());
@@ -91,12 +97,10 @@ contract TokenVoting is MajorityVotingBase {
             _startDate,
             _endDate
         );
-        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
         proposal_.parameters.minParticipation = minParticipation();
-
-        proposal_.tally.totalVotingPower = totalVotingPower;
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);
