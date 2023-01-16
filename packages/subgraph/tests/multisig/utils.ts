@@ -246,7 +246,7 @@ export function createGetProposalCall(
     .returns([
       ethereum.Value.fromBoolean(executed),
       
-      ethereum.Value.fromI32(approvals),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(approvals)),
 
       // ProposalParameters
       ethereum.Value.fromTuple(parameters),
