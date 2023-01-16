@@ -10,6 +10,7 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable'
 
 chai.use(smock.matchers);
 
@@ -123,6 +124,8 @@ describe('DAO', function () {
       expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress1);
     });
   });
+
+  shouldUpgradeCorrectly(shouldUpgradeCorrectly);
 
   describe('setTrustedForwarder:', async () => {
     it('reverts if the sender lacks the required permissionId', async () => {
