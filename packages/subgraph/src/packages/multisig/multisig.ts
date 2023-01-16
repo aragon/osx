@@ -49,16 +49,13 @@ export function _handleProposalCreated(
 
   if (!vote.reverted) {
     proposalEntity.executed = vote.value.value0;
+    proposalEntity.approvals = BigInt.fromI32(vote.value.value1);
 
     // ProposalParameters
-    let parameters = vote.value.value1;
+    let parameters = vote.value.value2s;
     proposalEntity.minApprovals = BigInt.fromI32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
-
-    // Tally
-    let tally = vote.value.value2;
-    proposalEntity.approvals = BigInt.fromI32(tally.approvals);
-
+    
     // Actions
     let actions = vote.value.value3;
     for (let index = 0; index < actions.length; index++) {
