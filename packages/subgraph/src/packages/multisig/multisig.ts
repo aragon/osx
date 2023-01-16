@@ -49,7 +49,7 @@ export function _handleProposalCreated(
 
   if (!vote.reverted) {
     proposalEntity.executed = vote.value.value0;
-    proposalEntity.approvals = BigInt.fromI32(vote.value.value1);
+    proposalEntity.approvals = vote.value.value1;
 
     // ProposalParameters
     let parameters = vote.value.value2;
@@ -116,7 +116,7 @@ export function handleApproved(event: Approved): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
-      proposalEntity.approvals = BigInt.fromI32(proposal.value.value1);
+      proposalEntity.approvals = proposal.value.value1;
 
       proposalEntity.save();
     }
