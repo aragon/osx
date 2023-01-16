@@ -116,10 +116,7 @@ export function handleApproved(event: Approved): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
-      let parameters = proposal.value.value1;
-      let tally = proposal.value.value2;
-
-      proposalEntity.approvals = BigInt.fromI32(tally.approvals);
+      proposalEntity.approvals = BigInt.fromI32(proposal.value.value1);
 
       proposalEntity.save();
     }
