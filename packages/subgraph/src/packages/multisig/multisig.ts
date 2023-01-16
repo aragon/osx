@@ -1,4 +1,4 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
+import {dataSource, store, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -52,13 +52,12 @@ export function _handleProposalCreated(
 
     // ProposalParameters
     let parameters = vote.value.value1;
-    proposalEntity.minApprovals = parameters.minApprovals;
+    proposalEntity.minApprovals = BigInt.fromI32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // Tally
     let tally = vote.value.value2;
-    proposalEntity.approvals = tally.approvals;
-    proposalEntity.addresslistLength = tally.addresslistLength;
+    proposalEntity.approvals = BigInt.fromI32(tally.approvals);
 
     // Actions
     let actions = vote.value.value3;
@@ -123,7 +122,7 @@ export function handleApproved(event: Approved): void {
       let parameters = proposal.value.value1;
       let tally = proposal.value.value2;
 
-      proposalEntity.approvals = tally.approvals;
+      proposalEntity.approvals = BigInt.fromI32(tally.approvals);
 
       proposalEntity.save();
     }
@@ -200,7 +199,7 @@ export function handleMultisigSettingsUpdated(
   let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;
-    packageEntity.minApprovals = event.params.minApprovals;
+    packageEntity.minApprovals = BigInt.fromI32(event.params.minApprovals);
     packageEntity.save();
   }
 }

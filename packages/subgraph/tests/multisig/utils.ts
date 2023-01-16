@@ -17,7 +17,6 @@ import {
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER,
   CREATED_AT,
   TWO,
   START_DATE,
@@ -218,8 +217,7 @@ export function createGetProposalCall(
   snapshotBlock: string,
 
   approvals: string,
-  addresslistLength: string,
-
+  
   actions: ethereum.Tuple[]
 ): void {
   let parameters = new ethereum.Tuple();
@@ -237,29 +235,21 @@ export function createGetProposalCall(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(endDate))
   );
 
-  let tally = new ethereum.Tuple();
-
-  tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(approvals)));
-  tally.push(
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(addresslistLength))
-  );
-
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,(uint256,uint64,uint64,uint64),(uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,uint32,(uint16,uint64,uint64,uint64),(address,uint256,bytes)[])'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
     ])
     .returns([
       ethereum.Value.fromBoolean(executed),
+      
+      ethereum.Value.fromI32(approvals),
 
       // ProposalParameters
       ethereum.Value.fromTuple(parameters),
-
-      // Tally
-      ethereum.Value.fromTuple(tally),
 
       ethereum.Value.fromTupleArray(actions)
     ]);
@@ -280,8 +270,6 @@ export function createMultisigProposalEntityState(
 
   snapshotBlock: string = SNAPSHOT_BLOCK,
 
-  addresslistLength: string = TOTAL_VOTING_POWER,
-
   createdAt: string = CREATED_AT,
   creationBlockNumber: BigInt = new BigInt(0),
 ): MultisigProposal {
@@ -295,7 +283,6 @@ export function createMultisigProposalEntityState(
   multisigProposal.executed = executed;
   multisigProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   multisigProposal.minApprovals = BigInt.fromString(minApprovals);
-  multisigProposal.addresslistLength = BigInt.fromString(addresslistLength);
   multisigProposal.createdAt = BigInt.fromString(createdAt);
   multisigProposal.creationBlockNumber = creationBlockNumber;
 

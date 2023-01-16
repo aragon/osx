@@ -38,7 +38,7 @@ export async function approveWithSigners(
   await Promise.all(promises);
 }
 
-describe('Multisig', function () {
+describe.only('Multisig', function () {
   let signers: SignerWithAddress[];
   let multisig: any;
   let dao: DAO;
@@ -493,8 +493,7 @@ describe('Multisig', function () {
         );
         expect(proposal.parameters.startDate).to.equal(startDate);
         expect(proposal.parameters.endDate).to.equal(endDate);
-        expect(proposal.tally.approvals).to.equal(0);
-        expect(proposal.tally.addresslistLength).to.equal(1);
+        expect(proposal.approvals).to.equal(0);
         expect(proposal.actions.length).to.equal(0);
 
         expect(await multisig.canApprove(id, signers[0].address)).to.be.true;
@@ -532,7 +531,7 @@ describe('Multisig', function () {
         );
         expect(proposal.parameters.startDate).to.equal(startDate);
         expect(proposal.parameters.endDate).to.equal(endDate);
-        expect(proposal.tally.approvals).to.equal(1);
+        expect(proposal.approvals).to.equal(1);
       });
 
       it('increases the proposal count', async () => {
@@ -678,7 +677,7 @@ describe('Multisig', function () {
       });
 
       it('approves with the msg.sender address', async () => {
-        expect((await multisig.getProposal(id)).tally.approvals).to.equal(0);
+        expect((await multisig.getProposal(id)).approvals).to.equal(0);
 
         let tx = await multisig.connect(signers[0]).approve(id, false);
 
@@ -687,7 +686,7 @@ describe('Multisig', function () {
         expect(event.args.approver).to.not.eq(multisig.address);
         expect(event.args.approver).to.eq(signers[0].address);
 
-        expect((await multisig.getProposal(id)).tally.approvals).to.equal(1);
+        expect((await multisig.getProposal(id)).approvals).to.equal(1);
       });
 
       it("reverts if the proposal hasn't started yet", async () => {

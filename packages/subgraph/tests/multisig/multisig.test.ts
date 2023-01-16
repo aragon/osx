@@ -19,7 +19,6 @@ import {
   DAO_ADDRESS,
   PROPOSAL_ID,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER,
   ONE,
   TWO,
   THREE,
@@ -65,9 +64,8 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     ONE,
     SNAPSHOT_BLOCK,
 
-    // Tally
+    // approvals
     ONE,
-    TOTAL_VOTING_POWER,
 
     actions
   );
@@ -120,12 +118,6 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     SNAPSHOT_BLOCK
   );
   assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
-  assert.fieldEquals(
-    'MultisigProposal',
-    entityID,
-    'addresslistLength',
-    TOTAL_VOTING_POWER
-  );
   assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
 
@@ -161,9 +153,8 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     TWO, // minApprovals
     SNAPSHOT_BLOCK,
 
-    // Tally
-    ONE, // approvals
-    TOTAL_VOTING_POWER,
+    // approvals
+    ONE,
 
     actions
   );
@@ -225,9 +216,8 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     TWO, // minApprovals
     SNAPSHOT_BLOCK,
 
-    // Tally
-    TWO, // approvals
-    TOTAL_VOTING_POWER,
+    // approvals
+    ONE,
 
     actions
   );
