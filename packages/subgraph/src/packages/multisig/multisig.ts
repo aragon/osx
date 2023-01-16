@@ -52,10 +52,10 @@ export function _handleProposalCreated(
     proposalEntity.approvals = BigInt.fromI32(vote.value.value1);
 
     // ProposalParameters
-    let parameters = vote.value.value2s;
+    let parameters = vote.value.value2;
     proposalEntity.minApprovals = BigInt.fromI32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
-    
+
     // Actions
     let actions = vote.value.value3;
     for (let index = 0; index < actions.length; index++) {
