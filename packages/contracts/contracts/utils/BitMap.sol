@@ -13,6 +13,6 @@ function hasBit(uint256 bitmap, uint8 index) pure returns (bool) {
 /// @param bitmap The `uint256` representation of bits.
 /// @param index The index number to set the bit.
 /// @return uint256 Returns a new number on which the bit is set at `index`.
-function setBit(uint256 bitmap, uint8 index) pure returns (uint256) {
+function flipBit(uint256 bitmap, uint8 index) pure returns (uint256) {
     return bitmap ^ (1 << (index & 0xff));
 }
