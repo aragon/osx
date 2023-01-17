@@ -228,7 +228,7 @@ describe('DAO', function () {
       );
     });
 
-    it("reverts if action is fallable and allowFailureMap doesn't include it", async () => {
+    it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
       await expect(dao.execute(0, [data.failAction], 0))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(0);
