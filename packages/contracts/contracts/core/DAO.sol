@@ -192,13 +192,13 @@ contract DAO is
 
             if(!success) {
                 // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if(!hasBit(allowFailureMap, i)) {
+                if(!hasBit(allowFailureMap, uint8(i))) {
                     revert ActionFailed(i);
                 }
 
                 // If the call failed, but was allowed in allowFailureMap, store that 
                 // this specific action has actually failed.
-                failureMap = setBit(failureMap, i);
+                failureMap = setBit(failureMap, uint8(i));
             }
             
             execResults[i] = response;
