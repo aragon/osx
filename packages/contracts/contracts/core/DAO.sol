@@ -209,8 +209,6 @@ contract DAO is
         }
 
         emit Executed(msg.sender, callId, _actions, failureMap, execResults);
-
-        return (execResults, failureMap);
     }
 
     /// @inheritdoc IDAO
