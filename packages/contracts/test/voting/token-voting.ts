@@ -113,7 +113,9 @@ describe('TokenVoting', function () {
     );
   });
 
-  async function setBalances(balances: {receiver: string; amount: number}[]) {
+  async function setBalances(
+    balances: {receiver: string; amount: number | BigNumber}[]
+  ) {
     const promises = balances.map(balance =>
       governanceErc20Mock.setBalance(balance.receiver, balance.amount)
     );
@@ -132,6 +134,65 @@ describe('TokenVoting', function () {
       BigNumber.from(totalSupply).sub(currentTotalSupply)
     );
   }
+
+  describe('PRECISION PROBLEM: ', async () => {
+    it.only('returns the wrong percentages because of precision loss if the amount > 10^18', async () => {
+      votingSettings.supportThreshold = pct16(50);
+      votingSettings.votingMode = VotingMode.EarlyExecution;
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      const pctBase = BigNumber.from(10).pow(18);
+      const oneToken = pctBase; // 18 decimals, the standard case
+      const balances = [
+        {
+          receiver: signers[0].address,
+          amount: oneToken.mul(5).add(9), // e.g. 5.000000000000000009 ANT
+        },
+        {
+          receiver: signers[1].address,
+          amount: oneToken.mul(5).sub(9), // e.g. 4.999999999999999991 ANT
+        },
+      ];
+      console.log(balances[0].amount);
+      console.log(balances[1].amount);
+
+      // signer[0] has more voting power than signer[1]
+      const balanceDifference = balances[0].amount.sub(balances[1].amount);
+      expect(balanceDifference).to.eq(18);
+
+      await setBalances(balances);
+
+      await voting.createProposal(
+        dummyMetadata,
+        dummyActions,
+        0,
+        0,
+        VoteOption.None,
+        false
+      );
+
+      expect((await voting.getProposal(id)).tally.totalVotingPower)
+        .to.eq(balances[0].amount.add(balances[1].amount))
+        .to.eq(oneToken.mul(10)); // 10 tokens exist in total
+
+      // vote with both signers
+      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false); // 5.000000000000000009 ANT vote for YES
+      await voting.connect(signers[1]).vote(id, VoteOption.No, false); // 4.999999999999999991 ANT vote for NO
+
+      // The `support = yes / (yes + no)` should be >50% because there there are 18 more YES than NO votes.
+      expect(await voting.support(id)).to.be.greaterThan(pct16(50)); // THIS FAILS
+      expect(await voting.worstCaseSupport(id)).to.be.greaterThan(pct16(50)); // THIS FAILS
+      expect(await voting.canExecute(id)).to.be.true; // THIS FAILS
+
+      // This is the wrong behavior. `N_yes = N_no + 1` should be enough to make the vote executable for the example of support threshold >50%. Otherwise, this precision loss might result unexpected behavior.
+      // More significant balance differences and precision loss  can be demonstrated for larger balances >> 10^18 (which is the case for almost all existing ERC-20 tokens) as well as non-standard tokens with more 18 decimals (which is the exception).
+    });
+  });
 
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
