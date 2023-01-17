@@ -47,13 +47,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
     mapping(bytes32 => PluginState) private states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
-    struct PrepareInstall {
+    struct PrepareInstallationParams {
         PluginSetupRef pluginSetupRef;
         bytes data;
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
-    struct ApplyInstall {
+    struct ApplyInstallationParams {
         PluginSetupRef pluginSetupRef;
         address plugin;
         PermissionLib.ItemMultiTarget[] permissions;
@@ -61,7 +61,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     }
 
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
-    struct PrepareUpdate {
+    struct PrepareUpdateParams {
         PluginRepo.Tag currentVersionTag;
         PluginRepo.Tag newVersionTag;
         PluginRepo pluginSetupRepo;
@@ -69,7 +69,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     }
 
     /// @notice The struct containing the parameters for the `applyUpdate` function.
-    struct ApplyUpdate {
+    struct ApplyUpdateParams {
         address plugin;
         PluginSetupRef pluginSetupRef;
         bytes initData;
@@ -78,14 +78,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
-    struct PrepareUninstall {
+    struct PrepareUninstallationParams {
         PluginSetupRef pluginSetupRef;
         IPluginSetup.SetupPayload setupPayload;
         bytes32 permissionsHash;
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
-    struct ApplyUninstall {
+    struct ApplyUninstallationParams {
         address plugin;
         PluginSetupRef pluginSetupRef;
         address[] currentHelpers;
@@ -152,7 +152,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error InvalidSetupId(bytes32 currentSetupId, bytes32 setupId);
 
     /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply.
-    /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
+    /// @param setupId The prepared setup id from the `ationParamsation`, `prepareUpdate` or `prepareUninstallation`.
     error SetupNotApplicable(bytes32 setupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
@@ -250,7 +250,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _params The struct containing the parameters for the `prepareInstallation` function.
     /// @return plugin The prepared plugin contract address.
     /// @return preparedDependency TOD:GIORGI
-    function prepareInstallation(address _dao, PrepareInstall calldata _params)
+    function prepareInstallation(address _dao, PrepareInstallationParams calldata _params)
         external
         returns (address plugin, IPluginSetup.PreparedDependency memory preparedDependency)
     {
@@ -316,7 +316,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Applies the permissions of a prepared installation to a DAO.
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `applyInstallation` function.
-    function applyInstallation(address _dao, ApplyInstall calldata _params)
+    function applyInstallation(address _dao, ApplyInstallationParams calldata _params)
         external
         canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID)
     {
@@ -371,7 +371,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
     /// @return preparedDependency TOD:GIORGI
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
-    function prepareUpdate(address _dao, PrepareUpdate calldata _params)
+    function prepareUpdate(address _dao, PrepareUpdateParams calldata _params)
         external
         returns (bytes memory initData, IPluginSetup.PreparedDependency memory preparedDependency)
     {
@@ -473,7 +473,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
     /// @param _dao The address of the updating DAO.
     /// @param _params The struct containing the parameters for the `applyInstallation` function.
-    function applyUpdate(address _dao, ApplyUpdate calldata _params)
+    function applyUpdate(address _dao, ApplyUpdateParams calldata _params)
         external
         canApply(_dao, APPLY_UPDATE_PERMISSION_ID)
     {
@@ -537,7 +537,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for
-    function prepareUninstallation(address _dao, PrepareUninstall calldata _params)
+    function prepareUninstallation(address _dao, PrepareUninstallationParams calldata _params)
         external
         returns (PermissionLib.ItemMultiTarget[] memory permissions)
     {
@@ -602,7 +602,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `applyUninstallation` function.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
-    function applyUninstallation(address _dao, ApplyUninstall calldata _params)
+    function applyUninstallation(address _dao, ApplyUninstallationParams calldata _params)
         external
         canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID)
     {
@@ -702,7 +702,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     function emitPrepareUpdateEvent(
         address _dao,
         bytes32 _setupId,
-        PrepareUpdate calldata _params,
+        PrepareUpdateParams calldata _params,
         IPluginSetup.PreparedDependency memory _preparedDependency,
         bytes memory _initData
     ) private {

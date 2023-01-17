@@ -89,7 +89,7 @@ contract DAOFactory {
                 IPluginSetup.PreparedDependency memory preparedDependency
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
-                    PluginSetupProcessor.PrepareInstall(
+                    PluginSetupProcessor.PrepareInstallationParams(
                         _pluginSettings[i].pluginSetupRef,
                         _pluginSettings[i].data
                     )
@@ -98,7 +98,7 @@ contract DAOFactory {
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
-                PluginSetupProcessor.ApplyInstall(
+                PluginSetupProcessor.ApplyInstallationParams(
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
                     preparedDependency.permissions,
