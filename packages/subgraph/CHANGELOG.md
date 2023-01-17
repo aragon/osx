@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint32) in the `Proposal` struct.
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 
 ### Removed
