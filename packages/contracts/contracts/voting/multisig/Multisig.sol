@@ -91,17 +91,17 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @notice Thrown if the minimal approvals value is out of bounds (less than 1 or greater than the number of members in the address list).
     /// @param limit The maximal value.
     /// @param actual The actual value.
-    error MinApprovalsOutOfBounds(uint256 limit, uint16 actual);
+    error MinApprovalsOutOfBounds(uint16 limit, uint16 actual);
 
-    /// @notice Thrown if the start date is to small.
+    /// @notice Thrown if the addresslist length is out of bounds.
     /// @param limit The limit value.
     /// @param actual The actual value.
-    error InvalidStartDate(uint64 limit, uint64 actual);
+    error AddresslistLengthOutOfBounds(uint16 limit, uint256 actual);
 
-    /// @notice Thrown if the end date is to small.
+    /// @notice Thrown if a date is out of bounds.
     /// @param limit The limit value.
     /// @param actual The actual value.
-    error InvalidEndDate(uint64 limit, uint64 actual);
+    error DateOutOfBounds(uint64 limit, uint64 actual);
 
     /// @notice Emitted when an proposal is approve by an approver.
     /// @param proposalId The ID of the proposal.
@@ -145,7 +145,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @notice Returns the number of approvals,
     /// @param _proposalId The ID of the proposal.
     /// @return The number of approvals.
-    function approvals(uint256 _proposalId) public view returns (uint32) {
+    function approvals(uint256 _proposalId) public view returns (uint16) {
         return proposals[_proposalId].approvals;
     }
 
@@ -154,6 +154,16 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     function addAddresses(
         address[] calldata _members
     ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
+        uint256 newAddresslistLength = addresslistLength() + _members.length;
+
+        // Check if the new address list length would be greater than `type(uint16).max`, the maximal number of approvals.
+        if (newAddresslistLength > type(uint16).max) {
+            revert AddresslistLengthOutOfBounds({
+                limit: type(uint16).max,
+                actual: newAddresslistLength
+            });
+        }
+
         _addAddresses(_members);
     }
 
@@ -162,14 +172,17 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     function removeAddresses(
         address[] calldata _members
     ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
-        _removeAddresses(_members);
+        uint16 newAddresslistLength = uint16(addresslistLength() - _members.length);
 
-        // Check if the new address list has become shorter than the current minimum number of approvals required.
-        uint256 newAddresslistLength = addresslistLength();
-        uint16 minApprovals_ = multisigSettings.minApprovals;
-        if (newAddresslistLength < minApprovals_) {
-            revert MinApprovalsOutOfBounds({limit: newAddresslistLength, actual: minApprovals_});
+        // Check if the new address list length would become less than the current minimum number of approvals required.
+        if (newAddresslistLength < multisigSettings.minApprovals) {
+            revert MinApprovalsOutOfBounds({
+                limit: newAddresslistLength,
+                actual: multisigSettings.minApprovals
+            });
         }
+
+        _removeAddresses(_members);
     }
 
     /// @notice Updates the plugin settings.
@@ -203,11 +216,11 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         if (_startDate == 0) {
             _startDate = block.timestamp.toUint64();
         } else if (_startDate < block.timestamp.toUint64()) {
-            revert InvalidStartDate({limit: block.timestamp.toUint64(), actual: _startDate});
+            revert DateOutOfBounds({limit: block.timestamp.toUint64(), actual: _startDate});
         }
 
         if (_endDate < _startDate) {
-            revert InvalidEndDate({limit: _startDate, actual: _endDate});
+            revert DateOutOfBounds({limit: _startDate, actual: _endDate});
         }
 
         proposalId = _createProposal({
@@ -249,8 +262,11 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
         Proposal storage proposal_ = proposals[_proposalId];
         
-        // should throw an error if more people approve than uint32.
-        proposal_.approvals += 1;
+        // As the list can never become more than type(uint16).max(due to addAddresses check)
+        // It's safe to use unchecked as it would never overflow.
+        unchecked {
+            proposal_.approvals += 1;
+        }
 
         proposal_.approvers[approver] = true;
 
@@ -385,7 +401,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice Internal function to update the plugin settings.
     function _updateMultisigSettings(MultisigSettings calldata _multisigSettings) internal {
-        uint256 addresslistLength_ = addresslistLength();
+        uint16 addresslistLength_ = uint16(addresslistLength());
 
         if (_multisigSettings.minApprovals > addresslistLength_) {
             revert MinApprovalsOutOfBounds({
