@@ -53,7 +53,7 @@ export function _handleProposalCreated(
 
     // ProposalParameters
     let parameters = vote.value.value2;
-    proposalEntity.minApprovals = BigInt.fromI32(parameters.minApprovals);
+    proposalEntity.minApprovals = BigInt.fromU32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
     // Actions
@@ -193,7 +193,7 @@ export function handleMultisigSettingsUpdated(
   let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;
-    packageEntity.minApprovals = BigInt.fromI32(event.params.minApprovals);
+    packageEntity.minApprovals = BigInt.fromU32(event.params.minApprovals);
     packageEntity.save();
   }
 }
