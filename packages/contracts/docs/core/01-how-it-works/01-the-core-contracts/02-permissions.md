@@ -61,7 +61,7 @@ function withdraw(uint256 value) external auth(WITHDRAW_PERMISSION_ID);
 
 ### Managing Permissions
 
-To manage permissions, the DAO contract has the `grant`, `revoke`, `grantWithOracle` and `freeze` functions in its public interface.
+To manage permissions, the DAO contract has the `grant`, `revoke` and `grantWithOracle` functions in its public interface.
 
 #### Granting and Revoking Permissions
 
@@ -151,12 +151,6 @@ Imagine, for example, that many instances of the `Service` contract exist, and a
 
 However, some restrictions apply. For security reasons, aragonOS does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
 
-#### Freezing Permissions
-
-Permissions on a target contract `where` can also be permanently frozen by using the `freeze` function.
-**Freezing** means that permissions involving this target contract can not be granted or revoked anymore. This can be useful when we want to secure certain permissions so that they can never change (by a contract owning the `ROOT_PERMISSION_ID` permission).
-Freezing permissions with `_where: ANY_ADDR` is not allowed.
-
 ### Permissions Native to the `DAO` Contract
 
 The following functions in the DAO are permissioned:
@@ -169,7 +163,7 @@ The following functions in the DAO are permissioned:
 | `setMetadata`                                  | `SET_METADATA_PERMISSION_ID`            | Required to set the DAO’s metadata.                                                    |
 | `setTrustedForwarder`                          | `SET_TRUSTED_FORWARDER_PERMISSION_ID`   | Required to set the DAO’s trusted forwarder for meta transactions.                     |
 | `setSignatureValidator`                        | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` | Required to set the DAO’s signature validator contract (see ERC-1271).                 |
-| `grant`, `grantWithOracle`, `revoke`, `freeze` | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
+| `grant`, `grantWithOracle`, `revoke`           | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
 
 Plugins installed to the DAO might require their own and introduce new permission settings.
 
