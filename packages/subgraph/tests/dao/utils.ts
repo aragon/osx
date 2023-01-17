@@ -8,7 +8,6 @@ import {
   Deposited,
   Granted,
   Revoked,
-  Frozen,
   Executed,
   Withdrawn,
   TrustedForwarderSet,
@@ -255,37 +254,6 @@ export function createNewRevokedEvent(
   newGrantedEvent.parameters.push(whoParam);
 
   return newGrantedEvent;
-}
-
-export function createNewFrozenEvent(
-  contractPermissionId: Bytes,
-  actor: string,
-  where: string,
-  contractAddress: string
-): Frozen {
-  let newFrozenEvent = changetype<Frozen>(newMockEvent());
-
-  newFrozenEvent.address = Address.fromString(contractAddress);
-  newFrozenEvent.parameters = [];
-
-  let contractPermissionIdParam = new ethereum.EventParam(
-    'contractPermissionId',
-    ethereum.Value.fromBytes(contractPermissionId)
-  );
-  let actorParam = new ethereum.EventParam(
-    'actor',
-    ethereum.Value.fromAddress(Address.fromString(actor))
-  );
-  let whereParam = new ethereum.EventParam(
-    'where',
-    ethereum.Value.fromAddress(Address.fromString(where))
-  );
-
-  newFrozenEvent.parameters.push(contractPermissionIdParam);
-  newFrozenEvent.parameters.push(actorParam);
-  newFrozenEvent.parameters.push(whereParam);
-
-  return newFrozenEvent;
 }
 
 export function createNewExecutedEvent(
