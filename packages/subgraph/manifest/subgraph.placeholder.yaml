@@ -215,7 +215,7 @@ templates:
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: MultisigSettingsUpdated(bool,indexed uint256)
+        - event: MultisigSettingsUpdated(bool,indexed uint16)
           handler: handleMultisigSettingsUpdated
     # admin (package)
   - name: Admin
