@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
-import {getIndex, setIndex} from "../utils/BitMap.sol";
+import {hasBit, setBit} from "../utils/BitMap.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021
@@ -192,13 +192,13 @@ contract DAO is
 
             if(!success) {
                 // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if(!getIndex(allowFailureMap, i)) {
+                if(!hasBit(allowFailureMap, i)) {
                     revert ActionFailed(i);
                 }
 
                 // If the call failed, but was allowed in allowFailureMap, store that 
                 // this specific action has actually failed.
-                failureMap = setIndex(failureMap, i);
+                failureMap = setBit(failureMap, i);
             }
             
             execResults[i] = response;

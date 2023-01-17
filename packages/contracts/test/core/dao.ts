@@ -4,13 +4,11 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
   DAO,
-  DAOFactory,
-  DAOFactory__factory,
   DAO__factory,
   GovernanceERC20,
 } from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
-import {setIndex, unsetIndex} from '../test-utils/bitmap';
+import {setBit, unsetBit} from '../test-utils/bitmap';
 
 import {getActions} from '../test-utils/dao';
 
@@ -238,7 +236,7 @@ describe('DAO', function () {
 
     it('succeeds if action is fallable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
-      num = setIndex(0, num);
+      num = setBit(0, num);
 
       const tx = await dao.execute(0, [data.failAction], num);
       const event = await findEvent(tx, EVENTS.Executed);
@@ -271,7 +269,7 @@ describe('DAO', function () {
       // Only add first 3 actions in the allowFailureMap
       // to make sure tx never succeeds.
       for (let i = 0; i < 3; i++) {
-        allowFailureMap = setIndex(i, allowFailureMap);
+        allowFailureMap = setBit(i, allowFailureMap);
       }
 
       // If the below call not fails, means allowFailureMap is correct.
@@ -285,7 +283,7 @@ describe('DAO', function () {
       // bits set at indexes where actions failed
       let failureMap = ethers.BigNumber.from(0);
       for (let i = 0; i < 3; i++) {
-        failureMap = setIndex(i, failureMap);
+        failureMap = setBit(i, failureMap);
       }
       // Check that dao crrectly generated failureMap
       expect(event.args.failureMap).to.equal(failureMap);
@@ -301,7 +299,7 @@ describe('DAO', function () {
 
       // lets remove one of the action from allowFailureMap
       // to see tx will actually revert.
-      allowFailureMap = unsetIndex(2, allowFailureMap);
+      allowFailureMap = unsetBit(2, allowFailureMap);
       await expect(dao.execute(0, actions, allowFailureMap))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(2); // Since we unset the 2th action from failureMap, it should fail with that index.
