@@ -6,7 +6,6 @@ import {
   Deposited,
   NativeTokenDeposited,
   Granted,
-  Frozen,
   Revoked,
   Withdrawn,
   TrustedForwarderSet,
@@ -205,7 +204,6 @@ export function handleGranted(event: Granted): void {
     contractPermissionIdEntity.dao = daoId;
     contractPermissionIdEntity.where = event.params.where;
     contractPermissionIdEntity.permissionId = event.params.permissionId;
-    contractPermissionIdEntity.frozen = false;
     contractPermissionIdEntity.save();
   }
 
@@ -234,27 +232,6 @@ export function handleRevoked(event: Revoked): void {
   if (permissionEntity) {
     store.remove('Permission', permissionId);
   }
-}
-
-export function handleFrozen(event: Frozen): void {
-  let daoId = event.address.toHexString();
-  let contractPermissionIdEntityId =
-    event.params.where.toHexString() +
-    '_' +
-    event.params.permissionId.toHexString();
-  let contractPermissionIdEntity = ContractPermissionId.load(
-    contractPermissionIdEntityId
-  );
-  if (!contractPermissionIdEntity) {
-    contractPermissionIdEntity = new ContractPermissionId(
-      contractPermissionIdEntityId
-    );
-    contractPermissionIdEntity.dao = daoId;
-    contractPermissionIdEntity.where = event.params.where;
-    contractPermissionIdEntity.permissionId = event.params.permissionId;
-  }
-  contractPermissionIdEntity.frozen = true;
-  contractPermissionIdEntity.save();
 }
 
 export function handleWithdrawn(event: Withdrawn): void {

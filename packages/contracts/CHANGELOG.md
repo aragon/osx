@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removes `open` parameter from Multisig proposals.
+- Removes `freeze` functionality.
 
 ## v0.4.0-alpha
 

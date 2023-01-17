@@ -39,7 +39,6 @@ type ContractPermissionId @entity(immutable: true) {
   dao: Dao!
   where: Bytes!
   permissionId: Bytes!
-  frozen: Boolean!
 }
 
 type Permission @entity(immutable: true) {
