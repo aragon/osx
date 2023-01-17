@@ -80,7 +80,7 @@ abstract contract ProposalBase {
         uint256 _proposalId,
         IDAO.Action[] memory _actions
     ) internal virtual {
-        bytes[] memory execResults = _dao.execute(_proposalId, _actions);
+        (bytes[] memory execResults, ) = _dao.execute(_proposalId, _actions, 0);
         emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 }

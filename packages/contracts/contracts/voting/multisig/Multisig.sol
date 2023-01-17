@@ -345,7 +345,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         Proposal storage proposal_ = proposals[_proposalId];
 
         proposal_.executed = true;
-
+        
         _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 

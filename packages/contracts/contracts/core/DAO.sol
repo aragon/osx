@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
+import {hasBit, flipBit} from "../utils/BitMap.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021
@@ -54,14 +55,21 @@ contract DAO is
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
+    /// @notice Only allows 256 actions to execute per tx.
+    uint256 internal constant MAX_ACTIONS = 256;
+
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
 
+    /// @notice Thrown if action length is more than MAX_ACTIONS.
+    error TooManyActions();
+
     /// @notice Thrown if action execution has failed.
-    error ActionFailed();
+    /// @param index Index of action in the array that failed.
+    error ActionFailed(uint256 index);
 
     /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
@@ -160,21 +168,39 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function execute(uint256 callId, Action[] calldata _actions)
+    function execute(
+        uint256 callId,
+        Action[] calldata _actions,
+        uint256 allowFailureMap
+    )
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory)
+        returns (bytes[] memory execResults, uint256 failureMap)
     {
-        bytes[] memory execResults = new bytes[](_actions.length);
+        if (_actions.length > MAX_ACTIONS) {
+            revert TooManyActions();
+        }
 
-        for (uint256 i; i < _actions.length;) {
-            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
+        execResults = new bytes[](_actions.length);
+
+        for (uint256 i = 0; i < _actions.length; ) {
+            address to = _actions[i].to;
+            (bool success, bytes memory response) = to.call{value: _actions[i].value}(
                 _actions[i].data
             );
 
-            if (!success) revert ActionFailed();
+            if(!success) {
+                // If the call failed and wasn't allowed in allowFailureMap, revert.
+                if(!hasBit(allowFailureMap, uint8(i))) {
+                    revert ActionFailed(i);
+                }
 
+                // If the call failed, but was allowed in allowFailureMap, store that 
+                // this specific action has actually failed.
+                failureMap = flipBit(failureMap, uint8(i));
+            }
+            
             execResults[i] = response;
 
             unchecked {
@@ -182,9 +208,7 @@ contract DAO is
             }
         }
 
-        emit Executed(msg.sender, callId, _actions, execResults);
-
-        return execResults;
+        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
     }
 
     /// @inheritdoc IDAO
