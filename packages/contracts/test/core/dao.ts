@@ -228,13 +228,13 @@ describe('DAO', function () {
       );
     });
 
-    it("reverts if action is fallable and allowFailureMap doesn't include it", async () => {
+    it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
       await expect(dao.execute(0, [data.failAction], 0))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(0);
     });
 
-    it('succeeds if action is fallable but allowFailureMap allows it', async () => {
+    it('succeeds if action is failable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = setBit(0, num);
 
