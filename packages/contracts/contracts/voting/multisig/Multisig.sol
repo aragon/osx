@@ -26,7 +26,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @param actions The actions to be executed when the proposal passes.
     struct Proposal {
         bool executed;
-        uint32 approvals;
+        uint16 approvals;
         ProposalParameters parameters;
         mapping(address => bool) approvers;
         IDAO.Action[] actions;

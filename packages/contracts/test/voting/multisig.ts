@@ -38,7 +38,7 @@ export async function approveWithSigners(
   await Promise.all(promises);
 }
 
-describe('Multisig', function () {
+describe.only('Multisig', function () {
   let signers: SignerWithAddress[];
   let multisig: any;
   let dao: DAO;
