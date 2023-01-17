@@ -52,7 +52,7 @@ abstract contract IDAO {
     /// @dev The value of callId is defined by the component/contract calling the execute function.
     ///      A `Plugin` implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed.
-    /// @param failureMap stores which actions have been failed.
+    /// @param failureMap Stores which actions have failed.
     /// @param execResults Array with the results of the executed actions.
     event Executed(
         address indexed actor,
