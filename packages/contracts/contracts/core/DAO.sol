@@ -68,7 +68,7 @@ contract DAO is
     error TooManyActions();
 
     /// @notice Thrown if action execution has failed.
-    /// @param index index of action in the array that failed.
+    /// @param index Index of action in the array that failed.
     error ActionFailed(uint256 index);
 
     /// @notice Thrown if the deposit or withdraw amount is zero.
