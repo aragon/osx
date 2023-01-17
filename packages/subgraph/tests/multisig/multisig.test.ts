@@ -217,7 +217,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     SNAPSHOT_BLOCK,
 
     // approvals
-    ONE,
+    TWO,
 
     actions
   );
