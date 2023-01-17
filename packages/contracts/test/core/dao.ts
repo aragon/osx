@@ -234,7 +234,7 @@ describe('DAO', function () {
         .withArgs(0);
     });
 
-    it('succeeds if action is fallable but allowFailureMap allows it', async () => {
+    it('succeeds if action is failable but allowFailureMap allows it', async () => {
       let num = ethers.BigNumber.from(0);
       num = setBit(0, num);
 
