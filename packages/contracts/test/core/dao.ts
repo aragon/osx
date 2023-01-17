@@ -60,7 +60,7 @@ const PERMISSION_IDS = {
   ),
 };
 
-describe.only('DAO', function () {
+describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
