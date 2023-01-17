@@ -10,6 +10,7 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
+import {BYTES32} from '../test-utils/dao';
 
 chai.use(smock.matchers);
 
@@ -196,7 +197,7 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(0, dummyActions))
+      await expect(dao.execute(BYTES32, dummyActions))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
@@ -207,19 +208,19 @@ describe('DAO', function () {
     });
 
     it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions)).to.deep.equal(
+      expect(await dao.callStatic.execute(BYTES32, dummyActions)).to.deep.equal(
         expectedDummyResults
       );
     });
 
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(0, dummyActions);
+      let tx = await dao.execute(BYTES32, dummyActions);
       let rc = await tx.wait();
 
       const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
       expect(event.args.actor).to.equal(ownerAddress);
-      expect(event.args.callId).to.equal(0);
+      expect(event.args.callId).to.equal(BYTES32);
       expect(event.args.actions.length).to.equal(1);
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -232,7 +233,7 @@ describe('DAO', function () {
       const actionExecute = await ActionExecuteFactory.deploy();
 
       await expect(
-        dao.execute(0, [
+        dao.execute(BYTES32, [
           {
             to: actionExecute.address,
             data: '0x0000',
@@ -559,10 +560,9 @@ describe('DAO', function () {
     // It's coming from UUPSUpgradeable which is already tested though since contracts are very critical,
     // Still testing this most important part wouldn't be bad..
     it.skip('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
-      await expect(dao.connect(signers[1]).upgradeTo(dao.address)).to.be.revertedWithCustomError(
-        dao,
-        'Unauthorized'
-      ).withArgs(
+      await expect(dao.connect(signers[1]).upgradeTo(dao.address))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           signers[1].address,
@@ -571,8 +571,7 @@ describe('DAO', function () {
     });
 
     it.skip('successfuly updates DAO contract', async () => {
-      await expect(dao.upgradeTo(dao.address)).to
-        .not.be.reverted;
+      await expect(dao.upgradeTo(dao.address)).to.not.be.reverted;
     });
     it.skip('shouldn not update if new implementation is not UUPS compliant'); // TODO:Implement
   });

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
+- Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.
 
 ### Removed
 
