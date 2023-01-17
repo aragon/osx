@@ -2,7 +2,7 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20, DAO__factory} from '../../typechain';
+import {DAO, GovernanceERC20} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
@@ -14,12 +14,11 @@ import {BYTES32} from '../test-utils/dao';
 
 chai.use(smock.matchers);
 
-const abiCoder = ethers.utils.defaultAbiCoder;
-
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
+const daoURI = 'https://example.com';
 
 const EVENTS = {
   MetadataSet: 'MetadataSet',
@@ -64,7 +63,7 @@ describe('DAO', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await deployWithProxy(DAO);
-    await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
+    await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1, daoURI);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
     token = await Token.deploy(dao.address, 'GOV', 'GOV', {
@@ -116,7 +115,7 @@ describe('DAO', function () {
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(
-        dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1)
+        dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1, daoURI)
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
@@ -550,6 +549,49 @@ describe('DAO', function () {
       expect(
         await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
       ).to.be.eq('0x41424344');
+    });
+
+    describe('ERC4824 - daoURI', async () => {
+      it('should set a new URI', async () => {
+        const newURI = 'https://new.example.com';
+        expect(await dao.daoURI()).not.to.be.eq(newURI);
+        await dao.setDaoURI(newURI);
+        expect(await dao.daoURI()).to.be.eq(newURI);
+      });
+
+      it('should emit DaoURIUpdated', async () => {
+        const newURI = 'https://new.example.com';
+        await expect(dao.setDaoURI(newURI))
+          .to.emit(dao, DAO_EVENTS.DAO_URI_UPDATED)
+          .withArgs(newURI);
+      });
+
+      it('should revert if the sender lacks the permission to update the URI', async () => {
+        await dao.revoke(
+          dao.address,
+          ownerAddress,
+          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+        );
+
+        await expect(dao.setDaoURI('https://new.example.com'))
+          .to.be.revertedWithCustomError(dao, 'Unauthorized')
+          .withArgs(
+            dao.address,
+            dao.address,
+            ownerAddress,
+            PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+          );
+
+        await dao.grant(
+          dao.address,
+          ownerAddress,
+          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+        );
+      });
+
+      it('should return the DAO URI', async () => {
+        expect(await dao.daoURI()).to.be.eq(daoURI);
+      });
     });
   });
 

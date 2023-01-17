@@ -27,7 +27,12 @@ describe('MajorityVotingMock', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await deployWithProxy(DAO);
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    await dao.initialize(
+      '0x',
+      ownerAddress,
+      ethers.constants.AddressZero,
+      'https://example.com'
+    );
   });
 
   beforeEach(async () => {

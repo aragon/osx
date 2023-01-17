@@ -23,7 +23,7 @@ contract DAOMock is IDAO, PermissionManager {
     ) public pure override returns (bool) {
         return true;
     }
-    
+
     function getTrustedForwarder() public pure override returns (address) {
         return address(0);
     }
@@ -75,4 +75,10 @@ contract DAOMock is IDAO, PermissionManager {
         bytes4 _callbackSelector,
         bytes4 _magicNumber
     ) external override {}
+
+    function setDaoURI(string calldata _daoURI) external override {}
+
+    function daoURI() external pure override returns (string memory) {
+        return "";
+    }
 }

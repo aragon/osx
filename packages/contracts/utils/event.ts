@@ -35,6 +35,7 @@ export const DAO_EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
   TRUSTED_FORWARDER_SET: 'TrustedForwarderSet',
   SIGNATURE_VALIDATOR_SET: 'SignatureValidatorSet',
+  DAO_URI_UPDATED: 'DaoURIUpdated'
 };
 
 export const ADDRESSLIST_EVENTS = {

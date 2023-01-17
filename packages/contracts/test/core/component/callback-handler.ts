@@ -37,7 +37,7 @@ describe('CallbackHandler', function () {
 
     dao = await deployWithProxy(DAO);
 
-    dao.initialize('0x', owner, ethers.constants.AddressZero);
+    dao.initialize('0x', owner, ethers.constants.AddressZero, 'https://example.com');
     dao.grant(dao.address, owner, REGISTER_STANDARD_CALLBACK_PERMISSION_ID);
 
     callbackHandlerMockHelper = await CallbackHandlerHelper.deploy(dao.address);

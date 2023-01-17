@@ -60,6 +60,9 @@ contract DAO is
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
 
+    /// @notice The [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) DAO uri.
+    string private _daoURI;
+
     /// @notice Thrown if action execution has failed.
     error ActionFailed();
 
@@ -90,13 +93,15 @@ contract DAO is
     function initialize(
         bytes calldata _metadata,
         address _initialOwner,
-        address _trustedForwarder
+        address _trustedForwarder,
+        string calldata daoURI_
     ) external initializer {
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
+        _setDaoURI(daoURI_);
         __PermissionManager_init(_initialOwner);
     }
 
@@ -286,6 +291,28 @@ contract DAO is
         emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
     }
 
+    /// @inheritdoc IDAO
+    function daoURI() external view override returns (string memory) {
+        return _daoURI;
+    }
+
+    /// @inheritdoc IDAO
+    function setDaoURI(string calldata newDaoURI)
+        external
+        override
+        auth(address(this), SET_METADATA_PERMISSION_ID)
+    {
+        _setDaoURI(newDaoURI);
+    }
+
+    /// @notice Sets the new DAO uri and emits the associated event.
+    /// @param newDaoURI The new DAO uri.
+    function _setDaoURI(string calldata newDaoURI) internal {
+        _daoURI = newDaoURI;
+
+        emit DaoURIUpdated(newDaoURI);
+    }
+
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 }

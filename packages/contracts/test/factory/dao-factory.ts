@@ -58,6 +58,7 @@ const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
 const EMPTY_DATA = '0x';
 const AddressZero = ethers.constants.AddressZero;
+const daoURI = 'https://example.com/'
 
 async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   dao: any;
@@ -212,6 +213,7 @@ describe('DAOFactory: ', function () {
       trustedForwarder: AddressZero,
       name: daoDummyName,
       metadata: daoDummyMetadata,
+      daoURI
     };
 
     votingSettings = {
