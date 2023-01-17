@@ -15,7 +15,7 @@ interface IPluginSetup {
 
     /// @param plugin The address of the `Plugin`.
     /// @param currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param data The `bytes` encoded data containing the input parameters for the preparation of update/uninstall as specified in the `prepareUpdateDataABI()` or `prepareUninstallationDataABI` function.
+    /// @param data The `bytes` encoded data containing the input parameters for the preparation of install/update/uninstall as specified in the corresponding ABI on the version's metadata.
     struct SetupPayload {
         address plugin;
         address[] currentHelpers;
