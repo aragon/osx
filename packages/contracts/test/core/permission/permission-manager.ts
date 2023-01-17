@@ -27,7 +27,6 @@ const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff';
 export enum Operation {
   Grant,
   Revoke,
-  Freeze,
   GrantWithOracle,
 }
 
@@ -140,15 +139,6 @@ describe('Core: PermissionManager', function () {
       await expect(
         pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
       ).to.not.emit(pm, 'Granted');
-    });
-
-    it('should revert if frozen', async () => {
-      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      await expect(
-        pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
-      )
-        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID);
     });
 
     it('should not allow grant', async () => {
@@ -288,20 +278,6 @@ describe('Core: PermissionManager', function () {
       ).to.be.revertedWithCustomError(pm, 'OracleNotPresentForAnyAddress');
     });
 
-    it('should revert if frozen', async () => {
-      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      await expect(
-        pm.grantWithOracle(
-          pm.address,
-          otherSigner.address,
-          ADMIN_PERMISSION_ID,
-          ALLOW_FLAG
-        )
-      )
-        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID);
-    });
-
     it('should set PermissionOracle', async () => {
       const signers = await ethers.getSigners();
       await pm.grantWithOracle(
@@ -401,16 +377,6 @@ describe('Core: PermissionManager', function () {
         );
     });
 
-    it('should revert if frozen', async () => {
-      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      await expect(
-        pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID)
-      )
-        .to.be.revertedWithCustomError(pm, 'PermissionFrozen')
-        .withArgs(pm.address, ADMIN_PERMISSION_ID);
-    });
-
     it('should not emit revoked if already revoked', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
       await pm.revoke(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
@@ -451,62 +417,6 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('freeze', () => {
-    it('should freeze', async () => {
-      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      const frozen = await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID);
-      expect(frozen).to.be.equal(true);
-    });
-
-    it('should emit Frozen', async () => {
-      await expect(pm.freeze(pm.address, ADMIN_PERMISSION_ID)).to.emit(
-        pm,
-        'Frozen'
-      );
-    });
-
-    it('should not emit frozen if already frozen', async () => {
-      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      await expect(pm.freeze(pm.address, ADMIN_PERMISSION_ID)).to.not.emit(
-        pm,
-        'Frozen'
-      );
-    });
-
-    it('should not allow', async () => {
-      await expect(
-        pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
-      )
-        .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          pm.address,
-          otherSigner.address,
-          ROOT_PERMISSION_ID
-        );
-    });
-
-    it('should not allow for non ROOT', async () => {
-      await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      await expect(
-        pm.connect(otherSigner).freeze(pm.address, ADMIN_PERMISSION_ID)
-      )
-        .to.be.revertedWithCustomError(pm, 'Unauthorized')
-        .withArgs(
-          pm.address,
-          pm.address,
-          otherSigner.address,
-          ROOT_PERMISSION_ID
-        );
-    });
-
-    it('reverts if `_where` is `ANY_ADDR`', async () => {
-      await expect(
-        pm.freeze(ANY_ADDR, ADMIN_PERMISSION_ID)
-      ).to.be.revertedWithCustomError(pm, 'FreezeOnAnyAddressDisallowed');
-    });
-  });
-
   describe('bulk on multiple target', () => {
     it('should bulk grant ADMIN_PERMISSION on different targets', async () => {
       const signers = await ethers.getSigners();
@@ -536,41 +446,6 @@ describe('Core: PermissionManager', function () {
           item.permissionId
         );
         expect(permission).to.be.equal(ALLOW_FLAG);
-      }
-    });
-
-    it('should bulk freeze', async () => {
-      const signers = await ethers.getSigners();
-      await pm.grant(
-        pm.address,
-        signers[0].address,
-        ethers.utils.id('PERMISSION_ID_1')
-      );
-      await pm.grant(
-        pm.address,
-        signers[0].address,
-        ethers.utils.id('PERMISSION_ID_2')
-      );
-      const bulkItems: ItemMultiTarget[] = [
-        {
-          operation: Operation.Freeze,
-          where: signers[1].address,
-          who: signers[2].address,
-          oracle: addressZero,
-          permissionId: ethers.utils.id('PERMISSION_ID_1'),
-        },
-        {
-          operation: Operation.Freeze,
-          where: signers[2].address,
-          who: signers[3].address,
-          oracle: addressZero,
-          permissionId: ethers.utils.id('PERMISSION_ID_2'),
-        },
-      ];
-      await pm.bulkOnMultiTarget(bulkItems);
-      for (const item of bulkItems) {
-        const permission = await pm.isFrozen(item.where, item.permissionId);
-        expect(permission).to.be.equal(true);
       }
     });
 
@@ -665,6 +540,7 @@ describe('Core: PermissionManager', function () {
         );
     });
   });
+
   describe('bulk on single target', () => {
     it('should bulk grant ADMIN_PERMISSION', async () => {
       const signers = await ethers.getSigners();
@@ -693,32 +569,6 @@ describe('Core: PermissionManager', function () {
           item.permissionId
         );
         expect(permission).to.be.equal(ALLOW_FLAG);
-      }
-    });
-
-    it('should bulk freeze', async () => {
-      const signers = await ethers.getSigners();
-      const bulkItems: ItemSingleTarget[] = [
-        {
-          operation: Operation.Freeze,
-          who: signers[1].address,
-          permissionId: ethers.utils.id('PERMISSION_ID_1'),
-        },
-        {
-          operation: Operation.Freeze,
-          who: signers[2].address,
-          permissionId: ethers.utils.id('PERMISSION_ID_2'),
-        },
-        {
-          operation: Operation.Freeze,
-          who: signers[3].address,
-          permissionId: ethers.utils.id('PERMISSION_ID_3'),
-        },
-      ];
-      await pm.bulkOnSingleTarget(pm.address, bulkItems);
-      for (const item of bulkItems) {
-        const permission = await pm.isFrozen(pm.address, item.permissionId);
-        expect(permission).to.be.equal(true);
       }
     });
 
@@ -769,11 +619,6 @@ describe('Core: PermissionManager', function () {
           who: signers[2].address,
           permissionId: ADMIN_PERMISSION_ID,
         },
-        {
-          operation: Operation.Freeze,
-          who: signers[3].address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
       ];
 
       await pm.bulkOnSingleTarget(pm.address, bulkItems);
@@ -791,9 +636,6 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
-      expect(await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
-        true
-      );
     });
 
     it('should emit correct events on bulk', async () => {
@@ -808,16 +650,6 @@ describe('Core: PermissionManager', function () {
         {
           operation: Operation.Grant,
           who: signers[2].address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-        {
-          operation: Operation.Freeze,
-          who: signers[3].address,
-          permissionId: ADMIN_PERMISSION_ID,
-        },
-        {
-          operation: Operation.Freeze,
-          who: signers[3].address,
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
@@ -837,11 +669,7 @@ describe('Core: PermissionManager', function () {
           pm.address,
           signers[2].address,
           ALLOW_FLAG
-        )
-        .to.emit(pm, 'Frozen')
-        .withArgs(ADMIN_PERMISSION_ID, ownerSigner.address, pm.address);
-
-      // Even though the ADMIN_PERMISSION_ID becomes frozen, signers[2].address still has it granted.
+        );
       expect(
         await pm.getAuthPermission(
           pm.address,
@@ -849,9 +677,6 @@ describe('Core: PermissionManager', function () {
           ADMIN_PERMISSION_ID
         )
       ).to.be.equal(ALLOW_FLAG);
-      expect(await pm.isFrozen(pm.address, ADMIN_PERMISSION_ID)).to.be.equal(
-        true
-      );
     });
 
     it('should not allow', async () => {
@@ -962,32 +787,6 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('isFrozen', () => {
-    it('should return true', async () => {
-      await pm.freeze(pm.address, ADMIN_PERMISSION_ID);
-      const isFrozen = await pm.callStatic.isFrozen(
-        pm.address,
-        ADMIN_PERMISSION_ID
-      );
-      expect(isFrozen).to.be.equal(true);
-    });
-
-    it('should return false', async () => {
-      const isFrozen = await pm.callStatic.isFrozen(
-        pm.address,
-        ADMIN_PERMISSION_ID
-      );
-      expect(isFrozen).to.be.equal(false);
-    });
-
-    it('should be callable by anyone', async () => {
-      const isFrozen = await pm
-        .connect(otherSigner)
-        .callStatic.isFrozen(pm.address, ADMIN_PERMISSION_ID);
-      expect(isFrozen).to.be.equal(false);
-    });
-  });
-
   describe('_hasPermission', () => {
     let permissionOracle: PermissionOracleMock;
 
@@ -1033,19 +832,6 @@ describe('Core: PermissionManager', function () {
       const contractHash = await pm.getPermissionHash(
         pm.address,
         ownerSigner.address,
-        ROOT_PERMISSION_ID
-      );
-      expect(hash).to.be.equal(contractHash);
-    });
-
-    it('should hash IMMUTABLE', async () => {
-      const packed = ethers.utils.solidityPack(
-        ['string', 'address', 'address'],
-        ['IMMUTABLE', pm.address, ROOT_PERMISSION_ID]
-      );
-      const hash = ethers.utils.keccak256(packed);
-      const contractHash = await pm.getFrozenPermissionHash(
-        pm.address,
         ROOT_PERMISSION_ID
       );
       expect(hash).to.be.equal(contractHash);
