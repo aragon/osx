@@ -46,7 +46,7 @@ This concatenated information is then stored as `keccak256` hashes inside a mapp
 mapping(bytes32 => address) internal permissionsHashed;
 ```
 
-Here, the `bytes32` keys are the permission hashes and the `address` values are either zero-address flags, such as `ALLOW_FLAG = address(0)` and `UNSET_FLAG = address(2)` indicating if the permission is set, or an actual address pointing to a `PermissionOracle` contract, which is discussed in the next section of this guide.
+Here, the `bytes32` keys are the permission hashes and the `address` values are either zero-address flags, such as `ALLOW_FLAG = address(0)` and `UNSET_FLAG = address(2)` indicating if the permission is set, or an actual address pointing to a `PermissionCondition` contract, which is discussed in the next section of this guide.
 
 ### Authorization Modifiers
 
@@ -61,7 +61,7 @@ function withdraw(uint256 value) external auth(WITHDRAW_PERMISSION_ID);
 
 ### Managing Permissions
 
-To manage permissions, the DAO contract has the `grant`, `revoke` and `grantWithOracle` functions in its public interface.
+To manage permissions, the DAO contract has the `grant`, `revoke` and `grantWithCondition` functions in its public interface.
 
 #### Granting and Revoking Permissions
 
@@ -90,25 +90,25 @@ By default, the `EXECUTE_PERMISSION_ID` permission is granted to governance cont
 Exceptions are, again, the [DAO creation](../02-the-dao-framework/01-dao-creation-process.md) and [plugin setup ](../02-the-dao-framework/02-plugin-repository/04-plugin-setup.md) processes.
 :::
 
-#### Granting Permission with Oracles
+#### Granting Permission with Conditions
 
 :::note
 This is and advanced topic that you might want to skip when learning about aragonOS permissions for the first time.
 :::
 
-AragonOS 6 supports relaying the authorization of a function call to a custom oracle inheriting from the `IPermissionOracle` contract interface. This works by granting the permission with the `grantWithOracle` function
+AragonOS 6 supports relaying the authorization of a function call to a custom condition inheriting from the `IPermissionCondition` contract interface. This works by granting the permission with the `grantWithCondition` function
 
 ```solidity title="contracts/core/permission/PermissionManager.sol"
-function grantWithOracle(
+function grantWithCondition(
   address _where,
   address _who,
   bytes32 _permissionId,
-  IPermissionOracle _oracle
+  IPermissionCondition _condition
 ) external auth(_where, ROOT_PERMISSION_ID) {}
 
 ```
 
-and specifying the `_oracle` address. This provides full flexibility to customize the conditions under which the function call is allowed.
+and specifying the `_condition` address. This provides full flexibility to customize the conditions under which the function call is allowed.
 
 These conditions can be based on the calldata of the function such as
 
@@ -121,18 +121,18 @@ on-chain data such as
 - token ownership
 - entries in curated registries
 
-or off-chain data being made available through third-party oracle services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
+or off-chain data being made available through third-party condition services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
 
 - market data
 - weather data
 - scientific data
 - sports data
 
-Typically, oracles are written specifically for and installed together with [plugins](../01-the-core-contracts/03-plugins.md).
+Typically, conditions are written specifically for and installed together with [plugins](../01-the-core-contracts/03-plugins.md).
 
 #### Granting Permission to `ANY_ADDR`
 
-In combination with oracles, the arguments `_where` and `_who` can be set to `ANY_ADDR = address(type(uint160).max)`.
+In combination with conditions, the arguments `_where` and `_who` can be set to `ANY_ADDR = address(type(uint160).max)`.
 Granting a permission with `_who: ANY_ADDR` has the effect that any address can now call the function so that it behaves as if the `auth` modifier is not present.
 Imagine, for example, you wrote a decentralized service
 
@@ -144,9 +144,9 @@ contract Service {
 ```
 
 Calling the `use()` function inside requires the caller to have the `USE_PERMISSION_ID` permission. Now, you want to make this service available to every user without uploading a new contract or requiring every user to ask for the permission.
-By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to an oracle, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
+By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to an condition, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
 
-Granting a permission with `_where: ANY_ADDR` to an oracle has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
+Granting a permission with `_where: ANY_ADDR` to an condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
 
 However, some restrictions apply. For security reasons, aragonOS does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
@@ -163,7 +163,7 @@ The following functions in the DAO are permissioned:
 | `setMetadata`                                  | `SET_METADATA_PERMISSION_ID`            | Required to set the DAO’s metadata.                                                    |
 | `setTrustedForwarder`                          | `SET_TRUSTED_FORWARDER_PERMISSION_ID`   | Required to set the DAO’s trusted forwarder for meta transactions.                     |
 | `setSignatureValidator`                        | `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` | Required to set the DAO’s signature validator contract (see ERC-1271).                 |
-| `grant`, `grantWithOracle`, `revoke`           | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
+| `grant`, `grantWithCondition`, `revoke`           | `ROOT_PERMISSION_ID`                    | Required to manage permissions of the DAO and associated plugins.                      |
 
 Plugins installed to the DAO might require their own and introduce new permission settings.
 
@@ -191,17 +191,17 @@ Let's assume you own the private key to address `0x123456...` and the `Example` 
 Now, to be able to call the `sendCoins` function, you need to `grant` the `SEND_COINS_PERMISSION_ID` permission to your wallet address (`_who=0x123456...`) for the `Example` contract (`_where=0xabcdef...`).
 If this is the case, the function call will succeed, otherwise it will revert.
 
-We can now add additional constraints to it by using the `grantWithOracle` function.
-Below, we show four exemplary oracles for different 4 different use cases that we could attach to the permission.
+We can now add additional constraints to it by using the `grantWithCondition` function.
+Below, we show four exemplary conditions for different 4 different use cases that we could attach to the permission.
 
-#### Oracle 1: Adding Parameter Constraints
+#### Condition 1: Adding Parameter Constraints
 
 Let’s imagine that we want to make sure that `_value` is not more than `1 ETH` without changing the code of `Example` contract.
 
-We can realize this requirement by deploying a `ParameterConstraintOracle` oracle.
+We can realize this requirement by deploying a `ParameterConstraintCondition` condition.
 
-```solidity title="ParameterConstraintOracle.sol"
-contract ParameterConstraintOracle is IPermissionOracle {
+```solidity title="ParameterConstraintCondition.sol"
+contract ParameterConstraintCondition is IPermissionCondition {
 	uint256 internal maxValue;
 
 	constructor(uint256 _maxValue) {
@@ -222,14 +222,14 @@ contract ParameterConstraintOracle is IPermissionOracle {
 }
 ```
 
-Now, after granting the `SEND_COINS_PERMISSION_ID` permission to `_where` and `_who` via the `grantWithOracle` function and pointing to the `ParameterConstraintOracle` oracle contract, the `_who` address can only call the `sendCoins` of the `Example` contract deployed at address `_where` successfully if `_value` is not larger than `_maxValue` stored in the oracle contract.
+Now, after granting the `SEND_COINS_PERMISSION_ID` permission to `_where` and `_who` via the `grantWithCondition` function and pointing to the `ParameterConstraintCondition` condition contract, the `_who` address can only call the `sendCoins` of the `Example` contract deployed at address `_where` successfully if `_value` is not larger than `_maxValue` stored in the condition contract.
 
-#### Oracle 2: Delaying a Call With a Timestamp
+#### Condition 2: Delaying a Call With a Timestamp
 
 In another use-case, we might want to make sure that the `sendCoins` can only be called after a certain date. This would look as following:
 
-```solidity title="TimeOracle.sol"
-contract TimeOracle is IPermissionOracle {
+```solidity title="TimeCondition.sol"
+contract TimeCondition is IPermissionCondition {
   uint256 internal date;
 
   constructor(uint256 _date) {
@@ -250,9 +250,9 @@ contract TimeOracle is IPermissionOracle {
 
 ```
 
-Here, the permission oracle will only allow the call the `_date` specified in the constructor has passed.
+Here, the permission condition will only allow the call the `_date` specified in the constructor has passed.
 
-#### Oracle 3: Using Curated Registries
+#### Condition 3: Using Curated Registries
 
 In another use-case, we might want to make sure that the `sendCoins` function can only be called by real humans to prevent sybil attacks. For this, let's say we use the [Proof of Humanity (PoH)](https://www.proofofhumanity.id/) registry providing a curated list of humans:
 
@@ -261,7 +261,7 @@ interface IProofOfHumanity {
   function isRegistered(address _submissionID) external view returns (bool);
 }
 
-contract ProofOfHumanityOracle is IPermissionOracle {
+contract ProofOfHumanityCondition is IPermissionCondition {
   IProofOfHumanity internal registry;
 
   constructor(IProofOfHumanity _registry) {
@@ -282,17 +282,17 @@ contract ProofOfHumanityOracle is IPermissionOracle {
 
 ```
 
-Here, the permission oracle will only allow the call if the PoH registry confirms that the `_who` address is registered and belongs to a real human.
+Here, the permission condition will only allow the call if the PoH registry confirms that the `_who` address is registered and belongs to a real human.
 
-#### Oracle 4: Using Price Oracles
+#### Condition 4: Using Price Conditions
 
 In another use-case, we might want to make sure that the `sendCoins` function can only be called if the ETH price in USD is above a certain threshold:
 
 <!-- prettier-ignore -->
-```solidity title="PriceOracle.sol"
+```solidity title="PriceCondition.sol"
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 
-contract PriceOracle is IPermissionOracle {
+contract PriceCondition is IPermissionCondition {
   AggregatorV3Interface internal priceFeed;
 
   // Network: Goerli
@@ -324,6 +324,6 @@ contract PriceOracle is IPermissionOracle {
   }
 }
 
-Here, we use [a data feed from a Chainlink oracle](https://docs.chain.link/docs/data-feeds/) providing us with the latest ETH/USD price on the Goerli testnet and require that the call is only allowed if the ETH price is over $9000.
+Here, we use [a data feed from a Chainlink condition](https://docs.chain.link/docs/data-feeds/) providing us with the latest ETH/USD price on the Goerli testnet and require that the call is only allowed if the ETH price is over $9000.
 
 ````
