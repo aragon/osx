@@ -48,48 +48,47 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     struct PrepareInstallationParams {
-        PluginSetupRef pluginSetupRef;
-        bytes data;
+        PluginSetupRef pluginSetupRef; // Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
+        bytes data; // The encoded data containing the input parameters for the installation as specified by the developer in the JSON.
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
     struct ApplyInstallationParams {
-        PluginSetupRef pluginSetupRef;
-        address plugin;
-        PermissionLib.ItemMultiTarget[] permissions;
-        bytes32 helpersHash;
+        PluginSetupRef pluginSetupRef; // Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
+        address plugin; // The address of the `Plugin` contract that will be installed on the DAO.
+        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
+        bytes32 helpersHash; // The abi encoded hash of helpers that were deployed in `prepareInstallation`. This helps to derive the setupId.
     }
 
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
     struct PrepareUpdateParams {
-        PluginRepo.Tag currentVersionTag;
-        PluginRepo.Tag newVersionTag;
-        PluginRepo pluginSetupRepo;
-        IPluginSetup.SetupPayload setupPayload;
+        PluginRepo.Tag currentVersionTag; // Current version of the plugin from which it's updating.
+        PluginRepo.Tag newVersionTag; // New version of the plugin to which it's updating.
+        PluginRepo pluginSetupRepo; // The pluginSetupRepo address on which the plugin exists.
+        IPluginSetup.SetupPayload setupPayload; // see IPluginSetup.SetupPayload
     }
 
     /// @notice The struct containing the parameters for the `applyUpdate` function.
     struct ApplyUpdateParams {
-        address plugin;
-        PluginSetupRef pluginSetupRef;
-        bytes initData;
-        PermissionLib.ItemMultiTarget[] permissions;
-        bytes32 helpersHash;
+        address plugin; // The address of the plugin which is updating.
+        PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + new Version Tag for which the `prepareUpdate` was called.
+        bytes initData; // the encoded data(function selector + arguments) that will be called on the plugin's upgradeToAndCall call.
+        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
+        bytes32 helpersHash; // The abi encoded hash of helpers that were deployed in `prepareUpdate`. This helps to derive the setupId.
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
     struct PrepareUninstallationParams {
-        PluginSetupRef pluginSetupRef;
-        IPluginSetup.SetupPayload setupPayload;
-        bytes32 permissionsHash;
+        PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
+        IPluginSetup.SetupPayload setupPayload; // see IPluginSetup.SetupPayload
+        bytes32 permissionsHash; // The abi encoded hash of the permissions that were derived at the last `applyUpdate` or if no update happened, at the applyInstall time. This helps to derive setupId.
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
     struct ApplyUninstallationParams {
-        address plugin;
-        PluginSetupRef pluginSetupRef;
-        address[] currentHelpers;
-        PermissionLib.ItemMultiTarget[] permissions;
+        address plugin; // The address of the plugin which is uninstalling.
+        PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
+        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcess. 
     }
 
     /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.

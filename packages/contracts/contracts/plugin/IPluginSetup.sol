@@ -6,6 +6,7 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {IDAO} from "../core/IDAO.sol";
 
 interface IPluginSetup {
+    /// @notice The plugin's assosiated dependency.
     /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedDependency {
@@ -30,7 +31,7 @@ interface IPluginSetup {
     /// @param _dao The address of the installing DAO.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
-    /// @return preparedDependency TOD:GIORGI
+    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareInstallation(address _dao, bytes memory _data)
         external
         returns (address plugin, PreparedDependency memory preparedDependency);
@@ -43,9 +44,9 @@ interface IPluginSetup {
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
     /// @param _currentBuild The build number of the plugin to update from.
-    /// @param _payload TOD:GIORGI how to add explanation ?
+    /// @param _payload The relevant data necessary for the `prepareUpdate`. see above.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
-    /// @return preparedDependency TOD:GIORGI
+    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareUpdate(
         address _dao,
         uint16 _currentBuild,
@@ -58,7 +59,7 @@ interface IPluginSetup {
 
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.
-    /// @param _payload TOD:GIORGI how to add explanation ?
+    /// @param _payload The relevant data necessary for the `prepareUninstallation`. see above.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external
