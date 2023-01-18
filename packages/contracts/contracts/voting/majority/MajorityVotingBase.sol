@@ -99,17 +99,17 @@ abstract contract MajorityVotingBase is
     /// @notice A container for the proposal parameters at the time of proposal creation.
     /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
-    /// @param minParticipation The minimum participation value.
+    /// @param minVotingPower The minimum voting power needed.
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
     struct ProposalParameters {
         VotingMode votingMode;
         uint64 supportThreshold;
-        uint64 minParticipation;
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
+        uint256 minVotingPower;
     }
 
     /// @notice A container for the proposal vote tally.
@@ -158,9 +158,6 @@ abstract contract MajorityVotingBase is
     /// @notice Thrown when a sender is not allowed to create a proposal.
     /// @param sender The sender address.
     error ProposalCreationForbidden(address sender);
-
-    /// @notice Thrown if zero is not allowed as a value.
-    error ZeroValueNotAllowed();
 
     /// @notice Thrown if an account is not allowed to cast a vote. This can be because the vote
     /// - has not started,
@@ -268,33 +265,49 @@ abstract contract MajorityVotingBase is
         return _canExecute(_proposalId);
     }
 
+    // Solution: don't do division on the contracts - do float division on the SDK / frontend. Transform the execution criteria so that no division is needed.
+
+    // Support criterium
+    // y/(y+n) > s
+    // y > s*(y+n)
+    // y > s*y + s*n
+    // (1-s)*y > sn
     /// @inheritdoc IMajorityVoting
-    function support(uint256 _proposalId) public view virtual returns (uint256) {
-        Proposal storage proposal_ = proposals[_proposalId];
-
-        return _calculatePct(proposal_.tally.yes, proposal_.tally.yes + proposal_.tally.no);
-    }
-
-    /// @inheritdoc IMajorityVoting
-    function worstCaseSupport(uint256 _proposalId) public view virtual returns (uint256) {
-        Proposal storage proposal_ = proposals[_proposalId];
-
-        return
-            _calculatePct(
-                proposal_.tally.yes,
-                proposal_.tally.totalVotingPower - proposal_.tally.abstain
-            );
-    }
-
-    /// @inheritdoc IMajorityVoting
-    function participation(uint256 _proposalId) public view virtual returns (uint256) {
+    function isSupportThresholdReached(uint256 _proposalId) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         return
-            _calculatePct(
-                proposal_.tally.yes + proposal_.tally.no + proposal_.tally.abstain,
-                proposal_.tally.totalVotingPower
-            );
+            (PCT_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
+            proposal_.parameters.supportThreshold * proposal_.tally.no;
+    }
+
+    // Worst case support criterium
+    // -> Start from the support criterium
+    // (1-s)*y > s(n + n_uncasted)
+    // (1-s)*y > s(n + (t - (y+n+a) ))
+    // (1-s)*y > s(t - y - a)
+    /// @inheritdoc IMajorityVoting
+    function isSupportThresholdReachedEarly(
+        uint256 _proposalId
+    ) public view virtual returns (bool) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return
+            (PCT_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
+            proposal_.parameters.supportThreshold *
+                (proposal_.tally.totalVotingPower - proposal_.tally.yes - proposal_.tally.abstain);
+    }
+
+    // Participation criterium
+    // (y+n+a) / t > p
+    // y+n+a  > p*t
+    /// @inheritdoc IMajorityVoting
+    function isMinParticipationReached(uint256 _proposalId) public view virtual returns (bool) {
+        Proposal storage proposal_ = proposals[_proposalId];
+
+        return
+            proposal_.tally.yes + proposal_.tally.no + proposal_.tally.abstain >=
+            proposal_.parameters.minVotingPower;
     }
 
     /// @inheritdoc IMajorityVoting
@@ -426,13 +439,11 @@ abstract contract MajorityVotingBase is
             // Early execution
             return
                 proposal_.parameters.votingMode == VotingMode.EarlyExecution &&
-                worstCaseSupport(_proposalId) > proposal_.parameters.supportThreshold &&
-                participation(_proposalId) >= proposal_.parameters.minParticipation;
+                isSupportThresholdReachedEarly(_proposalId) &&
+                isMinParticipationReached(_proposalId);
         }
         // Normal execution
-        return
-            support(_proposalId) > proposal_.parameters.supportThreshold &&
-            participation(_proposalId) >= proposal_.parameters.minParticipation;
+        return isSupportThresholdReached(_proposalId) && isMinParticipationReached(_proposalId);
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
@@ -445,18 +456,6 @@ abstract contract MajorityVotingBase is
             proposal_.parameters.startDate <= currentTime &&
             currentTime < proposal_.parameters.endDate &&
             !proposal_.executed;
-    }
-
-    /// @notice Calculates the relative of a value with respect to a total as a percentage.
-    /// @param _value The value.
-    /// @param _total The total.
-    /// @return returns The relative value as a percentage.
-    function _calculatePct(uint256 _value, uint256 _total) internal pure virtual returns (uint256) {
-        if (_total == 0) {
-            revert ZeroValueNotAllowed();
-        }
-
-        return (_value * PCT_BASE) / _total;
     }
 
     /// @notice Internal function to update the plugin-wide proposal vote settings.

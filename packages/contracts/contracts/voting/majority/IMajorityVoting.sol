@@ -75,20 +75,20 @@ interface IMajorityVoting {
     /// @return The minimum participation parameter.
     function minParticipation() external view returns (uint64);
 
-    /// @notice Returns the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote.
+    /// @notice Checks if the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
-    /// @return The support value.
-    function support(uint256 _proposalId) external view returns (uint256);
+    /// @return Returns `true` if the  support is greater than the suppor threshold and `false` otherwise.
+    function isSupportThresholdReached(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Returns the worst case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote.
+    /// @notice Checks if the worse case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
-    /// @return The worst case support value.
-    function worstCaseSupport(uint256 _proposalId) external view returns (uint256);
+    /// @return Returns `true` if the worst case support is greater than the suppor threshold and `false` otherwise.
+    function isSupportThresholdReachedEarly(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Returns the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote.
+    /// @notice Checks if the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote is greater or equal than the minimum participation value.
     /// @param _proposalId The ID of the proposal.
-    /// @return The participation value.
-    function participation(uint256 _proposalId) external view returns (uint256);
+    /// @return Returns `true` if the participation is greater than the minimum particpation and `false` otherwise.
+    function isMinParticipationReached(uint256 _proposalId) external view returns (bool);
 
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
     /// - has not started,

@@ -94,7 +94,7 @@ contract TokenVoting is MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-        proposal_.parameters.minParticipation = minParticipation();
+        proposal_.parameters.minVotingPower = (totalVotingPower * minParticipation()) / PCT_BASE;
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
