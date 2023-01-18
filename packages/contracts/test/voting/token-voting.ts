@@ -376,10 +376,11 @@ describe('TokenVoting', function () {
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );
+
       expect(proposal.parameters.minVotingPower).to.equal(
         proposal.tally.totalVotingPower
           .mul(votingSettings.minParticipation)
-          .div(pctToRatio(100)) // TODO IMRPOVE
+          .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
       expect(
@@ -441,7 +442,7 @@ describe('TokenVoting', function () {
       expect(proposal.parameters.minVotingPower).to.equal(
         proposal.tally.totalVotingPower
           .mul(votingSettings.minParticipation)
-          .div(pctToRatio(100)) // TODO IMRPOVE
+          .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
@@ -1163,7 +1164,7 @@ describe('TokenVoting', function () {
     });
   });
 
-  describe('execution criteria can handle token balances across all orders of magnitude', async function () {
+  describe('Execution criteria handle token balances for multiple orders of magnitude', async function () {
     beforeEach(async () => {
       votingSettings.supportThreshold = pctToRatio(50);
       votingSettings.minParticipation = pctToRatio(20);

@@ -308,7 +308,7 @@ describe('AddresslistVoting', function () {
       expect(proposal.parameters.minVotingPower).to.equal(
         proposal.tally.totalVotingPower
           .mul(votingSettings.minParticipation)
-          .div(pctToRatio(100)) // TODO IMRPOVE
+          .div(pctToRatio(100))
       );
       expect(
         proposal.parameters.startDate.add(votingSettings.minDuration)
@@ -369,7 +369,7 @@ describe('AddresslistVoting', function () {
       expect(proposal.parameters.minVotingPower).to.equal(
         proposal.tally.totalVotingPower
           .mul(votingSettings.minParticipation)
-          .div(pctToRatio(100)) // TODO IMRPOVE
+          .div(pctToRatio(100))
       );
 
       expect(proposal.tally.yes).to.equal(1);
