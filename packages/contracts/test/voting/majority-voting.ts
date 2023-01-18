@@ -67,7 +67,7 @@ describe('MajorityVotingMock', function () {
     it('reverts if the support threshold specified exceeds 100%', async () => {
       votingSettings.supportThreshold = pctToRatio(1000);
       await expect(votingBase.updateVotingSettings(votingSettings))
-        .to.be.revertedWithCustomError(votingBase, 'PercentageExceeds100')
+        .to.be.revertedWithCustomError(votingBase, 'RatioOutOfBounds')
         .withArgs(pctToRatio(100), votingSettings.supportThreshold);
     });
 
@@ -75,7 +75,7 @@ describe('MajorityVotingMock', function () {
       votingSettings.minParticipation = pctToRatio(1000);
 
       await expect(votingBase.updateVotingSettings(votingSettings))
-        .to.be.revertedWithCustomError(votingBase, 'PercentageExceeds100')
+        .to.be.revertedWithCustomError(votingBase, 'RatioOutOfBounds')
         .withArgs(pctToRatio(100), votingSettings.minParticipation);
     });
 
