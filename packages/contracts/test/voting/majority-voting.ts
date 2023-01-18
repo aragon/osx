@@ -13,6 +13,7 @@ import {
 } from '../test-utils/voting';
 import {deployWithProxy} from '../test-utils/proxy';
 import {OZ_ERRORS} from '../test-utils/error';
+import {daoExampleURI} from '../test-utils/dao';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -27,7 +28,12 @@ describe('MajorityVotingMock', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await deployWithProxy(DAO);
-    await dao.initialize('0x', ownerAddress, ethers.constants.AddressZero);
+    await dao.initialize(
+      '0x',
+      ownerAddress,
+      ethers.constants.AddressZero,
+      daoExampleURI
+    );
   });
 
   beforeEach(async () => {

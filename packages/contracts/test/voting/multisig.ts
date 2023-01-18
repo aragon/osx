@@ -18,6 +18,7 @@ import {
   getTime,
   setTimeForNextBlock,
   timestampIn,
+  toBytes32,
 } from '../test-utils/voting';
 
 export type MultisigSettings = {
@@ -864,7 +865,7 @@ describe('Multisig', function () {
           const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
           expect(event.args.actor).to.equal(multisig.address);
-          expect(event.args.callId).to.equal(id);
+          expect(event.args.callId).to.equal(toBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
