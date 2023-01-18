@@ -65,7 +65,6 @@ export function createGetProposalCall(
   abstain: string,
   yes: string,
   no: string,
-  totalVotingPower: string,
 
   actions: ethereum.Tuple[]
 ): void {
@@ -95,14 +94,11 @@ export function createGetProposalCall(
   tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(abstain)));
   tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(yes)));
   tally.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromString(no)));
-  tally.push(
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(totalVotingPower))
-  );
 
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint256),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint256),(uint256,uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
@@ -118,5 +114,24 @@ export function createGetProposalCall(
       ethereum.Value.fromTuple(tally),
 
       ethereum.Value.fromTupleArray(actions)
+    ]);
+}
+
+export function createTotalVotingPowerCall(
+  contractAddress: string,
+  blockNumber: string,
+
+  totalVotingPower: string
+): void {
+  createMockedFunction(
+    Address.fromString(contractAddress),
+    'totalVotingPower',
+    'totalVotingPower(uint256):(uint256)'
+  )
+    .withArgs([
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(blockNumber))
+    ])
+    .returns([
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(totalVotingPower))
     ]);
 }

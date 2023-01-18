@@ -17,12 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Avoided integer division in the `MajorityVoting` execution criteria to avoid precision loss.
 - Replaced `ProposalParameters.minParticipation` by `minVotingPower` in `TokenVoting` and `AddresslistVoting`.
-- Rescaled and renamed `PCT_BASE = 10*18` to `RATIO_BASE = 10*6`.
+- Rescaled and renamed `PCT_BASE = 10**18` to `RATIO_BASE = 10**6`.
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16`, and added `approvals`(uint16) in the `Proposal` struct.
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 
 ### Removed
 
+- Removed redundant storage of `totalVotingPower` in `ProposalParameters.Tally` in `TokenVoting` and `AddresslistVoting` and obtain it from `snapshotBlock` and `votingToken.getPastTotalSupply` and `addresslistLengthAtBlock` instead.
 - Removes `open` parameter from Multisig proposals.
 - Removes `Tally` struct as well as `addressListLength` and moves `approvals` in `Proposal`.
 - Removes `freeze` functionality.

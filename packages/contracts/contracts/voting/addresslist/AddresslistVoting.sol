@@ -73,6 +73,11 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
+    function totalVotingPower(uint256 _blockNumber) public view override returns (uint256) {
+        return addresslistLengthAtBlock(_blockNumber);
+    }
+
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
@@ -108,13 +113,9 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-
         proposal_.parameters.minVotingPower =
-            (addresslistLengthAtBlock(snapshotBlock) * minParticipation()) /
+            (totalVotingPower(snapshotBlock) * minParticipation()) /
             RATIO_BASE;
-
-        // REMOVE
-        proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO THIS DOESN'T NEED TO BE STORED ANYMORE https://aragonassociation.atlassian.net/browse/APP-1417
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

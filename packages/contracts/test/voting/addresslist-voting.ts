@@ -306,7 +306,7 @@ describe('AddresslistVoting', function () {
         votingSettings.supportThreshold
       );
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
@@ -317,6 +317,9 @@ describe('AddresslistVoting', function () {
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(1);
       expect(await voting.canVote(id, signers[0].address, VoteOption.Yes)).to.be
         .true;
       expect(await voting.canVote(id, signers[1].address, VoteOption.Yes)).to.be
@@ -367,13 +370,18 @@ describe('AddresslistVoting', function () {
         votingSettings.supportThreshold
       );
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
 
       expect(proposal.tally.yes).to.equal(1);
       expect(proposal.tally.no).to.equal(0);
+      expect(proposal.tally.abstain).to.equal(0);
+
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(1);
     });
 
     it('reverts creation if the creator tries to vote before the start date', async () => {

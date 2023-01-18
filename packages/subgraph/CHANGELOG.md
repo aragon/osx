@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Changed
+
+- Changed indexing of `totalVotingPower` which is now obtained from the `snapshotBlock` and the public function `totalVotingPower(uint256 _blockNumber)`.
+
 ## 0.6.2-alpha
 
 ### Added
@@ -18,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replaced `ProposalParameters.minParticipation` by `minVotingPower` in `TokenVoting` and `AddresslistVoting`.
 - Rescaled and renamed `PCT_BASE = 10*18` to `RATIO_BASE = 10*6`.
-- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16`, and added `approvals`(uint16) in the `Proposal` struct.
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 
 ### Removed

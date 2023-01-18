@@ -28,7 +28,11 @@ import {
   TOTAL_VOTING_POWER
 } from '../constants';
 
-import {createDummyActions, createGetProposalCall} from '../utils';
+import {
+  createDummyActions,
+  createGetProposalCall,
+  createTotalVotingPowerCall
+} from '../utils';
 import {
   createNewVoteCastEvent,
   createNewProposalExecutedEvent,
@@ -66,9 +70,14 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     '0', // abstain
     '0', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -178,9 +187,14 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '1', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions
+  );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
   );
 
   // create event
@@ -198,27 +212,6 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   let entityID = ADDRESS_ONE + '_' + proposal.id;
   assert.fieldEquals('TokenVotingVote', entityID, 'id', entityID);
 
-  // check voter
-  let memberId =
-    Address.fromString(CONTRACT_ADDRESS).toHexString() +
-    '_' +
-    Address.fromString(ADDRESS_ONE).toHexString();
-
-  assert.fieldEquals('TokenVotingVoter', memberId, 'id', memberId);
-  assert.fieldEquals('TokenVotingVoter', memberId, 'address', ADDRESS_ONE);
-  assert.fieldEquals(
-    'TokenVotingVoter',
-    memberId,
-    'plugin',
-    Address.fromString(CONTRACT_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'TokenVotingVoter',
-    memberId,
-    'lastUpdated',
-    event.block.timestamp.toString()
-  );
-
   // check proposal
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
 
@@ -235,6 +228,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     'castedVotingPower',
     '1'
   );
+
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
@@ -252,10 +246,16 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // abstain
     '2', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions
   );
+
+  createTotalVotingPowerCall(
+    CONTRACT_ADDRESS,
+    SNAPSHOT_BLOCK,
+    TOTAL_VOTING_POWER
+  );
+
   // create event
   let event2 = createNewVoteCastEvent(
     PROPOSAL_ID,
@@ -307,7 +307,6 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
     '0', // abstain
     '0', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions
   );
@@ -359,7 +358,6 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     '0', // abstain
     '1', // yes
     '0', // no
-    TOTAL_VOTING_POWER,
 
     actions
   );

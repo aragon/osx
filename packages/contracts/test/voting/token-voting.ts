@@ -378,7 +378,7 @@ describe('TokenVoting', function () {
       );
 
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
@@ -387,9 +387,12 @@ describe('TokenVoting', function () {
         proposal.parameters.startDate.add(votingSettings.minDuration)
       ).to.equal(proposal.parameters.endDate);
 
-      expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
+
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(1);
 
       expect(
         await voting.canVote(1, signers[0].address, VoteOption.Yes)
@@ -440,16 +443,19 @@ describe('TokenVoting', function () {
         votingSettings.supportThreshold
       );
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
-      expect(proposal.tally.totalVotingPower).to.equal(1);
       expect(proposal.tally.yes).to.equal(1);
       expect(proposal.tally.no).to.equal(0);
       expect(proposal.tally.abstain).to.equal(0);
+
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(1);
     });
 
     it('reverts creation when voting before the start date', async () => {
@@ -1210,7 +1216,10 @@ describe('TokenVoting', function () {
           false
         );
 
-        expect((await voting.getProposal(id)).tally.totalVotingPower).to.eq(
+        const snapshotBlock = (await voting.getProposal(id)).parameters
+          .snapshotBlock;
+        const totalVotingPower = await voting.totalVotingPower(snapshotBlock);
+        expect(totalVotingPower).to.eq(
           balances[0].amount.add(balances[1].amount)
         );
 

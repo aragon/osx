@@ -46,28 +46,27 @@ export function _handleProposalCreated(
   proposalEntity.endDate = event.params.endDate;
 
   let contract = AddresslistVoting.bind(event.address);
-  let vote = contract.try_getProposal(event.params.proposalId);
+  let proposal = contract.try_getProposal(event.params.proposalId);
 
-  if (!vote.reverted) {
-    proposalEntity.open = vote.value.value0;
-    proposalEntity.executed = vote.value.value1;
+  if (!proposal.reverted) {
+    proposalEntity.open = proposal.value.value0;
+    proposalEntity.executed = proposal.value.value1;
 
     // ProposalParameters
-    let parameters = vote.value.value2;
+    let parameters = proposal.value.value2;
     proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
     proposalEntity.supportThreshold = parameters.supportThreshold;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
     proposalEntity.minVotingPower = parameters.minVotingPower;
 
     // Tally
-    let tally = vote.value.value3;
+    let tally = proposal.value.value3;
     proposalEntity.abstain = tally.abstain;
     proposalEntity.yes = tally.yes;
     proposalEntity.no = tally.no;
-    proposalEntity.totalVotingPower = tally.totalVotingPower;
 
     // Actions
-    let actions = vote.value.value4;
+    let actions = proposal.value.value4;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -86,6 +85,11 @@ export function _handleProposalCreated(
       actionEntity.proposal = proposalId;
       actionEntity.save();
     }
+
+    // totalVotingPower
+    proposalEntity.totalVotingPower = contract.try_totalVotingPower(
+      parameters.snapshotBlock
+    ).value;
   }
 
   proposalEntity.save();
@@ -133,37 +137,41 @@ export function handleVoteCast(event: VoteCast): void {
     if (!proposal.reverted) {
       let parameters = proposal.value.value2;
       let tally = proposal.value.value3;
+      let totalVotingPowerCall = contract.try_totalVotingPower(
+        parameters.snapshotBlock
+      );
 
-      let abstain = tally.abstain;
-      let yes = tally.yes;
-      let no = tally.no;
-      let castedVotingPower = yes.plus(no.plus(abstain));
-      let totalVotingPower = tally.totalVotingPower;
+      if (!totalVotingPowerCall.reverted) {
+        let abstain = tally.abstain;
+        let yes = tally.yes;
+        let no = tally.no;
+        let castedVotingPower = yes.plus(no.plus(abstain));
+        let totalVotingPower = totalVotingPowerCall.value;
 
-      let supportThreshold = parameters.supportThreshold;
-      let minVotingPower = parameters.minVotingPower;
+        let supportThreshold = parameters.supportThreshold;
+        let minVotingPower = parameters.minVotingPower;
 
-      let BASE = BigInt.fromString(RATIO_BASE);
+        let BASE = BigInt.fromString(RATIO_BASE);
 
-      proposalEntity.yes = yes;
-      proposalEntity.no = no;
-      proposalEntity.abstain = abstain;
-      proposalEntity.castedVotingPower = castedVotingPower;
+        proposalEntity.yes = yes;
+        proposalEntity.no = no;
+        proposalEntity.abstain = abstain;
+        proposalEntity.castedVotingPower = castedVotingPower;
 
-      // check if the current vote results meet the conditions for the proposal to pass:
-      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
-      // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
+        // check if the current vote results meet the conditions for the proposal to pass:
+        // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
+        // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
-      let supportThresholdReachedEarly = BASE.minus(supportThreshold)
-        .times(yes)
-        .ge(totalVotingPower.minus(yes).minus(abstain));
+        let supportThresholdReachedEarly = BASE.minus(supportThreshold)
+          .times(yes)
+          .ge(totalVotingPower.minus(yes).minus(abstain));
 
-      let minParticipationReached = castedVotingPower.ge(minVotingPower);
+        let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
-      // set the executable param
-      proposalEntity.executable =
-        supportThresholdReachedEarly && minParticipationReached;
-
+        // set the executable param
+        proposalEntity.executable =
+          supportThresholdReachedEarly && minParticipationReached;
+      }
       proposalEntity.save();
     }
   }
