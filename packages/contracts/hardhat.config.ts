@@ -2,12 +2,13 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-import {HardhatUserConfig, task} from 'hardhat/config';
+import {HardhatUserConfig} from 'hardhat/config';
+import '@nomicfoundation/hardhat-chai-matchers';
 import '@nomiclabs/hardhat-etherscan';
-import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
 import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
+import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'solidity-docgen';
 
@@ -68,6 +69,7 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_KEY || '',
       arbitrumTestnet: process.env.ARBISCAN_KEY || '',
     },
+    customChains: []
   },
   namedAccounts: {
     deployer: 0,

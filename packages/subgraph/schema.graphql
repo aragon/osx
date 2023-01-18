@@ -39,7 +39,6 @@ type ContractPermissionId @entity(immutable: true) {
   dao: Dao!
   where: Bytes!
   permissionId: Bytes!
-  frozen: Boolean!
 }
 
 type Permission @entity(immutable: true) {
@@ -185,6 +184,8 @@ interface Proposal {
   actions: [Action!]! @derivedFrom(field: "proposal")
   executed: Boolean!
   createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
 }
 
 # Voting
@@ -249,8 +250,6 @@ type TokenVotingProposal implements Proposal @entity {
   votingMode: VotingMode!
   supportThreshold: BigInt!
   minParticipation: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
   snapshotBlock: BigInt!
 
   yes: BigInt
@@ -263,6 +262,8 @@ type TokenVotingProposal implements Proposal @entity {
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
   creationBlockNumber: BigInt!
   executable: Boolean
   executionDate: BigInt
@@ -314,8 +315,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   votingMode: VotingMode!
   supportThreshold: BigInt!
   minParticipation: BigInt!
-  startDate: BigInt!
-  endDate: BigInt!
+
   snapshotBlock: BigInt!
 
   abstain: BigInt
@@ -328,6 +328,8 @@ type AddresslistVotingProposal implements Proposal @entity {
   open: Boolean!
   executed: Boolean!
   createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
   creationBlockNumber: BigInt!
   executable: Boolean
   executionDate: BigInt
@@ -366,6 +368,8 @@ type AdminProposal implements Proposal @entity {
   actions: [Action!]! @derivedFrom(field: "proposal")
   executed: Boolean!
   createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
   plugin: AdminPlugin!
   proposalId: BigInt!
   adminstrator: Adminstrator!
@@ -380,7 +384,7 @@ type MultisigPlugin implements IPlugin @entity {
   proposalCount: BigInt
   proposals: [MultisigProposal!]! @derivedFrom(field: "plugin")
   members: [MultisigApprover!]! @derivedFrom(field: "plugin")
-  
+
   # multisig settings
   minApprovals: BigInt
   onlyListed: Boolean!
@@ -410,13 +414,12 @@ type MultisigProposal implements Proposal @entity {
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
+  startDate: BigInt!
+  endDate: BigInt!
   creationBlockNumber: BigInt!
-  open: Boolean!
   snapshotBlock: BigInt!
   minApprovals: BigInt!
-  addresslistLength: BigInt!
   approvals: BigInt
-  executable: Boolean
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt

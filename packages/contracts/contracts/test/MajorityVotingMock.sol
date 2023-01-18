@@ -10,26 +10,27 @@ contract MajorityVotingMock is MajorityVotingBase {
     }
 
     function createProposal(
-        bytes calldata, /* _metadata */
-        IDAO.Action[] calldata, /* _actions */
-        uint64, /* _startDate */
-        uint64, /* _endDate */
-        VoteOption, /* _voteOption */
+        bytes calldata /* _metadata */,
+        IDAO.Action[] calldata /* _actions */,
+        uint64 /* _startDate */,
+        uint64 /* _endDate */,
+        VoteOption /* _voteOption */,
         bool /* _tryEarlyExecution */
     ) external pure override returns (uint256 proposalId) {
         return 0;
     }
 
     function _vote(
-        uint256, /* _proposalId */
-        VoteOption, /* _voteOption */
-        address, /* _voter */
+        uint256 /* _proposalId */,
+        VoteOption /* _voteOption */,
+        address /* _voter */,
         bool /* _tryEarlyExecution */
     ) internal pure override {}
 
     function _canVote(
-        uint256, /* _proposalId */
-        address /* _voter */
+        uint256 /* _proposalId */,
+        address /* _voter */,
+        VoteOption /* _voteOption */
     ) internal pure override returns (bool) {
         return true;
     }

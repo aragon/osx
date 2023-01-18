@@ -1,4 +1,4 @@
-import { dataSource, store } from '@graphprotocol/graph-ts';
+import {dataSource, store, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -41,26 +41,23 @@ export function _handleProposalCreated(
   proposalEntity.metadata = metadata;
   proposalEntity.createdAt = event.block.timestamp;
   proposalEntity.creationBlockNumber = event.block.number;
+  proposalEntity.startDate = event.params.startDate;
+  proposalEntity.endDate = event.params.endDate;
 
   let contract = Multisig.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
-    proposalEntity.open = vote.value.value0;
-    proposalEntity.executed = vote.value.value1;
+    proposalEntity.executed = vote.value.value0;
+    proposalEntity.approvals = vote.value.value1;
 
     // ProposalParameters
     let parameters = vote.value.value2;
-    proposalEntity.minApprovals = parameters.minApprovals;
+    proposalEntity.minApprovals = BigInt.fromU32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
 
-    // Tally
-    let tally = vote.value.value3;
-    proposalEntity.approvals = tally.approvals;
-    proposalEntity.addresslistLength = tally.addresslistLength;
-
     // Actions
-    let actions = vote.value.value4;
+    let actions = vote.value.value3;
     for (let index = 0; index < actions.length; index++) {
       const action = actions[index];
 
@@ -119,17 +116,8 @@ export function handleApproved(event: Approved): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
-      let parameters = proposal.value.value2;
-      let tally = proposal.value.value3;
+      proposalEntity.approvals = proposal.value.value1;
 
-      proposalEntity.approvals = tally.approvals;
-
-      // check if the current total number of approvals meet the conditions for the proposal to pass:
-      // - approvals >= minApprovals
-      let executable = tally.approvals.ge(parameters.minApprovals);
-
-      // set the executable param
-      proposalEntity.executable = executable;
       proposalEntity.save();
     }
   }
@@ -140,7 +128,6 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     event.address.toHexString() + '_' + event.params.proposalId.toHexString();
   let proposalEntity = MultisigProposal.load(proposalId);
   if (proposalEntity) {
-    proposalEntity.open = false;
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
@@ -151,7 +138,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let contract = Multisig.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);
   if (!proposal.reverted) {
-    let actions = proposal.value.value4;
+    let actions = proposal.value.value3;
     for (let index = 0; index < actions.length; index++) {
       let actionId =
         event.address.toHexString() +
@@ -200,11 +187,13 @@ export function handleAddressesRemoved(event: AddressesRemoved): void {
   }
 }
 
-export function handleMultisigSettingsUpdated(event: MultisigSettingsUpdated): void {
+export function handleMultisigSettingsUpdated(
+  event: MultisigSettingsUpdated
+): void {
   let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;
-    packageEntity.minApprovals = event.params.minApprovals;
+    packageEntity.minApprovals = BigInt.fromU32(event.params.minApprovals);
     packageEntity.save();
   }
 }

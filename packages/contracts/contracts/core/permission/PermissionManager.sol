@@ -10,7 +10,7 @@ import "./PermissionLib.sol";
 /// @author Aragon Association - 2021, 2022
 /// @notice The permission manager used in a DAO and its associated components.
 contract PermissionManager is Initializable {
-    /// @notice The ID of the permission required to call the `grant`, `grantWithOracle`, `revoke`, `freeze`, and `bulk` function.
+    /// @notice The ID of the permission required to call the `grant`, `grantWithOracle`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
     /// @notice A special address encoding permissions that are valid for any address.
@@ -25,9 +25,6 @@ contract PermissionManager is Initializable {
     /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
     mapping(bytes32 => address) internal permissionsHashed;
 
-    /// @notice A mapping storing frozen permissions as hashes (i.e., `frozenPermissionHash(where, permissionId)`) and their status (`true` = frozen (immutable), `false` = not frozen (mutable)).
-    mapping(bytes32 => bool) internal frozenPermissionsHashed;
-
     /// @notice Thrown if a call is unauthorized.
     /// @param here The context in which the authorization reverted.
     /// @param where The contract requiring the permission.
@@ -35,28 +32,23 @@ contract PermissionManager is Initializable {
     /// @param permissionId The permission identifier.
     error Unauthorized(address here, address where, address who, bytes32 permissionId);
 
-    /// @notice Thrown if a permission has been already granted.
-    /// @param where The address of the target contract to grant `who` permission to.
-    /// @param who The address (EOA or contract) to which the permission has already been granted.
-    /// @param permissionId The permission identifier.
-    error PermissionAlreadyGranted(address where, address who, bytes32 permissionId);
-
-    /// @notice Thrown if a permission has been already revoked.
-    /// @param where The address of the target contract to revoke `who`s permission from.
-    /// @param who The address (EOA or contract) from which the permission has already been revoked.
-    /// @param permissionId The permission identifier.
-    error PermissionAlreadyRevoked(address where, address who, bytes32 permissionId);
-
-    /// @notice Thrown if a permission is frozen.
-    /// @param where The address of the target contract for which the permission is frozen.
-    /// @param permissionId The permission identifier.
-    error PermissionFrozen(address where, bytes32 permissionId);
-
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
 
-    /// @notice Thrown if a freeze happens on ANY_ADDR.
-    error FreezeOnAnyAddressDisallowed();
+    /// @notice Thrown if a permission has been already granted for different oracle.
+    /// @dev This makes sure that oracle on the same permission can not be overwriten by a different oracle.
+    /// @param where The address of the target contract to grant `who` permission to.
+    /// @param who The address (EOA or contract) to which the permission has already been granted.
+    /// @param permissionId The permission identifier.
+    /// @param currentOracle The current oracle set for permissionId
+    /// @param newOracle The new oracle it tries to set for permissionId
+    error PermissionAlreadyGrantedForDifferentOracle(
+        address where,
+        address who,
+        bytes32 permissionId,
+        address currentOracle,
+        address newOracle
+    );
 
     /// @notice thrown when WHO or WHERE is ANY_ADDR, but oracle is not present.
     error OracleNotPresentForAnyAddress();
@@ -94,12 +86,6 @@ contract PermissionManager is Initializable {
         address where,
         address indexed who
     );
-
-    /// @notice Emitted when a `permission` is made frozen to the address `here` by the contract `where`.
-    /// @param permissionId The permission identifier.
-    /// @param here The address of the context in which the permission is frozen.
-    /// @param where The address of the target contract for which the permission is frozen.
-    event Frozen(bytes32 indexed permissionId, address indexed here, address where);
 
     /// @notice A modifier to be used to check permissions on a target contract.
     /// @param _where The address of the target contract for which the permission is required.
@@ -157,17 +143,6 @@ contract PermissionManager is Initializable {
         _revoke(_where, _who, _permissionId);
     }
 
-    /// @notice Freezes the current permission settings of a target contract. This is a permanent operation and permissions on the specified contract with the specified permission identifier can never be granted or revoked again.
-    /// @dev Requires the `ROOT_PERMISSION_ID` permission.
-    /// @param _where The address of the target contract for which the permission are frozen.
-    /// @param _permissionId The permission identifier.
-    function freeze(address _where, bytes32 _permissionId)
-        external
-        auth(_where, ROOT_PERMISSION_ID)
-    {
-        _freeze(_where, _permissionId);
-    }
-
     /// @notice Processes bulk items on the permission manager.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the contract.
@@ -176,19 +151,17 @@ contract PermissionManager is Initializable {
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
-        for (uint256 i = 0; i < items.length; ) {
+        for (uint256 i; i < items.length; ) {
             PermissionLib.ItemSingleTarget memory item = items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(_where, item.who, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(_where, item.who, item.permissionId);
-            } else if (item.operation == PermissionLib.Operation.Freeze) {
-                _freeze(_where, item.permissionId);
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -197,7 +170,7 @@ contract PermissionManager is Initializable {
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
     function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
-        for (uint256 i = 0; i < items.length; ) {
+        for (uint256 i; i < items.length; ) {
             PermissionLib.ItemMultiTarget memory item = items[i];
 
             // TODO: Optimize
@@ -207,8 +180,6 @@ contract PermissionManager is Initializable {
                 _grant(item.where, item.who, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(item.where, item.who, item.permissionId);
-            } else if (item.operation == PermissionLib.Operation.Freeze) {
-                _freeze(item.where, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.GrantWithOracle) {
                 _grantWithOracle(
                     item.where,
@@ -219,7 +190,7 @@ contract PermissionManager is Initializable {
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -240,14 +211,6 @@ contract PermissionManager is Initializable {
             _isGranted(_where, _who, _permissionId, _data) || // check if _who has permission for _permissionId on _where
             _isGranted(_where, ANY_ADDR, _permissionId, _data) || // check if anyone has permission for _permissionId on _where
             _isGranted(ANY_ADDR, _who, _permissionId, _data); // check if _who has permission for _permissionId on any contract
-    }
-
-    /// @notice This method is used to check if permissions for a given permission identifier on a contract are frozen.
-    /// @param _where The address of the target contract for which `who` recieves permission.
-    /// @param _permissionId The permission identifier.
-    /// @return bool Returns true if the permission identifier is frozen for the contract address.
-    function isFrozen(address _where, bytes32 _permissionId) public view returns (bool) {
-        return frozenPermissionsHashed[frozenPermissionHash(_where, _permissionId)];
     }
 
     /// @notice Grants the `ROOT_PERMISSION_ID` permission to the initial owner during initialization of the permission manager.
@@ -294,22 +257,30 @@ contract PermissionManager is Initializable {
             }
         }
 
-        if (isFrozen(_where, _permissionId)) {
-            revert PermissionFrozen({where: _where, permissionId: _permissionId});
-        }
-
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
 
-        if (permissionsHashed[permHash] != UNSET_FLAG) {
-            revert PermissionAlreadyGranted({
+        address currentOracle = permissionsHashed[permHash];
+        address newOracle = address(_oracle);
+
+        // Means permHash is not currently set.
+        if (currentOracle == UNSET_FLAG) {
+            permissionsHashed[permHash] = newOracle;
+
+            emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
+        } else if (currentOracle != newOracle) {
+            // Revert if the permHash is already granted, but uses different oracle.
+            // If we don't revert, we either should:
+            //   - allow overriding the oracle on the same permission
+            //     which could be confusing whoever granted the same permission first
+            //   - or do nothing and succeed silently which could be confusing for the caller.
+            revert PermissionAlreadyGrantedForDifferentOracle({
                 where: _where,
                 who: _who,
-                permissionId: _permissionId
+                permissionId: _permissionId,
+                currentOracle: currentOracle,
+                newOracle: newOracle
             });
         }
-        permissionsHashed[permHash] = address(_oracle);
-
-        emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
     }
 
     /// @notice This method is used in the public `revoke` method of the permission manager.
@@ -321,39 +292,12 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId
     ) internal {
-        if (isFrozen(_where, _permissionId)) {
-            revert PermissionFrozen({where: _where, permissionId: _permissionId});
-        }
-
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
-        if (permissionsHashed[permHash] == UNSET_FLAG) {
-            revert PermissionAlreadyRevoked({
-                where: _where,
-                who: _who,
-                permissionId: _permissionId
-            });
+        if (permissionsHashed[permHash] != UNSET_FLAG) {
+            permissionsHashed[permHash] = UNSET_FLAG;
+
+            emit Revoked(_permissionId, msg.sender, _where, _who);
         }
-        permissionsHashed[permHash] = UNSET_FLAG;
-
-        emit Revoked(_permissionId, msg.sender, _where, _who);
-    }
-
-    /// @notice This method is used in the public `freeze` method of the permission manager.
-    /// @param _where The address of the target contract for which the permission is frozen.
-    /// @param _permissionId The permission identifier.
-    function _freeze(address _where, bytes32 _permissionId) internal {
-        if (_where == ANY_ADDR) {
-            revert FreezeOnAnyAddressDisallowed();
-        }
-
-        bytes32 frozenPermHash = frozenPermissionHash(_where, _permissionId);
-        if (frozenPermissionsHashed[frozenPermHash]) {
-            revert PermissionFrozen({where: _where, permissionId: _permissionId});
-        }
-
-        frozenPermissionsHashed[frozenPermHash] = true;
-
-        emit Frozen(_permissionId, msg.sender, _where);
     }
 
     /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was specified in the setup.
@@ -414,18 +358,6 @@ contract PermissionManager is Initializable {
         return keccak256(abi.encodePacked("PERMISSION", _who, _where, _permissionId));
     }
 
-    /// @notice Generates the hash for the `frozenPermissionsHashed` mapping obtained from the word "IMMUTABLE", the contract address, and the permission identifier.
-    /// @param _where The address of the target contract for which `who` recieves permission.
-    /// @param _permissionId The permission identifier.
-    /// @return bytes32 The hash used in the `frozenPermissions` mapping.
-    function frozenPermissionHash(address _where, bytes32 _permissionId)
-        internal
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encodePacked("IMMUTABLE", _where, _permissionId));
-    }
-
     /// @notice Decides if the granting permissionId is restricted when `_who = ANY_ADDR` or `_where = ANY_ADDR`.
     /// @dev by default, every permission is unrestricted and it's the derived contract's responsibility to override it. NOTE: ROOT_PERMISSION_ID is included and not required to set it again.
     /// @param _permissionId The permission identifier.
@@ -441,5 +373,5 @@ contract PermissionManager is Initializable {
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
-    uint256[48] private __gap;
+    uint256[49] private __gap;
 }

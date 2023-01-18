@@ -4,9 +4,8 @@ pragma solidity 0.8.10;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {PluginSetup} from "./PluginSetup.sol";
@@ -24,13 +23,13 @@ contract PluginRepo is
     UUPSUpgradeable,
     PermissionManager
 {
-    using Address for address;
+    using AddressUpgradeable for address;
     
     struct Tag {
         uint8 release;
         uint16 build;
     }
-
+    
     struct Version {
         Tag tag;
         address pluginSetup;
@@ -105,6 +104,11 @@ contract PluginRepo is
         bytes contentURI
     );
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initializes the contract by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - initializing the permission manager
@@ -158,7 +162,7 @@ contract PluginRepo is
         // NOTE: also checks if _pluginSetup is a contract and reverts if not.
         bytes memory data = _pluginSetup.functionCall(
             abi.encodeWithSelector(
-                ERC165.supportsInterface.selector,
+                ERC165Upgradeable.supportsInterface.selector,
                 type(IPluginSetup).interfaceId
             )
         );

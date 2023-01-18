@@ -1,7 +1,7 @@
 import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, ByteArray, Bytes, crypto} from '@graphprotocol/graph-ts';
 
-import {handleFrozen, handleGranted, handleRevoked} from '../../src/dao/dao';
+import {handleGranted, handleRevoked} from '../../src/dao/dao';
 import {Permission, ContractPermissionId} from '../../generated/schema';
 import {
   DAO_ADDRESS,
@@ -10,7 +10,6 @@ import {
   ADDRESS_TWO
 } from '../constants';
 import {
-  createNewFrozenEvent,
   createNewGrantedEvent,
   createNewRevokedEvent,
   getEXECUTE_PERMISSION_ID,
@@ -65,12 +64,6 @@ test('Run dao (handleGranted) mappings with mock event', () => {
     contractPermissionIdEntityID,
     'permissionId',
     contractPermissionId.toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'frozen',
-    'false'
   );
 
   // permission
@@ -151,7 +144,6 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   ).toHexString();
   contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
   contractPermissionIdEntity.permissionId = contractPermissionId;
-  contractPermissionIdEntity.frozen = false;
   contractPermissionIdEntity.save();
 
   let permissionEntity = new Permission(permissionEntityID);
@@ -210,92 +202,8 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
     'permissionId',
     contractPermissionId.toHexString()
   );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'frozen',
-    'false'
-  );
 
   assert.notInStore('Permission', permissionEntityID);
-
-  clearStore();
-});
-
-test('Run dao (handleFrozen) mappings with mock event', () => {
-  // create state
-  let contractPermissionIdEntityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    contractPermissionId.toHexString();
-
-  let contractPermissionIdEntity = new ContractPermissionId(
-    contractPermissionIdEntityID
-  );
-  contractPermissionIdEntity.dao = Address.fromString(
-    DAO_ADDRESS
-  ).toHexString();
-  contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
-  contractPermissionIdEntity.permissionId = contractPermissionId;
-  contractPermissionIdEntity.frozen = false;
-  contractPermissionIdEntity.save();
-
-  // check state exist
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'id',
-    contractPermissionIdEntityID
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'frozen',
-    'false'
-  );
-
-  // create event and run it's handler
-  let frozenEvent = createNewFrozenEvent(
-    contractPermissionId,
-    ADDRESS_ONE,
-    DAO_ADDRESS,
-    DAO_ADDRESS
-  );
-
-  // handle event
-  handleFrozen(frozenEvent);
-
-  // checks
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'id',
-    contractPermissionIdEntityID
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'where',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'permissionId',
-    contractPermissionId.toHexString()
-  );
-  assert.fieldEquals(
-    'ContractPermissionId',
-    contractPermissionIdEntityID,
-    'frozen',
-    'true'
-  );
 
   clearStore();
 });

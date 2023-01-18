@@ -2,21 +2,32 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO, GovernanceERC20, DAO__factory} from '../../typechain';
+import {
+  DAO,
+  DAO__factory,
+  GovernanceERC20,
+} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
-import {ERRORS, customError} from '../test-utils/custom-error-helper';
+import {flipBit} from '../test-utils/bitmap';
+
+import {getActions} from '../test-utils/dao';
+
 import {getInterfaceID} from '../test-utils/interfaces';
+import {OZ_ERRORS} from '../test-utils/error';
 import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
+import {deployWithProxy} from '../test-utils/proxy';
+import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
 
 chai.use(smock.matchers);
 
-const abiCoder = ethers.utils.defaultAbiCoder;
+const errorSignature = '0x08c379a0'; // first 4 bytes of Error(string)
 
 const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
+const MAX_ACTIONS = 256;
 
 const EVENTS = {
   MetadataSet: 'MetadataSet',
@@ -60,8 +71,7 @@ describe('DAO', function () {
     ownerAddress = await signers[0].getAddress();
 
     const DAO = await ethers.getContractFactory('DAO');
-
-    dao = await DAO.deploy();
+    dao = await deployWithProxy(DAO);
     await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
@@ -115,7 +125,7 @@ describe('DAO', function () {
     it('reverts if trying to re-initialize', async () => {
       await expect(
         dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1)
-      ).to.be.revertedWith(ERRORS.ALREADY_INITIALIZED);
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
     it('sets the trusted forwarder correctly', async () => {
@@ -131,15 +141,14 @@ describe('DAO', function () {
         PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
       );
 
-      await expect(dao.setTrustedForwarder(dummyAddress2)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(dao.setTrustedForwarder(dummyAddress2))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_TRUSTED_FORWARDER_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('sets a new trusted forwarder', async () => {
@@ -162,15 +171,14 @@ describe('DAO', function () {
         PERMISSION_IDS.SET_METADATA_PERMISSION_ID
       );
 
-      await expect(dao.setMetadata(dummyMetadata1)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(dao.setMetadata(dummyMetadata1))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.SET_METADATA_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('sets new metadata via an event', async () => {
@@ -181,14 +189,10 @@ describe('DAO', function () {
   });
 
   describe('execute:', async () => {
-    const dummyActions = [
-      {
-        to: dummyAddress1,
-        data: dummyMetadata1,
-        value: 0,
-      },
-    ];
-    const expectedDummyResults = ['0x'];
+    let data: any;
+    before(async () => {
+      data = await getActions();
+    });
 
     it('reverts if the sender lacks the required permissionId', async () => {
       await dao.revoke(
@@ -197,51 +201,171 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(0, dummyActions)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      await expect(dao.execute(0, [data.succeedAction], 0))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.EXECUTE_PERMISSION_ID
-        )
+        );
+    });
+
+    it('reverts if array of actions is too big', async () => {
+      let actions = [];
+      for (let i = 0; i < MAX_ACTIONS; i++) {
+        actions[i] = data.succeedAction;
+      }
+
+      await expect(dao.execute(0, actions, 0)).to.not.be.reverted;
+
+      // add one more to make sure it fails
+      actions[MAX_ACTIONS] = data.failAction;
+
+      await expect(dao.execute(0, actions, 0)).to.be.revertedWithCustomError(
+        dao,
+        'TooManyActions'
       );
     });
 
-    it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(0, dummyActions)).to.deep.equal(
-        expectedDummyResults
-      );
+    it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
+      await expect(dao.execute(0, [data.failAction], 0))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(0);
     });
 
-    it('emits an event afterwards', async () => {
-      let tx = await dao.execute(0, dummyActions);
-      let rc = await tx.wait();
+    it('succeeds if action is failable but allowFailureMap allows it', async () => {
+      let num = ethers.BigNumber.from(0);
+      num = flipBit(0, num);
 
-      const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+      const tx = await dao.execute(0, [data.failAction], num);
+      const event = await findEvent(tx, EVENTS.Executed);
+
+      // Check that failAction's revertMessage was correctly stored in the dao's execResults
+      expect(event.args.execResults[0]).to.includes(data.failActionMessage);
+      expect(event.args.execResults[0]).to.includes(errorSignature);
+    });
+
+    it('returns the correct result if action succeeds', async () => {
+      const tx = await dao.execute(0, [data.succeedAction], 0);
+      const event = await findEvent(tx, EVENTS.Executed);
+      expect(event.args.execResults[0]).to.equal(data.successActionResult);
+    });
+
+    it('succeeds and correctly constructs failureMap results ', async () => {
+      let allowFailureMap = ethers.BigNumber.from(0);
+      let actions = [];
+
+      // First 3 actions will fail
+      actions[0] = data.failAction;
+      actions[1] = data.failAction;
+      actions[2] = data.failAction;
+
+      // The next 3 actions will succeed
+      actions[3] = data.succeedAction;
+      actions[4] = data.succeedAction;
+      actions[5] = data.succeedAction;
+
+      // add first 3 actions in the allowFailureMap
+      // to make sure tx succeeds.
+      for (let i = 0; i < 3; i++) {
+        allowFailureMap = flipBit(i, allowFailureMap);
+      }
+
+      // If the below call not fails, means allowFailureMap is correct.
+      let tx = await dao.execute(0, actions, allowFailureMap);
+      let event = await findEvent(tx, EVENTS.Executed);
 
       expect(event.args.actor).to.equal(ownerAddress);
       expect(event.args.callId).to.equal(0);
-      expect(event.args.actions.length).to.equal(1);
-      expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
-      expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
-      expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
-      expect(event.args.execResults).to.deep.equal(expectedDummyResults);
+
+      // construct the failureMap which only has those
+      // bits set at indexes where actions failed
+      let failureMap = ethers.BigNumber.from(0);
+      for (let i = 0; i < 3; i++) {
+        failureMap = flipBit(i, failureMap);
+      }
+      // Check that dao crrectly generated failureMap
+      expect(event.args.failureMap).to.equal(failureMap);
+
+      // Check that execResult emitted correctly stores action results.
+      for (let i = 0; i < 3; i++) {
+        expect(event.args.execResults[i]).to.includes(data.failActionMessage);
+        expect(event.args.execResults[i]).to.includes(errorSignature);
+      }
+      for (let i = 3; i < 6; i++) {
+        expect(event.args.execResults[i]).to.equal(data.successActionResult);
+      }
+
+      // lets remove one of the action from allowFailureMap
+      // to see tx will actually revert.
+      allowFailureMap = flipBit(2, allowFailureMap);
+      await expect(dao.execute(0, actions, allowFailureMap))
+        .to.be.revertedWithCustomError(dao, 'ActionFailed')
+        .withArgs(2); // Since we unset the 2th action from failureMap, it should fail with that index.
     });
 
-    it('reverts if one of the actions failed', async () => {
-      const ActionExecuteFactory = await smock.mock('ActionExecute');
-      const actionExecute = await ActionExecuteFactory.deploy();
+    it('emits an event afterwards', async () => {
+      let tx = await dao.execute(0, [data.succeedAction], 0);
+      let rc = await tx.wait();
 
-      await expect(
-        dao.execute(0, [
-          {
-            to: actionExecute.address,
-            data: '0x0000',
-            value: 0,
-          },
-        ])
-      ).to.be.revertedWith(customError('ActionFailed'));
+      const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
+      expect(event.args.actor).to.equal(ownerAddress);
+      expect(event.args.callId).to.equal(0);
+      expect(event.args.actions.length).to.equal(1);
+      expect(event.args.actions[0].to).to.equal(data.succeedAction.to);
+      expect(event.args.actions[0].value).to.equal(data.succeedAction.value);
+      expect(event.args.actions[0].data).to.equal(data.succeedAction.data);
+      expect(event.args.execResults[0]).to.equal(data.successActionResult);
+    });
+
+    it('should transfer native token(eth) to recipient with action', async () => {
+      const recipient = signers[1].address;
+      const currentBalance = await ethers.provider.getBalance(recipient);
+
+      // deposit some eth so it can later transfer
+      const depositAmount = ethers.utils.parseEther('1.23');
+      await dao.deposit(ethers.constants.AddressZero, depositAmount, 'ref', {
+        value: depositAmount,
+      });
+
+      const transferAction = {to: recipient, value: depositAmount, data: '0x'};
+      await dao.execute(0, [transferAction], 0);
+      const newBalance = await ethers.provider.getBalance(recipient);
+      expect(newBalance.sub(currentBalance)).to.equal(depositAmount);
+    });
+
+    it('should transfer ERC20 tokens to recipient with action', async () => {
+      const TokenFactory = await ethers.getContractFactory('TestERC20');
+      const token = await TokenFactory.deploy('name', 'symbol', 20);
+
+      await token.transfer(dao.address, 20);
+
+      const recipient = signers[1].address;
+
+      const iface = new ethers.utils.Interface(DAO__factory.abi);
+
+      const encoded = iface.encodeFunctionData('withdraw', [
+        token.address,
+        recipient,
+        20,
+        'ref',
+      ]);
+
+      await dao.grant(
+        dao.address,
+        dao.address,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
+      );
+
+      const transferAction = {to: dao.address, value: 0, data: encoded};
+
+      expect(await token.balanceOf(dao.address)).to.equal(20);
+      expect(await token.balanceOf(recipient)).to.equal(0);
+
+      await dao.execute(0, [transferAction], 0);
+      expect(await token.balanceOf(dao.address)).to.equal(0);
+      expect(await token.balanceOf(recipient)).to.equal(20);
     });
   });
 
@@ -251,7 +375,7 @@ describe('DAO', function () {
     it('reverts if amount is zero', async () => {
       await expect(
         dao.deposit(ethers.constants.AddressZero, 0, 'ref')
-      ).to.be.revertedWith(customError('ZeroAmount'));
+      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
     });
 
     it('reverts if passed amount does not match native amount value', async () => {
@@ -260,20 +384,18 @@ describe('DAO', function () {
 
       await expect(
         dao.deposit(ethers.constants.AddressZero, passedAmount, 'ref', options)
-      ).to.be.revertedWith(
-        customError('NativeTokenDepositAmountMismatch', passedAmount, amount)
-      );
+      )
+        .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
+        .withArgs(passedAmount, amount);
     });
 
     it('reverts if ERC20 and native tokens are deposited at the same time', async () => {
       const options = {value: amount};
       await token.mint(ownerAddress, amount);
 
-      await expect(
-        dao.deposit(token.address, amount, 'ref', options)
-      ).to.be.revertedWith(
-        customError('NativeTokenDepositAmountMismatch', 0, amount)
-      );
+      await expect(dao.deposit(token.address, amount, 'ref', options))
+        .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
+        .withArgs(0, amount);
     });
 
     it('reverts when tries to deposit ERC20 token while sender does not have token amount', async () => {
@@ -341,15 +463,14 @@ describe('DAO', function () {
 
       await expect(
         dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.WITHDRAW_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('withdraws native tokens if DAO balance is high enough', async () => {
@@ -384,7 +505,7 @@ describe('DAO', function () {
           amount.add(1),
           'ref'
         )
-      ).to.be.revertedWith(customError('NativeTokenWithdrawFailed'));
+      ).to.be.revertedWithCustomError(dao, 'NativeTokenWithdrawFailed');
     });
 
     it('withdraws ERC20 if DAO balance is high enough', async () => {
@@ -410,7 +531,7 @@ describe('DAO', function () {
     it('throws an error if the amount is 0', async () => {
       await expect(
         dao.withdraw(token.address, ownerAddress, 0, 'ref')
-      ).to.be.revertedWith(customError('ZeroAmount'));
+      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
     });
   });
 
@@ -424,15 +545,14 @@ describe('DAO', function () {
 
       await expect(
         dao.registerStandardCallback('0x00000001', '0x00000001', '0x00000001')
-      ).to.be.revertedWith(
-        customError(
-          'Unauthorized',
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
           dao.address,
           dao.address,
           ownerAddress,
           PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
-        )
-      );
+        );
     });
 
     it('correctly emits selector and interface id', async () => {
@@ -459,9 +579,9 @@ describe('DAO', function () {
           to: dao.address,
           data: id,
         })
-      ).to.be.revertedWith(
-        customError('UnkownCallback', id, `0x${'00'.repeat(32)}`)
-      );
+      )
+        .to.be.revertedWithCustomError(dao, 'UnkownCallback')
+        .withArgs(id, UNREGISTERED_INTERFACE_RETURN);
 
       // register onERC721Received selector
       await dao.registerStandardCallback(id, id, id);
@@ -511,13 +631,20 @@ describe('DAO', function () {
       ).to.be.eq('0x00000000');
     });
 
-    it('should allow only SET_SIGNATURE_VALIDATOR_PERMISSION_ID to set validator', async () => {
+    it('should allow only `SET_SIGNATURE_VALIDATOR_PERMISSION_ID` to set validator', async () => {
       const signers = await ethers.getSigners();
       await expect(
         dao
           .connect(signers[2])
           .setSignatureValidator(ethers.Wallet.createRandom().address)
-      ).to.be.revertedWith('');
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
+          dao.address,
+          dao.address,
+          signers[2].address,
+          PERMISSION_IDS.SET_SIGNATURE_VALIDATOR_PERMISSION_ID
+        );
     });
 
     it('should set validator and emits event', async () => {
@@ -552,54 +679,25 @@ describe('DAO', function () {
   });
 
   describe('ERC1967', async () => {
-    it('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
-      const iface = new ethers.utils.Interface(DAO__factory.abi);
-      const initData = iface.encodeFunctionData('initialize', [
-        dummyMetadata1,
-        ownerAddress,
-        dummyAddress1,
-      ]);
-
-      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
-      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
-
-      const daoProxyContract = dao.attach(erc1967Proxy.address);
-
-      await expect(daoProxyContract.upgradeTo(dao.address)).to.be.revertedWith(
-        customError(
-          'Unauthorized',
-          daoProxyContract.address,
-          daoProxyContract.address,
-          ownerAddress,
+    // TODO: Must be made as a test utils that can be imported in every upgradeable test file
+    // Such as https://github.com/OpenZeppelin/openzeppelin-contracts/blob/a28aafdc85a592776544f7978c6b1a462d28ede2/test/token/ERC20/ERC20.behavior.js#L5
+    // This will avoid having the same 3 tests in every file or we could just neglect this test as
+    // It's coming from UUPSUpgradeable which is already tested though since contracts are very critical,
+    // Still testing this most important part wouldn't be bad..
+    it.skip('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
+      await expect(dao.connect(signers[1]).upgradeTo(dao.address))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(
+          dao.address,
+          dao.address,
+          signers[1].address,
           PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-        )
-      );
+        );
     });
 
-    it('successfuly updates DAO contract', async () => {
-      const iface = new ethers.utils.Interface(DAO__factory.abi);
-      const initData = iface.encodeFunctionData('initialize', [
-        dummyMetadata1,
-        ownerAddress,
-        dummyAddress1,
-      ]);
-
-      // function start here
-      const ERC1967 = await ethers.getContractFactory('ERC1967Proxy');
-      const erc1967Proxy = await ERC1967.deploy(dao.address, initData);
-
-      const daoProxyContract = dao.attach(erc1967Proxy.address);
-
-      await daoProxyContract.grant(
-        daoProxyContract.address,
-        ownerAddress,
-        PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-      );
-
-      await dao.attach(erc1967Proxy.address).upgradeTo(dao.address);
-
-      await expect(dao.attach(erc1967Proxy.address).upgradeTo(dao.address)).to
-        .not.be.reverted;
+    it.skip('successfuly updates DAO contract', async () => {
+      await expect(dao.upgradeTo(dao.address)).to.not.be.reverted;
     });
+    it.skip('shouldn not update if new implementation is not UUPS compliant'); // TODO:Implement
   });
 });

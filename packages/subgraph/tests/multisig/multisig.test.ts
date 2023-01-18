@@ -19,11 +19,12 @@ import {
   DAO_ADDRESS,
   PROPOSAL_ID,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER,
   ONE,
   TWO,
   THREE,
-  PROPOSAL_ENTITY_ID
+  PROPOSAL_ENTITY_ID,
+  START_DATE,
+  END_DATE
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -55,16 +56,16 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   createGetProposalCall(
     CONTRACT_ADDRESS,
     proposalId,
-    true,
     false,
 
     // ProposalParameters
+    START_DATE,
+    END_DATE,
     ONE,
     SNAPSHOT_BLOCK,
 
-    // Tally
+    // approvals
     ONE,
-    TOTAL_VOTING_POWER,
 
     actions
   );
@@ -73,6 +74,8 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   let event = createNewProposalCreatedEvent(
     proposalId,
     ADDRESS_ONE,
+    START_DATE,
+    END_DATE,
     STRING_DATA,
     actions,
     CONTRACT_ADDRESS
@@ -93,6 +96,8 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('MultisigProposal', entityID, 'plugin', packageId);
   assert.fieldEquals('MultisigProposal', entityID, 'proposalId', proposalId);
   assert.fieldEquals('MultisigProposal', entityID, 'creator', ADDRESS_ONE);
+  assert.fieldEquals('MultisigProposal', entityID, 'startDate', START_DATE);
+  assert.fieldEquals('MultisigProposal', entityID, 'endDate', END_DATE);
   assert.fieldEquals('MultisigProposal', entityID, 'metadata', STRING_DATA);
   assert.fieldEquals(
     'MultisigProposal',
@@ -106,7 +111,6 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     'creationBlockNumber',
     event.block.number.toString()
   );
-  assert.fieldEquals('MultisigProposal', entityID, 'open', 'true');
   assert.fieldEquals(
     'MultisigProposal',
     entityID,
@@ -114,12 +118,6 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     SNAPSHOT_BLOCK
   );
   assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
-  assert.fieldEquals(
-    'MultisigProposal',
-    entityID,
-    'addresslistLength',
-    TOTAL_VOTING_POWER
-  );
   assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
 
@@ -147,16 +145,16 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   createGetProposalCall(
     CONTRACT_ADDRESS,
     proposalId,
-    true,
     false,
 
     // ProposalParameters
+    START_DATE,
+    END_DATE,
     TWO, // minApprovals
     SNAPSHOT_BLOCK,
 
-    // Tally
-    ONE, // approvals
-    TOTAL_VOTING_POWER,
+    // approvals
+    ONE,
 
     actions
   );
@@ -203,24 +201,23 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   );
 
   // check proposal
-  assert.fieldEquals('MultisigProposal', proposal.id, 'executable', 'false');
   assert.fieldEquals('MultisigProposal', proposal.id, 'approvals', ONE);
 
-  // create 2nd approve, to test executable calculation, and approvals
+  // create 2nd approve, to test approvals
   // create calls
   createGetProposalCall(
     CONTRACT_ADDRESS,
     PROPOSAL_ID,
-    true,
     false,
 
     // ProposalParameters
+    START_DATE,
+    END_DATE,
     TWO, // minApprovals
     SNAPSHOT_BLOCK,
 
-    // Tally
-    TWO, // approvals
-    TOTAL_VOTING_POWER,
+    // approvals
+    TWO,
 
     actions
   );
@@ -235,7 +232,6 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
   handleApproved(event2);
 
   // Check
-  assert.fieldEquals('MultisigProposal', proposal.id, 'executable', 'true');
   assert.fieldEquals('MultisigProposal', proposal.id, 'approvals', TWO);
 
   clearStore();

@@ -82,7 +82,7 @@ contract DAOFactory {
         );
 
         // Install plugins on the newly created DAO.
-        for (uint256 i = 0; i < _pluginSettings.length; i++) {
+        for (uint256 i; i < _pluginSettings.length; ++i) {
             // Prepare plugin.
             (
                 address plugin,

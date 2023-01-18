@@ -7,8 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+## 0.6.2-alpha
+
+### Added
+
+- Added `startDate` and `endDate` to all `ProposalCreated` events.
+- Adds `startDate` and `endDate` fields to Multisig proposals.
+
 ### Changed
+
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
+- Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
+
+### Removed
+
+- Removes `Tally` struct as well as `addressListLength` and moves `approvals` in `Proposal`.
+
+
+## 0.6.1-alpha
+
+On 2023-01-11 17:06:50
+
+### Changed
+
 - Ignores `None` votes from addresslist voting and token voting
+- Updates `MULTISIG_INTERFACE`
+
+### Removed
+
+- Removes `open` and `executable` fields from Multisig proposals
 
 ## 0.5.0-alpha
 

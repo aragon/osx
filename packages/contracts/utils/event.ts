@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 export async function findEvent(tx: any, eventName: string) {
   const {events} = await tx.wait();
   const event = events.find(({event}: {event: any}) => event === eventName);

@@ -5,14 +5,15 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
+import {hasBit, flipBit} from "../utils/BitMap.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021
@@ -27,8 +28,8 @@ contract DAO is
     PermissionManager,
     CallbackHandler
 {
-    using SafeERC20 for ERC20;
-    using Address for address;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using AddressUpgradeable for address;
 
     /// @notice The ID of the permission required to call the `execute` function.
     bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
@@ -54,14 +55,21 @@ contract DAO is
     bytes32 public constant REGISTER_STANDARD_CALLBACK_PERMISSION_ID =
         keccak256("REGISTER_STANDARD_CALLBACK_PERMISSION");
 
+    /// @notice Only allows 256 actions to execute per tx.
+    uint256 internal constant MAX_ACTIONS = 256;
+
     /// @notice The [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) signature validator contract.
     IERC1271 public signatureValidator;
 
     /// @notice The address of the trusted forwarder verifying meta transactions.
     address private trustedForwarder;
 
+    /// @notice Thrown if action length is more than MAX_ACTIONS.
+    error TooManyActions();
+
     /// @notice Thrown if action execution has failed.
-    error ActionFailed();
+    /// @param index Index of action in the array that failed.
+    error ActionFailed(uint256 index);
 
     /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
@@ -73,6 +81,11 @@ contract DAO is
 
     /// @notice Thrown if a native token withdraw fails.
     error NativeTokenWithdrawFailed();
+
+    /// @dev Used to disallow initializing implementation contract by attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice Initializes the DAO by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
@@ -155,31 +168,47 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function execute(uint256 callId, Action[] calldata _actions)
+    function execute(
+        uint256 callId,
+        Action[] calldata _actions,
+        uint256 allowFailureMap
+    )
         external
         override
         auth(address(this), EXECUTE_PERMISSION_ID)
-        returns (bytes[] memory)
+        returns (bytes[] memory execResults, uint256 failureMap)
     {
-        bytes[] memory execResults = new bytes[](_actions.length);
+        if (_actions.length > MAX_ACTIONS) {
+            revert TooManyActions();
+        }
 
-        for (uint256 i = 0; i < _actions.length;) {
-            (bool success, bytes memory response) = _actions[i].to.call{value: _actions[i].value}(
+        execResults = new bytes[](_actions.length);
+
+        for (uint256 i = 0; i < _actions.length; ) {
+            address to = _actions[i].to;
+            (bool success, bytes memory response) = to.call{value: _actions[i].value}(
                 _actions[i].data
             );
 
-            if (!success) revert ActionFailed();
+            if(!success) {
+                // If the call failed and wasn't allowed in allowFailureMap, revert.
+                if(!hasBit(allowFailureMap, uint8(i))) {
+                    revert ActionFailed(i);
+                }
 
+                // If the call failed, but was allowed in allowFailureMap, store that 
+                // this specific action has actually failed.
+                failureMap = flipBit(failureMap, uint8(i));
+            }
+            
             execResults[i] = response;
 
             unchecked {
-                i++;
+                ++i;
             }
         }
 
-        emit Executed(msg.sender, callId, _actions, execResults);
-
-        return execResults;
+        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
     }
 
     /// @inheritdoc IDAO
@@ -197,7 +226,7 @@ contract DAO is
             if (msg.value != 0)
                 revert NativeTokenDepositAmountMismatch({expected: 0, actual: msg.value});
 
-            ERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
+            IERC20Upgradeable(_token).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
         emit Deposited(msg.sender, _token, _amount, _reference);
@@ -216,7 +245,7 @@ contract DAO is
             (bool ok, ) = _to.call{value: _amount}("");
             if (!ok) revert NativeTokenWithdrawFailed();
         } else {
-            ERC20(_token).safeTransfer(_to, _amount);
+            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
         }
 
         emit Withdrawn(_token, _to, _amount, _reference);

@@ -57,19 +57,17 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     /// @notice Adds new members to the address list.
     /// @param _members The addresses of members to be added.
     /// @dev This function is used during the plugin initialization.
-    function addAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_ADDRESSES_PERMISSION_ID)
-    {
+    function addAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _addAddresses(_members);
     }
 
     /// @notice Removes existing members from the address list.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_ADDRESSES_PERMISSION_ID)
-    {
+    function removeAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _removeAddresses(_members);
     }
 
@@ -91,15 +89,21 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             revert ProposalCreationForbidden(_msgSender());
         }
 
-        proposalId = proposalCount();
+        proposalId = _createProposal({
+            _creator: _msgSender(),
+            _metadata: _metadata,
+            _startDate: _startDate,
+            _endDate: _endDate,
+            _actions: _actions
+        });
 
         // Store proposal related information
         Proposal storage proposal_ = proposals[proposalId];
 
-        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates(
-            _startDate,
-            _endDate
-        );
+        (proposal_.parameters.startDate, proposal_.parameters.endDate) = _validateProposalDates({
+            _start: _startDate,
+            _end: _endDate
+        });
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
@@ -114,18 +118,9 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             }
         }
 
-        _incrementProposalCount();
-
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
-
-        emit ProposalCreated({
-            proposalId: proposalId,
-            creator: _msgSender(),
-            metadata: _metadata,
-            actions: _actions
-        });
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -172,11 +167,20 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
-    function _canVote(uint256 _proposalId, address _account) internal view override returns (bool) {
+    function _canVote(
+        uint256 _proposalId,
+        address _account,
+        VoteOption _voteOption
+    ) internal view override returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
         // The proposal vote hasn't started or has already ended.
         if (!_isProposalOpen(proposal_)) {
+            return false;
+        }
+
+        // The voter votes `None` which is not allowed.
+        if (_voteOption == VoteOption.None) {
             return false;
         }
 
@@ -199,5 +203,5 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     /// @dev This empty reserved space is put in place to allow future versions to add new
     /// variables without shifting down storage in the inheritance chain.
     /// https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-    uint256[48] private __gap;
+    uint256[50] private __gap;
 }

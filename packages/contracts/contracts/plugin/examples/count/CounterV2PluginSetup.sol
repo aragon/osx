@@ -3,7 +3,6 @@
 pragma solidity 0.8.10;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
@@ -49,8 +48,7 @@ contract CounterV2PluginSetup is PluginSetup {
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            // deploy helper without our proxy..
-            multiplyHelper = address(new ERC1967Proxy(address(multiplyHelperBase), bytes("")));
+            multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));            
         }
 
         bytes memory initData = abi.encodeWithSelector(

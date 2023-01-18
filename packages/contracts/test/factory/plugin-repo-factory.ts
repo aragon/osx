@@ -2,9 +2,12 @@ import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {customError} from '../test-utils/custom-error-helper';
-import {deployMockPluginSetup} from '../test-utils/repo';
+import {
+  deployMockPluginSetup,
+  deployPluginRepoRegistry,
+} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+import {deployNewDAO} from '../test-utils/dao';
 
 import {PluginRepoRegistry, DAO} from '../../typechain';
 import {getMergedABI} from '../../utils/abi';
@@ -12,8 +15,6 @@ import {getMergedABI} from '../../utils/abi';
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
 };
-
-const zeroAddress = ethers.constants.AddressZero;
 
 const REGISTER_PLUGIN_REPO_PERMISSION_ID = ethers.utils.id(
   'REGISTER_PLUGIN_REPO_PERMISSION'
@@ -63,9 +64,7 @@ describe('PluginRepoFactory: ', function () {
 
   beforeEach(async function () {
     // DAO
-    const DAO = await ethers.getContractFactory('DAO');
-    managingDao = await DAO.deploy();
-    await managingDao.initialize('0x00', ownerAddress, zeroAddress);
+    managingDao = await deployNewDAO(ownerAddress);
 
     // ENS subdomain Registry
     const ensSubdomainRegistrar = await deployENSSubdomainRegistrar(
@@ -75,14 +74,9 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // deploy and initialize PluginRepoRegistry
-    const PluginRepoRegistry = await ethers.getContractFactory(
-      'PluginRepoRegistry'
-    );
-
-    pluginRepoRegistry = await PluginRepoRegistry.deploy();
-    await pluginRepoRegistry.initialize(
-      managingDao.address,
-      ensSubdomainRegistrar.address
+    pluginRepoRegistry = await deployPluginRepoRegistry(
+      managingDao,
+      ensSubdomainRegistrar
     );
 
     // deploy PluginRepoFactory
@@ -96,14 +90,14 @@ describe('PluginRepoFactory: ', function () {
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    managingDao.grant(
+    await managingDao.grant(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
     // grant REGISTER_PERMISSION_ID to pluginRepoFactory
-    managingDao.grant(
+    await managingDao.grant(
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
@@ -111,7 +105,7 @@ describe('PluginRepoFactory: ', function () {
   });
 
   it('fail to create new pluginRepo with no PLUGIN_REGISTER_PERMISSION', async () => {
-    managingDao.revoke(
+    await managingDao.revoke(
       pluginRepoRegistry.address,
       pluginRepoFactory.address,
       REGISTER_PLUGIN_REPO_PERMISSION_ID
@@ -121,16 +115,15 @@ describe('PluginRepoFactory: ', function () {
 
     await expect(
       pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWith(
-      customError(
-        'DaoUnauthorized',
+    )
+      .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
+      .withArgs(
         managingDao.address,
         pluginRepoRegistry.address,
         pluginRepoRegistry.address,
         pluginRepoFactory.address,
         REGISTER_PLUGIN_REPO_PERMISSION_ID
-      )
-    );
+      );
   });
 
   it('fail to create new pluginRepo with empty name', async () => {
@@ -138,7 +131,7 @@ describe('PluginRepoFactory: ', function () {
 
     await expect(
       pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWith(customError('EmptyPluginRepoName'));
+    ).to.be.revertedWithCustomError(pluginRepoFactory, 'EmptyPluginRepoName');
   });
 
   it('create new pluginRepo', async () => {
@@ -162,6 +155,19 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
+    // Get the contract to be deployed by calling `createPluginRepoWithVersion` with `callStatic`
+
+    const PluginRepo = await ethers.getContractFactory('PluginRepo');
+    const pluginRepoToBeCreated = PluginRepo.attach(
+      pluginRepoFactory.callStatic.createPluginRepoWithVersion(
+        pluginRepoName,
+        [1, 0, 0],
+        pluginSetupAddress,
+        contentURI,
+        ownerAddress
+      )
+    );
+
     await expect(
       pluginRepoFactory.createPluginRepoWithContractAndContentURI(
         pluginRepoName,
@@ -169,7 +175,9 @@ describe('PluginRepoFactory: ', function () {
         contentURI,
         ownerAddress
       )
-    ).to.be.revertedWith('BumpInvalid([0, 0, 0], [0, 0, 0])');
+    )
+      .to.be.revertedWithCustomError(pluginRepoToBeCreated, 'BumpInvalid')
+      .withArgs([0, 0, 0], [0, 0, 0]);
   });
 
   it('create new pluginRepo with version', async () => {

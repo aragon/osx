@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added `startDate` and `endDate` to the `ProposalCreated` event.
+- Added the `ProposalBase`, `Proposal`, and `ProposalUpgradeable` contracts to refactor and unify the proposal creation and execution process across all governance plugins.
+- Adds `startDate` and `endDate` to Multisig proposals. Execution and approvals of proposals have now to be in the boundaries of these 2 dates.
+
+### Changed
+
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
+- Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
+
+### Removed
+
+- Removes `open` parameter from Multisig proposals.
+- Removes `Tally` struct as well as `addressListLength` and moves `approvals` in `Proposal`.
+- Removes `freeze` functionality.
+
 ## v0.4.0-alpha
 
 ### Added

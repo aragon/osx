@@ -1,4 +1,4 @@
-import {dataSource, log} from '@graphprotocol/graph-ts';
+import {dataSource} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -39,6 +39,8 @@ export function _handleProposalCreated(
   proposalEntity.metadata = metadata;
   proposalEntity.executed = false;
   proposalEntity.createdAt = event.block.timestamp;
+  proposalEntity.startDate = event.params.startDate;
+  proposalEntity.endDate = event.params.endDate;
   proposalEntity.adminstrator = adminstratorAddress.toHexString();
 
   // Adminstrator
