@@ -292,13 +292,6 @@ abstract contract MajorityVotingBase is
         return _canExecute(_proposalId);
     }
 
-    // Solution: don't do division on the contracts - do float division on the SDK / frontend. Transform the execution criteria so that no division is needed.
-
-    // Support criterium
-    // y/(y+n) > s
-    // y > s*(y+n)
-    // y > s*y + s*n
-    // (1-s)*y > sn
     /// @inheritdoc IMajorityVoting
     function isSupportThresholdReached(uint256 _proposalId) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
@@ -308,11 +301,6 @@ abstract contract MajorityVotingBase is
             proposal_.parameters.supportThreshold * proposal_.tally.no;
     }
 
-    // Worst case support criterium
-    // -> Start from the support criterium
-    // (1-s)*y > s(n + n_uncasted)
-    // (1-s)*y > s(n + (t - (y+n+a) ))
-    // (1-s)*y > s(t - y - a)
     /// @inheritdoc IMajorityVoting
     function isSupportThresholdReachedEarly(
         uint256 _proposalId
@@ -325,9 +313,6 @@ abstract contract MajorityVotingBase is
                 (proposal_.tally.totalVotingPower - proposal_.tally.yes - proposal_.tally.abstain);
     }
 
-    // Participation criterium
-    // (y+n+a) / t > p
-    // y+n+a  > p*t
     /// @inheritdoc IMajorityVoting
     function isMinParticipationReached(uint256 _proposalId) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
