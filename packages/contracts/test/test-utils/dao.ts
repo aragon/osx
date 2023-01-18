@@ -2,7 +2,7 @@ import {ethers} from 'hardhat';
 import {DAO} from '../../typechain';
 import {deployWithProxy} from './proxy';
 
-export const BYTES32 =
+export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 export const daoExampleURI = 'https://example.com';
 

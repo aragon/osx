@@ -10,7 +10,7 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
-import {BYTES32, daoExampleURI} from '../test-utils/dao';
+import {ZERO_BYTES32, daoExampleURI} from '../test-utils/dao';
 
 chai.use(smock.matchers);
 
@@ -205,7 +205,7 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(BYTES32, dummyActions))
+      await expect(dao.execute(ZERO_BYTES32, dummyActions))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
@@ -216,19 +216,19 @@ describe('DAO', function () {
     });
 
     it('executes an array of actions', async () => {
-      expect(await dao.callStatic.execute(BYTES32, dummyActions)).to.deep.equal(
+      expect(await dao.callStatic.execute(ZERO_BYTES32, dummyActions)).to.deep.equal(
         expectedDummyResults
       );
     });
 
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(BYTES32, dummyActions);
+      let tx = await dao.execute(ZERO_BYTES32, dummyActions);
       let rc = await tx.wait();
 
       const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
       expect(event.args.actor).to.equal(ownerAddress);
-      expect(event.args.callId).to.equal(BYTES32);
+      expect(event.args.callId).to.equal(ZERO_BYTES32);
       expect(event.args.actions.length).to.equal(1);
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -241,7 +241,7 @@ describe('DAO', function () {
       const actionExecute = await ActionExecuteFactory.deploy();
 
       await expect(
-        dao.execute(BYTES32, [
+        dao.execute(ZERO_BYTES32, [
           {
             to: actionExecute.address,
             data: '0x0000',
