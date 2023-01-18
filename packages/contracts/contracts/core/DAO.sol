@@ -20,14 +20,14 @@ import "./IEIP4824.sol";
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 contract DAO is
+    IEIP4824,
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
-    CallbackHandler,
-    IEIP4824
+    CallbackHandler
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
