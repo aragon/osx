@@ -8,7 +8,7 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
-import {hHash, PluginSetupRef} from "../plugin/psp/utils/Common.sol";
+import {hashHelpers, PluginSetupRef} from "../plugin/psp/utils/Common.sol";
 import {IPluginSetup} from "../plugin/IPluginSetup.sol";
 
 /// @title DAOFactory
@@ -102,7 +102,7 @@ contract DAOFactory {
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
                     preparedDependency.permissions,
-                    hHash(preparedDependency.helpers)
+                    hashHelpers(preparedDependency.helpers)
                 )
             );
         }

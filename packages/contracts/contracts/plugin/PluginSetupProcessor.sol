@@ -13,7 +13,7 @@ import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizabl
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
-import {PluginSetupRef, aHash, hHash, pHash, _getSetupId, _getPluginId, PreparationType} from "./psp/utils/Common.sol";
+import {PluginSetupRef, hashHelpers, hashPermissions, _getSetupId, _getPluginId, PreparationType} from "./psp/utils/Common.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -141,7 +141,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown when the update version is invalid.
     /// @param currentVersionTag The current version of the plugin from which it updates.
     /// @param newVersionTag The new version of the plugin to which it updates.
-    error UpdateVersionInvalid(PluginRepo.Tag currentVersionTag, PluginRepo.Tag newVersionTag);
+    error InvalidUpdateVersion(PluginRepo.Tag currentVersionTag, PluginRepo.Tag newVersionTag);
 
     /// @notice Thrown when plugin is already installed and one tries to prepare or apply install on it.
     error PluginAlreadyInstalled();
@@ -276,8 +276,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            pHash(preparedDependency.permissions),
-            hHash(preparedDependency.helpers),
+            hashPermissions(preparedDependency.permissions),
+            hashHelpers(preparedDependency.helpers),
             bytes(""),
             PreparationType.Install
         );
@@ -326,7 +326,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            pHash(_params.permissions),
+            hashPermissions(_params.permissions),
             _params.helpersHash,
             bytes(""),
             PreparationType.Install
@@ -379,7 +379,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.currentVersionTag.release != _params.newVersionTag.release ||
             _params.currentVersionTag.build >= _params.newVersionTag.build
         ) {
-            revert UpdateVersionInvalid({
+            revert InvalidUpdateVersion({
                 currentVersionTag: _params.currentVersionTag,
                 newVersionTag: _params.newVersionTag
             });
@@ -389,7 +389,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         PluginState storage pluginState = states[pluginId];
 
-        bytes32 currentHelpersHash = hHash(_params.setupPayload.currentHelpers);
+        bytes32 currentHelpersHash = hashHelpers(_params.setupPayload.currentHelpers);
 
         bytes32 setupId = _getSetupId(
             PluginSetupRef(_params.currentVersionTag, _params.pluginSetupRepo),
@@ -402,10 +402,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // The following check implicitly confirms that plugin
         // is currently installed. Otherwise, currentSetupId wouldn't be set.
         if (pluginState.currentSetupId != setupId) {
-            revert InvalidSetupId({
-                currentSetupId: pluginState.currentSetupId,
-                setupId: setupId
-            });
+            revert InvalidSetupId({currentSetupId: pluginState.currentSetupId, setupId: setupId});
         }
 
         PluginRepo.Version memory currentVersion = _params.pluginSetupRepo.getVersion(
@@ -448,8 +445,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
             newSetupId = _getSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
-                pHash(preparedDependency.permissions),
-                hHash(preparedDependency.helpers),
+                hashPermissions(preparedDependency.permissions),
+                hashHelpers(preparedDependency.helpers),
                 initData,
                 PreparationType.Update
             );
@@ -483,7 +480,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            pHash(_params.permissions),
+            hashPermissions(_params.permissions),
             _params.helpersHash,
             _params.initData,
             PreparationType.Update
@@ -548,16 +545,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
             bytes32(0),
-            hHash(_params.setupPayload.currentHelpers),
+            hashHelpers(_params.setupPayload.currentHelpers),
             bytes(""),
             PreparationType.None
         );
 
         if (pluginState.currentSetupId != setupId) {
-            revert InvalidSetupId({
-                currentSetupId: pluginState.currentSetupId,
-                setupId: setupId
-            });
+            revert InvalidSetupId({currentSetupId: pluginState.currentSetupId, setupId: setupId});
         }
 
         PluginRepo.Version memory version = _params.pluginSetupRef.pluginSetupRepo.getVersion(
@@ -571,7 +565,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
-            pHash(permissions),
+            hashPermissions(permissions),
             bytes32(0),
             bytes(""),
             PreparationType.Uninstall
@@ -612,7 +606,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            pHash(_params.permissions),
+            hashPermissions(_params.permissions),
             bytes32(0),
             bytes(""),
             PreparationType.Uninstall
@@ -717,5 +711,4 @@ contract PluginSetupProcessor is DaoAuthorizable {
             initData: _initData
         });
     }
-
 }

@@ -56,21 +56,13 @@ function _getSetupId(
 
 /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
 /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.
-function hHash(address[] memory _helpers) pure returns (bytes32) {
+function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
     return keccak256(abi.encode(_helpers));
 }
 
 /// @notice Returns a hash of an array of multi-targeted permission operations.
 /// @param _permissions The array of of multi-targeted permission operations.
 /// @return bytes The hash of the array of permission operations.
-function pHash(PermissionLib.ItemMultiTarget[] memory _permissions) pure returns (bytes32) {
+function hashPermissions(PermissionLib.ItemMultiTarget[] memory _permissions) pure returns (bytes32) {
     return keccak256(abi.encode(_permissions));
 }
-
-/// @notice Returns a hash of an array of IDAO.Action;
-/// @param _actions The array of Actions
-/// @return bytes The hash of the array of Actions;
-function aHash(IDAO.Action[] memory _actions) pure returns (bytes32) {
-    return keccak256(abi.encode(_actions));
-}
-
