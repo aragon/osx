@@ -121,7 +121,7 @@ on-chain data such as
 - token ownership
 - entries in curated registries
 
-or off-chain data being made available through third-party condition services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
+or off-chain data being made available through third-party oracle services (e.g., [chain.link](https://chain.link/), [witnet.io](https://witnet.io/)) such as
 
 - market data
 - weather data
@@ -144,9 +144,9 @@ contract Service {
 ```
 
 Calling the `use()` function inside requires the caller to have the `USE_PERMISSION_ID` permission. Now, you want to make this service available to every user without uploading a new contract or requiring every user to ask for the permission.
-By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to an condition, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
+By granting the `USE_PERMISSION_ID` to `_who: ANY_ADDR` on the contract `_where: serviceAddr` to a condition, you can allow everyone to use it and add more conditions to it. If you later on decide to make it permissioned again, you can revoke the permission to `ANY_ADDR`.
 
-Granting a permission with `_where: ANY_ADDR` to an condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
+Granting a permission with `_where: ANY_ADDR` to a condition has the effect that is granted on every contract. This is useful if you want to give an address `_who` permission over a large set of contracts that would be too costly or too much work to be granted on a per-contract basis.
 Imagine, for example, that many instances of the `Service` contract exist, and a user should have the permission to use all of them. By granting the `USE_PERMISSION_ID` with `_where: ANY_ADDR`, to some user `_who: userAddr`, the user has access to all of them. If this should not be possible anymore, you can later revoke the permission.
 
 However, some restrictions apply. For security reasons, aragonOS does not allow you to use both, `_where: ANY_ADDR` and `_who: ANY_ADDR` in the same permission. Furthermore, the permission IDs of [permissions native to the `DAO` Contract](#permissions-native-to-the-dao-contract) cannot be used.
@@ -324,6 +324,6 @@ contract PriceCondition is IPermissionCondition {
   }
 }
 
-Here, we use [a data feed from a Chainlink condition](https://docs.chain.link/docs/data-feeds/) providing us with the latest ETH/USD price on the Goerli testnet and require that the call is only allowed if the ETH price is over $9000.
+Here, we use [a data feed from a Chainlink oracle](https://docs.chain.link/docs/data-feeds/) providing us with the latest ETH/USD price on the Goerli testnet and require that the call is only allowed if the ETH price is over $9000.
 
 ````

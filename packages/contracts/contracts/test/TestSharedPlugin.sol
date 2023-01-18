@@ -10,7 +10,7 @@ import {DaoUnauthorized} from "../utils/auth.sol";
 import {IDAO} from "../core/IDAO.sol";
 
 /// @notice A test Plugin that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
-/// @dev This is realized by asking an `IPermissionCondition` that must be authorized in the DAO's permission manager.
+/// @dev This is realized by asking a `IPermissionCondition` that must be authorized in the DAO's permission manager.
 contract TestSharedPlugin is PluginUUPSUpgradeable {
     bytes32 public constant ID_GATED_ACTION_PERMISSION_ID = keccak256("ID_GATED_ACTION_PERMISSION");
 
@@ -52,7 +52,7 @@ contract TestSharedPlugin is PluginUUPSUpgradeable {
     }
 
     /// @notice Executes something if the `id` parameter is authorized by the DAO associated through `ownedIds`.
-    ///         This is done by asking an `IPermissionCondition` that must be authorized in the DAO's permission manager via `grantWithCondition` and the `ID_GATED_ACTION_PERMISSION_ID`.
+    ///         This is done by asking a `IPermissionCondition` that must be authorized in the DAO's permission manager via `grantWithCondition` and the `ID_GATED_ACTION_PERMISSION_ID`.
     /// @param _id The ID that is associated with a specific DAO
     function idGatedAction(uint256 _id) external sharedAuth(_id, ID_GATED_ACTION_PERMISSION_ID) {
         // do something

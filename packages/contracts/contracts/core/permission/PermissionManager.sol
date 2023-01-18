@@ -35,7 +35,7 @@ contract PermissionManager is Initializable {
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
 
-    /// @notice Thrown if a permission has been already granted for different condition.
+    /// @notice Thrown if a permission has been already granted with a different condition.
     /// @dev This makes sure that condition on the same permission can not be overwriten by a different condition.
     /// @param where The address of the target contract to grant `who` permission to.
     /// @param who The address (EOA or contract) to which the permission has already been granted.
@@ -268,7 +268,7 @@ contract PermissionManager is Initializable {
 
             emit Granted(_permissionId, msg.sender, _where, _who, _condition);
         } else if (currentCondition != newCondition) {
-            // Revert if the permHash is already granted, but uses different condition.
+            // Revert if the permHash is already granted, but uses a different condition.
             // If we don't revert, we either should:
             //   - allow overriding the condition on the same permission
             //     which could be confusing whoever granted the same permission first
@@ -300,7 +300,7 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to an `PermissionCondition` if this was specified in the setup.
+    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
@@ -312,16 +312,16 @@ contract PermissionManager is Initializable {
         bytes32 _permissionId,
         bytes memory _data
     ) internal view returns (bool) {
-        address accessFlagOrAclCondition = permissionsHashed[
+        address accessFlagOrCondition = permissionsHashed[
             permissionHash(_where, _who, _permissionId)
         ];
 
-        if (accessFlagOrAclCondition == UNSET_FLAG) return false;
-        if (accessFlagOrAclCondition == ALLOW_FLAG) return true;
+        if (accessFlagOrCondition == UNSET_FLAG) return false;
+        if (accessFlagOrCondition == ALLOW_FLAG) return true;
 
-        // Since it's not a flag, assume it's an PermissionCondition and try-catch to skip failures
+        // Since it's not a flag, assume it's a PermissionCondition and try-catch to skip failures
         try
-            IPermissionCondition(accessFlagOrAclCondition).isGranted(_where, _who, _permissionId, _data)
+            IPermissionCondition(accessFlagOrCondition).isGranted(_where, _who, _permissionId, _data)
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}
