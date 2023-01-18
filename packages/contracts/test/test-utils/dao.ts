@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {DAO} from '../../typechain';
+import {DAO, ActionExecute__factory} from '../../typechain';
 import {deployWithProxy} from './proxy';
 
 export const ZERO_BYTES32 =
@@ -18,4 +18,28 @@ export async function deployNewDAO(ownerAddress: string): Promise<DAO> {
   );
 
   return dao;
+}
+
+export async function getActions() {
+  const ActionExecuteFactory = await ethers.getContractFactory('ActionExecute');
+  let ActionExecute = await ActionExecuteFactory.deploy();
+  const iface = new ethers.utils.Interface(ActionExecute__factory.abi);
+
+  const num = 20;
+  return {
+    failAction: {
+      to: ActionExecute.address,
+      data: iface.encodeFunctionData('fail'),
+      value: 0,
+    },
+    succeedAction: {
+      to: ActionExecute.address,
+      data: iface.encodeFunctionData('setTest', [num]),
+      value: 0,
+    },
+    failActionMessage: ethers.utils
+      .hexlify(ethers.utils.toUtf8Bytes('ActionExecute:Revert'))
+      .substring(2),
+    successActionResult: ethers.utils.hexZeroPad(ethers.utils.hexlify(num), 32),
+  };
 }

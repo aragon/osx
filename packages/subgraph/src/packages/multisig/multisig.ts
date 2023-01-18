@@ -1,4 +1,4 @@
-import {dataSource, store} from '@graphprotocol/graph-ts';
+import {dataSource, store, BigInt} from '@graphprotocol/graph-ts';
 
 import {
   ProposalCreated,
@@ -49,16 +49,12 @@ export function _handleProposalCreated(
 
   if (!vote.reverted) {
     proposalEntity.executed = vote.value.value0;
+    proposalEntity.approvals = vote.value.value1;
 
     // ProposalParameters
-    let parameters = vote.value.value1;
-    proposalEntity.minApprovals = parameters.minApprovals;
+    let parameters = vote.value.value2;
+    proposalEntity.minApprovals = BigInt.fromU32(parameters.minApprovals);
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
-
-    // Tally
-    let tally = vote.value.value2;
-    proposalEntity.approvals = tally.approvals;
-    proposalEntity.addresslistLength = tally.addresslistLength;
 
     // Actions
     let actions = vote.value.value3;
@@ -120,10 +116,7 @@ export function handleApproved(event: Approved): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
-      let parameters = proposal.value.value1;
-      let tally = proposal.value.value2;
-
-      proposalEntity.approvals = tally.approvals;
+      proposalEntity.approvals = proposal.value.value1;
 
       proposalEntity.save();
     }
@@ -200,7 +193,7 @@ export function handleMultisigSettingsUpdated(
   let packageEntity = MultisigPlugin.load(event.address.toHexString());
   if (packageEntity) {
     packageEntity.onlyListed = event.params.onlyListed;
-    packageEntity.minApprovals = event.params.minApprovals;
+    packageEntity.minApprovals = BigInt.fromU32(event.params.minApprovals);
     packageEntity.save();
   }
 }

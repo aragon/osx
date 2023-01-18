@@ -37,11 +37,14 @@ abstract contract IDAO {
     /// @dev Runs a loop through the array of actions and executes them one by one. If one action fails, all will be reverted.
     /// @param callId The id of the call. The definition of the value of callId is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
+    /// @param _allowFailureMap Allows to succeed tx even if the action might revert. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
-    function execute(bytes32 callId, Action[] memory _actions)
-        external
-        virtual
-        returns (bytes[] memory);
+    /// @return uint256 The constructed failureMap which contains which actions have actually failed.
+    function execute(
+        bytes32 callId,
+        Action[] memory _actions,
+        uint256 _allowFailureMap
+    ) external virtual returns (bytes[] memory, uint256);
 
     /// @notice Emitted when a proposal is executed.
     /// @param actor The address of the caller.
@@ -49,8 +52,15 @@ abstract contract IDAO {
     /// @dev The value of callId is defined by the component/contract calling the execute function.
     ///      A `Plugin` implementation can use it, for example, as a nonce.
     /// @param actions Array of actions executed.
+    /// @param failureMap Stores which actions have failed.
     /// @param execResults Array with the results of the executed actions.
-    event Executed(address indexed actor, bytes32 callId, Action[] actions, bytes[] execResults);
+    event Executed(
+        address indexed actor,
+        bytes32 callId,
+        Action[] actions,
+        uint256 failureMap,
+        bytes[] execResults
+    );
 
     /// @notice Emitted when a standard callback is registered.
     /// @param interfaceId The ID of the interface.
