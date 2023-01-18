@@ -135,63 +135,6 @@ describe('TokenVoting', function () {
     );
   }
 
-  describe('PRECISION PROBLEM: ', async () => {
-    it.only('returns the wrong percentages because of precision loss if the amount > 10^18', async () => {
-      votingSettings.supportThreshold = pct16(50);
-      votingSettings.minParticipation = pct16(20);
-      votingSettings.votingMode = VotingMode.EarlyExecution;
-
-      await voting.initialize(
-        dao.address,
-        votingSettings,
-        governanceErc20Mock.address
-      );
-
-      const pctBase = BigNumber.from(10).pow(18);
-      const oneToken = pctBase; // 18 decimals, the standard case
-      const balances = [
-        {
-          receiver: signers[0].address,
-          amount: oneToken.mul(5).add(1), // e.g. 5.000000000000000009 ANT
-        },
-        {
-          receiver: signers[1].address,
-          amount: oneToken.mul(5).sub(0), // e.g. 4.999999999999999991 ANT
-        },
-      ];
-      //console.log(balances[0].amount);
-      //console.log(balances[1].amount);
-
-      // signer[0] has more voting power than signer[1]
-      const balanceDifference = balances[0].amount.sub(balances[1].amount);
-      expect(balanceDifference).to.eq(1);
-
-      await setBalances(balances);
-
-      await voting.createProposal(
-        dummyMetadata,
-        dummyActions,
-        0,
-        0,
-        VoteOption.None,
-        false
-      );
-
-      expect((await voting.getProposal(id)).tally.totalVotingPower).to.eq(
-        balances[0].amount.add(balances[1].amount)
-      );
-
-      // vote with both signers
-      await voting.connect(signers[0]).vote(id, VoteOption.Yes, false); // 5.000000000000000009 ANT vote for YES
-      await voting.connect(signers[1]).vote(id, VoteOption.No, false); // 4.999999999999999991 ANT vote for NO
-
-      expect(await voting.isSupportThresholdReached(id)).to.be.true;
-      expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
-      expect(await voting.isMinParticipationReached(id)).to.be.true;
-      expect(await voting.canExecute(id)).to.be.true;
-    });
-  });
-
   describe('initialize: ', async () => {
     it('reverts if trying to re-initialize', async () => {
       await voting.initialize(
@@ -1216,6 +1159,68 @@ describe('TokenVoting', function () {
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
+      });
+    });
+  });
+
+  describe('execution criteria can handle token balances across all orders of magnitude', async function () {
+    beforeEach(async () => {
+      votingSettings.supportThreshold = pct16(50);
+      votingSettings.minParticipation = pct16(20);
+      votingSettings.votingMode = VotingMode.EarlyExecution;
+    });
+
+    const powers = [0, 1, 2, 3, 6, 12, 18, 24, 36, 48];
+
+    powers.forEach(async power => {
+      it(`magnitudes of 10^${power}`, async function () {
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+
+        let magnitude = BigNumber.from(10).pow(power);
+
+        const oneToken = magnitude;
+        const balances = [
+          {
+            receiver: signers[0].address,
+            amount: oneToken.mul(5).add(1),
+          },
+          {
+            receiver: signers[1].address,
+            amount: oneToken.mul(5),
+          },
+        ];
+
+        // signer[0] has more voting power than signer[1]
+        const balanceDifference = balances[0].amount.sub(balances[1].amount);
+        expect(balanceDifference).to.eq(1);
+
+        await setBalances(balances);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+
+        expect((await voting.getProposal(id)).tally.totalVotingPower).to.eq(
+          balances[0].amount.add(balances[1].amount)
+        );
+
+        // vote with both signers
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.true;
       });
     });
   });
