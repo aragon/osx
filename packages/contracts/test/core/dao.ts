@@ -240,7 +240,7 @@ describe('DAO', function () {
     });
 
     it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
-      await expect(dao.execute(0, [data.failAction], 0))
+      await expect(dao.execute(ZERO_BYTES32, [data.failAction], 0))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(0);
     });
@@ -249,7 +249,7 @@ describe('DAO', function () {
       let num = ethers.BigNumber.from(0);
       num = flipBit(0, num);
 
-      const tx = await dao.execute(0, [data.failAction], num);
+      const tx = await dao.execute(ZERO_BYTES32, [data.failAction], num);
       const event = await findEvent(tx, EVENTS.Executed);
 
       // Check that failAction's revertMessage was correctly stored in the dao's execResults
@@ -258,7 +258,7 @@ describe('DAO', function () {
     });
 
     it('returns the correct result if action succeeds', async () => {
-      const tx = await dao.execute(0, [data.succeedAction], 0);
+      const tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
       const event = await findEvent(tx, EVENTS.Executed);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
@@ -284,11 +284,11 @@ describe('DAO', function () {
       }
 
       // If the below call not fails, means allowFailureMap is correct.
-      let tx = await dao.execute(0, actions, allowFailureMap);
+      let tx = await dao.execute(ZERO_BYTES32, actions, allowFailureMap);
       let event = await findEvent(tx, EVENTS.Executed);
 
       expect(event.args.actor).to.equal(ownerAddress);
-      expect(event.args.callId).to.equal(0);
+      expect(event.args.callId).to.equal(ZERO_BYTES32);
 
       // construct the failureMap which only has those
       // bits set at indexes where actions failed
@@ -311,7 +311,7 @@ describe('DAO', function () {
       // lets remove one of the action from allowFailureMap
       // to see tx will actually revert.
       allowFailureMap = flipBit(2, allowFailureMap);
-      await expect(dao.execute(0, actions, allowFailureMap))
+      await expect(dao.execute(ZERO_BYTES32, actions, allowFailureMap))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(2); // Since we unset the 2th action from failureMap, it should fail with that index.
     });
