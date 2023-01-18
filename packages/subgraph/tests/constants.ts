@@ -36,5 +36,6 @@ export const START_DATE = '1644851000';
 export const END_DATE = '1644852000';
 export const SNAPSHOT_BLOCK = '100';
 
+export const MIN_VOTING_POWER = TWO;
 export const TOTAL_VOTING_POWER = THREE;
 export const CREATED_AT = '1644850000';

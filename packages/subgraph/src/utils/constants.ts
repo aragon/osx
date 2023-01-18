@@ -18,3 +18,4 @@ export const ADMIN_INTERFACE = '0x9102c53e';
 export const MULTISIG_INTERFACE = '0x164b5edf';
 
 export const TEN_POWER_16 = '10000000000000000';
+export const TEN_POWER_18 = '1000000000000000000';

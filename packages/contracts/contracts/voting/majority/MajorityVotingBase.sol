@@ -99,10 +99,10 @@ abstract contract MajorityVotingBase is
     /// @notice A container for the proposal parameters at the time of proposal creation.
     /// @param votingMode A parameter to select the vote mode.
     /// @param supportThreshold The support threshold value.
-    /// @param minVotingPower The minimum voting power needed.
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
+    /// @param minVotingPower The minimum voting power needed.
     struct ProposalParameters {
         VotingMode votingMode;
         uint64 supportThreshold;
