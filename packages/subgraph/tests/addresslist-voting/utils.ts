@@ -2,7 +2,6 @@ import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
 
 import {AddresslistVotingProposal} from '../../generated/schema';
-import {TEN_POWER_16} from '../../src/utils/constants';
 import {
   ProposalCreated,
   VoteCast,

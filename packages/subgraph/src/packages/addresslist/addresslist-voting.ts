@@ -16,7 +16,7 @@ import {
   AddresslistVotingVoter,
   AddresslistVotingVote
 } from '../../../generated/schema';
-import {TEN_POWER_18, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
+import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -143,7 +143,7 @@ export function handleVoteCast(event: VoteCast): void {
       let supportThreshold = parameters.supportThreshold;
       let minVotingPower = parameters.minVotingPower;
 
-      let BASE = BigInt.fromString(TEN_POWER_18);
+      let BASE = BigInt.fromString(RATIO_BASE);
 
       proposalEntity.yes = yes;
       proposalEntity.no = no;

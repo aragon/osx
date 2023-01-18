@@ -17,7 +17,7 @@ import {
 import {getMergedABI} from '../../utils/abi';
 import {
   VoteOption,
-  pct16,
+  pctToRatio,
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
@@ -77,8 +77,8 @@ describe('TokenVoting', function () {
   beforeEach(async () => {
     votingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -379,7 +379,7 @@ describe('TokenVoting', function () {
       expect(proposal.parameters.minVotingPower).to.equal(
         proposal.tally.totalVotingPower
           .mul(votingSettings.minParticipation)
-          .div(pct16(100)) // TODO IMRPOVE
+          .div(pctToRatio(100)) // TODO IMRPOVE
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
       expect(
@@ -441,7 +441,7 @@ describe('TokenVoting', function () {
       expect(proposal.parameters.minVotingPower).to.equal(
         proposal.tally.totalVotingPower
           .mul(votingSettings.minParticipation)
-          .div(pct16(100)) // TODO IMRPOVE
+          .div(pctToRatio(100)) // TODO IMRPOVE
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
@@ -991,7 +991,7 @@ describe('TokenVoting', function () {
   describe('Different configurations:', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
-        votingSettings.minParticipation = pct16(25);
+        votingSettings.minParticipation = pctToRatio(25);
 
         await voting.initialize(
           dao.address,
@@ -1105,8 +1105,8 @@ describe('TokenVoting', function () {
 
     describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` and early execution mode activated', async () => {
       beforeEach(async () => {
-        votingSettings.supportThreshold = pct16(0);
-        votingSettings.minParticipation = pct16(0);
+        votingSettings.supportThreshold = pctToRatio(0);
+        votingSettings.minParticipation = pctToRatio(0);
 
         await voting.initialize(
           dao.address,
@@ -1165,8 +1165,8 @@ describe('TokenVoting', function () {
 
   describe('execution criteria can handle token balances across all orders of magnitude', async function () {
     beforeEach(async () => {
-      votingSettings.supportThreshold = pct16(50);
-      votingSettings.minParticipation = pct16(20);
+      votingSettings.supportThreshold = pctToRatio(50);
+      votingSettings.minParticipation = pctToRatio(20);
       votingSettings.votingMode = VotingMode.EarlyExecution;
     });
 

@@ -7,7 +7,7 @@ import {VOTING_EVENTS} from '../../utils/event';
 import {
   VotingSettings,
   VotingMode,
-  pct16,
+  pctToRatio,
   ONE_HOUR,
   ONE_YEAR,
 } from '../test-utils/voting';
@@ -33,8 +33,8 @@ describe('MajorityVotingMock', function () {
   beforeEach(async () => {
     votingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -65,18 +65,18 @@ describe('MajorityVotingMock', function () {
       await votingBase.initializeMock(dao.address, votingSettings);
     });
     it('reverts if the support threshold specified exceeds 100%', async () => {
-      votingSettings.supportThreshold = pct16(1000);
+      votingSettings.supportThreshold = pctToRatio(1000);
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'PercentageExceeds100')
-        .withArgs(pct16(100), votingSettings.supportThreshold);
+        .withArgs(pctToRatio(100), votingSettings.supportThreshold);
     });
 
     it('reverts if the participation threshold specified exceeds 100%', async () => {
-      votingSettings.minParticipation = pct16(1000);
+      votingSettings.minParticipation = pctToRatio(1000);
 
       await expect(votingBase.updateVotingSettings(votingSettings))
         .to.be.revertedWithCustomError(votingBase, 'PercentageExceeds100')
-        .withArgs(pct16(100), votingSettings.minParticipation);
+        .withArgs(pctToRatio(100), votingSettings.minParticipation);
     });
 
     it('reverts if the minimal duration is shorter than one hour', async () => {

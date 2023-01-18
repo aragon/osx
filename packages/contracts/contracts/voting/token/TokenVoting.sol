@@ -6,6 +6,7 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
+import {RATIO_BASE} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
@@ -94,7 +95,7 @@ contract TokenVoting is MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-        proposal_.parameters.minVotingPower = (totalVotingPower * minParticipation()) / PCT_BASE;
+        proposal_.parameters.minVotingPower = (totalVotingPower * minParticipation()) / RATIO_BASE;
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 

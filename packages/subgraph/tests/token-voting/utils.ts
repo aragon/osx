@@ -8,7 +8,6 @@ import {
   ProposalExecuted
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {TokenVotingProposal} from '../../generated/schema';
-import {TEN_POWER_16} from '../../src/utils/constants';
 import {
   ADDRESS_ONE,
   DAO_ADDRESS,

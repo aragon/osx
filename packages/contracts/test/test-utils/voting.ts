@@ -24,15 +24,14 @@ export type VotingSettings = {
   minProposerVotingPower: number;
 };
 
-const toBn = ethers.BigNumber.from;
-const bigExp = (x: number, y: number) => toBn(x).mul(toBn(10).pow(toBn(y)));
-export const pct16 = (x: number) => bigExp(x, 16);
+export const pctToRatio = (x: number) =>
+  ethers.BigNumber.from(10).pow(4).mul(x); // 100% => 10**6, 1% => 10**4
 
 export const ONE_HOUR = 60 * 60;
 export const ONE_DAY = 24 * ONE_HOUR;
 export const ONE_YEAR = 365 * ONE_DAY;
 
-export const MAX_UINT64 = toBn(2).pow(toBn(64)).sub(1);
+export const MAX_UINT64 = ethers.BigNumber.from(2).pow(64).sub(1);
 
 export async function getTime(): Promise<number> {
   return (await ethers.provider.getBlock('latest')).timestamp;
@@ -94,5 +93,5 @@ export async function timestampIn(durationInSec: number): Promise<number> {
 }
 
 export async function setTimeForNextBlock(timestamp: number): Promise<void> {
-  await ethers.provider.send('evm_setNextBlockTimestamp', [timestamp])
+  await ethers.provider.send('evm_setNextBlockTimestamp', [timestamp]);
 }

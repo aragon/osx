@@ -9,6 +9,7 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {RATIO_BASE, RatioOutOfBounds} from "../../utils/Ratio.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
@@ -131,19 +132,11 @@ abstract contract MajorityVotingBase is
     bytes32 public constant UPDATE_VOTING_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_VOTING_SETTINGS_PERMISSION");
 
-    /// @notice The base value being defined to correspond to 100% to calculate and compare percentages despite the lack of floating point arithmetic.
-    uint64 public constant PCT_BASE = 10 ** 18; // 0% = 0; 1% = 10^16; 100% = 10^18
-
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) internal proposals;
 
     /// @notice The struct storing the voting settings.
     VotingSettings private votingSettings;
-
-    /// @notice Thrown if a specified percentage value exceeds the limit (100% = 10^18).
-    /// @param limit The maximal value.
-    /// @param actual The actual value.
-    error PercentageExceeds100(uint64 limit, uint64 actual);
 
     /// @notice Thrown if a date is out of bounds.
     /// @param limit The limit value.
@@ -277,7 +270,7 @@ abstract contract MajorityVotingBase is
         Proposal storage proposal_ = proposals[_proposalId];
 
         return
-            (PCT_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
+            (RATIO_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
             proposal_.parameters.supportThreshold * proposal_.tally.no;
     }
 
@@ -293,7 +286,7 @@ abstract contract MajorityVotingBase is
         Proposal storage proposal_ = proposals[_proposalId];
 
         return
-            (PCT_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
+            (RATIO_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
             proposal_.parameters.supportThreshold *
                 (proposal_.tally.totalVotingPower - proposal_.tally.yes - proposal_.tally.abstain);
     }
@@ -461,18 +454,12 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to update the plugin-wide proposal vote settings.
     /// @param _votingSettings The voting settings to be validated and updated.
     function _updateVotingSettings(VotingSettings calldata _votingSettings) internal virtual {
-        if (_votingSettings.supportThreshold > PCT_BASE) {
-            revert PercentageExceeds100({
-                limit: PCT_BASE,
-                actual: _votingSettings.supportThreshold
-            });
+        if (_votingSettings.supportThreshold > RATIO_BASE) {
+            revert RatioOutOfBounds({limit: RATIO_BASE, actual: _votingSettings.supportThreshold});
         }
 
-        if (_votingSettings.minParticipation > PCT_BASE) {
-            revert PercentageExceeds100({
-                limit: PCT_BASE,
-                actual: _votingSettings.minParticipation
-            });
+        if (_votingSettings.minParticipation > RATIO_BASE) {
+            revert RatioOutOfBounds({limit: RATIO_BASE, actual: _votingSettings.minParticipation});
         }
 
         if (_votingSettings.minDuration < 60 minutes) {
