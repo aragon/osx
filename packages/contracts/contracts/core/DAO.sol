@@ -109,13 +109,9 @@ contract DAO is
     }
 
     /// @inheritdoc PermissionManager
-    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
-        internal
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function isPermissionRestrictedForAnyAddr(
+        bytes32 _permissionId
+    ) internal view virtual override returns (bool) {
         return
             _permissionId == EXECUTE_PERMISSION_ID ||
             _permissionId == UPGRADE_DAO_PERMISSION_ID ||
@@ -127,19 +123,14 @@ contract DAO is
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(address(this), UPGRADE_DAO_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(address(this), UPGRADE_DAO_PERMISSION_ID) {}
 
     /// @inheritdoc IDAO
-    function setTrustedForwarder(address _newTrustedForwarder)
-        external
-        override
-        auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID)
-    {
+    function setTrustedForwarder(
+        address _newTrustedForwarder
+    ) external override auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID) {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
@@ -159,11 +150,9 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function setMetadata(bytes calldata _metadata)
-        external
-        override
-        auth(address(this), SET_METADATA_PERMISSION_ID)
-    {
+    function setMetadata(
+        bytes calldata _metadata
+    ) external override auth(address(this), SET_METADATA_PERMISSION_ID) {
         _setMetadata(_metadata);
     }
 
@@ -190,17 +179,17 @@ contract DAO is
                 _actions[i].data
             );
 
-            if(!success) {
+            if (!success) {
                 // If the call failed and wasn't allowed in allowFailureMap, revert.
-                if(!hasBit(allowFailureMap, uint8(i))) {
+                if (!hasBit(allowFailureMap, uint8(i))) {
                     revert ActionFailed(i);
                 }
 
-                // If the call failed, but was allowed in allowFailureMap, store that 
+                // If the call failed, but was allowed in allowFailureMap, store that
                 // this specific action has actually failed.
                 failureMap = flipBit(failureMap, uint8(i));
             }
-            
+
             execResults[i] = response;
 
             unchecked {
@@ -252,23 +241,19 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function setSignatureValidator(address _signatureValidator)
-        external
-        override
-        auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID)
-    {
+    function setSignatureValidator(
+        address _signatureValidator
+    ) external override auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
         signatureValidator = IERC1271(_signatureValidator);
 
         emit SignatureValidatorSet({signatureValidator: _signatureValidator});
     }
 
     /// @inheritdoc IDAO
-    function isValidSignature(bytes32 _hash, bytes memory _signature)
-        external
-        view
-        override(IDAO, IERC1271)
-        returns (bytes4)
-    {
+    function isValidSignature(
+        bytes32 _hash,
+        bytes memory _signature
+    ) external view override(IDAO, IERC1271) returns (bytes4) {
         if (address(signatureValidator) == address(0)) return bytes4(0); // invalid magic number
         return signatureValidator.isValidSignature(_hash, _signature); // forward call to set validation contract
     }
