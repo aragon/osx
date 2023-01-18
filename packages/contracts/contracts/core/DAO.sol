@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "./component/CallbackHandler.sol";
 import "./permission/PermissionManager.sol";
 import "./IDAO.sol";
+import "./IEIP4824.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021
@@ -25,7 +26,8 @@ contract DAO is
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
-    CallbackHandler
+    CallbackHandler,
+    IEIP4824
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
@@ -77,6 +79,10 @@ contract DAO is
     /// @notice Thrown if a native token withdraw fails.
     error NativeTokenWithdrawFailed();
 
+    /// @notice Emitted when a new DAO uri is set.
+    /// @param daoURI The new uri.
+    event NewURI(string daoURI);
+
     /// @dev Used to disallow initializing implementation contract by attacker for extra safety.
     constructor() {
         _disableInitializers();
@@ -98,6 +104,7 @@ contract DAO is
     ) external initializer {
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
+        _registerInterface(type(IEIP4824).interfaceId);
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
@@ -291,26 +298,26 @@ contract DAO is
         emit StandardCallbackRegistered(_interfaceId, _callbackSelector, _magicNumber);
     }
 
-    /// @inheritdoc IDAO
-    function daoURI() external view override returns (string memory) {
+    /// @inheritdoc IEIP4824
+    function daoURI() external view returns (string memory) {
         return _daoURI;
     }
 
-    /// @inheritdoc IDAO
+    /// @notice Updates the set DAO uri to a new value.
+    /// @param newDaoURI The new DAO uri to be set.
     function setDaoURI(string calldata newDaoURI)
         external
-        override
         auth(address(this), SET_METADATA_PERMISSION_ID)
     {
         _setDaoURI(newDaoURI);
     }
 
     /// @notice Sets the new DAO uri and emits the associated event.
-    /// @param newDaoURI The new DAO uri.
-    function _setDaoURI(string calldata newDaoURI) internal {
-        _daoURI = newDaoURI;
+    /// @param daoURI_ The new DAO uri.
+    function _setDaoURI(string calldata daoURI_) internal {
+        _daoURI = daoURI_;
 
-        emit DaoURIUpdated(newDaoURI);
+        emit NewURI(daoURI_);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

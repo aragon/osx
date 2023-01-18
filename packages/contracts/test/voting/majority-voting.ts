@@ -13,6 +13,7 @@ import {
 } from '../test-utils/voting';
 import {deployWithProxy} from '../test-utils/proxy';
 import {OZ_ERRORS} from '../test-utils/error';
+import {daoExampleURI} from '../test-utils/dao';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];
@@ -31,7 +32,7 @@ describe('MajorityVotingMock', function () {
       '0x',
       ownerAddress,
       ethers.constants.AddressZero,
-      'https://example.com'
+      daoExampleURI
     );
   });
 

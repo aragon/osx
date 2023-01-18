@@ -7,7 +7,7 @@ import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
-import { toBytes32 } from '../test-utils/voting';
+import {toBytes32} from '../test-utils/voting';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(

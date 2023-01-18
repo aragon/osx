@@ -17,7 +17,7 @@ import {
 } from '../test-utils/repo';
 import {findEvent} from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
-import {deployNewDAO} from '../test-utils/dao';
+import {daoExampleURI, deployNewDAO} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
 
 const EVENTS = {
@@ -58,7 +58,6 @@ const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
 const EMPTY_DATA = '0x';
 const AddressZero = ethers.constants.AddressZero;
-const daoURI = 'https://example.com/'
 
 async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   dao: any;
@@ -213,7 +212,7 @@ describe('DAOFactory: ', function () {
       trustedForwarder: AddressZero,
       name: daoDummyName,
       metadata: daoDummyMetadata,
-      daoURI
+      daoURI: daoExampleURI,
     };
 
     votingSettings = {

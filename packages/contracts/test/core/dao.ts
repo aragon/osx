@@ -10,7 +10,7 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
-import {BYTES32} from '../test-utils/dao';
+import {BYTES32, daoExampleURI} from '../test-utils/dao';
 
 chai.use(smock.matchers);
 
@@ -18,7 +18,6 @@ const dummyAddress1 = '0x0000000000000000000000000000000000000001';
 const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
-const daoURI = 'https://example.com';
 
 const EVENTS = {
   MetadataSet: 'MetadataSet',
@@ -63,7 +62,12 @@ describe('DAO', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await deployWithProxy(DAO);
-    await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1, daoURI);
+    await dao.initialize(
+      dummyMetadata1,
+      ownerAddress,
+      dummyAddress1,
+      daoExampleURI
+    );
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
     token = await Token.deploy(dao.address, 'GOV', 'GOV', {
@@ -115,7 +119,12 @@ describe('DAO', function () {
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(
-        dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1, daoURI)
+        dao.initialize(
+          dummyMetadata1,
+          ownerAddress,
+          dummyAddress1,
+          daoExampleURI
+        )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
@@ -562,7 +571,7 @@ describe('DAO', function () {
       it('should emit DaoURIUpdated', async () => {
         const newURI = 'https://new.example.com';
         await expect(dao.setDaoURI(newURI))
-          .to.emit(dao, DAO_EVENTS.DAO_URI_UPDATED)
+          .to.emit(dao, DAO_EVENTS.NEW_URI)
           .withArgs(newURI);
       });
 
@@ -581,16 +590,10 @@ describe('DAO', function () {
             ownerAddress,
             PERMISSION_IDS.SET_METADATA_PERMISSION_ID
           );
-
-        await dao.grant(
-          dao.address,
-          ownerAddress,
-          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
-        );
       });
 
       it('should return the DAO URI', async () => {
-        expect(await dao.daoURI()).to.be.eq(daoURI);
+        expect(await dao.daoURI()).to.be.eq(daoExampleURI);
       });
     });
   });

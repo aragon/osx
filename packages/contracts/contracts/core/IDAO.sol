@@ -147,16 +147,4 @@ abstract contract IDAO {
         bytes4 _callbackSelector,
         bytes4 _magicNumber
     ) external virtual;
-
-    /// @notice Returns the DAO uri defined in [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
-    /// @return _daoURI Returns the DAO uri
-    function daoURI() external view virtual returns (string memory);
-
-    /// @notice Updates the set DAO uri to a new value.
-    /// @param _daoURI The new DAO uri to be set.
-    function setDaoURI(string calldata _daoURI) external virtual;
-
-    /// @notice Emitted when a new DAO uri is set.
-    /// @param newURI The new uri.
-    event DaoURIUpdated(string newURI);
 }
