@@ -169,7 +169,7 @@ describe('PluginRepoFactory: ', function () {
     );
 
     await expect(
-      pluginRepoFactory.createPluginRepoWithContractAndContentURI(
+      pluginRepoFactory.createPluginRepoWithFirstVersion(
         pluginRepoName,
         pluginSetupAddress,
         contentURI,
@@ -187,7 +187,7 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
-    let tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
+    let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       pluginRepoName,
       pluginSetupAddress,
       contentURI,

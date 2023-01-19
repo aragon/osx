@@ -184,7 +184,7 @@ describe('Plugin Setup Processor', function () {
     psp = await deployPluginSetupProcessor(managingDao, pluginRepoRegistry);
 
     // Create and register a plugin on the PluginRepoRegistry
-    let tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
+    let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       `PluginUUPSUpgradeableMock`,
       setupUV1.address,
       '0x00',
@@ -200,7 +200,7 @@ describe('Plugin Setup Processor', function () {
     await repoU.createVersion(1, setupUV1Bad.address, EMPTY_DATA);
     await repoU.createVersion(1, setupUV4.address, EMPTY_DATA);
 
-    tx = await pluginRepoFactory.createPluginRepoWithContractAndContentURI(
+    tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       `PluginCloneableMock`,
       setupCV1.address,
       '0x00',

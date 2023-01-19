@@ -106,7 +106,7 @@ export async function createPluginRepo(
     hre
   );
 
-  const tx = await pluginRepoFactoryContract.createPluginRepoWithContractAndContentURI(
+  const tx = await pluginRepoFactoryContract.createPluginRepoWithFirstVersion(
     pluginContractName,
     pluginSetupAddress,
     contentURI,

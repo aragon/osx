@@ -34,9 +34,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         keccak256("APPLY_UNINSTALLATION_PERMISSION");
 
     /// @notice Used when there's UI update only which gets stored for the setupId generation.
-    /// @dev keccak256(abi.encode[])
+    /// @dev keccak256(abi.encode([]))
     bytes32 private constant EMPTY_ARRAY_ENCODED_HASH =
-        bytes32(0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd);
+        0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd;
 
     struct PluginState {
         uint256 blockNumber;
@@ -151,7 +151,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error InvalidSetupId(bytes32 currentSetupId, bytes32 setupId);
 
     /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply.
-    /// @param setupId The prepared setup id from the `ationParamsation`, `prepareUpdate` or `prepareUninstallation`.
+    /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
     error SetupNotApplicable(bytes32 setupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.

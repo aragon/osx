@@ -45,7 +45,7 @@ contract PluginRepoFactory {
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _contentURI The external URI for fetching the new version's content.
     /// @param _maintainer The plugin maintainer address.
-    function createPluginRepoWithContractAndContentURI(
+    function createPluginRepoWithFirstVersion(
         string calldata _name,
         address _pluginSetup,
         bytes memory _contentURI,

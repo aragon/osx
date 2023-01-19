@@ -24,12 +24,12 @@ contract PluginRepo is
     PermissionManager
 {
     using AddressUpgradeable for address;
-    
+
     struct Tag {
         uint8 release;
         uint16 build;
     }
-    
+
     struct Version {
         Tag tag;
         address pluginSetup;
