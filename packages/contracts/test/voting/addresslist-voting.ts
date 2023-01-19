@@ -270,7 +270,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('ceils the `minVotingPower` value if it has a remainder', async () => {
-      votingSettings.minParticipation = pctToRatio(30).add(1); // 33.0001 %
+      votingSettings.minParticipation = pctToRatio(30).add(1); // 30.0001 %
 
       await voting.initialize(
         dao.address,
@@ -295,7 +295,7 @@ describe('AddresslistVoting', function () {
     });
 
     it('does not ceil the `minVotingPower` value if it has no remainder', async () => {
-      votingSettings.minParticipation = ethers.BigNumber.from('300000'); // 30.0000 %
+      votingSettings.minParticipation = pctToRatio(30); // 30.0000 %
 
       await voting.initialize(
         dao.address,

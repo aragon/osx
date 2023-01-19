@@ -339,7 +339,7 @@ describe('TokenVoting', function () {
     });
 
     it('ceils the `minVotingPower` value if it has a remainder', async () => {
-      votingSettings.minParticipation = pctToRatio(30).add(1); // 33.0001 %
+      votingSettings.minParticipation = pctToRatio(30).add(1); // 30.0001 %
 
       await setBalances([{receiver: signers[0].address, amount: 10}]);
 
