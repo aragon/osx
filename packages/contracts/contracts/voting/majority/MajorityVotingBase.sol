@@ -486,7 +486,7 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to update the plugin-wide proposal vote settings.
     /// @param _votingSettings The voting settings to be validated and updated.
     function _updateVotingSettings(VotingSettings calldata _votingSettings) internal virtual {
-        if (_votingSettings.supportThreshold > RATIO_BASE) {
+        if (_votingSettings.supportThreshold >= RATIO_BASE) {
             revert RatioOutOfBounds({limit: RATIO_BASE, actual: _votingSettings.supportThreshold});
         }
 
