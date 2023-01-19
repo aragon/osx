@@ -2,10 +2,10 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
-  handleAddressesAdded,
+  handleMembershipAnnounced,
   handleApproved,
   handleProposalExecuted,
-  handleAddressesRemoved,
+  handleMembershipRenounced,
   _handleProposalCreated,
   handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
@@ -28,10 +28,10 @@ import {
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
-  createNewAddressesAddedEvent,
+  createNewMembershipAnnouncedEvent,
   createNewApprovedEvent,
   createNewProposalExecutedEvent,
-  createNewAddressesRemovedEvent,
+  createNewMembershipRenouncedEvent,
   createNewProposalCreatedEvent,
   getProposalCountCall,
   createMultisigProposalEntityState,
@@ -281,17 +281,17 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
+test('Run Multisig (handleMembershipAnnounced) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewAddressesAddedEvent(userArray, CONTRACT_ADDRESS);
+  let event = createNewMembershipAnnouncedEvent(userArray, CONTRACT_ADDRESS);
 
   // handle event
-  handleAddressesAdded(event);
+  handleMembershipAnnounced(event);
 
   // checks
   let memberId =
@@ -316,7 +316,7 @@ test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
+test('Run Multisig (handleMembershipRenounced) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
@@ -346,13 +346,13 @@ test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
   assert.fieldEquals('MultisigApprover', memberId2, 'id', memberId2);
 
   // create event
-  let event = createNewAddressesRemovedEvent(
+  let event = createNewMembershipRenouncedEvent(
     [memberAddresses[1]],
     CONTRACT_ADDRESS
   );
 
   // handle event
-  handleAddressesRemoved(event);
+  handleMembershipRenounced(event);
 
   // checks
   assert.fieldEquals('MultisigApprover', memberId1, 'id', memberId1);

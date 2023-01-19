@@ -355,6 +355,12 @@ abstract contract MajorityVotingBase is
         actions = proposal_.actions;
     }
 
+    /// @notice Returns the current voting settings.
+    /// @return The current voting settings.
+    function getVotingSettings() public view virtual returns (VotingSettings memory) {
+        return votingSettings;
+    }
+
     /// @notice Updates the voting settings.
     /// @param _votingSettings The new voting settings.
     function updateVotingSettings(

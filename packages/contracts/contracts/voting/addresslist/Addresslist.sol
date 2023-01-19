@@ -23,24 +23,14 @@ abstract contract Addresslist {
     /// @param member The array of member addresses to be added or removed.
     error InvalidAddresslistUpdate(address member);
 
-    /// @notice Emitted when new members are added to the address list.
-    /// @param members The array of member addresses to be added.
-    event AddressesAdded(address[] members);
-
-    /// @notice Emitted when members are removed from the address list.
-    /// @param members The array of member addresses to be removed.
-    event AddressesRemoved(address[] members);
-
     /// @notice Checks if an account is on the address list at a specific block number.
     /// @param _account The account address being checked.
     /// @param _blockNumber The block number.
     /// @return Whether the account is listed at the specified block number.
-    function isListedAtBlock(address _account, uint256 _blockNumber)
-        public
-        view
-        virtual
-        returns (bool)
-    {
+    function isListedAtBlock(
+        address _account,
+        uint256 _blockNumber
+    ) public view virtual returns (bool) {
         return _addresslistCheckpoints[_account].getAtBlock(_blockNumber) == 1;
     }
 
@@ -80,8 +70,6 @@ abstract contract Addresslist {
             }
         }
         _addresslistLengthCheckpoints.push(_uncheckedAdd, _newAddresses.length);
-
-        emit AddressesAdded({members: _newAddresses});
     }
 
     /// @notice Internal function to remove existing addresses from the address list.
@@ -100,8 +88,6 @@ abstract contract Addresslist {
             }
         }
         _addresslistLengthCheckpoints.push(_uncheckedSub, _exitingAddresses.length);
-
-        emit AddressesRemoved({members: _exitingAddresses});
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new

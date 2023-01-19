@@ -5,6 +5,7 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
+  MembershipContractAnnounced,
   TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
@@ -14,6 +15,7 @@ import {
   TokenVotingVoter,
   TokenVotingVote
 } from '../../../generated/schema';
+import {handleERC20Token} from '../../utils/tokens';
 
 import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
@@ -225,6 +227,19 @@ export function handleVotingSettingsUpdated(
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.minProposerVotingPower = event.params.minProposerVotingPower;
+    packageEntity.save();
+  }
+}
+
+export function handleMembershipContractAnnounced(
+  event: MembershipContractAnnounced
+): void {
+  let token = event.params.definingContract;
+  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
+
+  if (packageEntity) {
+    packageEntity.token = handleERC20Token(token);
+
     packageEntity.save();
   }
 }

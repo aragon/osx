@@ -6,12 +6,13 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {Proposal, ProposalBase} from "../../core/plugin/Proposal.sol";
+import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.
-/// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
-contract Admin is PluginCloneable, Proposal {
+/// @notice The admin governance plugin giving execution permission on the DAO to a single address.
+contract Admin is IMembership, PluginCloneable, Proposal {
     using SafeCast for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -23,10 +24,15 @@ contract Admin is PluginCloneable, Proposal {
         keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
     /// @notice Initializes the contract.
-    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
-    function initialize(IDAO _dao) public initializer {
+    /// @param _admin The address of the admin to be announced as a DAO member.
+    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
+    function initialize(IDAO _dao, address _admin) public initializer {
         __PluginCloneable_init(_dao);
+
+        address[] memory members = new address[](1);
+        members[0] = _admin;
+        emit MembershipAnnounced({members: members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.

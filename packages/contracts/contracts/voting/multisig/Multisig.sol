@@ -8,6 +8,7 @@ import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
@@ -15,7 +16,7 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
+contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     using SafeCastUpgradeable for uint256;
 
     /// @notice A container for proposal-related information.
@@ -124,10 +125,11 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     ) public initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
-        // add member addresses to the address list
         _addAddresses(_members);
 
         _updateMultisigSettings(_multisigSettings);
+
+        emit MembershipAnnounced({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -165,6 +167,8 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         _addAddresses(_members);
+
+        emit MembershipAnnounced({members: _members});
     }
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
@@ -183,6 +187,8 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         _removeAddresses(_members);
+
+        emit MembershipRenounced({members: _members});
     }
 
     /// @notice Updates the plugin settings.
@@ -261,7 +267,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         Proposal storage proposal_ = proposals[_proposalId];
-        
+
         // As the list can never become more than type(uint16).max(due to addAddresses check)
         // It's safe to use unchecked as it would never overflow.
         unchecked {
@@ -345,7 +351,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         Proposal storage proposal_ = proposals[_proposalId];
 
         proposal_.executed = true;
-        
+
         _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 

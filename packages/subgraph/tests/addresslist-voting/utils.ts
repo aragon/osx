@@ -7,8 +7,8 @@ import {
   VoteCast,
   ProposalExecuted,
   VotingSettingsUpdated,
-  AddressesAdded,
-  AddressesRemoved
+  MembershipAnnounced,
+  MembershipRenounced
 } from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   ADDRESS_ONE,
@@ -179,42 +179,46 @@ export function createNewVotingSettingsUpdatedEvent(
   return newVotingSettingsUpdatedEvent;
 }
 
-export function createNewAddressesAddedEvent(
+export function createNewMembershipAnnouncedEvent(
   addresses: Address[],
   contractAddress: string
-): AddressesAdded {
-  let newAddressesAddedEvent = changetype<AddressesAdded>(newMockEvent());
+): MembershipAnnounced {
+  let newMembershipAnnouncedEvent = changetype<MembershipAnnounced>(
+    newMockEvent()
+  );
 
-  newAddressesAddedEvent.address = Address.fromString(contractAddress);
-  newAddressesAddedEvent.parameters = [];
+  newMembershipAnnouncedEvent.address = Address.fromString(contractAddress);
+  newMembershipAnnouncedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddressesAddedEvent.parameters.push(usersParam);
+  newMembershipAnnouncedEvent.parameters.push(usersParam);
 
-  return newAddressesAddedEvent;
+  return newMembershipAnnouncedEvent;
 }
 
-export function createNewAddressesRemovedEvent(
+export function createNewMembershipRenouncedEvent(
   addresses: Address[],
   contractAddress: string
-): AddressesRemoved {
-  let newAddressesRemovedEvent = changetype<AddressesRemoved>(newMockEvent());
+): MembershipRenounced {
+  let newMembershipRenouncedEvent = changetype<MembershipRenounced>(
+    newMockEvent()
+  );
 
-  newAddressesRemovedEvent.address = Address.fromString(contractAddress);
-  newAddressesRemovedEvent.parameters = [];
+  newMembershipRenouncedEvent.address = Address.fromString(contractAddress);
+  newMembershipRenouncedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddressesRemovedEvent.parameters.push(usersParam);
+  newMembershipRenouncedEvent.parameters.push(usersParam);
 
-  return newAddressesRemovedEvent;
+  return newMembershipRenouncedEvent;
 }
 
 // calls

@@ -3,8 +3,8 @@ import {dataSource, store, BigInt} from '@graphprotocol/graph-ts';
 import {
   ProposalCreated,
   ProposalExecuted,
-  AddressesAdded,
-  AddressesRemoved,
+  MembershipAnnounced,
+  MembershipRenounced,
   Multisig,
   Approved,
   MultisigSettingsUpdated
@@ -156,7 +156,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleAddressesAdded(event: AddressesAdded): void {
+export function handleMembershipAnnounced(event: MembershipAnnounced): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
@@ -173,7 +173,7 @@ export function handleAddressesAdded(event: AddressesAdded): void {
   }
 }
 
-export function handleAddressesRemoved(event: AddressesRemoved): void {
+export function handleMembershipRenounced(event: MembershipRenounced): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();

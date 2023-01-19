@@ -3,7 +3,12 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
 import {getMergedABI} from '../../utils/abi';
-import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
+import {
+  findEvent,
+  DAO_EVENTS,
+  PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
+} from '../../utils/event';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
@@ -68,7 +73,7 @@ describe('Admin plugin', function () {
   });
 
   function initializePlugin() {
-    return plugin.initialize(dao.address);
+    return plugin.initialize(dao.address, signers[0].address);
   }
 
   describe('initialize: ', async () => {
@@ -78,6 +83,12 @@ describe('Admin plugin', function () {
       await expect(initializePlugin()).to.be.revertedWith(
         OZ_ERRORS.ALREADY_INITIALIZED
       );
+    });
+
+    it('emits the `MembershipAnnounced` event', async () => {
+      await expect(plugin.initialize(dao.address, signers[0].address))
+        .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_ANNOUNCED)
+        .withArgs([signers[0].address]);
     });
   });
 
@@ -95,7 +106,7 @@ describe('Admin plugin', function () {
 
     it('supports admin address plugin interface', async () => {
       const iface = new ethers.utils.Interface([
-        'function initialize(address  _dao)',
+        'function initialize(address  _dao, address _admin)',
         'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions)',
       ]);
 

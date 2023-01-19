@@ -13,6 +13,7 @@ import {
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {
@@ -135,6 +136,34 @@ describe('TokenVoting', function () {
   }
 
   describe('initialize: ', async () => {
+    it('reverts if trying to re-initialize', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await expect(
+        voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        )
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+
+    it('emits the `MembershipContractAnnounced` event', async () => {
+      await expect(
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        )
+      )
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .withArgs(governanceErc20Mock.address);
+    });
+
     it('reverts if trying to re-initialize', async () => {
       await voting.initialize(
         dao.address,

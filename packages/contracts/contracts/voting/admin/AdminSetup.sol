@@ -37,7 +37,10 @@ contract AdminSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         returns (
             address plugin,
@@ -58,7 +61,7 @@ contract AdminSetup is PluginSetup {
         plugin = implementation.clone();
 
         // Initialize cloned plugin contract.
-        Admin(plugin).initialize(dao);
+        Admin(plugin).initialize(dao, admin);
 
         // Prepare helpers
         (helpers); // silence the warning.

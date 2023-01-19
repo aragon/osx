@@ -6,8 +6,8 @@ import {
   ProposalCreated,
   Approved,
   ProposalExecuted,
-  AddressesAdded,
-  AddressesRemoved,
+  MembershipAnnounced,
+  MembershipRenounced,
   MultisigSettingsUpdated
 } from '../../generated/templates/Multisig/Multisig';
 import {
@@ -125,42 +125,46 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewAddressesAddedEvent(
+export function createNewMembershipAnnouncedEvent(
   addresses: Address[],
   contractAddress: string
-): AddressesAdded {
-  let newAddressesAddedEvent = changetype<AddressesAdded>(newMockEvent());
+): MembershipAnnounced {
+  let newMembershipAnnouncedEvent = changetype<MembershipAnnounced>(
+    newMockEvent()
+  );
 
-  newAddressesAddedEvent.address = Address.fromString(contractAddress);
-  newAddressesAddedEvent.parameters = [];
+  newMembershipAnnouncedEvent.address = Address.fromString(contractAddress);
+  newMembershipAnnouncedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddressesAddedEvent.parameters.push(usersParam);
+  newMembershipAnnouncedEvent.parameters.push(usersParam);
 
-  return newAddressesAddedEvent;
+  return newMembershipAnnouncedEvent;
 }
 
-export function createNewAddressesRemovedEvent(
+export function createNewMembershipRenouncedEvent(
   addresses: Address[],
   contractAddress: string
-): AddressesRemoved {
-  let newAddressesRemovedEvent = changetype<AddressesRemoved>(newMockEvent());
+): MembershipRenounced {
+  let newMembershipRenouncedEvent = changetype<MembershipRenounced>(
+    newMockEvent()
+  );
 
-  newAddressesRemovedEvent.address = Address.fromString(contractAddress);
-  newAddressesRemovedEvent.parameters = [];
+  newMembershipRenouncedEvent.address = Address.fromString(contractAddress);
+  newMembershipRenouncedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddressesRemovedEvent.parameters.push(usersParam);
+  newMembershipRenouncedEvent.parameters.push(usersParam);
 
-  return newAddressesRemovedEvent;
+  return newMembershipRenouncedEvent;
 }
 
 export function createNewMultisigSettingsUpdatedEvent(
@@ -217,7 +221,7 @@ export function createGetProposalCall(
   snapshotBlock: string,
 
   approvals: string,
-  
+
   actions: ethereum.Tuple[]
 ): void {
   let parameters = new ethereum.Tuple();
@@ -245,7 +249,7 @@ export function createGetProposalCall(
     ])
     .returns([
       ethereum.Value.fromBoolean(executed),
-      
+
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(approvals)),
 
       // ProposalParameters
@@ -271,7 +275,7 @@ export function createMultisigProposalEntityState(
   snapshotBlock: string = SNAPSHOT_BLOCK,
 
   createdAt: string = CREATED_AT,
-  creationBlockNumber: BigInt = new BigInt(0),
+  creationBlockNumber: BigInt = new BigInt(0)
 ): MultisigProposal {
   let multisigProposal = new MultisigProposal(entityID);
   multisigProposal.dao = Address.fromString(dao).toHexString();
