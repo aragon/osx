@@ -35,11 +35,11 @@ interface IMajorityVoting {
 
     /// @notice Returns the support threshold parameter stored in the voting settings.
     /// @return The support threshold parameter.
-    function supportThreshold() external view returns (uint64);
+    function supportThreshold() external view returns (uint32);
 
     /// @notice Returns the minimum participation parameter stored in the voting settings.
     /// @return The minimum participation parameter.
-    function minParticipation() external view returns (uint64);
+    function minParticipation() external view returns (uint32);
 
     /// @notice Checks if the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.

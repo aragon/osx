@@ -111,8 +111,8 @@ abstract contract MajorityVotingBase is
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     struct VotingSettings {
         VotingMode votingMode;
-        uint64 supportThreshold;
-        uint64 minParticipation;
+        uint32 supportThreshold;
+        uint32 minParticipation;
         uint64 minDuration;
         uint256 minProposerVotingPower;
     }
@@ -140,7 +140,7 @@ abstract contract MajorityVotingBase is
     /// @param minVotingPower The minimum voting power needed.
     struct ProposalParameters {
         VotingMode votingMode;
-        uint64 supportThreshold;
+        uint32 supportThreshold;
         uint64 startDate;
         uint64 endDate;
         uint64 snapshotBlock;
@@ -208,8 +208,8 @@ abstract contract MajorityVotingBase is
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     event VotingSettingsUpdated(
         VotingMode votingMode,
-        uint64 supportThreshold,
-        uint64 minParticipation,
+        uint32 supportThreshold,
+        uint32 minParticipation,
         uint64 minDuration,
         uint256 minProposerVotingPower
     );
@@ -323,12 +323,12 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function supportThreshold() public view virtual returns (uint64) {
+    function supportThreshold() public view virtual returns (uint32) {
         return votingSettings.supportThreshold;
     }
 
     /// @inheritdoc IMajorityVoting
-    function minParticipation() public view virtual returns (uint64) {
+    function minParticipation() public view virtual returns (uint32) {
         return votingSettings.minParticipation;
     }
 
