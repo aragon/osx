@@ -130,6 +130,11 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         _updateMultisigSettings(_multisigSettings);
 
         emit MembershipAnnounced({members: _members});
+
+        emit MultisigSettingsUpdated({
+            onlyListed: _multisigSettings.onlyListed,
+            minApprovals: _multisigSettings.minApprovals
+        });
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -197,6 +202,11 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         MultisigSettings calldata _multisigSettings
     ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         _updateMultisigSettings(_multisigSettings);
+
+        emit MultisigSettingsUpdated({
+            onlyListed: _multisigSettings.onlyListed,
+            minApprovals: _multisigSettings.minApprovals
+        });
     }
 
     /// @notice Creates a new majority voting proposal.
@@ -421,10 +431,6 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         }
 
         multisigSettings = _multisigSettings;
-        emit MultisigSettingsUpdated({
-            onlyListed: _multisigSettings.onlyListed,
-            minApprovals: _multisigSettings.minApprovals
-        });
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
