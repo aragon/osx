@@ -76,8 +76,9 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 ///
 /// $$
 /// \begin{align*}
-///   (1- \texttt{supportThreshold}) \cdot N_\text{yes}
-///   &> \texttt{supportThreshold} \cdot (N_\text{no}+\texttt{remainingVotes})\\[3mm]
+///   (1 - \texttt{supportThreshold}) \cdot N_\text{yes}
+///   &> \texttt{supportThreshold} \cdot (N_\text{no} + \texttt{remainingVotes})\\[3mm]
+///   &> \texttt{supportThreshold} \cdot (N_\text{no} + N_\text{total}-(N_\text{yes}+N_\text{no}+N_\text{abstain}))\\[3mm]
 ///   &> \texttt{supportThreshold} \cdot (N_\text{total}-N_\text{yes}-N_\text{abstain})
 /// \end{align*}
 /// $$
