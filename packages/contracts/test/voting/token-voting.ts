@@ -444,7 +444,7 @@ describe('TokenVoting', function () {
       ).to.equal(proposal.parameters.endDate);
 
       expect(proposal.tally.totalVotingPower).to.equal(10);
-      expect(proposal.tally.yes).to.equal(10);
+      expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
       expect(
