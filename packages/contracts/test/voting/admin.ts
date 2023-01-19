@@ -8,6 +8,7 @@ import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
 import {deployWithProxy} from '../test-utils/proxy';
+import {toBytes32} from '../test-utils/voting';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -192,7 +193,7 @@ describe('Admin plugin', function () {
         const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
         expect(event.args.actor).to.equal(plugin.address);
-        expect(event.args.callId).to.equal(proposalId);
+        expect(event.args.callId).to.equal(toBytes32(proposalId));
         expect(event.args.actions.length).to.equal(1);
         expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
         expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -205,7 +206,7 @@ describe('Admin plugin', function () {
         const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
         const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
-        expect(event.args.callId).to.equal(proposalId);
+        expect(event.args.callId).to.equal(toBytes32(proposalId));
       }
     });
   });

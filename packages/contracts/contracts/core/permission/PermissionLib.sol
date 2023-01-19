@@ -9,7 +9,6 @@ library PermissionLib {
     enum Operation {
         Grant,
         Revoke,
-        Freeze,
         GrantWithOracle
     }
 

@@ -60,7 +60,7 @@ Once the proposal has passed, the actions specified in the `Action[]` array get 
 1. The DAO temporarily grants the `ROOT_PERMISSION_ID` permission to the `PluginSetupProcessor`. This is needed so that the processor can modify the DAO's permissions settings to setup the plugin.
 2. The next `Action` calls the `processInstallation`, `processUpdate`, or `processUninstallation` method in the `PluginSetupProcessor` depending on the setup process and with the permission list as an argument. The permission hash is compared with the stored hash to make sure that the permission didn’t change.
    In addition to the above, the update process also upgrades the logic contract to which the proxy points too.
-3. If the hash is valid, the list is processed and `PluginSetupProcessor` conducts the requested sequence of `grant`, `grantWithOracle`, `revoke`, and `freeze` calls on the owning DAO.
+3. If the hash is valid, the list is processed and `PluginSetupProcessor` conducts the requested sequence of `grant`, `grantWithOracle` and `revoke` calls on the owning DAO.
    Finally, the `PluginSetupProcessor` asks the DAO to revoke the `ROOT_PERMISSION_ID` permission from itself.
 
 :::info

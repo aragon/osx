@@ -23,7 +23,7 @@ contract DAOMock is IDAO, PermissionManager {
     ) public pure override returns (bool) {
         return true;
     }
-    
+
     function getTrustedForwarder() public pure override returns (address) {
         return address(0);
     }
@@ -36,14 +36,13 @@ contract DAOMock is IDAO, PermissionManager {
         bytes calldata /* _metadata */
     ) external override {}
 
-    function execute(uint256 callId, Action[] memory _actions)
+    function execute(bytes32 callId, Action[] memory _actions, uint256 allowFailureMap)
         external
         override
-        returns (bytes[] memory)
+        returns (bytes[] memory execResults, uint256 failureMap)
     {
-        bytes[] memory results;
-        emit Executed(msg.sender, callId, _actions, results);
-        return results;
+        (allowFailureMap);
+        emit Executed(msg.sender, callId, _actions, failureMap, execResults);
     }
 
     function deposit(

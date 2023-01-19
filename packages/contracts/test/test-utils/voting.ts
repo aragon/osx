@@ -96,3 +96,8 @@ export async function timestampIn(durationInSec: number): Promise<number> {
 export async function setTimeForNextBlock(timestamp: number): Promise<void> {
   await ethers.provider.send('evm_setNextBlockTimestamp', [timestamp])
 }
+
+export function toBytes32(num: number): string {
+  const hex = num.toString(16)
+  return `0x${'0'.repeat(64-hex.length)}${hex}`
+}

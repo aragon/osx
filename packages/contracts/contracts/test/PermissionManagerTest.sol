@@ -31,14 +31,6 @@ contract PermissionManagerTest is PermissionManager {
         return permissionHash(_where, _who, _permissionId);
     }
 
-    function getFrozenPermissionHash(address _where, bytes32 _permissionId)
-        public
-        pure
-        returns (bytes32)
-    {
-        return frozenPermissionHash(_where, _permissionId);
-    }
-
     function getAnyAddr() public pure returns (address) {
         return ANY_ADDR;
     }
