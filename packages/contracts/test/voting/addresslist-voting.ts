@@ -320,9 +320,11 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal successfully, but not vote', async () => {
-      await voting.initialize(dao.address, votingSettings, [
-        signers[0].address,
-      ]);
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -369,8 +371,8 @@ describe('AddresslistVoting', function () {
 
       expect(await voting.canVote(id, signers[0].address, VoteOption.Yes)).to.be
         .true;
-      expect(await voting.canVote(id, signers[1].address, VoteOption.Yes)).to.be
-        .false;
+      expect(await voting.canVote(id, signers[10].address, VoteOption.Yes)).to
+        .be.false;
       expect(await voting.canVote(1, signers[0].address, VoteOption.Yes)).to.be
         .false;
 
@@ -381,9 +383,11 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal and cast a vote immediately', async () => {
-      await voting.initialize(dao.address, votingSettings, [
-        signers[0].address,
-      ]);
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
 
       let tx = await voting.createProposal(
         dummyMetadata,

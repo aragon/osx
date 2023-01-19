@@ -399,6 +399,8 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
+      await setBalances([{receiver: signers[0].address, amount: 10}]);
+
       let tx = await voting.createProposal(
         dummyMetadata,
         dummyActions,
@@ -441,8 +443,8 @@ describe('TokenVoting', function () {
         proposal.parameters.startDate.add(votingSettings.minDuration)
       ).to.equal(proposal.parameters.endDate);
 
-      expect(proposal.tally.totalVotingPower).to.equal(1);
-      expect(proposal.tally.yes).to.equal(0);
+      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(proposal.tally.yes).to.equal(10);
       expect(proposal.tally.no).to.equal(0);
 
       expect(
@@ -462,6 +464,8 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
+      await setBalances([{receiver: signers[0].address, amount: 10}]);
+
       let tx = await voting.createProposal(
         dummyMetadata,
         dummyActions,
@@ -474,7 +478,7 @@ describe('TokenVoting', function () {
       await expect(tx)
         .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+        .withArgs(id, signers[0].address, VoteOption.Yes, 10);
 
       const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
       expect(event.args.proposalId).to.equal(id);
@@ -500,8 +504,8 @@ describe('TokenVoting', function () {
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
-      expect(proposal.tally.totalVotingPower).to.equal(1);
-      expect(proposal.tally.yes).to.equal(1);
+      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(proposal.tally.yes).to.equal(10);
       expect(proposal.tally.no).to.equal(0);
       expect(proposal.tally.abstain).to.equal(0);
     });
