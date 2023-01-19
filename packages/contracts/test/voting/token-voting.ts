@@ -1261,6 +1261,7 @@ describe('TokenVoting', function () {
 
         const tally = (await voting.getProposal(id)).tally;
         expect(tally.yes).to.eq(tally.totalVotingPower.sub(1));
+        expect(tally.no).to.eq(0);
 
         expect(await voting.isMinParticipationReached(id)).to.be.false;
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
