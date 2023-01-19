@@ -26,6 +26,7 @@ import {
   ONE_HOUR,
   MAX_UINT64,
   voteWithSigners,
+  toBytes32,
 } from '../test-utils/voting';
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
@@ -882,7 +883,7 @@ describe('TokenVoting', function () {
           const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
           expect(event.args.actor).to.equal(voting.address);
-          expect(event.args.callId).to.equal(id);
+          expect(event.args.callId).to.equal(toBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);

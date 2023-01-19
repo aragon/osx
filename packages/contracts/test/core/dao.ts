@@ -18,6 +18,7 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
+import {ZERO_BYTES32, daoExampleURI} from '../test-utils/dao';
 
 chai.use(smock.matchers);
 
@@ -72,7 +73,12 @@ describe('DAO', function () {
 
     const DAO = await ethers.getContractFactory('DAO');
     dao = await deployWithProxy(DAO);
-    await dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1);
+    await dao.initialize(
+      dummyMetadata1,
+      ownerAddress,
+      dummyAddress1,
+      daoExampleURI
+    );
 
     const Token = await ethers.getContractFactory('GovernanceERC20');
     token = await Token.deploy(dao.address, 'GOV', 'GOV', {
@@ -124,7 +130,12 @@ describe('DAO', function () {
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
       await expect(
-        dao.initialize(dummyMetadata1, ownerAddress, dummyAddress1)
+        dao.initialize(
+          dummyMetadata1,
+          ownerAddress,
+          dummyAddress1,
+          daoExampleURI
+        )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
@@ -201,7 +212,7 @@ describe('DAO', function () {
         PERMISSION_IDS.EXECUTE_PERMISSION_ID
       );
 
-      await expect(dao.execute(0, [data.succeedAction], 0))
+      await expect(dao.execute(ZERO_BYTES32, [data.succeedAction], 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
@@ -217,19 +228,19 @@ describe('DAO', function () {
         actions[i] = data.succeedAction;
       }
 
-      await expect(dao.execute(0, actions, 0)).to.not.be.reverted;
+      await expect(dao.execute(ZERO_BYTES32, actions, 0)).to.not.be.reverted;
 
       // add one more to make sure it fails
       actions[MAX_ACTIONS] = data.failAction;
 
-      await expect(dao.execute(0, actions, 0)).to.be.revertedWithCustomError(
+      await expect(dao.execute(ZERO_BYTES32, actions, 0)).to.be.revertedWithCustomError(
         dao,
         'TooManyActions'
       );
     });
 
     it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
-      await expect(dao.execute(0, [data.failAction], 0))
+      await expect(dao.execute(ZERO_BYTES32, [data.failAction], 0))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(0);
     });
@@ -238,7 +249,7 @@ describe('DAO', function () {
       let num = ethers.BigNumber.from(0);
       num = flipBit(0, num);
 
-      const tx = await dao.execute(0, [data.failAction], num);
+      const tx = await dao.execute(ZERO_BYTES32, [data.failAction], num);
       const event = await findEvent(tx, EVENTS.Executed);
 
       // Check that failAction's revertMessage was correctly stored in the dao's execResults
@@ -247,7 +258,7 @@ describe('DAO', function () {
     });
 
     it('returns the correct result if action succeeds', async () => {
-      const tx = await dao.execute(0, [data.succeedAction], 0);
+      const tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
       const event = await findEvent(tx, EVENTS.Executed);
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
@@ -273,11 +284,11 @@ describe('DAO', function () {
       }
 
       // If the below call not fails, means allowFailureMap is correct.
-      let tx = await dao.execute(0, actions, allowFailureMap);
+      let tx = await dao.execute(ZERO_BYTES32, actions, allowFailureMap);
       let event = await findEvent(tx, EVENTS.Executed);
 
       expect(event.args.actor).to.equal(ownerAddress);
-      expect(event.args.callId).to.equal(0);
+      expect(event.args.callId).to.equal(ZERO_BYTES32);
 
       // construct the failureMap which only has those
       // bits set at indexes where actions failed
@@ -300,18 +311,18 @@ describe('DAO', function () {
       // lets remove one of the action from allowFailureMap
       // to see tx will actually revert.
       allowFailureMap = flipBit(2, allowFailureMap);
-      await expect(dao.execute(0, actions, allowFailureMap))
+      await expect(dao.execute(ZERO_BYTES32, actions, allowFailureMap))
         .to.be.revertedWithCustomError(dao, 'ActionFailed')
         .withArgs(2); // Since we unset the 2th action from failureMap, it should fail with that index.
     });
 
     it('emits an event afterwards', async () => {
-      let tx = await dao.execute(0, [data.succeedAction], 0);
+      let tx = await dao.execute(ZERO_BYTES32, [data.succeedAction], 0);
       let rc = await tx.wait();
 
       const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
       expect(event.args.actor).to.equal(ownerAddress);
-      expect(event.args.callId).to.equal(0);
+      expect(event.args.callId).to.equal(ZERO_BYTES32);
       expect(event.args.actions.length).to.equal(1);
       expect(event.args.actions[0].to).to.equal(data.succeedAction.to);
       expect(event.args.actions[0].value).to.equal(data.succeedAction.value);
@@ -330,7 +341,7 @@ describe('DAO', function () {
       });
 
       const transferAction = {to: recipient, value: depositAmount, data: '0x'};
-      await dao.execute(0, [transferAction], 0);
+      await dao.execute(ZERO_BYTES32, [transferAction], 0);
       const newBalance = await ethers.provider.getBalance(recipient);
       expect(newBalance.sub(currentBalance)).to.equal(depositAmount);
     });
@@ -363,7 +374,7 @@ describe('DAO', function () {
       expect(await token.balanceOf(dao.address)).to.equal(20);
       expect(await token.balanceOf(recipient)).to.equal(0);
 
-      await dao.execute(0, [transferAction], 0);
+      await dao.execute(ZERO_BYTES32, [transferAction], 0);
       expect(await token.balanceOf(dao.address)).to.equal(0);
       expect(await token.balanceOf(recipient)).to.equal(20);
     });
@@ -675,6 +686,43 @@ describe('DAO', function () {
       expect(
         await dao.isValidSignature(ethers.utils.keccak256('0x00'), '0x00')
       ).to.be.eq('0x41424344');
+    });
+
+    describe('ERC4824 - daoURI', async () => {
+      it('should set a new URI', async () => {
+        const newURI = 'https://new.example.com';
+        expect(await dao.daoURI()).not.to.be.eq(newURI);
+        await dao.setDaoURI(newURI);
+        expect(await dao.daoURI()).to.be.eq(newURI);
+      });
+
+      it('should emit DaoURIUpdated', async () => {
+        const newURI = 'https://new.example.com';
+        await expect(dao.setDaoURI(newURI))
+          .to.emit(dao, DAO_EVENTS.NEW_URI)
+          .withArgs(newURI);
+      });
+
+      it('should revert if the sender lacks the permission to update the URI', async () => {
+        await dao.revoke(
+          dao.address,
+          ownerAddress,
+          PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+        );
+
+        await expect(dao.setDaoURI('https://new.example.com'))
+          .to.be.revertedWithCustomError(dao, 'Unauthorized')
+          .withArgs(
+            dao.address,
+            dao.address,
+            ownerAddress,
+            PERMISSION_IDS.SET_METADATA_PERMISSION_ID
+          );
+      });
+
+      it('should return the DAO URI', async () => {
+        expect(await dao.daoURI()).to.be.eq(daoExampleURI);
+      });
     });
   });
 

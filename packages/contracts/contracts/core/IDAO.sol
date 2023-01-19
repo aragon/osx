@@ -41,7 +41,7 @@ abstract contract IDAO {
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
     /// @return uint256 The constructed failureMap which contains which actions have actually failed.
     function execute(
-        uint256 callId,
+        bytes32 callId,
         Action[] memory _actions,
         uint256 _allowFailureMap
     ) external virtual returns (bytes[] memory, uint256);
@@ -56,7 +56,7 @@ abstract contract IDAO {
     /// @param execResults Array with the results of the executed actions.
     event Executed(
         address indexed actor,
-        uint256 callId,
+        bytes32 callId,
         Action[] actions,
         uint256 failureMap,
         bytes[] execResults

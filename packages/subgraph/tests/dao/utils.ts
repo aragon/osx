@@ -274,7 +274,7 @@ export function createNewExecutedEvent(
   );
   let callIdParam = new ethereum.EventParam(
     'callId',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(callId))
+    ethereum.Value.fromBytes(Bytes.fromHexString(callId))
   );
   let actionsParam = new ethereum.EventParam(
     'actions',
