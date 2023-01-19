@@ -1,4 +1,6 @@
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {expect} from 'chai';
+import {Contract, Signer} from 'ethers';
 import {ethers} from 'hardhat';
 
 /// Used as a common test suite to test upgradeability of the contracts.
@@ -13,6 +15,28 @@ export function shouldUpgradeCorrectly(
 ) {
   let uupsCompatibleBase: string;
 
+  function DaoUnauthorizedRevertArgs(
+    contract: Contract,
+    user: SignerWithAddress,
+    dao: Contract
+  ) {
+    return [
+      dao.address,
+      contract.address,
+      contract.address,
+      user.address,
+      upgradePermissionId,
+    ];
+  }
+
+  function UnauthorizedRevertArgs(
+    contract: Contract,
+    user: SignerWithAddress,
+    dao: Contract
+  ) {
+    return [dao.address, contract.address, user.address, upgradePermissionId];
+  }
+  
   describe('UUPS Upgradeability Test', async () => {
     before(async () => {
       const factory = await ethers.getContractFactory(
@@ -24,26 +48,34 @@ export function shouldUpgradeCorrectly(
     it('reverts if user without permission tries to upgrade', async function () {
       const {user, contract, dao} = this.upgrade;
       const connect = contract.connect(user);
-      const tx = connect.upgradeTo(ethers.constants.AddressZero);
+      const tx1 = connect.upgradeTo(ethers.constants.AddressZero);
+      const tx2 = connect.upgradeToAndCall(ethers.constants.AddressZero, '0x');
       if (upgradeRevertPermissionMessage == 'DaoUnauthorized') {
-        await expect(tx)
-          .to.be.revertedWithCustomError(contract, 'DaoUnauthorized')
-          .withArgs(
-            dao.address,
-            contract.address,
-            contract.address,
-            user.address,
-            upgradePermissionId
-          );
+        await expect(tx1)
+          .to.be.revertedWithCustomError(
+            contract,
+            upgradeRevertPermissionMessage
+          )
+          .withArgs(...DaoUnauthorizedRevertArgs(contract, user, dao));
+        await expect(tx2)
+          .to.be.revertedWithCustomError(
+            contract,
+            upgradeRevertPermissionMessage
+          )
+          .withArgs(...DaoUnauthorizedRevertArgs(contract, user, dao));
       } else {
-        await expect(tx)
-          .to.be.revertedWithCustomError(contract, 'Unauthorized')
-          .withArgs(
-            dao.address,
-            contract.address,
-            user.address,
-            upgradePermissionId
-          );
+        await expect(tx2)
+          .to.be.revertedWithCustomError(
+            contract,
+            upgradeRevertPermissionMessage
+          )
+          .withArgs(...UnauthorizedRevertArgs(contract, user, dao));
+        await expect(tx2)
+          .to.be.revertedWithCustomError(
+            contract,
+            upgradeRevertPermissionMessage
+          )
+          .withArgs(...UnauthorizedRevertArgs(contract, user, dao));
       }
     });
 

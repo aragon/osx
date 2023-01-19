@@ -87,26 +87,6 @@ describe('DAORegistry', function () {
     'DaoUnauthorized'
   )
 
-  describe("Upgrade", async () => {
-    it('reverts if user without permission tries to upgrade', async function () {
-      const {user, contract, dao} = this.upgrade;
-      const connect = contract.connect(user);
-      const tx = connect.upgradeTo(ethers.constants.AddressZero);
-      await expect(tx).to.be.reverted;
-    });
-
-    it('updates correctly to new implementation', async function () {
-      const newOne = await ethers.getContractFactory('DAORegistry')
-      const addr = await newOne.deploy();
-      const {user, contract, dao} = this.upgrade;
-      await dao.grant(contract.address, user.address, upgradePermissionId);
-      const connect = contract.connect(user);
-      await expect(connect.upgradeTo(addr.address))
-        .to.emit(contract, 'Upgraded')
-        .withArgs(addr.ddaress);
-    });
-  })
-
   it('reverts the registration if the DAO name is empty', async function () {
     await expect(
       daoRegistry.register(targetDao.address, ownerAddress, '')

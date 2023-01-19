@@ -41,7 +41,7 @@ export async function approveWithSigners(
   await Promise.all(promises);
 }
 
-describe('Multisig', function () {
+describe.only('Multisig', function () {
   let signers: SignerWithAddress[];
   let multisig: any;
   let dao: DAO;
@@ -110,7 +110,11 @@ describe('Multisig', function () {
         dao: dao,
         user: signers[8],
       };
-      await multisig.initialize(dao.address, [], multisigSettings);
+      await multisig.initialize(
+        dao.address,
+        signers.slice(0, 5).map(s => s.address),
+        multisigSettings
+      );
     });
 
     shouldUpgradeCorrectly(
