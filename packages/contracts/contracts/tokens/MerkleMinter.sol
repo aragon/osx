@@ -38,7 +38,7 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @inheritdoc IMerkleMinter
     function initialize(
         IDAO _dao,
@@ -52,11 +52,9 @@ contract MerkleMinter is IMerkleMinter, PluginUUPSUpgradeable {
     }
 
     /// @inheritdoc IMerkleMinter
-    function changeDistributorBase(IMerkleDistributor _distributorBase)
-        external
-        override
-        auth(CHANGE_DISTRIBUTOR_PERMISSION_ID)
-    {
+    function changeDistributorBase(
+        IMerkleDistributor _distributorBase
+    ) external override auth(CHANGE_DISTRIBUTOR_PERMISSION_ID) {
         distributorBase = _distributorBase;
     }
 

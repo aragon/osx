@@ -53,12 +53,9 @@ abstract contract PluginUUPSUpgradeable is
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_PLUGIN_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(UPGRADE_PLUGIN_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(UPGRADE_PLUGIN_PERMISSION_ID) {}
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
     uint256[50] private __gap;

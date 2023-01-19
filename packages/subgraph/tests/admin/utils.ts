@@ -3,7 +3,7 @@ import {newMockEvent} from 'matchstick-as';
 
 import {
   ProposalCreated,
-  ProposalExecuted
+  ProposalExecuted,
 } from '../../generated/templates/Admin/Admin';
 
 // events

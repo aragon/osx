@@ -8,9 +8,9 @@ contract PermissionOracleMock is IPermissionOracle {
     bool internal _hasPermissionsResult = true;
 
     function isGranted(
-        address, /* _where */
-        address, /* _who */
-        bytes32, /* _permissionId */
+        address /* _where */,
+        address /* _who */,
+        bytes32 /* _permissionId */,
         bytes memory /* _data */
     ) external view returns (bool) {
         return _hasPermissionsResult;

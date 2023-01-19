@@ -43,7 +43,7 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @inheritdoc IMerkleDistributor
     function initialize(
         IDAO _dao,

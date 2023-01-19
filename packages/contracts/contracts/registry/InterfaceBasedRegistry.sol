@@ -70,7 +70,9 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
 
         if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
 
-        try IERC165Upgradeable(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
+        try IERC165Upgradeable(_registrant).supportsInterface(targetInterfaceId) returns (
+            bool result
+        ) {
             if (!result) revert ContractInterfaceInvalid(_registrant);
         } catch {
             revert ContractERC165SupportInvalid({registrant: _registrant});

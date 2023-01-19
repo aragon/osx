@@ -6,7 +6,7 @@ pragma solidity 0.8.10;
 contract ActionExecute {
     uint num = 10;
 
-    function setTest(uint newNum) public returns(uint) {
+    function setTest(uint newNum) public returns (uint) {
         num = newNum;
         return num;
     }
@@ -14,5 +14,4 @@ contract ActionExecute {
     function fail() public pure {
         revert("ActionExecute:Revert");
     }
-    
 }

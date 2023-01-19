@@ -103,7 +103,12 @@ contract TokenFactory {
         }
 
         token = governanceERC20Base.clone();
-        GovernanceERC20(token).initialize(_managingDao, _tokenConfig.name, _tokenConfig.symbol, _mintSettings);
+        GovernanceERC20(token).initialize(
+            _managingDao,
+            _tokenConfig.name,
+            _tokenConfig.symbol,
+            _mintSettings
+        );
 
         // Clone and initialize a `MerkleMinter`
         address merkleMinter = merkleMinterBase.clone();
@@ -118,7 +123,7 @@ contract TokenFactory {
 
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
-        
+
         // Grant the managing DAO permission to directly mint tokens to an receiving address.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 

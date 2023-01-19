@@ -27,7 +27,7 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
     /// @param _dao The address of the managing DAO.
     /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
@@ -41,10 +41,10 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice Registers a plugin repository with a name and address.
     /// @param name The name of the PluginRepo.
     /// @param pluginRepo The address of the PluginRepo contract.
-    function registerPluginRepo(string calldata name, address pluginRepo)
-        external
-        auth(REGISTER_PLUGIN_REPO_PERMISSION_ID)
-    {
+    function registerPluginRepo(
+        string calldata name,
+        address pluginRepo
+    ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
         // The caller(PluginRepoFactory) explicitly checks
         // if the name is empty and reverts.
 

@@ -44,13 +44,9 @@ contract PermissionManagerTest is PermissionManager {
         return _isGranted(_where, _who, _permissionId, _data);
     }
 
-    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
-        internal
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function isPermissionRestrictedForAnyAddr(
+        bytes32 _permissionId
+    ) internal view virtual override returns (bool) {
         return _permissionId == TEST_PERMISSION_1_ID || _permissionId == TEST_PERMISSION_2_ID;
     }
 }

@@ -5,14 +5,14 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
-  TokenVoting
+  TokenVoting,
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
   Action,
   TokenVotingPlugin,
   TokenVotingProposal,
   TokenVotingVoter,
-  TokenVotingVote
+  TokenVotingVote,
 } from '../../../generated/schema';
 
 import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';

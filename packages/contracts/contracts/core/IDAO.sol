@@ -143,10 +143,10 @@ abstract contract IDAO {
     /// @param _hash The keccak256 hash of arbitrary length data signed on the behalf of `address(this)`.
     /// @param _signature Signature byte array associated with _data.
     /// @return magicValue Returns the `bytes4` magic value `0x1626ba7e` if the signature is valid.
-    function isValidSignature(bytes32 _hash, bytes memory _signature)
-        external
-        virtual
-        returns (bytes4);
+    function isValidSignature(
+        bytes32 _hash,
+        bytes memory _signature
+    ) external virtual returns (bytes4);
 
     /// @notice Registers an ERC standard having a callback by registering its [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID and callback function signature.
     /// @param _interfaceId The ID of the interface.

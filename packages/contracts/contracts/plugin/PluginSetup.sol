@@ -39,10 +39,10 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
     /// @param _data The data to initialize the storage of the proxy contract.
     /// @return address The address of the created proxy contract.
-    function createERC1967Proxy(address _implementation, bytes memory _data)
-        internal
-        returns (address)
-    {
+    function createERC1967Proxy(
+        address _implementation,
+        bytes memory _data
+    ) internal returns (address) {
         return createERC1967(_implementation, _data);
     }
 

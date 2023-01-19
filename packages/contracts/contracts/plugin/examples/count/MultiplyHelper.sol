@@ -15,15 +15,13 @@ contract MultiplyHelper is PluginUUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Multiplies the count with a number.
     /// @param _a The number to multiply the coun with.
-    function multiply(uint256 _a, uint256 _b)
-        external
-        view
-        auth(MULTIPLY_PERMISSION_ID)
-        returns (uint256)
-    {
+    function multiply(
+        uint256 _a,
+        uint256 _b
+    ) external view auth(MULTIPLY_PERMISSION_ID) returns (uint256) {
         return _a * _b;
     }
 }

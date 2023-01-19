@@ -11,10 +11,10 @@ error BumpInvalid(uint16[3] currentVersion, uint16[3] nextVersion);
 /// @param _oldVersion The old semantic version number.
 /// @param _newVersion The new semantic version number.
 /// @return bool Returns true if the bump is valid.
-function isValidBumpStrict(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
-    pure
-    returns (bool)
-{
+function isValidBumpStrict(
+    uint16[3] memory _oldVersion,
+    uint16[3] memory _newVersion
+) pure returns (bool) {
     uint256 i = 0;
     bool hasIncreased;
 
@@ -40,10 +40,10 @@ function isValidBumpStrict(uint16[3] memory _oldVersion, uint16[3] memory _newVe
 /// @param _oldVersion The old semantic version number.
 /// @param _newVersion The new semantic version number.
 /// @return bool Returns true if the bump is valid.
-function isValidBumpLoose(uint16[3] memory _oldVersion, uint16[3] memory _newVersion)
-    pure
-    returns (bool)
-{
+function isValidBumpLoose(
+    uint16[3] memory _oldVersion,
+    uint16[3] memory _newVersion
+) pure returns (bool) {
     uint256 i = 0;
     while (i < 3) {
         if (_newVersion[i] > _oldVersion[i]) {

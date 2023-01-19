@@ -7,7 +7,7 @@ import {
   UninstallationApplied,
   UninstallationPrepared,
   UpdateApplied,
-  UpdatePrepared
+  UpdatePrepared,
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 
 export function createVersionCreated(
@@ -130,7 +130,7 @@ export function createUpdatePreparedEvent(
   data: Bytes,
   plugin: string,
   updatedHelpers: string[],
-  initData: Bytes,
+  initData: Bytes
 ): UpdatePrepared {
   let newEvent = changetype<UpdatePrepared>(newMockEvent());
   newEvent.parameters = [];
@@ -207,7 +207,7 @@ export function createUninstallationPreparedEvent(
   pluginSetup: string,
   data: Bytes,
   plugin: string,
-  updatedHelpers: string[],
+  updatedHelpers: string[]
 ): UninstallationPrepared {
   let newEvent = changetype<UninstallationPrepared>(newMockEvent());
   newEvent.parameters = [];

@@ -23,10 +23,10 @@ interface IMerkleMinter {
     );
 
     /// @notice The [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token to be distributed.
-    function token() external returns(IERC20MintableUpgradeable);
+    function token() external returns (IERC20MintableUpgradeable);
 
     /// @notice The address of the `MerkleDistributor` to clone from.
-    function distributorBase() external returns(IMerkleDistributor);
+    function distributorBase() external returns (IMerkleDistributor);
 
     /// @notice Initializes the MerkleMinter.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).

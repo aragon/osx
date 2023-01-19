@@ -2,11 +2,7 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {
-  DAO,
-  DAO__factory,
-  GovernanceERC20,
-} from '../../typechain';
+import {DAO, DAO__factory, GovernanceERC20} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {flipBit} from '../test-utils/bitmap';
 
@@ -233,10 +229,9 @@ describe('DAO', function () {
       // add one more to make sure it fails
       actions[MAX_ACTIONS] = data.failAction;
 
-      await expect(dao.execute(ZERO_BYTES32, actions, 0)).to.be.revertedWithCustomError(
-        dao,
-        'TooManyActions'
-      );
+      await expect(
+        dao.execute(ZERO_BYTES32, actions, 0)
+      ).to.be.revertedWithCustomError(dao, 'TooManyActions');
     });
 
     it("reverts if action is failable and allowFailureMap doesn't include it", async () => {

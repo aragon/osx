@@ -39,7 +39,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @param node The node namehash.
     /// @param resolver The node resolver address.
     error InvalidResolver(bytes32 node, address resolver);
-    
+
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
         _disableInitializers();
@@ -53,11 +53,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     /// @param _managingDao The interface of the DAO managing the components permissions.
     /// @param _ens The interface of the ENS registry to be used.
     /// @param _node The ENS parent domain node under which the subdomains are to be registered.
-    function initialize(
-        IDAO _managingDao,
-        ENS _ens,
-        bytes32 _node
-    ) external initializer {
+    function initialize(IDAO _managingDao, ENS _ens, bytes32 _node) external initializer {
         __DaoAuthorizableUpgradeable_init(_managingDao);
 
         ens = _ens;
@@ -74,21 +70,18 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_REGISTRAR_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(UPGRADE_REGISTRAR_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(UPGRADE_REGISTRAR_PERMISSION_ID) {}
 
     /// @notice Registers a new subdomain with this registrar as the owner and set the target address in the resolver.
     /// @dev It reverts with no message if this contract isn't the owner nor an approved operator for the given node.
     /// @param _label The labelhash of the subdomain name.
     /// @param _targetAddress The address to which the subdomain resolves.
-    function registerSubnode(bytes32 _label, address _targetAddress)
-        external
-        auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID)
-    {
+    function registerSubnode(
+        bytes32 _label,
+        address _targetAddress
+    ) external auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID) {
         bytes32 subnode = keccak256(abi.encodePacked(node, _label));
         address currentOwner = ens.owner(subnode);
 
@@ -103,10 +96,9 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
 
     /// @notice Sets the default resolver contract address that the subdomains being registered will use.
     /// @param _resolver The resolver contract to be used.
-    function setDefaultResolver(address _resolver)
-        external
-        auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID)
-    {
+    function setDefaultResolver(
+        address _resolver
+    ) external auth(REGISTER_ENS_SUBDOMAIN_PERMISSION_ID) {
         if (_resolver == address(0)) {
             revert InvalidResolver({node: node, resolver: _resolver});
         }

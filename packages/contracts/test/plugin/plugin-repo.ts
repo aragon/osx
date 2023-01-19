@@ -43,7 +43,7 @@ describe('PluginRepo', function () {
 
   beforeEach(async function () {
     // deploy a pluginRepo and initialize
-    pluginRepo = await deployNewPluginRepo(ownerAddress)
+    pluginRepo = await deployNewPluginRepo(ownerAddress);
 
     // deploy pluging factory mock
     pluginSetupMock = await deployMockPluginSetup();

@@ -16,12 +16,7 @@ test('versionCreated event', () => {
     'pluginRepo',
     event.address.toHexString()
   );
-  assert.fieldEquals(
-    'PluginVersion',
-    entityId,
-    'semanticVersion',
-    '[1, 0, 0]'
-  );
+  assert.fieldEquals('PluginVersion', entityId, 'semanticVersion', '[1, 0, 0]');
   assert.fieldEquals(
     'PluginVersion',
     entityId,
@@ -41,12 +36,7 @@ test('versionCreated event', () => {
     'pluginRepo',
     event.address.toHexString()
   );
-  assert.fieldEquals(
-    'PluginVersion',
-    entityId,
-    'semanticVersion',
-    '[1, 1, 0]'
-  );
+  assert.fieldEquals('PluginVersion', entityId, 'semanticVersion', '[1, 1, 0]');
   assert.fieldEquals(
     'PluginVersion',
     entityId,

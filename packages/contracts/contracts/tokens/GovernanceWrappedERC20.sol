@@ -34,11 +34,7 @@ contract GovernanceWrappedERC20 is
     /// @param _token The underlying [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
     /// @param _name The name of the wrapped token.
     /// @param _symbol The symbol fo the wrapped token.
-    constructor(
-        IERC20Upgradeable _token,
-        string memory _name,
-        string memory _symbol
-    ) {
+    constructor(IERC20Upgradeable _token, string memory _name, string memory _symbol) {
         initialize(_token, _name, _symbol);
     }
 
@@ -81,20 +77,18 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @inheritdoc IGovernanceWrappedERC20
-    function depositFor(address account, uint256 amount)
-        public
-        override(IGovernanceWrappedERC20, ERC20WrapperUpgradeable)
-        returns (bool)
-    {
+    function depositFor(
+        address account,
+        uint256 amount
+    ) public override(IGovernanceWrappedERC20, ERC20WrapperUpgradeable) returns (bool) {
         return ERC20WrapperUpgradeable.depositFor(account, amount);
     }
 
     /// @inheritdoc IGovernanceWrappedERC20
-    function withdrawTo(address account, uint256 amount)
-        public
-        override(IGovernanceWrappedERC20, ERC20WrapperUpgradeable)
-        returns (bool)
-    {
+    function withdrawTo(
+        address account,
+        uint256 amount
+    ) public override(IGovernanceWrappedERC20, ERC20WrapperUpgradeable) returns (bool) {
         return ERC20WrapperUpgradeable.withdrawTo(account, amount);
     }
 
@@ -113,18 +107,18 @@ contract GovernanceWrappedERC20 is
     }
 
     /// @inheritdoc ERC20VotesUpgradeable
-    function _mint(address to, uint256 amount)
-        internal
-        override(ERC20VotesUpgradeable, ERC20Upgradeable)
-    {
+    function _mint(
+        address to,
+        uint256 amount
+    ) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._mint(to, amount);
     }
 
     /// @inheritdoc ERC20VotesUpgradeable
-    function _burn(address account, uint256 amount)
-        internal
-        override(ERC20VotesUpgradeable, ERC20Upgradeable)
-    {
+    function _burn(
+        address account,
+        uint256 amount
+    ) internal override(ERC20VotesUpgradeable, ERC20Upgradeable) {
         super._burn(account, amount);
     }
 }

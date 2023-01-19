@@ -51,10 +51,10 @@ contract DAOFactory {
     /// @notice Creates a new DAO and setup a number of plugins.
     /// @param _daoSettings The DAO settings containing `trustedForwarder`, `name` and `metadata`.
     /// @param _pluginSettings The list of plugin settings that will be installed after the DAO creation, containing `pluginSetup`, `pluginSetupRepo`, and `data`.
-    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata _pluginSettings)
-        external
-        returns (DAO createdDao)
-    {
+    function createDao(
+        DAOSettings calldata _daoSettings,
+        PluginSettings[] calldata _pluginSettings
+    ) external returns (DAO createdDao) {
         // Check if no plugin is provided.
         if (_pluginSettings.length == 0) {
             revert NoPluginProvided();
@@ -135,7 +135,12 @@ contract DAOFactory {
         dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
-        dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder, _daoSettings.daoURI);
+        dao.initialize(
+            _daoSettings.metadata,
+            address(this),
+            _daoSettings.trustedForwarder,
+            _daoSettings.daoURI
+        );
     }
 
     /// @notice Sets the required permissions for the new DAO.

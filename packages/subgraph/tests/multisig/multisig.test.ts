@@ -7,7 +7,7 @@ import {
   handleProposalExecuted,
   handleAddressesRemoved,
   _handleProposalCreated,
-  handleMultisigSettingsUpdated
+  handleMultisigSettingsUpdated,
 } from '../../src/packages/multisig/multisig';
 import {MultisigPlugin, MultisigApprover} from '../../generated/schema';
 import {
@@ -24,7 +24,7 @@ import {
   THREE,
   PROPOSAL_ENTITY_ID,
   START_DATE,
-  END_DATE
+  END_DATE,
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -36,7 +36,7 @@ import {
   getProposalCountCall,
   createMultisigProposalEntityState,
   createGetProposalCall,
-  createNewMultisigSettingsUpdatedEvent
+  createNewMultisigSettingsUpdatedEvent,
 } from './utils';
 
 let proposalId = '0';
@@ -284,7 +284,7 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
 test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO)
+    Address.fromString(ADDRESS_TWO),
   ];
 
   // create event
@@ -320,7 +320,7 @@ test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO)
+    Address.fromString(ADDRESS_TWO),
   ];
 
   for (let index = 0; index < memberAddresses.length; index++) {

@@ -21,7 +21,10 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -69,7 +72,10 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override

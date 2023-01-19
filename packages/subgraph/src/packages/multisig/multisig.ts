@@ -7,14 +7,14 @@ import {
   AddressesRemoved,
   Multisig,
   Approved,
-  MultisigSettingsUpdated
+  MultisigSettingsUpdated,
 } from '../../../generated/templates/Multisig/Multisig';
 import {
   Action,
   MultisigPlugin,
   MultisigProposal,
   MultisigApprover,
-  MultisigProposalApprover
+  MultisigProposalApprover,
 } from '../../../generated/schema';
 
 export function handleProposalCreated(event: ProposalCreated): void {
@@ -98,9 +98,8 @@ export function handleApproved(event: Approved): void {
 
   let proposalId = pluginId + '_' + event.params.proposalId.toHexString();
   let approverProposalId = member + '_' + proposalId;
-  let approverProposalEntity = MultisigProposalApprover.load(
-    approverProposalId
-  );
+  let approverProposalEntity =
+    MultisigProposalApprover.load(approverProposalId);
   if (!approverProposalEntity) {
     approverProposalEntity = new MultisigProposalApprover(approverProposalId);
     approverProposalEntity.approver = memberId;

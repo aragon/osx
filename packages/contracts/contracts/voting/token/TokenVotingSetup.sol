@@ -96,7 +96,10 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         returns (
             address plugin,

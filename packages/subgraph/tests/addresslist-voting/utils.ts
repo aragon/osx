@@ -8,7 +8,7 @@ import {
   ProposalExecuted,
   VotingSettingsUpdated,
   AddressesAdded,
-  AddressesRemoved
+  AddressesRemoved,
 } from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   ADDRESS_ONE,
@@ -23,7 +23,7 @@ import {
   END_DATE,
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
-  CREATED_AT
+  CREATED_AT,
 } from '../constants';
 
 // events

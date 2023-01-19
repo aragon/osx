@@ -32,10 +32,10 @@ contract PluginRepoFactory {
     /// @param _name The plugin repository name.
     /// @param _initialOwner The plugin maintainer address.
     /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithVersion`.
-    function createPluginRepo(string calldata _name, address _initialOwner)
-        external
-        returns (PluginRepo)
-    {
+    function createPluginRepo(
+        string calldata _name,
+        address _initialOwner
+    ) external returns (PluginRepo) {
         return _createPluginRepo(_name, _initialOwner);
     }
 
@@ -105,10 +105,10 @@ contract PluginRepoFactory {
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
     /// @param _name The plugin repository name.
     /// @param _initialOwner The initial owner address.
-    function _createPluginRepo(string calldata _name, address _initialOwner)
-        internal
-        returns (PluginRepo pluginRepo)
-    {
+    function _createPluginRepo(
+        string calldata _name,
+        address _initialOwner
+    ) internal returns (PluginRepo pluginRepo) {
         if (!(bytes(_name).length > 0)) {
             revert EmptyPluginRepoName();
         }

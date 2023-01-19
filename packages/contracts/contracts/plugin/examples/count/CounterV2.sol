@@ -27,7 +27,7 @@ contract CounterV2 is PluginUUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the plugin.
     /// @param _dao The contract of the associated DAO.
     /// @param _multiplyHelper The helper contract associated with the plugin to multiply numbers.

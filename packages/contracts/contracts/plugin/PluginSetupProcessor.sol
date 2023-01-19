@@ -568,11 +568,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Returns a hash of an array of multi-targeted permission operations.
     /// @param _permissions The array of of multi-targeted permission operations.
     /// @return bytes The hash of the array of permission operations.
-    function _getPermissionsHash(PermissionLib.ItemMultiTarget[] memory _permissions)
-        private
-        pure
-        returns (bytes32)
-    {
+    function _getPermissionsHash(
+        PermissionLib.ItemMultiTarget[] memory _permissions
+    ) private pure returns (bytes32) {
         return keccak256(abi.encode(_permissions));
     }
 
@@ -590,9 +588,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 PluginUUPSUpgradeable(_proxy).upgradeToAndCall(_implementation, _initData)
             {} catch Error(string memory reason) {
                 revert(reason);
-            } catch (
-                bytes memory /*lowLevelData*/
-            ) {
+            } catch (bytes memory /*lowLevelData*/) {
                 revert PluginProxyUpgradeFailed({
                     proxy: _proxy,
                     implementation: _implementation,
@@ -604,9 +600,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 string memory reason
             ) {
                 revert(reason);
-            } catch (
-                bytes memory /*lowLevelData*/
-            ) {
+            } catch (bytes memory /*lowLevelData*/) {
                 revert PluginProxyUpgradeFailed({
                     proxy: _proxy,
                     implementation: _implementation,

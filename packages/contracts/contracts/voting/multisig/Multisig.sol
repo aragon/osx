@@ -261,7 +261,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         Proposal storage proposal_ = proposals[_proposalId];
-        
+
         // As the list can never become more than type(uint16).max(due to addAddresses check)
         // It's safe to use unchecked as it would never overflow.
         unchecked {
@@ -345,7 +345,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         Proposal storage proposal_ = proposals[_proposalId];
 
         proposal_.executed = true;
-        
+
         _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
     }
 

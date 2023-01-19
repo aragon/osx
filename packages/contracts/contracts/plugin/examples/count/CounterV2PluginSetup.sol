@@ -35,7 +35,10 @@ contract CounterV2PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         virtual
         override
@@ -51,7 +54,7 @@ contract CounterV2PluginSetup is PluginSetup {
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));            
+            multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));
         }
 
         bytes memory initData = abi.encodeWithSelector(

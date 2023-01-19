@@ -24,6 +24,6 @@ export async function deployWithProxy<T>(
     kind: options.proxyType || 'uups',
     initializer: false,
     unsafeAllow: ['constructor'],
-    constructorArgs: options.constructurArgs || []
+    constructorArgs: options.constructurArgs || [],
   }) as unknown as Promise<T>;
 }

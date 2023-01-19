@@ -29,14 +29,14 @@ contract DAORegistry is InterfaceBasedRegistry {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the contract.
     /// @param _managingDao the managing DAO address.
     /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
-    function initialize(IDAO _managingDao, ENSSubdomainRegistrar _subdomainRegistrar)
-        public
-        initializer
-    {
+    function initialize(
+        IDAO _managingDao,
+        ENSSubdomainRegistrar _subdomainRegistrar
+    ) public initializer {
         __InterfaceBasedRegistry_init(_managingDao, type(IDAO).interfaceId);
         subdomainRegistrar = _subdomainRegistrar;
     }

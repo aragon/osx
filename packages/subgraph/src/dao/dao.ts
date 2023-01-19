@@ -10,14 +10,14 @@ import {
   Withdrawn,
   TrustedForwarderSet,
   SignatureValidatorSet,
-  StandardCallbackRegistered
+  StandardCallbackRegistered,
 } from '../../generated/templates/DaoTemplate/DAO';
 import {
   Dao,
   ContractPermissionId,
   Permission,
   VaultTransfer,
-  StandardCallback
+  StandardCallback,
 } from '../../generated/schema';
 
 import {ADDRESS_ZERO} from '../utils/constants';

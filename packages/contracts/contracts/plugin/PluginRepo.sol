@@ -83,7 +83,7 @@ contract PluginRepo is
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the contract by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - initializing the permission manager
@@ -154,11 +154,7 @@ contract PluginRepo is
     function getLatestVersion()
         public
         view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
+        returns (uint16[3] memory semanticVersion, address pluginSetup, bytes memory contentURI)
     {
         return getVersionById(nextVersionIndex - 1);
     }
@@ -167,14 +163,12 @@ contract PluginRepo is
     /// @return semanticVersion The semantic version number.
     /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionByPluginSetup(address _pluginSetup)
+    function getVersionByPluginSetup(
+        address _pluginSetup
+    )
         public
         view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
+        returns (uint16[3] memory semanticVersion, address pluginSetup, bytes memory contentURI)
     {
         return getVersionById(versionIndexForPluginSetup[_pluginSetup]);
     }
@@ -183,14 +177,12 @@ contract PluginRepo is
     /// @return semanticVersion The semantic version number.
     /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionBySemanticVersion(uint16[3] memory _semanticVersion)
+    function getVersionBySemanticVersion(
+        uint16[3] memory _semanticVersion
+    )
         public
         view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
+        returns (uint16[3] memory semanticVersion, address pluginSetup, bytes memory contentURI)
     {
         return getVersionById(versionIndexForSemantic[_semanticVersionHash(_semanticVersion)]);
     }
@@ -199,14 +191,12 @@ contract PluginRepo is
     /// @return semanticVersion The semantic version number.
     /// @return pluginSetup The address of the plugin factory associated with the version.
     /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionById(uint256 _versionIndex)
+    function getVersionById(
+        uint256 _versionIndex
+    )
         public
         view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
+        returns (uint16[3] memory semanticVersion, address pluginSetup, bytes memory contentURI)
     {
         if (_versionIndex <= 0 || _versionIndex >= nextVersionIndex)
             revert VersionIndexDoesNotExist({versionIndex: _versionIndex});
@@ -223,19 +213,18 @@ contract PluginRepo is
     /// @notice Generates a hash from a semantic version number.
     /// @param semanticVersion The semantic version number.
     /// @return bytes32 The hash of the semantic version number.
-    function _semanticVersionHash(uint16[3] memory semanticVersion) internal pure returns (bytes32) {
+    function _semanticVersionHash(
+        uint16[3] memory semanticVersion
+    ) internal pure returns (bytes32) {
         return
             keccak256(abi.encodePacked(semanticVersion[0], semanticVersion[1], semanticVersion[2]));
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_REPO_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(address(this), UPGRADE_REPO_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(address(this), UPGRADE_REPO_PERMISSION_ID) {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.
