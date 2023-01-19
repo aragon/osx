@@ -7,12 +7,17 @@ import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../test-utils/proxy';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
 };
 
-describe('DAORegistry', function () {
+const UPGRADE_REGISTRY_PERMISSION_ID = ethers.utils.id(
+  'UPGRADE_REGISTRY_PERMISSION'
+)
+
+describe.only('DAORegistry', function () {
   let signers: SignerWithAddress[];
   let daoRegistry: DAORegistry;
   let managingDao: DAO;
@@ -72,7 +77,18 @@ describe('DAORegistry', function () {
       daoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
     );
+
+    this.upgrade = {
+      contract: daoRegistry,
+      dao: managingDao,
+      user: signers[8],
+    }
   });
+  
+  shouldUpgradeCorrectly(
+    UPGRADE_REGISTRY_PERMISSION_ID, 
+    'DaoUnauthorized'
+  )
 
   it('reverts the registration if the DAO name is empty', async function () {
     await expect(
