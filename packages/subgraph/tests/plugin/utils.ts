@@ -7,7 +7,7 @@ import {
   UninstallationApplied,
   UninstallationPrepared,
   UpdateApplied,
-  UpdatePrepared,
+  UpdatePrepared
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 
 export function createVersionCreated(

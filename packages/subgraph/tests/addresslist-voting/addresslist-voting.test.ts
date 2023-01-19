@@ -7,11 +7,11 @@ import {
   handleProposalExecuted,
   handleAddressesRemoved,
   handleVotingSettingsUpdated,
-  _handleProposalCreated,
+  _handleProposalCreated
 } from '../../src/packages/addresslist/addresslist-voting';
 import {
   AddresslistVotingPlugin,
-  AddresslistVotingVoter,
+  AddresslistVotingVoter
 } from '../../generated/schema';
 import {VOTING_MODES} from '../../src/utils/constants';
 import {
@@ -30,7 +30,7 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER,
+  TOTAL_VOTING_POWER
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
@@ -41,7 +41,7 @@ import {
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall,
-  createAddresslistVotingProposalEntityState,
+  createAddresslistVotingProposalEntityState
 } from './utils';
 
 let proposalId = '0';
@@ -459,7 +459,7 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
 test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO),
+    Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
@@ -496,7 +496,7 @@ test('Run AddresslistVoting (AddressesRemoved) mappings with mock event', () => 
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
-    Address.fromString(ADDRESS_TWO),
+    Address.fromString(ADDRESS_TWO)
   ];
 
   for (let index = 0; index < memberAddresses.length; index++) {

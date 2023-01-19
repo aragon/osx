@@ -7,14 +7,14 @@ import {
   VotingSettingsUpdated,
   AddressesAdded,
   AddressesRemoved,
-  AddresslistVoting,
+  AddresslistVoting
 } from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   Action,
   AddresslistVotingPlugin,
   AddresslistVotingProposal,
   AddresslistVotingVoter,
-  AddresslistVotingVote,
+  AddresslistVotingVote
 } from '../../../generated/schema';
 import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 

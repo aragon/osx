@@ -3,7 +3,7 @@ import {
   BigInt,
   ByteArray,
   Bytes,
-  ethereum,
+  ethereum
 } from '@graphprotocol/graph-ts';
 
 import {ADDRESS_ZERO} from '../utils/constants';

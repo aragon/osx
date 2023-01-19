@@ -23,15 +23,15 @@ export function createTokenCalls(
   decimals: string
 ): void {
   createMockGetter(contractAddress, 'name', 'name():(string)', [
-    ethereum.Value.fromString(name),
+    ethereum.Value.fromString(name)
   ]);
 
   createMockGetter(contractAddress, 'symbol', 'symbol():(string)', [
-    ethereum.Value.fromString(symbol),
+    ethereum.Value.fromString(symbol)
   ]);
 
   createMockGetter(contractAddress, 'decimals', 'decimals():(uint8)', [
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals)),
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(decimals))
   ]);
 }
 
@@ -105,7 +105,7 @@ export function createGetProposalCall(
     'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
     ])
     .returns([
       ethereum.Value.fromBoolean(open),
@@ -117,6 +117,6 @@ export function createGetProposalCall(
       // Tally
       ethereum.Value.fromTuple(tally),
 
-      ethereum.Value.fromTupleArray(actions),
+      ethereum.Value.fromTupleArray(actions)
     ]);
 }

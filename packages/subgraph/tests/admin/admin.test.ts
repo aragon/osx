@@ -11,17 +11,17 @@ import {
   STRING_DATA,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
-  START_DATE,
+  START_DATE
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
   createNewProposalCreatedEvent,
-  createProposalExecutedEvent,
+  createProposalExecutedEvent
 } from './utils';
 
 import {
   handleProposalExecuted,
-  _handleProposalCreated,
+  _handleProposalCreated
 } from '../../src/packages/admin/admin';
 
 const actionValue = '0';

@@ -5,7 +5,7 @@ import {
   handleVoteCast,
   handleProposalExecuted,
   handleVotingSettingsUpdated,
-  _handleProposalCreated,
+  _handleProposalCreated
 } from '../../src/packages/token/token-voting';
 import {TokenVotingPlugin} from '../../generated/schema';
 import {VOTING_MODES} from '../../src/utils/constants';
@@ -24,7 +24,7 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER,
+  TOTAL_VOTING_POWER
 } from '../constants';
 
 import {createDummyActions, createGetProposalCall} from '../utils';
@@ -34,7 +34,7 @@ import {
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall,
-  createTokenVotingProposalEntityState,
+  createTokenVotingProposalEntityState
 } from './utils';
 
 let proposalId = '0';

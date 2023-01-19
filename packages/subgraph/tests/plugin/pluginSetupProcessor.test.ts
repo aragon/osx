@@ -7,7 +7,7 @@ import {
   ADDRESS_FIVE,
   ADDRESS_ZERO,
   ONE_ETH,
-  DAO_TOKEN_ADDRESS,
+  DAO_TOKEN_ADDRESS
 } from '../constants';
 import {
   createInstallationAppliedEvent,
@@ -15,7 +15,7 @@ import {
   createUninstallationAppliedEvent,
   createUninstallationPreparedEvent,
   createUpdateAppliedEvent,
-  createUpdatePreparedEvent,
+  createUpdatePreparedEvent
 } from './utils';
 import {
   handleInstallationApplied,
@@ -23,7 +23,7 @@ import {
   handleUninstallationApplied,
   handleUninstallationPrepared,
   handleUpdateApplied,
-  handleUpdatePrepared,
+  handleUpdatePrepared
 } from '../../src/plugin/pluginSetupProcessor';
 import {assert, clearStore, test} from 'matchstick-as';
 import {Plugin} from '../../generated/schema';
@@ -34,17 +34,17 @@ import {
   getSupportThreshold,
   getSupportsInterface,
   getProposalCount,
-  getVotingToken,
+  getVotingToken
 } from '../dao/utils';
 import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
   MULTISIG_INTERFACE,
-  TOKEN_VOTING_INTERFACE,
+  TOKEN_VOTING_INTERFACE
 } from '../../src/utils/constants';
 import {createTokenCalls} from '../utils';
 
-test('InstallationPrepared event', function () {
+test('InstallationPrepared event', function() {
   let pluginId = ADDRESS_THREE;
   let helperIds = [ADDRESS_FOUR, ADDRESS_FIVE];
 
@@ -81,7 +81,7 @@ test('InstallationPrepared event', function () {
   clearStore();
 });
 
-test('InstallationApplied event (existent plugin)', function () {
+test('InstallationApplied event (existent plugin)', function() {
   // prepare states
   let pluginId = ADDRESS_THREE;
   let preparedEvent = createInstallationPreparedEvent(
@@ -125,7 +125,7 @@ test('InstallationApplied event (existent plugin)', function () {
   clearStore();
 });
 
-test('InstallationApplied event (non existent plugin)', function () {
+test('InstallationApplied event (non existent plugin)', function() {
   let pluginId = ADDRESS_ONE;
   let event = createInstallationAppliedEvent(DAO_ADDRESS, pluginId);
 
@@ -136,7 +136,7 @@ test('InstallationApplied event (non existent plugin)', function () {
   clearStore();
 });
 
-test('UpdatePrepared event (existent plugin)', function () {
+test('UpdatePrepared event (existent plugin)', function() {
   let pluginId = ADDRESS_THREE;
   let helperIds = [ADDRESS_THREE, ADDRESS_FOUR];
   let preparedEvent = createInstallationPreparedEvent(
@@ -183,7 +183,7 @@ test('UpdatePrepared event (existent plugin)', function () {
   clearStore();
 });
 
-test('UpdatePrepared event (non existent plugin)', function () {
+test('UpdatePrepared event (non existent plugin)', function() {
   let pluginId = ADDRESS_ONE;
   let helperIds = [ADDRESS_FOUR, ADDRESS_FIVE];
   let event = createUpdatePreparedEvent(
@@ -203,7 +203,7 @@ test('UpdatePrepared event (non existent plugin)', function () {
   clearStore();
 });
 
-test('UpdateApplied event (existent plugin)', function () {
+test('UpdateApplied event (existent plugin)', function() {
   let pluginId = ADDRESS_THREE;
   let preparedEvent = createInstallationPreparedEvent(
     ADDRESS_ONE,
@@ -232,7 +232,7 @@ test('UpdateApplied event (existent plugin)', function () {
   clearStore();
 });
 
-test('UpdateApplied event (non existent plugin)', function () {
+test('UpdateApplied event (non existent plugin)', function() {
   let pluginId = ADDRESS_ONE;
   let event = createUpdateAppliedEvent(DAO_ADDRESS, pluginId);
 
@@ -243,7 +243,7 @@ test('UpdateApplied event (non existent plugin)', function () {
   clearStore();
 });
 
-test('UninstallationPrepared event (existent plugin)', function () {
+test('UninstallationPrepared event (existent plugin)', function() {
   let pluginId = ADDRESS_THREE;
   let helperIds = [ADDRESS_THREE, ADDRESS_FOUR];
   let preparedEvent = createInstallationPreparedEvent(
@@ -289,7 +289,7 @@ test('UninstallationPrepared event (existent plugin)', function () {
   clearStore();
 });
 
-test('UninstallationPrepared event (non existent plugin)', function () {
+test('UninstallationPrepared event (non existent plugin)', function() {
   let pluginId = ADDRESS_ONE;
   let helperIds = [ADDRESS_FOUR, ADDRESS_FIVE];
   let event = createUninstallationPreparedEvent(
@@ -308,7 +308,7 @@ test('UninstallationPrepared event (non existent plugin)', function () {
   clearStore();
 });
 
-test('UninstallationApplied event (existent plugin)', function () {
+test('UninstallationApplied event (existent plugin)', function() {
   let pluginId = ADDRESS_THREE;
   let preparedEvent = createInstallationPreparedEvent(
     ADDRESS_ONE,
@@ -337,7 +337,7 @@ test('UninstallationApplied event (existent plugin)', function () {
   clearStore();
 });
 
-test('UninstallationApplied event (non existent plugin)', function () {
+test('UninstallationApplied event (non existent plugin)', function() {
   let pluginId = ADDRESS_ONE;
   let event = createUninstallationAppliedEvent(DAO_ADDRESS, pluginId);
 

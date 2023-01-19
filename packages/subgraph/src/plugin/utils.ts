@@ -7,14 +7,14 @@ import {
   TokenVoting,
   AddresslistVoting,
   Admin,
-  Multisig,
+  Multisig
 } from '../../generated/templates';
 import {
   DaoPlugin,
   TokenVotingPlugin,
   AddresslistVotingPlugin,
   AdminPlugin,
-  MultisigPlugin,
+  MultisigPlugin
 } from '../../generated/schema';
 import {handleERC20Token} from '../utils/tokens';
 import {
@@ -22,7 +22,7 @@ import {
   ADDRESSLIST_VOTING_INTERFACE,
   ADMIN_INTERFACE,
   VOTING_MODES,
-  MULTISIG_INTERFACE,
+  MULTISIG_INTERFACE
 } from '../utils/constants';
 import {supportsInterface} from '../utils/erc165';
 

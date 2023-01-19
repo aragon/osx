@@ -7,13 +7,13 @@ import {
   DAO_ADDRESS,
   ADDRESS_ONE,
   CONTRACT_ADDRESS,
-  ADDRESS_TWO,
+  ADDRESS_TWO
 } from '../constants';
 import {
   createNewGrantedEvent,
   createNewRevokedEvent,
   getEXECUTE_PERMISSION_ID,
-  getEXECUTE_PERMISSION_IDreverted,
+  getEXECUTE_PERMISSION_IDreverted
 } from './utils';
 
 let contractPermissionId = Bytes.fromByteArray(
@@ -139,8 +139,9 @@ test('Run dao (handleRevoked) mappings with mock event', () => {
   let contractPermissionIdEntity = new ContractPermissionId(
     contractPermissionIdEntityID
   );
-  contractPermissionIdEntity.dao =
-    Address.fromString(DAO_ADDRESS).toHexString();
+  contractPermissionIdEntity.dao = Address.fromString(
+    DAO_ADDRESS
+  ).toHexString();
   contractPermissionIdEntity.where = Address.fromString(DAO_ADDRESS);
   contractPermissionIdEntity.permissionId = contractPermissionId;
   contractPermissionIdEntity.save();

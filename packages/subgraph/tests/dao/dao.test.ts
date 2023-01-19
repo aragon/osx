@@ -9,7 +9,7 @@ import {
   handleWithdrawn,
   handleTrustedForwarderSet,
   handleSignatureValidatorSet,
-  handleStandardCallbackRegistered,
+  handleStandardCallbackRegistered
 } from '../../src/dao/dao';
 import {
   DAO_ADDRESS,
@@ -20,7 +20,7 @@ import {
   HALF_ETH,
   ADDRESS_ZERO,
   CONTRACT_ADDRESS,
-  ZERO_BYTES32,
+  ZERO_BYTES32
 } from '../constants';
 import {createDummyActions, createTokenCalls} from '../utils';
 import {
@@ -32,7 +32,7 @@ import {
   createNewWithdrawnEvent,
   createTrustedForwarderSetEvent,
   createSignatureValidatorSetEvent,
-  createStandardCallbackRegisteredEvent,
+  createStandardCallbackRegisteredEvent
 } from './utils';
 import {createTokenVotingProposalEntityState} from '../token-voting/utils';
 import {decodeWithdrawParams} from '../../src/dao/utils';

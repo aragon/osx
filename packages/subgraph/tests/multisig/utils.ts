@@ -8,7 +8,7 @@ import {
   ProposalExecuted,
   AddressesAdded,
   AddressesRemoved,
-  MultisigSettingsUpdated,
+  MultisigSettingsUpdated
 } from '../../generated/templates/Multisig/Multisig';
 import {
   ADDRESS_ONE,
@@ -20,7 +20,7 @@ import {
   CREATED_AT,
   TWO,
   START_DATE,
-  END_DATE,
+  END_DATE
 } from '../constants';
 
 // events
@@ -241,7 +241,7 @@ export function createGetProposalCall(
     'getProposal(uint256):(bool,uint32,(uint16,uint64,uint64,uint64),(address,uint256,bytes)[])'
   )
     .withArgs([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId)),
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
     ])
     .returns([
       ethereum.Value.fromBoolean(executed),
@@ -251,7 +251,7 @@ export function createGetProposalCall(
       // ProposalParameters
       ethereum.Value.fromTuple(parameters),
 
-      ethereum.Value.fromTupleArray(actions),
+      ethereum.Value.fromTupleArray(actions)
     ]);
 }
 

@@ -5,7 +5,7 @@ import {
   UninstallationApplied,
   UninstallationPrepared,
   UpdateApplied,
-  UpdatePrepared,
+  UpdatePrepared
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 import {Plugin, PluginHelper} from '../../generated/schema';
 import {addPlugin} from './utils';

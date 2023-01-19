@@ -12,7 +12,7 @@ import {
   Withdrawn,
   TrustedForwarderSet,
   SignatureValidatorSet,
-  StandardCallbackRegistered,
+  StandardCallbackRegistered
 } from '../../generated/templates/DaoTemplate/DAO';
 
 // events
@@ -442,7 +442,7 @@ export function getIsUserAllowed(
   )
     .withArgs([
       ethereum.Value.fromAddress(Address.fromString(address)),
-      ethereum.Value.fromUnsignedBigInt(BigInt.zero()),
+      ethereum.Value.fromUnsignedBigInt(BigInt.zero())
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }
@@ -471,7 +471,7 @@ export function getSupportsInterface(
     'supportsInterface(bytes4):(bool)'
   )
     .withArgs([
-      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes),
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)
     ])
     .returns([ethereum.Value.fromBoolean(returns)]);
 }

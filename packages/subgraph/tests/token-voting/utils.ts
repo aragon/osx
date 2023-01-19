@@ -5,7 +5,7 @@ import {
   VotingSettingsUpdated,
   VoteCast,
   ProposalCreated,
-  ProposalExecuted,
+  ProposalExecuted
 } from '../../generated/templates/TokenVoting/TokenVoting';
 import {TokenVotingProposal} from '../../generated/schema';
 import {
@@ -21,7 +21,7 @@ import {
   END_DATE,
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
-  CREATED_AT,
+  CREATED_AT
 } from '../constants';
 
 // events

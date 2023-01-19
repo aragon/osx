@@ -20,7 +20,7 @@ export function getERC20Info(address: Address): ERCInfo {
   return {
     decimals: decimals.reverted ? null : BigInt.fromI32(decimals.value),
     name: name.reverted ? null : name.value,
-    symbol: decimals.reverted ? null : symbol.value,
+    symbol: decimals.reverted ? null : symbol.value
   };
 }
 
