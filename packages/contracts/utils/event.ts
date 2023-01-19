@@ -39,7 +39,7 @@ export const DAO_EVENTS = {
 };
 
 export const MEMBERSHIP_EVENTS = {
-  MEMBERSHIP_ANNOUNCED: 'IndividualMembershipAnnounced',
-  MEMBERSHIP_RENOUNCED: 'IndividualMembershipRenounced',
-  MEMBERSHIP_CONTRACT_ANNOUNCED: 'ContractualMembershipAnnounced',
+  MEMBERSHIP_ANNOUNCED: 'MembersAnnounced',
+  MEMBERSHIP_RENOUNCED: 'MembersRenounced',
+  MEMBERSHIP_CONTRACT_ANNOUNCED: 'MembershipContractAnnounced',
 };

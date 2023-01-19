@@ -6,8 +6,8 @@ import {
   ProposalCreated,
   Approved,
   ProposalExecuted,
-  IndividualMembershipAnnounced,
-  IndividualMembershipRenounced,
+  MembersAnnounced,
+  MembersRenounced,
   MultisigSettingsUpdated
 } from '../../generated/templates/Multisig/Multisig';
 import {
@@ -125,50 +125,42 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewIndividualMembershipAnnouncedEvent(
+export function createNewMembersAnnouncedEvent(
   addresses: Address[],
   contractAddress: string
-): IndividualMembershipAnnounced {
-  let newIndividualMembershipAnnouncedEvent = changetype<
-    IndividualMembershipAnnounced
-  >(newMockEvent());
+): MembersAnnounced {
+  let newMembersAnnouncedEvent = changetype<MembersAnnounced>(newMockEvent());
 
-  newIndividualMembershipAnnouncedEvent.address = Address.fromString(
-    contractAddress
-  );
-  newIndividualMembershipAnnouncedEvent.parameters = [];
+  newMembersAnnouncedEvent.address = Address.fromString(contractAddress);
+  newMembersAnnouncedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newIndividualMembershipAnnouncedEvent.parameters.push(usersParam);
+  newMembersAnnouncedEvent.parameters.push(usersParam);
 
-  return newIndividualMembershipAnnouncedEvent;
+  return newMembersAnnouncedEvent;
 }
 
-export function createNewIndividualMembershipRenouncedEvent(
+export function createNewMembersRenouncedEvent(
   addresses: Address[],
   contractAddress: string
-): IndividualMembershipRenounced {
-  let newIndividualMembershipRenouncedEvent = changetype<
-    IndividualMembershipRenounced
-  >(newMockEvent());
+): MembersRenounced {
+  let newMembersRenouncedEvent = changetype<MembersRenounced>(newMockEvent());
 
-  newIndividualMembershipRenouncedEvent.address = Address.fromString(
-    contractAddress
-  );
-  newIndividualMembershipRenouncedEvent.parameters = [];
+  newMembersRenouncedEvent.address = Address.fromString(contractAddress);
+  newMembersRenouncedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newIndividualMembershipRenouncedEvent.parameters.push(usersParam);
+  newMembersRenouncedEvent.parameters.push(usersParam);
 
-  return newIndividualMembershipRenouncedEvent;
+  return newMembersRenouncedEvent;
 }
 
 export function createNewMultisigSettingsUpdatedEvent(

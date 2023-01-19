@@ -122,7 +122,7 @@ describe('AddresslistVoting', function () {
       ).to.equal(false);
     });
 
-    it('should add new users in the address list and emit the `IndividualMembershipAnnounced` event', async () => {
+    it('should add new users in the address list and emit the `MembersAnnounced` event', async () => {
       const addresses = [signers[0].address, signers[1].address];
       await expect(voting.addAddresses(addresses))
         .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_ANNOUNCED)
@@ -138,7 +138,7 @@ describe('AddresslistVoting', function () {
       expect(await voting.isListed(signers[1].address)).to.equal(true);
     });
 
-    it('should remove users from the address list and emit the `IndividualMembershipRenounced` event', async () => {
+    it('should remove users from the address list and emit the `MembersRenounced` event', async () => {
       await voting.addAddresses([signers[0].address]);
 
       const block1 = await ethers.provider.getBlock('latest');

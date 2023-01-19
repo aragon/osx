@@ -85,7 +85,7 @@ describe('Admin plugin', function () {
       );
     });
 
-    it('emits the `IndividualMembershipAnnounced` event', async () => {
+    it('emits the `MembersAnnounced` event', async () => {
       await expect(plugin.initialize(dao.address, signers[0].address))
         .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_ANNOUNCED)
         .withArgs([signers[0].address]);

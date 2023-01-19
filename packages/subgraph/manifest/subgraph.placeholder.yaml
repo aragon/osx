@@ -151,8 +151,8 @@ templates:
         - name: TokenVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
-        - event: ContractualMembershipAnnounced(indexed address)
-          handler: handleContractualMembershipAnnounced
+        - event: MembershipContractAnnounced(indexed address)
+          handler: handleMembershipContractAnnounced
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
@@ -186,10 +186,10 @@ templates:
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
-        - event: IndividualMembershipAnnounced(address[])
-          handler: handleIndividualMembershipAnnounced
-        - event: IndividualMembershipRenounced(address[])
-          handler: handleIndividualMembershipRenounced
+        - event: MembersAnnounced(address[])
+          handler: handleMembersAnnounced
+        - event: MembersRenounced(address[])
+          handler: handleMembersRenounced
   # Multisig (package)
   - name: Multisig
     kind: ethereum/contract
@@ -207,10 +207,10 @@ templates:
         - name: Multisig
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
       eventHandlers:
-        - event: IndividualMembershipAnnounced(address[])
-          handler: handleIndividualMembershipAnnounced
-        - event: IndividualMembershipRenounced(address[])
-          handler: handleIndividualMembershipRenounced
+        - event: MembersAnnounced(address[])
+          handler: handleMembersAnnounced
+        - event: MembersRenounced(address[])
+          handler: handleMembersRenounced
         - event: Approved(indexed uint256,indexed address)
           handler: handleApproved
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])

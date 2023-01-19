@@ -5,7 +5,7 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
-  ContractualMembershipAnnounced,
+  MembershipContractAnnounced,
   TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
@@ -231,8 +231,8 @@ export function handleVotingSettingsUpdated(
   }
 }
 
-export function handleContractualMembershipAnnounced(
-  event: ContractualMembershipAnnounced
+export function handleMembershipContractAnnounced(
+  event: MembershipContractAnnounced
 ): void {
   let token = event.params.definingContract;
   let packageEntity = TokenVotingPlugin.load(event.address.toHexString());

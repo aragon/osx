@@ -2,10 +2,10 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
-  handleIndividualMembershipAnnounced,
+  handleMembersAnnounced,
   handleApproved,
   handleProposalExecuted,
-  handleIndividualMembershipRenounced,
+  handleMembersRenounced,
   _handleProposalCreated,
   handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
@@ -28,10 +28,10 @@ import {
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
-  createNewIndividualMembershipAnnouncedEvent,
+  createNewMembersAnnouncedEvent,
   createNewApprovedEvent,
   createNewProposalExecutedEvent,
-  createNewIndividualMembershipRenouncedEvent,
+  createNewMembersRenouncedEvent,
   createNewProposalCreatedEvent,
   getProposalCountCall,
   createMultisigProposalEntityState,
@@ -281,20 +281,17 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handleIndividualMembershipAnnounced) mappings with mock event', () => {
+test('Run Multisig (handleMembersAnnounced) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewIndividualMembershipAnnouncedEvent(
-    userArray,
-    CONTRACT_ADDRESS
-  );
+  let event = createNewMembersAnnouncedEvent(userArray, CONTRACT_ADDRESS);
 
   // handle event
-  handleIndividualMembershipAnnounced(event);
+  handleMembersAnnounced(event);
 
   // checks
   let memberId =
@@ -319,7 +316,7 @@ test('Run Multisig (handleIndividualMembershipAnnounced) mappings with mock even
   clearStore();
 });
 
-test('Run Multisig (handleIndividualMembershipRenounced) mappings with mock event', () => {
+test('Run Multisig (handleMembersRenounced) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
@@ -349,13 +346,13 @@ test('Run Multisig (handleIndividualMembershipRenounced) mappings with mock even
   assert.fieldEquals('MultisigApprover', memberId2, 'id', memberId2);
 
   // create event
-  let event = createNewIndividualMembershipRenouncedEvent(
+  let event = createNewMembersRenouncedEvent(
     [memberAddresses[1]],
     CONTRACT_ADDRESS
   );
 
   // handle event
-  handleIndividualMembershipRenounced(event);
+  handleMembersRenounced(event);
 
   // checks
   assert.fieldEquals('MultisigApprover', memberId1, 'id', memberId1);
