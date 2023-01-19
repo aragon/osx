@@ -26,6 +26,8 @@ jobs:
         run: npm i -G yarn
       - name: Install dependencies
         run: yarn
+      - name: Check formatting
+        run: yarn run formatting:check
       - name: Compile contracts
         run: yarn run build && yarn run build:npm
       - name: Run Hardhat Tests
