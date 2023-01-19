@@ -338,6 +338,60 @@ describe('TokenVoting', function () {
         .withArgs(earliestEndDate, tooEarlyEndDate);
     });
 
+    it('ceils the `minVotingPower` value if it has a remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30).add(1); // 33.0001 %
+
+      await setBalances([{receiver: signers[0].address, amount: 10}]);
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
+    });
+
+    it('does not ceil the `minVotingPower` value if it has no remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30); // 30.0000 %
+
+      await setBalances([{receiver: signers[0].address, amount: 10}]); // 10 votes * 30% = 3 votes
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
+    });
+
     it('should create a vote successfully, but not vote', async () => {
       await voting.initialize(
         dao.address,

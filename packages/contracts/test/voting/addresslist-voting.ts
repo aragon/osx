@@ -269,6 +269,56 @@ describe('AddresslistVoting', function () {
         .withArgs(earliestEndDate, tooEarlyEndDate);
     });
 
+    it('ceils the `minVotingPower` value if it has a remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30).add(1); // 33.0001 %
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
+    });
+
+    it('does not ceil the `minVotingPower` value if it has no remainder', async () => {
+      votingSettings.minParticipation = ethers.BigNumber.from('300000'); // 30.0000 %
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
+    });
+
     it('should create a proposal successfully, but not vote', async () => {
       await voting.initialize(dao.address, votingSettings, [
         signers[0].address,
@@ -980,9 +1030,9 @@ describe('AddresslistVoting', function () {
       });
     });
 
-    describe('A special majority vote with >50% support and >=80% participation required and early execution enabled', async () => {
+    describe('A special majority vote with >50% support and >=75% participation required and early execution enabled', async () => {
       beforeEach(async () => {
-        votingSettings.minParticipation = pctToRatio(80);
+        votingSettings.minParticipation = pctToRatio(75);
 
         await voting.initialize(
           dao.address,
