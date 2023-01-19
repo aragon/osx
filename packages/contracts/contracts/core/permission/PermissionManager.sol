@@ -147,10 +147,10 @@ contract PermissionManager is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the contract.
     /// @param items The array of bulk items to process.
-    function bulkOnSingleTarget(address _where, PermissionLib.ItemSingleTarget[] calldata items)
-        external
-        auth(_where, ROOT_PERMISSION_ID)
-    {
+    function bulkOnSingleTarget(
+        address _where,
+        PermissionLib.ItemSingleTarget[] calldata items
+    ) external auth(_where, ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.ItemSingleTarget memory item = items[i];
 
@@ -223,11 +223,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    function _grant(
-        address _where,
-        address _who,
-        bytes32 _permissionId
-    ) internal {
+    function _grant(address _where, address _who, bytes32 _permissionId) internal {
         _grantWithOracle(_where, _who, _permissionId, IPermissionOracle(ALLOW_FLAG));
     }
 
@@ -287,11 +283,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    function _revoke(
-        address _where,
-        address _who,
-        bytes32 _permissionId
-    ) internal {
+    function _revoke(address _where, address _who, bytes32 _permissionId) internal {
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
         if (permissionsHashed[permHash] != UNSET_FLAG) {
             permissionsHashed[permHash] = UNSET_FLAG;
@@ -362,12 +354,9 @@ contract PermissionManager is Initializable {
     /// @dev by default, every permission is unrestricted and it's the derived contract's responsibility to override it. NOTE: ROOT_PERMISSION_ID is included and not required to set it again.
     /// @param _permissionId The permission identifier.
     /// @return bool Whether ot not permissionId is restricted.
-    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
-        internal
-        view
-        virtual
-        returns (bool)
-    {
+    function isPermissionRestrictedForAnyAddr(
+        bytes32 _permissionId
+    ) internal view virtual returns (bool) {
         (_permissionId); // silence the warning.
         return false;
     }
