@@ -105,8 +105,8 @@ abstract contract MajorityVotingBase is
 
     /// @notice A container for the majority voting settings that will be applied as parameters on proposal creation.
     /// @param votingMode A parameter to select the vote mode.
-    /// @param supportThreshold The support threshold value.
-    /// @param minParticipation The minimum participation value.
+    /// @param supportThreshold The support threshold value. Its value has to be in the interval [0, 10^6] defined by `RATIO_BASE = 10**6`.
+    /// @param minParticipation The minimum participation value. Its value has to be in the interval [0, 10^6] defined by `RATIO_BASE = 10**6`.
     /// @param minDuration The minimum duration of the proposal vote in seconds.
     /// @param minProposerVotingPower The minimum voting power required to create a proposal.
     struct VotingSettings {
@@ -133,7 +133,7 @@ abstract contract MajorityVotingBase is
 
     /// @notice A container for the proposal parameters at the time of proposal creation.
     /// @param votingMode A parameter to select the vote mode.
-    /// @param supportThreshold The support threshold value.
+    /// @param supportThreshold The support threshold value. The value has to be in the interval [0, 10^6] defined by `RATIO_BASE = 10**6`.
     /// @param startDate The start date of the proposal vote.
     /// @param endDate The end date of the proposal vote.
     /// @param snapshotBlock The number of the block prior to the proposal creation.
