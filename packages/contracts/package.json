@@ -62,7 +62,7 @@
     "hardhat-gas-reporter": "^1.0.4",
     "ipfs-http-client": "51.0.0",
     "prettier": "^2.4.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "prettier-plugin-solidity": "^1.1.1",
     "rollup": "^2.70.1",
     "rollup-plugin-dts": "^4.2.0",
     "solhint": "^3.3.6",
