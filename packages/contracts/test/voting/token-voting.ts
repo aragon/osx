@@ -1163,10 +1163,11 @@ describe('TokenVoting', function () {
       });
     });
 
-    describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` and early execution mode activated', async () => {
+    describe('An edge case with `supportThreshold = 0%`, `minParticipation = 0%`, in early execution mode', async () => {
       beforeEach(async () => {
         votingSettings.supportThreshold = pctToRatio(0);
         votingSettings.minParticipation = pctToRatio(0);
+        votingSettings.votingMode = VotingMode.EarlyExecution;
 
         await voting.initialize(
           dao.address,
@@ -1219,6 +1220,80 @@ describe('TokenVoting', function () {
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
+      });
+    });
+
+    describe('An edge case with `supportThreshold = 99.9999%` and `minParticipation = 100%` in early execution mode', async () => {
+      beforeEach(async () => {
+        votingSettings.supportThreshold = pctToRatio(100).sub(1);
+        votingSettings.minParticipation = pctToRatio(100);
+        votingSettings.votingMode = VotingMode.EarlyExecution;
+
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: ethers.BigNumber.from(10).pow(6).sub(1),
+          },
+          {receiver: signers[1].address, amount: 1},
+        ]);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+      });
+
+      it('does not execute with 10^6-1 votes', async () => {
+        // does not execute early
+        advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        const tally = (await voting.getProposal(id)).tally;
+        expect(tally.yes).to.eq(tally.totalVotingPower.sub(1));
+
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.canExecute(id)).to.be.false;
+
+        // does not execute normally
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.false;
+      });
+
+      it('executes if participation and support are met', async () => {
+        // Check if the proposal can execute early
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+
+        const tally = (await voting.getProposal(id)).tally;
+        expect(tally.yes).to.eq(tally.totalVotingPower);
+
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.true;
+
+        // Check if the proposal can execute normally
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.true;
       });
     });
   });
