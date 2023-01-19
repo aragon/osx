@@ -152,7 +152,7 @@ describe('TokenVoting', function () {
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
-    it('emits the `MembershipContractAnnounced` event', async () => {
+    it('emits the `ContractualMembershipAnnounced` event', async () => {
       await expect(
         await voting.initialize(
           dao.address,

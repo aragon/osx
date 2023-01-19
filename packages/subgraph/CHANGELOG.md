@@ -15,13 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added the `MembershipContractAnnounced` event.
+- Added the `ContractualMembershipAnnounced` event.
 - Added `startDate` and `endDate` to all `ProposalCreated` events.
 - Adds `startDate` and `endDate` fields to Multisig proposals.
 
 ### Changed
 
-- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembershipAnnounced` and `MembershipRenounced`.
+- Renamed the `AddressesAdded` and `AddressesRemoved` event to `IndividualMembershipAnnounced` and `IndividualMembershipRenounced`.
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 

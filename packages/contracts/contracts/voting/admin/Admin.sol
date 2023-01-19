@@ -6,13 +6,13 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {Proposal, ProposalBase} from "../../core/plugin/Proposal.sol";
-import {IMembership} from "../../core/plugin/IMembership.sol";
+import {IIndividualMembership} from "../../core/plugin/IIndividualMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022.
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
-contract Admin is IMembership, PluginCloneable, Proposal {
+contract Admin is IIndividualMembership, PluginCloneable, Proposal {
     using SafeCast for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -32,7 +32,7 @@ contract Admin is IMembership, PluginCloneable, Proposal {
 
         address[] memory members = new address[](1);
         members[0] = _admin;
-        emit MembershipAnnounced({members: members});
+        emit IndividualMembershipAnnounced({members: members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.

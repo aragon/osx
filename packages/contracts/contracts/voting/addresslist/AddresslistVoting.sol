@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IMembership} from "../../core/plugin/IMembership.sol";
+import {IIndividualMembership} from "../../core/plugin/IIndividualMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
@@ -14,7 +14,7 @@ import {Addresslist} from "./Addresslist.sol";
 /// @author Aragon Association - 2021-2022.
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
+contract AddresslistVoting is IIndividualMembership, Addresslist, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -44,7 +44,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
         _addAddresses(_members);
 
-        emit MembershipAnnounced({members: _members});
+        emit IndividualMembershipAnnounced({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -64,7 +64,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _addAddresses(_members);
 
-        emit MembershipAnnounced({members: _members});
+        emit IndividualMembershipAnnounced({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
@@ -74,7 +74,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _removeAddresses(_members);
 
-        emit MembershipRenounced({members: _members});
+        emit IndividualMembershipRenounced({members: _members});
     }
 
     /// @inheritdoc MajorityVotingBase

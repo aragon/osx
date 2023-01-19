@@ -8,7 +8,7 @@ import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
 import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
-import {IMembership} from "../../core/plugin/IMembership.sol";
+import {IIndividualMembership} from "../../core/plugin/IIndividualMembership.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
@@ -16,7 +16,12 @@ import {Addresslist} from "../addresslist/Addresslist.sol";
 /// @author Aragon Association - 2022.
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
+contract Multisig is
+    IIndividualMembership,
+    PluginUUPSUpgradeable,
+    ProposalUpgradeable,
+    Addresslist
+{
     using SafeCastUpgradeable for uint256;
 
     /// @notice A container for proposal-related information.
@@ -129,7 +134,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
         _updateMultisigSettings(_multisigSettings);
 
-        emit MembershipAnnounced({members: _members});
+        emit IndividualMembershipAnnounced({members: _members});
 
         emit MultisigSettingsUpdated({
             onlyListed: _multisigSettings.onlyListed,
@@ -173,7 +178,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
         _addAddresses(_members);
 
-        emit MembershipAnnounced({members: _members});
+        emit IndividualMembershipAnnounced({members: _members});
     }
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
@@ -193,7 +198,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
         _removeAddresses(_members);
 
-        emit MembershipRenounced({members: _members});
+        emit IndividualMembershipRenounced({members: _members});
     }
 
     /// @notice Updates the plugin settings.

@@ -216,7 +216,7 @@ describe('Multisig', function () {
   });
 
   describe('addAddresses:', async () => {
-    it('should add new members to the address list and emit the `MembershipAnnounced` event', async () => {
+    it('should add new members to the address list and emit the `IndividualMembershipAnnounced` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -238,7 +238,7 @@ describe('Multisig', function () {
   });
 
   describe('removeAddresses:', async () => {
-    it('should remove users from the address list and emit the `MembershipRenounced` event', async () => {
+    it('should remove users from the address list and emit the `IndividualMembershipRenounced` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
