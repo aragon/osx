@@ -46,7 +46,7 @@ interface IMajorityVoting {
     /// @return Returns `true` if the  support is greater than the suppor threshold and `false` otherwise.
     function isSupportThresholdReached(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Checks if the worse case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote is greater than the support threshold.
+    /// @notice Checks if the worst case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
     /// @return Returns `true` if the worst case support is greater than the suppor threshold and `false` otherwise.
     function isSupportThresholdReachedEarly(uint256 _proposalId) external view returns (bool);
