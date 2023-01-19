@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 - Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.
+- Renamed `ItemSingleTarget` and `ItemMultiTarget` in `PermissionLib` to `SimplePermission` and `AdvancedPermission`.
+- Renamed `bulkOnSingleTarget()` and `bulkOnMultiTarget()` in `PermissionManager` to `applySimplePermissionsBulk()` and `applyAdvancedPermissionsBulk()`
 
 ### Removed
 

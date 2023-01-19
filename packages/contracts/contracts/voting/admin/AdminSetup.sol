@@ -42,7 +42,7 @@ contract AdminSetup is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.AdvancedPermission[] memory permissions
         )
     {
         IDAO dao = IDAO(_dao);
@@ -64,10 +64,10 @@ contract AdminSetup is PluginSetup {
         (helpers); // silence the warning.
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](2);
+        permissions = new PermissionLib.AdvancedPermission[](2);
 
         // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Grant,
             plugin,
             admin,
@@ -76,7 +76,7 @@ contract AdminSetup is PluginSetup {
         );
 
         // Grant `EXECUTE_PERMISSION` on the DAO to the plugin.
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
@@ -100,11 +100,11 @@ contract AdminSetup is PluginSetup {
         address _plugin,
         address[] calldata,
         bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external view returns (PermissionLib.AdvancedPermission[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](1);
+        permissions = new PermissionLib.AdvancedPermission[](1);
 
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,

@@ -11,12 +11,12 @@ function mockPermissions(
     uint160 start,
     uint160 end,
     PermissionLib.Operation op
-) pure returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+) pure returns (PermissionLib.AdvancedPermission[] memory permissions) {
     require(end > start);
-    permissions = new PermissionLib.ItemMultiTarget[](end - start);
+    permissions = new PermissionLib.AdvancedPermission[](end - start);
 
     for (uint160 i = start; i < end; i++) {
-        permissions[i - start] = PermissionLib.ItemMultiTarget(
+        permissions[i - start] = PermissionLib.AdvancedPermission(
             op,
             address(i),
             address(i),

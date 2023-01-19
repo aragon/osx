@@ -34,7 +34,7 @@ contract MultisigSetup is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.AdvancedPermission[] memory permissions
         )
     {
         IDAO dao = IDAO(_dao);
@@ -60,11 +60,11 @@ contract MultisigSetup is PluginSetup {
         (helpers); // silence the warning.
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](3);
+        permissions = new PermissionLib.AdvancedPermission[](3);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
@@ -72,7 +72,7 @@ contract MultisigSetup is PluginSetup {
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
@@ -81,7 +81,7 @@ contract MultisigSetup is PluginSetup {
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
@@ -101,12 +101,12 @@ contract MultisigSetup is PluginSetup {
         address _plugin,
         address[] calldata,
         bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external view returns (PermissionLib.AdvancedPermission[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](3);
+        permissions = new PermissionLib.AdvancedPermission[](3);
 
         // Set permissions to be Revoked.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
@@ -114,7 +114,7 @@ contract MultisigSetup is PluginSetup {
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
@@ -122,7 +122,7 @@ contract MultisigSetup is PluginSetup {
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.AdvancedPermission(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,

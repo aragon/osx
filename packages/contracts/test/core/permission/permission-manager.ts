@@ -30,13 +30,13 @@ export enum Operation {
   GrantWithOracle,
 }
 
-interface ItemSingleTarget {
+interface SimplePermission {
   operation: Operation;
   who: string;
   permissionId: string;
 }
 
-interface ItemMultiTarget {
+interface AdvancedPermission {
   operation: Operation;
   where: string;
   who: string;
@@ -417,11 +417,11 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('bulk on multiple target', () => {
+  describe('bulk on advanced permission', () => {
     it('should bulk grant ADMIN_PERMISSION on different targets', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
-      const bulkItems: ItemMultiTarget[] = [
+      const bulkItems: AdvancedPermission[] = [
         {
           operation: Operation.Grant,
           where: signers[1].address,
@@ -438,7 +438,7 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await pm.bulkOnMultiTarget(bulkItems);
+      await pm.applyAdvancedPermissionsBulk(bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           item.where,
@@ -461,7 +461,7 @@ describe('Core: PermissionManager', function () {
         signers[0].address,
         ADMIN_PERMISSION_ID
       );
-      const bulkItems: ItemMultiTarget[] = [
+      const bulkItems: AdvancedPermission[] = [
         {
           operation: Operation.Revoke,
           where: signers[1].address,
@@ -477,7 +477,7 @@ describe('Core: PermissionManager', function () {
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
-      await pm.bulkOnMultiTarget(bulkItems);
+      await pm.applyAdvancedPermissionsBulk(bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           item.where,
@@ -491,7 +491,7 @@ describe('Core: PermissionManager', function () {
     it('should grant with oracle', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[0].address, ADMIN_PERMISSION_ID);
-      const bulkItems: ItemMultiTarget[] = [
+      const bulkItems: AdvancedPermission[] = [
         {
           operation: Operation.GrantWithOracle,
           where: signers[1].address,
@@ -507,7 +507,7 @@ describe('Core: PermissionManager', function () {
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
-      await pm.bulkOnMultiTarget(bulkItems);
+      await pm.applyAdvancedPermissionsBulk(bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           item.where,
@@ -520,7 +520,7 @@ describe('Core: PermissionManager', function () {
 
     it('throws Unauthorized error when caller does not have ROOT_PERMISSION_ID permission', async () => {
       const signers = await ethers.getSigners();
-      const bulkItems: ItemMultiTarget[] = [
+      const bulkItems: AdvancedPermission[] = [
         {
           operation: Operation.Grant,
           where: signers[1].address,
@@ -530,7 +530,7 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await expect(pm.connect(signers[2]).bulkOnMultiTarget(bulkItems))
+      await expect(pm.connect(signers[2]).applyAdvancedPermissionsBulk(bulkItems))
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
           pm.address,
@@ -541,10 +541,10 @@ describe('Core: PermissionManager', function () {
     });
   });
 
-  describe('bulk on single target', () => {
+  describe('bulk on simple permission', () => {
     it('should bulk grant ADMIN_PERMISSION', async () => {
       const signers = await ethers.getSigners();
-      const bulkItems: ItemSingleTarget[] = [
+      const bulkItems: SimplePermission[] = [
         {
           operation: Operation.Grant,
           who: signers[1].address,
@@ -561,7 +561,7 @@ describe('Core: PermissionManager', function () {
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
-      await pm.bulkOnSingleTarget(pm.address, bulkItems);
+      await pm.applySimplePermissionsBulk(pm.address, bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           pm.address,
@@ -577,7 +577,7 @@ describe('Core: PermissionManager', function () {
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[2].address, ADMIN_PERMISSION_ID);
       await pm.grant(pm.address, signers[3].address, ADMIN_PERMISSION_ID);
-      const bulkItems: ItemSingleTarget[] = [
+      const bulkItems: SimplePermission[] = [
         {
           operation: Operation.Revoke,
           who: signers[1].address,
@@ -594,7 +594,7 @@ describe('Core: PermissionManager', function () {
           permissionId: ADMIN_PERMISSION_ID,
         },
       ];
-      await pm.bulkOnSingleTarget(pm.address, bulkItems);
+      await pm.applySimplePermissionsBulk(pm.address, bulkItems);
       for (const item of bulkItems) {
         const permission = await pm.getAuthPermission(
           pm.address,
@@ -608,7 +608,7 @@ describe('Core: PermissionManager', function () {
     it('should handle bulk mixed', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      const bulkItems: ItemSingleTarget[] = [
+      const bulkItems: SimplePermission[] = [
         {
           operation: Operation.Revoke,
           who: signers[1].address,
@@ -621,7 +621,7 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await pm.bulkOnSingleTarget(pm.address, bulkItems);
+      await pm.applySimplePermissionsBulk(pm.address, bulkItems);
       expect(
         await pm.getAuthPermission(
           pm.address,
@@ -641,7 +641,7 @@ describe('Core: PermissionManager', function () {
     it('should emit correct events on bulk', async () => {
       const signers = await ethers.getSigners();
       await pm.grant(pm.address, signers[1].address, ADMIN_PERMISSION_ID);
-      const bulkItems: ItemSingleTarget[] = [
+      const bulkItems: SimplePermission[] = [
         {
           operation: Operation.Revoke,
           who: signers[1].address,
@@ -654,7 +654,7 @@ describe('Core: PermissionManager', function () {
         },
       ];
 
-      await expect(pm.bulkOnSingleTarget(pm.address, bulkItems))
+      await expect(pm.applySimplePermissionsBulk(pm.address, bulkItems))
         .to.emit(pm, 'Revoked')
         .withArgs(
           ADMIN_PERMISSION_ID,
@@ -680,7 +680,7 @@ describe('Core: PermissionManager', function () {
     });
 
     it('should not allow', async () => {
-      const bulkItems: ItemSingleTarget[] = [
+      const bulkItems: SimplePermission[] = [
         {
           operation: Operation.Grant,
           who: otherSigner.address,
@@ -688,7 +688,7 @@ describe('Core: PermissionManager', function () {
         },
       ];
       await expect(
-        pm.connect(otherSigner).bulkOnSingleTarget(pm.address, bulkItems)
+        pm.connect(otherSigner).applySimplePermissionsBulk(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(
@@ -701,7 +701,7 @@ describe('Core: PermissionManager', function () {
 
     it('should not allow for non ROOT', async () => {
       await pm.grant(pm.address, otherSigner.address, ADMIN_PERMISSION_ID);
-      const bulkItems: ItemSingleTarget[] = [
+      const bulkItems: SimplePermission[] = [
         {
           operation: Operation.Grant,
           who: otherSigner.address,
@@ -709,7 +709,7 @@ describe('Core: PermissionManager', function () {
         },
       ];
       await expect(
-        pm.connect(otherSigner).bulkOnSingleTarget(pm.address, bulkItems)
+        pm.connect(otherSigner).applySimplePermissionsBulk(pm.address, bulkItems)
       )
         .to.be.revertedWithCustomError(pm, 'Unauthorized')
         .withArgs(

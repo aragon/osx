@@ -12,13 +12,15 @@ library PermissionLib {
         GrantWithOracle
     }
 
-    struct ItemSingleTarget {
+    /// @notice Simple permission struct to represent a permission without `where` nor `filter`.
+    struct SimplePermission {
         Operation operation;
         address who;
         bytes32 permissionId;
     }
 
-    struct ItemMultiTarget {
+    /// @notice Advanced permission struct to represent a permission with `where` and `filter`.
+    struct AdvancedPermission {
         Operation operation;
         address where;
         address who;
