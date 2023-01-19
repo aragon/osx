@@ -450,13 +450,25 @@ abstract contract MajorityVotingBase is
 
         if (_isProposalOpen(proposal_)) {
             // Early execution
-            return
-                proposal_.parameters.votingMode == VotingMode.EarlyExecution &&
-                isSupportThresholdReachedEarly(_proposalId) &&
-                isMinParticipationReached(_proposalId);
+            if (proposal_.parameters.votingMode != VotingMode.EarlyExecution) {
+                return false;
+            }
+            if (!isSupportThresholdReachedEarly(_proposalId)) {
+                return false;
+            }
+            if (!isMinParticipationReached(_proposalId)) {
+                return false;
+            }
+        } else {
+            // Normal execution
+            if (!isSupportThresholdReached(_proposalId)) {
+                return false;
+            }
+            if (!isMinParticipationReached(_proposalId)) {
+                return false;
+            }
         }
-        // Normal execution
-        return isSupportThresholdReached(_proposalId) && isMinParticipationReached(_proposalId);
+        return true;
     }
 
     /// @notice Internal function to check if a proposal vote is still open.
