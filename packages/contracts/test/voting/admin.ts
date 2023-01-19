@@ -7,6 +7,7 @@ import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
+import {deployWithProxy} from '../test-utils/proxy';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -56,7 +57,7 @@ describe('Admin plugin', function () {
       adminFactoryBytecode,
       signers[0]
     );
-    plugin = await AdminFactory.deploy();
+    plugin = await deployWithProxy(AdminFactory);
 
     await dao.grant(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
     await dao.grant(

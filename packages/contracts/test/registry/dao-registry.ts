@@ -8,16 +8,13 @@ import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../test-utils/proxy';
 import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
 };
 
-const UPGRADE_REGISTRY_PERMISSION_ID = ethers.utils.id(
-  'UPGRADE_REGISTRY_PERMISSION'
-)
-
-describe.only('DAORegistry', function () {
+describe('DAORegistry', function () {
   let signers: SignerWithAddress[];
   let daoRegistry: DAORegistry;
   let managingDao: DAO;
@@ -86,9 +83,29 @@ describe.only('DAORegistry', function () {
   });
   
   shouldUpgradeCorrectly(
-    UPGRADE_REGISTRY_PERMISSION_ID, 
+    UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID, 
     'DaoUnauthorized'
   )
+
+  describe("Upgrade", async () => {
+    it('reverts if user without permission tries to upgrade', async function () {
+      const {user, contract, dao} = this.upgrade;
+      const connect = contract.connect(user);
+      const tx = connect.upgradeTo(ethers.constants.AddressZero);
+      await expect(tx).to.be.reverted;
+    });
+
+    it('updates correctly to new implementation', async function () {
+      const newOne = await ethers.getContractFactory('DAORegistry')
+      const addr = await newOne.deploy();
+      const {user, contract, dao} = this.upgrade;
+      await dao.grant(contract.address, user.address, upgradePermissionId);
+      const connect = contract.connect(user);
+      await expect(connect.upgradeTo(addr.address))
+        .to.emit(contract, 'Upgraded')
+        .withArgs(addr.ddaress);
+    });
+  })
 
   it('reverts the registration if the DAO name is empty', async function () {
     await expect(

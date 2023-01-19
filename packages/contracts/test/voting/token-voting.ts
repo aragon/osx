@@ -29,6 +29,9 @@ import {
 } from '../test-utils/voting';
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -74,7 +77,7 @@ describe('TokenVoting', function () {
     dao = await deployNewDAO(signers[0].address);
   });
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     votingSettings = {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pct16(50),
@@ -101,7 +104,7 @@ describe('TokenVoting', function () {
       tokenVotingFactoryBytecode,
       signers[0]
     );
-    voting = await TokenVotingFactory.deploy();
+    voting = await deployWithProxy(TokenVotingFactory);
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -110,6 +113,26 @@ describe('TokenVoting', function () {
       dao.address,
       voting.address,
       ethers.utils.id('EXECUTE_PERMISSION')
+    );
+  });
+
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      this.upgrade = {
+        contract: voting,
+        dao: dao,
+        user: signers[8],
+      };
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+    });
+
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+      'DaoUnauthorized'
     );
   });
 

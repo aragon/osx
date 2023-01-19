@@ -9,6 +9,10 @@ import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
 import {deployWithProxy} from '../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../test-utils/dao';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+
+const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 
 describe('MerkleDistributor', function () {
   let signers: SignerWithAddress[];
@@ -18,7 +22,7 @@ describe('MerkleDistributor', function () {
   let wallet0: string;
   let wallet1: string;
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     signers = await ethers.getSigners();
     wallet0 = await signers[0].getAddress();
     wallet1 = await signers[1].getAddress();
@@ -36,10 +40,24 @@ describe('MerkleDistributor', function () {
     distributor = await deployWithProxy(MerkleDistributor);
   });
 
-  describe('general', () => {
-    const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      this.upgrade = {
+        contract: distributor,
+        dao: dao,
+        user: signers[8],
+      };
+      await distributor.initialize(dao.address, token.address, ZERO_BYTES32);
+    });
 
-    beforeEach(async () => {
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+      'DaoUnauthorized'
+    );
+  });
+
+  describe('general', () => {
+    beforeEach(async function () {
       await distributor.initialize(dao.address, token.address, ZERO_BYTES32);
     });
 
