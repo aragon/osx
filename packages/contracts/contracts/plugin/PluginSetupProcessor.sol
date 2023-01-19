@@ -13,7 +13,7 @@ import {DaoAuthorizable} from "../core/component/dao-authorizable/DaoAuthorizabl
 import {DAO, IDAO} from "../core/DAO.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "./PluginRepo.sol";
-import {PluginSetupRef, hashHelpers, hashPermissions, _getSetupId, _getPluginId, PreparationType} from "./psp/utils/Common.sol";
+import {PluginSetupRef, hashHelpers, hashPermissions, _getSetupId, _getPluginInstallationId, PreparationType} from "./psp/utils/Common.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022
@@ -88,7 +88,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     struct ApplyUninstallationParams {
         address plugin; // The address of the plugin which is uninstalling.
         PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
-        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcess. 
+        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcess.
     }
 
     /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
@@ -271,7 +271,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.data
         );
 
-        bytes32 pluginId = _getPluginId(_dao, plugin);
+        bytes32 pluginInstallationId = _getPluginInstallationId(_dao, plugin);
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -281,7 +281,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.Install
         );
 
-        PluginState storage pluginState = states[pluginId];
+        PluginState storage pluginState = states[pluginInstallationId];
 
         // Allow calling `prepareInstallation` only when
         // plugin was uninstalled or never been installed before.
@@ -319,9 +319,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID)
     {
-        bytes32 pluginId = _getPluginId(_dao, _params.plugin);
+        bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
-        PluginState storage pluginState = states[pluginId];
+        PluginState storage pluginState = states[pluginInstallationId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -384,9 +384,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
             });
         }
 
-        bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
+        bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.setupPayload.plugin);
 
-        PluginState storage pluginState = states[pluginId];
+        PluginState storage pluginState = states[pluginInstallationId];
 
         bytes32 currentHelpersHash = hashHelpers(_params.setupPayload.currentHelpers);
 
@@ -473,9 +473,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         canApply(_dao, APPLY_UPDATE_PERMISSION_ID)
     {
-        bytes32 pluginId = _getPluginId(_dao, _params.plugin);
+        bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
-        PluginState storage pluginState = states[pluginId];
+        PluginState storage pluginState = states[pluginInstallationId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -537,9 +537,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         returns (PermissionLib.ItemMultiTarget[] memory permissions)
     {
-        bytes32 pluginId = _getPluginId(_dao, _params.setupPayload.plugin);
+        bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.setupPayload.plugin);
 
-        PluginState storage pluginState = states[pluginId];
+        PluginState storage pluginState = states[pluginInstallationId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
@@ -599,9 +599,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         external
         canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID)
     {
-        bytes32 pluginId = _getPluginId(_dao, _params.plugin);
+        bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
-        PluginState storage pluginState = states[pluginId];
+        PluginState storage pluginState = states[pluginInstallationId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,

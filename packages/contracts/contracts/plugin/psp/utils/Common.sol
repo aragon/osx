@@ -24,7 +24,7 @@ enum PreparationType {
 /// @notice Returns an identifier for the plugin id.
 /// @param _dao The address of the DAO conducting the setup.
 /// @param _plugin The plugin address
-function _getPluginId(address _dao, address _plugin) pure returns (bytes32) {
+function _getPluginInstallationId(address _dao, address _plugin) pure returns (bytes32) {
     return keccak256(abi.encode(_dao, _plugin));
 }
 
