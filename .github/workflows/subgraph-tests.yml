@@ -56,6 +56,8 @@ jobs:
           node-version: 14
       - name: Install dependencies
         run: yarn
+      - name: Check formatting
+        run: yarn run formatting:check
       - name: Build contracts
         run: yarn run build:contracts
       - name: Build manifest
