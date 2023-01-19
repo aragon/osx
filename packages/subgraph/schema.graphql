@@ -39,7 +39,6 @@ type ContractPermissionId @entity(immutable: true) {
   dao: Dao!
   where: Bytes!
   permissionId: Bytes!
-  frozen: Boolean!
 }
 
 type Permission @entity(immutable: true) {
@@ -420,7 +419,6 @@ type MultisigProposal implements Proposal @entity {
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
   minApprovals: BigInt!
-  addresslistLength: BigInt!
   approvals: BigInt
   executed: Boolean!
   executionDate: BigInt
