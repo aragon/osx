@@ -10,19 +10,25 @@ uint256 constant RATIO_BASE = 10 ** 6;
 /// @param actual The actual value.
 error RatioOutOfBounds(uint256 limit, uint256 actual);
 
-/// @notice Divides a ratio by `RATIO_BASE` and ceils the remainder.
-/// @param _ratioValue The dividend to be divded by `RATIO_BASE`.
-/// @return The quotient obtained after ceiling a potential remainder.
-function ceilDivisionByRatio(uint256 _ratioValue) pure returns (uint256) {
-    if (_ratioValue % RATIO_BASE != 0) {
-        return (_ratioValue / RATIO_BASE) + 1;
+/// @notice Applys a ratio to a value and ceils the remainder.
+/// @param _value The value to which the ratio is applied .
+/// @param _ratio The ratio.
+/// @return result The resulting value.
+function applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
+    _value = _value * _ratio;
+    uint256 remainder = _value % RATIO_BASE;
+    result = _value / RATIO_BASE;
+
+    // Check if ceiling is needed
+    if (remainder != 0) {
+        ++result;
     }
-    return _ratioValue / RATIO_BASE;
 }
 
-/// @notice Divides a ratio by `RATIO_BASE` and floors the remainder, which is equivalent to dropping it.
-/// @param _ratioValue The dividend to be divded by `RATIO_BASE`.
-/// @return The quotient obtained.
-function floorDivisionByRatio(uint256 _ratioValue) pure returns (uint256) {
-    return _ratioValue / RATIO_BASE;
+/// @notice Applys a ratio to a value and floors the remainder.
+/// @param _value The value to which the ratio is applied .
+/// @param _ratio The ratio.
+/// @return result The resulting value.
+function applyRatioFloored(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
+    result = (_value * _ratio) / RATIO_BASE;
 }
