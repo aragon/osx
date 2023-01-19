@@ -8,24 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UPCOMING]
 
 ### Changed
+
 - Changes callId in `Executed` event from `uint256` to `bytes32`
 
 ## 0.6.2-alpha
 
 ### Added
 
+- Added the `MembershipContractAnnounced` event.
 - Added `startDate` and `endDate` to all `ProposalCreated` events.
 - Adds `startDate` and `endDate` fields to Multisig proposals.
 
 ### Changed
 
+- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembershipAnnounced` and `MembershipRenounced`.
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 
 ### Removed
 
 - Removes `Tally` struct as well as `addressListLength` and moves `approvals` in `Proposal`.
-
 
 ## 0.6.1-alpha
 
