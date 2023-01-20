@@ -2,6 +2,7 @@ import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
 import {BigNumberish} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
@@ -14,6 +15,17 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
   rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // dao.eth
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
+
+export async function uploadToIPFS(metadataObj: any): Promise<any> {
+  const client = IPFS.create({
+    url: 'https://ipfs-0.aragon.network/api/v0',
+    headers: {
+      'X-API-KEY': 'yRERPRwFAb5ZiV94XvJdgvDKoGEeFerfFsAQ65',
+    },
+  });
+  const cid = await client.add(JSON.stringify(metadataObj));
+  return cid;
+}
 
 export async function getContractAddress(
   contractName: string,
