@@ -10,7 +10,7 @@ uint256 constant RATIO_BASE = 10 ** 6;
 /// @param actual The actual value.
 error RatioOutOfBounds(uint256 limit, uint256 actual);
 
-/// @notice Applys a ratio to a value and ceils the remainder.
+/// @notice Applies a ratio to a value and ceils the remainder.
 /// @param _value The value to which the ratio is applied .
 /// @param _ratio The ratio.
 /// @return result The resulting value.
@@ -29,7 +29,7 @@ function applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 
     }
 }
 
-/// @notice Applys a ratio to a value and floors the remainder.
+/// @notice Applies a ratio to a value and floors the remainder.
 /// @param _value The value to which the ratio is applied .
 /// @param _ratio The ratio.
 /// @return result The resulting value.
