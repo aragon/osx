@@ -135,10 +135,9 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 _interfaceId
-    ) public view virtual override(PluginUUPSUpgradeable, ProposalBase) returns (bool) {
+    ) public view virtual override(PluginUUPSUpgradeable) returns (bool) {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
-            ProposalBase.supportsInterface(_interfaceId) ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
     

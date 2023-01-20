@@ -34,10 +34,9 @@ contract Admin is PluginCloneable, Proposal {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(PluginCloneable, ProposalBase) returns (bool) {
+    ) public view override(PluginCloneable) returns (bool) {
         return
             interfaceId == ADMIN_INTERFACE_ID ||
-            ProposalBase.supportsInterface(interfaceId) ||
             PluginCloneable.supportsInterface(interfaceId);
     }
 
