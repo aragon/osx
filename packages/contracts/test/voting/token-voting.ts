@@ -31,7 +31,7 @@ import {
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 
-describe.only('TokenVoting', function () {
+describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;

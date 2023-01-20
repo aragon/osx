@@ -26,7 +26,7 @@ import {
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 
-describe.only('AddresslistVoting', function () {
+describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;
