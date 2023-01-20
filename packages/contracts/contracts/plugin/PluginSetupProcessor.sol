@@ -354,12 +354,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginAlreadyInstalled();
         }
 
-        // If the plugin block number exceeds the setupId preparation block number,
-        // This means applyInstallation was already called on another setupId
-        // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotApplicable(setupId);
-        }
+        validateSetupId(pluginInstallationId, setupId);
 
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
@@ -502,12 +497,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.Update
         );
 
-        // If the plugin block number exceeds the setupId preparation block number,
-        // This means applyUpdate was already called on another setupId
-        // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotApplicable(setupId);
-        }
+        validateSetupId(pluginInstallationId, setupId);
 
         // Once the applyUpdate is called and arguments are confirmed(including initData)
         // we update the setupId with the new versionTag, the current helpers. All other
@@ -628,12 +618,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.Uninstall
         );
 
-        // If the plugin block number exceeds the setupId preparation block number,
-        // This means applyUninstallation was already called on another setupId
-        // and all the rest setupIds should become idle or setupId is not prepared before.
-        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
-            revert SetupNotApplicable(setupId);
-        }
+        validateSetupId(pluginInstallationId, setupId);
 
         pluginState.blockNumber = block.number;
         pluginState.currentSetupId = bytes32(0);
@@ -645,6 +630,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         emit UninstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
+    }
+
+    /// @notice Checks if the setupId for the plugin is valid to be applied for `applyUpdate`, `applyInstallation` or `applyUninstallation`.
+    /// @param pluginInstallationId the hash of abi.encode(daoAddress, pluginAddress)
+    /// @param setupId The setupId to check for validity to be used in `applyType` functions.
+    function validateSetupId(bytes32 pluginInstallationId, bytes32 setupId) public view {
+        PluginState storage pluginState = states[pluginInstallationId];
+        // If the plugin block number exceeds the setupId preparation block number,
+        // This means applyUpdate was already called on another setupId
+        // and all the rest setupIds should become idle or setupId is not prepared before.
+        if (pluginState.blockNumber >= pluginState.setupIds[setupId]) {
+            revert SetupNotApplicable(setupId);
+        }
     }
 
     /// @notice Upgrades an UUPSUpgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
