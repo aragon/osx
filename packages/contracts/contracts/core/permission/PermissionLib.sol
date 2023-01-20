@@ -12,13 +12,13 @@ library PermissionLib {
         GrantWithCondition
     }
 
-    struct ItemSingleTarget {
+    struct SingleTargetPermission {
         Operation operation;
         address who;
         bytes32 permissionId;
     }
 
-    struct ItemMultiTarget {
+    struct MultiTargetPermission {
         Operation operation;
         address where;
         address who;

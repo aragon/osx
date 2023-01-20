@@ -15,7 +15,9 @@
     "start:dev": "docker-compose -f docker/docker-compose.yml up -d && sleep 15 && yarn create:local && yarn deploy:local",
     "stop:dev": "docker-compose -f docker/docker-compose.yml down",
     "test": "graph test -r",
-    "coverage": "graph test -c"
+    "coverage": "graph test -c",
+    "formatting:check": "prettier '**/*.{json,ts,js}' -c",
+    "formatting:write": "prettier '**/*.{json,ts,js}' --write"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.33.1",
