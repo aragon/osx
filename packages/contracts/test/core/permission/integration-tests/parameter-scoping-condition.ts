@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {
-  TestParameterScopingPermissionOracle,
+  TestParameterScopingPermissionCondition,
   TestPlugin,
   DAO,
 } from '../../../../typechain';
@@ -11,9 +11,9 @@ import {deployNewDAO} from '../../../test-utils/dao';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 
-describe('TestParameterScopingOracle', function () {
+describe('TestParameterScopingCondition', function () {
   let signers: SignerWithAddress[];
-  let parameterOracle: TestParameterScopingPermissionOracle;
+  let parameterCondition: TestParameterScopingPermissionCondition;
   let testPlugin: TestPlugin;
   let managingDao: DAO;
   let ownerAddress: string;
@@ -31,18 +31,18 @@ describe('TestParameterScopingOracle', function () {
     testPlugin = await TestPlugin.deploy();
     await testPlugin.initialize(managingDao.address);
 
-    // Deploy the oracle
-    const ParameterOracle = await ethers.getContractFactory(
-      'TestParameterScopingPermissionOracle'
+    // Deploy the condition
+    const ParameterCondition = await ethers.getContractFactory(
+      'TestParameterScopingPermissionCondition'
     );
-    parameterOracle = await ParameterOracle.deploy();
+    parameterCondition = await ParameterCondition.deploy();
 
     // Give signers[0] the `DO_SOMETHING_PERMISSION_ID` on the TestPlugin
-    managingDao.grantWithOracle(
+    managingDao.grantWithCondition(
       testPlugin.address,
       ownerAddress,
       DO_SOMETHING_PERMISSION_ID,
-      parameterOracle.address
+      parameterCondition.address
     );
 
     expectedUnauthorizedErrorArguments = [
@@ -54,7 +54,7 @@ describe('TestParameterScopingOracle', function () {
     ];
   });
 
-  describe('oracle conditions:', async () => {
+  describe('condition conditions:', async () => {
     it('adds if the first parameter is larger than the second', async () => {
       let param1 = 10;
       let param2 = 1;
@@ -64,7 +64,7 @@ describe('TestParameterScopingOracle', function () {
       ).to.be.equal(11);
     });
 
-    it('reverts if the oracle is called by the wrong function', async () => {
+    it('reverts if the condition is called by the wrong function', async () => {
       let param1 = 10;
       let param2 = 1;
 

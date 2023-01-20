@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {TestSharedPlugin, TestIdGatingOracle, DAO} from '../../../../typechain';
+import {TestSharedPlugin, TestIdGatingCondition, DAO} from '../../../../typechain';
 import {deployNewDAO} from '../../../test-utils/dao';
 
 const ID_GATED_ACTION_PERMISSION_ID = ethers.utils.id(
@@ -59,22 +59,22 @@ describe('SharedPlugin', function () {
   });
 
   describe('idGatedAction:', async () => {
-    let oracle: TestIdGatingOracle;
+    let condition: TestIdGatingCondition;
 
     beforeEach(async () => {});
     it('executes if the ID is allowed', async () => {
       const allowedId = 0;
 
-      // Deploy `TestIdGatingOracle` and set the allowed ID in the constructor
-      const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
-      oracle = await Oracle.deploy(allowedId);
+      // Deploy `TestIdGatingCondition` and set the allowed ID in the constructor
+      const Condition = await ethers.getContractFactory('TestIdGatingCondition');
+      condition = await Condition.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
-      dao1.grantWithOracle(
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
+      dao1.grantWithCondition(
         testPlugin.address,
         ownerAddress,
         ID_GATED_ACTION_PERMISSION_ID,
-        oracle.address
+        condition.address
       );
 
       // Deploy a new object in the `TestPlugin` which will have the ID 0
@@ -91,16 +91,16 @@ describe('SharedPlugin', function () {
       const allowedId = 0;
       const nonExistingId = 1;
 
-      // Deploy the oracle and set the allowed ID
-      const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
-      oracle = await Oracle.deploy(allowedId);
+      // Deploy the condition and set the allowed ID
+      const Condition = await ethers.getContractFactory('TestIdGatingCondition');
+      condition = await Condition.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
-      dao1.grantWithOracle(
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
+      dao1.grantWithCondition(
         testPlugin.address,
         ownerAddress,
         ID_GATED_ACTION_PERMISSION_ID,
-        oracle.address
+        condition.address
       );
 
       // The call fails because no object with ID 1 exists
@@ -124,25 +124,25 @@ describe('SharedPlugin', function () {
     });
 
     it('reverts if the ID is not allowed', async () => {
-      // deploy oracle and set allowed ID
+      // deploy condition and set allowed ID
       const allowedId = 1;
       const existingButNotAllowedId = 0;
 
-      const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
-      oracle = await Oracle.deploy(allowedId);
+      const Condition = await ethers.getContractFactory('TestIdGatingCondition');
+      condition = await Condition.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions on `testPlugin` via `oracle`
-      dao1.grantWithOracle(
+      // Grants signers[0] the permission to do ID gated actions on `testPlugin` via `condition`
+      dao1.grantWithCondition(
         testPlugin.address,
         ownerAddress,
         ID_GATED_ACTION_PERMISSION_ID,
-        oracle.address
+        condition.address
       );
-      dao2.grantWithOracle(
+      dao2.grantWithCondition(
         testPlugin.address,
         ownerAddress,
         ID_GATED_ACTION_PERMISSION_ID,
-        oracle.address
+        condition.address
       );
 
       // Create ID-gated object associated with `dao1`
@@ -164,11 +164,11 @@ describe('SharedPlugin', function () {
     });
 
     it('reverts if the permission is missing', async () => {
-      // Deploy oracle and set allowed ID
+      // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
-      oracle = await Oracle.deploy(allowedId);
+      const Condition = await ethers.getContractFactory('TestIdGatingCondition');
+      condition = await Condition.deploy(allowedId);
 
       // Create ID-gated object associated with `dao1`
       const tx = await testPlugin.createNewObject(dao1.address);
@@ -181,18 +181,18 @@ describe('SharedPlugin', function () {
     });
 
     it('reverts if the permission is set in the wrong DAO', async () => {
-      // Deploy oracle and set allowed ID
+      // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
-      oracle = await Oracle.deploy(allowedId);
+      const Condition = await ethers.getContractFactory('TestIdGatingCondition');
+      condition = await Condition.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
-      dao2.grantWithOracle(
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
+      dao2.grantWithCondition(
         testPlugin.address,
         ownerAddress,
         ID_GATED_ACTION_PERMISSION_ID,
-        oracle.address
+        condition.address
       );
 
       // Create ID-gated object associated with `dao1`
@@ -206,18 +206,18 @@ describe('SharedPlugin', function () {
     });
 
     it('reverts if the object belongs to the wrong DAO', async () => {
-      // Deploy oracle and set allowed ID
+      // Deploy condition and set allowed ID
       const allowedId = 0;
 
-      const Oracle = await ethers.getContractFactory('TestIdGatingOracle');
-      oracle = await Oracle.deploy(allowedId);
+      const Condition = await ethers.getContractFactory('TestIdGatingCondition');
+      condition = await Condition.deploy(allowedId);
 
-      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingOracle` oracle
-      dao1.grantWithOracle(
+      // Grants signers[0] the permission to do ID gated actions with the deployed `TestIdGatingCondition` condition
+      dao1.grantWithCondition(
         testPlugin.address,
         ownerAddress,
         ID_GATED_ACTION_PERMISSION_ID,
-        oracle.address
+        condition.address
       );
 
       // Create ID-gated object associated with `dao1`
