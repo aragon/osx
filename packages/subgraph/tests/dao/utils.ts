@@ -181,7 +181,7 @@ export function createNewGrantedEvent(
   actor: string,
   where: string,
   who: string,
-  oracle: string,
+  condition: string,
   contractAddress: string
 ): Granted {
   let newGrantedEvent = changetype<Granted>(newMockEvent());
@@ -205,16 +205,16 @@ export function createNewGrantedEvent(
     'who',
     ethereum.Value.fromAddress(Address.fromString(who))
   );
-  let oracleParam = new ethereum.EventParam(
-    'oracle',
-    ethereum.Value.fromAddress(Address.fromString(oracle))
+  let conditionParam = new ethereum.EventParam(
+    'condition',
+    ethereum.Value.fromAddress(Address.fromString(condition))
   );
 
   newGrantedEvent.parameters.push(contractPermissionIdParam);
   newGrantedEvent.parameters.push(actorParam);
   newGrantedEvent.parameters.push(whereParam);
   newGrantedEvent.parameters.push(whoParam);
-  newGrantedEvent.parameters.push(oracleParam);
+  newGrantedEvent.parameters.push(conditionParam);
 
   return newGrantedEvent;
 }
