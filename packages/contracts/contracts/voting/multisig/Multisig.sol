@@ -6,7 +6,7 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
+import {ProposalUpgradeable} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
@@ -135,7 +135,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 _interfaceId
-    ) public view virtual override(PluginUUPSUpgradeable) returns (bool) {
+    ) public view virtual override returns (bool) {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
