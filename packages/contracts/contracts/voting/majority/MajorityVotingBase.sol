@@ -473,18 +473,16 @@ abstract contract MajorityVotingBase is
             if (!isSupportThresholdReachedEarly(_proposalId)) {
                 return false;
             }
-            if (!isMinParticipationReached(_proposalId)) {
-                return false;
-            }
         } else {
             // Normal execution
             if (!isSupportThresholdReached(_proposalId)) {
                 return false;
             }
-            if (!isMinParticipationReached(_proposalId)) {
-                return false;
-            }
         }
+        if (!isMinParticipationReached(_proposalId)) {
+            return false;
+        }
+
         return true;
     }
 
