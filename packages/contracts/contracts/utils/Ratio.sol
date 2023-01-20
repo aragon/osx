@@ -9,3 +9,34 @@ uint256 constant RATIO_BASE = 10 ** 6;
 /// @param limit The maximal value.
 /// @param actual The actual value.
 error RatioOutOfBounds(uint256 limit, uint256 actual);
+
+/// @notice Applys a ratio to a value and ceils the remainder.
+/// @param _value The value to which the ratio is applied .
+/// @param _ratio The ratio.
+/// @return result The resulting value.
+function applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
+    if (_ratio > RATIO_BASE) {
+        revert RatioOutOfBounds({limit: RATIO_BASE, actual: _ratio});
+    }
+
+    _value = _value * _ratio;
+    uint256 remainder = _value % RATIO_BASE;
+    result = _value / RATIO_BASE;
+
+    // Check if ceiling is needed
+    if (remainder != 0) {
+        ++result;
+    }
+}
+
+/// @notice Applys a ratio to a value and floors the remainder.
+/// @param _value The value to which the ratio is applied .
+/// @param _ratio The ratio.
+/// @return result The resulting value.
+function applyRatioFloored(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
+    if (_ratio > RATIO_BASE) {
+        revert RatioOutOfBounds({limit: RATIO_BASE, actual: RATIO_BASE});
+    }
+
+    result = (_value * _ratio) / RATIO_BASE;
+}

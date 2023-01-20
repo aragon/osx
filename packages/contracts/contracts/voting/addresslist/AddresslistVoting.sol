@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
-import {RATIO_BASE} from "../../utils/Ratio.sol";
+import {RATIO_BASE, applyRatioCeiled} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "./Addresslist.sol";
@@ -113,9 +113,10 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-        proposal_.parameters.minVotingPower =
-            (totalVotingPower(snapshotBlock) * minParticipation()) /
-            RATIO_BASE;
+        proposal_.parameters.minVotingPower = applyRatioCeiled(
+            totalVotingPower(snapshotBlock),
+            minParticipation()
+        );
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

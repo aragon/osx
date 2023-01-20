@@ -87,7 +87,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256), address)',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256), address)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -99,7 +99,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI

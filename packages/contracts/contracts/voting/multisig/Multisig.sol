@@ -140,14 +140,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
             ProposalBase.supportsInterface(_interfaceId) ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
-
-    /// @notice Returns the number of approvals,
-    /// @param _proposalId The ID of the proposal.
-    /// @return The number of approvals.
-    function approvals(uint256 _proposalId) public view returns (uint16) {
-        return proposals[_proposalId].approvals;
-    }
-
+    
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
     function addAddresses(

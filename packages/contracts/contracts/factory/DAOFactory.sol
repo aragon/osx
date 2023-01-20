@@ -24,6 +24,7 @@ contract DAOFactory {
 
     struct DAOSettings {
         address trustedForwarder; // The address of the trusted forwarder required for meta transactions.
+        string daoURI; // The DAO uri used with [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824).
         string name; // The name of the DAO.
         bytes metadata; // Meta data of the DAO.
     }
@@ -134,7 +135,7 @@ contract DAOFactory {
         dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
-        dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder);
+        dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder, _daoSettings.daoURI);
     }
 
     /// @notice Sets the required permissions for the new DAO.

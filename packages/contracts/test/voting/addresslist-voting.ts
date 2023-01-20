@@ -21,6 +21,7 @@ import {
   ONE_HOUR,
   MAX_UINT64,
   voteWithSigners,
+  toBytes32,
 } from '../test-utils/voting';
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
@@ -269,10 +270,62 @@ describe('AddresslistVoting', function () {
         .withArgs(earliestEndDate, tooEarlyEndDate);
     });
 
+    it('ceils the `minVotingPower` value if it has a remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30).add(1); // 30.0001 %
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
+    });
+
+    it('does not ceil the `minVotingPower` value if it has no remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30); // 30.0000 %
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
+    });
+
     it('should create a proposal successfully, but not vote', async () => {
-      await voting.initialize(dao.address, votingSettings, [
-        signers[0].address,
-      ]);
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -319,11 +372,11 @@ describe('AddresslistVoting', function () {
 
       expect(
         await voting.totalVotingPower(proposal.parameters.snapshotBlock)
-      ).to.equal(1);
+      ).to.equal(10);
       expect(await voting.canVote(id, signers[0].address, VoteOption.Yes)).to.be
         .true;
-      expect(await voting.canVote(id, signers[1].address, VoteOption.Yes)).to.be
-        .false;
+      expect(await voting.canVote(id, signers[10].address, VoteOption.Yes)).to
+        .be.false;
       expect(await voting.canVote(1, signers[0].address, VoteOption.Yes)).to.be
         .false;
 
@@ -334,9 +387,11 @@ describe('AddresslistVoting', function () {
     });
 
     it('should create a proposal and cast a vote immediately', async () => {
-      await voting.initialize(dao.address, votingSettings, [
-        signers[0].address,
-      ]);
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        signers.slice(0, 10).map(s => s.address)
+      );
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -375,13 +430,12 @@ describe('AddresslistVoting', function () {
           .div(pctToRatio(100))
       );
 
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(10);
       expect(proposal.tally.yes).to.equal(1);
       expect(proposal.tally.no).to.equal(0);
       expect(proposal.tally.abstain).to.equal(0);
-
-      expect(
-        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
-      ).to.equal(1);
     });
 
     it('reverts creation if the creator tries to vote before the start date', async () => {
@@ -715,7 +769,7 @@ describe('AddresslistVoting', function () {
           const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
           expect(event.args.actor).to.equal(voting.address);
-          expect(event.args.callId).to.equal(id);
+          expect(event.args.callId).to.equal(toBytes32(id));
           expect(event.args.actions.length).to.equal(1);
           expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
           expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
@@ -988,9 +1042,9 @@ describe('AddresslistVoting', function () {
       });
     });
 
-    describe('A special majority vote with >50% support and >=80% participation required and early execution enabled', async () => {
+    describe('A special majority vote with >50% support and >=75% participation required and early execution enabled', async () => {
       beforeEach(async () => {
-        votingSettings.minParticipation = pctToRatio(80);
+        votingSettings.minParticipation = pctToRatio(75);
 
         await voting.initialize(
           dao.address,
@@ -1125,7 +1179,7 @@ describe('AddresslistVoting', function () {
       });
     });
 
-    describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` and early execution mode activated', async () => {
+    describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` in early execution mode activated', async () => {
       beforeEach(async () => {
         votingSettings.supportThreshold = pctToRatio(0);
         votingSettings.minParticipation = pctToRatio(0);
@@ -1167,6 +1221,72 @@ describe('AddresslistVoting', function () {
         await advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.true;
+
+        // Check if the proposal can execute normally
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.true;
+      });
+    });
+
+    describe('An edge case with `supportThreshold = 99.9999%` and `minParticipation = 100%` in early execution mode', async () => {
+      beforeEach(async () => {
+        votingSettings.supportThreshold = pctToRatio(100).sub(1);
+        votingSettings.minParticipation = pctToRatio(100); //
+
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          signers.slice(0, 10).map(s => s.address)
+        );
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+      });
+
+      it('does not execute with 9 votes', async () => {
+        // does not execute early
+        advanceIntoVoteTime(startDate, endDate);
+
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3, 4, 5, 6, 7, 8], // 9 votes
+          no: [], // 0 votes
+          abstain: [], // 0 votes
+        });
+
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.canExecute(id)).to.be.false;
+
+        // does not execute normally
+        await advanceAfterVoteEnd(endDate);
+
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.false;
+      });
+
+      it('executes if participation and support are met', async () => {
+        // Check if the proposal can execute early
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voteWithSigners(voting, id, signers, {
+          yes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], // 10 votes
+          no: [], // 0 votes
+          abstain: [], // 0 votes
+        });
 
         expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;

@@ -80,7 +80,7 @@ describe('AddresslistVotingSetup', function () {
       'function isListedAtBlock(address,uint256) returns (bool)',
       'function addresslistLength() returns (uint256)',
       'function addresslistLengthAtBlock(uint256) returns (uint256)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256),address[])',
     ]);
 
     expect(
@@ -92,7 +92,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
+        '(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()

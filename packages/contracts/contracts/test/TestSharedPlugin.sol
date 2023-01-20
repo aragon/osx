@@ -3,14 +3,14 @@
 pragma solidity 0.8.10;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IPermissionOracle} from "../core/permission/IPermissionOracle.sol";
+import {IPermissionCondition} from "../core/permission/IPermissionCondition.sol";
 
 import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
 import {DaoUnauthorized} from "../utils/auth.sol";
 import {IDAO} from "../core/IDAO.sol";
 
 /// @notice A test Plugin that manages permission to internal objects by associating their IDs with specific DAOs. Only the DAO for which the object was created has the permission to perform ID-gated actions on them.
-/// @dev This is realized by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager.
+/// @dev This is realized by asking a `IPermissionCondition` that must be authorized in the DAO's permission manager.
 contract TestSharedPlugin is PluginUUPSUpgradeable {
     bytes32 public constant ID_GATED_ACTION_PERMISSION_ID = keccak256("ID_GATED_ACTION_PERMISSION");
 
@@ -52,15 +52,15 @@ contract TestSharedPlugin is PluginUUPSUpgradeable {
     }
 
     /// @notice Executes something if the `id` parameter is authorized by the DAO associated through `ownedIds`.
-    ///         This is done by asking an `IPermissionOracle` that must be authorized in the DAO's permission manager via `grantWithOracle` and the `ID_GATED_ACTION_PERMISSION_ID`.
+    ///         This is done by asking a `IPermissionCondition` that must be authorized in the DAO's permission manager via `grantWithCondition` and the `ID_GATED_ACTION_PERMISSION_ID`.
     /// @param _id The ID that is associated with a specific DAO
     function idGatedAction(uint256 _id) external sharedAuth(_id, ID_GATED_ACTION_PERMISSION_ID) {
         // do something
     }
 }
 
-/// @notice The oracle associated with `TestSharedPlugin`
-contract TestIdGatingOracle is IPermissionOracle {
+/// @notice The condition associated with `TestSharedPlugin`
+contract TestIdGatingCondition is IPermissionCondition {
     uint256 public allowedId;
 
     constructor(uint256 _id) {

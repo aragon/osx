@@ -36,7 +36,7 @@ export type PermissionOperation = {
   operation: Operation;
   where: string;
   who: string;
-  oracle: string;
+  condition: string;
   permissionId: BytesLike;
 };
 
@@ -158,7 +158,7 @@ export function mockPermissionsOperations(
       operation: op,
       where: utils.hexZeroPad(ethers.utils.hexlify(i), 20),
       who: utils.hexZeroPad(ethers.utils.hexlify(i), 20),
-      oracle: constants.AddressZero,
+      condition: constants.AddressZero,
       permissionId: utils.id('MOCK_PERMISSION'),
     });
   }

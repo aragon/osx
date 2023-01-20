@@ -35,18 +35,18 @@ interface IMajorityVoting {
 
     /// @notice Returns the support threshold parameter stored in the voting settings.
     /// @return The support threshold parameter.
-    function supportThreshold() external view returns (uint64);
+    function supportThreshold() external view returns (uint32);
 
     /// @notice Returns the minimum participation parameter stored in the voting settings.
     /// @return The minimum participation parameter.
-    function minParticipation() external view returns (uint64);
+    function minParticipation() external view returns (uint32);
 
     /// @notice Checks if the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
     /// @return Returns `true` if the  support is greater than the suppor threshold and `false` otherwise.
     function isSupportThresholdReached(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Checks if the worse case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote is greater than the support threshold.
+    /// @notice Checks if the worst case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
     /// @return Returns `true` if the worst case support is greater than the suppor threshold and `false` otherwise.
     function isSupportThresholdReachedEarly(uint256 _proposalId) external view returns (bool);
