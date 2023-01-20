@@ -28,12 +28,10 @@ contract CounterV1PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "(address multiplyHelper, uint num)";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         virtual
         override
@@ -96,11 +94,6 @@ contract CounterV1PluginSetup is PluginSetup {
         helpers[0] = multiplyHelper;
 
         return (plugin, helpers, permissions);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
     }
 
     /// @inheritdoc IPluginSetup

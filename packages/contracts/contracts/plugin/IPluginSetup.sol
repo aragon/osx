@@ -5,29 +5,22 @@ pragma solidity 0.8.10;
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 interface IPluginSetup {
-    /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.
-    /// @return The ABI in string format.
-    function prepareInstallationDataABI() external view returns (string memory);
-
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
     /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
     /// @return helpers The address array of all helpers (contracts or EOAs) associated with the plugin after the installation.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
-    
         returns (
             address plugin,
             address[] memory helpers,
             PermissionLib.ItemMultiTarget[] memory permissions
         );
-
-    /// @notice The ABI required to decode the `bytes` data in `prepareUpdate()`.
-    /// @return The ABI in string format.
-    /// @dev The empty implemention is provided here so that this doesn't need to be overriden and implemented. This is relevant, for example, for the initial version of a plugin for which no update exists.
-    function prepareUpdateDataABI() external view returns (string memory);
 
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
@@ -47,16 +40,11 @@ interface IPluginSetup {
         bytes memory _data
     )
         external
-    
         returns (
             address[] memory updatedHelpers,
             bytes memory initData,
             PermissionLib.ItemMultiTarget[] memory permissions
         );
-
-    /// @notice The ABI required to decode the `bytes` data in `prepareUninstallation()`.
-    /// @return The ABI in string format.
-    function prepareUninstallationDataABI() external view returns (string memory);
 
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.

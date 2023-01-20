@@ -6,7 +6,7 @@ import {ERC20, TokenVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import {deployWithProxy} from '../test-utils/proxy';
+import metadata from '../../contracts/voting/token/metadata.json';
 
 import {
   VotingSettings,
@@ -101,9 +101,7 @@ describe('TokenVotingSetup', function () {
       const dataHRABI =
         '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
-      expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
-        dataHRABI
-      );
+      expect(metadata.setupABIs.prepareInstallationDataABI).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
@@ -439,7 +437,7 @@ describe('TokenVotingSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(await tokenVotingSetup.prepareUninstallationDataABI()).to.be.eq(
+      expect(metadata.setupABIs.prepareUninstallationDataABI).to.be.eq(
         dataHRABI
       );
     });

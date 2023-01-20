@@ -30,12 +30,10 @@ contract CounterV2PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "(address multiplyHelper, uint num, uint newVariable)";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         virtual
         override
@@ -51,7 +49,7 @@ contract CounterV2PluginSetup is PluginSetup {
         address multiplyHelper = _multiplyHelper;
 
         if (_multiplyHelper == address(0)) {
-            multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));            
+            multiplyHelper = createERC1967Proxy(address(multiplyHelperBase), bytes(""));
         }
 
         bytes memory initData = abi.encodeWithSelector(
@@ -101,11 +99,6 @@ contract CounterV2PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUpdateDataABI() external view virtual override returns (string memory) {
-        return "(uint _newVariable)";
-    }
-
-    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         address _plugin, // proxy
@@ -144,11 +137,6 @@ contract CounterV2PluginSetup is PluginSetup {
         // if another helper is deployed, put it inside activeHelpers + put old ones as well.
         activeHelpers = new address[](1);
         activeHelpers[0] = _helpers[0];
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
     }
 
     /// @inheritdoc IPluginSetup

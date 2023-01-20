@@ -1,0 +1,7 @@
+{
+  "setupABIs": {
+    "prepareInstallationDataABI": "(address admin)",
+    "prepareUpdateDataABI": "",
+    "prepareUninstallationDataABI": ""
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "setupABIs": {
+    "prepareInstallationDataABI": "(address[] members, tuple(bool onlyListed, uint16 minApprovals))",
+    "prepareUpdateDataABI": "",
+    "prepareUninstallationDataABI": ""
+  }
+}

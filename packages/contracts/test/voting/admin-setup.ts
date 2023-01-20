@@ -5,6 +5,7 @@ import {AdminSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
+import metadata from '../../contracts/voting/admin/metadata.json';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
@@ -56,7 +57,7 @@ describe('AdminSetup', function () {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI = '(address admin)';
 
-      expect(await adminSetup.prepareInstallationDataABI()).to.be.eq(dataHRABI);
+      expect(metadata.setupABIs.prepareInstallationDataABI).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
@@ -147,7 +148,7 @@ describe('AdminSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(await adminSetup.prepareUninstallationDataABI()).to.be.eq(
+      expect(metadata.setupABIs.prepareUninstallationDataABI).to.be.eq(
         dataHRABI
       );
     });

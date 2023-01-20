@@ -25,13 +25,10 @@ contract AddresslistVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         returns (
             address plugin,
@@ -96,11 +93,6 @@ contract AddresslistVotingSetup is PluginSetup {
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
     }
 
     /// @inheritdoc IPluginSetup

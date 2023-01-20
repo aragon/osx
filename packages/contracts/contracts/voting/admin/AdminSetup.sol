@@ -32,12 +32,10 @@ contract AdminSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return "(address admin)";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         returns (
             address plugin,
@@ -83,11 +81,6 @@ contract AdminSetup is PluginSetup {
             NO_ORACLE,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
     }
 
     /// @inheritdoc IPluginSetup

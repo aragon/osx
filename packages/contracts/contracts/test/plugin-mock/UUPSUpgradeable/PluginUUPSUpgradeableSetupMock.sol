@@ -16,12 +16,15 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
+    // function prepareInstallationDataABI() external view virtual override returns (string memory) {
+    //     return "";
+    // }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -37,9 +40,9 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
+    // function prepareUninstallationDataABI() external view virtual override returns (string memory) {
+    //     return "";
+    // }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
@@ -59,7 +62,10 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
 }
 
 contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock {
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         pure
         override
@@ -82,7 +88,10 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -131,7 +140,10 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -186,7 +198,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
     }
 }
 
-/// @dev With this plugin setup, the plugin base implementation doesn't change. 
+/// @dev With this plugin setup, the plugin base implementation doesn't change.
 /// This setup is a good example when you want to design a new plugin setup
 /// which uses the same base implementation(doesn't update the logic contract)
 /// but applies new/modifier permissions on it.
@@ -197,7 +209,10 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -232,16 +247,16 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
 
         // if oldVersion is previous pluginsetup prior to this one
         // (E.x This one is 1.3.0, the previous one is 1.2.0)
-        // This means plugin base implementations(a.k.a contract logic code) 
-        // don't change Which means this update should only include returning 
-        // the desired updated permissions. PluginSetupProcessor will take care of 
+        // This means plugin base implementations(a.k.a contract logic code)
+        // don't change Which means this update should only include returning
+        // the desired updated permissions. PluginSetupProcessor will take care of
         // not calling `upgradeTo` on the plugin in such cases.
         if (_oldVersion[0] == 1 && _oldVersion[1] == 2 && _oldVersion[2] == 0) {
             permissions = mockPermissions(3, 4, PermissionLib.Operation.Grant);
         }
         // If the update happens from the previous's previous plugin setups
-        // (1.1.0 or 1.0.0), that means logic contracts change and It's required 
-        // to call initialize for the upgrade call. Logic below is just a test 
+        // (1.1.0 or 1.0.0), that means logic contracts change and It's required
+        // to call initialize for the upgrade call. Logic below is just a test
         // but dev is free to do what he wishes.
         else if (
             (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) ||
