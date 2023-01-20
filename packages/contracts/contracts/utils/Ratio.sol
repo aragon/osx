@@ -16,7 +16,7 @@ error RatioOutOfBounds(uint256 limit, uint256 actual);
 /// @return result The resulting value.
 function applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
     if (_ratio > RATIO_BASE) {
-        revert RatioOutOfBounds({limit: RATIO_BASE, actual: RATIO_BASE});
+        revert RatioOutOfBounds({limit: RATIO_BASE, actual: _ratio});
     }
 
     _value = _value * _ratio;
