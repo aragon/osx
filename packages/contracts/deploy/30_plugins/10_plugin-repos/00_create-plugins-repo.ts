@@ -6,6 +6,7 @@ import adminMetadata from '../../../contracts/voting/admin/metadata.json';
 import multisigMetadata from '../../../contracts/voting/multisig/metadata.json';
 import tokenMetadata from '../../../contracts/voting/token/metadata.json';
 import {createPluginRepo, uploadToIPFS} from '../../helpers';
+import {ethers} from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log(`\nCreating plugin repos.`);
@@ -14,38 +15,60 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'Please make sure pluginRepo is not created more than once with the same name.'
   );
 
+  const {network} = hre;
+
   // AddresslistVotingSetup
-  const addresslistCID = await uploadToIPFS(addresslistMetadata);
+  const addresslistCIDPath = await uploadToIPFS(
+    JSON.stringify(addresslistMetadata),
+    network.name
+  );
   await createPluginRepo(
     hre,
     'AddresslistVoting',
     'AddresslistVotingSetup',
     [1, 0, 0],
-    addresslistCID
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${addresslistCIDPath}`)
+    )
   );
 
   // TokenVotingSetup
-  const tokenCID = await uploadToIPFS(tokenMetadata);
+  const tokenCIDPath = await uploadToIPFS(
+    JSON.stringify(tokenMetadata),
+    network.name
+  );
   await createPluginRepo(
     hre,
     'TokenVoting',
     'TokenVotingSetup',
     [1, 0, 0],
-    tokenCID
+    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${tokenCIDPath}`))
   );
 
   // AdminSetup
-  const adminCID = await uploadToIPFS(adminMetadata);
-  await createPluginRepo(hre, 'Admin', 'AdminSetup', [1, 0, 0], adminCID);
+  const adminCIDPath = await uploadToIPFS(
+    JSON.stringify(adminMetadata),
+    network.name
+  );
+  await createPluginRepo(
+    hre,
+    'Admin',
+    'AdminSetup',
+    [1, 0, 0],
+    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${adminCIDPath}`))
+  );
 
   // MultisigSetup
-  const multisigCID = await uploadToIPFS(multisigMetadata);
+  const multisigCIDPath = await uploadToIPFS(
+    JSON.stringify(multisigMetadata),
+    network.name
+  );
   await createPluginRepo(
     hre,
     'Multisig',
     'MultisigSetup',
     [1, 0, 0],
-    multisigCID
+    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${multisigCIDPath}`))
   );
 };
 export default func;

@@ -20,7 +20,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          cache: "yarn"
+          cache: 'yarn'
           node-version: 14
       - name: Install yarn
         run: npm i -G yarn
@@ -32,3 +32,9 @@ jobs:
         env:
           REPORT_GAS: true
         run: yarn run test
+      - name: Test deployment (hardhat)
+        run: yarn deploy --network hardhat --reset
+        env:
+          ETH_KEY: ''
+          HARDHAT_DAO_ENS_DOMAIN: 'dao.eth'
+          HARDHAT_PLUGIN_ENS_DOMAIN: 'plugin.eth'
