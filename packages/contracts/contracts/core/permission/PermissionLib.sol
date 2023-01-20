@@ -9,7 +9,7 @@ library PermissionLib {
     enum Operation {
         Grant,
         Revoke,
-        GrantWithOracle
+        GrantWithCondition
     }
 
     /// @notice Simple permission struct to represent a permission without `where` nor `filter`.
@@ -24,7 +24,7 @@ library PermissionLib {
         Operation operation;
         address where;
         address who;
-        address oracle;
+        address condition;
         bytes32 permissionId;
     }
 }

@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
 
-address constant NO_ORACLE = address(0);
+address constant NO_CONDITION = address(0);
 
 function mockPermissions(
     uint160 start,
@@ -20,7 +20,7 @@ function mockPermissions(
             op,
             address(i),
             address(i),
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("MOCK_PERMISSION")
         );
     }

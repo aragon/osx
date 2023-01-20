@@ -21,7 +21,7 @@ contract CounterV2PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV2 public counterBase;
 
-    address private constant NO_ORACLE = address(0);
+    address private constant NO_CONDITION = address(0);
 
     // MultiplyHelper doesn't change. so dev decides to pass the old one.
     constructor(MultiplyHelper _helper) {
@@ -72,7 +72,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -80,7 +80,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -89,7 +89,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
-                NO_ORACLE,
+                NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -137,7 +137,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -165,7 +165,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -173,7 +173,7 @@ contract CounterV2PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             plugin,
             dao,
-            NO_ORACLE,
+            NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -182,7 +182,7 @@ contract CounterV2PluginSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 activeHelpers[0],
                 plugin,
-                NO_ORACLE,
+                NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }

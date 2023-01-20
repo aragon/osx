@@ -51,7 +51,7 @@ To learn more about the architecture of the system, visit the section explaining
 | :------------------ | :--------------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
 | `PermissionManager` | A permission manager (an access control list (ACL)) that `DAO` and other contracts can inherit from. | owned by `DAO`                                       |
 | `PermissionLib`     | A library for data types needed for the processing of permission operations.                         | used by `DAO`, `PluginSetup`, `PluginSetupProcessor` |
-| `IPermissionOracle` | An interface for oracle implementations.                                                             | implementations can be used by `PermissionManager`   |
+| `IPermissionCondition` | An interface for condition implementations.                                                             | implementations can be used by `PermissionManager`   |
 
 #### Plugin Related
 

@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.
 - Renamed `ItemSingleTarget` and `ItemMultiTarget` in `PermissionLib` to `SimplePermission` and `AdvancedPermission`.
 - Renamed `bulkOnSingleTarget()` and `bulkOnMultiTarget()` in `PermissionManager` to `applySimplePermissionsBulk()` and `applyAdvancedPermissionsBulk()`
+- Changed all occurences of `oracle` to `condition`.
 
 ### Removed
 

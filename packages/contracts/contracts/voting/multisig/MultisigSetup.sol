@@ -15,8 +15,8 @@ contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
     Multisig private immutable multisigBase;
 
-    /// @notice The address zero to be used as oracle address for permissions.
-    address private constant NO_ORACLE = address(0);
+    /// @notice The address zero to be used as condition address for permissions.
+    address private constant NO_CONDITION = address(0);
 
     /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
     constructor() {
@@ -68,7 +68,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
@@ -76,7 +76,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -85,7 +85,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
@@ -110,7 +110,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
@@ -118,7 +118,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -126,7 +126,7 @@ contract MultisigSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
