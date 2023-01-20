@@ -1241,15 +1241,14 @@ describe('TokenVoting', function () {
     context('token balances are in the magnitude of 10^18', async () => {
       beforeEach(async () => {
         const totalSupply = ethers.BigNumber.from(10).pow(18);
-
         const delta = totalSupply.div(RATIO_BASE);
         await setBalances([
           {
             receiver: signers[0].address,
-            amount: totalSupply.sub(delta),
+            amount: totalSupply.sub(delta), // 99.9999% of the total supply
           },
-          {receiver: signers[1].address, amount: 1},
-          {receiver: signers[2].address, amount: delta.sub(1)},
+          {receiver: signers[1].address, amount: 1}, // 1 vote (10^-16 % = 0.0000000000000001%)
+          {receiver: signers[2].address, amount: delta.sub(1)}, // 1 vote less than 0.0001% of the total supply (99.9999% - 10^-16% = 0.0009999999999999%)
         ]);
 
         await voting.createProposal(
@@ -1293,7 +1292,7 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
 
-        // 1 vote is still missing to meet =100%
+        // 1 vote is still missing to meet particpiation = 100%
         const tally = (await voting.getProposal(id)).tally;
         expect(
           tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
@@ -1307,13 +1306,13 @@ describe('TokenVoting', function () {
     });
 
     context('tokens balances are in the magnitude of 10^6', async () => {
+      const totalSupply = ethers.BigNumber.from(10).pow(6);
+      const delta = 1; // 0.0001% of the total supply
+
       beforeEach(async () => {
         await setBalances([
-          {
-            receiver: signers[0].address,
-            amount: ethers.BigNumber.from(10).pow(6).sub(1),
-          },
-          {receiver: signers[1].address, amount: 1},
+          {receiver: signers[0].address, amount: totalSupply.sub(delta)}, // 99.9999%
+          {receiver: signers[1].address, amount: delta}, //             0.0001%
         ]);
 
         await voting.createProposal(
@@ -1326,21 +1325,22 @@ describe('TokenVoting', function () {
         );
       });
 
-      it('early support is not met with 1 vote missing', async () => {
+      it('early support criterium is sharp by 1 vote', async () => {
         advanceIntoVoteTime(startDate, endDate);
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        // 1 vote is still missing to meet >99.9999%%
+        const tally = (await voting.getProposal(id)).tally;
+        expect(
+          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
 
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
-      });
 
-      it('early support is met when all votes are casted with yes', async () => {
-        advanceIntoVoteTime(startDate, endDate);
-
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // cast the last vote so that support = 100%%
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
       });
@@ -1350,14 +1350,16 @@ describe('TokenVoting', function () {
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
         expect(await voting.isMinParticipationReached(id)).to.be.false;
-      });
 
-      it('participation is met when all votes are casted', async () => {
-        await advanceIntoVoteTime(startDate, endDate);
+        // 1 vote is still missing to meet particpiation = 100%
+        const tally = (await voting.getProposal(id)).tally;
+        expect(
+          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+        ).to.eq(1);
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
 
-        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        // cast the last vote so that participation = 100%
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
-
         expect(await voting.isMinParticipationReached(id)).to.be.true;
       });
     });
