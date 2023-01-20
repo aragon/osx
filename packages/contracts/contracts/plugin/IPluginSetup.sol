@@ -6,7 +6,7 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {IDAO} from "../core/IDAO.sol";
 
 interface IPluginSetup {
-    /// @notice The plugin's assosiated dependency.
+    /// @notice The plugin's associated dependency.
     /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedDependency {
