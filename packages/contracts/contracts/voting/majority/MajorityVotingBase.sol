@@ -497,6 +497,7 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to update the plugin-wide proposal vote settings.
     /// @param _votingSettings The voting settings to be validated and updated.
     function _updateVotingSettings(VotingSettings calldata _votingSettings) internal virtual {
+        // Require the support threshold value to be in the interval [0, 10^6), because `>` comparision is used in the support criterion.
         if (_votingSettings.supportThreshold > RATIO_BASE - 1) {
             revert RatioOutOfBounds({
                 limit: RATIO_BASE - 1,
@@ -504,6 +505,7 @@ abstract contract MajorityVotingBase is
             });
         }
 
+        // Require the minimum participation value to be in the interval [0, 10^6], because `>=` comparision is used in the participation criterion.
         if (_votingSettings.minParticipation > RATIO_BASE) {
             revert RatioOutOfBounds({limit: RATIO_BASE, actual: _votingSettings.minParticipation});
         }
