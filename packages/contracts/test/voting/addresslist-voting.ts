@@ -27,7 +27,7 @@ import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
 import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
-import { deployWithProxy } from '../test-utils/proxy';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -84,7 +84,7 @@ describe('AddresslistVoting', function () {
       addresslistVotingFactoryBytecode,
       signers[0]
     );
-    voting = await deployWithProxy(AddresslistVotingFactory)
+    voting = await deployWithProxy(AddresslistVotingFactory);
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;

@@ -21,7 +21,7 @@ contract Admin is PluginCloneable, Proposal {
     /// @notice The ID of the permission required to call the `executeProposal` function.
     bytes32 public constant EXECUTE_PROPOSAL_PERMISSION_ID =
         keccak256("EXECUTE_PROPOSAL_PERMISSION");
-    
+
     /// @notice Initializes the contract.
     /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
