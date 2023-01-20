@@ -244,12 +244,11 @@ abstract contract MajorityVotingBase is
         public
         view
         virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable, ProposalBase)
+        override(ERC165Upgradeable, PluginUUPSUpgradeable)
         returns (bool)
     {
         return
             interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
-            ProposalBase.supportsInterface(interfaceId) ||
             PluginUUPSUpgradeable.supportsInterface(interfaceId);
     }
 

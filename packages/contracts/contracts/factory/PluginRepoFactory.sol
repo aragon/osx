@@ -68,38 +68,38 @@ contract PluginRepoFactory {
     /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_REPO_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function _setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
-        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](5);
+        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](5);
 
         // Grant the plugin maintainer all the permissions required
-        items[0] = PermissionLib.ItemSingleTarget(
+        items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.CREATE_VERSION_PERMISSION_ID()
         );
-        items[1] = PermissionLib.ItemSingleTarget(
+        items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.UPGRADE_REPO_PERMISSION_ID()
         );
-        items[2] = PermissionLib.ItemSingleTarget(
+        items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.ROOT_PERMISSION_ID()
         );
 
         // Revoke permissions from the plugin repository factory (`address(this)`).
-        items[3] = PermissionLib.ItemSingleTarget(
+        items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
             pluginRepo.ROOT_PERMISSION_ID()
         );
-        items[4] = PermissionLib.ItemSingleTarget(
+        items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
             pluginRepo.CREATE_VERSION_PERMISSION_ID()
         );
 
-        pluginRepo.bulkOnSingleTarget(address(pluginRepo), items);
+        pluginRepo.applySingleTargetPermissions(address(pluginRepo), items);
     }
 
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.

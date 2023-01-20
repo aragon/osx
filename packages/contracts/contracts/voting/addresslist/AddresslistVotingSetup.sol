@@ -39,7 +39,7 @@ contract AddresslistVotingSetup is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         IDAO dao = IDAO(_dao);
@@ -63,11 +63,11 @@ contract AddresslistVotingSetup is PluginSetup {
         (helpers); // silence the warning.
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        permissions = new PermissionLib.MultiTargetPermission[](4);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
@@ -75,7 +75,7 @@ contract AddresslistVotingSetup is PluginSetup {
             addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
@@ -83,7 +83,7 @@ contract AddresslistVotingSetup is PluginSetup {
             addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
@@ -92,7 +92,7 @@ contract AddresslistVotingSetup is PluginSetup {
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[3] = PermissionLib.ItemMultiTarget(
+        permissions[3] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
@@ -112,12 +112,12 @@ contract AddresslistVotingSetup is PluginSetup {
         address _plugin,
         address[] calldata,
         bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](4);
+        permissions = new PermissionLib.MultiTargetPermission[](4);
 
         // Set permissions to be Revoked.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
@@ -125,7 +125,7 @@ contract AddresslistVotingSetup is PluginSetup {
             addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
@@ -133,7 +133,7 @@ contract AddresslistVotingSetup is PluginSetup {
             addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
@@ -141,7 +141,7 @@ contract AddresslistVotingSetup is PluginSetup {
             addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
-        permissions[3] = PermissionLib.ItemMultiTarget(
+        permissions[3] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,

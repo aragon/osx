@@ -147,12 +147,12 @@ contract PermissionManager is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the contract.
     /// @param items The array of bulk items to process.
-    function bulkOnSingleTarget(
-        address _where,
-        PermissionLib.ItemSingleTarget[] calldata items
-    ) external auth(_where, ROOT_PERMISSION_ID) {
+    function applySingleTargetPermissions(address _where, PermissionLib.SingleTargetPermission[] calldata items)
+        external
+        auth(_where, ROOT_PERMISSION_ID)
+    {
         for (uint256 i; i < items.length; ) {
-            PermissionLib.ItemSingleTarget memory item = items[i];
+            PermissionLib.SingleTargetPermission memory item = items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(_where, item.who, item.permissionId);
@@ -169,9 +169,9 @@ contract PermissionManager is Initializable {
     /// @notice Processes bulk items on the permission manager.
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
-    function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
+    function applyMultiTargetPermissions(PermissionLib.MultiTargetPermission[] calldata items) external {
         for (uint256 i; i < items.length; ) {
-            PermissionLib.ItemMultiTarget memory item = items[i];
+            PermissionLib.MultiTargetPermission memory item = items[i];
 
             // TODO: Optimize
             _auth(item.where, ROOT_PERMISSION_ID);
