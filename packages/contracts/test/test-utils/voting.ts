@@ -24,8 +24,8 @@ export type VotingSettings = {
   minProposerVotingPower: number;
 };
 
-export const pctToRatio = (x: number) =>
-  ethers.BigNumber.from(10).pow(4).mul(x); // 100% => 10**6, 1% => 10**4
+export const RATIO_BASE = ethers.BigNumber.from(10).pow(6); // 100% => 10**6
+export const pctToRatio = (x: number) => RATIO_BASE.mul(x).div(100);
 
 export const ONE_HOUR = 60 * 60;
 export const ONE_DAY = 24 * ONE_HOUR;
