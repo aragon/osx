@@ -21,7 +21,7 @@ contract CounterV1PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
 
-    address private constant NO_ORACLE = address(0);
+    address private constant NO_CONDITION = address(0);
 
     constructor() {
         multiplyHelperBase = new MultiplyHelper();
@@ -69,7 +69,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -77,7 +77,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -86,7 +86,7 @@ contract CounterV1PluginSetup is PluginSetup {
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
-                NO_ORACLE,
+                NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -121,7 +121,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
@@ -129,7 +129,7 @@ contract CounterV1PluginSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
@@ -138,7 +138,7 @@ contract CounterV1PluginSetup is PluginSetup {
                 PermissionLib.Operation.Revoke,
                 _payload.currentHelpers[0],
                 _payload.plugin,
-                NO_ORACLE,
+                NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }

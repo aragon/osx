@@ -16,8 +16,8 @@ contract AddresslistVotingSetup is PluginSetup {
     /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
     AddresslistVoting private immutable addresslistVotingBase;
 
-    /// @notice The address zero to be used as oracle address for permissions.
-    address private constant NO_ORACLE = address(0);
+    /// @notice The address zero to be used as condition address for permissions.
+    address private constant NO_CONDITION = address(0);
 
     /// @notice The contract constructor, that deployes the `AddresslistVoting` plugin logic contract.
     constructor() {
@@ -61,7 +61,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
@@ -69,7 +69,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -77,7 +77,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -86,7 +86,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -112,7 +112,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             addresslistVotingBase.UPDATE_ADDRESSES_PERMISSION_ID()
         );
 
@@ -120,7 +120,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             addresslistVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
@@ -128,7 +128,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             addresslistVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
@@ -136,7 +136,7 @@ contract AddresslistVotingSetup is PluginSetup {
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
