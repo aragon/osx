@@ -63,6 +63,6 @@ function hashHelpers(address[] memory _helpers) pure returns (bytes32) {
 /// @notice Returns a hash of an array of multi-targeted permission operations.
 /// @param _permissions The array of of multi-targeted permission operations.
 /// @return bytes The hash of the array of permission operations.
-function hashPermissions(PermissionLib.ItemMultiTarget[] memory _permissions) pure returns (bytes32) {
+function hashPermissions(PermissionLib.MultiTargetPermission[] memory _permissions) pure returns (bytes32) {
     return keccak256(abi.encode(_permissions));
 }

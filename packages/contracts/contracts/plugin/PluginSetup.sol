@@ -26,9 +26,7 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
         external
         virtual
         override
-        returns (
-            bytes memory initData, PreparedDependency memory preparedDependency
-        )
+        returns (bytes memory initData, PreparedDependency memory preparedDependency)
     {}
 
     /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.

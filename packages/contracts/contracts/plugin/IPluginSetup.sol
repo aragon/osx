@@ -11,7 +11,7 @@ interface IPluginSetup {
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedDependency {
         address[] helpers;
-        PermissionLib.ItemMultiTarget[] permissions;
+        PermissionLib.MultiTargetPermission[] permissions;
     }
 
     /// @param plugin The address of the `Plugin`.
@@ -63,7 +63,7 @@ interface IPluginSetup {
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     function prepareUninstallation(address _dao, SetupPayload calldata _payload)
         external
-        returns (PermissionLib.ItemMultiTarget[] memory permissions);
+        returns (PermissionLib.MultiTargetPermission[] memory permissions);
 
     /// @notice Returns the plugin's base implementation.
     /// @return address The address of the plugin implementation contract.

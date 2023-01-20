@@ -56,16 +56,17 @@ contract CounterV1PluginSetup is PluginSetup {
             _num
         );
 
-        PermissionLib.ItemMultiTarget[] memory permissions = new PermissionLib.ItemMultiTarget[](
-            _multiplyHelper == address(0) ? 3 : 2
-        );
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](
+                _multiplyHelper == address(0) ? 3 : 2
+            );
         address[] memory helpers = new address[](1);
 
         // deploy
         plugin = createERC1967Proxy(address(counterBase), initData);
 
         // set permissions
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
@@ -73,7 +74,7 @@ contract CounterV1PluginSetup is PluginSetup {
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
@@ -82,7 +83,7 @@ contract CounterV1PluginSetup is PluginSetup {
         );
 
         if (_multiplyHelper == address(0)) {
-            permissions[2] = PermissionLib.ItemMultiTarget(
+            permissions[2] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
@@ -110,14 +111,14 @@ contract CounterV1PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
-    {   
-        permissions = new PermissionLib.ItemMultiTarget[](
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
+        permissions = new PermissionLib.MultiTargetPermission[](
             _payload.currentHelpers.length != 0 ? 3 : 2
         );
 
         // set permissions
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
             _payload.plugin,
@@ -125,7 +126,7 @@ contract CounterV1PluginSetup is PluginSetup {
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
@@ -134,7 +135,7 @@ contract CounterV1PluginSetup is PluginSetup {
         );
 
         if (_payload.currentHelpers.length != 0) {
-            permissions[2] = PermissionLib.ItemMultiTarget(
+            permissions[2] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Revoke,
                 _payload.currentHelpers[0],
                 _payload.plugin,

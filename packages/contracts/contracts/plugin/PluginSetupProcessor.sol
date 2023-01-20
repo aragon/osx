@@ -68,7 +68,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     struct ApplyInstallationParams {
         PluginSetupRef pluginSetupRef;
         address plugin;
-        PermissionLib.ItemMultiTarget[] permissions;
+        PermissionLib.MultiTargetPermission[] permissions;
         bytes32 helpersHash;
     }
 
@@ -94,7 +94,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address plugin;
         PluginSetupRef pluginSetupRef;
         bytes initData;
-        PermissionLib.ItemMultiTarget[] permissions;
+        PermissionLib.MultiTargetPermission[] permissions;
         bytes32 helpersHash;
     }
 
@@ -115,7 +115,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     struct ApplyUninstallationParams {
         address plugin;
         PluginSetupRef pluginSetupRef;
-        PermissionLib.ItemMultiTarget[] permissions;
+        PermissionLib.MultiTargetPermission[] permissions;
     }
 
     /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
@@ -237,7 +237,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginRepo indexed pluginSetupRepo,
         PluginRepo.Tag versionTag,
         IPluginSetup.SetupPayload setupPayload,
-        PermissionLib.ItemMultiTarget[] permissions
+        PermissionLib.MultiTargetPermission[] permissions
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -370,7 +370,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Process the permissions
         // PSP on the dao should have ROOT permission
         if (_params.permissions.length > 0) {
-            DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+            DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
         emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
@@ -529,7 +529,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Process the permissions
         // PSP on the dao should have ROOT permission
         if (_params.permissions.length > 0) {
-            DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+            DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
         emit UpdateApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
@@ -542,7 +542,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for
     function prepareUninstallation(address _dao, PrepareUninstallationParams calldata _params)
         external
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
     {
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.setupPayload.plugin);
 
@@ -626,7 +626,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Process the permissions
         // PSP on the dao should have ROOT permission
         if (_params.permissions.length > 0) {
-            DAO(payable(_dao)).bulkOnMultiTarget(_params.permissions);
+            DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
         emit UninstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});

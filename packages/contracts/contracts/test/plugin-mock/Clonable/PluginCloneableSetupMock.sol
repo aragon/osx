@@ -43,7 +43,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
     {
         (_dao, _payload);
         permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
@@ -87,7 +87,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
         external
         virtual
         override
-        returns (PermissionLib.ItemMultiTarget[] memory permissions)
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
     {
         (_dao, _payload);
         permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);

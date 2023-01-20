@@ -8,9 +8,6 @@ import {IDAO} from "../IDAO.sol";
 /// @author Aragon Association - 2022
 /// @notice An abstract base contract defining the traits and internal functionality to create and execute proposals.
 abstract contract ProposalBase {
-    /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
-    bytes4 internal constant PROPOSAL_INTERFACE_ID = this.proposalCount.selector;
-
     /// @notice Emitted when a proposal is created.
     /// @param proposalId The ID of the proposal.
     /// @param creator  The creator of the proposal.
@@ -31,13 +28,6 @@ abstract contract ProposalBase {
     /// @param proposalId The ID of the proposal.
     /// @param execResults The bytes array resulting from the proposal execution in the associated DAO.
     event ProposalExecuted(uint256 indexed proposalId, bytes[] execResults);
-
-    /// @notice Checks if this or the parent contract supports an interface by its ID.
-    /// @param interfaceId The ID of the interface.
-    /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
-        return interfaceId == PROPOSAL_INTERFACE_ID;
-    }
 
     /// @notice Returns the proposal count determining the next proposal ID.
     /// @return The proposal count.
