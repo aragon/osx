@@ -131,12 +131,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param setupId The abi encoded hash of versionTag & permissions & helpers.
     error SetupAlreadyPrepared(bytes32 setupId);
 
-    /// @notice Thrown if a plugin setup is not applied.
-    error SetupNotApplied();
-
-    /// @notice Thrown if a plugin setup was already prepared. This is done in case the `PluginSetup` contract is malicios and always/sometime returns the same addresss.
-    error SetupAlreadyApplied();
-
     /// @notice Thrown when the update version is invalid.
     /// @param currentVersionTag The current version of the plugin from which it updates.
     /// @param newVersionTag The new version of the plugin to which it updates.
