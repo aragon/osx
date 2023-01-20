@@ -1269,7 +1269,7 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
 
-        // 1 vote is still missing to meet >99.9999% worst case support
+        // 1 vote is still missing to meet >99.9999% worst-case support
         const tally = (await voting.getProposal(id)).tally;
         expect(
           tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes

@@ -67,7 +67,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 ///
 /// $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}.$$
 ///
-/// We can use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
+/// We can use this quantity to calculate the worst-case support that would be obtained if all remaining votes are casted with no:
 ///
 /// $$
 /// \begin{align*}

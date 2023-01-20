@@ -164,7 +164,7 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.castedVotingPower = castedVotingPower;
 
       // check if the current vote results meet the conditions for the proposal to pass:
-      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
+      // - worst-case support :  N_yes / (N_total - N_abstain) > support threshold
       // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
       let supportThresholdReachedEarly = BASE.minus(supportThreshold)
