@@ -9,7 +9,7 @@ library PermissionLib {
     enum Operation {
         Grant,
         Revoke,
-        GrantWithOracle
+        GrantWithCondition
     }
 
     struct ItemSingleTarget {
@@ -22,7 +22,7 @@ library PermissionLib {
         Operation operation;
         address where;
         address who;
-        address oracle;
+        address condition;
         bytes32 permissionId;
     }
 }
