@@ -38,12 +38,18 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 private constant EMPTY_ARRAY_ENCODED_HASH =
         0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd;
 
+    /// @notice The plugin state struct that contains the information related to the installed plugin.
+    /// @param blockNumber The block number at which the `applyInstallation`, `applyUpdate` or `applyUninstallation` occured for the plugin.
+    /// @param currentSetupId The current setup id that plugin holds. Needed to confirm that `prepareUpdate` or `prepareUninstallation` happens for the plugin's current/valid dependencies. 
+    /// @param setupIds The block number at which `prepareInstallation`, `prepareUpdate` or `prepareUninstallation` occured for the derived setupId.
     struct PluginState {
         uint256 blockNumber;
         bytes32 currentSetupId;
         mapping(bytes32 => uint256) setupIds;
     }
 
+    /// @notice Stores plugin state information per pluginInstallationId
+    /// @dev pluginInstallationId => abi.encode(pluginAddress, daoAddress)
     mapping(bytes32 => PluginState) private states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.

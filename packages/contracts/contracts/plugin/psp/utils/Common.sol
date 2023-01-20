@@ -32,7 +32,7 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
 /// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
 /// @param _permissionHash The hash of the permission objects.
 /// @param _helperHash The hash of the helper contract addresses.
-/// @param _data data that is passed by the user or wdd.. GIORGI
+/// @param _data encoded initialize data for the upgrade that is returned by the prepareUpdate.
 /// @param _preparationType Tells which PreparationType the plugin is in currently. Without this, it's possible to call applyUpdate even after applyInstallation is called.
 function _getSetupId(
     PluginSetupRef memory _pluginSetupRef,
