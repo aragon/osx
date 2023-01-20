@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 - Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.
 - Changed all occurences of `oracle` to `condition`.
+- Renamed `ItemSingleTarget` and `ItemMultiTarget` in `PermissionLib` to `SingleTargetPermission` and `MultiTargetPermission`.
+- Renamed `bulkOnSingleTarget()` and `bulkOnMultiTarget()` in `PermissionManager` to `applySingleTargetPermissions()` and `applyMultiTargetPermissions()`
 
 ### Removed
 
