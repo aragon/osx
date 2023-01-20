@@ -198,7 +198,7 @@ contract PluginRepo is
 
         uint16 build;
         unchecked {
-            build = uint16(buildsPerRelease[_release]++);
+            build = uint16(++buildsPerRelease[_release]);
         }
 
         Tag memory tag = Tag(_release, build);

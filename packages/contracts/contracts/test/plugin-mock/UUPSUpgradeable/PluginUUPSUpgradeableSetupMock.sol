@@ -193,25 +193,19 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         override
         returns (bytes memory initData, PreparedDependency memory preparedDependency)
     {
-        // if oldVersion is previous pluginsetup prior to this one
-        // (E.x This one is 1.3.0, the previous one is 1.2.0)
-        // This means plugin base implementations(a.k.a contract logic code)
-        // don't change Which means this update should only include returning
+        // If one tries to upgrade from v3 to this(v4), developer of this v4
+        // knows that logic contract doesn't change as he specified the same address
+        // in getImplementationAddress. This means this update should only include returning
         // the desired updated permissions. PluginSetupProcessor will take care of
         // not calling `upgradeTo` on the plugin in such cases.
-        // if (_oldVersion[0] == 1 && _oldVersion[1] == 2 && _oldVersion[2] == 0) {
         if (_currentBuild == 3) {
             preparedDependency.permissions = mockPermissions(3, 4, PermissionLib.Operation.Grant);
         }
-        // If the update happens from the previous's previous plugin setups
-        // (1.1.0 or 1.0.0), that means logic contracts change and It's required
-        // to call initialize for the upgrade call. Logic below is just a test
-        // but dev is free to do what he wishes.
-        else if (
-            // (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) ||
-            // (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0)
-            _currentBuild == 1 || _currentBuild == 2
-        ) {
+        // If the update happens from those that have different implementation addresses(v1,v2)
+        // proxy(plugin) contract should be upgraded to the new base implementation which requires(not always though)
+        // returning the `initData` that will be called upon `upradeToAndCall` by plugin setup processor.
+        // NOTE that dev is free to do what he wishes.
+        else if (_currentBuild == 1 || _currentBuild == 2) {
             (initData, preparedDependency) = super.prepareUpdate(_dao, _currentBuild, _payload);
             // Even for this case, dev might decide to modify the permissions..
             preparedDependency.permissions = mockPermissions(4, 5, PermissionLib.Operation.Grant);

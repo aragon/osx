@@ -120,7 +120,6 @@ contract CounterV2PluginSetup is PluginSetup {
     {
         uint256 _newVariable;
 
-        // if (_oldVersion[0] == 1 && _oldVersion[1] == 0) { // TODO:GIORGI
         if (_currentBuild == 1) {
             (_newVariable) = abi.decode(_payload.data, (uint256));
             initData = abi.encodeWithSelector(
