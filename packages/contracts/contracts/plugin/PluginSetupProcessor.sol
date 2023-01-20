@@ -47,48 +47,69 @@ contract PluginSetupProcessor is DaoAuthorizable {
     mapping(bytes32 => PluginState) private states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
+    /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
+    /// @param data The encoded data containing the input parameters for the installation as specified by the developer in the JSON.
     struct PrepareInstallationParams {
-        PluginSetupRef pluginSetupRef; // Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
-        bytes data; // The encoded data containing the input parameters for the installation as specified by the developer in the JSON.
+        PluginSetupRef pluginSetupRef; 
+        bytes data;
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
+    /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
+    /// @param plugin The address of the `Plugin` contract that will be installed on the DAO.
+    /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
+    /// @param helpersHash  The abi encoded hash of helpers that were deployed in `prepareInstallation`. This helps to derive the setupId.
     struct ApplyInstallationParams {
-        PluginSetupRef pluginSetupRef; // Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
-        address plugin; // The address of the `Plugin` contract that will be installed on the DAO.
-        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
-        bytes32 helpersHash; // The abi encoded hash of helpers that were deployed in `prepareInstallation`. This helps to derive the setupId.
+        PluginSetupRef pluginSetupRef;
+        address plugin;
+        PermissionLib.ItemMultiTarget[] permissions;
+        bytes32 helpersHash;
     }
 
     /// @notice The struct containing the parameters for the `prepareUpdate` function.
+    /// @param currentVersionTag Current version of the plugin from which it's updating.
+    /// @param newVersionTag New version of the plugin to which it's updating.
+    /// @param pluginSetupRepo The pluginSetupRepo address on which the plugin exists.
+    /// @param setupPayload see IPluginSetup.SetupPayload
     struct PrepareUpdateParams {
-        PluginRepo.Tag currentVersionTag; // Current version of the plugin from which it's updating.
-        PluginRepo.Tag newVersionTag; // New version of the plugin to which it's updating.
-        PluginRepo pluginSetupRepo; // The pluginSetupRepo address on which the plugin exists.
-        IPluginSetup.SetupPayload setupPayload; // see IPluginSetup.SetupPayload
+        PluginRepo.Tag currentVersionTag;
+        PluginRepo.Tag newVersionTag;
+        PluginRepo pluginSetupRepo;
+        IPluginSetup.SetupPayload setupPayload;
     }
 
     /// @notice The struct containing the parameters for the `applyUpdate` function.
+    /// @param plugin The address of the plugin which is updating.
+    /// @param pluginSetupRef The PluginSetupRepo address + new Version Tag for which the `prepareUpdate` was called.
+    /// @param initData The encoded data(function selector + arguments) that will be called on the plugin's upgradeToAndCall call.
+    /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
+    /// @param helpersHash The abi encoded hash of helpers that were deployed in `prepareUpdate`. This helps to derive the setupId.
     struct ApplyUpdateParams {
-        address plugin; // The address of the plugin which is updating.
-        PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + new Version Tag for which the `prepareUpdate` was called.
-        bytes initData; // the encoded data(function selector + arguments) that will be called on the plugin's upgradeToAndCall call.
-        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
-        bytes32 helpersHash; // The abi encoded hash of helpers that were deployed in `prepareUpdate`. This helps to derive the setupId.
+        address plugin;
+        PluginSetupRef pluginSetupRef;
+        bytes initData;
+        PermissionLib.ItemMultiTarget[] permissions;
+        bytes32 helpersHash;
     }
 
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
+    /// @param pluginSetupRef The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
+    /// @param setupPayload see IPluginSetup.SetupPayload
+    /// @param permissionsHash The abi encoded hash of the permissions that were derived at the last `applyUpdate` or if no update happened, at the applyInstall time. This helps to derive setupId.
     struct PrepareUninstallationParams {
-        PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
-        IPluginSetup.SetupPayload setupPayload; // see IPluginSetup.SetupPayload
-        bytes32 permissionsHash; // The abi encoded hash of the permissions that were derived at the last `applyUpdate` or if no update happened, at the applyInstall time. This helps to derive setupId.
+        PluginSetupRef pluginSetupRef;
+        IPluginSetup.SetupPayload setupPayload;
+        bytes32 permissionsHash;
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
+    /// @param plugin The address of the plugin which is uninstalling.
+    /// @param pluginSetupRef The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
+    /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcess.
     struct ApplyUninstallationParams {
-        address plugin; // The address of the plugin which is uninstalling.
-        PluginSetupRef pluginSetupRef; // The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
-        PermissionLib.ItemMultiTarget[] permissions; // The array of multi-targeted permission operations to be applied by the `PluginSetupProcess.
+        address plugin;
+        PluginSetupRef pluginSetupRef;
+        PermissionLib.ItemMultiTarget[] permissions;
     }
 
     /// @notice The plugin repo registry listing the `PluginRepo` contracts versioning the `PluginSetup` contracts.
@@ -123,13 +144,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Thrown if a plugin repository does not exist on the plugin repo registry.
     error PluginRepoNonexistent();
 
-    /// @notice Thrown if a plugin setup is not prepared.
-    /// @param setupId The abi encoded hash of versionTag & permissions & helpers.
-    error SetupNotPrepared(bytes32 setupId);
-
     /// @notice Thrown if a plugin setup was already prepared.
-    /// @param setupId The abi encoded hash of versionTag & permissions & helpers.
+    /// @param setupId Already prepared setupId.
     error SetupAlreadyPrepared(bytes32 setupId);
+
+    /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply or setupId wasn't prepared in the first place.
+    /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
+    error SetupNotApplicable(bytes32 setupId);
 
     /// @notice Thrown when the update version is invalid.
     /// @param currentVersionTag The current version of the plugin from which it updates.
@@ -143,10 +164,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param currentSetupId The current setup id to which user's preparation setup should match to.
     /// @param setupId The user's preparation setup id.
     error InvalidSetupId(bytes32 currentSetupId, bytes32 setupId);
-
-    /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply.
-    /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
-    error SetupNotApplicable(bytes32 setupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -449,7 +466,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Note that the following check ensures that the same setupId can be prepared
         // once again if the plugin was uninstalled and then installed.
         if (pluginState.blockNumber < pluginState.setupIds[newSetupId]) {
-            revert SetupAlreadyPrepared(setupId);
+            revert SetupAlreadyPrepared(newSetupId);
         }
 
         pluginState.setupIds[newSetupId] = block.number;
@@ -568,7 +585,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Note that the following check ensures that the same setupId can be prepared
         // once again if the plugin was uninstalled and then installed/updated.
         if (pluginState.blockNumber < pluginState.setupIds[newSetupId]) {
-            revert SetupAlreadyPrepared(setupId);
+            revert SetupAlreadyPrepared(newSetupId);
         }
 
         pluginState.setupIds[newSetupId] = block.number;
