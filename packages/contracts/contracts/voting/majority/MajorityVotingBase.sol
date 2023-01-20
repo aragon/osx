@@ -305,6 +305,8 @@ abstract contract MajorityVotingBase is
     function isSupportThresholdReached(uint256 _proposalId) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
+        // The code below implements the formula of the support criterion explained in the top of this file.
+        // `(1 - supportThreshold) * N_yes > supportThreshold *  N_no`
         return
             (RATIO_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
             proposal_.parameters.supportThreshold * proposal_.tally.no;
@@ -320,6 +322,8 @@ abstract contract MajorityVotingBase is
             proposal_.tally.yes -
             proposal_.tally.abstain;
 
+        // The code below implements the formula of the early execution support criterion explained in the top of this file.
+        // `(1 - supportThreshold) * N_yes > supportThreshold *  N_no,worst-case`
         return
             (RATIO_BASE - proposal_.parameters.supportThreshold) * proposal_.tally.yes >
             proposal_.parameters.supportThreshold * noVotesWorstCase;
@@ -329,6 +333,8 @@ abstract contract MajorityVotingBase is
     function isMinParticipationReached(uint256 _proposalId) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
+        // The code below implements the formula of the participation criterion explained in the top of this file.
+        // `N_yes + N_no + N_abstain >= minVotingPower = minParticipation * N_total`
         return
             proposal_.tally.yes + proposal_.tally.no + proposal_.tally.abstain >=
             proposal_.parameters.minVotingPower;
@@ -497,7 +503,7 @@ abstract contract MajorityVotingBase is
     /// @notice Internal function to update the plugin-wide proposal vote settings.
     /// @param _votingSettings The voting settings to be validated and updated.
     function _updateVotingSettings(VotingSettings calldata _votingSettings) internal virtual {
-        // Require the support threshold value to be in the interval [0, 10^6), because `>` comparision is used in the support criterion.
+        // Require the support threshold value to be in the interval [0, 10^6-1], because `>` comparision is used in the support criterion and >100% could never be reached.
         if (_votingSettings.supportThreshold > RATIO_BASE - 1) {
             revert RatioOutOfBounds({
                 limit: RATIO_BASE - 1,

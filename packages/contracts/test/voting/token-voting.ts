@@ -1248,7 +1248,7 @@ describe('TokenVoting', function () {
             amount: totalSupply.sub(delta), // 99.9999% of the total supply
           },
           {receiver: signers[1].address, amount: 1}, // 1 vote (10^-16 % = 0.0000000000000001%)
-          {receiver: signers[2].address, amount: delta.sub(1)}, // 1 vote less than 0.0001% of the total supply (99.9999% - 10^-16% = 0.0009999999999999%)
+          {receiver: signers[2].address, amount: delta.sub(1)}, // 1 vote less than 0.0001% of the total supply (99.9999% - 10^-16% = 0.00009999999999999%)
         ]);
 
         await voting.createProposal(
@@ -1330,7 +1330,7 @@ describe('TokenVoting', function () {
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
-        // 1 vote is still missing to meet >99.9999%%
+        // 1 vote is still missing to meet >99.9999%
         const tally = (await voting.getProposal(id)).tally;
         expect(
           tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
@@ -1339,7 +1339,7 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
 
-        // cast the last vote so that support = 100%%
+        // cast the last vote so that support = 100%
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
