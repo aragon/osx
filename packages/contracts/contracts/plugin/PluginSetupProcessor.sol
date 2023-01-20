@@ -633,7 +633,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     }
 
     /// @notice Checks if the setupId for the plugin is valid to be applied for `applyUpdate`, `applyInstallation` or `applyUninstallation`.
-    /// @param pluginInstallationId the hash of abi.encode(daoAddress, pluginAddress)
+    /// @param pluginInstallationId the hash of `abi.encode(daoAddress, pluginAddress)`-
     /// @param setupId The setupId to check for validity to be used in `applyType` functions.
     function validateSetupId(bytes32 pluginInstallationId, bytes32 setupId) public view {
         PluginState storage pluginState = states[pluginInstallationId];
