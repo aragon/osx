@@ -154,7 +154,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param setupId Already prepared setupId.
     error SetupAlreadyPrepared(bytes32 setupId);
 
-    /// @notice Thrown when setup is no longer eligible for the `apply`. This could happen if another prepared setup was chosen for the apply or setupId wasn't prepared in the first place.
+    /// @notice Thrown when the setupId is no longer eligible for the `apply`. This could happen if another prepared setupId was chosen for the apply or setupId wasn't prepared in the first place.
     /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
     error SetupNotApplicable(bytes32 setupId);
 
