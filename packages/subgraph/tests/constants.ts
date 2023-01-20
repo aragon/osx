@@ -36,6 +36,10 @@ export const START_DATE = '1644851000';
 export const END_DATE = '1644852000';
 export const SNAPSHOT_BLOCK = '100';
 
+// Use 1 for testing as default value is anyways 0 
+// and test might succeed even though it shouldn't
+export const ALLOW_FAILURE_MAP = '1';
+
 export const TOTAL_VOTING_POWER = THREE;
 export const CREATED_AT = '1644850000';
 

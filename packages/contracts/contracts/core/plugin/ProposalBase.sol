@@ -18,13 +18,15 @@ abstract contract ProposalBase {
     /// @param endDate The end date of the proposal in seconds.
     /// @param metadata The metadata of the proposal.
     /// @param actions The actions that will be executed if the proposal passes.
+    /// @param allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     event ProposalCreated(
         uint256 indexed proposalId,
         address indexed creator,
         uint64 startDate,
         uint64 endDate,
         bytes metadata,
-        IDAO.Action[] actions
+        IDAO.Action[] actions,
+        uint256 allowFailureMap
     );
 
     /// @notice Emitted when a proposal is executed.
@@ -51,6 +53,7 @@ abstract contract ProposalBase {
     /// @param _metadata The the proposal metadata.
     /// @param _startDate The start date of the proposal in seconds.
     /// @param _endDate The end date of the proposal in seconds.
+    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     /// @param _actions The actions that will be executed after the proposal passes.
     /// @return proposalId The ID of the proposal.
     function _createProposal(
@@ -58,7 +61,8 @@ abstract contract ProposalBase {
         bytes calldata _metadata,
         uint64 _startDate,
         uint64 _endDate,
-        IDAO.Action[] calldata _actions
+        IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap
     ) internal virtual returns (uint256 proposalId) {
         proposalId = createProposalId();
 
@@ -68,19 +72,26 @@ abstract contract ProposalBase {
             metadata: _metadata,
             startDate: _startDate,
             endDate: _endDate,
-            actions: _actions
+            actions: _actions,
+            allowFailureMap: _allowFailureMap
         });
     }
 
     /// @notice Internal function to execute a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
     /// @param _actions The array of actions to be executed.
+    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     function _executeProposal(
         IDAO _dao,
         uint256 _proposalId,
-        IDAO.Action[] memory _actions
+        IDAO.Action[] memory _actions,
+        uint256 _allowFailureMap
     ) internal virtual {
-        (bytes[] memory execResults, ) = _dao.execute(bytes32(_proposalId), _actions, 0);
+        (bytes[] memory execResults, ) = _dao.execute(
+            bytes32(_proposalId),
+            _actions,
+            _allowFailureMap
+        );
         emit ProposalExecuted({proposalId: _proposalId, execResults: execResults});
     }
 }

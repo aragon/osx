@@ -182,6 +182,7 @@ interface Proposal {
   creator: Bytes!
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -242,6 +243,7 @@ type TokenVotingProposal implements Proposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   plugin: TokenVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -307,6 +309,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   plugin: AddresslistVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -366,6 +369,7 @@ type AdminProposal implements Proposal @entity {
   creator: Bytes! # Adminstrator address
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -409,6 +413,7 @@ type MultisigProposal implements Proposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   plugin: MultisigPlugin!
   proposalId: BigInt!
   creator: Bytes!

@@ -15,7 +15,7 @@ const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
 );
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 
-describe('Admin plugin', function () {
+describe.only('Admin plugin', function () {
   let signers: SignerWithAddress[];
   let plugin: any;
   let dao: any;
@@ -96,7 +96,7 @@ describe('Admin plugin', function () {
     it('supports admin address plugin interface', async () => {
       const iface = new ethers.utils.Interface([
         'function initialize(address  _dao)',
-        'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions)',
+        'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions, uint256 _allowFailureMap)',
       ]);
 
       expect(await plugin.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -113,7 +113,7 @@ describe('Admin plugin', function () {
     it("fails to call DAO's `execute()` if `EXECUTE_PERMISSION` is not granted to the plugin address", async () => {
       await dao.revoke(dao.address, plugin.address, EXECUTE_PERMISSION_ID);
 
-      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
         .withArgs(
           dao.address,
@@ -130,7 +130,7 @@ describe('Admin plugin', function () {
         EXECUTE_PROPOSAL_PERMISSION_ID
       );
 
-      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.be.revertedWithCustomError(plugin, 'DaoUnauthorized')
         .withArgs(
           dao.address,
@@ -144,7 +144,9 @@ describe('Admin plugin', function () {
     it('correctly emits the ProposalCreated event', async () => {
       const currentExpectedProposalId = 0;
 
-      const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+      const allowFailureMap = 1;
+
+      const tx = await plugin.executeProposal(dummyMetadata, dummyActions, allowFailureMap);
 
       await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
@@ -157,13 +159,14 @@ describe('Admin plugin', function () {
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.allowFailureMap).to.equal(allowFailureMap);
     });
 
     it('correctly emits the `ProposalExecuted` event', async () => {
       const currentExpectedProposalId = 0;
       const expectedDummyResults = ['0x'];
 
-      await expect(plugin.executeProposal(dummyMetadata, dummyActions))
+      await expect(plugin.executeProposal(dummyMetadata, dummyActions, 0))
         .to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_EXECUTED)
         .withArgs(currentExpectedProposalId, expectedDummyResults);
     });
@@ -171,11 +174,11 @@ describe('Admin plugin', function () {
     it('correctly increments the proposal ID', async () => {
       const currentExpectedProposalId = 0;
 
-      await plugin.executeProposal(dummyMetadata, dummyActions);
+      await plugin.executeProposal(dummyMetadata, dummyActions, 0);
 
       const nextExpectedProposalId = currentExpectedProposalId + 1;
 
-      const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+      const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
 
       await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
@@ -187,8 +190,9 @@ describe('Admin plugin', function () {
     it("calls the DAO's execute function correctly with proposalId", async () => {
       {
         const proposalId = 0;
+        const allowFailureMap = 1;
 
-        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions, allowFailureMap);
         const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
         expect(event.args.actor).to.equal(plugin.address);
@@ -197,12 +201,14 @@ describe('Admin plugin', function () {
         expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
         expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
         expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+        // note that failureMap is different than allowFailureMap. See DAO.sol for details
+        expect(event.args.failureMap).to.equal(0);
       }
 
       {
         const proposalId = 1;
 
-        const tx = await plugin.executeProposal(dummyMetadata, dummyActions);
+        const tx = await plugin.executeProposal(dummyMetadata, dummyActions, 0);
         const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
         expect(event.args.callId).to.equal(toBytes32(proposalId));

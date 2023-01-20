@@ -43,6 +43,7 @@ export function _handleProposalCreated(
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
+  proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = TokenVoting.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);

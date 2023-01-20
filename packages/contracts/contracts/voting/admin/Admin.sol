@@ -44,9 +44,11 @@ contract Admin is PluginCloneable, Proposal {
     /// @notice Creates and executes a new proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions to be executed.
+    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     function executeProposal(
         bytes calldata _metadata,
-        IDAO.Action[] calldata _actions
+        IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap
     ) external auth(EXECUTE_PROPOSAL_PERMISSION_ID) {
         uint64 currentTimestamp64 = block.timestamp.toUint64();
 
@@ -55,8 +57,9 @@ contract Admin is PluginCloneable, Proposal {
             _metadata: _metadata,
             _startDate: currentTimestamp64,
             _endDate: currentTimestamp64,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
-        _executeProposal(dao, proposalId, _actions);
+        _executeProposal(dao, proposalId, _actions, _allowFailureMap);
     }
 }

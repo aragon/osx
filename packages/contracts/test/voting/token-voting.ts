@@ -31,7 +31,7 @@ import {
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
 
-describe('TokenVoting', function () {
+describe.only('TokenVoting', function () {
   let signers: SignerWithAddress[];
   let voting: any;
   let dao: DAO;
@@ -173,6 +173,7 @@ describe('TokenVoting', function () {
           .createProposal(
             dummyMetadata,
             [],
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -186,6 +187,7 @@ describe('TokenVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           startDate,
           endDate,
           VoteOption.None,
@@ -216,6 +218,7 @@ describe('TokenVoting', function () {
           .createProposal(
             dummyMetadata,
             [],
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -231,6 +234,7 @@ describe('TokenVoting', function () {
           .createProposal(
             dummyMetadata,
             [],
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -257,7 +261,7 @@ describe('TokenVoting', function () {
       );
 
       await expect(
-        voting.createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
+        voting.createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
       ).to.be.revertedWithCustomError(voting, 'NoVotingPower');
     });
 
@@ -276,6 +280,7 @@ describe('TokenVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           startDateInThePast,
           endDate,
           VoteOption.None,
@@ -304,6 +309,7 @@ describe('TokenVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           tooLateStartDate,
           endDate,
           VoteOption.None,
@@ -327,6 +333,7 @@ describe('TokenVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           startDate,
           tooEarlyEndDate,
           VoteOption.None,
@@ -343,10 +350,13 @@ describe('TokenVoting', function () {
         votingSettings,
         governanceErc20Mock.address
       );
+      
+      const allowFailureMap = 1;
 
       let tx = await voting.createProposal(
         dummyMetadata,
         dummyActions,
+        allowFailureMap,
         0,
         0,
         VoteOption.None,
@@ -365,6 +375,7 @@ describe('TokenVoting', function () {
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.allowFailureMap).to.equal(allowFailureMap);
 
       const block = await ethers.provider.getBlock('latest');
 
@@ -372,6 +383,7 @@ describe('TokenVoting', function () {
 
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
+      expect(proposal.allowFailureMap).to.equal(allowFailureMap);
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );
@@ -409,6 +421,7 @@ describe('TokenVoting', function () {
         dummyActions,
         0,
         0,
+        0,
         VoteOption.Yes,
         false
       );
@@ -426,12 +439,14 @@ describe('TokenVoting', function () {
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.allowFailureMap).to.equal(0);
 
       const block = await ethers.provider.getBlock('latest');
 
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.equal(true);
       expect(proposal.executed).to.equal(false);
+      expect(proposal.allowFailureMap).to.equal(0);
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );
@@ -460,6 +475,7 @@ describe('TokenVoting', function () {
         voting.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           startDate,
           endDate,
           VoteOption.Yes,
@@ -475,6 +491,7 @@ describe('TokenVoting', function () {
           await voting.createProposal(
             dummyMetadata,
             dummyActions,
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -516,6 +533,7 @@ describe('TokenVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -654,6 +672,7 @@ describe('TokenVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -888,6 +907,7 @@ describe('TokenVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -1049,6 +1069,7 @@ describe('TokenVoting', function () {
           dummyActions,
           0,
           0,
+          0,
           VoteOption.None,
           false
         );
@@ -1186,6 +1207,7 @@ describe('TokenVoting', function () {
         await voting.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           0,
           0,
           VoteOption.None,

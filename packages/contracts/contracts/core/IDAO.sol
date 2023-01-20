@@ -37,7 +37,7 @@ abstract contract IDAO {
     /// @dev Runs a loop through the array of actions and executes them one by one. If one action fails, all will be reverted.
     /// @param callId The id of the call. The definition of the value of callId is up to the calling contract and can be used, e.g., as a nonce.
     /// @param _actions The array of actions.
-    /// @param _allowFailureMap Allows to succeed tx even if the action might revert. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed.
+    /// @param _allowFailureMap Allows to succeed tx even if the action might revert. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     /// @return bytes[] The array of results obtained from the executed actions in `bytes`.
     /// @return uint256 The constructed failureMap which contains which actions have actually failed.
     function execute(

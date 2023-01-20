@@ -24,12 +24,14 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @param parameters The proposal-specific approve settings at the time of the proposal creation.
     /// @param approvers The approves casted by the approvers.
     /// @param actions The actions to be executed when the proposal passes.
+    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     struct Proposal {
         bool executed;
         uint16 approvals;
         ProposalParameters parameters;
         mapping(address => bool) approvers;
         IDAO.Action[] actions;
+        uint256 allowFailureMap;
     }
 
     /// @notice A container for the proposal parameters.
@@ -133,20 +135,25 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(
-        bytes4 _interfaceId
-    ) public view virtual override(PluginUUPSUpgradeable, ProposalBase) returns (bool) {
+    function supportsInterface(bytes4 _interfaceId)
+        public
+        view
+        virtual
+        override(PluginUUPSUpgradeable, ProposalBase)
+        returns (bool)
+    {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
             ProposalBase.supportsInterface(_interfaceId) ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
-    
+
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
-    function addAddresses(
-        address[] calldata _members
-    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
+    function addAddresses(address[] calldata _members)
+        external
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
+    {
         uint256 newAddresslistLength = addresslistLength() + _members.length;
 
         // Check if the new address list length would be greater than `type(uint16).max`, the maximal number of approvals.
@@ -162,9 +169,10 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(
-        address[] calldata _members
-    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
+    function removeAddresses(address[] calldata _members)
+        external
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
+    {
         uint16 newAddresslistLength = uint16(addresslistLength() - _members.length);
 
         // Check if the new address list length would become less than the current minimum number of approvals required.
@@ -180,21 +188,24 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice Updates the plugin settings.
     /// @param _multisigSettings The new settings.
-    function updateMultisigSettings(
-        MultisigSettings calldata _multisigSettings
-    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
+    function updateMultisigSettings(MultisigSettings calldata _multisigSettings)
+        external
+        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
+    {
         _updateMultisigSettings(_multisigSettings);
     }
 
     /// @notice Creates a new majority voting proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
+    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     /// @param _approveProposal If `true`, the sender will approve the proposal.
     /// @param _tryExecution If `true`, execution is tried after the vote cast. The call does not revert if early execution is not possible.
     /// @return proposalId The ID of the proposal.
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         bool _approveProposal,
         bool _tryExecution,
         uint64 _startDate,
@@ -221,7 +232,8 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
             _metadata: _metadata,
             _startDate: _startDate,
             _endDate: _endDate,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
 
         // Create the proposal
@@ -231,6 +243,11 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         proposal_.parameters.startDate = _startDate;
         proposal_.parameters.endDate = _endDate;
         proposal_.parameters.minApprovals = multisigSettings.minApprovals;
+
+        // Reduce costs
+        if(_allowFailureMap != 0) {
+            proposal_.allowFailureMap = _allowFailureMap;
+        }
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);
@@ -254,7 +271,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         Proposal storage proposal_ = proposals[_proposalId];
-        
+
         // As the list can never become more than type(uint16).max(due to addAddresses check)
         // It's safe to use unchecked as it would never overflow.
         unchecked {
@@ -294,16 +311,16 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @return approvals The number of approvals casted.
     /// @return parameters The parameters of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    function getProposal(
-        uint256 _proposalId
-    )
+    /// @return allowFailureMap The bit map representations of which actions are allowed to revert so tx still succeeds.
+    function getProposal(uint256 _proposalId)
         public
         view
         returns (
             bool executed,
             uint32 approvals,
             ProposalParameters memory parameters,
-            IDAO.Action[] memory actions
+            IDAO.Action[] memory actions,
+            uint256 allowFailureMap
         )
     {
         Proposal storage proposal_ = proposals[_proposalId];
@@ -312,6 +329,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         approvals = proposal_.approvals;
         parameters = proposal_.parameters;
         actions = proposal_.actions;
+        allowFailureMap = proposal_.allowFailureMap;
     }
 
     /// @notice Returns whether the account has approved the proposal. Note, that this does not check if the account is listed.
@@ -338,8 +356,13 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         Proposal storage proposal_ = proposals[_proposalId];
 
         proposal_.executed = true;
-        
-        _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
+
+        _executeProposal(
+            dao,
+            _proposalId,
+            proposals[_proposalId].actions,
+            proposals[_proposalId].allowFailureMap
+        );
     }
 
     /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists. //TODO is this assumption relevant?
