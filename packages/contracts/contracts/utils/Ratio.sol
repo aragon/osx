@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-// @notice The base value being defined to encode ratios being real numbers on the interval `[0,1]` as integers on the interval `[0, 10**6]`
+// The base value to encode real-valued ratios on the interval `[0,1]` as integers on the interval `[0, 10**6]`.
 uint256 constant RATIO_BASE = 10 ** 6;
 
 /// @notice Thrown if a ratio value exceeds the maximal value of `10**6`.
@@ -11,10 +11,10 @@ uint256 constant RATIO_BASE = 10 ** 6;
 error RatioOutOfBounds(uint256 limit, uint256 actual);
 
 /// @notice Applies a ratio to a value and ceils the remainder.
-/// @param _value The value to which the ratio is applied .
-/// @param _ratio The ratio.
+/// @param _value The value to which the ratio is applied.
+/// @param _ratio The ratio that must be in the interval `[0, 10**6]`.
 /// @return result The resulting value.
-function applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
+function _applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
     if (_ratio > RATIO_BASE) {
         revert RatioOutOfBounds({limit: RATIO_BASE, actual: _ratio});
     }
@@ -31,11 +31,11 @@ function applyRatioCeiled(uint256 _value, uint256 _ratio) pure returns (uint256 
 
 /// @notice Applies a ratio to a value and floors the remainder.
 /// @param _value The value to which the ratio is applied .
-/// @param _ratio The ratio.
+/// @param _ratio The ratio that must be in the interval `[0, 10**6]`.
 /// @return result The resulting value.
-function applyRatioFloored(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
+function _applyRatioFloored(uint256 _value, uint256 _ratio) pure returns (uint256 result) {
     if (_ratio > RATIO_BASE) {
-        revert RatioOutOfBounds({limit: RATIO_BASE, actual: RATIO_BASE});
+        revert RatioOutOfBounds({limit: RATIO_BASE, actual: _ratio});
     }
 
     result = (_value * _ratio) / RATIO_BASE;

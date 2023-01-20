@@ -1,0 +1,62 @@
+import {expect} from 'chai';
+import {ethers} from 'hardhat';
+
+import {RatioTest} from '../../typechain';
+import {pctToRatio, RATIO_BASE} from '../test-utils/voting';
+
+describe('Ratio', function () {
+  let ratio: RatioTest;
+
+  before(async () => {
+    beforeEach(async () => {
+      const RatioTest = await ethers.getContractFactory('RatioTest');
+      ratio = await RatioTest.deploy();
+    });
+  });
+
+  beforeEach(async () => {});
+
+  describe('RATIO_BASE', async () => {
+    it('is 10^6', async () => {
+      expect(await ratio.getRatioBase())
+        .to.eq(RATIO_BASE)
+        .to.eq(10 ** 6);
+    });
+  });
+
+  describe('applyRatioCeiled', async () => {
+    it('reverts for ratios larger than `RATIO_BASE`', async () => {
+      const tooLargeRatio = RATIO_BASE.add(1);
+      await expect(ratio.applyRatioCeiled(123, tooLargeRatio))
+        .to.revertedWithCustomError(ratio, 'RatioOutOfBounds')
+        .withArgs(RATIO_BASE, tooLargeRatio);
+      await expect(ratio.applyRatioCeiled(123, RATIO_BASE)).to.not.be.reverted;
+    });
+
+    it('does not ceil for division without reminder', async () => {
+      expect(await ratio.applyRatioCeiled(32, pctToRatio(50))).to.eq(16);
+    });
+
+    it('ceils for division with reminder', async () => {
+      expect(await ratio.applyRatioCeiled(33, pctToRatio(50))).to.eq(17);
+    });
+  });
+
+  describe('applyRatioFloored', async () => {
+    it('reverts for ratios larger than `RATIO_BASE`', async () => {
+      const tooLargeRatio = RATIO_BASE.add(1);
+      await expect(ratio.applyRatioFloored(123, tooLargeRatio))
+        .to.revertedWithCustomError(ratio, 'RatioOutOfBounds')
+        .withArgs(RATIO_BASE, tooLargeRatio);
+      await expect(ratio.applyRatioFloored(123, RATIO_BASE)).to.not.be.reverted;
+    });
+
+    it('does not floor for division without reminder', async () => {
+      expect(await ratio.applyRatioFloored(32, pctToRatio(50))).to.eq(16);
+    });
+
+    it('floors for division with reminder', async () => {
+      expect(await ratio.applyRatioFloored(33, pctToRatio(50))).to.eq(16);
+    });
+  });
+});
