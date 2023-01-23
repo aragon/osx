@@ -9,7 +9,7 @@ import {Operation} from '../core/permission/permission-manager';
 import {
   VotingSettings,
   VotingMode,
-  pct16,
+  pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
 import metadata from '../../contracts/voting/addresslist/metadata.json';
@@ -44,8 +44,8 @@ describe('AddresslistVotingSetup', function () {
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -76,7 +76,7 @@ describe('AddresslistVotingSetup', function () {
       'function isListedAtBlock(address,uint256) returns (bool)',
       'function addresslistLength() returns (uint256)',
       'function addresslistLengthAtBlock(uint256) returns (uint256)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256),address[])',
     ]);
 
     expect(

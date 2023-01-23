@@ -6,11 +6,12 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
+import {RATIO_BASE, applyRatioCeiled} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title TokenVoting
-/// @author Aragon Association - 2021-2022
+/// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is MajorityVotingBase {
@@ -94,7 +95,11 @@ contract TokenVoting is MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-        proposal_.parameters.minParticipation = minParticipation();
+
+        proposal_.parameters.minVotingPower = applyRatioCeiled(
+            totalVotingPower,
+            minParticipation()
+        );
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 

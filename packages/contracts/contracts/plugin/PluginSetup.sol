@@ -28,7 +28,7 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
         returns (
             address[] memory updatedHelpers,
             bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {}
 

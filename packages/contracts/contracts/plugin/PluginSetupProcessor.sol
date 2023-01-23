@@ -113,7 +113,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes data,
         address plugin,
         address[] helpers,
-        PermissionLib.ItemMultiTarget[] permissions
+        PermissionLib.MultiTargetPermission[] permissions
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -137,7 +137,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes data,
         address plugin,
         address[] updatedHelpers,
-        PermissionLib.ItemMultiTarget[] permissions,
+        PermissionLib.MultiTargetPermission[] permissions,
         bytes initData
     );
 
@@ -161,7 +161,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes data,
         address plugin,
         address[] currentHelpers,
-        PermissionLib.ItemMultiTarget[] permissions
+        PermissionLib.MultiTargetPermission[] permissions
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -202,7 +202,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         // Check that the plugin repository exists on the plugin repo registry.
@@ -250,7 +250,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         address _plugin,
-        PermissionLib.ItemMultiTarget[] calldata _permissions
+        PermissionLib.MultiTargetPermission[] calldata _permissions
     ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
         // Check if the installation was applied already.
         bytes32 appliedId = _getAppliedId(_dao, _plugin);
@@ -272,7 +272,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
 
         // Process the permission list.
-        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
+        DAO(payable(_dao)).applyMultiTargetPermissions(_permissions);
 
         // Mark this installation as applied.
         isInstallationApplied[appliedId] = true;
@@ -300,7 +300,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginUpdateParams calldata _updateParams,
         address[] calldata _currentHelpers,
         bytes memory _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory, bytes memory) {
+    ) external returns (PermissionLib.MultiTargetPermission[] memory, bytes memory) {
         // Check that plugin is `PluginUUPSUpgradable`.
         if (!_updateParams.plugin.supportsInterface(type(IPlugin).interfaceId)) {
             revert IPluginNotSupported({plugin: _updateParams.plugin});
@@ -359,7 +359,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         (
             address[] memory updatedHelpers,
             bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         ) = PluginSetup(_updateParams.newPluginSetup).prepareUpdate(
                 _dao,
                 _updateParams.plugin,
@@ -410,7 +410,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         bytes memory _initData,
-        PermissionLib.ItemMultiTarget[] calldata _permissions
+        PermissionLib.MultiTargetPermission[] calldata _permissions
     ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), _plugin);
 
@@ -425,7 +425,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _upgradeProxy(_plugin, newImplementation, _initData);
         }
 
-        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
+        DAO(payable(_dao)).applyMultiTargetPermissions(_permissions);
 
         // Free up space by deleting the permission hash being not needed anymore.
         delete updatePermissionHashes[setupId];
@@ -449,7 +449,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginRepo _pluginSetupRepo,
         address[] calldata _currentHelpers,
         bytes calldata _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // ensure repo for plugin manager exists
         if (!repoRegistry.entries(address(_pluginSetupRepo))) {
             revert PluginRepoNonexistent();
@@ -512,7 +512,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         address _pluginSetup,
         PluginRepo _pluginSetupRepo,
         address[] calldata _currentHelpers, // TODO Isn't it sufficient to pass the helpers hash?
-        PermissionLib.ItemMultiTarget[] calldata _permissions
+        PermissionLib.MultiTargetPermission[] calldata _permissions
     ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
         bytes32 setupId = _getSetupId(_dao, _pluginSetup, address(_pluginSetupRepo), _plugin);
 
@@ -529,7 +529,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PermissionsHashMismatch();
         }
 
-        DAO(payable(_dao)).bulkOnMultiTarget(_permissions);
+        DAO(payable(_dao)).applyMultiTargetPermissions(_permissions);
 
         // Free up space by deleting the helpers and permission hash being not needed anymore.
         delete helpersHashes[setupId];
@@ -568,9 +568,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Returns a hash of an array of multi-targeted permission operations.
     /// @param _permissions The array of of multi-targeted permission operations.
     /// @return bytes The hash of the array of permission operations.
-    function _getPermissionsHash(
-        PermissionLib.ItemMultiTarget[] memory _permissions
-    ) private pure returns (bytes32) {
+    function _getPermissionsHash(PermissionLib.MultiTargetPermission[] memory _permissions)
+        private
+        pure
+        returns (bytes32)
+    {
         return keccak256(abi.encode(_permissions));
     }
 

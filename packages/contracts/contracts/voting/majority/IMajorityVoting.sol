@@ -5,42 +5,8 @@ pragma solidity 0.8.10;
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title IMajorityVoting
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The interface of majority voting plugin.
-///
-///  #### Parameterization
-///  We define two parameters
-///  $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$
-///  and
-///  $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$
-///  where $N_\text{yes}$, $N_\text{no}$, and $N_\text{abstain}$ are the yes, no, and abstain votes that have been casted and $N_\text{total}$ is the total voting power available at proposal creation time.
-///  Majority voting implies that the support threshold is set with
-///  $$\texttt{supportThreshold} \ge 50\% .$$
-///  However, this is not enforced by the contract code and developers can make unsafe parameterss and only the frontend will warn about bad parameter settings.
-///
-///  #### Vote Replacement Execution
-///  The contract allows votes to be replaced. Voters can change their vote multiple times and only the latest vote option is tallied.
-///
-///  #### Early Execution
-///  This contract allows a proposal to be executed early, iff the vote outcome cannot change anymore by more voters voting. Accordingly, vote replacement and early execution are mutually exclusive options.
-///  $$\texttt{remainingVotes} = N_\text{total}-\underbrace{(N_\text{yes}+N_\text{no}+N_\text{abstain})}_{\text{turnout}}$$
-///  We use this quantity to calculate the worst case support that would be obtained if all remaining votes are casted with no:
-///  $$\begin{align*}
-///    \texttt{worstCaseSupport}
-///    &= \frac{N_\text{yes}}{N_\text{yes}+(N_\text{no} + \texttt{remainingVotes})}
-///    \\[3mm]
-///    &= \frac{N_\text{yes}}{N_\text{yes}+N_\text{no} + N_\text{total}-(N_\text{yes}+N_\text{no}+N_\text{abstain})}
-///    \\[3mm]
-///    &= \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}
-///  \end{align*}$$
-///  Accordingly, early execution is possible when the vote is open, the support threshold
-///  $$\texttt{worstCaseSupport} > \texttt{supportThreshold}$$,
-///  and the minimum participation
-///  $$\texttt{participation} \ge \texttt{minParticipation}$$
-///  are met.
-///  #### Threshold vs. Minimum
-///  For threshold values, $>$ comparison is used. This **does not** include the threshold value. E.g., for $\texttt{supportThreshold} = 50\%$, the criterion is fulfilled if there is at least one more yes than no votes ($N_\text{yes} = N_\text{no}+1$).
-///  For minimal values, $\ge$ comparison is used. This **does** include the minimum participation value. E.g., for $\texttt{minParticipation} = 40\%$ and $N_\text{total} = 10$, the criterion is fulfilled if 4 out of 10 votes were casted.
 /// @dev This contract implements the `IMajorityVoting` interface.
 interface IMajorityVoting {
     /// @notice Vote options that a voter can chose from.
@@ -69,26 +35,26 @@ interface IMajorityVoting {
 
     /// @notice Returns the support threshold parameter stored in the voting settings.
     /// @return The support threshold parameter.
-    function supportThreshold() external view returns (uint64);
+    function supportThreshold() external view returns (uint32);
 
     /// @notice Returns the minimum participation parameter stored in the voting settings.
     /// @return The minimum participation parameter.
-    function minParticipation() external view returns (uint64);
+    function minParticipation() external view returns (uint32);
 
-    /// @notice Returns the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote.
+    /// @notice Checks if the support value defined as $$\texttt{support} = \frac{N_\text{yes}}{N_\text{yes}+N_\text{no}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
-    /// @return The support value.
-    function support(uint256 _proposalId) external view returns (uint256);
+    /// @return Returns `true` if the  support is greater than the support threshold and `false` otherwise.
+    function isSupportThresholdReached(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Returns the worst case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote.
+    /// @notice Checks if the worst-case support value defined as $$\texttt{worstCaseSupport} = \frac{N_\text{yes}}{ N_\text{total}-N_\text{abstain}}$$ for a proposal vote is greater than the support threshold.
     /// @param _proposalId The ID of the proposal.
-    /// @return The worst case support value.
-    function worstCaseSupport(uint256 _proposalId) external view returns (uint256);
+    /// @return Returns `true` if the worst-case support is greater than the support threshold and `false` otherwise.
+    function isSupportThresholdReachedEarly(uint256 _proposalId) external view returns (bool);
 
-    /// @notice Returns the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote.
+    /// @notice Checks if the participation value defined as $$\texttt{participation} = \frac{N_\text{yes}+N_\text{no}+N_\text{abstain}}{N_\text{total}}$$ for a proposal vote is greater or equal than the minimum participation value.
     /// @param _proposalId The ID of the proposal.
-    /// @return The participation value.
-    function participation(uint256 _proposalId) external view returns (uint256);
+    /// @return Returns `true` if the participation is greater than the minimum particpation and `false` otherwise.
+    function isMinParticipationReached(uint256 _proposalId) external view returns (bool);
 
     /// @notice Checks if an account can participate on a proposal vote. This can be because the vote
     /// - has not started,

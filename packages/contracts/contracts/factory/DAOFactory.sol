@@ -87,7 +87,7 @@ contract DAOFactory {
             (
                 address plugin,
                 ,
-                PermissionLib.ItemMultiTarget[] memory permissions
+                PermissionLib.MultiTargetPermission[] memory permissions
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
                     _pluginSettings[i].pluginSetup,
@@ -147,40 +147,40 @@ contract DAOFactory {
     /// @param _dao The DAO instance just created.
     function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
-        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](6);
+        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](6);
 
         // Grant DAO all the permissions required
-        items[0] = PermissionLib.ItemSingleTarget(
+        items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.ROOT_PERMISSION_ID()
         );
-        items[1] = PermissionLib.ItemSingleTarget(
+        items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.WITHDRAW_PERMISSION_ID()
         );
-        items[2] = PermissionLib.ItemSingleTarget(
+        items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.UPGRADE_DAO_PERMISSION_ID()
         );
-        items[3] = PermissionLib.ItemSingleTarget(
+        items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
         );
-        items[4] = PermissionLib.ItemSingleTarget(
+        items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
-        items[5] = PermissionLib.ItemSingleTarget(
+        items[5] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_METADATA_PERMISSION_ID()
         );
 
-        _dao.bulkOnSingleTarget(address(_dao), items);
+        _dao.applySingleTargetPermissions(address(_dao), items);
     }
 }

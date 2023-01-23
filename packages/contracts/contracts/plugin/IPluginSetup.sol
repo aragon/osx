@@ -19,7 +19,7 @@ interface IPluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         );
 
     /// @notice Prepares the update of a plugin.
@@ -43,7 +43,7 @@ interface IPluginSetup {
         returns (
             address[] memory updatedHelpers,
             bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         );
 
     /// @notice Prepares the uninstallation of a plugin.
@@ -58,7 +58,7 @@ interface IPluginSetup {
         address _plugin,
         address[] calldata _currentHelpers,
         bytes calldata _data
-    ) external returns (PermissionLib.ItemMultiTarget[] memory permissions);
+    ) external returns (PermissionLib.MultiTargetPermission[] memory permissions);
 
     /// @notice Returns the plugin's base implementation.
     /// @return address The address of the plugin implementation contract.

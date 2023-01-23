@@ -11,7 +11,7 @@ import metadata from '../../contracts/voting/token/metadata.json';
 import {
   VotingSettings,
   VotingMode,
-  pct16,
+  pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
 
@@ -53,8 +53,8 @@ describe('TokenVotingSetup', function () {
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -84,7 +84,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256), address)',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256), address)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(

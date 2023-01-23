@@ -26,7 +26,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         plugin = mockPluginProxy(pluginBase, _dao);
@@ -40,7 +40,7 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         address _plugin,
         address[] calldata _currentHelpers,
         bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _plugin, _currentHelpers);
         permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
     }
@@ -67,7 +67,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         plugin = mockPluginProxy(pluginBase, _dao);
@@ -81,7 +81,7 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
         address _plugin,
         address[] calldata _currentHelpers,
         bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _plugin, _currentHelpers);
         permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);
     }

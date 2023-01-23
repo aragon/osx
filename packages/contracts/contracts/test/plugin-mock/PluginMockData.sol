@@ -5,22 +5,22 @@ pragma solidity 0.8.10;
 import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
 
-address constant NO_ORACLE = address(0);
+address constant NO_CONDITION = address(0);
 
 function mockPermissions(
     uint160 start,
     uint160 end,
     PermissionLib.Operation op
-) pure returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+) pure returns (PermissionLib.MultiTargetPermission[] memory permissions) {
     require(end > start);
-    permissions = new PermissionLib.ItemMultiTarget[](end - start);
+    permissions = new PermissionLib.MultiTargetPermission[](end - start);
 
     for (uint160 i = start; i < end; i++) {
-        permissions[i - start] = PermissionLib.ItemMultiTarget(
+        permissions[i - start] = PermissionLib.MultiTargetPermission(
             op,
             address(i),
             address(i),
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("MOCK_PERMISSION")
         );
     }

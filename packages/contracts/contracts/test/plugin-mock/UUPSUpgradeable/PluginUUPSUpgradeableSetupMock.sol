@@ -26,7 +26,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         plugin = mockPluginProxy(pluginBase, _dao);
@@ -40,7 +40,7 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         address _plugin,
         address[] calldata _currentHelpers,
         bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _plugin, _currentHelpers);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Revoke);
     }
@@ -62,7 +62,7 @@ contract PluginUUPSUpgradeableSetupV1MockBad is PluginUUPSUpgradeableSetupV1Mock
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         (_dao);
@@ -88,7 +88,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         plugin = mockPluginProxy(pluginBase, _dao);
@@ -109,7 +109,7 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
         returns (
             address[] memory currentHelpers,
             bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         // Update from V1
@@ -140,7 +140,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         plugin = mockPluginProxy(pluginBase, _dao);
@@ -161,7 +161,7 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
         returns (
             address[] memory currentHelpers,
             bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         (_dao, _plugin, _helpers);
@@ -209,7 +209,7 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         plugin = mockPluginProxy(pluginBase, _dao);
@@ -230,7 +230,7 @@ contract PluginUUPSUpgradeableSetupV4Mock is PluginUUPSUpgradeableSetupV3Mock {
         returns (
             address[] memory currentHelpers,
             bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         (_dao, _plugin, _helpers);
