@@ -39,11 +39,7 @@ contract AdminSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.MultiTargetPermission[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         IDAO dao = IDAO(_dao);
 
@@ -60,11 +56,9 @@ contract AdminSetup is PluginSetup {
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(dao);
 
-        // Prepare helpers
-        (helpers); // silence the warning.
-
         // Prepare permissions
-        permissions = new PermissionLib.MultiTargetPermission[](2);
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
         // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
         permissions[0] = PermissionLib.MultiTargetPermission(
@@ -83,6 +77,8 @@ contract AdminSetup is PluginSetup {
             NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
@@ -95,19 +91,18 @@ contract AdminSetup is PluginSetup {
     /// that have been granted to addresses during the life cycle of the plugin.
     /// or the ones that have been granted are not revoked already,
     /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata,
-        bytes calldata
-    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        view
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](1);
 
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );

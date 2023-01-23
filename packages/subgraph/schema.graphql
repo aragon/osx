@@ -251,7 +251,7 @@ type TokenVotingProposal implements Proposal @entity {
 
   votingMode: VotingMode!
   supportThreshold: BigInt!
-  minParticipation: BigInt!
+  minVotingPower: BigInt!
   snapshotBlock: BigInt!
 
   yes: BigInt
@@ -317,8 +317,7 @@ type AddresslistVotingProposal implements Proposal @entity {
 
   votingMode: VotingMode!
   supportThreshold: BigInt!
-  minParticipation: BigInt!
-
+  minVotingPower: BigInt!
   snapshotBlock: BigInt!
 
   abstain: BigInt

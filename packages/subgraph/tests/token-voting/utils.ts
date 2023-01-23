@@ -16,7 +16,7 @@ import {
   CONTRACT_ADDRESS,
   VOTING_MODE,
   SUPPORT_THRESHOLD,
-  MIN_PARTICIPATION,
+  MIN_VOTING_POWER,
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
@@ -219,7 +219,7 @@ export function createTokenVotingProposalEntityState(
 
   votingMode: string = VOTING_MODE,
   supportThreshold: string = SUPPORT_THRESHOLD,
-  minParticipation: string = MIN_PARTICIPATION,
+  minVotingPower: string = MIN_VOTING_POWER,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
@@ -241,7 +241,7 @@ export function createTokenVotingProposalEntityState(
 
   tokenVotingProposal.votingMode = votingMode;
   tokenVotingProposal.supportThreshold = BigInt.fromString(supportThreshold);
-  tokenVotingProposal.minParticipation = BigInt.fromString(minParticipation);
+  tokenVotingProposal.minVotingPower = BigInt.fromString(minVotingPower);
   tokenVotingProposal.startDate = BigInt.fromString(startDate);
   tokenVotingProposal.endDate = BigInt.fromString(endDate);
   tokenVotingProposal.snapshotBlock = BigInt.fromString(snapshotBlock);

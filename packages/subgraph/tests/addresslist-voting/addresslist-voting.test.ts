@@ -25,6 +25,7 @@ import {
   VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
+  MIN_VOTING_POWER,
   MIN_DURATION,
   MIN_PROPOSER_VOTING_POWER,
   START_DATE,
@@ -66,7 +67,7 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     // ProposalParameters
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -163,8 +164,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
   assert.fieldEquals(
     'AddresslistVotingProposal',
     entityID,
-    'minParticipation',
-    MIN_PARTICIPATION
+    'minVotingPower',
+    MIN_VOTING_POWER
   );
   assert.fieldEquals(
     'AddresslistVotingProposal',
@@ -223,7 +224,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     // ProposalParameters
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -283,7 +284,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
 
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -344,7 +345,7 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
     // ProposalParameters
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,

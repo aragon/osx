@@ -1,7 +1,7 @@
 import {Address, BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts';
 import {createMockedFunction, newMockEvent} from 'matchstick-as';
-import {AddresslistVotingProposal} from '../../generated/schema';
 
+import {AddresslistVotingProposal} from '../../generated/schema';
 import {
   ProposalCreated,
   VoteCast,
@@ -18,7 +18,7 @@ import {
   CONTRACT_ADDRESS,
   VOTING_MODE,
   SUPPORT_THRESHOLD,
-  MIN_PARTICIPATION,
+  MIN_VOTING_POWER,
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
@@ -260,7 +260,7 @@ export function createAddresslistVotingProposalEntityState(
 
   votingMode: string = VOTING_MODE,
   supportThreshold: string = SUPPORT_THRESHOLD,
-  minParticipation: string = MIN_PARTICIPATION,
+  minVotingPower: string = MIN_VOTING_POWER,
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   snapshotBlock: string = SNAPSHOT_BLOCK,
@@ -282,7 +282,7 @@ export function createAddresslistVotingProposalEntityState(
 
   addresslistProposal.votingMode = votingMode;
   addresslistProposal.supportThreshold = BigInt.fromString(supportThreshold);
-  addresslistProposal.minParticipation = BigInt.fromString(minParticipation);
+  addresslistProposal.minVotingPower = BigInt.fromString(minVotingPower);
   addresslistProposal.startDate = BigInt.fromString(startDate);
   addresslistProposal.endDate = BigInt.fromString(endDate);
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);

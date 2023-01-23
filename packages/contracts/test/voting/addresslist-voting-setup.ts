@@ -9,7 +9,7 @@ import {Operation} from '../core/permission/permission-manager';
 import {
   VotingSettings,
   VotingMode,
-  pct16,
+  pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
 
@@ -48,8 +48,8 @@ describe('AddresslistVotingSetup', function () {
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -80,7 +80,7 @@ describe('AddresslistVotingSetup', function () {
       'function isListedAtBlock(address,uint256) returns (bool)',
       'function addresslistLength() returns (uint256)',
       'function addresslistLengthAtBlock(uint256) returns (uint256)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256),address[])',
     ]);
 
     expect(
@@ -92,7 +92,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
+        '(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()
@@ -131,11 +131,13 @@ describe('AddresslistVotingSetup', function () {
         nonce,
       });
 
-      const {plugin, helpers, permissions} =
-        await addresslistVotingSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          defaultData
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await addresslistVotingSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        defaultData
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(0);
@@ -201,6 +203,7 @@ describe('AddresslistVotingSetup', function () {
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
         defaultVotingSettings.supportThreshold
       );
+
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
         defaultVotingSettings.minDuration
       );
@@ -240,9 +243,11 @@ describe('AddresslistVotingSetup', function () {
       const permissions =
         await addresslistVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [],
+            data: EMPTY_DATA,
+          }
         );
 
       expect(permissions.length).to.be.equal(4);

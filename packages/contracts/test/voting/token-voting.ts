@@ -17,7 +17,8 @@ import {
 import {getMergedABI} from '../../utils/abi';
 import {
   VoteOption,
-  pct16,
+  pctToRatio,
+  RATIO_BASE,
   getTime,
   advanceIntoVoteTime,
   advanceAfterVoteEnd,
@@ -78,8 +79,8 @@ describe('TokenVoting', function () {
   beforeEach(async () => {
     votingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -114,7 +115,9 @@ describe('TokenVoting', function () {
     );
   });
 
-  async function setBalances(balances: {receiver: string; amount: number}[]) {
+  async function setBalances(
+    balances: {receiver: string; amount: number | BigNumber}[]
+  ) {
     const promises = balances.map(balance =>
       governanceErc20Mock.setBalance(balance.receiver, balance.amount)
     );
@@ -344,6 +347,60 @@ describe('TokenVoting', function () {
         .withArgs(earliestEndDate, tooEarlyEndDate);
     });
 
+    it('ceils the `minVotingPower` value if it has a remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30).add(1); // 30.0001 %
+
+      await setBalances([{receiver: signers[0].address, amount: 10}]);
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(4); // 4 out of 10 votes must be casted for the proposal to pass
+    });
+
+    it('does not ceil the `minVotingPower` value if it has no remainder', async () => {
+      votingSettings.minParticipation = pctToRatio(30); // 30.0000 %
+
+      await setBalances([{receiver: signers[0].address, amount: 10}]); // 10 votes * 30% = 3 votes
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      expect(
+        (
+          await voting.createProposal(
+            dummyMetadata,
+            dummyActions,
+            startDate,
+            endDate,
+            VoteOption.None,
+            false
+          )
+        ).value
+      ).to.equal(id);
+
+      expect((await voting.getProposal(id)).parameters.minVotingPower).to.eq(3); // 3 out of 10 votes must be casted for the proposal to pass
+    });
+
     it('should create a vote successfully, but not vote', async () => {
       await voting.initialize(
         dao.address,
@@ -352,6 +409,8 @@ describe('TokenVoting', function () {
       );
       
       const allowFailureMap = 1;
+
+      await setBalances([{receiver: signers[0].address, amount: 10}]);
 
       let tx = await voting.createProposal(
         dummyMetadata,
@@ -387,15 +446,18 @@ describe('TokenVoting', function () {
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );
-      expect(proposal.parameters.minParticipation).to.equal(
-        votingSettings.minParticipation
+
+      expect(proposal.parameters.minVotingPower).to.equal(
+        proposal.tally.totalVotingPower
+          .mul(votingSettings.minParticipation)
+          .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
       expect(
         proposal.parameters.startDate.add(votingSettings.minDuration)
       ).to.equal(proposal.parameters.endDate);
 
-      expect(proposal.tally.totalVotingPower).to.equal(1);
+      expect(proposal.tally.totalVotingPower).to.equal(10);
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
@@ -416,6 +478,8 @@ describe('TokenVoting', function () {
         governanceErc20Mock.address
       );
 
+      await setBalances([{receiver: signers[0].address, amount: 10}]);
+
       let tx = await voting.createProposal(
         dummyMetadata,
         dummyActions,
@@ -429,7 +493,7 @@ describe('TokenVoting', function () {
       await expect(tx)
         .to.emit(voting, PROPOSAL_EVENTS.PROPOSAL_CREATED)
         .to.emit(voting, VOTING_EVENTS.VOTE_CAST)
-        .withArgs(id, signers[0].address, VoteOption.Yes, 1);
+        .withArgs(id, signers[0].address, VoteOption.Yes, 10);
 
       const event = await findEvent(tx, PROPOSAL_EVENTS.PROPOSAL_CREATED);
       expect(event.args.proposalId).to.equal(id);
@@ -450,13 +514,15 @@ describe('TokenVoting', function () {
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
       );
-      expect(proposal.parameters.minParticipation).to.equal(
-        votingSettings.minParticipation
+      expect(proposal.parameters.minVotingPower).to.equal(
+        proposal.tally.totalVotingPower
+          .mul(votingSettings.minParticipation)
+          .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
-      expect(proposal.tally.totalVotingPower).to.equal(1);
-      expect(proposal.tally.yes).to.equal(1);
+      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(proposal.tally.yes).to.equal(10);
       expect(proposal.tally.no).to.equal(0);
       expect(proposal.tally.abstain).to.equal(0);
     });
@@ -584,12 +650,8 @@ describe('TokenVoting', function () {
           abstain: [],
         });
 
-        expect(await voting.worstCaseSupport(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -602,22 +664,14 @@ describe('TokenVoting', function () {
           abstain: [5, 6], // 20 votes
         });
 
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
 
         expect(await voting.canExecute(id)).to.equal(true);
       });
@@ -774,31 +828,19 @@ describe('TokenVoting', function () {
           abstain: [],
         });
 
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
@@ -964,12 +1006,8 @@ describe('TokenVoting', function () {
           abstain: [],
         });
 
-        expect(await voting.worstCaseSupport(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -982,22 +1020,14 @@ describe('TokenVoting', function () {
           abstain: [5, 6], // 20 votes
         });
 
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
 
         expect(await voting.canExecute(id)).to.equal(true);
       });
@@ -1042,7 +1072,7 @@ describe('TokenVoting', function () {
   describe('Different configurations:', async () => {
     describe('A simple majority vote with >50% support and >=25% participation required', async () => {
       beforeEach(async () => {
-        votingSettings.minParticipation = pct16(25);
+        votingSettings.minParticipation = pctToRatio(25);
 
         await voting.initialize(
           dao.address,
@@ -1080,22 +1110,15 @@ describe('TokenVoting', function () {
 
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
-        expect(await voting.participation(id)).to.be.lt(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.lt(
-          votingSettings.minParticipation
-        );
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -1108,22 +1131,14 @@ describe('TokenVoting', function () {
           abstain: [], // 0 votes
         });
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.support(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
       });
 
@@ -1136,22 +1151,14 @@ describe('TokenVoting', function () {
           abstain: [], // 0 votes
         });
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
       });
 
@@ -1161,39 +1168,28 @@ describe('TokenVoting', function () {
         );
         await Promise.all(promises);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.lte(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
         await voting.connect(signers[5]).vote(id, VoteOption.Yes, false);
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
 
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
       });
     });
 
-    describe('An edge case with `supportThreshold = 0` and `minParticipation = 0` and early execution mode activated', async () => {
+    describe('An edge case with `supportThreshold = 0%`, `minParticipation = 0%`, in early execution mode', async () => {
       beforeEach(async () => {
-        votingSettings.supportThreshold = pct16(0);
-        votingSettings.minParticipation = pct16(0);
+        votingSettings.supportThreshold = pctToRatio(0);
+        votingSettings.minParticipation = pctToRatio(0);
+        votingSettings.votingMode = VotingMode.EarlyExecution;
 
         await voting.initialize(
           dao.address,
@@ -1219,30 +1215,16 @@ describe('TokenVoting', function () {
         // does not execute early
         advanceIntoVoteTime(startDate, endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        // worst case support can be calculated without throwing an error even if nobody has voted
-        expect(await voting.worstCaseSupport(id)).to.be.eq(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.canExecute(id)).to.equal(false);
 
         // does not execute normally
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-
-        await expect(voting.support(id)).to.be.revertedWithCustomError(
-          voting,
-          'ZeroValueNotAllowed'
-        );
-        await expect(voting.canExecute(id)).to.be.revertedWithCustomError(
-          voting,
-          'ZeroValueNotAllowed'
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.false;
+        expect(await voting.canExecute(id)).to.equal(false);
       });
 
       it('executes if participation and support are met', async () => {
@@ -1251,24 +1233,218 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
         // Check if the proposal can execute early
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.worstCaseSupport(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
 
         // Check if the proposal can execute normally
         await advanceAfterVoteEnd(endDate);
 
-        expect(await voting.participation(id)).to.be.gte(
-          votingSettings.minParticipation
-        );
-        expect(await voting.support(id)).to.be.gt(
-          votingSettings.supportThreshold
-        );
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
         expect(await voting.canExecute(id)).to.equal(true);
+      });
+    });
+  });
+
+  describe('An edge case with `supportThreshold = 99.9999%` and `minParticipation = 100%` in early execution mode', async () => {
+    beforeEach(async () => {
+      votingSettings.supportThreshold = pctToRatio(100).sub(1);
+      votingSettings.minParticipation = pctToRatio(100);
+      votingSettings.votingMode = VotingMode.EarlyExecution;
+
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+    });
+
+    context('token balances are in the magnitude of 10^18', async () => {
+      beforeEach(async () => {
+        const totalSupply = ethers.BigNumber.from(10).pow(18);
+        const delta = totalSupply.div(RATIO_BASE);
+        await setBalances([
+          {
+            receiver: signers[0].address,
+            amount: totalSupply.sub(delta), // 99.9999% of the total supply
+          },
+          {receiver: signers[1].address, amount: 1}, // 1 vote (10^-16 % = 0.0000000000000001%)
+          {receiver: signers[2].address, amount: delta.sub(1)}, // 1 vote less than 0.0001% of the total supply (99.9999% - 10^-16% = 0.00009999999999999%)
+        ]);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+      });
+
+      it('early support criterium is sharp by 1 vote', async () => {
+        advanceIntoVoteTime(startDate, endDate);
+
+        // 99.9999% of the voting power voted for yes
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+
+        // 1 vote is still missing to meet >99.9999% worst-case support
+        const tally = (await voting.getProposal(id)).tally;
+        expect(
+          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
+
+        // vote with 1 more yes vote
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+
+        // voting with the remaining votes does not change this
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+      });
+
+      it('participation criterium is sharp by 1 vote', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
+
+        // 1 vote is still missing to meet particpiation = 100%
+        const tally = (await voting.getProposal(id)).tally;
+        expect(
+          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+        ).to.eq(1);
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+
+        // cast the last vote so that participation = 100%
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+      });
+    });
+
+    context('tokens balances are in the magnitude of 10^6', async () => {
+      const totalSupply = ethers.BigNumber.from(10).pow(6);
+      const delta = 1; // 0.0001% of the total supply
+
+      beforeEach(async () => {
+        await setBalances([
+          {receiver: signers[0].address, amount: totalSupply.sub(delta)}, // 99.9999%
+          {receiver: signers[1].address, amount: delta}, //             0.0001%
+        ]);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+      });
+
+      it('early support criterium is sharp by 1 vote', async () => {
+        advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+
+        // 1 vote is still missing to meet >99.9999%
+        const tally = (await voting.getProposal(id)).tally;
+        expect(
+          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
+
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+
+        // cast the last vote so that support = 100%
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+      });
+
+      it('participation is not met with 1 vote missing', async () => {
+        await advanceIntoVoteTime(startDate, endDate);
+
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+
+        // 1 vote is still missing to meet particpiation = 100%
+        const tally = (await voting.getProposal(id)).tally;
+        expect(
+          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+        ).to.eq(1);
+        expect(await voting.isMinParticipationReached(id)).to.be.false;
+
+        // cast the last vote so that participation = 100%
+        await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+      });
+    });
+  });
+
+  describe('Execution criteria handle token balances for multiple orders of magnitude', async function () {
+    beforeEach(async () => {
+      votingSettings.supportThreshold = pctToRatio(50);
+      votingSettings.minParticipation = pctToRatio(20);
+      votingSettings.votingMode = VotingMode.EarlyExecution;
+    });
+
+    const powers = [0, 1, 2, 3, 6, 12, 18, 24, 36, 48];
+
+    powers.forEach(async power => {
+      it(`magnitudes of 10^${power}`, async function () {
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        );
+
+        let magnitude = BigNumber.from(10).pow(power);
+
+        const oneToken = magnitude;
+        const balances = [
+          {
+            receiver: signers[0].address,
+            amount: oneToken.mul(5).add(1),
+          },
+          {
+            receiver: signers[1].address,
+            amount: oneToken.mul(5),
+          },
+        ];
+
+        // signer[0] has more voting power than signer[1]
+        const balanceDifference = balances[0].amount.sub(balances[1].amount);
+        expect(balanceDifference).to.eq(1);
+
+        await setBalances(balances);
+
+        await voting.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          0,
+          VoteOption.None,
+          false
+        );
+
+        expect((await voting.getProposal(id)).tally.totalVotingPower).to.eq(
+          balances[0].amount.add(balances[1].amount)
+        );
+
+        // vote with both signers
+        await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
+        await voting.connect(signers[1]).vote(id, VoteOption.No, false);
+
+        expect(await voting.isSupportThresholdReached(id)).to.be.true;
+        expect(await voting.isSupportThresholdReachedEarly(id)).to.be.true;
+        expect(await voting.isMinParticipationReached(id)).to.be.true;
+        expect(await voting.canExecute(id)).to.be.true;
       });
     });
   });

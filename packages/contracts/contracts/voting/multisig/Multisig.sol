@@ -12,9 +12,8 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "../addresslist/Addresslist.sol";
 
 /// @title Multisig
-/// @author Aragon Association - 2022.
+/// @author Aragon Association - 2022-2023
 /// @notice The on-chain multisig governance plugin in which a proposal passes if X out of Y approvals are met.
-/// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     using SafeCastUpgradeable for uint256;
 

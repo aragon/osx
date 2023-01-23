@@ -27,8 +27,8 @@ export const HALF_ETH = '500000000000000000';
 export const ONE_HOUR = '3600';
 
 export const VOTING_MODE: string = ONE; // EarlyExecution
-export const SUPPORT_THRESHOLD = '500000000000000000';
-export const MIN_PARTICIPATION = '500000000000000000';
+export const SUPPORT_THRESHOLD = '500000'; // 50*10**4 = 50%
+export const MIN_PARTICIPATION = '500000'; // 50*10**4 = 50%
 export const MIN_DURATION = ONE_HOUR;
 
 export const MIN_PROPOSER_VOTING_POWER = ZERO;
@@ -40,6 +40,7 @@ export const SNAPSHOT_BLOCK = '100';
 // and test might succeed even though it shouldn't
 export const ALLOW_FAILURE_MAP = '1';
 
+export const MIN_VOTING_POWER = TWO;
 export const TOTAL_VOTING_POWER = THREE;
 export const CREATED_AT = '1644850000';
 

@@ -92,17 +92,16 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.MultiTargetPermission[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         IDAO dao = IDAO(_dao);
 
@@ -129,7 +128,7 @@ contract TokenVotingSetup is PluginSetup {
         address token = tokenSettings.addr;
 
         // Prepare helpers.
-        helpers = new address[](1);
+        address[] memory helpers = new address[](1);
 
         if (token != address(0)) {
             // the following 2 calls(_getTokenInterfaceIds, isERC20) don't use
@@ -186,7 +185,9 @@ contract TokenVotingSetup is PluginSetup {
         );
 
         // Prepare permissions
-        permissions = new PermissionLib.MultiTargetPermission[](tokenSettings.addr != address(0) ? 3 : 4);
+        PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](
+            tokenSettings.addr != address(0) ? 3 : 4
+        );
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -226,6 +227,9 @@ contract TokenVotingSetup is PluginSetup {
                 tokenMintPermission
             );
         }
+
+        preparedDependency.helpers = helpers;
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
@@ -234,14 +238,13 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata _helpers,
-        bytes calldata
-    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        view
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {        
         // Prepare permissions.
-        uint256 helperLength = _helpers.length;
+        uint256 helperLength = _payload.currentHelpers.length;
         if (helperLength != 1) {
             revert WrongHelpersArrayLength({length: helperLength});
         }
@@ -250,7 +253,7 @@ contract TokenVotingSetup is PluginSetup {
         // it's either GovernanceWrappedERC20 or GovernanceERC20
         // which is ensured by PluginSetupProcessor that it can NOT pass helper
         // that wasn't deployed by the prepareInstall in this plugin setup.
-        address token = _helpers[0];
+        address token = _payload.currentHelpers[0];
 
         bool[] memory supportedIds = _getTokenInterfaceIds(token);
 
@@ -263,7 +266,7 @@ contract TokenVotingSetup is PluginSetup {
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
@@ -271,7 +274,7 @@ contract TokenVotingSetup is PluginSetup {
 
         permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
@@ -280,7 +283,7 @@ contract TokenVotingSetup is PluginSetup {
         permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
