@@ -23,11 +23,14 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @param pluginRepo The address of the plugin repository.
     event PluginRepoRegistered(string name, address pluginRepo);
 
+    /// @notice Thrown if the plugin name doesn't match the regex `[0-9a-z\-]`
+    error InvalidPluginName(string name);
+
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the contract by setting calling the `InterfaceBasedRegistry` base class initialize method.
     /// @param _dao The address of the managing DAO.
     /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
@@ -41,12 +44,16 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice Registers a plugin repository with a name and address.
     /// @param name The name of the PluginRepo.
     /// @param pluginRepo The address of the PluginRepo contract.
-    function registerPluginRepo(string calldata name, address pluginRepo)
-        external
-        auth(REGISTER_PLUGIN_REPO_PERMISSION_ID)
-    {
+    function registerPluginRepo(
+        string calldata name,
+        address pluginRepo
+    ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
         // The caller(PluginRepoFactory) explicitly checks
         // if the name is empty and reverts.
+
+        if (!_checkNameValidity(name)) {
+            revert InvalidPluginName({name: name});
+        }
 
         bytes32 labelhash = keccak256(bytes(name));
         subdomainRegistrar.registerSubnode(labelhash, pluginRepo);
@@ -54,6 +61,37 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
         _register(pluginRepo);
 
         emit PluginRepoRegistered(name, pluginRepo);
+    }
+
+    /// @notice Checks if the name is either 0-9, a-z or a dash (-).
+    /// @param _name The name of the plugin.
+    /// @return `true` if the name is valid or `false` if at least one char is invalid.
+    /// @dev Aborts on the first invalid char found.
+    function _checkNameValidity(string calldata _name) internal pure returns (bool) {
+        bytes calldata nameBytes = bytes(_name);
+        uint256 nameLength = nameBytes.length;
+        for (uint256 i; i < nameLength; i++) {
+            uint8 char = uint8(nameBytes[i]);
+
+            // if char is between 0-9
+            if (char > 47 && char < 58) {
+                continue;
+            }
+
+            // if char is between a-z
+            if (char > 96 && char < 123) {
+                continue;
+            }
+
+            // if char is -
+            if (char == 45) {
+                continue;
+            }
+
+            // invalid if one char doesn't work with the rules above
+            return false;
+        }
+        return true;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

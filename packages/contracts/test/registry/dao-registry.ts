@@ -7,6 +7,7 @@ import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../test-utils/proxy';
+import { Wallet } from 'ethers';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -51,7 +52,7 @@ describe('DAORegistry', function () {
 
     // DAO Registry
     const Registry = await ethers.getContractFactory('DAORegistry');
-    
+
     daoRegistry = await deployWithProxy(Registry);
 
     await daoRegistry.initialize(
@@ -139,5 +140,36 @@ describe('DAORegistry', function () {
     )
       .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
       .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
+  });
+
+  it('should revert if name contains any invalid char', async () => {
+    const baseName = 'this-is-my-super-valid-name';
+
+    // loop through the ascii table
+    for (let i = 0; i < 127; i++) {
+      const newTargetDao = await deployNewDAO(ownerAddress);
+      // random place for the char to improve validation check
+      const placement = Math.round(Math.random() * baseName.length);
+      const daoName =
+        baseName.substring(0, placement) +
+        String.fromCharCode(i) +
+        baseName.substring(placement + 1);
+
+      // test success if it is a valid char [0-9a-z\-]
+      if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+        await expect(
+          daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
+        )
+          .to.emit(daoRegistry, EVENTS.DAORegistered)
+          .withArgs(newTargetDao.address, ownerAddress, daoName);
+        continue;
+      }
+
+      await expect(
+        daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
+      )
+        .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoName')
+        .withArgs(daoName);
+    }
   });
 });

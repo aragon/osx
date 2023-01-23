@@ -157,4 +157,38 @@ describe('PluginRepoRegistry', function () {
       .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
       .withArgs(pluginRepoNameDomainHash, ensSubdomainRegistrar.address);
   });
+
+  it('should revert if name contains any invalid char', async () => {
+    const baseName = 'this-is-my-super-valid-name';
+
+    // loop through the ascii table
+    for (let i = 0; i < 127; i++) {
+      // deploy a pluginRepo and initialize
+      const newPluginRepo = await deployNewPluginRepo(ownerAddress);
+
+      // random place for the char to improve validation check
+      const placement = Math.round(Math.random() * baseName.length);
+      const pluginName =
+        baseName.substring(0, placement) +
+        String.fromCharCode(i) +
+        baseName.substring(placement + 1);
+
+      // test success if it is a valid char [0-9a-z\-]
+      if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+        await expect(
+          pluginRepoRegistry.registerPluginRepo(
+            pluginName,
+            newPluginRepo.address
+          )
+        ).to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered);
+        continue;
+      }
+
+      await expect(
+        pluginRepoRegistry.registerPluginRepo(pluginName, newPluginRepo.address)
+      )
+        .to.be.revertedWithCustomError(pluginRepoRegistry, 'InvalidPluginName')
+        .withArgs(pluginName);
+    }
+  });
 });

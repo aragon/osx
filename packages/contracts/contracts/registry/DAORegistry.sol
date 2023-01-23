@@ -16,8 +16,11 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ENS subdomain registrar registering the DAO names.
     ENSSubdomainRegistrar private subdomainRegistrar;
 
-    // @notice Thrown if the plugin repository name is empty.
+    /// @notice Thrown if the DAO repository name is empty.
     error EmptyDaoName();
+
+    /// @notice Thrown if the DAO name doesn't match the regex `[0-9a-z\-]`
+    error InvalidDaoName(string name);
 
     /// @notice Emitted when a new DAO is registered.
     /// @param dao The address of the DAO contract.
@@ -29,14 +32,14 @@ contract DAORegistry is InterfaceBasedRegistry {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the contract.
     /// @param _managingDao the managing DAO address.
     /// @param _subdomainRegistrar The `ENSSubdomainRegistrar` where `ENS` subdomain will be registered.
-    function initialize(IDAO _managingDao, ENSSubdomainRegistrar _subdomainRegistrar)
-        public
-        initializer
-    {
+    function initialize(
+        IDAO _managingDao,
+        ENSSubdomainRegistrar _subdomainRegistrar
+    ) public initializer {
         __InterfaceBasedRegistry_init(_managingDao, type(IDAO).interfaceId);
         subdomainRegistrar = _subdomainRegistrar;
     }
@@ -57,6 +60,10 @@ contract DAORegistry is InterfaceBasedRegistry {
             revert EmptyDaoName();
         }
 
+        if (!_checkNameValidity(_name)) {
+            revert InvalidDaoName({name: _name});
+        }
+
         _register(daoAddr);
 
         bytes32 labelhash = keccak256(bytes(_name));
@@ -64,6 +71,37 @@ contract DAORegistry is InterfaceBasedRegistry {
         subdomainRegistrar.registerSubnode(labelhash, daoAddr);
 
         emit DAORegistered(daoAddr, _creator, _name);
+    }
+
+    /// @notice Checks if the name is either 0-9, a-z or a dash (-).
+    /// @param _name The name of the DAO.
+    /// @return `true` if the name is valid or `false` if at least one char is invalid.
+    /// @dev Aborts on the first invalid char found.
+    function _checkNameValidity(string calldata _name) internal pure returns (bool) {
+        bytes calldata nameBytes = bytes(_name);
+        uint256 nameLength = nameBytes.length;
+        for (uint256 i; i < nameLength; i++) {
+            uint8 char = uint8(nameBytes[i]);
+
+            // if char is between 0-9
+            if (char > 47 && char < 58) {
+                continue;
+            }
+
+            // if char is between a-z
+            if (char > 96 && char < 123) {
+                continue;
+            }
+
+            // if char is -
+            if (char == 45) {
+                continue;
+            }
+
+            // invalid if one char doesn't work with the rules above
+            return false;
+        }
+        return true;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
