@@ -19,6 +19,7 @@ import {
   VOTING_MODE,
   SUPPORT_THRESHOLD,
   MIN_PARTICIPATION,
+  MIN_VOTING_POWER,
   MIN_DURATION,
   MIN_PROPOSER_VOTING_POWER,
   START_DATE,
@@ -57,7 +58,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -125,8 +126,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
-    'minParticipation',
-    MIN_PARTICIPATION
+    'minVotingPower',
+    MIN_VOTING_POWER
   );
 
   assert.fieldEquals('TokenVotingProposal', entityID, 'startDate', START_DATE);
@@ -169,7 +170,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -243,7 +244,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
 
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -297,7 +298,7 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
     // ProposalParameters
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,
@@ -350,7 +351,7 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
 
     VOTING_MODE,
     SUPPORT_THRESHOLD,
-    MIN_PARTICIPATION,
+    MIN_VOTING_POWER,
     START_DATE,
     END_DATE,
     SNAPSHOT_BLOCK,

@@ -378,7 +378,7 @@ export function getSupportThreshold(
   createMockedFunction(
     Address.fromString(contractAddress),
     'supportThreshold',
-    'supportThreshold():(uint64)'
+    'supportThreshold():(uint32)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);
@@ -391,7 +391,7 @@ export function getMinimalParticipation(
   createMockedFunction(
     Address.fromString(contractAddress),
     'minParticipation',
-    'minParticipation():(uint64)'
+    'minParticipation():(uint32)'
   )
     .withArgs([])
     .returns([ethereum.Value.fromSignedBigInt(returns)]);

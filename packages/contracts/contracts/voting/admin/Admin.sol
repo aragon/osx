@@ -10,7 +10,7 @@ import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
-/// @author Aragon Association - 2022.
+/// @author Aragon Association - 2022-2023.
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
 contract Admin is IMembership, PluginCloneable, Proposal {
     using SafeCast for uint256;

@@ -6,12 +6,13 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 
 import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
+import {RATIO_BASE, applyRatioCeiled} from "../../utils/Ratio.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {Addresslist} from "./Addresslist.sol";
 
 /// @title AddresslistVoting
-/// @author Aragon Association - 2021-2022.
+/// @author Aragon Association - 2021-2023.
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
@@ -113,9 +114,13 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-        proposal_.parameters.minParticipation = minParticipation();
+        proposal_.parameters.minVotingPower = applyRatioCeiled(
+            addresslistLengthAtBlock(snapshotBlock),
+            minParticipation()
+        );
 
-        proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO https://aragonassociation.atlassian.net/browse/APP-1417
+        // REMOVE
+        proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO THIS DOESN'T NEED TO BE STORED ANYMORE https://aragonassociation.atlassian.net/browse/APP-1417
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

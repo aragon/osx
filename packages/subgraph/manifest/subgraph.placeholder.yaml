@@ -159,7 +159,7 @@ templates:
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
-        - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+        - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
   # AddresslistVoting (package)
   - name: AddresslistVoting
@@ -184,7 +184,7 @@ templates:
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
-        - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+        - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
         - event: MembersAdded(address[])
           handler: handleMembersAdded

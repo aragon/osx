@@ -16,7 +16,7 @@ import {
   AddresslistVotingVoter,
   AddresslistVotingVote
 } from '../../../generated/schema';
-import {TEN_POWER_16, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
+import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
 export function handleProposalCreated(event: ProposalCreated): void {
   let context = dataSource.context();
@@ -56,8 +56,8 @@ export function _handleProposalCreated(
     let parameters = vote.value.value2;
     proposalEntity.votingMode = VOTING_MODES.get(parameters.votingMode);
     proposalEntity.supportThreshold = parameters.supportThreshold;
-    proposalEntity.minParticipation = parameters.minParticipation;
     proposalEntity.snapshotBlock = parameters.snapshotBlock;
+    proposalEntity.minVotingPower = parameters.minVotingPower;
 
     // Tally
     let tally = vote.value.value3;
@@ -131,12 +131,19 @@ export function handleVoteCast(event: VoteCast): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
+      let parameters = proposal.value.value2;
       let tally = proposal.value.value3;
 
       let abstain = tally.abstain;
       let yes = tally.yes;
       let no = tally.no;
       let castedVotingPower = yes.plus(no.plus(abstain));
+      let totalVotingPower = tally.totalVotingPower;
+
+      let supportThreshold = parameters.supportThreshold;
+      let minVotingPower = parameters.minVotingPower;
+
+      let BASE = BigInt.fromString(RATIO_BASE);
 
       proposalEntity.yes = yes;
       proposalEntity.no = no;
@@ -144,26 +151,19 @@ export function handleVoteCast(event: VoteCast): void {
       proposalEntity.castedVotingPower = castedVotingPower;
 
       // check if the current vote results meet the conditions for the proposal to pass:
-      // - worst case support :  N_yes / (N_total - N_abstain) > support threshold
+      // - worst-case support :  N_yes / (N_total - N_abstain) > support threshold
       // - participation      :  (N_yes + N_no + N_abstain) / N_total >= minimum participation
 
-      // expect a number between 0 and 100
-      let currentParticipation = castedVotingPower
-        .times(BigInt.fromI32(100))
-        .div(proposalEntity.totalVotingPower);
+      let supportThresholdReachedEarly = BASE.minus(supportThreshold)
+        .times(yes)
+        .ge(totalVotingPower.minus(yes).minus(abstain));
 
-      let worstCaseSupport = yes
-        .times(BigInt.fromI32(100))
-        .div(proposalEntity.totalVotingPower.minus(abstain));
+      let minParticipationReached = castedVotingPower.ge(minVotingPower);
 
       // set the executable param
       proposalEntity.executable =
-        worstCaseSupport.gt(
-          proposalEntity.supportThreshold.div(BigInt.fromString(TEN_POWER_16))
-        ) &&
-        currentParticipation.ge(
-          proposalEntity.minParticipation.div(BigInt.fromString(TEN_POWER_16))
-        );
+        supportThresholdReachedEarly && minParticipationReached;
+
       proposalEntity.save();
     }
   }
