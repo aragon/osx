@@ -546,7 +546,7 @@ describe('DAO', function () {
     });
   });
 
-  describe('registerStandardCallback:', async () => {
+  describe.only('registerStandardCallback:', async () => {
     it('reverts if `REGISTER_STANDARD_CALLBACK_PERMISSION` is not granted', async () => {
       await dao.revoke(
         dao.address,

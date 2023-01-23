@@ -8,35 +8,39 @@ pragma solidity 0.8.10;
 /// @dev This callback handling functionality is intented to be used by executor contracts (i.e., `DAO.sol`).
 contract CallbackHandler {
     /// @notice A mapping between callback function selectors and magic return numbers.
-    mapping(bytes4 => bytes32) internal callbackMagicNumbers;
+    mapping(bytes4 => bytes4) internal callbackMagicNumbers;
 
     /// @notice The magic number refering to unregistered callbacks.
-    bytes32 internal constant UNREGISTERED_CALLBACK = bytes32(0);
+    bytes4 internal constant UNREGISTERED_CALLBACK = bytes4(0);
 
     /// @notice Thrown if the callback function is not registered.
     /// @param callbackSelector The selector of the callback function.
     /// @param magicNumber The magic number to be registered for the callback function selector.
-    error UnkownCallback(bytes4 callbackSelector, bytes32 magicNumber);
+    error UnkownCallback(bytes4 callbackSelector, bytes4 magicNumber);
+    
+    /// @notice Emitted when `_handleCallback` is called.
+    /// @param sig The function signature.
+    /// @param data The calldata for the function signature.
+    event ReceivedCallback(bytes4 indexed sig, bytes data);
 
     /// @notice Handles callbacks to adaptively support ERC standards.
     /// @param _callbackSelector The selector of the callback function.
     /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
-    function _handleCallback(bytes4 _callbackSelector) internal view {
-        bytes32 magicNumber = callbackMagicNumbers[_callbackSelector];
+    function _handleCallback(bytes4 _callbackSelector, bytes memory _data) internal virtual returns(bytes4) {
+        bytes4 magicNumber = callbackMagicNumbers[_callbackSelector];
         if (magicNumber == UNREGISTERED_CALLBACK) {
             revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
         }
-        // low-level return magic number
-        assembly {
-            mstore(0x00, magicNumber)
-            return(0x00, 0x20)
-        }
+
+        emit ReceivedCallback(_callbackSelector, _data);
+
+        return magicNumber;
     }
 
     /// @notice Registers a magic number for a callback function selector.
     /// @param _callbackSelector The selector of the callback function.
     /// @param _magicNumber The magic number to be registered for the callback function selector.
-    function _registerCallback(bytes4 _callbackSelector, bytes4 _magicNumber) internal {
+    function _registerCallback(bytes4 _callbackSelector, bytes4 _magicNumber) internal virtual {
         callbackMagicNumbers[_callbackSelector] = _magicNumber;
     }
 

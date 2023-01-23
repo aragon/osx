@@ -81,4 +81,5 @@ describe('CallbackHandler', function () {
       )
     ).to.be.equal(magicNumberReturn);
   });
+  
 });

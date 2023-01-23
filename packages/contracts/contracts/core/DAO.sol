@@ -278,8 +278,11 @@ contract DAO is
     }
 
     /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
-    fallback() external {
-        _handleCallback(msg.sig); // WARN: does a low-level return, any code below would be unreacheable
+    /// @param _input As per the solidity docs, _input is the alias for msg.data.
+    /// @return bytes The magic number registered on the signature selector.
+    fallback(bytes calldata _input) external returns (bytes memory) {
+        bytes4 magicNumber = _handleCallback(msg.sig, _input);
+        return abi.encode(magicNumber);
     }
 
     /// @notice Emits the MetadataSet event if new metadata is set.
