@@ -11,6 +11,6 @@ interface IMembership {
     event MembersAnnounced(address[] members);
 
     /// @notice Emitted to renounce the membership of existing members.
-    /// @param members The list of exisiting members.
+    /// @param members The list of existing members.
     event MembersRenounced(address[] members);
 }
