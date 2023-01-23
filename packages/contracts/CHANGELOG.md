@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds `startDate` and `endDate` to Multisig proposals. Execution and approvals of proposals have now to be in the boundaries of these 2 dates.
 - Adds `IEIP4824`
 - Adds `event NewURI` implementations for `daoURI()` and `setDaoURI()` definitions in `DAO`
-- Added check that plugin and DAO names only contain `a-z`, `0-9` or a dash (`-`)
+- Added check that plugin and DAO names only contain `a-z`, `0-9` or a dash (`-`).
 
 ### Changed
 
@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed all occurences of `oracle` to `condition`.
 - Renamed `ItemSingleTarget` and `ItemMultiTarget` in `PermissionLib` to `SingleTargetPermission` and `MultiTargetPermission`.
 - Renamed `bulkOnSingleTarget()` and `bulkOnMultiTarget()` in `PermissionManager` to `applySingleTargetPermissions()` and `applyMultiTargetPermissions()`
+- Renames plugins `TokenVoting`, `AddresslistVoting`, `Admin` and `multisig` to be compliant to the new naming rules.
 
 ### Removed
 

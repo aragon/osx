@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // AddresslistVotingSetup
   await createPluginRepo(
     hre,
-    'AddresslistVoting',
+    'address-list-voting',
     'AddresslistVotingSetup',
     [1, 0, 0],
     '0x'
@@ -22,17 +22,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // TokenVotingSetup
   await createPluginRepo(
     hre,
-    'TokenVoting',
+    'token-voting',
     'TokenVotingSetup',
     [1, 0, 0],
     '0x'
   );
 
   // AdminSetup
-  await createPluginRepo(hre, 'Admin', 'AdminSetup', [1, 0, 0], '0x');
+  await createPluginRepo(hre, 'admin', 'AdminSetup', [1, 0, 0], '0x');
 
   // MultisigSetup
-  await createPluginRepo(hre, 'Multisig', 'MultisigSetup', [1, 0, 0], '0x');
+  await createPluginRepo(hre, 'multisig', 'MultisigSetup', [1, 0, 0], '0x');
 };
 export default func;
 func.tags = ['Create_Register_Plugins'];

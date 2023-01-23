@@ -198,7 +198,7 @@ describe('DAOFactory: ', function () {
     );
     pluginSetupV1Mock = await PluginUUPSUpgradeableSetupV1Mock.deploy();
     const tx = await pluginRepoFactory.createPluginRepoWithVersion(
-      'PluginUUPSUpgradeableSetupV1Mock',
+      'plugin-uupsupgradeable-setup-v1-mock',
       [1, 0, 0],
       pluginSetupV1Mock.address,
       '0x00',
