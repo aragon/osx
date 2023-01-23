@@ -7,7 +7,7 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 interface IPluginSetup {
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
-    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata.
+    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
     /// @return helpers The address array of all helpers (contracts or EOAs) associated with the plugin after the installation.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing DAO.
@@ -27,7 +27,7 @@ interface IPluginSetup {
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
     /// @param _oldVersion The semantic version of the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the plugin's build metadata.
+    /// @param _data The `bytes` encoded data containing the input parameters for the update as specified in the plugin's build metadata json file.
     /// @return updatedHelpers The address array of helpers (contracts or EOAs) associated with the plugin after the update.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the updating DAO.
@@ -50,7 +50,7 @@ interface IPluginSetup {
     /// @param _dao The address of the uninstalling DAO.
     /// @param _plugin The address of the `Plugin` contract to update from.
     /// @param _currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param _data The `bytes` encoded data containing the input parameters for the uninstalltion as specified in the plugin's build metadata.
+    /// @param _data The `bytes` encoded data containing the input parameters for the uninstalltion as specified in the plugin's build metadata json file.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
     /// @dev The array of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which this update is prepared for.
     function prepareUninstallation(
