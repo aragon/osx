@@ -2,8 +2,8 @@
   "ui": "",
   "change": "",
   "pluginSetupABI": {
-    "prepareInstallation": "(address multiplyHelper, uint num)",
-    "prepareUpdate": "",
-    "prepareUninstallation": ""
+    "prepareInstallation": ["address multiplyHelper", "uint num"],
+    "prepareUpdate": [""],
+    "prepareUninstallation": [""]
   }
 }

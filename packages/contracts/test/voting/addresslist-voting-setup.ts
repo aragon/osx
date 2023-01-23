@@ -22,11 +22,6 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-const prepareInstallationDataTypes = [
-  'tuple(uint8,uint64,uint64,uint64,uint256)',
-  'address[]',
-];
-
 // Permissions
 const UPDATE_ADDRESSES_PERMISSION_ID = ethers.utils.id(
   'UPDATE_ADDRESSES_PERMISSION'
@@ -64,7 +59,7 @@ describe('AddresslistVotingSetup', function () {
     implementationAddress =
       await addresslistVotingSetup.getImplementationAddress();
 
-    defaultData = abiCoder.encode(prepareInstallationDataTypes, [
+    defaultData = abiCoder.encode(metadata.pluginSetupABI.prepareInstallation, [
       Object.values(defaultVotingSettings),
       defaultMembers,
     ]);

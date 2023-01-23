@@ -30,7 +30,10 @@ describe('AdminSetup', function () {
     ownerAddress = await signers[0].getAddress();
     targetDao = await deployNewDAO(ownerAddress);
 
-    minimum_data = abiCoder.encode(['address'], [ownerAddress]);
+    minimum_data = abiCoder.encode(
+      metadata.pluginSetupABI.prepareInstallation,
+      [ownerAddress]
+    );
 
     const AdminSetup = await ethers.getContractFactory('AdminSetup');
     adminSetup = await AdminSetup.deploy();
@@ -71,7 +74,10 @@ describe('AdminSetup', function () {
     });
 
     it('reverts if encoded address in `_data` is zero', async () => {
-      const dataWithAddressZero = abiCoder.encode(['address'], [AddressZero]);
+      const dataWithAddressZero = abiCoder.encode(
+        metadata.pluginSetupABI.prepareInstallation,
+        [AddressZero]
+      );
 
       await expect(
         adminSetup.prepareInstallation(targetDao.address, dataWithAddressZero)

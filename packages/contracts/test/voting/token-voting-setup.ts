@@ -24,11 +24,8 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
 
-const prepareInstallationDataTypes = [
-  'tuple(uint8,uint64,uint64,uint64,uint256)',
-  'tuple(address,string,string)',
-  'tuple(address[],uint256[])',
-];
+const prepareInstallationDataTypes =
+  metadata.pluginSetupABI.prepareInstallation;
 
 const tokenName = 'name';
 const tokenSymbol = 'symbol';
