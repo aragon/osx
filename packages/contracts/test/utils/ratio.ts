@@ -7,11 +7,9 @@ import {pctToRatio, RATIO_BASE} from '../test-utils/voting';
 describe('Ratio', function () {
   let ratio: RatioTest;
 
-  before(async () => {
-    beforeEach(async () => {
-      const RatioTest = await ethers.getContractFactory('RatioTest');
-      ratio = await RatioTest.deploy();
-    });
+  beforeEach(async () => {
+    const RatioTest = await ethers.getContractFactory('RatioTest');
+    ratio = await RatioTest.deploy();
   });
 
   beforeEach(async () => {});
