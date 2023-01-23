@@ -7,12 +7,10 @@ import {pctToRatio, RATIO_BASE} from '../test-utils/voting';
 describe('Ratio', function () {
   let ratio: RatioTest;
 
-  beforeEach(async () => {
+  before(async () => {
     const RatioTest = await ethers.getContractFactory('RatioTest');
     ratio = await RatioTest.deploy();
   });
-
-  beforeEach(async () => {});
 
   describe('RATIO_BASE', async () => {
     it('is 10^6', async () => {
