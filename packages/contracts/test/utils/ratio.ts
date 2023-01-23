@@ -43,7 +43,7 @@ describe('Ratio', function () {
         .not.be.reverted;
     });
 
-    it('does not ceil for division without reminder', async () => {
+    it('does not ceil for division without remainder', async () => {
       expect(await ratio.applyRatioCeiled(32, pctToRatio(50))).to.eq(16);
     });
 
