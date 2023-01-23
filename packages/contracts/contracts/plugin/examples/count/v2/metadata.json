@@ -4,7 +4,8 @@
   "pluginSetupABI": {
     "prepareInstallation": [
       "address multiplyHelper",
-      "uint num, uint newVariable"
+      "uint num",
+      "uint newVariable"
     ],
     "prepareUpdate": ["uint _newVariable"],
     "prepareUninstallation": [""]
