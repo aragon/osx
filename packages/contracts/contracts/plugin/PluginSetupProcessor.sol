@@ -35,12 +35,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Used when there's UI update only which gets stored for the setupId generation.
     /// @dev keccak256(abi.encode([]))
-    bytes32 private constant EMPTY_ARRAY_ENCODED_HASH =
+    bytes32 private constant EMPTY_ARRAY_HASH =
         0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd;
+
+    /// @notice Used to show that the value is NULL
+    /// @dev keccak256(abi.encode(bytes32(0))
+    bytes32 private constant ZERO_BYTES_HASH =
+        0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563;
 
     /// @notice The plugin state struct that contains the information related to the installed plugin.
     /// @param blockNumber The block number at which the `applyInstallation`, `applyUpdate` or `applyUninstallation` occured for the plugin.
-    /// @param currentSetupId The current setup id that plugin holds. Needed to confirm that `prepareUpdate` or `prepareUninstallation` happens for the plugin's current/valid dependencies. 
+    /// @param currentSetupId The current setup id that plugin holds. Needed to confirm that `prepareUpdate` or `prepareUninstallation` happens for the plugin's current/valid dependencies.
     /// @param setupIds The block number at which `prepareInstallation`, `prepareUpdate` or `prepareUninstallation` occured for the derived setupId.
     struct PluginState {
         uint256 blockNumber;
@@ -56,7 +61,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
     /// @param data The encoded data containing the input parameters for the installation as specified by the developer in the JSON.
     struct PrepareInstallationParams {
-        PluginSetupRef pluginSetupRef; 
+        PluginSetupRef pluginSetupRef;
         bytes data;
     }
 
@@ -101,11 +106,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice The struct containing the parameters for the `prepareUninstallation` function.
     /// @param pluginSetupRef The PluginSetupRepo address + the current version of the plugin at which time it's getting uninstalled.
     /// @param setupPayload see IPluginSetup.SetupPayload
-    /// @param permissionsHash The abi encoded hash of the permissions that were derived at the last `applyUpdate` or if no update happened, at the applyInstall time. This helps to derive setupId.
     struct PrepareUninstallationParams {
         PluginSetupRef pluginSetupRef;
         IPluginSetup.SetupPayload setupPayload;
-        bytes32 permissionsHash;
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
@@ -266,10 +269,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _params The struct containing the parameters for the `prepareInstallation` function.
     /// @return plugin The prepared plugin contract address.
     /// @return preparedDependency TOD:GIORGI
-    function prepareInstallation(address _dao, PrepareInstallationParams calldata _params)
-        external
-        returns (address plugin, IPluginSetup.PreparedDependency memory preparedDependency)
-    {
+    function prepareInstallation(
+        address _dao,
+        PrepareInstallationParams calldata _params
+    ) external returns (address plugin, IPluginSetup.PreparedDependency memory preparedDependency) {
         PluginRepo pluginSetupRepo = _params.pluginSetupRef.pluginSetupRepo;
 
         // Check that the plugin repository exists on the plugin repo registry.
@@ -309,6 +312,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // Only allow to prepare if setupId has not been prepared before.
         // NOTE that if plugin was uninstalled, the same setupId can still
         // be prepared as blockNumber would end up being higher than setupId's blockNumber.
+        // This case applies to stateful plugins which means pluginSetup always returns the same plugin address.
+        // Though, the same setupId still would need to be prepared (see validateSetupId in `applyInstallation`) first
+        // to make sure prepare event is thrown again.
         if (pluginState.blockNumber < pluginState.setupIds[setupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
@@ -332,10 +338,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Applies the permissions of a prepared installation to a DAO.
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `applyInstallation` function.
-    function applyInstallation(address _dao, ApplyInstallationParams calldata _params)
-        external
-        canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID)
-    {
+    function applyInstallation(
+        address _dao,
+        ApplyInstallationParams calldata _params
+    ) external canApply(_dao, APPLY_INSTALLATION_PERMISSION_ID) {
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
         PluginState storage pluginState = states[pluginInstallationId];
@@ -358,7 +364,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
-            bytes32(0),
+            ZERO_BYTES_HASH,
             _params.helpersHash,
             bytes(""),
             PreparationType.None
@@ -373,7 +379,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
-        emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
+        emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: newSetupId});
     }
 
     /// @notice Prepares the update of an UUPS upgradeable plugin.
@@ -382,7 +388,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
     /// @return preparedDependency TOD:GIORGI
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
-    function prepareUpdate(address _dao, PrepareUpdateParams calldata _params)
+    function prepareUpdate(
+        address _dao,
+        PrepareUpdateParams calldata _params
+    )
         external
         returns (bytes memory initData, IPluginSetup.PreparedDependency memory preparedDependency)
     {
@@ -404,7 +413,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             PluginSetupRef(_params.currentVersionTag, _params.pluginSetupRepo),
-            bytes32(0),
+            ZERO_BYTES_HASH,
             currentHelpersHash,
             bytes(""),
             PreparationType.None
@@ -433,7 +442,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         if (currentVersion.pluginSetup == newVersion.pluginSetup) {
             newSetupId = _getSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
-                EMPTY_ARRAY_ENCODED_HASH,
+                EMPTY_ARRAY_HASH,
                 currentHelpersHash,
                 bytes(""),
                 PreparationType.Update
@@ -481,10 +490,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
     /// @param _dao The address of the updating DAO.
     /// @param _params The struct containing the parameters for the `applyInstallation` function.
-    function applyUpdate(address _dao, ApplyUpdateParams calldata _params)
-        external
-        canApply(_dao, APPLY_UPDATE_PERMISSION_ID)
-    {
+    function applyUpdate(
+        address _dao,
+        ApplyUpdateParams calldata _params
+    ) external canApply(_dao, APPLY_UPDATE_PERMISSION_ID) {
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
         PluginState storage pluginState = states[pluginInstallationId];
@@ -505,7 +514,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // prepareUpdate/prepareUninstallation.
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
-            bytes32(0),
+            ZERO_BYTES_HASH,
             _params.helpersHash,
             bytes(""),
             PreparationType.None
@@ -540,17 +549,17 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for
-    function prepareUninstallation(address _dao, PrepareUninstallationParams calldata _params)
-        external
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        PrepareUninstallationParams calldata _params
+    ) external returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.setupPayload.plugin);
 
         PluginState storage pluginState = states[pluginInstallationId];
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            bytes32(0),
+            ZERO_BYTES_HASH,
             hashHelpers(_params.setupPayload.currentHelpers),
             bytes(""),
             PreparationType.None
@@ -572,7 +581,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             hashPermissions(permissions),
-            bytes32(0),
+            ZERO_BYTES_HASH,
             bytes(""),
             PreparationType.Uninstall
         );
@@ -602,10 +611,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `applyUninstallation` function.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
-    function applyUninstallation(address _dao, ApplyUninstallationParams calldata _params)
-        external
-        canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID)
-    {
+    function applyUninstallation(
+        address _dao,
+        ApplyUninstallationParams calldata _params
+    ) external canApply(_dao, APPLY_UNINSTALLATION_PERMISSION_ID) {
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, _params.plugin);
 
         PluginState storage pluginState = states[pluginInstallationId];
@@ -613,7 +622,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
             hashPermissions(_params.permissions),
-            bytes32(0),
+            ZERO_BYTES_HASH,
             bytes(""),
             PreparationType.Uninstall
         );
@@ -659,9 +668,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 PluginUUPSUpgradeable(_proxy).upgradeToAndCall(_implementation, _initData)
             {} catch Error(string memory reason) {
                 revert(reason);
-            } catch (
-                bytes memory /*lowLevelData*/
-            ) {
+            } catch (bytes memory /*lowLevelData*/) {
                 revert PluginProxyUpgradeFailed({
                     proxy: _proxy,
                     implementation: _implementation,
@@ -673,9 +680,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
                 string memory reason
             ) {
                 revert(reason);
-            } catch (
-                bytes memory /*lowLevelData*/
-            ) {
+            } catch (bytes memory /*lowLevelData*/) {
                 revert PluginProxyUpgradeFailed({
                     proxy: _proxy,
                     implementation: _implementation,
