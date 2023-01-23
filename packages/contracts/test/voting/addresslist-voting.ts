@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO} from '../../typechain';
+import {AddresslistVoting, DAO} from '../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
@@ -28,7 +28,7 @@ import {OZ_ERRORS} from '../test-utils/error';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
-  let voting: any;
+  let voting: AddresslistVoting;
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -81,7 +81,7 @@ describe('AddresslistVoting', function () {
       addresslistVotingFactoryBytecode,
       signers[0]
     );
-    voting = await AddresslistVotingFactory.deploy();
+    voting = (await AddresslistVotingFactory.deploy()) as AddresslistVoting;
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -287,6 +287,7 @@ describe('AddresslistVoting', function () {
           await voting.createProposal(
             dummyMetadata,
             dummyActions,
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -312,6 +313,7 @@ describe('AddresslistVoting', function () {
           await voting.createProposal(
             dummyMetadata,
             dummyActions,
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -1261,6 +1263,7 @@ describe('AddresslistVoting', function () {
         await voting.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           0,
           0,
           VoteOption.None,
