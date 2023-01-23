@@ -216,7 +216,7 @@ describe('Multisig', function () {
   });
 
   describe('addAddresses:', async () => {
-    it('should add new members to the address list and emit the `MembersAnnounced` event', async () => {
+    it('should add new members to the address list and emit the `MembersAdded` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -238,7 +238,7 @@ describe('Multisig', function () {
   });
 
   describe('removeAddresses:', async () => {
-    it('should remove users from the address list and emit the `MembersRenounced` event', async () => {
+    it('should remove users from the address list and emit the `MembersRemoved` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -676,7 +676,7 @@ describe('Multisig', function () {
       });
 
       it('reverts if minimal approval is not met yet', async () => {
-        const proposal = await multisig.getProposal(id)
+        const proposal = await multisig.getProposal(id);
         expect(proposal.approvals).to.eq(0);
         await expect(multisig.execute(id))
           .to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden')

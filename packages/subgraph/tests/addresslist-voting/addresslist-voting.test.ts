@@ -2,10 +2,10 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
-  handleMembersAnnounced,
+  handleMembersAdded,
   handleVoteCast,
   handleProposalExecuted,
-  handleMembersRenounced,
+  handleMembersRemoved,
   handleVotingSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/addresslist/addresslist-voting';
@@ -34,10 +34,10 @@ import {
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
-  createNewMembersAnnouncedEvent,
+  createNewMembersAddedEvent,
   createNewVoteCastEvent,
   createNewProposalExecutedEvent,
-  createNewMembersRenouncedEvent,
+  createNewMembersRemovedEvent,
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall,
@@ -456,17 +456,17 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
   clearStore();
 });
 
-test('Run AddresslistVoting (handleMembersAnnounced) mappings with mock event', () => {
+test('Run AddresslistVoting (handleMembersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewMembersAnnouncedEvent(userArray, CONTRACT_ADDRESS);
+  let event = createNewMembersAddedEvent(userArray, CONTRACT_ADDRESS);
 
   // handle event
-  handleMembersAnnounced(event);
+  handleMembersAdded(event);
 
   // checks
 
@@ -492,7 +492,7 @@ test('Run AddresslistVoting (handleMembersAnnounced) mappings with mock event', 
   clearStore();
 });
 
-test('Run AddresslistVoting (MembersRenounced) mappings with mock event', () => {
+test('Run AddresslistVoting (MembersRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
@@ -522,13 +522,13 @@ test('Run AddresslistVoting (MembersRenounced) mappings with mock event', () => 
   assert.fieldEquals('AddresslistVotingVoter', memberId2, 'id', memberId2);
 
   // create event
-  let event = createNewMembersRenouncedEvent(
+  let event = createNewMembersRemovedEvent(
     [memberAddresses[1]],
     CONTRACT_ADDRESS
   );
 
   // handle event
-  handleMembersRenounced(event);
+  handleMembersRemoved(event);
 
   // checks
   assert.fieldEquals('AddresslistVotingVoter', memberId1, 'id', memberId1);

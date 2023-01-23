@@ -32,18 +32,14 @@ contract Admin is IMembership, PluginCloneable, Proposal {
 
         address[] memory members = new address[](1);
         members[0] = _admin;
-        emit MembersAnnounced({members: members});
+        emit MembersAdded({members: members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override returns (bool) {
-        return
-            interfaceId == ADMIN_INTERFACE_ID ||
-            PluginCloneable.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == ADMIN_INTERFACE_ID || PluginCloneable.supportsInterface(interfaceId);
     }
 
     /// @notice Creates and executes a new proposal.

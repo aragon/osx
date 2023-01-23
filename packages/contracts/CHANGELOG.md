@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAnnounced` and `MembersRenounced`.
+- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 - Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.

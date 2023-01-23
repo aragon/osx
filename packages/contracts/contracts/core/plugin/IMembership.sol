@@ -4,13 +4,13 @@ pragma solidity 0.8.10;
 
 import {IDAO} from "../IDAO.sol";
 
-/// @notice An interface to be used by DAO plugins that define membership by announcing and renouncing individual addresses.
+/// @notice An interface to be used by DAO plugins that define membership by adding and removing individual addresses.
 interface IMembership {
-    /// @notice Emitted to announce the membership of new members.
-    /// @param members The list of new members.
-    event MembersAnnounced(address[] members);
+    /// @notice Emitted when members are added to the DAO plugin.
+    /// @param members The list of new members being added.
+    event MembersAdded(address[] members);
 
-    /// @notice Emitted to renounce the membership of existing members.
-    /// @param members The list of existing members.
-    event MembersRenounced(address[] members);
+    /// @notice Emitted when members are removed from the DAO plugin.
+    /// @param members The list of existing members being removed.
+    event MembersRemoved(address[] members);
 }

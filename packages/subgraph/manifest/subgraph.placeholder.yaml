@@ -186,10 +186,10 @@ templates:
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
           handler: handleVotingSettingsUpdated
-        - event: MembersAnnounced(address[])
-          handler: handleMembersAnnounced
-        - event: MembersRenounced(address[])
-          handler: handleMembersRenounced
+        - event: MembersAdded(address[])
+          handler: handleMembersAdded
+        - event: MembersRemoved(address[])
+          handler: handleMembersRemoved
   # Multisig (package)
   - name: Multisig
     kind: ethereum/contract
@@ -207,10 +207,10 @@ templates:
         - name: Multisig
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
       eventHandlers:
-        - event: MembersAnnounced(address[])
-          handler: handleMembersAnnounced
-        - event: MembersRenounced(address[])
-          handler: handleMembersRenounced
+        - event: MembersAdded(address[])
+          handler: handleMembersAdded
+        - event: MembersRemoved(address[])
+          handler: handleMembersRemoved
         - event: Approved(indexed uint256,indexed address)
           handler: handleApproved
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])

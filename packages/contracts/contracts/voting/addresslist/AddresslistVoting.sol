@@ -44,7 +44,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
 
         _addAddresses(_members);
 
-        emit MembersAnnounced({members: _members});
+        emit MembersAdded({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -64,7 +64,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _addAddresses(_members);
 
-        emit MembersAnnounced({members: _members});
+        emit MembersAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
@@ -74,7 +74,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _removeAddresses(_members);
 
-        emit MembersRenounced({members: _members});
+        emit MembersRemoved({members: _members});
     }
 
     /// @inheritdoc MajorityVotingBase

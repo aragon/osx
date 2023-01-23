@@ -6,8 +6,8 @@ import {
   ProposalCreated,
   Approved,
   ProposalExecuted,
-  MembersAnnounced,
-  MembersRenounced,
+  MembersAdded,
+  MembersRemoved,
   MultisigSettingsUpdated
 } from '../../generated/templates/Multisig/Multisig';
 import {
@@ -125,42 +125,42 @@ export function createNewProposalExecutedEvent(
   return createProposalExecutedEvent;
 }
 
-export function createNewMembersAnnouncedEvent(
+export function createNewMembersAddedEvent(
   addresses: Address[],
   contractAddress: string
-): MembersAnnounced {
-  let newMembersAnnouncedEvent = changetype<MembersAnnounced>(newMockEvent());
+): MembersAdded {
+  let newMembersAddedEvent = changetype<MembersAdded>(newMockEvent());
 
-  newMembersAnnouncedEvent.address = Address.fromString(contractAddress);
-  newMembersAnnouncedEvent.parameters = [];
+  newMembersAddedEvent.address = Address.fromString(contractAddress);
+  newMembersAddedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newMembersAnnouncedEvent.parameters.push(usersParam);
+  newMembersAddedEvent.parameters.push(usersParam);
 
-  return newMembersAnnouncedEvent;
+  return newMembersAddedEvent;
 }
 
-export function createNewMembersRenouncedEvent(
+export function createNewMembersRemovedEvent(
   addresses: Address[],
   contractAddress: string
-): MembersRenounced {
-  let newMembersRenouncedEvent = changetype<MembersRenounced>(newMockEvent());
+): MembersRemoved {
+  let newMembersRemovedEvent = changetype<MembersRemoved>(newMockEvent());
 
-  newMembersRenouncedEvent.address = Address.fromString(contractAddress);
-  newMembersRenouncedEvent.parameters = [];
+  newMembersRemovedEvent.address = Address.fromString(contractAddress);
+  newMembersRemovedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newMembersRenouncedEvent.parameters.push(usersParam);
+  newMembersRemovedEvent.parameters.push(usersParam);
 
-  return newMembersRenouncedEvent;
+  return newMembersRemovedEvent;
 }
 
 export function createNewMultisigSettingsUpdatedEvent(

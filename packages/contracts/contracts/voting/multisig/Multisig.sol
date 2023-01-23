@@ -129,7 +129,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
         _updateMultisigSettings(_multisigSettings);
 
-        emit MembersAnnounced({members: _members});
+        emit MembersAdded({members: _members});
 
         emit MultisigSettingsUpdated({
             onlyListed: _multisigSettings.onlyListed,
@@ -140,14 +140,12 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(
-        bytes4 _interfaceId
-    ) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
-    
+
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
     function addAddresses(
@@ -165,7 +163,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
         _addAddresses(_members);
 
-        emit MembersAnnounced({members: _members});
+        emit MembersAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
@@ -185,7 +183,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
         _removeAddresses(_members);
 
-        emit MembersRenounced({members: _members});
+        emit MembersRemoved({members: _members});
     }
 
     /// @notice Updates the plugin settings.
