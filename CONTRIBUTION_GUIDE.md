@@ -107,7 +107,7 @@ For the frontends, we use [prettier](https://prettier.io/) and [eslint](https://
 
 For the contracts, we use [eth-lint](https://github.com/duaraghav8/Ethlint) and [prettier](https://prettier.io/) to automatically lint the project.
 
-For the SDK, we use [Deno's built-in formatter](https://deno.land/manual@v1.29.2/tools/formatter).
+For the SDK, we use [Prettier JS/TS formatter](https://prettier.io/docs/en/editors.html).
 
 Handy `npm` scripts (usually `npm run lint`) are provided at all levels to help automate these checks.
 
