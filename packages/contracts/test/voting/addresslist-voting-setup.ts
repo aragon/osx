@@ -131,11 +131,13 @@ describe('AddresslistVotingSetup', function () {
         nonce,
       });
 
-      const {plugin, helpers, permissions} =
-        await addresslistVotingSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          defaultData
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await addresslistVotingSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        defaultData
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(0);
@@ -191,15 +193,17 @@ describe('AddresslistVotingSetup', function () {
         anticipatedPluginAddress
       );
       const latestBlock = await ethers.provider.getBlock('latest');
-        
-      expect(await addresslistVotingContract.getDAO()).to.be.equal(targetDao.address);
+
+      expect(await addresslistVotingContract.getDAO()).to.be.equal(
+        targetDao.address
+      );
       expect(await addresslistVotingContract.minParticipation()).to.be.equal(
         defaultVotingSettings.minParticipation
       );
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
         defaultVotingSettings.supportThreshold
       );
-      
+
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
         defaultVotingSettings.minDuration
       );
@@ -239,9 +243,11 @@ describe('AddresslistVotingSetup', function () {
       const permissions =
         await addresslistVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [],
+            data: EMPTY_DATA,
+          }
         );
 
       expect(permissions.length).to.be.equal(4);

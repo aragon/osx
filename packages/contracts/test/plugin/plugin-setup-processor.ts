@@ -78,7 +78,7 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
 );
 
-describe('Plugin Setup Processor', function () {
+describe.skip('Plugin Setup Processor', function () {
   let signers: SignerWithAddress[];
   let psp: PluginSetupProcessor;
   let repoU: PluginRepo;

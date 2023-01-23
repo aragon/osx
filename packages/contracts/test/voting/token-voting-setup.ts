@@ -6,7 +6,6 @@ import {ERC20, TokenVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import {deployWithProxy} from '../test-utils/proxy';
 
 import {
   VotingSettings,
@@ -189,7 +188,7 @@ describe('TokenVotingSetup', function () {
         Object.values(defaultMintSettings),
       ]);
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           data
@@ -285,7 +284,7 @@ describe('TokenVotingSetup', function () {
         Object.values(defaultMintSettings),
       ]);
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           data
@@ -334,7 +333,7 @@ describe('TokenVotingSetup', function () {
         nonce: nonce + 1,
       });
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           defaultData
@@ -451,9 +450,11 @@ describe('TokenVotingSetup', function () {
       await expect(
         tokenVotingSetup.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [],
+            data: EMPTY_DATA
+          }
         )
       )
         .to.be.revertedWithCustomError(
@@ -465,9 +466,11 @@ describe('TokenVotingSetup', function () {
       await expect(
         tokenVotingSetup.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [AddressZero, AddressZero, AddressZero],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [AddressZero, AddressZero, AddressZero],
+            data: EMPTY_DATA
+          }
         )
       )
         .to.be.revertedWithCustomError(
@@ -502,9 +505,11 @@ describe('TokenVotingSetup', function () {
       const permissions1 =
         await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [governanceWrappedERC20.address],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [governanceWrappedERC20.address],
+            data: EMPTY_DATA
+          }
         );
 
       const essentialPermissions = [
@@ -537,9 +542,11 @@ describe('TokenVotingSetup', function () {
       const permissions2 =
         await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [governanceERC20.address],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [governanceERC20.address],
+            data: EMPTY_DATA
+          }
         );
 
       expect(permissions2.length).to.be.equal(4);

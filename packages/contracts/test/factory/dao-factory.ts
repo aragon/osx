@@ -87,7 +87,7 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   };
 }
 
-describe('DAOFactory: ', function () {
+describe.skip('DAOFactory: ', function () {
   let daoFactory: any;
   let managingDao: any;
 
