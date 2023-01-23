@@ -181,6 +181,24 @@ describe('TokenVoting', function () {
     });
   });
 
+  describe('isMember: ', async () => {
+    it('returns true if the account currently owns at least one token', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await setBalances([
+        {receiver: signers[0].address, amount: 1},
+        {receiver: signers[1].address, amount: 0},
+      ]);
+
+      expect(await voting.isMember(signers[0].address)).to.be.true;
+      expect(await voting.isMember(signers[1].address)).to.be.false;
+    });
+  });
+
   describe('Proposal creation', async () => {
     beforeEach(async () => {
       await setBalances([{receiver: signers[0].address, amount: 1}]);
