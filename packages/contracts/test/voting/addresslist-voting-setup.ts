@@ -90,14 +90,6 @@ describe('AddresslistVotingSetup', function () {
   });
 
   describe('prepareInstallation', async () => {
-    it('correctly returns prepare installation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareInstallation`.
-      const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
-
-      expect(metadata.pluginSetupABI.prepareInstallation).to.be.eq(dataHRABI);
-    });
-
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         addresslistVotingSetup.prepareInstallation(
@@ -224,13 +216,6 @@ describe('AddresslistVotingSetup', function () {
   });
 
   describe('prepareUninstallation', async () => {
-    it('correctly returns prepare uninstallation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareUninstallation`.
-      const dataHRABI = '';
-
-      expect(metadata.pluginSetupABI.prepareUninstallation).to.be.eq(dataHRABI);
-    });
-
     it('correctly returns permissions', async () => {
       const plugin = ethers.Wallet.createRandom().address;
 

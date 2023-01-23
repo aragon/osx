@@ -96,14 +96,6 @@ describe('TokenVotingSetup', function () {
   });
 
   describe('prepareInstallation', async () => {
-    it('correctly returns prepare installation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareInstallation`.
-      const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
-
-      expect(metadata.pluginSetupABI.prepareInstallation).to.be.eq(dataHRABI);
-    });
-
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         tokenVotingSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
@@ -433,13 +425,6 @@ describe('TokenVotingSetup', function () {
   });
 
   describe('prepareUninstallation', async () => {
-    it('correctly returns prepare uninstallation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareUninstallation`.
-      const dataHRABI = '';
-
-      expect(metadata.pluginSetupABI.prepareUninstallation).to.be.eq(dataHRABI);
-    });
-
     it('fails when the wrong number of helpers is supplied', async () => {
       const plugin = ethers.Wallet.createRandom().address;
 

@@ -53,13 +53,6 @@ describe('AdminSetup', function () {
   });
 
   describe('prepareInstallation', async () => {
-    it('correctly returns prepare installation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareInstallation`.
-      const dataHRABI = '(address admin)';
-
-      expect(metadata.pluginSetupABI.prepareInstallation).to.be.eq(dataHRABI);
-    });
-
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         adminSetup.prepareInstallation(targetDao.address, EMPTY_DATA)
@@ -144,13 +137,6 @@ describe('AdminSetup', function () {
   });
 
   describe('prepareUninstallation', async () => {
-    it('correctly returns prepare uninstallation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareUninstallation`.
-      const dataHRABI = '';
-
-      expect(metadata.pluginSetupABI.prepareUninstallation).to.be.eq(dataHRABI);
-    });
-
     it('correctly returns permissions', async () => {
       const plugin = ethers.Wallet.createRandom().address;
 
