@@ -16,11 +16,12 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   let pluginEntity = new Plugin(pluginId);
   pluginEntity.sender = event.params.sender.toHexString();
   pluginEntity.dao = event.params.dao.toHexString();
-  pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
+  // TODO: SARKAWT
+  // pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
   pluginEntity.data = event.params.data;
   pluginEntity.state = 'InstallationPrepared';
 
-  handleHelperIds(event.params.helpers, pluginId);
+  handleHelperIds(event.params.preparedDependency.helpers, pluginId);
   pluginEntity.save();
 }
 
@@ -43,18 +44,20 @@ export function handleInstallationApplied(event: InstallationApplied): void {
 }
 
 export function handleUpdatePrepared(event: UpdatePrepared): void {
-  let pluginId = event.params.plugin.toHexString();
+  // TODO: SARKAWT
+  let pluginId = event.params.setupPayload.plugin.toHexString();
 
   let pluginEntity = Plugin.load(pluginId);
   if (pluginEntity) {
     pluginEntity.sender = event.params.sender.toHexString();
     pluginEntity.dao = event.params.dao.toHexString();
-    pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
-    pluginEntity.data = event.params.data;
+    // TODO: SARKAWT
+    // pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
+    pluginEntity.data = event.params.setupPayload.data;
     pluginEntity.state = 'UpdatePrepared';
     pluginEntity.save();
 
-    handleHelperIds(event.params.updatedHelpers, pluginId);
+    handleHelperIds(event.params.preparedDependency.helpers, pluginId);
   } else {
     log.warning(
       'UpdatePrepared event happened without being installed, for DAO: {}, plugin: {}',
@@ -81,18 +84,19 @@ export function handleUpdateApplied(event: UpdateApplied): void {
 export function handleUninstallationPrepared(
   event: UninstallationPrepared
 ): void {
-  let pluginId = event.params.plugin.toHexString();
+  let pluginId = event.params.setupPayload.plugin.toHexString();
 
   let pluginEntity = Plugin.load(pluginId);
   if (pluginEntity) {
     pluginEntity.sender = event.params.sender.toHexString();
     pluginEntity.dao = event.params.dao.toHexString();
-    pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
-    pluginEntity.data = event.params.data;
+    // TODO: SARKAWT
+    // pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
+    pluginEntity.data = event.params.setupPayload.data;
     pluginEntity.state = 'UninstallPrepared';
     pluginEntity.save();
 
-    handleHelperIds(event.params.currentHelpers, pluginId);
+    handleHelperIds(event.params.setupPayload.currentHelpers, pluginId);
   } else {
     log.warning(
       'UninstallationPrepared event happened without being installed, for DAO: {}, plugin: {}',
