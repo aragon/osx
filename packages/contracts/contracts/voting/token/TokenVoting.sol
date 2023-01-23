@@ -116,7 +116,7 @@ contract TokenVoting is IMembershipContract, MajorityVotingBase {
     /// @inheritdoc IMembershipContract
     function isMember(address _account) external view returns (bool) {
         /// whatever condition
-        return votingToken.getVotes(_account) >= getVotingSettings().minProposerVotingPower; //
+        return votingToken.getVotes(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase
