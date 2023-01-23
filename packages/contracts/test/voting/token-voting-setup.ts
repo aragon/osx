@@ -101,7 +101,7 @@ describe('TokenVotingSetup', function () {
       const dataHRABI =
         '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
-      expect(metadata.setupABIs.prepareInstallationDataABI).to.be.eq(dataHRABI);
+      expect(metadata.pluginSetupABI.prepareInstallation).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
@@ -437,9 +437,7 @@ describe('TokenVotingSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(metadata.setupABIs.prepareUninstallationDataABI).to.be.eq(
-        dataHRABI
-      );
+      expect(metadata.pluginSetupABI.prepareUninstallation).to.be.eq(dataHRABI);
     });
 
     it('fails when the wrong number of helpers is supplied', async () => {

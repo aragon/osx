@@ -57,7 +57,7 @@ describe('AdminSetup', function () {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI = '(address admin)';
 
-      expect(metadata.setupABIs.prepareInstallationDataABI).to.be.eq(dataHRABI);
+      expect(metadata.pluginSetupABI.prepareInstallation).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
@@ -148,9 +148,7 @@ describe('AdminSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(metadata.setupABIs.prepareUninstallationDataABI).to.be.eq(
-        dataHRABI
-      );
+      expect(metadata.pluginSetupABI.prepareUninstallation).to.be.eq(dataHRABI);
     });
 
     it('correctly returns permissions', async () => {

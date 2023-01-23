@@ -4,10 +4,10 @@ pragma solidity 0.8.10;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {IPluginSetup} from "../../IPluginSetup.sol";
-import {PluginSetup} from "../../PluginSetup.sol";
-import {MultiplyHelper} from "./MultiplyHelper.sol";
+import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
+import {IPluginSetup} from "../../../IPluginSetup.sol";
+import {PluginSetup} from "../../../PluginSetup.sol";
+import {MultiplyHelper} from "../MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
 /// @title CounterV1PluginSetup

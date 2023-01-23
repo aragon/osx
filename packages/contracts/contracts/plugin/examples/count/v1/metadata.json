@@ -2,7 +2,7 @@
   "ui": "",
   "change": "",
   "pluginSetupABI": {
-    "prepareInstallation": "(address admin)",
+    "prepareInstallation": "(address multiplyHelper, uint num)",
     "prepareUpdate": "",
     "prepareUninstallation": ""
   }

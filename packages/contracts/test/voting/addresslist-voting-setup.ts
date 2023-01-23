@@ -95,7 +95,7 @@ describe('AddresslistVotingSetup', function () {
       const dataHRABI =
         '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
 
-      expect(metadata.setupABIs.prepareInstallationDataABI).to.be.eq(dataHRABI);
+      expect(metadata.pluginSetupABI.prepareInstallation).to.be.eq(dataHRABI);
     });
 
     it('fails if data is empty, or not of minimum length', async () => {
@@ -228,9 +228,7 @@ describe('AddresslistVotingSetup', function () {
       // Human-Readable Abi of data param of `prepareUninstallation`.
       const dataHRABI = '';
 
-      expect(metadata.setupABIs.prepareUninstallationDataABI).to.be.eq(
-        dataHRABI
-      );
+      expect(metadata.pluginSetupABI.prepareUninstallation).to.be.eq(dataHRABI);
     });
 
     it('correctly returns permissions', async () => {

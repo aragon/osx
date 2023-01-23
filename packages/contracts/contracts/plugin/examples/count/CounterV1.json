@@ -1,7 +1,0 @@
-{
-  "setupABIs": {
-    "prepareInstallationDataABI": "(address multiplyHelper, uint num)",
-    "prepareUpdateDataABI": "",
-    "prepareUninstallationDataABI": ""
-  }
-}

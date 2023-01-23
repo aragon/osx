@@ -32,7 +32,7 @@ contract DAOFactory {
     struct PluginSettings {
         address pluginSetup; // The `PluginSetup` address of the plugin.
         PluginRepo pluginSetupRepo; // The `PluginRepo` of the plugin.
-        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
+        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -51,10 +51,10 @@ contract DAOFactory {
     /// @notice Creates a new DAO and setup a number of plugins.
     /// @param _daoSettings The DAO settings containing `trustedForwarder`, `name` and `metadata`.
     /// @param _pluginSettings The list of plugin settings that will be installed after the DAO creation, containing `pluginSetup`, `pluginSetupRepo`, and `data`.
-    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata _pluginSettings)
-        external
-        returns (DAO createdDao)
-    {
+    function createDao(
+        DAOSettings calldata _daoSettings,
+        PluginSettings[] calldata _pluginSettings
+    ) external returns (DAO createdDao) {
         // Check if no plugin is provided.
         if (_pluginSettings.length == 0) {
             revert NoPluginProvided();
@@ -135,7 +135,12 @@ contract DAOFactory {
         dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
-        dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder, _daoSettings.daoURI);
+        dao.initialize(
+            _daoSettings.metadata,
+            address(this),
+            _daoSettings.trustedForwarder,
+            _daoSettings.daoURI
+        );
     }
 
     /// @notice Sets the required permissions for the new DAO.

@@ -1,7 +1,9 @@
 {
-  "setupABIs": {
-    "prepareInstallationDataABI": "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)",
-    "prepareUpdateDataABI": "",
-    "prepareUninstallationDataABI": ""
+  "ui": "",
+  "change": "",
+  "pluginSetupABI": {
+    "prepareInstallation": "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)",
+    "prepareUpdate": "",
+    "prepareUninstallation": ""
   }
 }
