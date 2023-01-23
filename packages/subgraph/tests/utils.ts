@@ -57,7 +57,7 @@ export function createGetProposalCall(
 
   votingMode: string,
   supportThreshold: string,
-  minParticipation: string,
+  minVotingPower: string,
   startDate: string,
   endDate: string,
   snapshotBlock: string,
@@ -78,9 +78,6 @@ export function createGetProposalCall(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(supportThreshold))
   );
   parameters.push(
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(minParticipation))
-  );
-  parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(startDate))
   );
   parameters.push(
@@ -88,6 +85,9 @@ export function createGetProposalCall(
   );
   parameters.push(
     ethereum.Value.fromUnsignedBigInt(BigInt.fromString(snapshotBlock))
+  );
+  parameters.push(
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(minVotingPower))
   );
 
   let tally = new ethereum.Tuple();
@@ -102,7 +102,7 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(uint8,uint64,uint64,uint64,uint64,uint64),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,bool,(uint8,uint32,uint64,uint64,uint64,uint256),(uint256,uint256,uint256,uint256),(address,uint256,bytes)[])'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))

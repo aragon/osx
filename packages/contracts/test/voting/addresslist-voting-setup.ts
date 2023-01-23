@@ -9,7 +9,7 @@ import {Operation} from '../core/permission/permission-manager';
 import {
   VotingSettings,
   VotingMode,
-  pct16,
+  pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
 
@@ -48,8 +48,8 @@ describe('AddresslistVotingSetup', function () {
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -80,7 +80,7 @@ describe('AddresslistVotingSetup', function () {
       'function isListedAtBlock(address,uint256) returns (bool)',
       'function addresslistLength() returns (uint256)',
       'function addresslistLengthAtBlock(uint256) returns (uint256)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256),address[])',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256),address[])',
     ]);
 
     expect(
@@ -92,7 +92,7 @@ describe('AddresslistVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
+        '(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
 
       expect(
         await addresslistVotingSetup.prepareInstallationDataABI()

@@ -287,11 +287,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    function _revoke(
-        address _where,
-        address _who,
-        bytes32 _permissionId
-    ) internal {
+    function _revoke(address _where, address _who, bytes32 _permissionId) internal {
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
         if (permissionsHashed[permHash] != UNSET_FLAG) {
             permissionsHashed[permHash] = UNSET_FLAG;
@@ -362,12 +358,9 @@ contract PermissionManager is Initializable {
     /// @dev by default, every permission is unrestricted and it's the derived contract's responsibility to override it. NOTE: ROOT_PERMISSION_ID is included and not required to set it again.
     /// @param _permissionId The permission identifier.
     /// @return bool Whether ot not permissionId is restricted.
-    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
-        internal
-        view
-        virtual
-        returns (bool)
-    {
+    function isPermissionRestrictedForAnyAddr(
+        bytes32 _permissionId
+    ) internal view virtual returns (bool) {
         (_permissionId); // silence the warning.
         return false;
     }
