@@ -16,11 +16,6 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    // function prepareInstallationDataABI() external view virtual override returns (string memory) {
-    //     return "";
-    // }
-
-    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
@@ -38,11 +33,6 @@ contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
         helpers = mockHelpers(1);
         permissions = mockPermissions(0, 1, PermissionLib.Operation.Grant);
     }
-
-    /// @inheritdoc IPluginSetup
-    // function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-    //     return "";
-    // }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(

@@ -16,11 +16,6 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    // function prepareInstallationDataABI() external view virtual override returns (string memory) {
-    //     return "";
-    // }
-
-    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
@@ -38,11 +33,6 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
         helpers = mockHelpers(1);
         permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
     }
-
-    /// @inheritdoc IPluginSetup
-    // function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-    //     return "";
-    // }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
@@ -67,11 +57,6 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    // function prepareInstallationDataABI() external view virtual override returns (string memory) {
-    //     return "";
-    // }
-
-    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory
@@ -89,11 +74,6 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
         helpers = mockHelpers(1);
         permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
     }
-
-    /// @inheritdoc IPluginSetup
-    // function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-    //     return "";
-    // }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
