@@ -45,7 +45,7 @@ describe('Ratio', function () {
       expect(await ratio.applyRatioCeiled(32, pctToRatio(50))).to.eq(16);
     });
 
-    it('ceils for division with reminder', async () => {
+    it('ceils for division with remainder', async () => {
       expect(await ratio.applyRatioCeiled(33, pctToRatio(50))).to.eq(17);
     });
   });
@@ -69,11 +69,11 @@ describe('Ratio', function () {
         .not.be.reverted;
     });
 
-    it('does not floor for division without reminder', async () => {
+    it('does not floor for division without remainder', async () => {
       expect(await ratio.applyRatioFloored(32, pctToRatio(50))).to.eq(16);
     });
 
-    it('floors for division with reminder', async () => {
+    it('floors for division with remainder', async () => {
       expect(await ratio.applyRatioFloored(33, pctToRatio(50))).to.eq(16);
     });
   });
