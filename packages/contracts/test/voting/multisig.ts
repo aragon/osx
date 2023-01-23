@@ -330,7 +330,7 @@ describe('Multisig', function () {
       );
       await ethers.provider.send('evm_mine', []);
 
-      let proposalId0 = await multisig.callStatic.createProposal(
+      const proposalId0 = await multisig.callStatic.createProposal(
         dummyMetadata,
         dummyActions,
         false,
@@ -350,7 +350,7 @@ describe('Multisig', function () {
         )
       ).to.not.be.reverted;
 
-      let proposalId1 = await multisig.callStatic.createProposal(
+      const proposalId1 = await multisig.callStatic.createProposal(
         dummyMetadata,
         dummyActions,
         false,
@@ -372,8 +372,8 @@ describe('Multisig', function () {
         multisigSettings
       );
 
-      let startDate = await timestampIn(1000);
-      let endDate = await timestampIn(5000);
+      const startDate = await timestampIn(1000);
+      const endDate = await timestampIn(5000);
       await expect(
         multisig
           .connect(signers[0])
@@ -402,8 +402,8 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal when unlisted accounts are allowed', async () => {
-        let startDate = await timestampIn(1000);
-        let endDate = await timestampIn(5000);
+        const startDate = await timestampIn(1000);
+        const endDate = await timestampIn(5000);
 
         await expect(
           multisig
@@ -464,8 +464,8 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and does not approve if not specified', async () => {
-        let startDate = await timestampIn(1000);
-        let endDate = await timestampIn(5000);
+        const startDate = await timestampIn(1000);
+        const endDate = await timestampIn(5000);
 
         await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
 
@@ -507,8 +507,8 @@ describe('Multisig', function () {
       });
 
       it('creates a proposal successfully and approves if specified', async () => {
-        let startDate = await timestampIn(3000);
-        let endDate = await timestampIn(5000);
+        const startDate = await timestampIn(3000);
+        const endDate = await timestampIn(5000);
 
         await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
 
@@ -676,7 +676,8 @@ describe('Multisig', function () {
       });
 
       it('reverts if minimal approval is not met yet', async () => {
-        expect(await multisig.approvals(id)).to.eq(0);
+        const proposal = await multisig.getProposal(id)
+        expect(proposal.approvals).to.eq(0);
         await expect(multisig.execute(id))
           .to.be.revertedWithCustomError(multisig, 'ProposalExecutionForbidden')
           .withArgs(id);
@@ -685,7 +686,7 @@ describe('Multisig', function () {
       it('approves with the msg.sender address', async () => {
         expect((await multisig.getProposal(id)).approvals).to.equal(0);
 
-        let tx = await multisig.connect(signers[0]).approve(id, false);
+        const tx = await multisig.connect(signers[0]).approve(id, false);
 
         const event = await findEvent(tx, 'Approved');
         expect(event.args.proposalId).to.eq(id);
@@ -740,9 +741,8 @@ describe('Multisig', function () {
 
     describe('canExecute:', async () => {
       it('returns `false` if the proposal has not reached the minimum approval yet', async () => {
-        expect(await multisig.approvals(id)).to.be.lt(
-          (await multisig.getProposal(id)).parameters.minApprovals
-        );
+        const proposal = await multisig.getProposal(id);
+        expect(proposal.approvals).to.be.lt(proposal.parameters.minApprovals);
 
         expect(await multisig.canExecute(id)).to.be.false;
       });
@@ -823,9 +823,7 @@ describe('Multisig', function () {
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
-        expect(await multisig.approvals(id)).to.be.eq(
-          multisigSettings.minApprovals
-        );
+        expect(proposal.approvals).to.be.eq(multisigSettings.minApprovals);
 
         expect(await multisig.canExecute(id)).to.be.true;
         await expect(multisig.execute(id)).to.not.be.reverted;
@@ -839,9 +837,7 @@ describe('Multisig', function () {
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
-        expect(await multisig.approvals(id)).to.be.eq(
-          multisigSettings.minApprovals
-        );
+        expect(proposal.approvals).to.be.eq(multisigSettings.minApprovals);
 
         expect(await multisig.canExecute(id)).to.be.true;
         expect(await multisig.isListed(signers[9].address)).to.be.false; // signers[9] is not listed

@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
-import {Proposal, ProposalBase} from "../../core/plugin/Proposal.sol";
+import {Proposal} from "../../core/plugin/Proposal.sol";
 import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
@@ -40,10 +40,9 @@ contract Admin is IMembership, PluginCloneable, Proposal {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(PluginCloneable, ProposalBase) returns (bool) {
+    ) public view override returns (bool) {
         return
             interfaceId == ADMIN_INTERFACE_ID ||
-            ProposalBase.supportsInterface(interfaceId) ||
             PluginCloneable.supportsInterface(interfaceId);
     }
 

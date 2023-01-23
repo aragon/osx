@@ -15,8 +15,8 @@ contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
     Multisig private immutable multisigBase;
 
-    /// @notice The address zero to be used as oracle address for permissions.
-    address private constant NO_ORACLE = address(0);
+    /// @notice The address zero to be used as condition address for permissions.
+    address private constant NO_CONDITION = address(0);
 
     /// @notice The contract constructor, that deployes the `Multisig` plugin logic contract.
     constructor() {
@@ -34,7 +34,7 @@ contract MultisigSetup is PluginSetup {
         returns (
             address plugin,
             address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
+            PermissionLib.MultiTargetPermission[] memory permissions
         )
     {
         IDAO dao = IDAO(_dao);
@@ -60,32 +60,32 @@ contract MultisigSetup is PluginSetup {
         (helpers); // silence the warning.
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](3);
+        permissions = new PermissionLib.MultiTargetPermission[](3);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
@@ -101,32 +101,32 @@ contract MultisigSetup is PluginSetup {
         address _plugin,
         address[] calldata,
         bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](3);
+        permissions = new PermissionLib.MultiTargetPermission[](3);
 
         // Set permissions to be Revoked.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
             _plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }

@@ -6,7 +6,7 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
 import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
+import {ProposalUpgradeable} from "../../core/plugin/ProposalUpgradeable.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
@@ -142,20 +142,12 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 _interfaceId
-    ) public view virtual override(PluginUUPSUpgradeable, ProposalBase) returns (bool) {
+    ) public view virtual override returns (bool) {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
-            ProposalBase.supportsInterface(_interfaceId) ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
     }
-
-    /// @notice Returns the number of approvals,
-    /// @param _proposalId The ID of the proposal.
-    /// @return The number of approvals.
-    function approvals(uint256 _proposalId) public view returns (uint16) {
-        return proposals[_proposalId].approvals;
-    }
-
+    
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
     function addAddresses(

@@ -3,7 +3,7 @@
 // Core contracts
 import * as PermissionManager from '../artifacts/contracts/core/permission/PermissionManager.sol/PermissionManager.json';
 import * as PermissionLib from '../artifacts/contracts/core/permission/PermissionLib.sol/PermissionLib.json';
-import * as IPermissionOracle from '../artifacts/contracts/core/permission/IPermissionOracle.sol/IPermissionOracle.json';
+import * as IPermissionCondition from '../artifacts/contracts/core/permission/IPermissionCondition.sol/IPermissionCondition.json';
 import * as DAO from '../artifacts/contracts/core/DAO.sol/DAO.json';
 import * as IDAO from '../artifacts/contracts/core/IDAO.sol/IDAO.json';
 import * as DaoAuthorizable from '../artifacts/contracts/core/component/dao-authorizable/DaoAuthorizable.sol/DaoAuthorizable.json';
@@ -28,7 +28,7 @@ import * as MerkleMinter from '../artifacts/contracts/tokens/MerkleMinter.sol/Me
 export default {
   PermissionManager,
   PermissionLib,
-  IPermissionOracle,
+  IPermissionCondition,
   DAO,
   IDAO,
   DaoAuthorizable,

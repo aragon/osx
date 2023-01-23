@@ -3,14 +3,14 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./IPermissionOracle.sol";
+import "./IPermissionCondition.sol";
 import "./PermissionLib.sol";
 
 /// @title PermissionManager
 /// @author Aragon Association - 2021, 2022
 /// @notice The permission manager used in a DAO and its associated components.
 contract PermissionManager is Initializable {
-    /// @notice The ID of the permission required to call the `grant`, `grantWithOracle`, `revoke`, and `bulk` function.
+    /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.
     bytes32 public constant ROOT_PERMISSION_ID = keccak256("ROOT_PERMISSION");
 
     /// @notice A special address encoding permissions that are valid for any address.
@@ -22,7 +22,7 @@ contract PermissionManager is Initializable {
     /// @notice A special address encoding if a permission is allowed.
     address internal constant ALLOW_FLAG = address(2);
 
-    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionOracle`).
+    /// @notice A mapping storing permissions as hashes (i.e., `permissionHash(where, who, permissionId)`) and their status (unset, allowed, or redirect to a `PermissionCondition`).
     mapping(bytes32 => address) internal permissionsHashed;
 
     /// @notice Thrown if a call is unauthorized.
@@ -35,23 +35,23 @@ contract PermissionManager is Initializable {
     /// @notice Thrown if a Root permission is set on ANY_ADDR.
     error RootPermissionForAnyAddressDisallowed();
 
-    /// @notice Thrown if a permission has been already granted for different oracle.
-    /// @dev This makes sure that oracle on the same permission can not be overwriten by a different oracle.
+    /// @notice Thrown if a permission has been already granted with a different condition.
+    /// @dev This makes sure that condition on the same permission can not be overwriten by a different condition.
     /// @param where The address of the target contract to grant `who` permission to.
     /// @param who The address (EOA or contract) to which the permission has already been granted.
     /// @param permissionId The permission identifier.
-    /// @param currentOracle The current oracle set for permissionId
-    /// @param newOracle The new oracle it tries to set for permissionId
-    error PermissionAlreadyGrantedForDifferentOracle(
+    /// @param currentCondition The current condition set for permissionId
+    /// @param newCondition The new condition it tries to set for permissionId
+    error PermissionAlreadyGrantedForDifferentCondition(
         address where,
         address who,
         bytes32 permissionId,
-        address currentOracle,
-        address newOracle
+        address currentCondition,
+        address newCondition
     );
 
-    /// @notice thrown when WHO or WHERE is ANY_ADDR, but oracle is not present.
-    error OracleNotPresentForAnyAddress();
+    /// @notice thrown when WHO or WHERE is ANY_ADDR, but condition is not present.
+    error ConditionNotPresentForAnyAddress();
 
     /// @notice thrown when WHO or WHERE is ANY_ADDR and permissionId is ROOT/EXECUTE
     error PermissionsForAnyAddressDisallowed();
@@ -66,13 +66,13 @@ contract PermissionManager is Initializable {
     /// @param here The address of the context in which the permission is granted.
     /// @param where The address of the target contract for which `who` receives permission.
     /// @param who The address (EOA or contract) receiving the permission.
-    /// @param oracle The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionOracle` to be used.
+    /// @param condition The address `ALLOW_FLAG` for regular permissions or, alternatively, the `PermissionCondition` to be used.
     event Granted(
         bytes32 indexed permissionId,
         address indexed here,
         address where,
         address indexed who,
-        IPermissionOracle oracle
+        IPermissionCondition condition
     );
 
     /// @notice Emitted when a permission `permission` is revoked in the context `here` from the address `who` for the contract `where`.
@@ -115,19 +115,19 @@ contract PermissionManager is Initializable {
         _grant(_where, _who, _permissionId);
     }
 
-    /// @notice Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier if the referenced oracle permits it.
+    /// @notice Grants permission to an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier if the referenced condition permits it.
     /// @dev Requires the `ROOT_PERMISSION_ID` permission
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) receiving the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _oracle The `PermissionOracle` that will be asked for authorization on calls connected to the specified permission identifier.
-    function grantWithOracle(
+    /// @param _condition The `PermissionCondition` that will be asked for authorization on calls connected to the specified permission identifier.
+    function grantWithCondition(
         address _where,
         address _who,
         bytes32 _permissionId,
-        IPermissionOracle _oracle
+        IPermissionCondition _condition
     ) external auth(_where, ROOT_PERMISSION_ID) {
-        _grantWithOracle(_where, _who, _permissionId, _oracle);
+        _grantWithCondition(_where, _who, _permissionId, _condition);
     }
 
     /// @notice Revokes permission from an address to call methods in a target contract guarded by an auth modifier with the specified permission identifier.
@@ -147,12 +147,12 @@ contract PermissionManager is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the contract.
     /// @param items The array of bulk items to process.
-    function bulkOnSingleTarget(address _where, PermissionLib.ItemSingleTarget[] calldata items)
+    function applySingleTargetPermissions(address _where, PermissionLib.SingleTargetPermission[] calldata items)
         external
         auth(_where, ROOT_PERMISSION_ID)
     {
         for (uint256 i; i < items.length; ) {
-            PermissionLib.ItemSingleTarget memory item = items[i];
+            PermissionLib.SingleTargetPermission memory item = items[i];
 
             if (item.operation == PermissionLib.Operation.Grant) {
                 _grant(_where, item.who, item.permissionId);
@@ -169,9 +169,9 @@ contract PermissionManager is Initializable {
     /// @notice Processes bulk items on the permission manager.
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
-    function bulkOnMultiTarget(PermissionLib.ItemMultiTarget[] calldata items) external {
+    function applyMultiTargetPermissions(PermissionLib.MultiTargetPermission[] calldata items) external {
         for (uint256 i; i < items.length; ) {
-            PermissionLib.ItemMultiTarget memory item = items[i];
+            PermissionLib.MultiTargetPermission memory item = items[i];
 
             // TODO: Optimize
             _auth(item.where, ROOT_PERMISSION_ID);
@@ -180,12 +180,12 @@ contract PermissionManager is Initializable {
                 _grant(item.where, item.who, item.permissionId);
             } else if (item.operation == PermissionLib.Operation.Revoke) {
                 _revoke(item.where, item.who, item.permissionId);
-            } else if (item.operation == PermissionLib.Operation.GrantWithOracle) {
-                _grantWithOracle(
+            } else if (item.operation == PermissionLib.Operation.GrantWithCondition) {
+                _grantWithCondition(
                     item.where,
                     item.who,
                     item.permissionId,
-                    IPermissionOracle(item.oracle)
+                    IPermissionCondition(item.condition)
                 );
             }
 
@@ -199,7 +199,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) for which the permission is checked.
     /// @param _permissionId The permission identifier.
-    /// @param _data The optional data passed to the `PermissionOracle` registered.
+    /// @param _data The optional data passed to the `PermissionCondition` registered.
     /// @return bool Returns true if `who` has the permissions on the target contract via the specified permission identifier.
     function isGranted(
         address _where,
@@ -228,19 +228,19 @@ contract PermissionManager is Initializable {
         address _who,
         bytes32 _permissionId
     ) internal {
-        _grantWithOracle(_where, _who, _permissionId, IPermissionOracle(ALLOW_FLAG));
+        _grantWithCondition(_where, _who, _permissionId, IPermissionCondition(ALLOW_FLAG));
     }
 
     /// @notice This method is used in the internal `_grant` method of the permission manager.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _oracle The PermissionOracle to be used or it is just the ALLOW_FLAG.
-    function _grantWithOracle(
+    /// @param _condition The PermissionCondition to be used or it is just the ALLOW_FLAG.
+    function _grantWithCondition(
         address _where,
         address _who,
         bytes32 _permissionId,
-        IPermissionOracle _oracle
+        IPermissionCondition _condition
     ) internal {
         if (_where == ANY_ADDR && _who == ANY_ADDR) {
             revert AnyAddressDisallowedForWhoAndWhere();
@@ -252,33 +252,33 @@ contract PermissionManager is Initializable {
                 revert PermissionsForAnyAddressDisallowed();
             }
 
-            if (address(_oracle) == ALLOW_FLAG) {
-                revert OracleNotPresentForAnyAddress();
+            if (address(_condition) == ALLOW_FLAG) {
+                revert ConditionNotPresentForAnyAddress();
             }
         }
 
         bytes32 permHash = permissionHash(_where, _who, _permissionId);
 
-        address currentOracle = permissionsHashed[permHash];
-        address newOracle = address(_oracle);
+        address currentCondition = permissionsHashed[permHash];
+        address newCondition = address(_condition);
 
         // Means permHash is not currently set.
-        if (currentOracle == UNSET_FLAG) {
-            permissionsHashed[permHash] = newOracle;
+        if (currentCondition == UNSET_FLAG) {
+            permissionsHashed[permHash] = newCondition;
 
-            emit Granted(_permissionId, msg.sender, _where, _who, _oracle);
-        } else if (currentOracle != newOracle) {
-            // Revert if the permHash is already granted, but uses different oracle.
+            emit Granted(_permissionId, msg.sender, _where, _who, _condition);
+        } else if (currentCondition != newCondition) {
+            // Revert if the permHash is already granted, but uses a different condition.
             // If we don't revert, we either should:
-            //   - allow overriding the oracle on the same permission
+            //   - allow overriding the condition on the same permission
             //     which could be confusing whoever granted the same permission first
             //   - or do nothing and succeed silently which could be confusing for the caller.
-            revert PermissionAlreadyGrantedForDifferentOracle({
+            revert PermissionAlreadyGrantedForDifferentCondition({
                 where: _where,
                 who: _who,
                 permissionId: _permissionId,
-                currentOracle: currentOracle,
-                newOracle: newOracle
+                currentCondition: currentCondition,
+                newCondition: newCondition
             });
         }
     }
@@ -300,11 +300,11 @@ contract PermissionManager is Initializable {
         }
     }
 
-    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to an `PermissionOracle` if this was specified in the setup.
+    /// @notice Checks if a caller is granted permissions on a contract via a permission identifier and redirects the approval to a `PermissionCondition` if this was specified in the setup.
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    /// @param _data The optional data passed to the `PermissionOracle` registered..
+    /// @param _data The optional data passed to the `PermissionCondition` registered..
     /// @return bool Returns true if `who` has the permissions on the contract via the specified permissionId identifier.
     function _isGranted(
         address _where,
@@ -312,16 +312,16 @@ contract PermissionManager is Initializable {
         bytes32 _permissionId,
         bytes memory _data
     ) internal view returns (bool) {
-        address accessFlagOrAclOracle = permissionsHashed[
+        address accessFlagOrCondition = permissionsHashed[
             permissionHash(_where, _who, _permissionId)
         ];
 
-        if (accessFlagOrAclOracle == UNSET_FLAG) return false;
-        if (accessFlagOrAclOracle == ALLOW_FLAG) return true;
+        if (accessFlagOrCondition == UNSET_FLAG) return false;
+        if (accessFlagOrCondition == ALLOW_FLAG) return true;
 
-        // Since it's not a flag, assume it's an PermissionOracle and try-catch to skip failures
+        // Since it's not a flag, assume it's a PermissionCondition and try-catch to skip failures
         try
-            IPermissionOracle(accessFlagOrAclOracle).isGranted(_where, _who, _permissionId, _data)
+            IPermissionCondition(accessFlagOrCondition).isGranted(_where, _who, _permissionId, _data)
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}
