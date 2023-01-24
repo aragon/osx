@@ -24,8 +24,9 @@ abstract contract CallbackHandler {
     event CallbackReceived(bytes4 indexed sig, bytes data);
 
     /// @notice Handles callbacks to adaptively support ERC standards.
-    /// @param _callbackSelector The selector of the callback function.
     /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
+    /// @param _callbackSelector The selector of the callback function.
+    /// @return bytes4 The magic number stored for `_callbackSelector`.
     function _handleCallback(
         bytes4 _callbackSelector,
         bytes memory _data
