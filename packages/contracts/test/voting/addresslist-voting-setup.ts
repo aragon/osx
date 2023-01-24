@@ -12,6 +12,7 @@ import {
   pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
+import metadata from '../../contracts/voting/addresslist/metadata.json';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -20,11 +21,6 @@ let defaultMembers: string[];
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;
 const EMPTY_DATA = '0x';
-
-const prepareInstallationDataTypes = [
-  'tuple(uint8,uint64,uint64,uint64,uint256)',
-  'address[]',
-];
 
 // Permissions
 const UPDATE_ADDRESSES_PERMISSION_ID = ethers.utils.id(
@@ -63,7 +59,7 @@ describe('AddresslistVotingSetup', function () {
     implementationAddress =
       await addresslistVotingSetup.getImplementationAddress();
 
-    defaultData = abiCoder.encode(prepareInstallationDataTypes, [
+    defaultData = abiCoder.encode(metadata.pluginSetupABI.prepareInstallation, [
       Object.values(defaultVotingSettings),
       defaultMembers,
     ]);
@@ -89,16 +85,6 @@ describe('AddresslistVotingSetup', function () {
   });
 
   describe('prepareInstallation', async () => {
-    it('correctly returns prepare installation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareInstallation`.
-      const dataHRABI =
-        '(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)';
-
-      expect(
-        await addresslistVotingSetup.prepareInstallationDataABI()
-      ).to.be.eq(dataHRABI);
-    });
-
     it('fails if data is empty, or not of minimum length', async () => {
       await expect(
         addresslistVotingSetup.prepareInstallation(
@@ -131,11 +117,13 @@ describe('AddresslistVotingSetup', function () {
         nonce,
       });
 
-      const {plugin, helpers, permissions} =
-        await addresslistVotingSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          defaultData
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await addresslistVotingSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        defaultData
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(0);
@@ -201,6 +189,7 @@ describe('AddresslistVotingSetup', function () {
       expect(await addresslistVotingContract.supportThreshold()).to.be.equal(
         defaultVotingSettings.supportThreshold
       );
+
       expect(await addresslistVotingContract.minDuration()).to.be.equal(
         defaultVotingSettings.minDuration
       );
@@ -225,24 +214,17 @@ describe('AddresslistVotingSetup', function () {
   });
 
   describe('prepareUninstallation', async () => {
-    it('correctly returns prepare uninstallation data abi', async () => {
-      // Human-Readable Abi of data param of `prepareUninstallation`.
-      const dataHRABI = '';
-
-      expect(
-        await addresslistVotingSetup.prepareUninstallationDataABI()
-      ).to.be.eq(dataHRABI);
-    });
-
     it('correctly returns permissions', async () => {
       const plugin = ethers.Wallet.createRandom().address;
 
       const permissions =
         await addresslistVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [],
+            data: EMPTY_DATA,
+          }
         );
 
       expect(permissions.length).to.be.equal(4);

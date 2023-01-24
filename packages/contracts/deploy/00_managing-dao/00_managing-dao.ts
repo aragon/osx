@@ -12,6 +12,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
+  const initializeParams = {
+    metadata: '0x',
+    initialOwner: deployer,
+    trustedForwarder: ethers.constants.AddressZero,
+    daoURI: '0x',
+  };
+
   await deploy('DAO', {
     from: deployer,
     args: [],
@@ -23,7 +30,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: ['0x00', deployer, ethers.constants.AddressZero],
+          args: [
+            initializeParams.metadata,
+            initializeParams.initialOwner,
+            initializeParams.trustedForwarder,
+            initializeParams.daoURI,
+          ],
         },
       },
     },

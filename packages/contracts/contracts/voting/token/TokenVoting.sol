@@ -6,7 +6,7 @@ import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
-import {RATIO_BASE, applyRatioCeiled} from "../../utils/Ratio.sol";
+import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
@@ -60,6 +60,7 @@ contract TokenVoting is MajorityVotingBase {
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         uint64 _startDate,
         uint64 _endDate,
         VoteOption _voteOption,
@@ -82,7 +83,8 @@ contract TokenVoting is MajorityVotingBase {
             _metadata: _metadata,
             _startDate: _startDate,
             _endDate: _endDate,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
 
         // Store proposal related information
@@ -96,12 +98,17 @@ contract TokenVoting is MajorityVotingBase {
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
 
-        proposal_.parameters.minVotingPower = applyRatioCeiled(
+        proposal_.parameters.minVotingPower = _applyRatioCeiled(
             totalVotingPower,
             minParticipation()
         );
 
         proposal_.tally.totalVotingPower = totalVotingPower;
+
+        // Reduce costs
+        if(_allowFailureMap != 0) {
+            proposal_.allowFailureMap = _allowFailureMap;
+        }
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

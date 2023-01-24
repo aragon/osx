@@ -76,7 +76,7 @@ describe('CounterPluginSetup(Example)', function () {
 
       const data = abiCoder.encode(['address', 'uint256'], [ownerAddress, num]);
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await counterV1Setup.callStatic.prepareInstallation(
           daoMock.address,
           data
@@ -109,7 +109,7 @@ describe('CounterPluginSetup(Example)', function () {
 
       const data = abiCoder.encode(['address', 'uint256'], [AddressZero, num]);
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await counterV1Setup.callStatic.prepareInstallation(
           daoMock.address,
           data
@@ -149,7 +149,6 @@ describe('CounterPluginSetup(Example)', function () {
     it('correcly returns activeHelpers/initData/permissions', async () => {
       const num = 10;
       const data = abiCoder.encode(['uint256'], [num]);
-      const oldVersion: [BigNumberish, BigNumberish, BigNumberish] = [1, 0, 0];
       const plugin = address1;
       const helper = address2;
       const ABI = ['function setNewVariable(uint256 _newVariable)'];
@@ -158,16 +157,18 @@ describe('CounterPluginSetup(Example)', function () {
         num,
       ]);
 
-      const {activeHelpers, initData, permissions} =
+      const {initData, preparedDependency: {permissions, helpers}}=
         await counterV2Setup.callStatic.prepareUpdate(
           daoMock.address,
-          plugin,
-          [helper],
-          oldVersion,
-          data
+          1,
+          {
+            plugin,
+            currentHelpers: [helper],
+            data: data
+          }        
         );
 
-      expect(activeHelpers.length).to.be.equal(1);
+      expect(helpers.length).to.be.equal(1);
       expect(initData).to.be.equal(expectedInitData);
       expect(permissions).to.deep.equal([
         [
@@ -185,9 +186,11 @@ describe('CounterPluginSetup(Example)', function () {
     it('correcly returns permissions when helper is NOT passed', async () => {
       const permissions = await counterV1Setup.callStatic.prepareUninstallation(
         daoMock.address,
-        address1,
-        [],
-        EMPTY_DATA
+        {
+          plugin: address1,
+          currentHelpers: [],
+          data: EMPTY_DATA
+        }
       );
 
       expect(permissions).to.deep.equal([
@@ -214,9 +217,11 @@ describe('CounterPluginSetup(Example)', function () {
 
       const permissions = await counterV1Setup.callStatic.prepareUninstallation(
         daoMock.address,
-        plugin,
-        [helper],
-        EMPTY_DATA
+        {
+          plugin,
+          currentHelpers: [helper],
+          data: EMPTY_DATA
+        }
       );
 
       expect(permissions).to.deep.equal([

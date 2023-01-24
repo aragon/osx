@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `metadata.json` file for all plugins.
 - Added `startDate` and `endDate` to the `ProposalCreated` event.
 - Added the `ProposalBase`, `Proposal`, and `ProposalUpgradeable` contracts to refactor and unify the proposal creation and execution process across all governance plugins.
 - Adds `startDate` and `endDate` to Multisig proposals. Execution and approvals of proposals have now to be in the boundaries of these 2 dates.
 - Adds `IEIP4824`
 - Adds `event NewURI` implementations for `daoURI()` and `setDaoURI()` definitions in `DAO`
 - Added check that plugin and DAO names only contain `a-z`, `0-9` or a dash (`-`).
+- adds `allowFailureMap` to the plugins for creating proposals.
 
 ### Changed
 
@@ -24,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16`, and added `approvals`(uint16) in the `Proposal` struct.
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 - Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.
+- Changed the `createProposal` function signature which expects `uint256` `allowFaiureMap` argument.
 - Changed all occurences of `oracle` to `condition`.
 - Renamed `ItemSingleTarget` and `ItemMultiTarget` in `PermissionLib` to `SingleTargetPermission` and `MultiTargetPermission`.
 - Renamed `bulkOnSingleTarget()` and `bulkOnMultiTarget()` in `PermissionManager` to `applySingleTargetPermissions()` and `applyMultiTargetPermissions()`
@@ -31,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed `prepare*DataABI()` from `IPluginSetup` & `PluginSetup` and all the other contracts that inherit from `PluginSetup`.
 - Removes `open` parameter from Multisig proposals.
 - Removes `Tally` struct as well as `addressListLength` and moves `approvals` in `Proposal`.
 - Removes `freeze` functionality.

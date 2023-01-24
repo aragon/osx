@@ -23,7 +23,8 @@ import {
   END_DATE,
   SNAPSHOT_BLOCK,
   TOTAL_VOTING_POWER,
-  CREATED_AT
+  CREATED_AT,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 
 // events
@@ -34,6 +35,8 @@ export function createNewProposalCreatedEvent(
   startDate: string,
   endDate: string,
   description: string,
+  actions: ethereum.Tuple[],
+  allowFailureMap: string,
   contractAddress: string
 ): ProposalCreated {
   let createProposalCreatedEvent = changetype<ProposalCreated>(newMockEvent());
@@ -61,12 +64,22 @@ export function createNewProposalCreatedEvent(
     'description',
     ethereum.Value.fromBytes(Bytes.fromUTF8(description))
   );
+  let actionsParam = new ethereum.EventParam(
+    'actions',
+    ethereum.Value.fromTupleArray(actions)
+  )
+  let allowFailureMapParam = new ethereum.EventParam(
+    'allowFailureMap',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
+  );
 
   createProposalCreatedEvent.parameters.push(proposalIdParam);
   createProposalCreatedEvent.parameters.push(creatorParam);
   createProposalCreatedEvent.parameters.push(startDateParam);
   createProposalCreatedEvent.parameters.push(endDateParam);
   createProposalCreatedEvent.parameters.push(descriptionParam);
+  createProposalCreatedEvent.parameters.push(actionsParam);
+  createProposalCreatedEvent.parameters.push(allowFailureMapParam);
 
   return createProposalCreatedEvent;
 }
@@ -243,6 +256,7 @@ export function createAddresslistVotingProposalEntityState(
 
   open: boolean = true,
   executed: boolean = false,
+  allowFailureMap: string = ALLOW_FAILURE_MAP,
 
   votingMode: string = VOTING_MODE,
   supportThreshold: string = SUPPORT_THRESHOLD,
@@ -274,7 +288,8 @@ export function createAddresslistVotingProposalEntityState(
   addresslistProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
 
   addresslistProposal.totalVotingPower = BigInt.fromString(totalVotingPower);
-
+  addresslistProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
+  
   addresslistProposal.createdAt = BigInt.fromString(createdAt);
   addresslistProposal.creationBlockNumber = creationBlockNumber;
   addresslistProposal.executable = executable;

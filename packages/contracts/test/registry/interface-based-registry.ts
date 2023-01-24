@@ -74,9 +74,9 @@ describe('InterfaceBasedRegistry', function () {
     });
 
     it('fail to register if the contract does not support ERC165', async () => {
-      // Use the `CallbackHandler` contract for testing purposes here, because the interface doesn't support ERC-165.
+      // Use the `CallbackHandlerMockHelper` contract for testing purposes here, because the interface doesn't support ERC-165.
       const CallbackHandler = await ethers.getContractFactory(
-        'CallbackHandler'
+        'CallbackHandlerMockHelper'
       );
       let contractThatDoesNotSupportERC165 = await CallbackHandler.deploy();
 

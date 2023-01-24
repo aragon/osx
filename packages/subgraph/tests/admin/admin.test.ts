@@ -11,7 +11,8 @@ import {
   STRING_DATA,
   PROPOSAL_ID,
   CONTRACT_ADDRESS,
-  START_DATE
+  START_DATE,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -42,6 +43,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
     START_DATE,
     STRING_DATA,
     actions,
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -69,6 +71,7 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   );
   assert.fieldEquals('AdminProposal', entityID, 'startDate', START_DATE);
   assert.fieldEquals('AdminProposal', entityID, 'endDate', START_DATE);
+  assert.fieldEquals('AdminProposal', entityID, 'allowFailureMap', ALLOW_FAILURE_MAP);
 
   // check actions
   for (let index = 0; index < actions.length; index++) {
@@ -111,6 +114,7 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   adminProposal.createdAt = BigInt.fromString(START_DATE);
   adminProposal.startDate = BigInt.fromString(START_DATE);
   adminProposal.endDate = BigInt.fromString(START_DATE);
+  adminProposal.allowFailureMap = BigInt.fromString(ALLOW_FAILURE_MAP);
   adminProposal.adminstrator = adminstratorAddress.toHexString();
   adminProposal.save();
 
