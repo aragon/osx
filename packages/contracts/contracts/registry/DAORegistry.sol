@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
 import {IDAO} from "../core/IDAO.sol";
 import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
+import {isSubdomainValid} from "./RegistryUtils.sol";
 
 /// @title Register your unique DAO name
 /// @author Aragon Association - 2022
@@ -60,7 +61,7 @@ contract DAORegistry is InterfaceBasedRegistry {
             revert EmptyDaoName();
         }
 
-        if (!_checkNameValidity(_name)) {
+        if (!isSubdomainValid(_name)) {
             revert InvalidDaoName({name: _name});
         }
 
@@ -71,37 +72,6 @@ contract DAORegistry is InterfaceBasedRegistry {
         subdomainRegistrar.registerSubnode(labelhash, daoAddr);
 
         emit DAORegistered(daoAddr, _creator, _name);
-    }
-
-    /// @notice Checks if the name is either 0-9, a-z or a dash (-).
-    /// @param _name The name of the DAO.
-    /// @return `true` if the name is valid or `false` if at least one char is invalid.
-    /// @dev Aborts on the first invalid char found.
-    function _checkNameValidity(string calldata _name) internal pure returns (bool) {
-        bytes calldata nameBytes = bytes(_name);
-        uint256 nameLength = nameBytes.length;
-        for (uint256 i; i < nameLength; i++) {
-            uint8 char = uint8(nameBytes[i]);
-
-            // if char is between 0-9
-            if (char > 47 && char < 58) {
-                continue;
-            }
-
-            // if char is between a-z
-            if (char > 96 && char < 123) {
-                continue;
-            }
-
-            // if char is -
-            if (char == 45) {
-                continue;
-            }
-
-            // invalid if one char doesn't work with the rules above
-            return false;
-        }
-        return true;
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).

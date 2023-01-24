@@ -7,7 +7,7 @@ import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../test-utils/proxy';
-import { Wallet } from 'ethers';
+import {Wallet} from 'ethers';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -142,34 +142,85 @@ describe('DAORegistry', function () {
       .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
   });
 
-  it('should revert if name contains any invalid char', async () => {
-    const baseName = 'this-is-my-super-valid-name';
+  // without mocking we have to repeat the tests here to make sure the validation is correct
+  describe('name validation', () => {
+    it('should validate the passed name correctly (< 32 bytes long name)', async () => {
+      const baseName = 'this-is-my-super-valid-name';
 
-    // loop through the ascii table
-    for (let i = 0; i < 127; i++) {
-      const newTargetDao = await deployNewDAO(ownerAddress);
-      // random place for the char to improve validation check
-      const placement = Math.round(Math.random() * baseName.length);
-      const daoName =
-        baseName.substring(0, placement) +
-        String.fromCharCode(i) +
-        baseName.substring(placement + 1);
+      // loop through the ascii table
+      for (let i = 0; i < 127; i++) {
+        const newTargetDao = await deployNewDAO(ownerAddress);
 
-      // test success if it is a valid char [0-9a-z\-]
-      if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+        // replace the 10th char in the baseName
+        const subdomainName =
+          baseName.substring(0, 10) +
+          String.fromCharCode(i) +
+          baseName.substring(10 + 1);
+
+        // test success if it is a valid char [0-9a-z\-]
+        if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+          await expect(
+            daoRegistry.register(
+              newTargetDao.address,
+              ownerAddress,
+              subdomainName
+            )
+          )
+            .to.emit(daoRegistry, EVENTS.DAORegistered)
+            .withArgs(newTargetDao.address, ownerAddress, subdomainName);
+          continue;
+        }
+
         await expect(
-          daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
+          daoRegistry.register(
+            newTargetDao.address,
+            ownerAddress,
+            subdomainName
+          )
         )
-          .to.emit(daoRegistry, EVENTS.DAORegistered)
-          .withArgs(newTargetDao.address, ownerAddress, daoName);
-        continue;
+          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoName')
+          .withArgs(subdomainName);
       }
+    });
 
-      await expect(
-        daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
-      )
-        .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoName')
-        .withArgs(daoName);
-    }
+    it('should validate the passed name correctly (> 32 bytes long name)', async () => {
+      const baseName =
+        'this-is-my-super-looooooooooooooooooooooooooong-valid-name';
+
+      // loop through the ascii table
+      for (let i = 0; i < 127; i++) {
+        const newTargetDao = await deployNewDAO(ownerAddress);
+
+        // replace the 40th char in the baseName
+        const subdomainName =
+          baseName.substring(0, 40) +
+          String.fromCharCode(i) +
+          baseName.substring(40 + 1);
+
+        // test success if it is a valid char [0-9a-z\-]
+        if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+          await expect(
+            daoRegistry.register(
+              newTargetDao.address,
+              ownerAddress,
+              subdomainName
+            )
+          )
+            .to.emit(daoRegistry, EVENTS.DAORegistered)
+            .withArgs(newTargetDao.address, ownerAddress, subdomainName);
+          continue;
+        }
+
+        await expect(
+          daoRegistry.register(
+            newTargetDao.address,
+            ownerAddress,
+            subdomainName
+          )
+        )
+          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoName')
+          .withArgs(subdomainName);
+      }
+    });
   });
 });
