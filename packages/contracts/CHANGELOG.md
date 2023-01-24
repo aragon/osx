@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added ERC-721 and ERC-1155 support to `deposit` and `withdraw` in `DAO` and adapted the `Deposited` and `Withdrawn` events.
 - Added `startDate` and `endDate` to the `ProposalCreated` event.
 - Added the `ProposalBase`, `Proposal`, and `ProposalUpgradeable` contracts to refactor and unify the proposal creation and execution process across all governance plugins.
 - Adds `startDate` and `endDate` to Multisig proposals. Execution and approvals of proposals have now to be in the boundaries of these 2 dates.

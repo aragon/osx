@@ -20,7 +20,7 @@ contract CallbackHandler {
 
     /// @notice Handles callbacks to adaptively support ERC standards.
     /// @param _callbackSelector The selector of the callback function.
-    /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
+    /// @dev This function is supposed to be called via `_handleCallback(msg.sig)` in the `fallback()` function of the inheriting contract.
     function _handleCallback(bytes4 _callbackSelector) internal view {
         bytes32 magicNumber = callbackMagicNumbers[_callbackSelector];
         if (magicNumber == UNREGISTERED_CALLBACK) {

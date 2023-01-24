@@ -5,7 +5,9 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {
   DAO,
   DAO__factory,
-  GovernanceERC20,
+  TestERC20,
+  TestERC721,
+  TestERC1155,
 } from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {flipBit} from '../test-utils/bitmap';
@@ -29,6 +31,9 @@ const dummyAddress2 = '0x0000000000000000000000000000000000000002';
 const dummyMetadata1 = '0x0001';
 const dummyMetadata2 = '0x0002';
 const MAX_ACTIONS = 256;
+const NATIVE = ethers.constants.AddressZero;
+const NO_ID = 0;
+const NO_AMOUNT = 0;
 
 const EVENTS = {
   MetadataSet: 'MetadataSet',
@@ -65,7 +70,9 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
-  let token: GovernanceERC20;
+  let erc20: TestERC20;
+  let erc721: TestERC721;
+  let erc1155: TestERC1155;
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
@@ -80,11 +87,14 @@ describe('DAO', function () {
       daoExampleURI
     );
 
-    const Token = await ethers.getContractFactory('GovernanceERC20');
-    token = await Token.deploy(dao.address, 'GOV', 'GOV', {
-      receivers: [],
-      amounts: [],
-    });
+    const TestERC20 = await ethers.getContractFactory('TestERC20');
+    erc20 = await TestERC20.deploy('ERC20', 'ERC20');
+
+    const TestERC721 = await ethers.getContractFactory('TestERC721');
+    erc721 = await TestERC721.deploy('ERC721', 'ERC721');
+
+    const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+    erc1155 = await TestERC1155.deploy('ERC1155');
 
     // Grant permissions
     await Promise.all([
@@ -123,7 +133,7 @@ describe('DAO', function () {
         ownerAddress,
         PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       ),
-      dao.grant(token.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
+      dao.grant(erc20.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
     ]);
   });
 
@@ -233,10 +243,9 @@ describe('DAO', function () {
       // add one more to make sure it fails
       actions[MAX_ACTIONS] = data.failAction;
 
-      await expect(dao.execute(ZERO_BYTES32, actions, 0)).to.be.revertedWithCustomError(
-        dao,
-        'TooManyActions'
-      );
+      await expect(
+        dao.execute(ZERO_BYTES32, actions, 0)
+      ).to.be.revertedWithCustomError(dao, 'TooManyActions');
     });
 
     it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
@@ -336,7 +345,7 @@ describe('DAO', function () {
 
       // deposit some eth so it can later transfer
       const depositAmount = ethers.utils.parseEther('1.23');
-      await dao.deposit(ethers.constants.AddressZero, depositAmount, 'ref', {
+      await dao.deposit(NATIVE, NO_ID, depositAmount, 'ref', {
         value: depositAmount,
       });
 
@@ -347,18 +356,18 @@ describe('DAO', function () {
     });
 
     it('should transfer ERC20 tokens to recipient with action', async () => {
-      const TokenFactory = await ethers.getContractFactory('TestERC20');
-      const token = await TokenFactory.deploy('name', 'symbol', 20);
+      await erc20.mint(ownerAddress, 20);
 
-      await token.transfer(dao.address, 20);
+      await erc20.transfer(dao.address, 20);
 
       const recipient = signers[1].address;
 
       const iface = new ethers.utils.Interface(DAO__factory.abi);
 
       const encoded = iface.encodeFunctionData('withdraw', [
-        token.address,
+        erc20.address,
         recipient,
+        NO_ID,
         20,
         'ref',
       ]);
@@ -371,98 +380,239 @@ describe('DAO', function () {
 
       const transferAction = {to: dao.address, value: 0, data: encoded};
 
-      expect(await token.balanceOf(dao.address)).to.equal(20);
-      expect(await token.balanceOf(recipient)).to.equal(0);
+      expect(await erc20.balanceOf(dao.address)).to.equal(20);
+      expect(await erc20.balanceOf(recipient)).to.equal(0);
 
       await dao.execute(ZERO_BYTES32, [transferAction], 0);
-      expect(await token.balanceOf(dao.address)).to.equal(0);
-      expect(await token.balanceOf(recipient)).to.equal(20);
+      expect(await erc20.balanceOf(dao.address)).to.equal(0);
+      expect(await erc20.balanceOf(recipient)).to.equal(20);
     });
   });
 
   describe('deposit:', async () => {
     const amount = ethers.utils.parseEther('1.23');
+    const tokenId = 456;
+    const options = {value: amount};
 
-    it('reverts if amount is zero', async () => {
-      await expect(
-        dao.deposit(ethers.constants.AddressZero, 0, 'ref')
-      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+    context('Native', async () => {
+      it('reverts if amount is zero', async () => {
+        await expect(
+          dao.deposit(NATIVE, NO_ID, NO_AMOUNT, 'ref')
+        ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+      });
+
+      it('reverts if tokenId is not zero', async () => {
+        await expect(dao.deposit(NATIVE, tokenId, amount, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'NonZeroTokenId')
+          .withArgs(tokenId);
+      });
+
+      it('reverts if passed amount does not match native amount', async () => {
+        const passedAmount = ethers.utils.parseEther('1.22');
+
+        await expect(dao.deposit(NATIVE, NO_ID, passedAmount, 'ref', options))
+          .to.be.revertedWithCustomError(
+            dao,
+            'NativeTokenDepositAmountMismatch'
+          )
+          .withArgs(passedAmount, amount);
+      });
+
+      it('deposits native tokens into the DAO', async () => {
+        // is empty at the beginning
+        expect(await ethers.provider.getBalance(dao.address)).to.equal(0);
+
+        await expect(dao.deposit(NATIVE, NO_ID, amount, 'ref', options))
+          .to.emit(dao, EVENTS.Deposited)
+          .withArgs(ownerAddress, NATIVE, NO_ID, amount, 'ref');
+
+        // holds amount now
+        expect(await ethers.provider.getBalance(dao.address)).to.equal(amount);
+      });
     });
 
-    it('reverts if passed amount does not match native amount value', async () => {
-      const options = {value: amount};
-      const passedAmount = ethers.utils.parseEther('1.22');
+    context('ERC20', async () => {
+      it('reverts if the amount is zero', async () => {
+        await expect(
+          dao.deposit(erc20.address, NO_ID, NO_AMOUNT, 'ref')
+        ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+      });
 
-      await expect(
-        dao.deposit(ethers.constants.AddressZero, passedAmount, 'ref', options)
-      )
-        .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
-        .withArgs(passedAmount, amount);
+      it('reverts if the token ID is not zero', async () => {
+        await expect(dao.deposit(erc20.address, tokenId, amount, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'NonZeroTokenId')
+          .withArgs(tokenId);
+      });
+
+      it('reverts if the sender balance is too low', async () => {
+        await expect(dao.deposit(erc20.address, NO_ID, amount, 'ref')).to.be
+          .reverted;
+      });
+
+      it('reverts if native tokens are sent alongside', async () => {
+        await erc20.mint(ownerAddress, amount);
+
+        await expect(dao.deposit(erc20.address, NO_ID, amount, 'ref', options))
+          .to.be.revertedWithCustomError(
+            dao,
+            'NativeTokenDepositAmountMismatch'
+          )
+          .withArgs(NO_AMOUNT, amount);
+      });
+
+      it('reverts if the sender has not approved the tokens', async () => {
+        await erc20.mint(ownerAddress, amount);
+
+        await expect(
+          dao.deposit(erc20.address, NO_ID, amount, 'ref')
+        ).to.be.revertedWith('ERC20: insufficient allowance');
+      });
+
+      it('deposits if tokens are approved', async () => {
+        await erc20.mint(ownerAddress, amount);
+        await erc20.approve(dao.address, amount);
+
+        // is empty at the beginning
+        expect(await erc20.balanceOf(dao.address)).to.equal(0);
+
+        await expect(dao.deposit(erc20.address, NO_ID, amount, 'ref'))
+          .to.emit(dao, EVENTS.Deposited)
+          .withArgs(ownerAddress, erc20.address, NO_ID, amount, 'ref');
+
+        // holds amount now
+        expect(await erc20.balanceOf(dao.address)).to.equal(amount);
+      });
     });
 
-    it('reverts if ERC20 and native tokens are deposited at the same time', async () => {
-      const options = {value: amount};
-      await token.mint(ownerAddress, amount);
+    context('ERC721', async () => {
+      it('reverts if the amount is not zero', async () => {
+        await expect(
+          dao.withdraw(erc721.address, ownerAddress, NO_ID, amount, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'NonZeroAmount')
+          .withArgs(amount);
+      });
 
-      await expect(dao.deposit(token.address, amount, 'ref', options))
-        .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
-        .withArgs(0, amount);
+      it('reverts when the sender does not own the token', async () => {
+        await expect(dao.deposit(erc721.address, tokenId, NO_AMOUNT, 'ref')).to
+          .be.reverted;
+      });
+
+      it('reverts if native tokens are sent alongside', async () => {
+        await erc721.mint(ownerAddress, tokenId);
+
+        await expect(
+          dao.deposit(erc721.address, tokenId, NO_AMOUNT, 'ref', options)
+        )
+          .to.be.revertedWithCustomError(
+            dao,
+            'NativeTokenDepositAmountMismatch'
+          )
+          .withArgs(NO_AMOUNT, amount);
+      });
+
+      it('reverts if the sender has not approved the tokens', async () => {
+        await erc721.mint(ownerAddress, tokenId);
+
+        await expect(
+          dao.deposit(erc721.address, tokenId, NO_AMOUNT, 'ref')
+        ).to.be.revertedWith('ERC721: caller is not token owner nor approved');
+      });
+
+      it('deposits if tokens are approved', async () => {
+        await erc721.mint(ownerAddress, tokenId);
+        await erc721.setApprovalForAll(dao.address, true);
+
+        // is empty at the beginning
+        expect(await erc721.balanceOf(dao.address)).to.equal(0);
+
+        await expect(dao.deposit(erc721.address, tokenId, NO_AMOUNT, 'ref'))
+          .to.emit(dao, EVENTS.Deposited)
+          .withArgs(ownerAddress, erc721.address, tokenId, NO_AMOUNT, 'ref');
+
+        // holds amount now
+        expect(await erc721.balanceOf(dao.address)).to.equal(1);
+      });
     });
 
-    it('reverts when tries to deposit ERC20 token while sender does not have token amount', async () => {
-      await expect(dao.deposit(token.address, amount, 'ref')).to.be.reverted;
+    context('ERC1155', async () => {
+      it('reverts if the amount is zero', async () => {
+        await expect(
+          dao.withdraw(erc1155.address, ownerAddress, NO_ID, NO_AMOUNT, 'ref')
+        ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+      });
+
+      it('reverts when the sender does not own the token', async () => {
+        await expect(dao.deposit(erc1155.address, tokenId, amount, 'ref')).to.be
+          .reverted;
+      });
+
+      it('reverts if native tokens are sent alongside', async () => {
+        await erc1155.mint(ownerAddress, tokenId, amount);
+
+        await expect(
+          dao.deposit(erc1155.address, tokenId, amount, 'ref', options)
+        )
+          .to.be.revertedWithCustomError(
+            dao,
+            'NativeTokenDepositAmountMismatch'
+          )
+          .withArgs(NO_AMOUNT, amount);
+      });
+
+      it('reverts if the sender has not approved the tokens', async () => {
+        await erc1155.mint(ownerAddress, tokenId, amount);
+
+        await expect(
+          dao.deposit(erc1155.address, tokenId, amount, 'ref')
+        ).to.be.revertedWith('ERC1155: caller is not token owner nor approved');
+      });
+
+      it('deposits if tokens are approved', async () => {
+        await erc1155.mint(ownerAddress, tokenId, amount);
+        await erc1155.setApprovalForAll(dao.address, true);
+
+        // is empty at the beginning
+        expect(await erc1155.balanceOf(dao.address, tokenId)).to.equal(0);
+
+        await expect(dao.deposit(erc1155.address, tokenId, amount, 'ref'))
+          .to.emit(dao, EVENTS.Deposited)
+          .withArgs(ownerAddress, erc1155.address, tokenId, amount, 'ref');
+
+        // holds amount now
+        expect(await erc1155.balanceOf(dao.address, tokenId)).to.equal(amount);
+      });
     });
 
-    it('reverts when tries to deposit ERC20 token while sender does not have approved token transfer', async () => {
-      await token.mint(ownerAddress, amount);
-
-      await expect(
-        dao.deposit(token.address, amount, 'ref')
-      ).to.be.revertedWith('ERC20: insufficient allowance');
-    });
-
-    it('deposits native tokens into the DAO', async () => {
-      const options = {value: amount};
-
-      // is empty at the beginning
-      expect(await ethers.provider.getBalance(dao.address)).to.equal(0);
-
-      await expect(
-        dao.deposit(ethers.constants.AddressZero, amount, 'ref', options)
-      )
-        .to.emit(dao, EVENTS.Deposited)
-        .withArgs(ownerAddress, ethers.constants.AddressZero, amount, 'ref');
-
-      // holds amount now
-      expect(await ethers.provider.getBalance(dao.address)).to.equal(amount);
-    });
-
-    it('deposits ERC20 into the DAO', async () => {
-      await token.mint(ownerAddress, amount);
-      await token.approve(dao.address, amount);
-
-      // is empty at the beginning
-      expect(await token.balanceOf(dao.address)).to.equal(0);
-
-      await expect(dao.deposit(token.address, amount, 'ref'))
-        .to.emit(dao, EVENTS.Deposited)
-        .withArgs(ownerAddress, token.address, amount, 'ref');
-
-      // holds amount now
-      expect(await token.balanceOf(dao.address)).to.equal(amount);
+    context('Unsupported Token', async () => {
+      it('reverts if the provided address does not refer to a supported token', async () => {
+        await expect(dao.deposit(dao.address, NO_ID, amount, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
+        await expect(dao.deposit(dao.address, tokenId, NO_AMOUNT, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
+        await expect(dao.deposit(dao.address, tokenId, amount, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
+        await expect(dao.deposit(dao.address, NO_ID, NO_AMOUNT, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
+      });
     });
   });
 
   describe('withdraw:', async () => {
     const amount = ethers.utils.parseEther('1.23');
+    const tokenId = 456;
     const options = {value: amount};
 
     beforeEach(async () => {
-      // put native tokens into the DAO
-      await dao.deposit(ethers.constants.AddressZero, amount, 'ref', options);
-
-      // put ERC20 into the DAO
-      await token.mint(dao.address, amount);
+      // put tokens into the DAO
+      await dao.deposit(NATIVE, NO_ID, amount, 'ref', options);
+      await erc20.mint(dao.address, amount);
+      await erc721.mint(dao.address, tokenId);
+      await erc1155.mint(dao.address, tokenId, amount);
     });
 
     it('reverts if the sender lacks the required permissionId', async () => {
@@ -472,77 +622,197 @@ describe('DAO', function () {
         PERMISSION_IDS.WITHDRAW_PERMISSION_ID
       );
 
+      const expectedArgs = [
+        dao.address,
+        dao.address,
+        ownerAddress,
+        PERMISSION_IDS.WITHDRAW_PERMISSION_ID,
+      ];
+      await expect(dao.withdraw(NATIVE, ownerAddress, NO_ID, amount, 'ref'))
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(...expectedArgs);
       await expect(
-        dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
+        dao.withdraw(erc20.address, ownerAddress, NO_ID, amount, 'ref')
       )
         .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          dao.address,
-          dao.address,
-          ownerAddress,
-          PERMISSION_IDS.WITHDRAW_PERMISSION_ID
-        );
-    });
-
-    it('withdraws native tokens if DAO balance is high enough', async () => {
-      const receiverBalance = await signers[1].getBalance();
-
+        .withArgs(...expectedArgs);
       await expect(
-        dao.withdraw(
-          ethers.constants.AddressZero,
-          signers[1].address,
-          amount,
-          'ref'
-        )
+        dao.withdraw(erc721.address, ownerAddress, tokenId, NO_AMOUNT, 'ref')
       )
-        .to.emit(dao, EVENTS.Withdrawn)
-        .withArgs(
-          ethers.constants.AddressZero,
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(...expectedArgs);
+      await expect(
+        dao.withdraw(erc1155.address, ownerAddress, tokenId, amount, 'ref')
+      )
+        .to.be.revertedWithCustomError(dao, 'Unauthorized')
+        .withArgs(...expectedArgs);
+    });
+
+    context('Native', async () => {
+      it('reverts if the amount is zero', async () => {
+        await expect(
+          dao.withdraw(NATIVE, ownerAddress, NO_ID, NO_AMOUNT, 'ref')
+        ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+      });
+
+      it('reverts if the token ID is not zero', async () => {
+        await expect(dao.withdraw(NATIVE, ownerAddress, tokenId, amount, 'ref'))
+          .to.be.revertedWithCustomError(dao, 'NonZeroTokenId')
+          .withArgs(tokenId);
+      });
+
+      it('reverts if the native balance is too low', async () => {
+        await expect(
+          dao.withdraw(NATIVE, ownerAddress, NO_ID, amount.add(1), 'ref')
+        ).to.be.revertedWithCustomError(dao, 'NativeTokenWithdrawFailed');
+      });
+
+      it('withdraws the native balance is high enough', async () => {
+        const receiverBalance = await signers[1].getBalance();
+
+        await expect(
+          dao.withdraw(NATIVE, signers[1].address, NO_ID, amount, 'ref')
+        )
+          .to.emit(dao, EVENTS.Withdrawn)
+          .withArgs(NATIVE, signers[1].address, NO_ID, amount, 'ref');
+
+        expect(await signers[1].getBalance()).to.equal(
+          receiverBalance.add(amount)
+        );
+      });
+    });
+
+    context('ERC20', async () => {
+      it('reverts if the amount is zero', async () => {
+        await expect(
+          dao.withdraw(erc20.address, ownerAddress, NO_ID, NO_AMOUNT, 'ref')
+        ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+      });
+
+      it('reverts if the token ID is not zero', async () => {
+        await expect(
+          dao.withdraw(erc20.address, ownerAddress, tokenId, amount, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'NonZeroTokenId')
+          .withArgs(tokenId);
+      });
+
+      it('reverts if the balance is too low', async () => {
+        await erc20.approve(dao.address, amount);
+        await expect(
+          dao.withdraw(erc20.address, ownerAddress, NO_ID, amount.add(1), 'ref')
+        ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
+      });
+
+      it('withdraws if the balance is high enough', async () => {
+        const receiverBalance = await erc20.balanceOf(signers[1].address);
+
+        await expect(
+          dao.withdraw(erc20.address, signers[1].address, NO_ID, amount, 'ref')
+        )
+          .to.emit(dao, EVENTS.Withdrawn)
+          .withArgs(erc20.address, signers[1].address, NO_ID, amount, 'ref');
+
+        expect(await erc20.balanceOf(signers[1].address)).to.equal(
+          receiverBalance.add(amount)
+        );
+      });
+    });
+
+    context('ERC721', async () => {
+      it('reverts if the amount is not zero', async () => {
+        await expect(
+          dao.withdraw(erc721.address, ownerAddress, NO_ID, amount, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'NonZeroAmount')
+          .withArgs(amount);
+      });
+
+      it('withdraws the token', async () => {
+        await expect(
+          dao.withdraw(
+            erc721.address,
+            signers[1].address,
+            tokenId,
+            NO_AMOUNT,
+            'ref'
+          )
+        )
+          .to.emit(dao, EVENTS.Withdrawn)
+          .withArgs(
+            erc721.address,
+            signers[1].address,
+            tokenId,
+            NO_AMOUNT,
+            'ref'
+          );
+
+        expect(await erc721.balanceOf(signers[1].address)).to.equal(1);
+      });
+    });
+
+    context('ERC1155', async () => {
+      it('reverts if the amount is zero', async () => {
+        await expect(
+          dao.withdraw(erc1155.address, ownerAddress, NO_ID, NO_AMOUNT, 'ref')
+        ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+      });
+
+      it('withdraws if the balance is high enough', async () => {
+        const receiverBalance = await erc1155.balanceOf(
           signers[1].address,
-          amount,
-          'ref'
+          tokenId
         );
 
-      expect(await signers[1].getBalance()).to.equal(
-        receiverBalance.add(amount)
-      );
-    });
-
-    it('throws an error if the native token balance is too low', async () => {
-      await expect(
-        dao.withdraw(
-          ethers.constants.AddressZero,
-          ownerAddress,
-          amount.add(1),
-          'ref'
+        await expect(
+          dao.withdraw(
+            erc1155.address,
+            signers[1].address,
+            tokenId,
+            amount,
+            'ref'
+          )
         )
-      ).to.be.revertedWithCustomError(dao, 'NativeTokenWithdrawFailed');
+          .to.emit(dao, EVENTS.Withdrawn)
+          .withArgs(
+            erc1155.address,
+            signers[1].address,
+            tokenId,
+            amount,
+            'ref'
+          );
+
+        expect(await erc1155.balanceOf(signers[1].address, tokenId)).to.equal(
+          receiverBalance.add(amount)
+        );
+      });
     });
 
-    it('withdraws ERC20 if DAO balance is high enough', async () => {
-      const receiverBalance = await token.balanceOf(signers[1].address);
+    context('Unsupported Token', async () => {
+      it('reverts if the provided address does not refer to a supported token', async () => {
+        await expect(
+          dao.withdraw(dao.address, ownerAddress, NO_ID, amount, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
 
-      await expect(
-        dao.withdraw(token.address, signers[1].address, amount, 'ref')
-      )
-        .to.emit(dao, EVENTS.Withdrawn)
-        .withArgs(token.address, signers[1].address, amount, 'ref');
+        await expect(
+          dao.withdraw(dao.address, ownerAddress, tokenId, NO_AMOUNT, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
 
-      expect(await token.balanceOf(signers[1].address)).to.equal(
-        receiverBalance.add(amount)
-      );
-    });
-
-    it('throws an error if the ERC20 balance is too low', async () => {
-      await expect(
-        dao.withdraw(token.address, ownerAddress, amount.add(1), 'ref')
-      ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
-    });
-
-    it('throws an error if the amount is 0', async () => {
-      await expect(
-        dao.withdraw(token.address, ownerAddress, 0, 'ref')
-      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
+        await expect(
+          dao.withdraw(dao.address, ownerAddress, tokenId, amount, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
+        await expect(
+          dao.withdraw(dao.address, ownerAddress, NO_ID, NO_AMOUNT, 'ref')
+        )
+          .to.be.revertedWithCustomError(dao, 'UnsupportedTokenStandard')
+          .withArgs(dao.address);
+      });
     });
   });
 
@@ -580,11 +850,11 @@ describe('DAO', function () {
 
     it('correctly sets callback selector and interface and can call later', async () => {
       // (Real usecase example)
-      // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
-      // callbackSelector (onERC721Received.selector)
-      const id = '0x150b7a02';
+      // interfaceId for supportsInterface(type(IERC777Recipient).interfaceId)
+      // callbackSelector (tokensReceived.selector)
+      const id = '0x0023de29';
 
-      // onERC721Received selector doesn't exist, so it should fail..
+      // 0023de29 selector doesn't exist, so it should fail..
       await expect(
         signers[0].sendTransaction({
           to: dao.address,
@@ -594,16 +864,16 @@ describe('DAO', function () {
         .to.be.revertedWithCustomError(dao, 'UnkownCallback')
         .withArgs(id, UNREGISTERED_INTERFACE_RETURN);
 
-      // register onERC721Received selector
+      // register tokensReceived selector
       await dao.registerStandardCallback(id, id, id);
 
-      let onERC721ReceivedReturned = await ethers.provider.call({
+      let tokensReceivedReturned = await ethers.provider.call({
         to: dao.address,
         data: id,
       });
 
       // TODO: ethers utils pads zero to the left. we need to pad to the right.
-      expect(onERC721ReceivedReturned).to.equal(id + '00'.repeat(28));
+      expect(tokensReceivedReturned).to.equal(id + '00'.repeat(28));
       expect(await dao.supportsInterface(id)).to.equal(true);
     });
   });

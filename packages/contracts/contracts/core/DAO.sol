@@ -3,10 +3,15 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
@@ -25,6 +30,8 @@ contract DAO is
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
+    //IERC721ReceiverUpgradeable, // We use callback handler instead.
+    //IERC1155ReceiverUpgradeable,
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
@@ -32,6 +39,7 @@ contract DAO is
 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
+    using ERC165CheckerUpgradeable for address;
 
     /// @notice The ID of the permission required to call the `execute` function.
     bytes32 public constant EXECUTE_PERMISSION_ID = keccak256("EXECUTE_PERMISSION");
@@ -79,6 +87,14 @@ contract DAO is
     /// @notice Thrown if the deposit or withdraw amount is zero.
     error ZeroAmount();
 
+    /// @notice Thrown if the deposit or withdraw amount is not zero.
+    /// @param amount The amount differing from zero.
+    error NonZeroAmount(uint256 amount);
+
+    /// @notice Thrown if the deposit or withdraw token ID is not zero.
+    /// @param tokenId The token ID differing from zero.
+    error NonZeroTokenId(uint256 tokenId);
+
     /// @notice Thrown if there is a mismatch between the expected and actually deposited amount of native tokens.
     /// @param expected The expected native token amount.
     /// @param actual The actual native token amount deposited.
@@ -86,6 +102,10 @@ contract DAO is
 
     /// @notice Thrown if a native token withdraw fails.
     error NativeTokenWithdrawFailed();
+
+    /// @notice Thrown when an unsupported token is deposited or withdrawn.
+    /// @param token The address of the unsupported token.
+    error UnsupportedTokenStandard(address token);
 
     /// @notice Emitted when a new DAO uri is set.
     /// @param daoURI The new uri.
@@ -113,6 +133,21 @@ contract DAO is
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
+        _registerInterface(type(IERC721ReceiverUpgradeable).interfaceId);
+        _registerInterface(type(IERC1155ReceiverUpgradeable).interfaceId);
+
+        _registerCallback(
+            IERC721ReceiverUpgradeable.onERC721Received.selector,
+            IERC721ReceiverUpgradeable.onERC721Received.selector
+        ); // 0x150b7a02  => onERC721Received(address,address,uint256,bytes)
+        _registerCallback(
+            IERC1155ReceiverUpgradeable.onERC1155Received.selector,
+            IERC1155ReceiverUpgradeable.onERC1155Received.selector
+        ); // 0xf23a6e61  => onERC1155Received(address,address,uint256,uint256,bytes)
+        _registerCallback(
+            IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector,
+            IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector
+        ); // 0xbc197c81  => onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
@@ -142,7 +177,7 @@ contract DAO is
     /// @inheritdoc IDAO
     function setTrustedForwarder(
         address _newTrustedForwarder
-    ) external override auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID) {
+    ) external auth(address(this), SET_TRUSTED_FORWARDER_PERMISSION_ID) {
         _setTrustedForwarder(_newTrustedForwarder);
     }
 
@@ -157,14 +192,14 @@ contract DAO is
         address _who,
         bytes32 _permissionId,
         bytes memory _data
-    ) external view override returns (bool) {
+    ) external view returns (bool) {
         return isGranted(_where, _who, _permissionId, _data);
     }
 
     /// @inheritdoc IDAO
     function setMetadata(
         bytes calldata _metadata
-    ) external override auth(address(this), SET_METADATA_PERMISSION_ID) {
+    ) external auth(address(this), SET_METADATA_PERMISSION_ID) {
         _setMetadata(_metadata);
     }
 
@@ -175,7 +210,6 @@ contract DAO is
         uint256 allowFailureMap
     )
         external
-        override
         auth(address(this), EXECUTE_PERMISSION_ID)
         returns (bytes[] memory execResults, uint256 failureMap)
     {
@@ -215,47 +249,156 @@ contract DAO is
     /// @inheritdoc IDAO
     function deposit(
         address _token,
+        uint256 _tokenId,
         uint256 _amount,
         string calldata _reference
-    ) external payable override {
-        if (_amount == 0) revert ZeroAmount();
-
+    ) external payable {
+        // -- Native Token -- //
         if (_token == address(0)) {
-            if (msg.value != _amount)
+            if (_amount == 0) {
+                revert ZeroAmount();
+            }
+            if (_tokenId != 0) {
+                revert NonZeroTokenId(_tokenId);
+            }
+            if (msg.value != _amount) {
                 revert NativeTokenDepositAmountMismatch({expected: _amount, actual: msg.value});
+            }
         } else {
-            if (msg.value != 0)
+            if (msg.value != 0) {
                 revert NativeTokenDepositAmountMismatch({expected: 0, actual: msg.value});
+            }
 
-            IERC20Upgradeable(_token).safeTransferFrom(msg.sender, address(this), _amount);
+            // -- ERC-165 Supporting Tokens -- //
+            if (_token.supportsERC165()) {
+                // -- ERC-721 Token -- //
+                if (_token.supportsInterface(type(IERC721Upgradeable).interfaceId)) {
+                    if (_amount != 0) {
+                        revert NonZeroAmount({amount: _amount});
+                    }
+                    IERC721Upgradeable(_token).safeTransferFrom({
+                        from: msg.sender,
+                        to: address(this),
+                        tokenId: _tokenId
+                        //, data: _reference // TODO Should we pass the data or save gas because we emit it in the event anyway.
+                    });
+                }
+                // -- ERC-1155 Token -- //
+                else if (_token.supportsInterface(type(IERC1155Upgradeable).interfaceId)) {
+                    if (_amount == 0) {
+                        revert ZeroAmount();
+                    }
+                    IERC1155Upgradeable(_token).safeTransferFrom({
+                        from: msg.sender,
+                        to: address(this),
+                        id: _tokenId,
+                        amount: _amount,
+                        data: bytes(_reference)
+                    });
+                } else {
+                    revert UnsupportedTokenStandard({token: _token});
+                }
+            }
+            // -- ERC-20 Token -- //
+            else {
+                if (_tokenId != 0) {
+                    revert NonZeroTokenId({tokenId: _tokenId});
+                }
+                if (_amount == 0) {
+                    revert ZeroAmount();
+                }
+                IERC20Upgradeable(_token).safeTransferFrom(msg.sender, address(this), _amount);
+            }
         }
 
-        emit Deposited(msg.sender, _token, _amount, _reference);
+        emit Deposited({
+            sender: msg.sender,
+            token: _token,
+            amount: _amount,
+            tokenId: _tokenId,
+            _reference: _reference
+        });
     }
 
     /// @inheritdoc IDAO
     function withdraw(
         address _token,
         address _to,
+        uint256 _tokenId,
         uint256 _amount,
         string memory _reference
-    ) external override auth(address(this), WITHDRAW_PERMISSION_ID) {
-        if (_amount == 0) revert ZeroAmount();
-
+    ) external auth(address(this), WITHDRAW_PERMISSION_ID) {
+        // -- Native Token -- //
         if (_token == address(0)) {
+            if (_amount == 0) {
+                revert ZeroAmount();
+            }
+            if (_tokenId != 0) {
+                revert NonZeroTokenId({tokenId: _tokenId});
+            }
             (bool ok, ) = _to.call{value: _amount}("");
-            if (!ok) revert NativeTokenWithdrawFailed();
-        } else {
-            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
+            if (!ok) {
+                revert NativeTokenWithdrawFailed();
+            }
+        }
+        // -- Non-Native Tokens -- //
+        else {
+            // -- ERC-165 Supporting Tokens -- //
+            if (_token.supportsERC165()) {
+                // -- ERC-721 Token -- //
+                if (_token.supportsInterface(type(IERC721Upgradeable).interfaceId)) {
+                    if (_amount != 0) {
+                        revert NonZeroAmount({amount: _amount});
+                    }
+
+                    IERC721Upgradeable(_token).safeTransferFrom({
+                        from: address(this),
+                        to: _to,
+                        tokenId: _tokenId
+                    });
+                }
+                // -- ERC-1155 Token -- //
+                else if (_token.supportsInterface(type(IERC1155Upgradeable).interfaceId)) {
+                    if (_amount == 0) {
+                        revert ZeroAmount();
+                    }
+                    IERC1155Upgradeable(_token).safeTransferFrom({
+                        from: address(this),
+                        to: _to,
+                        id: _tokenId,
+                        amount: _amount,
+                        data: bytes(_reference)
+                    });
+                } else {
+                    revert UnsupportedTokenStandard({token: _token});
+                }
+            }
+            // -- ERC-20 Token -- //
+            else {
+                if (_tokenId != 0) {
+                    revert NonZeroTokenId({tokenId: _tokenId});
+                }
+                if (_amount == 0) {
+                    revert ZeroAmount();
+                }
+
+                IERC20Upgradeable(_token).safeTransfer(_to, _amount);
+            }
         }
 
-        emit Withdrawn(_token, _to, _amount, _reference);
+        emit Withdrawn({
+            token: _token,
+            to: _to,
+            tokenId: _tokenId,
+            amount: _amount,
+            _reference: _reference
+        });
     }
 
     /// @inheritdoc IDAO
     function setSignatureValidator(
         address _signatureValidator
-    ) external override auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
+    ) external auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
         signatureValidator = IERC1271(_signatureValidator);
 
         emit SignatureValidatorSet({signatureValidator: _signatureValidator});
@@ -314,10 +457,9 @@ contract DAO is
 
     /// @notice Updates the set DAO uri to a new value.
     /// @param newDaoURI The new DAO uri to be set.
-    function setDaoURI(string calldata newDaoURI)
-        external
-        auth(address(this), SET_METADATA_PERMISSION_ID)
-    {
+    function setDaoURI(
+        string calldata newDaoURI
+    ) external auth(address(this), SET_METADATA_PERMISSION_ID) {
         _setDaoURI(newDaoURI);
     }
 

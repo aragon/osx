@@ -28,7 +28,7 @@ describe('MerkleDistributor', function () {
     dao = await deployNewDAO(wallet0);
 
     const TestERC20 = await ethers.getContractFactory('TestERC20');
-    token = await TestERC20.deploy('FOO', 'FOO', 0); // mint 0 FOO tokens
+    token = await TestERC20.deploy('FOO', 'FOO');
 
     const MerkleDistributor = await ethers.getContractFactory(
       'MerkleDistributor'
@@ -83,7 +83,7 @@ describe('MerkleDistributor', function () {
         token.address,
         tree.getHexRoot()
       );
-      await token.setBalance(distributor.address, 201);
+      await token.mint(distributor.address, 201);
     });
 
     it('successful claim', async () => {
@@ -106,7 +106,7 @@ describe('MerkleDistributor', function () {
 
     it('must have enough to transfer', async () => {
       const proof0 = tree.getProof(0, wallet0, BigNumber.from(100));
-      await token.setBalance(distributor.address, 99);
+      await token.burn(distributor.address, 102); // 99 tokens remain
       await expect(
         distributor.claim(0, wallet0, 100, proof0)
       ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
@@ -209,7 +209,7 @@ describe('MerkleDistributor', function () {
         token.address,
         tree.getHexRoot()
       );
-      await token.setBalance(distributor.address, 201);
+      await token.mint(distributor.address, 201);
     });
 
     it('claim index 4', async () => {

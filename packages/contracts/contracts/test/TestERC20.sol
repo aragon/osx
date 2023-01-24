@@ -5,22 +5,13 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract TestERC20 is ERC20 {
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint256 amountToMint
-    ) ERC20(name_, symbol_) {
-        setBalance(msg.sender, amountToMint);
+    constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) {}
+
+    function mint(address account, uint256 amount) public {
+        _mint(account, amount);
     }
 
-    // sets the balance of the address
-    // this mints/burns the amount depending on the current balance
-    function setBalance(address to, uint256 amount) public {
-        uint256 old = balanceOf(to);
-        if (old < amount) {
-            _mint(to, amount - old);
-        } else if (old > amount) {
-            _burn(to, old - amount);
-        }
+    function burn(address account, uint256 amount) public {
+        _burn(account, amount);
     }
 }
