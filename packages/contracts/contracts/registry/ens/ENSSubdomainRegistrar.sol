@@ -22,7 +22,7 @@ contract ENSSubdomainRegistrar is UUPSUpgradeable, DaoAuthorizableUpgradeable {
         keccak256("REGISTER_ENS_SUBDOMAIN_PERMISSION");
 
     /// @notice The ENS registry contract
-    ENS private ens;
+    ENS public ens;
 
     /// @notice The namehash of the domain on which subdomains are registered.
     bytes32 public node;

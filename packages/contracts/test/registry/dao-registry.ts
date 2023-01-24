@@ -51,7 +51,7 @@ describe('DAORegistry', function () {
 
     // DAO Registry
     const Registry = await ethers.getContractFactory('DAORegistry');
-    
+
     daoRegistry = await deployWithProxy(Registry);
 
     await daoRegistry.initialize(
@@ -78,6 +78,12 @@ describe('DAORegistry', function () {
     await expect(
       daoRegistry.register(targetDao.address, ownerAddress, '')
     ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoName');
+  });
+
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await daoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
+    );
   });
 
   it('Should register a new DAO successfully', async function () {
