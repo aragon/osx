@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.10;
 
-import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
@@ -37,11 +36,7 @@ contract CounterV2PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.MultiTargetPermission[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -59,8 +54,11 @@ contract CounterV2PluginSetup is PluginSetup {
             _num
         );
 
-        permissions = new PermissionLib.MultiTargetPermission[](_multiplyHelper == address(0) ? 3 : 2);
-        helpers = new address[](1);
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](
+                _multiplyHelper == address(0) ? 3 : 2
+            );
+        address[] memory helpers = new address[](1);
 
         // deploy
         plugin = createERC1967Proxy(address(counterBase), initData);
@@ -95,81 +93,82 @@ contract CounterV2PluginSetup is PluginSetup {
         // add helpers
         helpers[0] = multiplyHelper;
 
-        return (plugin, helpers, permissions);
+        preparedDependency.helpers = helpers;
+        preparedDependency.permissions = permissions;
+
+        return (plugin, preparedDependency);
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
-        address _plugin, // proxy
-        address[] memory _helpers,
-        uint16[3] calldata _oldVersion,
-        bytes memory _data
+        uint16 _currentBuild,
+        SetupPayload calldata _payload
     )
         external
         view
         override
-        returns (
-            address[] memory activeHelpers,
-            bytes memory initData,
-            PermissionLib.MultiTargetPermission[] memory permissions
-        )
+        returns (bytes memory initData, PreparedDependency memory preparedDependency)
     {
         uint256 _newVariable;
 
-        if (_oldVersion[0] == 1 && _oldVersion[1] == 0) {
-            (_newVariable) = abi.decode(_data, (uint256));
+        if (_currentBuild == 1) {
+            (_newVariable) = abi.decode(_payload.data, (uint256));
             initData = abi.encodeWithSelector(
                 bytes4(keccak256("setNewVariable(uint256)")),
                 _newVariable
             );
         }
 
-        permissions = new PermissionLib.MultiTargetPermission[](1);
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](1);
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_CONDITION,
             multiplyHelperBase.MULTIPLY_PERMISSION_ID()
         );
 
         // if another helper is deployed, put it inside activeHelpers + put old ones as well.
-        activeHelpers = new address[](1);
-        activeHelpers[0] = _helpers[0];
+        address[] memory activeHelpers = new address[](1);
+        activeHelpers[0] = _payload.currentHelpers[0];
+
+        preparedDependency.helpers = activeHelpers;
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
-        address dao,
-        address plugin,
-        address[] calldata activeHelpers,
-        bytes calldata
+        address _dao,
+        SetupPayload calldata _payload
     ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
-        permissions = new PermissionLib.MultiTargetPermission[](activeHelpers.length != 0 ? 3 : 2);
+        permissions = new PermissionLib.MultiTargetPermission[](
+            _payload.currentHelpers.length != 0 ? 3 : 2
+        );
 
         // set permissions
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            dao,
-            plugin,
+            _dao,
+            _payload.plugin,
             NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
         permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            plugin,
-            dao,
+            _payload.plugin,
+            _dao,
             NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
-        if (activeHelpers.length != 0) {
+        if (_payload.currentHelpers.length != 0) {
             permissions[2] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Revoke,
-                activeHelpers[0],
-                plugin,
+                _payload.currentHelpers[0],
+                _payload.plugin,
                 NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );

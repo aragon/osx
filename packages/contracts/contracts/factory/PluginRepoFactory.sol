@@ -31,7 +31,7 @@ contract PluginRepoFactory {
     /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
     /// @param _name The plugin repository name.
     /// @param _initialOwner The plugin maintainer address.
-    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithVersion`.
+    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithFirstVersion`.
     function createPluginRepo(string calldata _name, address _initialOwner)
         external
         returns (PluginRepo)
@@ -42,13 +42,11 @@ contract PluginRepoFactory {
     /// @notice Creates and registers a named `PluginRepo` and publishes an initial version.
     /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the address `_maintainer`.
     /// @param _name The plugin repository name.
-    /// @param _initialSemanticVersion The semantic version for the new plugin repository version.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _contentURI The external URI for fetching the new version's content.
     /// @param _maintainer The plugin maintainer address.
-    function createPluginRepoWithVersion(
+    function createPluginRepoWithFirstVersion(
         string calldata _name,
-        uint16[3] memory _initialSemanticVersion,
         address _pluginSetup,
         bytes memory _contentURI,
         address _maintainer
@@ -56,7 +54,7 @@ contract PluginRepoFactory {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_name, address(this));
 
-        pluginRepo.createVersion(_initialSemanticVersion, _pluginSetup, _contentURI);
+        pluginRepo.createVersion(1, _pluginSetup, _contentURI);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         _setPluginRepoPermissions(pluginRepo, _maintainer);

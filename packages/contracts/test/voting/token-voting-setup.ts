@@ -176,11 +176,13 @@ describe('TokenVotingSetup', function () {
         Object.values(defaultMintSettings),
       ]);
 
-      const {plugin, helpers, permissions} =
-        await tokenVotingSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          data
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await tokenVotingSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        data
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -272,11 +274,13 @@ describe('TokenVotingSetup', function () {
         Object.values(defaultMintSettings),
       ]);
 
-      const {plugin, helpers, permissions} =
-        await tokenVotingSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          data
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await tokenVotingSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        data
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -321,11 +325,13 @@ describe('TokenVotingSetup', function () {
         nonce: nonce + 1,
       });
 
-      const {plugin, helpers, permissions} =
-        await tokenVotingSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          defaultData
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await tokenVotingSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        defaultData
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(1);
@@ -391,6 +397,7 @@ describe('TokenVotingSetup', function () {
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
+
       expect(await tokenVoting.minParticipation()).to.be.equal(
         defaultVotingSettings.minParticipation
       );
@@ -426,12 +433,11 @@ describe('TokenVotingSetup', function () {
       const plugin = ethers.Wallet.createRandom().address;
 
       await expect(
-        tokenVotingSetup.prepareUninstallation(
-          targetDao.address,
+        tokenVotingSetup.prepareUninstallation(targetDao.address, {
           plugin,
-          [],
-          EMPTY_DATA
-        )
+          currentHelpers: [],
+          data: EMPTY_DATA,
+        })
       )
         .to.be.revertedWithCustomError(
           tokenVotingSetup,
@@ -440,12 +446,11 @@ describe('TokenVotingSetup', function () {
         .withArgs(0);
 
       await expect(
-        tokenVotingSetup.prepareUninstallation(
-          targetDao.address,
+        tokenVotingSetup.prepareUninstallation(targetDao.address, {
           plugin,
-          [AddressZero, AddressZero, AddressZero],
-          EMPTY_DATA
-        )
+          currentHelpers: [AddressZero, AddressZero, AddressZero],
+          data: EMPTY_DATA,
+        })
       )
         .to.be.revertedWithCustomError(
           tokenVotingSetup,
@@ -479,9 +484,11 @@ describe('TokenVotingSetup', function () {
       const permissions1 =
         await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [governanceWrappedERC20.address],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [governanceWrappedERC20.address],
+            data: EMPTY_DATA,
+          }
         );
 
       const essentialPermissions = [
@@ -514,9 +521,11 @@ describe('TokenVotingSetup', function () {
       const permissions2 =
         await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [governanceERC20.address],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [governanceERC20.address],
+            data: EMPTY_DATA,
+          }
         );
 
       expect(permissions2.length).to.be.equal(4);

@@ -26,7 +26,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre,
     'AddresslistVoting',
     'AddresslistVotingSetup',
-    [1, 0, 0],
     ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes(`ipfs://${addresslistCIDPath}`)
     )
@@ -41,33 +40,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre,
     'TokenVoting',
     'TokenVotingSetup',
-    [1, 0, 0],
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${tokenCIDPath}`))
   );
 
   // AdminSetup
   const adminCIDPath = await uploadToIPFS(
-    JSON.stringify(adminMetadata),
+    JSON.stringify(tokenMetadata),
     network.name
   );
   await createPluginRepo(
     hre,
     'Admin',
     'AdminSetup',
-    [1, 0, 0],
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${adminCIDPath}`))
   );
 
   // MultisigSetup
   const multisigCIDPath = await uploadToIPFS(
-    JSON.stringify(multisigMetadata),
+    JSON.stringify(tokenMetadata),
     network.name
   );
   await createPluginRepo(
     hre,
     'Multisig',
     'MultisigSetup',
-    [1, 0, 0],
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${multisigCIDPath}`))
   );
 };

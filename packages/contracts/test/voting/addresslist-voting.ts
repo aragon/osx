@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO} from '../../typechain';
+import {AddresslistVoting, DAO} from '../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
@@ -28,7 +28,7 @@ import {OZ_ERRORS} from '../test-utils/error';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
-  let voting: any;
+  let voting: AddresslistVoting;
   let dao: DAO;
   let dummyActions: any;
   let dummyMetadata: string;
@@ -81,7 +81,7 @@ describe('AddresslistVoting', function () {
       addresslistVotingFactoryBytecode,
       signers[0]
     );
-    voting = await AddresslistVotingFactory.deploy();
+    voting = (await AddresslistVotingFactory.deploy()) as AddresslistVoting;
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -164,7 +164,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
+          .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
       )
         .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
         .withArgs(signers[1].address);
@@ -172,7 +172,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
+          .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
       ).to.not.be.reverted;
     });
 
@@ -188,7 +188,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[1])
-          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
+          .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
       )
         .to.be.revertedWithCustomError(voting, 'ProposalCreationForbidden')
         .withArgs(signers[1].address);
@@ -196,7 +196,7 @@ describe('AddresslistVoting', function () {
       await expect(
         voting
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], 0, 0, VoteOption.None, false)
+          .createProposal(dummyMetadata, [], 0, 0, 0, VoteOption.None, false)
       ).to.not.be.reverted;
     });
 
@@ -213,6 +213,7 @@ describe('AddresslistVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           startDateInThePast,
           endDate,
           VoteOption.None,
@@ -239,6 +240,7 @@ describe('AddresslistVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           tooLateStartDate,
           endDate,
           VoteOption.None,
@@ -260,6 +262,7 @@ describe('AddresslistVoting', function () {
         voting.createProposal(
           dummyMetadata,
           [],
+          0,
           startDate,
           tooEarlyEndDate,
           VoteOption.None,
@@ -284,6 +287,7 @@ describe('AddresslistVoting', function () {
           await voting.createProposal(
             dummyMetadata,
             dummyActions,
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -309,6 +313,7 @@ describe('AddresslistVoting', function () {
           await voting.createProposal(
             dummyMetadata,
             dummyActions,
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -327,9 +332,12 @@ describe('AddresslistVoting', function () {
         signers.slice(0, 10).map(s => s.address)
       );
 
+      const allowFailureMap = 1;
+
       let tx = await voting.createProposal(
         dummyMetadata,
         dummyActions,
+        allowFailureMap,
         0,
         0,
         VoteOption.None,
@@ -348,12 +356,14 @@ describe('AddresslistVoting', function () {
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.allowFailureMap).to.equal(allowFailureMap);
 
       const block = await ethers.provider.getBlock('latest');
 
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.be.true;
       expect(proposal.executed).to.be.false;
+      expect(proposal.allowFailureMap).to.equal(allowFailureMap);
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
@@ -395,6 +405,7 @@ describe('AddresslistVoting', function () {
         dummyActions,
         0,
         0,
+        0,
         VoteOption.Yes,
         false
       );
@@ -412,11 +423,13 @@ describe('AddresslistVoting', function () {
       expect(event.args.actions[0].to).to.equal(dummyActions[0].to);
       expect(event.args.actions[0].value).to.equal(dummyActions[0].value);
       expect(event.args.actions[0].data).to.equal(dummyActions[0].data);
+      expect(event.args.allowFailureMap).to.equal(0);
 
       const block = await ethers.provider.getBlock('latest');
       const proposal = await voting.getProposal(id);
       expect(proposal.open).to.be.true;
       expect(proposal.executed).to.be.false;
+      expect(proposal.allowFailureMap).to.equal(0);
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
       expect(proposal.parameters.supportThreshold).to.equal(
         votingSettings.supportThreshold
@@ -443,6 +456,7 @@ describe('AddresslistVoting', function () {
         voting.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           startDate,
           endDate,
           VoteOption.Yes,
@@ -458,6 +472,7 @@ describe('AddresslistVoting', function () {
           await voting.createProposal(
             dummyMetadata,
             dummyActions,
+            0,
             startDate,
             endDate,
             VoteOption.None,
@@ -484,6 +499,7 @@ describe('AddresslistVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -614,6 +630,7 @@ describe('AddresslistVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -808,6 +825,7 @@ describe('AddresslistVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -943,6 +961,7 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
+          0,
           VoteOption.None,
           false
         );
@@ -1049,6 +1068,7 @@ describe('AddresslistVoting', function () {
             await voting.createProposal(
               dummyMetadata,
               dummyActions,
+              0,
               startDate,
               endDate,
               VoteOption.None,
@@ -1188,6 +1208,7 @@ describe('AddresslistVoting', function () {
           dummyActions,
           0,
           0,
+          0,
           VoteOption.None,
           false
         );
@@ -1242,6 +1263,7 @@ describe('AddresslistVoting', function () {
         await voting.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           0,
           0,
           VoteOption.None,

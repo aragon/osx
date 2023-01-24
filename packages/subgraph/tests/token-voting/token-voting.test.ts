@@ -25,7 +25,8 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER
+  TOTAL_VOTING_POWER,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 
 import {createDummyActions, createGetProposalCall} from '../utils';
@@ -68,7 +69,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -78,6 +80,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     START_DATE,
     END_DATE,
     STRING_DATA,
+    [],
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -97,6 +101,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('TokenVotingProposal', entityID, 'proposalId', proposalId);
   assert.fieldEquals('TokenVotingProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('TokenVotingProposal', entityID, 'metadata', STRING_DATA);
+  assert.fieldEquals('TokenVotingProposal', entityID, 'allowFailureMap', ALLOW_FAILURE_MAP);
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
@@ -180,7 +185,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -254,7 +260,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
   // create event
   let event2 = createNewVoteCastEvent(
@@ -309,7 +316,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -361,7 +369,8 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event

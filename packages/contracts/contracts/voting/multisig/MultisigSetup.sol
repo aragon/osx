@@ -27,14 +27,7 @@ contract MultisigSetup is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    )
-        external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.MultiTargetPermission[] memory permissions
-        )
-    {
+    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
@@ -49,11 +42,9 @@ contract MultisigSetup is PluginSetup {
             abi.encodeWithSelector(Multisig.initialize.selector, dao, members, multisigSettings)
         );
 
-        // Prepare helpers
-        (helpers); // silence the warning.
-
         // Prepare permissions
-        permissions = new PermissionLib.MultiTargetPermission[](3);
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](3);
 
         // Set permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -81,14 +72,14 @@ contract MultisigSetup is PluginSetup {
             NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
-        address _plugin,
-        address[] calldata,
-        bytes calldata
+        SetupPayload calldata _payload
     ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](3);
@@ -96,7 +87,7 @@ contract MultisigSetup is PluginSetup {
         // Set permissions to be Revoked.
         permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_CONDITION,
             multisigBase.UPDATE_MULTISIG_SETTINGS_PERMISSION_ID()
@@ -104,7 +95,7 @@ contract MultisigSetup is PluginSetup {
 
         permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
             NO_CONDITION,
             multisigBase.UPGRADE_PLUGIN_PERMISSION_ID()
@@ -113,7 +104,7 @@ contract MultisigSetup is PluginSetup {
         permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
+            _payload.plugin,
             NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
