@@ -278,7 +278,7 @@ contract DAO is
     }
 
     /// @notice Fallback to handle future versions of the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) standard.
-    /// @param _input An alias being equivalent to `msg.data`. This a feature of the fallback function was introduced with [solidity compiler version 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6)
+    /// @param _input An alias being equivalent to `msg.data`. This feature of the fallback function was introduced with the [solidity compiler version 0.7.6](https://github.com/ethereum/solidity/releases/tag/v0.7.6)
     /// @return bytes The magic number registered for the function selector triggering the fallback.
     fallback(bytes calldata _input) external returns (bytes memory) {
         bytes4 magicNumber = _handleCallback(msg.sig, _input);
