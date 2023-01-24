@@ -152,7 +152,6 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-plugin-repo';
-    const pluginRepoName = 'my-pluginRepo';
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
