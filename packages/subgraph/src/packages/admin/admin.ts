@@ -42,6 +42,7 @@ export function _handleProposalCreated(
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
   proposalEntity.adminstrator = adminstratorAddress.toHexString();
+  proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   // Adminstrator
   let adminstratorId = adminstratorAddress.toHexString() + '_' + pluginId;

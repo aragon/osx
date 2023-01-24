@@ -15,6 +15,7 @@ export function createNewProposalCreatedEvent(
   endDate: string,
   metadata: string,
   actions: ethereum.Tuple[],
+  allowFailureMap: string,
   contractAddress: string
 ): ProposalCreated {
   let createProposalCreatedEvent = changetype<ProposalCreated>(newMockEvent());
@@ -46,6 +47,10 @@ export function createNewProposalCreatedEvent(
     'actions',
     ethereum.Value.fromTupleArray(actions)
   );
+  let allowFailureMapParam = new ethereum.EventParam(
+    'allowFailureMap',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
+  );
 
   createProposalCreatedEvent.parameters.push(proposalIdParam);
   createProposalCreatedEvent.parameters.push(creatorParam);
@@ -53,6 +58,7 @@ export function createNewProposalCreatedEvent(
   createProposalCreatedEvent.parameters.push(endDateParam);
   createProposalCreatedEvent.parameters.push(metadataParam);
   createProposalCreatedEvent.parameters.push(actionsParam);
+  createProposalCreatedEvent.parameters.push(allowFailureMapParam);
 
   return createProposalCreatedEvent;
 }

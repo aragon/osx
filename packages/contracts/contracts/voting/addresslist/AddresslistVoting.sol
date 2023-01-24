@@ -76,6 +76,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         uint64 _startDate,
         uint64 _endDate,
         VoteOption _voteOption,
@@ -95,7 +96,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             _metadata: _metadata,
             _startDate: _startDate,
             _endDate: _endDate,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
 
         // Store proposal related information
@@ -115,6 +117,11 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
 
         // REMOVE
         proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO THIS DOESN'T NEED TO BE STORED ANYMORE https://aragonassociation.atlassian.net/browse/APP-1417
+
+        // Reduce costs
+        if(_allowFailureMap != 0) {
+            proposal_.allowFailureMap = _allowFailureMap;
+        }
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

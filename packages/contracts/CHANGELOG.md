@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds `startDate` and `endDate` to Multisig proposals. Execution and approvals of proposals have now to be in the boundaries of these 2 dates.
 - Adds `IEIP4824`
 - Adds `event NewURI` implementations for `daoURI()` and `setDaoURI()` definitions in `DAO`
+- adds `allowFailureMap` to the plugins for creating proposals.
 
 ### Changed
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16`, and added `approvals`(uint16) in the `Proposal` struct.
 - Changed `_canVote` logic to revert for votes being cast with `VoteOption.None`.
 - Changed `callId` in `DAO.execute()` from `uint256` to `bytes32`.
+- Changed the `createProposal` function signature which expects `uint256` `allowFaiureMap` argument.
 - Changed all occurences of `oracle` to `condition`.
 - Renamed `ItemSingleTarget` and `ItemMultiTarget` in `PermissionLib` to `SingleTargetPermission` and `MultiTargetPermission`.
 - Renamed `bulkOnSingleTarget()` and `bulkOnMultiTarget()` in `PermissionManager` to `applySingleTargetPermissions()` and `applyMultiTargetPermissions()`

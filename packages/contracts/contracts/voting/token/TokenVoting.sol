@@ -60,6 +60,7 @@ contract TokenVoting is MajorityVotingBase {
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         uint64 _startDate,
         uint64 _endDate,
         VoteOption _voteOption,
@@ -82,7 +83,8 @@ contract TokenVoting is MajorityVotingBase {
             _metadata: _metadata,
             _startDate: _startDate,
             _endDate: _endDate,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
 
         // Store proposal related information
@@ -102,6 +104,11 @@ contract TokenVoting is MajorityVotingBase {
         );
 
         proposal_.tally.totalVotingPower = totalVotingPower;
+
+        // Reduce costs
+        if(_allowFailureMap != 0) {
+            proposal_.allowFailureMap = _allowFailureMap;
+        }
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

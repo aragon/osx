@@ -155,7 +155,7 @@ templates:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -180,7 +180,7 @@ templates:
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
@@ -211,7 +211,7 @@ templates:
           handler: handleAddressesRemoved
         - event: Approved(indexed uint256,indexed address)
           handler: handleApproved
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
@@ -236,7 +236,7 @@ templates:
       eventHandlers:
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
-        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
+        - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
   # PluginRepo
   - name: PluginRepoTemplate

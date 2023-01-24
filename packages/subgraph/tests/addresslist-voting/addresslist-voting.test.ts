@@ -31,7 +31,8 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER
+  TOTAL_VOTING_POWER,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
@@ -77,7 +78,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -87,6 +89,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     START_DATE,
     END_DATE,
     STRING_DATA,
+    [],
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -137,6 +141,12 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     entityID,
     'creationBlockNumber',
     event.block.number.toString()
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'allowFailureMap',
+    ALLOW_FAILURE_MAP
   );
 
   assert.fieldEquals(
@@ -225,7 +235,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -283,7 +294,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -344,7 +356,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
     '0', // no
     TOTAL_VOTING_POWER,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
