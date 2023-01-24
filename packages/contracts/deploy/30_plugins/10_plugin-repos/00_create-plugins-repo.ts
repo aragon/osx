@@ -45,7 +45,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // AdminSetup
   const adminCIDPath = await uploadToIPFS(
-    JSON.stringify(tokenMetadata),
+    JSON.stringify(adminMetadata),
     network.name
   );
   await createPluginRepo(
@@ -57,7 +57,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // MultisigSetup
   const multisigCIDPath = await uploadToIPFS(
-    JSON.stringify(tokenMetadata),
+    JSON.stringify(multisigMetadata),
     network.name
   );
   await createPluginRepo(
