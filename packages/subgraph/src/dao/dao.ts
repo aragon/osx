@@ -216,7 +216,7 @@ export function handleGranted(event: Granted): void {
   permissionEntity.where = event.params.where;
   permissionEntity.who = event.params.who;
   permissionEntity.actor = event.params.here;
-  permissionEntity.oracle = event.params.oracle;
+  permissionEntity.condition = event.params.condition;
   permissionEntity.save();
 }
 

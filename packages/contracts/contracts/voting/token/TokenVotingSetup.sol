@@ -33,8 +33,8 @@ contract TokenVotingSetup is PluginSetup {
     /// @notice The address of the `TokenVoting` base contract.
     TokenVoting private immutable tokenVotingBase;
 
-    /// @notice The address zero to be used as oracle address for permissions.
-    address private constant NO_ORACLE = address(0);
+    /// @notice The address zero to be used as condition address for permissions.
+    address private constant NO_CONDITION = address(0);
 
     /// @notice The address of the `GovernanceERC20` base contract.
     address public immutable governanceERC20Base;
@@ -92,17 +92,16 @@ contract TokenVotingSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallationDataABI() external pure returns (string memory) {
         return
-            "(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
+            "(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         IDAO dao = IDAO(_dao);
 
@@ -129,7 +128,7 @@ contract TokenVotingSetup is PluginSetup {
         address token = tokenSettings.addr;
 
         // Prepare helpers.
-        helpers = new address[](1);
+        address[] memory helpers = new address[](1);
 
         if (token != address(0)) {
             // the following 2 calls(_getTokenInterfaceIds, isERC20) don't use
@@ -186,46 +185,51 @@ contract TokenVotingSetup is PluginSetup {
         );
 
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](tokenSettings.addr != address(0) ? 3 : 4);
+        PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](
+            tokenSettings.addr != address(0) ? 3 : 4
+        );
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` of the DAO to the plugin.
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
         if (tokenSettings.addr == address(0)) {
             bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
 
-            permissions[3] = PermissionLib.ItemMultiTarget(
+            permissions[3] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Grant,
                 token,
                 _dao,
-                NO_ORACLE,
+                NO_CONDITION,
                 tokenMintPermission
             );
         }
+
+        preparedDependency.helpers = helpers;
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
@@ -234,14 +238,13 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata _helpers,
-        bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        view
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {        
         // Prepare permissions.
-        uint256 helperLength = _helpers.length;
+        uint256 helperLength = _payload.currentHelpers.length;
         if (helperLength != 1) {
             revert WrongHelpersArrayLength({length: helperLength});
         }
@@ -250,7 +253,7 @@ contract TokenVotingSetup is PluginSetup {
         // it's either GovernanceWrappedERC20 or GovernanceERC20
         // which is ensured by PluginSetupProcessor that it can NOT pass helper
         // that wasn't deployed by the prepareInstall in this plugin setup.
-        address token = _helpers[0];
+        address token = _payload.currentHelpers[0];
 
         bool[] memory supportedIds = _getTokenInterfaceIds(token);
 
@@ -258,30 +261,30 @@ contract TokenVotingSetup is PluginSetup {
         // Then it's GovernanceERC20.
         bool isGovernanceERC20 = supportedIds[0] && supportedIds[1] && !supportedIds[2];
 
-        permissions = new PermissionLib.ItemMultiTarget[](isGovernanceERC20 ? 4 : 3);
+        permissions = new PermissionLib.MultiTargetPermission[](isGovernanceERC20 ? 4 : 3);
 
         // Set permissions to be Revoked.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             tokenVotingBase.UPDATE_VOTING_SETTINGS_PERMISSION_ID()
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             tokenVotingBase.UPGRADE_PLUGIN_PERMISSION_ID()
         );
 
-        permissions[2] = PermissionLib.ItemMultiTarget(
+        permissions[2] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
-            NO_ORACLE,
+            _payload.plugin,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
@@ -291,11 +294,11 @@ contract TokenVotingSetup is PluginSetup {
         // calls dao for the permissions, we might decide to include the below always as it will be
         // more gas less than checking isGovernanceERC20..
         if (isGovernanceERC20) {
-            permissions[3] = PermissionLib.ItemMultiTarget(
+            permissions[3] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Revoke,
                 token,
                 _dao,
-                NO_ORACLE,
+                NO_CONDITION,
                 GovernanceERC20(token).MINT_PERMISSION_ID()
             );
         }

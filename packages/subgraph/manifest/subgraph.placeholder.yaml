@@ -74,17 +74,17 @@ dataSources:
         - name: AddresslistVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
-        - event: InstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+        - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
-        - event: InstallationApplied(indexed address,indexed address)
+        - event: UninstallationApplied(indexed address,indexed address,bytes32)
           handler: handleInstallationApplied
-        - event: UpdatePrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[],bytes)
+        - event: UpdatePrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),(address,address[],bytes),(address[],(uint8,address,address,address,bytes32)[]),bytes)
           handler: handleUpdatePrepared
-        - event: UpdateApplied(indexed address,indexed address)
+        - event: UpdateApplied(indexed address,indexed address,bytes32)
           handler: handleUpdateApplied
-        - event: UninstallationPrepared(indexed address,indexed address,indexed address,bytes,address,address[],(uint8,address,address,address,bytes32)[])
+        - event: UninstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),(address,address[],bytes),(uint8,address,address,address,bytes32)[])
           handler: handleUninstallationPrepared
-        - event: UninstallationApplied(indexed address,indexed address)
+        - event: UninstallationApplied(indexed address,indexed address,bytes32)
           handler: handleUninstallationApplied
       file: ./src/plugin/pluginSetupProcessor.ts
 # templates
@@ -157,7 +157,7 @@ templates:
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
-        - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+        - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
   # AddresslistVoting (package)
   - name: AddresslistVoting
@@ -182,7 +182,7 @@ templates:
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[])
           handler: handleProposalCreated
-        - event: VotingSettingsUpdated(uint8,uint64,uint64,uint64,uint256)
+        - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
         - event: AddressesAdded(address[])
           handler: handleAddressesAdded
@@ -255,5 +255,5 @@ templates:
         - name: PluginRepo
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginRepo.sol/PluginRepo.json
       eventHandlers:
-        - event: VersionCreated(uint256,uint16[3],indexed address,bytes)
+        - event: VersionCreated(uint8,uint16,indexed address,bytes)
           handler: handleVersionCreated

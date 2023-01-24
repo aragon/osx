@@ -148,11 +148,10 @@ describe('PluginRepoFactory: ', function () {
     expect(pluginRepo).not.undefined;
   });
 
-  it('fail creating new pluginRepo with wrong major version', async () => {
+  it.skip('fail creating new pluginRepo with wrong major version', async () => {
     const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
-    const wrongInitialSemanticVersion = [0, 0, 0];
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
@@ -160,9 +159,8 @@ describe('PluginRepoFactory: ', function () {
 
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     const pluginRepoToBeCreated = PluginRepo.attach(
-      pluginRepoFactory.callStatic.createPluginRepoWithVersion(
+      pluginRepoFactory.callStatic.createPluginRepoWithFirstVersion(
         pluginRepoName,
-        [1, 0, 0],
         pluginSetupAddress,
         contentURI,
         ownerAddress
@@ -170,9 +168,8 @@ describe('PluginRepoFactory: ', function () {
     );
 
     await expect(
-      pluginRepoFactory.createPluginRepoWithVersion(
+      pluginRepoFactory.createPluginRepoWithFirstVersion(
         pluginRepoName,
-        wrongInitialSemanticVersion,
         pluginSetupAddress,
         contentURI,
         ownerAddress
@@ -186,13 +183,11 @@ describe('PluginRepoFactory: ', function () {
     const pluginSetupMock = await deployMockPluginSetup();
 
     const pluginRepoName = 'my-pluginRepo';
-    const initialSemanticVersion = [1, 0, 0];
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
-    let tx = await pluginRepoFactory.createPluginRepoWithVersion(
+    let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       pluginRepoName,
-      initialSemanticVersion,
       pluginSetupAddress,
       contentURI,
       ownerAddress

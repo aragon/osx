@@ -6,12 +6,11 @@ import {ERC20, TokenVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import {deployWithProxy} from '../test-utils/proxy';
 
 import {
   VotingSettings,
   VotingMode,
-  pct16,
+  pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
 
@@ -56,8 +55,8 @@ describe('TokenVotingSetup', function () {
 
     defaultVotingSettings = {
       votingMode: VotingMode.EarlyExecution,
-      supportThreshold: pct16(50),
-      minParticipation: pct16(20),
+      supportThreshold: pctToRatio(50),
+      minParticipation: pctToRatio(20),
       minDuration: ONE_HOUR,
       minProposerVotingPower: 0,
     };
@@ -87,7 +86,7 @@ describe('TokenVotingSetup', function () {
 
     const iface = new ethers.utils.Interface([
       'function getVotingToken() returns (address)',
-      'function initialize(address,(uint8,uint64,uint64,uint64,uint256), address)',
+      'function initialize(address,(uint8,uint32,uint32,uint64,uint256), address)',
     ]);
 
     expect(await tokenVoting.supportsInterface(getInterfaceID(iface))).to.be.eq(
@@ -99,7 +98,7 @@ describe('TokenVotingSetup', function () {
     it('correctly returns prepare installation data abi', async () => {
       // Human-Readable Abi of data param of `prepareInstallation`.
       const dataHRABI =
-        '(tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
+        '(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)';
 
       expect(await tokenVotingSetup.prepareInstallationDataABI()).to.be.eq(
         dataHRABI
@@ -189,7 +188,7 @@ describe('TokenVotingSetup', function () {
         Object.values(defaultMintSettings),
       ]);
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           data
@@ -285,7 +284,7 @@ describe('TokenVotingSetup', function () {
         Object.values(defaultMintSettings),
       ]);
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           data
@@ -334,7 +333,7 @@ describe('TokenVotingSetup', function () {
         nonce: nonce + 1,
       });
 
-      const {plugin, helpers, permissions} =
+      const {plugin, preparedDependency: {helpers, permissions}} =
         await tokenVotingSetup.callStatic.prepareInstallation(
           targetDao.address,
           defaultData
@@ -404,6 +403,7 @@ describe('TokenVotingSetup', function () {
       const tokenVoting = PluginFactory.attach(anticipatedPluginAddress);
 
       expect(await tokenVoting.getDAO()).to.be.equal(daoAddress);
+   
       expect(await tokenVoting.minParticipation()).to.be.equal(
         defaultVotingSettings.minParticipation
       );
@@ -450,9 +450,11 @@ describe('TokenVotingSetup', function () {
       await expect(
         tokenVotingSetup.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [],
+            data: EMPTY_DATA
+          }
         )
       )
         .to.be.revertedWithCustomError(
@@ -464,9 +466,11 @@ describe('TokenVotingSetup', function () {
       await expect(
         tokenVotingSetup.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [AddressZero, AddressZero, AddressZero],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [AddressZero, AddressZero, AddressZero],
+            data: EMPTY_DATA
+          }
         )
       )
         .to.be.revertedWithCustomError(
@@ -501,9 +505,11 @@ describe('TokenVotingSetup', function () {
       const permissions1 =
         await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [governanceWrappedERC20.address],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [governanceWrappedERC20.address],
+            data: EMPTY_DATA
+          }
         );
 
       const essentialPermissions = [
@@ -536,9 +542,11 @@ describe('TokenVotingSetup', function () {
       const permissions2 =
         await tokenVotingSetup.callStatic.prepareUninstallation(
           targetDao.address,
-          plugin,
-          [governanceERC20.address],
-          EMPTY_DATA
+          {
+            plugin,
+            currentHelpers: [governanceERC20.address],
+            data: EMPTY_DATA
+          }
         );
 
       expect(permissions2.length).to.be.equal(4);

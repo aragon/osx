@@ -12,9 +12,9 @@ export const VOTING_MODES = new Map<number, string>()
   .set(1, 'EarlyExecution')
   .set(2, 'VoteReplacement');
 
-export const TOKEN_VOTING_INTERFACE = '0x302aac6a';
-export const ADDRESSLIST_VOTING_INTERFACE = '0xcedebd0f';
+export const TOKEN_VOTING_INTERFACE = '0x50eb001e';
+export const ADDRESSLIST_VOTING_INTERFACE = '0x54942d88';
 export const ADMIN_INTERFACE = '0x9102c53e';
 export const MULTISIG_INTERFACE = '0x164b5edf';
 
-export const TEN_POWER_16 = '10000000000000000';
+export const RATIO_BASE = '1000000'; // 10**6

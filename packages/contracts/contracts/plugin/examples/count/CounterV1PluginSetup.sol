@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IDAO} from "../../../core/IDAO.sol";
 import {IPluginSetup} from "../../IPluginSetup.sol";
 import {PluginSetup} from "../../PluginSetup.sol";
 import {MultiplyHelper} from "./MultiplyHelper.sol";
@@ -20,7 +21,7 @@ contract CounterV1PluginSetup is PluginSetup {
     MultiplyHelper public multiplyHelperBase;
     CounterV1 public counterBase;
 
-    address private constant NO_ORACLE = address(0);
+    address private constant NO_CONDITION = address(0);
 
     constructor() {
         multiplyHelperBase = new MultiplyHelper();
@@ -37,11 +38,7 @@ contract CounterV1PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -59,35 +56,38 @@ contract CounterV1PluginSetup is PluginSetup {
             _num
         );
 
-        permissions = new PermissionLib.ItemMultiTarget[](_multiplyHelper == address(0) ? 3 : 2);
-        helpers = new address[](1);
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](
+                _multiplyHelper == address(0) ? 3 : 2
+            );
+        address[] memory helpers = new address[](1);
 
         // deploy
         plugin = createERC1967Proxy(address(counterBase), initData);
 
         // set permissions
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
         if (_multiplyHelper == address(0)) {
-            permissions[2] = PermissionLib.ItemMultiTarget(
+            permissions[2] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Grant,
                 multiplyHelper,
                 plugin,
-                NO_ORACLE,
+                NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }
@@ -95,7 +95,10 @@ contract CounterV1PluginSetup is PluginSetup {
         // add helpers
         helpers[0] = multiplyHelper;
 
-        return (plugin, helpers, permissions);
+        preparedDependency.helpers = helpers;
+        preparedDependency.permissions = permissions;
+
+        return (plugin, preparedDependency);
     }
 
     /// @inheritdoc IPluginSetup
@@ -104,37 +107,39 @@ contract CounterV1PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata _activeHelpers,
-        bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        permissions = new PermissionLib.ItemMultiTarget[](_activeHelpers.length != 0 ? 3 : 2);
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        virtual
+        override
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
+        permissions = new PermissionLib.MultiTargetPermission[](
+            _payload.currentHelpers.length != 0 ? 3 : 2
+        );
 
         // set permissions
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
-            NO_ORACLE,
+            _payload.plugin,
+            NO_CONDITION,
             keccak256("EXECUTE_PERMISSION")
         );
 
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
-            _plugin,
+            _payload.plugin,
             _dao,
-            NO_ORACLE,
+            NO_CONDITION,
             counterBase.MULTIPLY_PERMISSION_ID()
         );
 
-        if (_activeHelpers.length != 0) {
-            permissions[2] = PermissionLib.ItemMultiTarget(
+        if (_payload.currentHelpers.length != 0) {
+            permissions[2] = PermissionLib.MultiTargetPermission(
                 PermissionLib.Operation.Revoke,
-                _activeHelpers[0],
-                _plugin,
-                NO_ORACLE,
+                _payload.currentHelpers[0],
+                _payload.plugin,
+                NO_CONDITION,
                 multiplyHelperBase.MULTIPLY_PERMISSION_ID()
             );
         }

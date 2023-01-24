@@ -49,7 +49,7 @@ type Permission @entity(immutable: true) {
   contractPermissionId: ContractPermissionId!
   who: Bytes!
   actor: Bytes!
-  oracle: Bytes
+  condition: Bytes
 }
 
 # Executions
@@ -249,7 +249,7 @@ type TokenVotingProposal implements Proposal @entity {
 
   votingMode: VotingMode!
   supportThreshold: BigInt!
-  minParticipation: BigInt!
+  minVotingPower: BigInt!
   snapshotBlock: BigInt!
 
   yes: BigInt
@@ -314,8 +314,7 @@ type AddresslistVotingProposal implements Proposal @entity {
 
   votingMode: VotingMode!
   supportThreshold: BigInt!
-  minParticipation: BigInt!
-
+  minVotingPower: BigInt!
   snapshotBlock: BigInt!
 
   abstain: BigInt

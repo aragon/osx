@@ -9,20 +9,20 @@ library PermissionLib {
     enum Operation {
         Grant,
         Revoke,
-        GrantWithOracle
+        GrantWithCondition
     }
 
-    struct ItemSingleTarget {
+    struct SingleTargetPermission {
         Operation operation;
         address who;
         bytes32 permissionId;
     }
 
-    struct ItemMultiTarget {
+    struct MultiTargetPermission {
         Operation operation;
         address where;
         address who;
-        address oracle;
+        address condition;
         bytes32 permissionId;
     }
 }

@@ -95,11 +95,13 @@ describe('AdminSetup', function () {
         nonce,
       });
 
-      const {plugin, helpers, permissions} =
-        await adminSetup.callStatic.prepareInstallation(
-          targetDao.address,
-          minimum_data
-        );
+      const {
+        plugin,
+        preparedDependency: {helpers, permissions},
+      } = await adminSetup.callStatic.prepareInstallation(
+        targetDao.address,
+        minimum_data
+      );
 
       expect(plugin).to.be.equal(anticipatedPluginAddress);
       expect(helpers.length).to.be.equal(0);
@@ -157,9 +159,11 @@ describe('AdminSetup', function () {
 
       const permissions = await adminSetup.callStatic.prepareUninstallation(
         targetDao.address,
-        plugin,
-        [],
-        EMPTY_DATA
+        {
+          plugin,
+          currentHelpers: [],
+          data: EMPTY_DATA,
+        }
       );
 
       expect(permissions.length).to.be.equal(1);

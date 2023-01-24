@@ -19,8 +19,8 @@ contract AdminSetup is PluginSetup {
     /// @notice The address of `Admin` plugin logic contract to be cloned.
     address private immutable implementation;
 
-    /// @notice The address zero to be used as oracle address for permissions.
-    address private constant NO_ORACLE = address(0);
+    /// @notice The address zero to be used as condition address for permissions.
+    address private constant NO_CONDITION = address(0);
 
     /// @notice Thrown if admin address is zero.
     /// @param admin The admin address.
@@ -39,11 +39,7 @@ contract AdminSetup is PluginSetup {
     /// @inheritdoc IPluginSetup
     function prepareInstallation(address _dao, bytes memory _data)
         external
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         IDAO dao = IDAO(_dao);
 
@@ -60,29 +56,29 @@ contract AdminSetup is PluginSetup {
         // Initialize cloned plugin contract.
         Admin(plugin).initialize(dao);
 
-        // Prepare helpers
-        (helpers); // silence the warning.
-
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](2);
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](2);
 
         // Grant `ADMIN_EXECUTE_PERMISSION` of the Plugin to the admin.
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             plugin,
             admin,
-            NO_ORACLE,
+            NO_CONDITION,
             Admin(plugin).EXECUTE_PROPOSAL_PERMISSION_ID()
         );
 
         // Grant `EXECUTE_PERMISSION` on the DAO to the plugin.
-        permissions[1] = PermissionLib.ItemMultiTarget(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
             _dao,
             plugin,
-            NO_ORACLE,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
+
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
@@ -95,20 +91,19 @@ contract AdminSetup is PluginSetup {
     /// that have been granted to addresses during the life cycle of the plugin.
     /// or the ones that have been granted are not revoked already,
     /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
-    function prepareUninstallation(
-        address _dao,
-        address _plugin,
-        address[] calldata,
-        bytes calldata
-    ) external view returns (PermissionLib.ItemMultiTarget[] memory permissions) {
+    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+        external
+        view
+        returns (PermissionLib.MultiTargetPermission[] memory permissions)
+    {
         // Prepare permissions
-        permissions = new PermissionLib.ItemMultiTarget[](1);
+        permissions = new PermissionLib.MultiTargetPermission[](1);
 
-        permissions[0] = PermissionLib.ItemMultiTarget(
+        permissions[0] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _dao,
-            _plugin,
-            NO_ORACLE,
+            _payload.plugin,
+            NO_CONDITION,
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
     }
