@@ -36,7 +36,7 @@ abstract contract CallbackHandler {
             revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
         }
 
-        emit CallbackReceived(_callbackSelector, _data);
+        emit CallbackReceived({sig: _callbackSelector, data: _data});
 
         return magicNumber;
     }
