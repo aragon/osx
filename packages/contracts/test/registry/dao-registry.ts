@@ -80,6 +80,12 @@ describe('DAORegistry', function () {
     ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoName');
   });
 
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await daoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
+    );
+  });
+
   it('Should register a new DAO successfully', async function () {
     await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
       .to.emit(daoRegistry, EVENTS.DAORegistered)

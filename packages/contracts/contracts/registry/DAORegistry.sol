@@ -14,7 +14,7 @@ contract DAORegistry is InterfaceBasedRegistry {
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
     /// @notice The ENS subdomain registrar registering the DAO names.
-    ENSSubdomainRegistrar private subdomainRegistrar;
+    ENSSubdomainRegistrar public subdomainRegistrar;
 
     // @notice Thrown if the plugin repository name is empty.
     error EmptyDaoName();
