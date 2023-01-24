@@ -61,7 +61,7 @@ contract AdminSetup is PluginSetup {
         plugin = implementation.clone();
 
         // Initialize cloned plugin contract.
-        Admin(plugin).initialize(dao, admin);
+        Admin(plugin).initialize(dao);
 
         // Prepare helpers
         (helpers); // silence the warning.

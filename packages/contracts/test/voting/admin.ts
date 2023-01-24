@@ -73,7 +73,7 @@ describe('Admin plugin', function () {
   });
 
   function initializePlugin() {
-    return plugin.initialize(dao.address, signers[0].address);
+    return plugin.initialize(dao.address);
   }
 
   describe('initialize: ', async () => {
@@ -85,10 +85,13 @@ describe('Admin plugin', function () {
       );
     });
 
-    it('emits the `MembersAdded` event', async () => {
-      await expect(plugin.initialize(dao.address, signers[0].address))
-        .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_ANNOUNCED)
-        .withArgs([signers[0].address]);
+    it('emits the `MembershipContractAnnounced` event and returns the admin as a member afterwards', async () => {
+      await expect(plugin.initialize(dao.address))
+        .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .withArgs(dao.address);
+
+      expect(await plugin.isMember(signers[0].address)).to.be.true; // signer[0] has `EXECUTE_PROPOSAL_PERMISSION_ID`
+      expect(await plugin.isMember(signers[1].address)).to.be.false; // signer[1] has not
     });
   });
 
@@ -106,7 +109,7 @@ describe('Admin plugin', function () {
 
     it('supports admin address plugin interface', async () => {
       const iface = new ethers.utils.Interface([
-        'function initialize(address  _dao, address _admin)',
+        'function initialize(address  _dao)',
         'function executeProposal(bytes _metadata, tuple(address,uint256,bytes)[] _actions)',
       ]);
 
