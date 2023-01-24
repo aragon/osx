@@ -24,15 +24,10 @@ contract MultisigSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return "(address[] members, tuple(bool onlyListed, uint16 minApprovals))";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
-        external
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
@@ -82,16 +77,10 @@ contract MultisigSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        view
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](3);
 

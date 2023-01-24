@@ -25,19 +25,10 @@ contract AddresslistVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, address[] members)";
-    }
-
-    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    )
-        external
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
@@ -98,16 +89,10 @@ contract AddresslistVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        view
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](4);
 

@@ -15,9 +15,6 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @inheritdoc IPluginSetup
-    function prepareUpdateDataABI() external view virtual override returns (string memory) {}
-
-    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
         uint16 _currentBuild,
@@ -33,10 +30,10 @@ abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
     /// @param _data The data to initialize the storage of the proxy contract.
     /// @return address The address of the created proxy contract.
-    function createERC1967Proxy(address _implementation, bytes memory _data)
-        internal
-        returns (address)
-    {
+    function createERC1967Proxy(
+        address _implementation,
+        bytes memory _data
+    ) internal returns (address) {
         return createERC1967(_implementation, _data);
     }
 
