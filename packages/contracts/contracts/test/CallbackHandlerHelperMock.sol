@@ -15,7 +15,7 @@ contract CallbackHandlerMockHelper is CallbackHandler {
         return magicNumber;
     }
 
-    /// @notice Executes _registerCallback on the parens to register magic number per selector.
+    /// @notice Executes `_registerCallback` on the parent to register magic number per selector.
     /// @param selector The function selector
     /// @param magicNumber The selector's magic number.
     function registerCallback(bytes4 selector, bytes4 magicNumber) external {
