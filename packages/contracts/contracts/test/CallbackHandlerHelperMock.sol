@@ -7,9 +7,9 @@ import {CallbackHandler} from "../core/component/CallbackHandler.sol";
 contract CallbackHandlerMockHelper is CallbackHandler {
     address callbackHandlerMockAddr;
 
-    /// @notice Executes _handleCallback on the parens for testing purposes.
-    /// @param selector Any kind of selector in order to call fallback.
-    /// @param data Some arbitrary data. Mainly, you should pass msg.data to _handleCallback most of the time.
+    /// @notice Calls the internal `_handleCallback` on the parent `CallbackHandler` for testing purposes.
+    /// @param selector The function selector of the callback function to be tested.
+    /// @param data Arbitrary data accompanying the callback that will be emitted with the `CallbackReceived` event.
     function handleCallback(bytes4 selector, bytes memory data) external returns (bytes4) {
         bytes4 magicNumber = _handleCallback(selector, data);      
         return magicNumber;
