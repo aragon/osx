@@ -305,7 +305,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @return approvals The number of approvals casted.
     /// @return parameters The parameters of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
-    /// @return allowFailureMap The bit map representations of which actions are allowed to revert so tx still succeeds.
+    /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     function getProposal(uint256 _proposalId)
         public
         view
