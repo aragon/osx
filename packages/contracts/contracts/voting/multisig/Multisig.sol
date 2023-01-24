@@ -311,7 +311,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         view
         returns (
             bool executed,
-            uint32 approvals,
+            uint16 approvals,
             ProposalParameters memory parameters,
             IDAO.Action[] memory actions,
             uint256 allowFailureMap
