@@ -567,10 +567,6 @@ describe('DAO', function () {
     });
 
     it('correctly emits selector and interface id', async () => {
-      // The below id (Real usecase example)
-      // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
-      // callbackSelector (onERC721Received.selector)
-      const id = '0x150b7a02';
       await expect(
         dao.registerStandardCallback('0x00000001', '0x00000002', '0x00000001')
       )
