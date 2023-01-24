@@ -72,17 +72,17 @@ interface IDAO {
         bytes4 magicNumber
     );
 
-    /// @notice Emitted when a native token deposit has been made to the DAO.
+    /// @notice Emitted when a native token deposit has been sent directly to the DAO via the `receive` function.
     /// @dev This event is intended to be emitted in the `receive` function and is therefore bound by the gas limitations for `send`/`transfer` calls introduced by [ERC-2929](https://eips.ethereum.org/EIPS/eip-2929).
     /// @param sender The address of the sender.
     /// @param amount The amount of native tokens deposited.
     event NativeTokenDeposited(address sender, uint256 amount);
 
-    /// @notice Emitted when a token deposit has been made to the DAO.
+    /// @notice Emitted when a native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20), [ERC-721](https://eips.ethereum.org/EIPS/eip-721), or [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) token deposit has been made into the DAO.
     /// @param sender The address of the sender.
-    /// @param token The address of the deposited token.
-    /// @param tokenId The ID of the token deposited (applies to [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
-    /// @param amount The amount of tokens deposited  (applies to native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
+    /// @param token The address of the token contract or `address(0)` in case of the native token.
+    /// @param tokenId The ID of the deposited token (applies to ERC-721 and ERC-1155 tokens).
+    /// @param amount The amount of deposited tokens (applies to native, ERC-20 and ERC-1155 tokens).
     /// @param _reference The reference describing the deposit reason.
     event Deposited(
         address indexed sender,
@@ -92,11 +92,11 @@ interface IDAO {
         string _reference
     );
 
-    /// @notice Emitted when a token withdrawal has been made from the DAO.
-    /// @param token The address of the withdrawn token or address(0) in case of the native token.
+    /// @notice Emitted when a native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20), [ERC-721](https://eips.ethereum.org/EIPS/eip-721), and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155 token withdrawal has been made from the DAO.
+    /// @param token The address of the token contract or `address(0)` in case of the native token.
     /// @param to The address of the receiver.
-    /// @param tokenId The ID of the token withdrawn (applies to [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
-    /// @param amount The amount of tokens withdrawn  (applies to native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
+    /// @param tokenId The ID of the withdrawn token (applies to ERC-721 and ERC-1155 tokens).
+    /// @param amount The amount of withdrawn tokens (applies to native, ERC-20 and ERC-1155 tokens).
     /// @param _reference The reference describing the withdrawal reason.
     event Withdrawn(
         address indexed token,
@@ -106,9 +106,10 @@ interface IDAO {
         string _reference
     );
 
-    /// @notice Deposits native tokens to the DAO contract with a reference string.
-    /// @param _tokenId The ID of the token deposited (applies to [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
-    /// @param _amount The amount of tokens d  (applies to native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
+    /// @notice Deposits native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20), [ERC-721](https://eips.ethereum.org/EIPS/eip-721), and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) into the DAO with a deposit reference string.
+    /// @param _token The address of the token contract or `address(0)` in case of the native token.
+    /// @param _tokenId The ID of the deposited token (applies to ERC-721 and ERC-1155 tokens).
+    /// @param _amount The amount of deposited tokens (applies to native, ERC-20 and ERC-1155 tokens).
     /// @param _reference The reference describing the deposit reason.
     function deposit(
         address _token,
@@ -117,10 +118,11 @@ interface IDAO {
         string calldata _reference
     ) external payable;
 
-    /// @notice Withdraw native tokens from the DAO with a withdraw reference string.
+    /// @notice Withdraws native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20), [ERC-721](https://eips.ethereum.org/EIPS/eip-721), [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) from the DAO with a withdraw reference string.
+    /// @param _token The address of the token contract or `address(0)` in case of the native token.
     /// @param _to The target address to send native tokens to.
-    /// @param _tokenId The ID of the token withdrawn (applies to [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
-    /// @param _amount The amount of tokens withdrawn  (applies to native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
+    /// @param _tokenId The ID of the withdrawn token (applies to [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
+    /// @param _amount The amount of withdrawn tokens (applies to native, [ERC-20](https://eips.ethereum.org/EIPS/eip-20) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) tokens).
     /// @param _reference The reference describing the withdrawal reason.
     function withdraw(
         address _token,

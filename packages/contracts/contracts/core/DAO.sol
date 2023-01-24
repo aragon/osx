@@ -30,8 +30,6 @@ contract DAO is
     Initializable,
     IERC1271,
     ERC165StorageUpgradeable,
-    //IERC721ReceiverUpgradeable, // We use callback handler instead.
-    //IERC1155ReceiverUpgradeable,
     IDAO,
     UUPSUpgradeable,
     PermissionManager,
@@ -103,7 +101,7 @@ contract DAO is
     /// @notice Thrown if a native token withdraw fails.
     error NativeTokenWithdrawFailed();
 
-    /// @notice Thrown when an unsupported token is deposited or withdrawn.
+    /// @notice Thrown if an unsupported token is deposited or withdrawn.
     /// @param token The address of the unsupported token.
     error UnsupportedTokenStandard(address token);
 
@@ -117,7 +115,8 @@ contract DAO is
     }
 
     /// @notice Initializes the DAO by
-    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
+    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface IDs
+    /// - registering the [ERC-721](https://eips.ethereum.org/EIPS/eip-721) and [ERC-1155](https://eips.ethereum.org/EIPS/eip-1155) callbacks
     /// - setting the trusted forwarder for meta transactions
     /// - giving the `ROOT_PERMISSION_ID` permission to the initial owner (that should be revoked and transferred to the DAO after setup).
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
