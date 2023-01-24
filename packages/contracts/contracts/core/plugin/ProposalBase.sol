@@ -70,7 +70,7 @@ abstract contract ProposalBase {
     /// @notice Internal function to execute a proposal.
     /// @param _proposalId The ID of the proposal to be executed.
     /// @param _actions The array of actions to be executed.
-    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
+    /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     function _executeProposal(
         IDAO _dao,
         uint256 _proposalId,
