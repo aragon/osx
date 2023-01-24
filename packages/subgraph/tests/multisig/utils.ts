@@ -20,7 +20,8 @@ import {
   CREATED_AT,
   TWO,
   START_DATE,
-  END_DATE
+  END_DATE,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 
 // events
@@ -32,6 +33,7 @@ export function createNewProposalCreatedEvent(
   endDate: string,
   metadata: string,
   actions: ethereum.Tuple[],
+  allowFailureMap: string,
   contractAddress: string
 ): ProposalCreated {
   let createProposalCreatedEvent = changetype<ProposalCreated>(newMockEvent());
@@ -63,6 +65,10 @@ export function createNewProposalCreatedEvent(
     'actions',
     ethereum.Value.fromTupleArray(actions)
   );
+  let allowFailureMapParam = new ethereum.EventParam(
+    'allowFailureMap',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
+  );
 
   createProposalCreatedEvent.parameters.push(proposalIdParam);
   createProposalCreatedEvent.parameters.push(creatorParam);
@@ -70,6 +76,7 @@ export function createNewProposalCreatedEvent(
   createProposalCreatedEvent.parameters.push(endDateParam);
   createProposalCreatedEvent.parameters.push(metadataParam);
   createProposalCreatedEvent.parameters.push(actionsParam);
+  createProposalCreatedEvent.parameters.push(allowFailureMapParam);
 
   return createProposalCreatedEvent;
 }
@@ -217,8 +224,9 @@ export function createGetProposalCall(
   snapshotBlock: string,
 
   approvals: string,
-
-  actions: ethereum.Tuple[]
+  
+  actions: ethereum.Tuple[],
+  allowFailureMap: string
 ): void {
   let parameters = new ethereum.Tuple();
 
@@ -238,7 +246,7 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,uint32,(uint16,uint64,uint64,uint64),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,uint16,(uint16,uint64,uint64,uint64),(address,uint256,bytes)[],uint256)'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
@@ -251,7 +259,9 @@ export function createGetProposalCall(
       // ProposalParameters
       ethereum.Value.fromTuple(parameters),
 
-      ethereum.Value.fromTupleArray(actions)
+      ethereum.Value.fromTupleArray(actions),
+
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
     ]);
 }
 
@@ -267,6 +277,7 @@ export function createMultisigProposalEntityState(
   startDate: string = START_DATE,
   endDate: string = END_DATE,
   executed: boolean = false,
+  allowFailureMap: string = ALLOW_FAILURE_MAP,
 
   snapshotBlock: string = SNAPSHOT_BLOCK,
 
@@ -283,6 +294,7 @@ export function createMultisigProposalEntityState(
   multisigProposal.executed = executed;
   multisigProposal.snapshotBlock = BigInt.fromString(snapshotBlock);
   multisigProposal.minApprovals = BigInt.fromString(minApprovals);
+  multisigProposal.allowFailureMap = BigInt.fromString(allowFailureMap);
   multisigProposal.createdAt = BigInt.fromString(createdAt);
   multisigProposal.creationBlockNumber = creationBlockNumber;
 

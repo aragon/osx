@@ -24,7 +24,8 @@ import {
   THREE,
   PROPOSAL_ENTITY_ID,
   START_DATE,
-  END_DATE
+  END_DATE,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
@@ -67,7 +68,9 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     // approvals
     ONE,
 
-    actions
+    actions,
+
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -78,6 +81,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     END_DATE,
     STRING_DATA,
     actions,
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -120,6 +124,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
+  assert.fieldEquals('MultisigProposal', entityID, 'allowFailureMap', ALLOW_FAILURE_MAP);
 
   // check MultisigPlugin
   assert.fieldEquals(
@@ -155,8 +160,9 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 
     // approvals
     ONE,
-
-    actions
+    
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -219,7 +225,8 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     // approvals
     TWO,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event

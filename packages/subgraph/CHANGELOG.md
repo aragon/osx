@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the `MembershipContractAnnounced` event.
 - Added `startDate` and `endDate` to all `ProposalCreated` events.
 - Adds `startDate` and `endDate` fields to Multisig proposals.
+- Adds `allowFailureMap` to the proposal entities.
 
 ### Changed
 

@@ -312,6 +312,7 @@ describe('Multisig', function () {
         multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           0,
@@ -333,6 +334,7 @@ describe('Multisig', function () {
       const proposalId0 = await multisig.callStatic.createProposal(
         dummyMetadata,
         dummyActions,
+        0,
         false,
         false,
         0,
@@ -343,6 +345,7 @@ describe('Multisig', function () {
         multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           0,
@@ -353,6 +356,7 @@ describe('Multisig', function () {
       const proposalId1 = await multisig.callStatic.createProposal(
         dummyMetadata,
         dummyActions,
+        0,
         false,
         false,
         0,
@@ -372,12 +376,22 @@ describe('Multisig', function () {
         multisigSettings
       );
 
+      const allowFailureMap = 1;
+
       const startDate = await timestampIn(1000);
       const endDate = await timestampIn(5000);
       await expect(
         multisig
           .connect(signers[0])
-          .createProposal(dummyMetadata, [], false, false, startDate, endDate)
+          .createProposal(
+            dummyMetadata,
+            [],
+            allowFailureMap,
+            false,
+            false,
+            startDate,
+            endDate
+          )
       )
         .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
         .withArgs(
@@ -386,7 +400,8 @@ describe('Multisig', function () {
           startDate,
           endDate,
           dummyMetadata,
-          []
+          [],
+          allowFailureMap
         );
     });
 
@@ -408,7 +423,15 @@ describe('Multisig', function () {
         await expect(
           multisig
             .connect(signers[1]) // not listed
-            .createProposal(dummyMetadata, [], false, false, startDate, endDate)
+            .createProposal(
+              dummyMetadata,
+              [],
+              0,
+              false,
+              false,
+              startDate,
+              endDate
+            )
         )
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
@@ -417,7 +440,8 @@ describe('Multisig', function () {
             startDate,
             endDate,
             dummyMetadata,
-            []
+            [],
+            0
           );
       });
     });
@@ -440,6 +464,7 @@ describe('Multisig', function () {
             .createProposal(
               dummyMetadata,
               [],
+              0,
               false,
               false,
               0,
@@ -455,6 +480,7 @@ describe('Multisig', function () {
             .createProposal(
               dummyMetadata,
               [],
+              0,
               false,
               false,
               0,
@@ -473,6 +499,7 @@ describe('Multisig', function () {
           multisig.createProposal(
             dummyMetadata,
             [],
+            0,
             false,
             false,
             startDate,
@@ -486,7 +513,8 @@ describe('Multisig', function () {
             startDate,
             endDate,
             dummyMetadata,
-            []
+            [],
+            0
           );
 
         const block = await ethers.provider.getBlock('latest');
@@ -497,6 +525,7 @@ describe('Multisig', function () {
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
         );
+        expect(proposal.allowFailureMap).to.equal(0);
         expect(proposal.parameters.startDate).to.equal(startDate);
         expect(proposal.parameters.endDate).to.equal(endDate);
         expect(proposal.approvals).to.equal(0);
@@ -510,10 +539,20 @@ describe('Multisig', function () {
         const startDate = await timestampIn(3000);
         const endDate = await timestampIn(5000);
 
+        const allowFailureMap = 1;
+
         await ethers.provider.send('evm_setNextBlockTimestamp', [startDate]);
 
         await expect(
-          multisig.createProposal(dummyMetadata, [], true, false, 0, endDate)
+          multisig.createProposal(
+            dummyMetadata,
+            [],
+            allowFailureMap,
+            true,
+            false,
+            0,
+            endDate
+          )
         )
           .to.emit(multisig, PROPOSAL_EVENTS.PROPOSAL_CREATED)
           .withArgs(
@@ -522,7 +561,8 @@ describe('Multisig', function () {
             startDate,
             endDate,
             dummyMetadata,
-            []
+            [],
+            allowFailureMap
           )
           .to.emit(multisig, MULTISIG_EVENTS.APPROVED)
           .withArgs(id, signers[0].address);
@@ -531,6 +571,7 @@ describe('Multisig', function () {
 
         const proposal = await multisig.getProposal(id);
         expect(proposal.executed).to.equal(false);
+        expect(proposal.allowFailureMap).to.equal(allowFailureMap);
         expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
         expect(proposal.parameters.minApprovals).to.equal(
           multisigSettings.minApprovals
@@ -546,6 +587,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           true,
           false,
           0,
@@ -556,6 +598,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           true,
           false,
           0,
@@ -569,7 +612,15 @@ describe('Multisig', function () {
       const timeStamp = (await getTime()) + 500;
       await setTimeForNextBlock(timeStamp);
       await expect(
-        multisig.createProposal(dummyMetadata, dummyActions, true, false, 5, 0)
+        multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          true,
+          false,
+          5,
+          0
+        )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
         .withArgs(timeStamp, 5);
@@ -579,7 +630,15 @@ describe('Multisig', function () {
       const timeStamp = (await getTime()) + 500;
       await setTimeForNextBlock(timeStamp);
       await expect(
-        multisig.createProposal(dummyMetadata, dummyActions, true, false, 0, 5)
+        multisig.createProposal(
+          dummyMetadata,
+          dummyActions,
+          0,
+          true,
+          false,
+          0,
+          5
+        )
       )
         .to.be.revertedWithCustomError(multisig, 'DateOutOfBounds')
         .withArgs(timeStamp, 5);
@@ -598,6 +657,7 @@ describe('Multisig', function () {
       await multisig.createProposal(
         dummyMetadata,
         dummyActions,
+        0,
         false,
         false,
         0,
@@ -634,6 +694,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           await timestampIn(2000),
@@ -651,6 +712,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           0,
@@ -700,6 +762,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           await timestampIn(5000),
@@ -720,6 +783,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           0,
@@ -768,6 +832,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           await timestampIn(1000),
@@ -788,6 +853,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           0,
@@ -911,6 +977,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           await timestampIn(1000),
@@ -935,6 +1002,7 @@ describe('Multisig', function () {
         await multisig.createProposal(
           dummyMetadata,
           dummyActions,
+          0,
           false,
           false,
           0,
