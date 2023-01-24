@@ -132,7 +132,7 @@ abstract contract MajorityVotingBase is
     /// @param tally The vote tally of the proposal.
     /// @param voters The votes casted by the voters.
     /// @param actions The actions to be executed when the proposal passes.
-    /// @param allowFailureMap Allows to succeed tx even if the action might revert. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
+    /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     struct Proposal {
         bool executed;
         ProposalParameters parameters;
