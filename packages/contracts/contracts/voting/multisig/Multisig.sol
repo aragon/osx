@@ -127,10 +127,9 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         __PluginUUPSUpgradeable_init(_dao);
 
         _addAddresses(_members);
+        emit MembersAdded({members: _members});
 
         _updateMultisigSettings(_multisigSettings);
-
-        emit MembersAdded({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
