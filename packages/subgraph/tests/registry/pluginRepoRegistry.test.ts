@@ -13,7 +13,7 @@ test('Run plugin repo registry mappings with mock event', () => {
 
   handlePluginRepoRegistered(newRepoRegisteredEvent);
 
-  assert.fieldEquals('PluginRepo', id, 'name', 'plugin-repo');
+  assert.fieldEquals('PluginRepo', id, 'subdomain', 'plugin-repo');
 
   clearStore();
 });

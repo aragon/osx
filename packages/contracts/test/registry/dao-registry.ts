@@ -27,9 +27,9 @@ describe('DAORegistry', function () {
   const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
   const topLevelDomain = 'dao.eth';
-  const daoName = 'my-cool-org';
-  const daoNameEnsLabelhash = ensLabelHash(daoName);
-  const daoDomainHash = ensDomainHash(daoName + '.' + topLevelDomain);
+  const daoSubdomain = 'my-cool-org';
+  const daoSubdomainEnsLabelhash = ensLabelHash(daoSubdomain);
+  const daoDomainHash = ensDomainHash(daoSubdomain + '.' + topLevelDomain);
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -78,20 +78,20 @@ describe('DAORegistry', function () {
   it('reverts the registration if the DAO name is empty', async function () {
     await expect(
       daoRegistry.register(targetDao.address, ownerAddress, '')
-    ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoName');
+    ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoSubdomain');
   });
 
   it('Should register a new DAO successfully', async function () {
-    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
+    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain))
       .to.emit(daoRegistry, EVENTS.DAORegistered)
-      .withArgs(targetDao.address, ownerAddress, daoName);
+      .withArgs(targetDao.address, ownerAddress, daoSubdomain);
 
     expect(await daoRegistry.entries(targetDao.address)).to.equal(true);
   });
 
   it('fails to register if the sender lacks the required role', async () => {
     // Register a DAO successfully
-    await daoRegistry.register(targetDao.address, ownerAddress, daoName);
+    await daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain);
 
     // Revoke the permission
     await managingDao.revoke(
@@ -103,7 +103,7 @@ describe('DAORegistry', function () {
     const newTargetDao = await deployNewDAO(ownerAddress);
 
     await expect(
-      daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
+      daoRegistry.register(newTargetDao.address, ownerAddress, daoSubdomain)
     )
       .to.be.revertedWithCustomError(daoRegistry, 'DaoUnauthorized')
       .withArgs(
@@ -119,24 +119,24 @@ describe('DAORegistry', function () {
     await daoRegistry.register(
       targetDao.address,
       ownerAddress,
-      daoNameEnsLabelhash
+      daoSubdomainEnsLabelhash
     );
 
-    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
+    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain))
       .to.be.revertedWithCustomError(daoRegistry, 'ContractAlreadyRegistered')
       .withArgs(targetDao.address);
   });
 
   it('fails to register a DAO with the same name twice', async function () {
     // Register the the DAO name under the top level domain
-    await daoRegistry.register(targetDao.address, ownerAddress, daoName);
+    await daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain);
 
     const newTargetDao = await deployNewDAO(ownerAddress);
     const otherOwnerAddress = await (await ethers.getSigners())[1].getAddress();
 
     // Try to register the the DAO name under the top level domain a second time
     await expect(
-      daoRegistry.register(newTargetDao.address, otherOwnerAddress, daoName)
+      daoRegistry.register(newTargetDao.address, otherOwnerAddress, daoSubdomain)
     )
       .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
       .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
@@ -178,7 +178,7 @@ describe('DAORegistry', function () {
             subdomainName
           )
         )
-          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoName')
+          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
           .withArgs(subdomainName);
       }
     });
@@ -218,7 +218,7 @@ describe('DAORegistry', function () {
             subdomainName
           )
         )
-          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoName')
+          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
           .withArgs(subdomainName);
       }
     });

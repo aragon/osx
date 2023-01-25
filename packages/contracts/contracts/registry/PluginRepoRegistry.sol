@@ -16,16 +16,16 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
     bytes32 public constant REGISTER_PLUGIN_REPO_PERMISSION_ID =
         keccak256("REGISTER_PLUGIN_REPO_PERMISSION");
 
-    /// @notice The ENS subdomain registrar registering the PluginRepo names.
+    /// @notice The ENS subdomain registrar registering the PluginRepo subdomains.
     ENSSubdomainRegistrar public subdomainRegistrar;
 
     /// @notice Emitted if a new plugin repository is registered.
-    /// @param name The name of the plugin repository.
+    /// @param subdomain The subdomain of the plugin repository.
     /// @param pluginRepo The address of the plugin repository.
-    event PluginRepoRegistered(string name, address pluginRepo);
+    event PluginRepoRegistered(string subdomain, address pluginRepo);
 
-    /// @notice Thrown if the plugin name doesn't match the regex `[0-9a-z\-]`
-    error InvalidPluginName(string name);
+    /// @notice Thrown if the plugin subdomain doesn't match the regex `[0-9a-z\-]`
+    error InvalidPluginSubdomain(string subdomain);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -42,26 +42,26 @@ contract PluginRepoRegistry is InterfaceBasedRegistry {
         subdomainRegistrar = _subdomainRegistrar;
     }
 
-    /// @notice Registers a plugin repository with a name and address.
-    /// @param name The name of the PluginRepo.
+    /// @notice Registers a plugin repository with a subdomain and address.
+    /// @param subdomain The subdomain of the PluginRepo.
     /// @param pluginRepo The address of the PluginRepo contract.
     function registerPluginRepo(
-        string calldata name,
+        string calldata subdomain,
         address pluginRepo
     ) external auth(REGISTER_PLUGIN_REPO_PERMISSION_ID) {
         // The caller(PluginRepoFactory) explicitly checks
-        // if the name is empty and reverts.
+        // if the subdomain is empty and reverts.
 
-        if (!isSubdomainValid(name)) {
-            revert InvalidPluginName({name: name});
+        if (!isSubdomainValid(subdomain)) {
+            revert InvalidPluginSubdomain({subdomain: subdomain});
         }
 
-        bytes32 labelhash = keccak256(bytes(name));
+        bytes32 labelhash = keccak256(bytes(subdomain));
         subdomainRegistrar.registerSubnode(labelhash, pluginRepo);
 
         _register(pluginRepo);
 
-        emit PluginRepoRegistered(name, pluginRepo);
+        emit PluginRepoRegistered(subdomain, pluginRepo);
     }
 
     /// @notice This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain (see [OpenZepplins guide about storage gaps](https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps)).
