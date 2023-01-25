@@ -471,6 +471,12 @@ test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', 
     'executionBlockNumber',
     event.block.number.toString()
   );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
+  );
 
   clearStore();
 });
