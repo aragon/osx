@@ -97,7 +97,7 @@ type StandardCallback @entity {
 
 type Dao @entity {
   id: ID! # use address as id
-  name: String
+  subdomain: String
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
@@ -134,7 +134,7 @@ type PluginVersion @entity(immutable: true) {
 
 type PluginRepo @entity(immutable: true) {
   id: ID! # address
-  name: String!
+  subdomain: String!
   versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
 }
 

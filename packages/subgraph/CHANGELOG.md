@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changes callId in `Executed` event from `uint256` to `bytes32`
+- Changes `callId` in `Executed` event from `uint256` to `bytes32`.
+- Renames `name` in `PluginRepoRegistry` and `DAORegistry` to `subdomain`.
+
 
 ## 0.6.2-alpha
 

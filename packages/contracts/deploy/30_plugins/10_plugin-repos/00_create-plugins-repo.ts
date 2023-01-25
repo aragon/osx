@@ -24,7 +24,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   await createPluginRepo(
     hre,
-    'AddresslistVoting',
+    'address-list-voting',
     'AddresslistVotingSetup',
     ethers.utils.hexlify(
       ethers.utils.toUtf8Bytes(`ipfs://${addresslistCIDPath}`)
@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   await createPluginRepo(
     hre,
-    'TokenVoting',
+    'token-voting',
     'TokenVotingSetup',
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${tokenCIDPath}`))
   );
@@ -50,7 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   await createPluginRepo(
     hre,
-    'Admin',
+    'admin',
     'AdminSetup',
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${adminCIDPath}`))
   );
@@ -62,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   await createPluginRepo(
     hre,
-    'Multisig',
+    'multisig',
     'MultisigSetup',
     ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${multisigCIDPath}`))
   );
