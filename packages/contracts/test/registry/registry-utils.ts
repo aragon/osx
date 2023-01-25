@@ -26,12 +26,12 @@ describe('RegistryUtils', () => {
 
         // test success if it is a valid char [0-9a-z\-]
         if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
-          expect(await registryUtilsContract._isSubdomainValid(subdomainName))
+          expect(await registryUtilsContract.isSubdomainValid(subdomainName))
             .to.be.true;
           continue;
         }
 
-        expect(await registryUtilsContract._isSubdomainValid(subdomainName)).to
+        expect(await registryUtilsContract.isSubdomainValid(subdomainName)).to
           .be.false;
       }
     });
@@ -50,12 +50,12 @@ describe('RegistryUtils', () => {
 
         // test success if it is a valid char [0-9a-z\-]
         if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
-          expect(await registryUtilsContract._isSubdomainValid(subdomainName))
+          expect(await registryUtilsContract.isSubdomainValid(subdomainName))
             .to.be.true;
           continue;
         }
 
-        expect(await registryUtilsContract._isSubdomainValid(subdomainName)).to
+        expect(await registryUtilsContract.isSubdomainValid(subdomainName)).to
           .be.false;
       }
     });
