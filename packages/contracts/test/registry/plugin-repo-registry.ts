@@ -141,7 +141,7 @@ describe('PluginRepoRegistry', function () {
       .withArgs(pluginRepo.address);
   });
 
-  it("reverts the registration if the plugin repo's ENS name is already taken", async function () {
+  it("reverts the registration if the plugin repo's ENS subdomain is already taken", async function () {
     await pluginRepoRegistry.registerPluginRepo(
       pluginRepoSubdomain,
       pluginRepo.address
@@ -159,20 +159,20 @@ describe('PluginRepoRegistry', function () {
   });
 
   // without mocking we have to repeat the tests here to make sure the validation is correct
-  describe('name validation', () => {
-    it('should validate the passed name correctly (< 32 bytes long name)', async () => {
-      const baseName = 'this-is-my-super-valid-name';
+  describe('subdomain validation', () => {
+    it('should validate the passed subdomain correctly (< 32 bytes long subdomain)', async () => {
+      const baseSubdomain = 'this-is-my-super-valid-subdomain';
 
       // loop through the ascii table
       for (let i = 0; i < 127; i++) {
         // deploy a pluginRepo and initialize
         const newPluginRepo = await deployNewPluginRepo(ownerAddress);
 
-        // replace the 10th char in the baseName
+        // replace the 10th char in the baseSubdomain
         const subdomainName =
-          baseName.substring(0, 10) +
+          baseSubdomain.substring(0, 10) +
           String.fromCharCode(i) +
-          baseName.substring(10 + 1);
+          baseSubdomain.substring(10 + 1);
 
         // test success if it is a valid char [0-9a-z\-]
         if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
@@ -199,20 +199,20 @@ describe('PluginRepoRegistry', function () {
       }
     });
 
-    it('should validate the passed name correctly (> 32 bytes long name)', async () => {
-      const baseName =
-        'this-is-my-super-looooooooooooooooooooooooooong-valid-name';
+    it('should validate the passed subdomain correctly (> 32 bytes long subdomain)', async () => {
+      const baseSubdomain =
+        'this-is-my-super-looooooooooooooooooooooooooong-valid-subdomain';
 
       // loop through the ascii table
       for (let i = 0; i < 127; i++) {
         // deploy a pluginRepo and initialize
         const newPluginRepo = await deployNewPluginRepo(ownerAddress);
 
-        // replace the 40th char in the baseName
+        // replace the 40th char in the baseSubdomain
         const subdomainName =
-          baseName.substring(0, 40) +
+          baseSubdomain.substring(0, 40) +
           String.fromCharCode(i) +
-          baseName.substring(40 + 1);
+          baseSubdomain.substring(40 + 1);
 
         // test success if it is a valid char [0-9a-z\-]
         if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {

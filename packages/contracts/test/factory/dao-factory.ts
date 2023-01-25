@@ -53,7 +53,7 @@ const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
 const PermissionManagerAllowFlagAddress =
   '0x0000000000000000000000000000000000000002';
-const daoDummyName = 'dao1';
+const daoDummySubdomain = 'dao1';
 const registrarManagedDomain = 'dao.eth';
 const daoDummyMetadata = '0x0000';
 const EMPTY_DATA = '0x';
@@ -62,14 +62,14 @@ const AddressZero = ethers.constants.AddressZero;
 async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   dao: any;
   creator: any;
-  name: any;
+  subdomain: any;
   plugin: any;
   helpers: any;
   permissions: any;
 }> {
   const data = await tx.wait();
   const {events} = data;
-  const {dao, creator, name} = events.find(
+  const {dao, creator, subdomain} = events.find(
     ({event}: {event: any}) => event === EVENTS.DAORegistered
   ).args;
 
@@ -80,7 +80,7 @@ async function extractInfoFromCreateDaoTx(tx: any): Promise<{
   return {
     dao: dao,
     creator: creator,
-    name: name,
+    subdomain: subdomain,
     plugin: plugin,
     helpers: helpers,
     permissions: permissions,
@@ -209,7 +209,7 @@ describe.skip('DAOFactory: ', function () {
     // default params
     daoSettings = {
       trustedForwarder: AddressZero,
-      name: daoDummyName,
+      subdomain: daoDummySubdomain,
       metadata: daoDummyMetadata,
       daoURI: daoExampleURI,
     };
@@ -234,7 +234,7 @@ describe.skip('DAOFactory: ', function () {
 
     await expect(tx)
       .to.emit(daoRegistry, EVENTS.DAORegistered)
-      .withArgs(dao, ownerAddress, daoSettings.name);
+      .withArgs(dao, ownerAddress, daoSettings.subdomain);
 
     const event = await findEvent(tx, EVENTS.InstallationPrepared);
 
