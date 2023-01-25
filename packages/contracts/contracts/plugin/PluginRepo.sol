@@ -33,7 +33,7 @@ contract PluginRepo is
     struct Version {
         Tag tag;
         address pluginSetup;
-        Metadata metadata;
+        bytes buildMetadata;
     }
 
     /// @notice The ID of the permission required to call the `createVersion` function.
@@ -56,6 +56,9 @@ contract PluginRepo is
 
     /// @notice The mapping between plugin setup address and its corresponding versionHash
     mapping(address => bytes32) internal latestTagHashForPluginSetup;
+
+    /// @notice The mapping between release id and release's metadata URI.
+    mapping(uint8 => bytes) internal metadataPerRelease;
 
     /// @notice Thrown if version does not exist.
     /// @param versionHash The version Hash(release + build)
@@ -88,16 +91,16 @@ contract PluginRepo is
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param release the release number
-    /// @param build the build number
+    /// @param release the release number.
+    /// @param build the build number.
     /// @param pluginSetup The address of the plugin setup contract.
     /// @param metadata External URI where the plugin metadata and subsequent resources can be fetched from.
-    event VersionCreated(
-        uint8 release,
-        uint16 build,
-        address indexed pluginSetup,
-        Metadata metadata
-    );
+    event VersionCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
+
+    /// @notice Thrown when a release's metadata was updated.
+    /// @param release the release number.
+    /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
+    event ReleaseUpdated(uint8 release, bytes metadata);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -146,10 +149,20 @@ contract PluginRepo is
     // //  },
 
     /// @inheritdoc IPluginRepo
+    function updateReleaseMetadata(
+        uint8 _release,
+        bytes calldata _releaseMetadata
+    ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
+        metadataPerRelease[_release] = _releaseMetadata;
+
+        emit ReleaseUpdated(_release, _releaseMetadata);
+    }
+
+    /// @inheritdoc IPluginRepo
     function createVersion(
         uint8 _release, // 1
         address _pluginSetup,
-        Metadata calldata _metadata
+        bytes calldata _buildMetadata
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
         // In a case where _pluginSetup doesn't contain supportsInterface,
         // but contains fallback, that doesn't return anything(most cases)
@@ -199,11 +212,11 @@ contract PluginRepo is
         Tag memory tag = Tag(_release, build);
         bytes32 _tagHash = tagHash(tag);
 
-        versions[_tagHash] = Version(tag, _pluginSetup, _metadata);
+        versions[_tagHash] = Version(tag, _pluginSetup, _buildMetadata);
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
-        emit VersionCreated(_release, build, _pluginSetup, _metadata);
+        emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
     }
 
     /// @notice latest version in the release number.

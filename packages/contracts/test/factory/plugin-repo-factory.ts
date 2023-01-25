@@ -184,13 +184,15 @@ describe('PluginRepoFactory: ', function () {
 
     const pluginRepoName = 'my-pluginRepo';
     const pluginSetupAddress = pluginSetupMock.address;
-    const metadata = ['0x00', '0x00'];
+    const releaseMetadata = '0x00';
+    const buildMetadata = '0x00';
 
     let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
       pluginRepoName,
       pluginSetupAddress,
       ownerAddress,
-      metadata
+      releaseMetadata,
+      buildMetadata
     );
 
     const {name, pluginRepo} = await getPluginRepoRegistryEvents(tx);
