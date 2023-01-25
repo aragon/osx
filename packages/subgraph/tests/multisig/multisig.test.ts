@@ -124,7 +124,12 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
-  assert.fieldEquals('MultisigProposal', entityID, 'allowFailureMap', ALLOW_FAILURE_MAP);
+  assert.fieldEquals(
+    'MultisigProposal',
+    entityID,
+    'allowFailureMap',
+    ALLOW_FAILURE_MAP
+  );
 
   // check MultisigPlugin
   assert.fieldEquals(
@@ -160,7 +165,7 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
 
     // approvals
     ONE,
-    
+
     actions,
     ALLOW_FAILURE_MAP
   );
@@ -283,6 +288,12 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
     PROPOSAL_ENTITY_ID,
     'executionBlockNumber',
     event.block.number.toString()
+  );
+  assert.fieldEquals(
+    'MultisigProposal',
+    PROPOSAL_ENTITY_ID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
   );
 
   clearStore();

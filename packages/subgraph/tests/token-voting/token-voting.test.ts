@@ -231,6 +231,27 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     BigInt.zero().toString()
   );
 
+  // check voter
+  let memberId =
+    Address.fromString(CONTRACT_ADDRESS).toHexString() +
+    '_' +
+    Address.fromString(ADDRESS_ONE).toHexString();
+
+  assert.fieldEquals('TokenVotingVoter', memberId, 'id', memberId);
+  assert.fieldEquals('TokenVotingVoter', memberId, 'address', ADDRESS_ONE);
+  assert.fieldEquals(
+    'TokenVotingVoter',
+    memberId,
+    'plugin',
+    Address.fromString(CONTRACT_ADDRESS).toHexString()
+  );
+  assert.fieldEquals(
+    'TokenVotingVoter',
+    memberId,
+    'lastUpdated',
+    event.block.timestamp.toString()
+  );
+
   // check proposal
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
 
@@ -264,8 +285,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     SNAPSHOT_BLOCK,
 
     '0', // abstain
-    '2', // yes
-    '0', // no
+    '0', // yes
+    '1', // no
 
     actions,
     ALLOW_FAILURE_MAP
@@ -446,6 +467,12 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     entityID,
     'executionBlockNumber',
     event.block.number.toString()
+  );
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
   );
 
   clearStore();

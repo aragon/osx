@@ -71,7 +71,12 @@ test('Run Admin plugin (handleProposalCreated) mappings with mock event', () => 
   );
   assert.fieldEquals('AdminProposal', entityID, 'startDate', START_DATE);
   assert.fieldEquals('AdminProposal', entityID, 'endDate', START_DATE);
-  assert.fieldEquals('AdminProposal', entityID, 'allowFailureMap', ALLOW_FAILURE_MAP);
+  assert.fieldEquals(
+    'AdminProposal',
+    entityID,
+    'allowFailureMap',
+    ALLOW_FAILURE_MAP
+  );
 
   // check actions
   for (let index = 0; index < actions.length; index++) {
@@ -140,6 +145,12 @@ test('Run Admin plugin (handleProposalExecuted) mappings with mock event', () =>
   // checks
   assert.fieldEquals('AdminProposal', entityID, 'id', entityID);
   assert.fieldEquals('AdminProposal', entityID, 'executed', 'true');
+  assert.fieldEquals(
+    'AdminProposal',
+    entityID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
+  );
 
   clearStore();
 });

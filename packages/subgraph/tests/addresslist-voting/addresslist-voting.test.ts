@@ -317,8 +317,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     SNAPSHOT_BLOCK,
 
     '0', // abstain
-    '2', // yes
-    '0', // no
+    '0', // yes
+    '1', // no
 
     actions,
     ALLOW_FAILURE_MAP
@@ -481,6 +481,12 @@ test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', 
     entityID,
     'executionBlockNumber',
     event.block.number.toString()
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
   );
 
   clearStore();
