@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IMembership} from "../../core/plugin/IMembership.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
@@ -15,7 +14,7 @@ import {Addresslist} from "./Addresslist.sol";
 /// @author Aragon Association - 2021-2023.
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
+contract AddresslistVoting is Addresslist, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -44,8 +43,6 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         _addAddresses(_members);
-
-        emit MembersAdded({members: _members});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -64,8 +61,6 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         address[] calldata _members
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _addAddresses(_members);
-
-        emit MembersAdded({members: _members});
     }
 
     /// @notice Removes existing members from the address list.
@@ -74,8 +69,6 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         address[] calldata _members
     ) external auth(UPDATE_ADDRESSES_PERMISSION_ID) {
         _removeAddresses(_members);
-
-        emit MembersRemoved({members: _members});
     }
 
     /// @inheritdoc MajorityVotingBase
@@ -125,7 +118,7 @@ contract AddresslistVoting is IMembership, Addresslist, MajorityVotingBase {
         proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO THIS DOESN'T NEED TO BE STORED ANYMORE https://aragonassociation.atlassian.net/browse/APP-1417
 
         // Reduce costs
-        if(_allowFailureMap != 0) {
+        if (_allowFailureMap != 0) {
             proposal_.allowFailureMap = _allowFailureMap;
         }
 
