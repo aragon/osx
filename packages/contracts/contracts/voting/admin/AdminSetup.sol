@@ -32,11 +32,6 @@ contract AdminSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return "(address admin)";
-    }
-
-    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory _data
@@ -82,11 +77,6 @@ contract AdminSetup is PluginSetup {
         );
 
         preparedDependency.permissions = permissions;
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
     }
 
     /// @inheritdoc IPluginSetup

@@ -90,19 +90,10 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
-    }
-
-    /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    )
-        external
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
@@ -185,9 +176,10 @@ contract TokenVotingSetup is PluginSetup {
         );
 
         // Prepare permissions
-        PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](
-            tokenSettings.addr != address(0) ? 3 : 4
-        );
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](
+                tokenSettings.addr != address(0) ? 3 : 4
+            );
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -233,16 +225,10 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        view
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {        
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions.
         uint256 helperLength = _payload.currentHelpers.length;
         if (helperLength != 1) {

@@ -17,12 +17,10 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -34,17 +32,10 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        virtual
-        override
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _payload);
         permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
     }
@@ -61,12 +52,10 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
@@ -78,17 +67,10 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        virtual
-        override
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         (_dao, _payload);
         permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);
     }

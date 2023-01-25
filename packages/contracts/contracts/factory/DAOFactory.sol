@@ -33,7 +33,7 @@ contract DAOFactory {
 
     struct PluginSettings {
         PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
-        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
+        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -52,10 +52,10 @@ contract DAOFactory {
     /// @notice Creates a new DAO and setup a number of plugins.
     /// @param _daoSettings The DAO settings containing `trustedForwarder`, `name` and `metadata`.
     /// @param _pluginSettings The list of plugin settings that will be installed after the DAO creation, containing `pluginSetup`, `pluginSetupRepo`, and `data`.
-    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata _pluginSettings)
-        external
-        returns (DAO createdDao)
-    {
+    function createDao(
+        DAOSettings calldata _daoSettings,
+        PluginSettings[] calldata _pluginSettings
+    ) external returns (DAO createdDao) {
         // Check if no plugin is provided.
         if (_pluginSettings.length == 0) {
             revert NoPluginProvided();
