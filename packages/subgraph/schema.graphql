@@ -237,6 +237,8 @@ type TokenVotingVote @entity {
   voteOption: VoteOption!
   votingPower: BigInt!
   createdAt: BigInt!
+  voteReplaced: Boolean!
+  updatedAt: BigInt!
 }
 
 type TokenVotingProposal implements Proposal @entity {
@@ -303,6 +305,8 @@ type AddresslistVotingVote @entity {
   voteOption: VoteOption!
   votingPower: BigInt!
   createdAt: BigInt!
+  voteReplaced: Boolean!
+  updatedAt: BigInt!
 }
 
 type AddresslistVotingProposal implements Proposal @entity {

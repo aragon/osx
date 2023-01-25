@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added `voteReplaced` and `updatedAt` to `TokenVotingVote` and `AddresslistVotingVote`.
+
 ### Changed
+
 - Changes callId in `Executed` event from `uint256` to `bytes32`
 
 ## 0.6.2-alpha
