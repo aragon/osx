@@ -44,7 +44,7 @@ const EVENTS = {
   NativeTokenDeposited: 'NativeTokenDeposited',
   SignatureValidatorSet: 'SignatureValidatorSet',
   StandardCallbackRegistered: 'StandardCallbackRegistered',
-  CALLBACK_RECEIVED: 'CallbackReceived',
+  CallbackReceived: 'CallbackReceived',
 };
 
 const PERMISSION_IDS = {
@@ -587,7 +587,7 @@ describe('DAO', function () {
           1
         )
       )
-        .to.emit(dao, EVENTS.CALLBACK_RECEIVED)
+        .to.emit(dao, EVENTS.CallbackReceived)
         .withArgs(
           erc721Token.address,
           TOKEN_INTERFACE_IDS.erc721ReceivedId,
@@ -648,7 +648,7 @@ describe('DAO', function () {
       await expect(
         erc1155Token.safeTransferFrom(ownerAddress, dao.address, 1, 1, '0x')
       )
-        .to.emit(dao, EVENTS.CALLBACK_RECEIVED)
+        .to.emit(dao, EVENTS.CallbackReceived)
         .withArgs(
           erc1155Token.address,
           TOKEN_INTERFACE_IDS.erc1155ReceivedId,
@@ -663,7 +663,7 @@ describe('DAO', function () {
           '0x'
         )
       )
-        .to.emit(dao, EVENTS.CALLBACK_RECEIVED)
+        .to.emit(dao, EVENTS.CallbackReceived)
         .withArgs(
           erc1155Token.address,
           TOKEN_INTERFACE_IDS.erc1155BatchReceivedId,

@@ -141,7 +141,7 @@ contract DAO is
     /// @dev The caller must have the `UPGRADE_DAO_PERMISSION_ID` permission.
     function _authorizeUpgrade(
         address
-    ) internal override auth(address(this), UPGRADE_DAO_PERMISSION_ID) {}
+    ) internal virtual override auth(address(this), UPGRADE_DAO_PERMISSION_ID) {}
 
     /// @inheritdoc IDAO
     function setTrustedForwarder(
@@ -151,7 +151,7 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function getTrustedForwarder() external view override returns (address) {
+    function getTrustedForwarder() external view virtual override returns (address) {
         return trustedForwarder;
     }
 
