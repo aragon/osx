@@ -19,9 +19,10 @@ abstract contract CallbackHandler {
     error UnkownCallback(bytes4 callbackSelector, bytes4 magicNumber);
 
     /// @notice Emitted when `_handleCallback` is called.
+    /// @param sender Who called the callback.
     /// @param sig The function signature.
     /// @param data The calldata for the function signature.
-    event CallbackReceived(bytes4 indexed sig, bytes data);
+    event CallbackReceived(address sender, bytes4 indexed sig, bytes data);
 
     /// @notice Handles callbacks to adaptively support ERC standards.
     /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
@@ -36,7 +37,7 @@ abstract contract CallbackHandler {
             revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
         }
 
-        emit CallbackReceived({sig: _callbackSelector, data: _data});
+        emit CallbackReceived({sender: msg.sender, sig: _callbackSelector, data: _data});
 
         return magicNumber;
     }

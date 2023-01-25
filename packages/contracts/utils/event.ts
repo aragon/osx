@@ -31,7 +31,6 @@ export const DAO_EVENTS = {
   METADATA_SET: 'MetadataSet',
   EXECUTED: 'Executed',
   DEPOSITED: 'Deposited',
-  WITHDRAWN: 'Withdrawn',
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
   TRUSTED_FORWARDER_SET: 'TrustedForwarderSet',
   SIGNATURE_VALIDATOR_SET: 'SignatureValidatorSet',
