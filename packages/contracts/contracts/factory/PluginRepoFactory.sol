@@ -6,6 +6,7 @@ import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
+import {IPluginRepo} from "../plugin/IPluginRepo.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022
@@ -32,10 +33,10 @@ contract PluginRepoFactory {
     /// @param _name The plugin repository name.
     /// @param _initialOwner The plugin maintainer address.
     /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithFirstVersion`.
-    function createPluginRepo(string calldata _name, address _initialOwner)
-        external
-        returns (PluginRepo)
-    {
+    function createPluginRepo(
+        string calldata _name,
+        address _initialOwner
+    ) external returns (PluginRepo) {
         return _createPluginRepo(_name, _initialOwner);
     }
 
@@ -43,18 +44,18 @@ contract PluginRepoFactory {
     /// @dev The initial owner of the new PluginRepo is `address(this)`, afterward ownership will be transfered to the address `_maintainer`.
     /// @param _name The plugin repository name.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
-    /// @param _contentURI The external URI for fetching the new version's content.
     /// @param _maintainer The plugin maintainer address.
+    /// @param _metadata The external URI for fetching the new version's content.
     function createPluginRepoWithFirstVersion(
         string calldata _name,
         address _pluginSetup,
-        bytes memory _contentURI,
-        address _maintainer
+        address _maintainer,
+        IPluginRepo.Metadata memory _metadata
     ) external returns (PluginRepo pluginRepo) {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_name, address(this));
 
-        pluginRepo.createVersion(1, _pluginSetup, _contentURI);
+        pluginRepo.createVersion(1, _pluginSetup, _metadata);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         _setPluginRepoPermissions(pluginRepo, _maintainer);
@@ -66,7 +67,8 @@ contract PluginRepoFactory {
     /// @dev The plugin maintainer is granted the `CREATE_VERSION_PERMISSION_ID`, `UPGRADE_REPO_PERMISSION_ID`, and `ROOT_PERMISSION_ID`.
     function _setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
-        PermissionLib.SingleTargetPermission[] memory items = new PermissionLib.SingleTargetPermission[](5);
+        PermissionLib.SingleTargetPermission[]
+            memory items = new PermissionLib.SingleTargetPermission[](5);
 
         // Grant the plugin maintainer all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
@@ -103,10 +105,10 @@ contract PluginRepoFactory {
     /// @notice Internal method creating a `PluginRepo` via the [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy pattern from the provided base contract and registering it in the Aragon plugin registry.
     /// @param _name The plugin repository name.
     /// @param _initialOwner The initial owner address.
-    function _createPluginRepo(string calldata _name, address _initialOwner)
-        internal
-        returns (PluginRepo pluginRepo)
-    {
+    function _createPluginRepo(
+        string calldata _name,
+        address _initialOwner
+    ) internal returns (PluginRepo pluginRepo) {
         if (!(bytes(_name).length > 0)) {
             revert EmptyPluginRepoName();
         }
