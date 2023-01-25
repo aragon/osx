@@ -115,14 +115,19 @@ export function handleVoteCast(event: VoteCast): void {
   }
 
   let voterProposalVoteEntity = TokenVotingVote.load(voterVoteId);
-  if (!voterProposalVoteEntity) {
+  if (voterProposalVoteEntity) {
+    voterProposalVoteEntity.voteReplaced = true;
+    voterProposalVoteEntity.updatedAt = event.block.timestamp;
+  } else {
     voterProposalVoteEntity = new TokenVotingVote(voterVoteId);
     voterProposalVoteEntity.voter = memberId;
     voterProposalVoteEntity.proposal = proposalId;
+    voterProposalVoteEntity.createdAt = event.block.timestamp;
+    voterProposalVoteEntity.voteReplaced = false;
+    voterProposalVoteEntity.updatedAt = BigInt.zero();
   }
   voterProposalVoteEntity.voteOption = voteOption;
   voterProposalVoteEntity.votingPower = event.params.votingPower;
-  voterProposalVoteEntity.createdAt = event.block.timestamp;
   voterProposalVoteEntity.save();
 
   // voter
