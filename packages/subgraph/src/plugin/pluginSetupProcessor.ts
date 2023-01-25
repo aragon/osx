@@ -9,6 +9,7 @@ import {
 } from '../../generated/PluginSetupProcessor/PluginSetupProcessor';
 import {Plugin, PluginHelper} from '../../generated/schema';
 import {addPlugin} from './utils';
+import {PluginRepo as PluginRepoContract} from '../../generated/templates/PluginRepoTemplate/PluginRepo';
 
 export function handleInstallationPrepared(event: InstallationPrepared): void {
   let pluginId = event.params.plugin.toHexString();
@@ -16,8 +17,11 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   let pluginEntity = new Plugin(pluginId);
   pluginEntity.sender = event.params.sender.toHexString();
   pluginEntity.dao = event.params.dao.toHexString();
-  // TODO: SARKAWT
-  // pluginEntity.pluginSetup = event.params.pluginSetup.toHexString();
+  let repoContract = PluginRepoContract.bind(event.params.plugin);
+  let version = repoContract.try_getVersion1(event.params.versionTag);
+  if (!version.reverted) {
+    pluginEntity.pluginSetup = version.value.pluginSetup.toHexString();
+  }
   pluginEntity.data = event.params.data;
   pluginEntity.state = 'InstallationPrepared';
 

@@ -118,6 +118,12 @@ type Dao @entity {
 
 # Plugins
 
+type PluginRepo @entity(immutable: true) {
+  id: ID! # address
+  name: String!
+  versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+}
+
 type PluginSetup @entity(immutable: true) {
   id: ID! # contract address
   versions: [PluginVersion!]! @derivedFrom(field: "pluginSetup")
@@ -127,15 +133,10 @@ type PluginSetup @entity(immutable: true) {
 type PluginVersion @entity(immutable: true) {
   id: ID! # pluginRepo + version index
   pluginRepo: PluginRepo!
-  semanticVersion: [BigInt!]!
-  pluginSetup: PluginSetup!
-  contentURI: Bytes!
-}
-
-type PluginRepo @entity(immutable: true) {
-  id: ID! # address
-  name: String!
-  versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
+  pluginSetup: PluginSetup
+  release: Int!
+  build: Int!
+  metadata: Bytes!
 }
 
 type PluginHelper @entity(immutable: true) {
@@ -145,13 +146,15 @@ type PluginHelper @entity(immutable: true) {
 
 type Plugin @entity {
   "TODO: should do `implements IPlugin` once plugin is seperated from core"
-  id: ID! # address
+  id: ID! # address plugin
+  sender: String!
   dao: Dao!
+  setupId: Bytes!
+  pluginSetupRepo: PluginRepo!
   pluginSetup: PluginSetup!
   data: Bytes!
   helpers: [PluginHelper!]! @derivedFrom(field: "plugin")
   state: PluginState!
-  sender: String!
 }
 
 enum PluginState {

@@ -7,12 +7,10 @@ export function handleVersionCreated(event: VersionCreated): void {
   let pluginSetupId = event.params.pluginSetup.toHexString();
   let entity = new PluginVersion(id);
   entity.pluginRepo = event.address.toHexString();
-  // TODO: SARKAWT
-  // entity.semanticVersion = event.params.semanticVersion.map<BigInt>(version =>
-  //   BigInt.fromI32(version)
-  // );
+  entity.release = event.params.release;
+  entity.build = event.params.build;
   entity.pluginSetup = pluginSetupId;
-  entity.contentURI = event.params.contentURI;
+  entity.metadata = event.params.contentURI;
 
   entity.save();
 
