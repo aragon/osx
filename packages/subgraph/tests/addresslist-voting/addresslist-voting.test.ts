@@ -251,8 +251,20 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event);
 
   // checks
-  let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('AddresslistVotingVote', entityID, 'id', entityID);
+  let voteEntityID = ADDRESS_ONE + '_' + proposal.id;
+  assert.fieldEquals('AddresslistVotingVote', voteEntityID, 'id', voteEntityID);
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'voteReplaced',
+    'false'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'updatedAt',
+    BigInt.zero().toString()
+  );
 
   // check proposal
   assert.fieldEquals('AddresslistVotingProposal', proposal.id, 'yes', '1');
@@ -275,7 +287,56 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '1'
   );
 
-  // create calls
+  // Check when voter replace vote
+  // create calls 2
+  createGetProposalCall(
+    CONTRACT_ADDRESS,
+    PROPOSAL_ID,
+    true,
+    false,
+
+    VOTING_MODE,
+    SUPPORT_THRESHOLD,
+    MIN_VOTING_POWER,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    '0', // abstain
+    '0', // yes
+    '1', // no
+    TOTAL_VOTING_POWER,
+
+    actions,
+    ALLOW_FAILURE_MAP
+  );
+
+  // create event
+  let event2 = createNewVoteCastEvent(
+    PROPOSAL_ID,
+    ADDRESS_ONE,
+    '3', // No
+    '1', // votingPower
+    CONTRACT_ADDRESS
+  );
+
+  handleVoteCast(event2);
+
+  // checks 2
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'voteReplaced',
+    'true'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'updatedAt',
+    event2.block.timestamp.toString()
+  );
+
+  // create calls 3
   createGetProposalCall(
     CONTRACT_ADDRESS,
     PROPOSAL_ID,
@@ -299,15 +360,15 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   );
 
   // create event
-  let event2 = createNewVoteCastEvent(
+  let event3 = createNewVoteCastEvent(
     PROPOSAL_ID,
-    ADDRESS_ONE,
+    ADDRESS_TWO,
     '2', // yes
     '1', // votingPower
     CONTRACT_ADDRESS
   );
 
-  handleVoteCast(event2);
+  handleVoteCast(event3);
 
   // Check executable
   // abstain: 0, yes: 2, no: 0
