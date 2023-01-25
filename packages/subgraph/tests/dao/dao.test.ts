@@ -28,7 +28,6 @@ import {
   getBalanceOf,
   createNewExecutedEvent,
   createDaoEntityState,
-  createNewWithdrawnEvent,
   createTrustedForwarderSetEvent,
   createSignatureValidatorSetEvent,
   createStandardCallbackRegisteredEvent
