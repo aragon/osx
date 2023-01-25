@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
-import {Proposal, ProposalBase} from "../../core/plugin/Proposal.sol";
+import {Proposal} from "../../core/plugin/Proposal.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
@@ -34,19 +34,20 @@ contract Admin is PluginCloneable, Proposal {
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(PluginCloneable, ProposalBase) returns (bool) {
+    ) public view override returns (bool) {
         return
             interfaceId == ADMIN_INTERFACE_ID ||
-            ProposalBase.supportsInterface(interfaceId) ||
             PluginCloneable.supportsInterface(interfaceId);
     }
 
     /// @notice Creates and executes a new proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions to be executed.
+    /// @param _allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     function executeProposal(
         bytes calldata _metadata,
-        IDAO.Action[] calldata _actions
+        IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap
     ) external auth(EXECUTE_PROPOSAL_PERMISSION_ID) {
         uint64 currentTimestamp64 = block.timestamp.toUint64();
 
@@ -55,8 +56,9 @@ contract Admin is PluginCloneable, Proposal {
             _metadata: _metadata,
             _startDate: currentTimestamp64,
             _endDate: currentTimestamp64,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
-        _executeProposal(dao, proposalId, _actions);
+        _executeProposal(dao, proposalId, _actions, _allowFailureMap);
     }
 }

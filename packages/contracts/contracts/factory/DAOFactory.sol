@@ -8,6 +8,8 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/PluginSetupProcessor.sol";
+import {hashHelpers, PluginSetupRef} from "../plugin/psp/utils/Common.sol";
+import {IPluginSetup} from "../plugin/IPluginSetup.sol";
 
 /// @title DAOFactory
 /// @author Aragon Association - 2022
@@ -30,9 +32,8 @@ contract DAOFactory {
     }
 
     struct PluginSettings {
-        address pluginSetup; // The `PluginSetup` address of the plugin.
-        PluginRepo pluginSetupRepo; // The `PluginRepo` of the plugin.
-        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
+        PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
+        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -51,10 +52,10 @@ contract DAOFactory {
     /// @notice Creates a new DAO and setup a number of plugins.
     /// @param _daoSettings The DAO settings containing `trustedForwarder`, `name` and `metadata`.
     /// @param _pluginSettings The list of plugin settings that will be installed after the DAO creation, containing `pluginSetup`, `pluginSetupRepo`, and `data`.
-    function createDao(DAOSettings calldata _daoSettings, PluginSettings[] calldata _pluginSettings)
-        external
-        returns (DAO createdDao)
-    {
+    function createDao(
+        DAOSettings calldata _daoSettings,
+        PluginSettings[] calldata _pluginSettings
+    ) external returns (DAO createdDao) {
         // Check if no plugin is provided.
         if (_pluginSettings.length == 0) {
             revert NoPluginProvided();
@@ -86,22 +87,24 @@ contract DAOFactory {
             // Prepare plugin.
             (
                 address plugin,
-                ,
-                PermissionLib.ItemMultiTarget[] memory permissions
+                IPluginSetup.PreparedDependency memory preparedDependency
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
-                    _pluginSettings[i].pluginSetup,
-                    _pluginSettings[i].pluginSetupRepo,
-                    _pluginSettings[i].data
+                    PluginSetupProcessor.PrepareInstallationParams(
+                        _pluginSettings[i].pluginSetupRef,
+                        _pluginSettings[i].data
+                    )
                 );
 
             // Apply plugin.
             pluginSetupProcessor.applyInstallation(
                 address(createdDao),
-                _pluginSettings[i].pluginSetup,
-                _pluginSettings[i].pluginSetupRepo,
-                plugin,
-                permissions
+                PluginSetupProcessor.ApplyInstallationParams(
+                    _pluginSettings[i].pluginSetupRef,
+                    plugin,
+                    preparedDependency.permissions,
+                    hashHelpers(preparedDependency.helpers)
+                )
             );
         }
 
@@ -135,47 +138,53 @@ contract DAOFactory {
         dao = DAO(payable(createERC1967Proxy(daoBase, bytes(""))));
 
         // initialize dao with the `ROOT_PERMISSION_ID` permission as DAOFactory.
-        dao.initialize(_daoSettings.metadata, address(this), _daoSettings.trustedForwarder, _daoSettings.daoURI);
+        dao.initialize(
+            _daoSettings.metadata,
+            address(this),
+            _daoSettings.trustedForwarder,
+            _daoSettings.daoURI
+        );
     }
 
     /// @notice Sets the required permissions for the new DAO.
     /// @param _dao The DAO instance just created.
     function _setDAOPermissions(DAO _dao) internal {
         // set permissionIds on the dao itself.
-        PermissionLib.ItemSingleTarget[] memory items = new PermissionLib.ItemSingleTarget[](6);
+        PermissionLib.SingleTargetPermission[]
+            memory items = new PermissionLib.SingleTargetPermission[](6);
 
         // Grant DAO all the permissions required
-        items[0] = PermissionLib.ItemSingleTarget(
+        items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.ROOT_PERMISSION_ID()
         );
-        items[1] = PermissionLib.ItemSingleTarget(
+        items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.WITHDRAW_PERMISSION_ID()
         );
-        items[2] = PermissionLib.ItemSingleTarget(
+        items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.UPGRADE_DAO_PERMISSION_ID()
         );
-        items[3] = PermissionLib.ItemSingleTarget(
+        items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_SIGNATURE_VALIDATOR_PERMISSION_ID()
         );
-        items[4] = PermissionLib.ItemSingleTarget(
+        items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_TRUSTED_FORWARDER_PERMISSION_ID()
         );
-        items[5] = PermissionLib.ItemSingleTarget(
+        items[5] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             address(_dao),
             _dao.SET_METADATA_PERMISSION_ID()
         );
 
-        _dao.bulkOnSingleTarget(address(_dao), items);
+        _dao.applySingleTargetPermissions(address(_dao), items);
     }
 }

@@ -3,6 +3,7 @@
 pragma solidity 0.8.10;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {IDAO} from "../../../core/IDAO.sol";
 import {PluginSetup} from "../../../plugin/PluginSetup.sol";
 import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
 import {PluginCloneableV1Mock, PluginCloneableV2Mock} from "./PluginCloneableMock.sol";
@@ -16,39 +17,26 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         plugin = mockPluginProxy(pluginBase, _dao);
-        helpers = mockHelpers(1);
-        permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
+        preparedDependency.helpers = mockHelpers(1);
+        preparedDependency.permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
-        address _plugin,
-        address[] calldata _currentHelpers,
-        bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        (_dao, _plugin, _currentHelpers);
+        SetupPayload calldata _payload
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+        (_dao, _payload);
         permissions = mockPermissions(5, 6, PermissionLib.Operation.Revoke);
     }
 
@@ -64,39 +52,26 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory)
+    function prepareInstallation(
+        address _dao,
+        bytes memory
+    )
         public
         virtual
         override
-        returns (
-            address plugin,
-            address[] memory helpers,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (address plugin, PreparedDependency memory preparedDependency)
     {
         plugin = mockPluginProxy(pluginBase, _dao);
-        helpers = mockHelpers(1);
-        permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
+        preparedDependency.helpers = mockHelpers(1);
+        preparedDependency.permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
     function prepareUninstallation(
         address _dao,
-        address _plugin,
-        address[] calldata _currentHelpers,
-        bytes calldata
-    ) external virtual override returns (PermissionLib.ItemMultiTarget[] memory permissions) {
-        (_dao, _plugin, _currentHelpers);
+        SetupPayload calldata _payload
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+        (_dao, _payload);
         permissions = mockPermissions(5, 7, PermissionLib.Operation.Revoke);
     }
 

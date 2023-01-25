@@ -15,34 +15,25 @@ import {PermissionLib} from "../core/permission/PermissionLib.sol";
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @inheritdoc IPluginSetup
-    function prepareUpdateDataABI() external view virtual override returns (string memory) {}
-
-    /// @inheritdoc IPluginSetup
     function prepareUpdate(
         address _dao,
-        address _plugin,
-        address[] memory _currentHelpers,
-        uint16[3] calldata _oldVersion,
-        bytes memory _data
+        uint16 _currentBuild,
+        SetupPayload calldata _payload
     )
         external
         virtual
         override
-        returns (
-            address[] memory updatedHelpers,
-            bytes memory initData,
-            PermissionLib.ItemMultiTarget[] memory permissions
-        )
+        returns (bytes memory initData, PreparedDependency memory preparedDependency)
     {}
 
     /// @notice A convenience function to create an [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) proxy contract pointing to an implementation and being associated to a DAO.
     /// @param _implementation The address of the implementation contract to which the proxy is pointing to.
     /// @param _data The data to initialize the storage of the proxy contract.
     /// @return address The address of the created proxy contract.
-    function createERC1967Proxy(address _implementation, bytes memory _data)
-        internal
-        returns (address)
-    {
+    function createERC1967Proxy(
+        address _implementation,
+        bytes memory _data
+    ) internal returns (address) {
         return createERC1967(_implementation, _data);
     }
 

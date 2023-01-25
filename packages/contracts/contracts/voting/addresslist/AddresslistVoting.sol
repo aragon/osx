@@ -5,7 +5,7 @@ pragma solidity 0.8.10;
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
-import {RATIO_BASE, applyRatioCeiled} from "../../utils/Ratio.sol";
+import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 import {Addresslist} from "./Addresslist.sol";
@@ -81,6 +81,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         uint64 _startDate,
         uint64 _endDate,
         VoteOption _voteOption,
@@ -100,7 +101,8 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
             _metadata: _metadata,
             _startDate: _startDate,
             _endDate: _endDate,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
 
         // Store proposal related information
@@ -113,10 +115,15 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         proposal_.parameters.snapshotBlock = snapshotBlock;
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-        proposal_.parameters.minVotingPower = applyRatioCeiled(
+        proposal_.parameters.minVotingPower = _applyRatioCeiled(
             totalVotingPower(snapshotBlock),
             minParticipation()
         );
+
+        // Reduce costs
+        if (_allowFailureMap != 0) {
+            proposal_.allowFailureMap = _allowFailureMap;
+        }
 
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);

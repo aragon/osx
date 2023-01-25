@@ -2,17 +2,23 @@
 
 pragma solidity 0.8.10;
 
-contract CallbackHandlerMockHelper {
+import {CallbackHandler} from "../core/component/CallbackHandler.sol";
+
+contract CallbackHandlerMockHelper is CallbackHandler {
     address callbackHandlerMockAddr;
 
-    constructor(address _callbackHandlerMockAddr) {
-        callbackHandlerMockAddr = _callbackHandlerMockAddr;
+    /// @notice Calls the internal `_handleCallback` on the parent `CallbackHandler` for testing purposes.
+    /// @param selector The function selector of the callback function to be tested.
+    /// @param data Arbitrary data accompanying the callback that will be emitted with the `CallbackReceived` event.
+    function handleCallback(bytes4 selector, bytes memory data) external returns (bytes4) {
+        bytes4 magicNumber = _handleCallback(selector, data);      
+        return magicNumber;
     }
 
-    // @notice Executes the `fallback()` function in `CallbackHandlerMock` and emits the returned value.
-    // @param selector Any kind of selector in order to call fallback.
-    function handleCallback(bytes4 selector) external returns (bytes32 magicNumber) {
-        (, bytes memory value) = callbackHandlerMockAddr.call(abi.encodeWithSelector(selector));
-        magicNumber = abi.decode(value, (bytes32));
+    /// @notice Executes `_registerCallback` on the parent to register magic number per selector.
+    /// @param selector The function selector.
+    /// @param magicNumber The selector's magic number.
+    function registerCallback(bytes4 selector, bytes4 magicNumber) external {
+        _registerCallback(selector, magicNumber);
     }
 }

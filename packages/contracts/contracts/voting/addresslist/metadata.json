@@ -1,0 +1,12 @@
+{
+  "ui": "",
+  "change": "",
+  "pluginSetupABI": {
+    "prepareInstallation": [
+      "tuple(uint8 votingMode, uint64 supportThreshold, uint64 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings",
+      "address[] members"
+    ],
+    "prepareUpdate": [""],
+    "prepareUninstallation": [""]
+  }
+}

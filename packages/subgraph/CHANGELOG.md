@@ -7,14 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added `voteReplaced` and `updatedAt` to `TokenVotingVote` and `AddresslistVotingVote`.
+
 ### Changed
 
-- Rescaled and renamed `PCT_BASE = 10*18` to `RATIO_BASE = 10*6`.
-- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16`, and added `approvals`(uint16) in the `Proposal` struct.
-- Rescaled and renamed `PCT_BASE = 10**18` to `RATIO_BASE = 10**6`.
-- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Changed indexing of `totalVotingPower` which is now obtained from the `snapshotBlock` and the public function `totalVotingPower(uint256 _blockNumber)`.
-- Changes callId in `Executed` event from `uint256` to `bytes32`
+- Changes `callId` in `Executed` event from `uint256` to `bytes32`.
+- Renames `name` in `PluginRepoRegistry` and `DAORegistry` to `subdomain`.
 
 ## 0.6.2-alpha
 
@@ -22,10 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `startDate` and `endDate` to all `ProposalCreated` events.
 - Adds `startDate` and `endDate` fields to Multisig proposals.
+- Adds `allowFailureMap` to the proposal entities.
 
 ### Changed
 
 - Replaced `ProposalParameters.minParticipation` by `minVotingPower` in `TokenVoting` and `AddresslistVoting`.
+- Rescaled and renamed `PCT_BASE = 10**18` to `RATIO_BASE = 10**6`.
+- Changed the type of `ProposalParameter.minApprovals`, `MultisigSettingsUpdated.minApprovals` from `uint256` to `uint16` , and added `approvals`(uint16) in the `Proposal` struct.
 - Updates `ADDRESSLIST_VOTING_INTERFACE` and `ADMIN_INTERFACE`
 - Changed all occurences of `oracle` to `condition`.
 

@@ -44,6 +44,7 @@ export function _handleProposalCreated(
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
+  proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = AddresslistVoting.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);
@@ -118,14 +119,19 @@ export function handleVoteCast(event: VoteCast): void {
   }
 
   let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
-  if (!voterProposalVoteEntity) {
+  if (voterProposalVoteEntity) {
+    voterProposalVoteEntity.voteReplaced = true;
+    voterProposalVoteEntity.updatedAt = event.block.timestamp;
+  } else {
     voterProposalVoteEntity = new AddresslistVotingVote(voterVoteId);
     voterProposalVoteEntity.voter = memberId;
     voterProposalVoteEntity.proposal = proposalId;
+    voterProposalVoteEntity.createdAt = event.block.timestamp;
+    voterProposalVoteEntity.voteReplaced = false;
+    voterProposalVoteEntity.updatedAt = BigInt.zero();
   }
   voterProposalVoteEntity.voteOption = voteOption;
   voterProposalVoteEntity.votingPower = event.params.votingPower;
-  voterProposalVoteEntity.createdAt = event.block.timestamp;
   voterProposalVoteEntity.save();
 
   // update count

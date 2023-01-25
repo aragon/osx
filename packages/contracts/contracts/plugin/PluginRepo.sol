@@ -8,11 +8,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
-import {_uncheckedIncrement} from "../utils/UncheckedMath.sol";
 import {PluginSetup} from "./PluginSetup.sol";
 import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
-import {isValidBumpStrict, BumpInvalid} from "./SemanticVersioning.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2022
@@ -27,8 +25,13 @@ contract PluginRepo is
 {
     using AddressUpgradeable for address;
 
+    struct Tag {
+        uint8 release;
+        uint16 build;
+    }
+
     struct Version {
-        uint16[3] semanticVersion;
+        Tag tag;
         address pluginSetup;
         bytes contentURI;
     }
@@ -39,21 +42,24 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
-    /// @notice The index of the next version to be created.
-    uint256 internal nextVersionIndex;
+    /// @notice The ID of the latest release.
+    /// @dev The maximum release ID is 255 as it is later stored as an `uint8` inside `Version.tag`.
+    uint256 public latestRelease;
 
-    /// @notice The mapping between version indices and version information.
-    mapping(uint256 => Version) internal versions;
+    /// @notice increasing build numbers per release
+    /// @dev keys can only be uint8 even though uint256 is specified to reduce gas cost.
+    mapping(uint256 => uint256) internal buildsPerRelease;
 
-    /// @notice A mapping between the semantic version number hash and the version index.
-    mapping(bytes32 => uint256) internal versionIndexForSemantic;
+    /// @notice The mapping between version hash and its corresponding Version information.
+    /// @dev key: keccak(abi.encode(release, build)) value: Version struct.
+    mapping(bytes32 => Version) internal versions;
 
-    /// @notice A mapping between the `PluginSetup` contract addresses and the version index.
-    mapping(address => uint256) internal versionIndexForPluginSetup;
+    /// @notice The mapping between plugin setup address and its corresponding versionHash
+    mapping(address => bytes32) internal latestTagHashForPluginSetup;
 
     /// @notice Thrown if version does not exist.
-    /// @param versionIndex The index of the version.
-    error VersionIndexDoesNotExist(uint256 versionIndex);
+    /// @param versionHash The version Hash(release + build)
+    error VersionHashDoesNotExist(bytes32 versionHash);
 
     /// @notice Thrown if a contract does not inherit from `PluginSetup`.
     /// @param invalidPluginSetup The address of the contract missing the `PluginSetup` interface.
@@ -67,14 +73,33 @@ contract PluginRepo is
     /// @param invalidContract The address not being a contract.
     error InvalidContractAddress(address invalidContract);
 
-    /// @notice Emitted when a new version is created.
-    /// @param versionId The version index.
-    /// @param semanticVersion The semantic version number.
+    /// @notice Thrown if release id is 0.
+    error ReleaseIdZeroNotAllowed();
+
+    /// @notice Thrown if release id is by more than 1 to the previous release id.
+    /// @param currentRelease the current latest release id.
+    /// @param newRelease new release id dev is trying to push.
+    error ReleaseIdIncrementInvalid(uint256 currentRelease, uint256 newRelease);
+
+    /// @notice Thrown if the same plugin setup exists in previous releases.
+    /// @param release the release number in which pluginSetup is found.
+    /// @param build the build number of the release number in which pluginSetup is found.
+    /// @param pluginSetup the plugin setup address.
+    error PluginSetupAlreadyInPreviousRelease(
+        uint8 release,
+        uint16 build,
+        address pluginSetup
+    );
+
+    /// @notice Thrown if the same plugin setup exists in previous releases.
+    /// @param release the release number
+    /// @param build the build number
     /// @param pluginSetup The address of the plugin setup contract.
     /// @param contentURI External URI where the plugin metadata and subsequent resources can be fetched from
+    /// @param pluginSetup the plugin setup address.
     event VersionCreated(
-        uint256 versionId,
-        uint16[3] semanticVersion,
+        uint8 release,
+        uint16 build,
         address indexed pluginSetup,
         bytes contentURI
     );
@@ -93,15 +118,41 @@ contract PluginRepo is
     function initialize(address initialOwner) external initializer {
         __PermissionManager_init(initialOwner);
 
-        nextVersionIndex = 1;
-
         // set permissionIds.
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
     }
 
+    // How it looks: Will be removed as the last commit before the merge.
+    // Release 1
+    // //  1 => {
+    //         pluginSetup: 0x12  (implementation: 0x55)
+    //         contentURI: cid12
+    // //  },
+    // //  2 => {
+    //         pluginSetup: 0x34 (implementation: 0x77)
+    //         contentURI: cid12
+    // //  },
+    // //  3 => {
+    //         pluginSetup: 0x56 (implementation: 0x88)
+    //         contentURI: cid12
+    // //  },
+    // //  4 => {
+    //         pluginSetup: 0x56 (implementation: 0x88)
+    //         contentURI: cid34
+    // //  }
+    // Release 2
+    // //  1 => {
+    //         pluginSetup: 0x44  (implementation: 0x11)
+    //         contentURI: cid12
+    // //  },
+    // //  2 => {
+    //         pluginSetup: 0x66  (implementation: 0x22)
+    //         contentURI: cid12
+    // //  },
+
     /// @inheritdoc IPluginRepo
     function createVersion(
-        uint16[3] memory _newSemanticVersion,
+        uint8 _release, // 1
         address _pluginSetup,
         bytes calldata _contentURI
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
@@ -122,110 +173,104 @@ contract PluginRepo is
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         }
 
-        uint256 currentVersionIndex = nextVersionIndex - 1;
-
-        uint16[3] memory currentSemanticVersion;
-
-        if (currentVersionIndex > 0) {
-            Version storage currentVersion = versions[currentVersionIndex];
-            currentSemanticVersion = currentVersion.semanticVersion;
+        if (_release == 0) {
+            revert ReleaseIdZeroNotAllowed();
         }
 
-        if (!isValidBumpStrict(currentSemanticVersion, _newSemanticVersion)) {
-            revert BumpInvalid({
-                currentVersion: currentSemanticVersion,
-                nextVersion: _newSemanticVersion
-            });
+        // Can't release 3 unless 2 is released.
+        if (_release - latestRelease > 1) {
+            revert ReleaseIdIncrementInvalid(latestRelease, _release);
         }
 
-        uint256 versionIndex = nextVersionIndex;
-        nextVersionIndex = _uncheckedIncrement(nextVersionIndex);
-        versions[versionIndex] = Version(_newSemanticVersion, _pluginSetup, _contentURI);
-        versionIndexForSemantic[_semanticVersionHash(_newSemanticVersion)] = versionIndex;
-        versionIndexForPluginSetup[_pluginSetup] = versionIndex;
+        if (_release > latestRelease) {
+            latestRelease = _release;
+        }
 
-        emit VersionCreated(versionIndex, _newSemanticVersion, _pluginSetup, _contentURI);
+        // Make sure the same plugin setup wasn't used in previous releases.
+        Version storage version = versions[latestTagHashForPluginSetup[_pluginSetup]];
+        if (version.tag.release != 0 && version.tag.release != _release) {
+            revert PluginSetupAlreadyInPreviousRelease(
+                version.tag.release,
+                version.tag.build,
+                _pluginSetup
+            );
+        }
+
+        uint16 build;
+        unchecked {
+            build = uint16(++buildsPerRelease[_release]);
+        }
+
+        Tag memory tag = Tag(_release, build);
+        bytes32 _tagHash = tagHash(tag);
+
+        versions[_tagHash] = Version(
+            tag,
+            _pluginSetup,
+            _contentURI
+        );
+
+        latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
+
+        emit VersionCreated(_release, build, _pluginSetup, _contentURI);
     }
 
-    /// @notice Gets the version information of the latest version.
-    /// @return semanticVersion The semantic version number.
-    /// @return pluginSetup The address of the plugin factory associated with the version.
-    /// @return contentURI The external URI pointing to the content of the version.
-    function getLatestVersion()
+
+    /// @notice latest version in the release number.
+    /// @param _release the release number.
+    /// @return Version the latest version in the release number.
+    function getLatestVersion(uint8 _release) public view returns (Version memory) {
+        uint16 latestBuild = uint16(buildsPerRelease[_release]);
+        return getVersion(tagHash(Tag(_release, latestBuild)));
+    }
+
+    /// @notice get the latest version by plugin setup.
+    /// @param _pluginSetup the plugin setup address
+    /// @return Version latest version that is bound to the _pluginSetup
+    function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
+        return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
+    }
+
+    /// @notice get the version by tag.
+    /// @param _tag the version tag.
+    /// @return the version which belongs to the _tag.
+    function getVersion(Tag calldata _tag)
         public
         view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
+        returns (Version memory)
     {
-        return getVersionById(nextVersionIndex - 1);
+        return getVersion(tagHash(_tag));
     }
 
-    /// @notice Gets the version information associated with a plugin factory address.
-    /// @return semanticVersion The semantic version number.
-    /// @return pluginSetup The address of the plugin factory associated with the version.
-    /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionByPluginSetup(address _pluginSetup)
+    /// @notice get the concrete version.
+    /// @param _tagHash the tag hash.
+    /// @return Version the concrete version by the exact hash.
+    function getVersion(bytes32 _tagHash)
         public
         view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
+        returns (Version memory)
     {
-        return getVersionById(versionIndexForPluginSetup[_pluginSetup]);
+        Version storage version = versions[_tagHash];
+
+        if (version.tag.release == 0) {
+            revert VersionHashDoesNotExist(_tagHash);
+        }
+
+        return version;
     }
 
-    /// @notice Gets the version information associated with a semantic version number.
-    /// @return semanticVersion The semantic version number.
-    /// @return pluginSetup The address of the plugin factory associated with the version.
-    /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionBySemanticVersion(uint16[3] memory _semanticVersion)
-        public
-        view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
-    {
-        return getVersionById(versionIndexForSemantic[_semanticVersionHash(_semanticVersion)]);
+    /// @notice Gets the total number of published versions per release.
+    /// @param _release release id.
+    /// @return The number of published versions in the release.
+    function buildCount(uint8 _release) public view returns (uint256) {
+        return buildsPerRelease[_release];
     }
-
-    /// @notice Gets the version information associated with a version index.
-    /// @return semanticVersion The semantic version number.
-    /// @return pluginSetup The address of the plugin factory associated with the version.
-    /// @return contentURI The external URI pointing to the content of the version.
-    function getVersionById(uint256 _versionIndex)
-        public
-        view
-        returns (
-            uint16[3] memory semanticVersion,
-            address pluginSetup,
-            bytes memory contentURI
-        )
-    {
-        if (_versionIndex <= 0 || _versionIndex >= nextVersionIndex)
-            revert VersionIndexDoesNotExist({versionIndex: _versionIndex});
-        Version storage version = versions[_versionIndex];
-        return (version.semanticVersion, version.pluginSetup, version.contentURI);
-    }
-
-    /// @notice Gets the total number of published versions.
-    /// @return uint256 The number of published versions.
-    function getVersionCount() public view returns (uint256) {
-        return nextVersionIndex - 1;
-    }
-
-    /// @notice Generates a hash from a semantic version number.
-    /// @param semanticVersion The semantic version number.
-    /// @return bytes32 The hash of the semantic version number.
-    function _semanticVersionHash(uint16[3] memory semanticVersion) internal pure returns (bytes32) {
-        return
-            keccak256(abi.encodePacked(semanticVersion[0], semanticVersion[1], semanticVersion[2]));
+    
+    /// @notice get the tag hash.
+    /// @param _tag the tag.
+    /// @return bytes32 the keccak hash of abi encoded _release and _build
+    function tagHash(Tag memory _tag) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_tag.release, _tag.build));
     }
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).

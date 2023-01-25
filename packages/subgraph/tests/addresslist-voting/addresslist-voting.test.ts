@@ -31,7 +31,8 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER
+  TOTAL_VOTING_POWER,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 import {
   createDummyActions,
@@ -80,7 +81,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     '0', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   createTotalVotingPowerCall(
@@ -96,6 +98,8 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     START_DATE,
     END_DATE,
     STRING_DATA,
+    [],
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -146,6 +150,12 @@ test('Run AddresslistVoting (handleProposalCreated) mappings with mock event', (
     entityID,
     'creationBlockNumber',
     event.block.number.toString()
+  );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'allowFailureMap',
+    ALLOW_FAILURE_MAP
   );
 
   assert.fieldEquals(
@@ -233,7 +243,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '1', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   createTotalVotingPowerCall(
@@ -254,8 +265,20 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event);
 
   // checks
-  let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('AddresslistVotingVote', entityID, 'id', entityID);
+  let voteEntityID = ADDRESS_ONE + '_' + proposal.id;
+  assert.fieldEquals('AddresslistVotingVote', voteEntityID, 'id', voteEntityID);
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'voteReplaced',
+    'false'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'updatedAt',
+    BigInt.zero().toString()
+  );
 
   // check proposal
   assert.fieldEquals('AddresslistVotingProposal', proposal.id, 'yes', '1');
@@ -278,7 +301,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '1'
   );
 
-  // create calls
+  // Check when voter replace vote
+  // create calls 2
   createGetProposalCall(
     CONTRACT_ADDRESS,
     PROPOSAL_ID,
@@ -296,19 +320,67 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '2', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
   let event2 = createNewVoteCastEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
-    '2', // yes
+    '3', // No
     '1', // votingPower
     CONTRACT_ADDRESS
   );
 
   handleVoteCast(event2);
+
+  // checks 2
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'voteReplaced',
+    'true'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'updatedAt',
+    event2.block.timestamp.toString()
+  );
+
+  // create calls 3
+  createGetProposalCall(
+    CONTRACT_ADDRESS,
+    PROPOSAL_ID,
+    true,
+    false,
+
+    VOTING_MODE,
+    SUPPORT_THRESHOLD,
+    MIN_VOTING_POWER,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    '0', // abstain
+    '2', // yes
+    '0', // no
+
+    actions,
+    ALLOW_FAILURE_MAP
+  );
+
+  // create event
+  let event3 = createNewVoteCastEvent(
+    PROPOSAL_ID,
+    ADDRESS_TWO,
+    '2', // yes
+    '1', // votingPower
+    CONTRACT_ADDRESS
+  );
+
+  handleVoteCast(event3);
 
   // Check executable
   // abstain: 0, yes: 2, no: 0
@@ -356,7 +428,8 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event and vote o
     '0', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event

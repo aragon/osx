@@ -97,7 +97,7 @@ type StandardCallback @entity {
 
 type Dao @entity {
   id: ID! # use address as id
-  name: String
+  subdomain: String
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
@@ -134,7 +134,7 @@ type PluginVersion @entity(immutable: true) {
 
 type PluginRepo @entity(immutable: true) {
   id: ID! # address
-  name: String!
+  subdomain: String!
   versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
 }
 
@@ -182,10 +182,12 @@ interface Proposal {
   creator: Bytes!
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
   endDate: BigInt!
+  executionTxHash: Bytes
 }
 
 # Voting
@@ -236,12 +238,15 @@ type TokenVotingVote @entity {
   voteOption: VoteOption!
   votingPower: BigInt!
   createdAt: BigInt!
+  voteReplaced: Boolean!
+  updatedAt: BigInt!
 }
 
 type TokenVotingProposal implements Proposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   plugin: TokenVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -268,6 +273,7 @@ type TokenVotingProposal implements Proposal @entity {
   executable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
+  executionTxHash: Bytes
 }
 
 # AddresslistVoting
@@ -301,12 +307,15 @@ type AddresslistVotingVote @entity {
   voteOption: VoteOption!
   votingPower: BigInt!
   createdAt: BigInt!
+  voteReplaced: Boolean!
+  updatedAt: BigInt!
 }
 
 type AddresslistVotingProposal implements Proposal @entity {
   id: ID! # package + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   plugin: AddresslistVotingPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -333,6 +342,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   executable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
+  executionTxHash: Bytes
 }
 
 # Admin (plugin)
@@ -365,6 +375,7 @@ type AdminProposal implements Proposal @entity {
   creator: Bytes! # Adminstrator address
   metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
@@ -372,6 +383,7 @@ type AdminProposal implements Proposal @entity {
   plugin: AdminPlugin!
   proposalId: BigInt!
   adminstrator: Adminstrator!
+  executionTxHash: Bytes
 }
 
 # Multisig
@@ -408,6 +420,7 @@ type MultisigProposal implements Proposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
   actions: [Action!]! @derivedFrom(field: "proposal")
+  allowFailureMap: BigInt!
   plugin: MultisigPlugin!
   proposalId: BigInt!
   creator: Bytes!
@@ -422,5 +435,6 @@ type MultisigProposal implements Proposal @entity {
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
+  executionTxHash: Bytes
   approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
 }

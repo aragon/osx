@@ -66,7 +66,8 @@ export function createGetProposalCall(
   yes: string,
   no: string,
 
-  actions: ethereum.Tuple[]
+  actions: ethereum.Tuple[],
+  allowFailureMap: string
 ): void {
   let parameters = new ethereum.Tuple();
 
@@ -98,7 +99,7 @@ export function createGetProposalCall(
   createMockedFunction(
     Address.fromString(contractAddress),
     'getProposal',
-    'getProposal(uint256):(bool,bool,(uint8,uint32,uint64,uint64,uint64,uint256),(uint256,uint256,uint256),(address,uint256,bytes)[])'
+    'getProposal(uint256):(bool,bool,(uint8,uint32,uint64,uint64,uint64,uint256),(uint256,uint256,uint256),(address,uint256,bytes)[],uint256)'
   )
     .withArgs([
       ethereum.Value.fromUnsignedBigInt(BigInt.fromString(proposalId))
@@ -113,7 +114,9 @@ export function createGetProposalCall(
       // Tally
       ethereum.Value.fromTuple(tally),
 
-      ethereum.Value.fromTupleArray(actions)
+      ethereum.Value.fromTupleArray(actions),
+
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromString(allowFailureMap))
     ]);
 }
 

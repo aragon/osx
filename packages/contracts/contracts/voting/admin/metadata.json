@@ -1,0 +1,9 @@
+{
+  "ui": "",
+  "change": "",
+  "pluginSetupABI": {
+    "prepareInstallation": ["address admin"],
+    "prepareUpdate": [""],
+    "prepareUninstallation": [""]
+  }
+}

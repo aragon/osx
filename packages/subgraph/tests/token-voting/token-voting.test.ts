@@ -25,7 +25,9 @@ import {
   START_DATE,
   END_DATE,
   SNAPSHOT_BLOCK,
-  TOTAL_VOTING_POWER
+  TOTAL_VOTING_POWER,
+  ALLOW_FAILURE_MAP,
+  ADDRESS_TWO
 } from '../constants';
 
 import {
@@ -71,7 +73,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     '0', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   createTotalVotingPowerCall(
@@ -87,6 +90,8 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
     START_DATE,
     END_DATE,
     STRING_DATA,
+    [],
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -106,6 +111,12 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('TokenVotingProposal', entityID, 'proposalId', proposalId);
   assert.fieldEquals('TokenVotingProposal', entityID, 'creator', ADDRESS_ONE);
   assert.fieldEquals('TokenVotingProposal', entityID, 'metadata', STRING_DATA);
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'allowFailureMap',
+    ALLOW_FAILURE_MAP
+  );
   assert.fieldEquals(
     'TokenVotingProposal',
     entityID,
@@ -170,7 +181,7 @@ test('Run TokenVoting (handleProposalCreated) mappings with mock event', () => {
 test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   let proposal = createTokenVotingProposalEntityState();
 
-  // create calls
+  // create calls 1
   createGetProposalCall(
     CONTRACT_ADDRESS,
     PROPOSAL_ID,
@@ -188,7 +199,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '1', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   createTotalVotingPowerCall(
@@ -209,8 +221,15 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event);
 
   // checks
-  let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('TokenVotingVote', entityID, 'id', entityID);
+  let voteEntityID = ADDRESS_ONE + '_' + proposal.id;
+  assert.fieldEquals('TokenVotingVote', voteEntityID, 'id', voteEntityID);
+  assert.fieldEquals('TokenVotingVote', voteEntityID, 'voteReplaced', 'false');
+  assert.fieldEquals(
+    'TokenVotingVote',
+    voteEntityID,
+    'updatedAt',
+    BigInt.zero().toString()
+  );
 
   // check proposal
   assert.fieldEquals('TokenVotingProposal', proposal.id, 'yes', '1');
@@ -229,7 +248,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '1'
   );
 
-  // create calls
+  // Check when voter replace vote
+  // create calls 2
   createGetProposalCall(
     CONTRACT_ADDRESS,
     PROPOSAL_ID,
@@ -247,7 +267,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
     '2', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   createTotalVotingPowerCall(
@@ -260,12 +281,53 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event', () => {
   let event2 = createNewVoteCastEvent(
     PROPOSAL_ID,
     ADDRESS_ONE,
-    '2', // yes
+    '3', // No
     '1', // votingPower
     CONTRACT_ADDRESS
   );
 
   handleVoteCast(event2);
+
+  // checks 2
+  assert.fieldEquals('TokenVotingVote', voteEntityID, 'voteReplaced', 'true');
+  assert.fieldEquals(
+    'TokenVotingVote',
+    voteEntityID,
+    'updatedAt',
+    event2.block.timestamp.toString()
+  );
+
+  // create calls 3
+  createGetProposalCall(
+    CONTRACT_ADDRESS,
+    PROPOSAL_ID,
+    true,
+    false,
+
+    VOTING_MODE,
+    SUPPORT_THRESHOLD,
+    MIN_VOTING_POWER,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    '0', // abstain
+    '2', // yes
+    '0', // no
+
+    actions,
+    ALLOW_FAILURE_MAP
+  );
+  // create event 3
+  let event3 = createNewVoteCastEvent(
+    PROPOSAL_ID,
+    ADDRESS_TWO,
+    '2', // yes
+    '1', // votingPower
+    CONTRACT_ADDRESS
+  );
+
+  handleVoteCast(event3);
 
   // Check executable
   // abstain: 0, yes: 2, no: 0
@@ -308,7 +370,8 @@ test('Run TokenVoting (handleVoteCast) mappings with mock event and vote option 
     '0', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -359,7 +422,8 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     '1', // yes
     '0', // no
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
