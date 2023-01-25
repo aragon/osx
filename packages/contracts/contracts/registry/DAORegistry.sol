@@ -17,9 +17,6 @@ contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ENS subdomain registrar registering the DAO subdomains.
     ENSSubdomainRegistrar private subdomainRegistrar;
 
-    /// @notice Thrown if the DAO repository subdomain is empty.
-    error EmptyDaoSubdomain();
-
     /// @notice Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
     error InvalidDaoSubdomain(string subdomain);
 
@@ -57,19 +54,17 @@ contract DAORegistry is InterfaceBasedRegistry {
     ) external auth(REGISTER_DAO_PERMISSION_ID) {
         address daoAddr = address(dao);
 
-        if (!(bytes(subdomain).length > 0)) {
-            revert EmptyDaoSubdomain();
-        }
-
-        if (!isSubdomainValid(subdomain)) {
-            revert InvalidDaoSubdomain({subdomain: subdomain});
-        }
-
         _register(daoAddr);
 
-        bytes32 labelhash = keccak256(bytes(subdomain));
+        if ((bytes(subdomain).length > 0)) {
+            if (!isSubdomainValid(subdomain)) {
+                revert InvalidDaoSubdomain({subdomain: subdomain});
+            }
 
-        subdomainRegistrar.registerSubnode(labelhash, daoAddr);
+            bytes32 labelhash = keccak256(bytes(subdomain));
+
+            subdomainRegistrar.registerSubnode(labelhash, daoAddr);
+        }
 
         emit DAORegistered(daoAddr, creator, subdomain);
     }

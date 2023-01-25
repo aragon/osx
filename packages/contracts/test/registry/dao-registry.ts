@@ -75,12 +75,6 @@ describe('DAORegistry', function () {
     );
   });
 
-  it('reverts the registration if the DAO subdomain is empty', async function () {
-    await expect(
-      daoRegistry.register(targetDao.address, ownerAddress, '')
-    ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoSubdomain');
-  });
-
   it('Should register a new DAO successfully', async function () {
     await expect(daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain))
       .to.emit(daoRegistry, EVENTS.DAORegistered)
