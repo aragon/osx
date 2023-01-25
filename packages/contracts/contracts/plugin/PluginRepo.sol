@@ -197,7 +197,7 @@ contract PluginRepo is
 
         uint16 build;
         unchecked {
-            build = uint16(++buildsPerRelease[_release]);
+            build = ++buildsPerRelease[_release];
         }
 
         Tag memory tag = Tag(_release, build);
@@ -213,7 +213,6 @@ contract PluginRepo is
 
         emit VersionCreated(_release, build, _pluginSetup, _contentURI);
     }
-
 
     /// @notice latest version in the release number.
     /// @param _release the release number.
