@@ -11,7 +11,7 @@ import {
 import {deployNewDAO} from '../test-utils/dao';
 import {deployNewPluginRepo} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {ensDomainHash, ensLabelHash} from '../../utils/ens';
+import {ensDomainHash} from '../../utils/ens';
 import {deployWithProxy} from '../test-utils/proxy';
 
 const EVENTS = {
@@ -35,7 +35,7 @@ describe('PluginRepoRegistry', function () {
   );
 
   const topLevelDomain = 'dao.eth';
-  const pluginRepoName = 'my-plugin-repo';
+  const pluginRepoSubdomain = 'my-plugin-repo';
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -91,12 +91,12 @@ describe('PluginRepoRegistry', function () {
   it('Should register a new pluginRepo successfully', async function () {
     await expect(
       await pluginRepoRegistry.registerPluginRepo(
-        pluginRepoName,
+        pluginRepoSubdomain,
         pluginRepo.address
       )
     )
       .to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered)
-      .withArgs(pluginRepoName, pluginRepo.address);
+      .withArgs(pluginRepoSubdomain, pluginRepo.address);
 
     expect(await pluginRepoRegistry.entries(pluginRepo.address)).to.equal(true);
   });
@@ -104,7 +104,7 @@ describe('PluginRepoRegistry', function () {
   it('fail to register if the sender lacks the required role', async () => {
     // Register a plugin successfully
     await pluginRepoRegistry.registerPluginRepo(
-      pluginRepoName,
+      pluginRepoSubdomain,
       pluginRepo.address
     );
 
@@ -120,7 +120,7 @@ describe('PluginRepoRegistry', function () {
 
     await expect(
       pluginRepoRegistry.registerPluginRepo(
-        pluginRepoName,
+        pluginRepoSubdomain,
         newPluginRepo.address
       )
     )
@@ -147,20 +147,102 @@ describe('PluginRepoRegistry', function () {
       .withArgs(pluginRepo.address);
   });
 
-  it("reverts the registration if the plugin repo's ENS name is already taken", async function () {
+  it("reverts the registration if the plugin repo's ENS subdomain is already taken", async function () {
     await pluginRepoRegistry.registerPluginRepo(
-      pluginRepoName,
+      pluginRepoSubdomain,
       pluginRepo.address
     );
 
-    const pluginRepoNameDomainHash = ensDomainHash(
-      pluginRepoName + '.' + topLevelDomain
+    const pluginRepoSubdomainDomainHash = ensDomainHash(
+      pluginRepoSubdomain + '.' + topLevelDomain
     );
 
     await expect(
-      pluginRepoRegistry.registerPluginRepo(pluginRepoName, pluginRepo.address)
+      pluginRepoRegistry.registerPluginRepo(pluginRepoSubdomain, pluginRepo.address)
     )
       .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
-      .withArgs(pluginRepoNameDomainHash, ensSubdomainRegistrar.address);
+      .withArgs(pluginRepoSubdomainDomainHash, ensSubdomainRegistrar.address);
+  });
+
+  // without mocking we have to repeat the tests here to make sure the validation is correct
+  describe('subdomain validation', () => {
+    it('should validate the passed subdomain correctly (< 32 bytes long subdomain)', async () => {
+      const baseSubdomain = 'this-is-my-super-valid-subdomain';
+
+      // loop through the ascii table
+      for (let i = 0; i < 127; i++) {
+        // deploy a pluginRepo and initialize
+        const newPluginRepo = await deployNewPluginRepo(ownerAddress);
+
+        // replace the 10th char in the baseSubdomain
+        const subdomainName =
+          baseSubdomain.substring(0, 10) +
+          String.fromCharCode(i) +
+          baseSubdomain.substring(10 + 1);
+
+        // test success if it is a valid char [0-9a-z\-]
+        if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+          await expect(
+            pluginRepoRegistry.registerPluginRepo(
+              subdomainName,
+              newPluginRepo.address
+            )
+          ).to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered);
+          continue;
+        }
+
+        await expect(
+          pluginRepoRegistry.registerPluginRepo(
+            subdomainName,
+            newPluginRepo.address
+          )
+        )
+          .to.be.revertedWithCustomError(
+            pluginRepoRegistry,
+            'InvalidPluginSubdomain'
+          )
+          .withArgs(subdomainName);
+      }
+    });
+
+    it('should validate the passed subdomain correctly (> 32 bytes long subdomain)', async () => {
+      const baseSubdomain =
+        'this-is-my-super-looooooooooooooooooooooooooong-valid-subdomain';
+
+      // loop through the ascii table
+      for (let i = 0; i < 127; i++) {
+        // deploy a pluginRepo and initialize
+        const newPluginRepo = await deployNewPluginRepo(ownerAddress);
+
+        // replace the 40th char in the baseSubdomain
+        const subdomainName =
+          baseSubdomain.substring(0, 40) +
+          String.fromCharCode(i) +
+          baseSubdomain.substring(40 + 1);
+
+        // test success if it is a valid char [0-9a-z\-]
+        if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+          await expect(
+            pluginRepoRegistry.registerPluginRepo(
+              subdomainName,
+              newPluginRepo.address
+            )
+          ).to.emit(pluginRepoRegistry, EVENTS.PluginRepoRegistered);
+          continue;
+        }
+
+        await expect(
+          pluginRepoRegistry.registerPluginRepo(
+            subdomainName,
+            newPluginRepo.address
+          )
+        )
+          .to.be.revertedWithCustomError(
+            pluginRepoRegistry,
+            'InvalidPluginSubdomain'
+          )
+          .withArgs(subdomainName);
+      }
+    });
   });
 });
