@@ -131,11 +131,6 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         _updateMultisigSettings(_multisigSettings);
 
         emit MembersAdded({members: _members});
-
-        emit MultisigSettingsUpdated({
-            onlyListed: _multisigSettings.onlyListed,
-            minApprovals: _multisigSettings.minApprovals
-        });
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -149,10 +144,9 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
-    function addAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function addAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         uint256 newAddresslistLength = addresslistLength() + _members.length;
 
         // Check if the new address list length would be greater than `type(uint16).max`, the maximal number of approvals.
@@ -170,10 +164,9 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function removeAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         uint16 newAddresslistLength = uint16(addresslistLength() - _members.length);
 
         // Check if the new address list length would become less than the current minimum number of approvals required.
@@ -191,16 +184,10 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
 
     /// @notice Updates the plugin settings.
     /// @param _multisigSettings The new settings.
-    function updateMultisigSettings(MultisigSettings calldata _multisigSettings)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function updateMultisigSettings(
+        MultisigSettings calldata _multisigSettings
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         _updateMultisigSettings(_multisigSettings);
-
-        emit MultisigSettingsUpdated({
-            onlyListed: _multisigSettings.onlyListed,
-            minApprovals: _multisigSettings.minApprovals
-        });
     }
 
     /// @notice Creates a new majority voting proposal.
@@ -253,7 +240,7 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         proposal_.parameters.minApprovals = multisigSettings.minApprovals;
 
         // Reduce costs
-        if(_allowFailureMap != 0) {
+        if (_allowFailureMap != 0) {
             proposal_.allowFailureMap = _allowFailureMap;
         }
 
@@ -320,7 +307,9 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
     /// @return parameters The parameters of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    function getProposal(uint256 _proposalId)
+    function getProposal(
+        uint256 _proposalId
+    )
         public
         view
         returns (
@@ -439,6 +428,11 @@ contract Multisig is IMembership, PluginUUPSUpgradeable, ProposalUpgradeable, Ad
         }
 
         multisigSettings = _multisigSettings;
+
+        emit MultisigSettingsUpdated({
+            onlyListed: _multisigSettings.onlyListed,
+            minApprovals: _multisigSettings.minApprovals
+        });
     }
 
     /// @dev This empty reserved space is put in place to allow future versions to add new
