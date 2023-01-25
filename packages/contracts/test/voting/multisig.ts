@@ -229,7 +229,7 @@ describe('Multisig', function () {
 
       // add a new member
       await expect(multisig.addAddresses([signers[1].address]))
-        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERSHIP_ANNOUNCED)
+        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
         .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
@@ -251,7 +251,7 @@ describe('Multisig', function () {
 
       // remove an existing member
       await expect(multisig.removeAddresses([signers[1].address]))
-        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERSHIP_RENOUNCED)
+        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
         .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);

@@ -124,7 +124,7 @@ describe('AddresslistVoting', function () {
     it('should add new users in the address list and emit the `MembersAdded` event', async () => {
       const addresses = [signers[0].address, signers[1].address];
       await expect(voting.addAddresses(addresses))
-        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_ANNOUNCED)
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
         .withArgs(addresses);
 
       const block = await ethers.provider.getBlock('latest');
@@ -146,7 +146,7 @@ describe('AddresslistVoting', function () {
       expect(await voting.isListed(signers[0].address)).to.be.true;
 
       await expect(voting.removeAddresses([signers[0].address]))
-        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_RENOUNCED)
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
         .withArgs([signers[0].address]);
 
       const block2 = await ethers.provider.getBlock('latest');
