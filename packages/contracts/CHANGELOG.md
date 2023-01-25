@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for relase metadata.
 - Added a `metadata.json` file for all plugins.
 - Added `startDate` and `endDate` to the `ProposalCreated` event.
 - Added the `ProposalBase`, `Proposal`, and `ProposalUpgradeable` contracts to refactor and unify the proposal creation and execution process across all governance plugins.

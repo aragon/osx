@@ -90,6 +90,11 @@ contract PluginRepo is
     /// @param pluginSetup the plugin setup address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
+    /// @notice Thrown if metadata is not set for release.
+    /// @param release the release number in which pluginSetup is found.
+    /// @param releaseMetadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
+    error ReleaseMetadataInvalid(uint8 release, bytes releaseMetadata);
+
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number.
     /// @param build the build number.
@@ -153,6 +158,14 @@ contract PluginRepo is
         uint8 _release,
         bytes calldata _releaseMetadata
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
+        if (_release == 0) {
+            revert ReleaseIdZeroNotAllowed();
+        }
+
+        if (_releaseMetadata.length == 0) {
+            revert ReleaseMetadataInvalid({release: _release, releaseMetadata: _releaseMetadata});
+        }
+
         metadataPerRelease[_release] = _releaseMetadata;
 
         emit ReleaseUpdated(_release, _releaseMetadata);
@@ -183,6 +196,11 @@ contract PluginRepo is
 
         if (_release == 0) {
             revert ReleaseIdZeroNotAllowed();
+        }
+
+        bytes memory releaseMetadata = metadataPerRelease[_release];
+        if (releaseMetadata.length == 0) {
+            revert ReleaseMetadataInvalid({release: _release, releaseMetadata: releaseMetadata});
         }
 
         // Can't release 3 unless 2 is released.
