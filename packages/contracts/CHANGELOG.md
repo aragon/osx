@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `IMembership` and `IMembershipContract` and the `MembershipContractAnnounced` event.
 - Added a `metadata.json` file for all plugins.
 - Added `startDate` and `endDate` to the `ProposalCreated` event.
 - Added the `ProposalBase`, `Proposal`, and `ProposalUpgradeable` contracts to refactor and unify the proposal creation and execution process across all governance plugins.
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
 - Avoided integer division in the `MajorityVoting` execution criteria to avoid precision loss.
 - Replaced `ProposalParameters.minParticipation` by `minVotingPower` in `TokenVoting` and `AddresslistVoting`.
 - Rescaled and renamed `PCT_BASE = 10**18` to `RATIO_BASE = 10**6`.
