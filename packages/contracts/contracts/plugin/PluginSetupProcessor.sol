@@ -55,7 +55,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Stores plugin state information per pluginInstallationId
     /// @dev pluginInstallationId => abi.encode(pluginAddress, daoAddress)
-    mapping(bytes32 => PluginState) private states;
+    /// @dev This variable is public on purpose to allow future version to access and migrate the storage.
+    mapping(bytes32 => PluginState) public states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
