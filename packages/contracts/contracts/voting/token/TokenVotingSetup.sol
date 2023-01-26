@@ -16,8 +16,6 @@ import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
 import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol";
-import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
-import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
