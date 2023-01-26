@@ -72,21 +72,13 @@ contract PluginRepo is
     /// @param invalidPluginSetup The address of the contract missing the `PluginSetup` interface.
     error InvalidPluginSetupInterface(address invalidPluginSetup);
 
-    /// @notice Thrown if a contract is not a `PluginSetup` contract.
-    /// @param invalidPluginSetup The address of the contract not being a plugin factory.
-    error InvalidPluginSetupContract(address invalidPluginSetup);
-
-    /// @notice Thrown if address is not a contract.
-    /// @param invalidContract The address not being a contract.
-    error InvalidContractAddress(address invalidContract);
-
-    /// @notice Thrown if release id is 0.
-    error ReleaseIdZeroNotAllowed();
+    /// @notice Thrown if release is 0.
+    error ReleaseZeroNotAllowed();
 
     /// @notice Thrown if release id is by more than 1 to the previous release id.
-    /// @param currentRelease the current latest release id.
+    /// @param latestRelease the current latest release id.
     /// @param newRelease new release id dev is trying to push.
-    error ReleaseIdIncrementInvalid(uint256 currentRelease, uint256 newRelease);
+    error ReleaseIncrementInvalid(uint256 latestRelease, uint256 newRelease);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number in which pluginSetup is found.
@@ -134,59 +126,9 @@ contract PluginRepo is
         _grant(address(this), initialOwner, UPDATE_RELEASE_METADATA_PERMISSION_ID);
     }
 
-    // How it looks: Will be removed as the last commit before the merge.
-    // Release 1
-    // //  1 => {
-    //         pluginSetup: 0x12  (implementation: 0x55)
-    //         contentURI: cid12
-    // //  },
-    // //  2 => {
-    //         pluginSetup: 0x34 (implementation: 0x77)
-    //         contentURI: cid12
-    // //  },
-    // //  3 => {
-    //         pluginSetup: 0x56 (implementation: 0x88)
-    //         contentURI: cid12
-    // //  },
-    // //  4 => {
-    //         pluginSetup: 0x56 (implementation: 0x88)
-    //         contentURI: cid34
-    // //  }
-    // Release 2
-    // //  1 => {
-    //         pluginSetup: 0x44  (implementation: 0x11)
-    //         contentURI: cid12
-    // //  },
-    // //  2 => {
-    //         pluginSetup: 0x66  (implementation: 0x22)
-    //         contentURI: cid12
-    // //  },
-
-    /// @inheritdoc IPluginRepo
-    function updateReleaseMetadata(
-        uint8 _release,
-        bytes calldata _metadata
-    ) external auth(address(this), UPDATE_RELEASE_METADATA_PERMISSION_ID) {
-        if (_release == 0) {
-            revert ReleaseIdZeroNotAllowed();
-        }
-
-        if (_release > latestRelease) {
-            revert ReleaseDoesNotExist({release: _release});
-        }
-
-        if (_metadata.length == 0) {
-            revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
-        }
-
-        metadataPerRelease[_release] = _metadata;
-
-        emit ReleaseMetadataUpdated(_release, _metadata);
-    }
-
     /// @inheritdoc IPluginRepo
     function createVersion(
-        uint8 _release, // 1
+        uint8 _release,
         address _pluginSetup,
         bytes calldata _buildMetadata
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
@@ -208,12 +150,12 @@ contract PluginRepo is
         }
 
         if (_release == 0) {
-            revert ReleaseIdZeroNotAllowed();
+            revert ReleaseZeroNotAllowed();
         }
 
-        // Can't release 3 unless 2 is released.
+        // Can't release `x` unless `x-1` is released.
         if (_release - latestRelease > 1) {
-            revert ReleaseIdIncrementInvalid({currentRelease: latestRelease, newRelease: _release});
+            revert ReleaseIncrementInvalid({latestRelease: latestRelease, newRelease: _release});
         }
 
         if (_release > latestRelease) {
@@ -243,6 +185,28 @@ contract PluginRepo is
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
         emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
+    }
+
+    /// @inheritdoc IPluginRepo
+    function updateReleaseMetadata(
+        uint8 _release,
+        bytes calldata _metadata
+    ) external auth(address(this), UPDATE_RELEASE_METADATA_PERMISSION_ID) {
+        if (_release == 0) {
+            revert ReleaseZeroNotAllowed();
+        }
+
+        if (_release > latestRelease) {
+            revert ReleaseDoesNotExist({release: _release});
+        }
+
+        if (_metadata.length == 0) {
+            revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
+        }
+
+        metadataPerRelease[_release] = _metadata;
+
+        emit ReleaseMetadataUpdated(_release, _metadata);
     }
 
     /// @notice latest version in the release number.
