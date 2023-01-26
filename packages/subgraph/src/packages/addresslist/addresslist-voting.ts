@@ -5,8 +5,8 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
-  AddressesAdded,
-  AddressesRemoved,
+  MembersAdded,
+  MembersRemoved,
   AddresslistVoting
 } from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
@@ -223,7 +223,7 @@ export function handleVotingSettingsUpdated(
   }
 }
 
-export function handleAddressesAdded(event: AddressesAdded): void {
+export function handleMembersAdded(event: MembersAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
@@ -240,7 +240,7 @@ export function handleAddressesAdded(event: AddressesAdded): void {
   }
 }
 
-export function handleAddressesRemoved(event: AddressesRemoved): void {
+export function handleMembersRemoved(event: MembersRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
