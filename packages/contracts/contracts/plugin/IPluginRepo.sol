@@ -14,10 +14,12 @@ interface IPluginRepo {
     /// @notice Creates a new version with contract `_pluginSetupAddress` and content `@fromHex(_buildMetadata)`.
     /// @param _release the release number.
     /// @param _pluginSetupAddress The address of the plugin setup contract.
+    /// @param _releaseMetadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
     /// @param _buildMetadata External URI where the plugin's build metadata and subsequent resources can be fetched from.
-    function createVersion(
+    function createRelease(
         uint8 _release,
         address _pluginSetupAddress,
+        bytes calldata _releaseMetadata,
         bytes calldata _buildMetadata
     ) external;
 }

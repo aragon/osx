@@ -108,7 +108,9 @@ contract PluginRepo is
     /// @param build the build number.
     /// @param pluginSetup The address of the plugin setup contract.
     /// @param metadata External URI where the plugin metadata and subsequent resources can be fetched from.
-    event VersionCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
+    event BuildCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
+
+    event ReleaseCreated(uint8 release, bytes metadata);
 
     /// @notice Thrown when a release's metadata was updated.
     /// @param release the release number.
@@ -167,16 +169,8 @@ contract PluginRepo is
         uint8 _release,
         bytes calldata _metadata
     ) external auth(address(this), UPDATE_RELEASE_METADATA_PERMISSION_ID) {
-        if (_release == 0) {
-            revert ReleaseIdZeroNotAllowed();
-        }
-
-        if (_release > latestRelease) {
+        if (metadataPerRelease[_release].length == 0) {
             revert ReleaseDoesNotExist({release: _release});
-        }
-
-        if (_metadata.length == 0) {
-            revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
         }
 
         metadataPerRelease[_release] = _metadata;
@@ -185,11 +179,29 @@ contract PluginRepo is
     }
 
     /// @inheritdoc IPluginRepo
-    function createVersion(
-        uint8 _release, // 1
+    function createRelease(
+        uint8 _release,
+        address _pluginSetup,
+        bytes calldata _buildMetadata,
+        bytes calldata _releaseMetadata
+    ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
+        _checkPluginSetup(_release, _pluginSetup);
+        _checkReleaseId(_release);
+        _createRelease(_release, _releaseMetadata);
+        _createBuild(_release, _pluginSetup, _buildMetadata);
+    }
+
+    function createBuild(
+        uint8 _release,
         address _pluginSetup,
         bytes calldata _buildMetadata
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
+        _checkPluginSetup(_release, _pluginSetup);
+        _checkReleaseId(_release);
+        _createBuild(_release, _pluginSetup, _buildMetadata);
+    }
+
+    function _checkPluginSetup(uint8 _release, address _pluginSetup) internal {
         // In a case where _pluginSetup doesn't contain supportsInterface,
         // but contains fallback, that doesn't return anything(most cases)
         // the below approach aims to still return custom error which not possible with try/catch..
@@ -207,19 +219,6 @@ contract PluginRepo is
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         }
 
-        if (_release == 0) {
-            revert ReleaseIdZeroNotAllowed();
-        }
-
-        // Can't release 3 unless 2 is released.
-        if (_release - latestRelease > 1) {
-            revert ReleaseIdIncrementInvalid({currentRelease: latestRelease, newRelease: _release});
-        }
-
-        if (_release > latestRelease) {
-            latestRelease = _release;
-        }
-
         // Make sure the same plugin setup wasn't used in previous releases.
         Version storage version = versions[latestTagHashForPluginSetup[_pluginSetup]];
         if (version.tag.release != 0 && version.tag.release != _release) {
@@ -229,7 +228,38 @@ contract PluginRepo is
                 _pluginSetup
             );
         }
+    }
 
+    function _checkReleaseId(uint8 _release) internal {
+        if (_release == 0) {
+            revert ReleaseIdZeroNotAllowed();
+        }
+
+        // Can't release 3 unless 2 is released.
+        if (_release - latestRelease > 1) {
+            revert ReleaseIdIncrementInvalid({currentRelease: latestRelease, newRelease: _release});
+        }
+    }
+
+    function _createRelease(uint8 _release, bytes calldata _releaseMetadata) internal {
+        if (_releaseMetadata.length == 0) {
+            revert ReleaseMetadataInvalid({release: _release, metadata: _releaseMetadata});
+        }
+
+        if (_release > latestRelease) {
+            latestRelease = _release;
+        }
+
+        metadataPerRelease[_release] = _releaseMetadata;
+
+        emit ReleaseCreated(_release, _releaseMetadata);
+    }
+
+    function _createBuild(
+        uint8 _release, // 1
+        address _pluginSetup,
+        bytes calldata _metadata
+    ) internal {
         uint16 build;
         unchecked {
             build = uint16(++buildsPerRelease[_release]);
@@ -238,11 +268,11 @@ contract PluginRepo is
         Tag memory tag = Tag(_release, build);
         bytes32 _tagHash = tagHash(tag);
 
-        versions[_tagHash] = Version(tag, _pluginSetup, _buildMetadata);
+        versions[_tagHash] = Version(tag, _pluginSetup, _metadata);
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
-        emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
+        emit BuildCreated(_release, build, _pluginSetup, _metadata);
     }
 
     /// @notice latest version in the release number.
