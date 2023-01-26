@@ -10,6 +10,7 @@ This checklist is seen as a guide to deploy the stack to a new chain.
   - [ ] Check if there is already an entry for it in `packages/contracts/deploy/helpers.ts`
   - [ ] Check that the owner of the DAO domain is the deployer
   - [ ] Check that the owner of the plugin domain is the deployer
+- [ ] Set `PRE_DEPLOYMENT_TESTS` to `true` in `.env` to enable warnings from proxy tests
 - [ ] Run `yarn` in the repository root to install the dependencies
 - [ ] Run `yarn build` in `packages/contracts` to make sure the contracts compile
 - [ ] Run `yarn test` in `packages/contracts` to make sure the contract tests succeed
@@ -18,7 +19,6 @@ This checklist is seen as a guide to deploy the stack to a new chain.
 - [ ] Set the right API key for the chains blockchain explorer in `.env` (e.g. for mainnet it is `ETHERSCAN_KEY`)
 - [ ] Set the choosen DAO ENS domain to `NETWORK_DAO_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_DAO_ENS_DOMAIN`)
 - [ ] Set the choosen Plugin ENS domain to `NETWORK_PLUGIN_ENS_DOMAIN` in `.env` and replace `NETWORK` with the correct network name (e.g. for mainnet it is `MAINNET_PLUGIN_ENS_DOMAIN`)
-- [ ] Set `PRE_DEPLOYMENT_TESTS` to `true` in `.env` to enable warnings from proxy tests
 
 ## Deployment
 
