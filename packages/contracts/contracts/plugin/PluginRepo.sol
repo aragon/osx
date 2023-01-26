@@ -130,6 +130,7 @@ contract PluginRepo is
     function createVersion(
         uint8 _release,
         address _pluginSetup,
+        bytes calldata _releaseMetadata,
         bytes calldata _buildMetadata
     ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
         // In a case where _pluginSetup doesn't contain supportsInterface,
@@ -184,6 +185,10 @@ contract PluginRepo is
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
+        if(_releaseMetadata.length > 0) {
+            _updateReleaseMetadata(_release, _releaseMetadata);
+        }
+
         emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
     }
 
@@ -204,6 +209,10 @@ contract PluginRepo is
             revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
         }
 
+        _updateReleaseMetadata(_release, _metadata);
+    }
+
+    function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) private {
         metadataPerRelease[_release] = _metadata;
 
         emit ReleaseMetadataUpdated(_release, _metadata);
