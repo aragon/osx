@@ -174,6 +174,10 @@ contract PluginRepo is
             revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
         }
 
+        _updateReleaseMetadata(_release, _metadata);
+    }
+
+    function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) internal {
         metadataPerRelease[_release] = _metadata;
 
         emit ReleaseMetadataUpdated(_release, _metadata);
@@ -183,7 +187,8 @@ contract PluginRepo is
     function createVersion(
         uint8 _release, // 1
         address _pluginSetup,
-        bytes calldata _buildMetadata
+        bytes calldata _buildMetadata,
+        bytes calldata _releaseMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
         // In a case where _pluginSetup doesn't contain supportsInterface,
         // but contains fallback, that doesn't return anything(most cases)
@@ -213,6 +218,10 @@ contract PluginRepo is
 
         if (_release > latestRelease) {
             latestRelease = _release;
+
+            if (_releaseMetadata.length == 0) {
+                revert ReleaseMetadataInvalid({release: _release, metadata: _releaseMetadata});
+            }
         }
 
         // Make sure the same plugin setup wasn't used in previous releases.
@@ -238,6 +247,10 @@ contract PluginRepo is
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
         emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
+
+        if (_releaseMetadata.length > 0) {
+            _updateReleaseMetadata(_release, _releaseMetadata);
+        }
     }
 
     /// @notice latest version in the release number.

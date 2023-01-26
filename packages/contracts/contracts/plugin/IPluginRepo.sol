@@ -15,9 +15,11 @@ interface IPluginRepo {
     /// @param _release the release number.
     /// @param _pluginSetupAddress The address of the plugin setup contract.
     /// @param _buildMetadata External URI where the plugin's build metadata and subsequent resources can be fetched from.
+    /// @param _releaseMetadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
     function createVersion(
         uint8 _release,
         address _pluginSetupAddress,
-        bytes calldata _buildMetadata
+        bytes calldata _buildMetadata,
+        bytes calldata _releaseMetadata
     ) external;
 }
