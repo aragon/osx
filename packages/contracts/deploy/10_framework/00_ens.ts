@@ -4,7 +4,6 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {ensDomainHash, ensLabelHash, setupENS} from '../../utils/ens';
 
 import {
-  detemineDeployerNextAddress,
   ENS_ADDRESSES,
   getContractAddress,
 } from '../helpers';

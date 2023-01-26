@@ -6,5 +6,8 @@
     "[solidity]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "prettier.bracketSpacing": true
+    "prettier.bracketSpacing": true,
+    "[markdown]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
   }

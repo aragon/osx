@@ -140,6 +140,12 @@ export async function createPluginRepo(
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
 
+  if(!hre.aragonPluginRepos) {
+    hre.aragonPluginRepos = {}
+  }
+
+  hre.aragonPluginRepos[pluginContractName] = repoAddress
+
   console.log(
     `Created & registered repo for ${pluginContractName} at address: ${repoAddress}, with contentURI ${ethers.utils.toUtf8String(
       contentURI
