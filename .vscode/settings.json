@@ -1,13 +1,13 @@
 {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[solidity]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "prettier.bracketSpacing": true,
-    "[markdown]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[solidity]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.bracketSpacing": true,
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
+}
