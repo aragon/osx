@@ -37,6 +37,8 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ### Configurations
 
+- [ ] Check if the managing DAO set in the `DAO_ENSSubdomainRegistrar`
+- [ ] Check if the managing DAO set in the `Plugin_ENSSubdomainRegistrar`
 - [ ] Check if the managing DAO set in the `DAORegistry`
 - [ ] Check if the managing DAO set in the `PluginRepoRegistry`
 - [ ] Check if the `PluginRepoRegistry` is set in the `PluginRepoFactory`
