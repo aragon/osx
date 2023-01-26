@@ -84,11 +84,7 @@ contract PluginRepo is
     /// @param release the release number in which pluginSetup is found.
     /// @param build the build number of the release number in which pluginSetup is found.
     /// @param pluginSetup the plugin setup address.
-    error PluginSetupAlreadyInPreviousRelease(
-        uint8 release,
-        uint16 build,
-        address pluginSetup
-    );
+    error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number
@@ -107,7 +103,7 @@ contract PluginRepo is
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the contract by
     /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - initializing the permission manager
@@ -195,19 +191,12 @@ contract PluginRepo is
             );
         }
 
-        uint16 build;
-        unchecked {
-            build = ++buildsPerRelease[_release];
-        }
+        uint16 build = ++buildsPerRelease[_release];
 
         Tag memory tag = Tag(_release, build);
         bytes32 _tagHash = tagHash(tag);
 
-        versions[_tagHash] = Version(
-            tag,
-            _pluginSetup,
-            _contentURI
-        );
+        versions[_tagHash] = Version(tag, _pluginSetup, _contentURI);
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
@@ -232,22 +221,14 @@ contract PluginRepo is
     /// @notice get the version by tag.
     /// @param _tag the version tag.
     /// @return the version which belongs to the _tag.
-    function getVersion(Tag calldata _tag)
-        public
-        view
-        returns (Version memory)
-    {
+    function getVersion(Tag calldata _tag) public view returns (Version memory) {
         return getVersion(tagHash(_tag));
     }
 
     /// @notice get the concrete version.
     /// @param _tagHash the tag hash.
     /// @return Version the concrete version by the exact hash.
-    function getVersion(bytes32 _tagHash)
-        public
-        view
-        returns (Version memory)
-    {
+    function getVersion(bytes32 _tagHash) public view returns (Version memory) {
         Version storage version = versions[_tagHash];
 
         if (version.tag.release == 0) {
@@ -263,7 +244,7 @@ contract PluginRepo is
     function buildCount(uint8 _release) public view returns (uint256) {
         return buildsPerRelease[_release];
     }
-    
+
     /// @notice get the tag hash.
     /// @param _tag the tag.
     /// @return bytes32 the keccak hash of abi encoded _release and _build
@@ -273,12 +254,9 @@ contract PluginRepo is
 
     /// @notice Internal method authorizing the upgrade of the contract via the [upgradeabilty mechanism for UUPS proxies](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable) (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @dev The caller must have the `UPGRADE_REPO_PERMISSION_ID` permission.
-    function _authorizeUpgrade(address)
-        internal
-        virtual
-        override
-        auth(address(this), UPGRADE_REPO_PERMISSION_ID)
-    {}
+    function _authorizeUpgrade(
+        address
+    ) internal virtual override auth(address(this), UPGRADE_REPO_PERMISSION_ID) {}
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.
