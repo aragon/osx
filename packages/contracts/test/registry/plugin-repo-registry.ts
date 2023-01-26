@@ -82,6 +82,12 @@ describe('PluginRepoRegistry', function () {
     );
   });
 
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await pluginRepoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
+    );
+  });
+
   it('Should register a new pluginRepo successfully', async function () {
     await expect(
       await pluginRepoRegistry.registerPluginRepo(
