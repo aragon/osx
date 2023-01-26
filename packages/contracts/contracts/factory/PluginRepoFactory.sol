@@ -57,8 +57,8 @@ contract PluginRepoFactory {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_name, address(this));
 
-        pluginRepo.updateReleaseMetadata(1, _releaseMetadata);
         pluginRepo.createVersion(1, _pluginSetup, _buildMetadata);
+        pluginRepo.updateReleaseMetadata(1, _releaseMetadata);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         _setPluginRepoPermissions(pluginRepo, _maintainer);
@@ -71,7 +71,7 @@ contract PluginRepoFactory {
     function _setPluginRepoPermissions(PluginRepo pluginRepo, address maintainer) internal {
         // Set permissions on the `PluginRepo`s `PermissionManager`
         PermissionLib.SingleTargetPermission[]
-            memory items = new PermissionLib.SingleTargetPermission[](5);
+            memory items = new PermissionLib.SingleTargetPermission[](7);
 
         // Grant the plugin maintainer all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
@@ -82,24 +82,34 @@ contract PluginRepoFactory {
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.UPGRADE_REPO_PERMISSION_ID()
+            pluginRepo.UPDATE_RELEASE_METADATA_PERMISSION_ID()
         );
         items[2] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Grant,
+            maintainer,
+            pluginRepo.UPGRADE_REPO_PERMISSION_ID()
+        );
+        items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
             pluginRepo.ROOT_PERMISSION_ID()
         );
 
         // Revoke permissions from the plugin repository factory (`address(this)`).
-        items[3] = PermissionLib.SingleTargetPermission(
+        items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
             pluginRepo.ROOT_PERMISSION_ID()
         );
-        items[4] = PermissionLib.SingleTargetPermission(
+        items[5] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
             pluginRepo.CREATE_VERSION_PERMISSION_ID()
+        );
+        items[6] = PermissionLib.SingleTargetPermission(
+            PermissionLib.Operation.Revoke,
+            address(this),
+            pluginRepo.UPDATE_RELEASE_METADATA_PERMISSION_ID()
         );
 
         pluginRepo.applySingleTargetPermissions(address(pluginRepo), items);

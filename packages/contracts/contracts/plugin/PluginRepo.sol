@@ -42,6 +42,10 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
+    /// @notice The ID of the permission required to call the `updateReleaseMetadata` function.
+    bytes32 public constant UPDATE_RELEASE_METADATA_PERMISSION_ID =
+        keccak256("UPDATE_RELEASE_METADATA_PERMISSION");
+
     /// @notice The ID of the latest release.
     /// @dev The maximum release ID is 255 as it is later stored as an `uint8` inside `Version.tag`.
     uint256 public latestRelease;
@@ -92,8 +96,12 @@ contract PluginRepo is
 
     /// @notice Thrown if metadata is not set for release.
     /// @param release the release number in which pluginSetup is found.
-    /// @param releaseMetadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    error ReleaseMetadataInvalid(uint8 release, bytes releaseMetadata);
+    /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
+    error ReleaseMetadataInvalid(uint8 release, bytes metadata);
+
+    /// @notice Thrown if release does not exist.
+    /// @param release the release number in which pluginSetup is found.
+    error ReleaseDoesNotExist(uint8 release);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number.
@@ -105,7 +113,7 @@ contract PluginRepo is
     /// @notice Thrown when a release's metadata was updated.
     /// @param release the release number.
     /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    event ReleaseUpdated(uint8 release, bytes metadata);
+    event ReleaseMetadataUpdated(uint8 release, bytes metadata);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -123,6 +131,7 @@ contract PluginRepo is
 
         // set permissionIds.
         _grant(address(this), initialOwner, CREATE_VERSION_PERMISSION_ID);
+        _grant(address(this), initialOwner, UPDATE_RELEASE_METADATA_PERMISSION_ID);
     }
 
     // How it looks: Will be removed as the last commit before the merge.
@@ -156,19 +165,23 @@ contract PluginRepo is
     /// @inheritdoc IPluginRepo
     function updateReleaseMetadata(
         uint8 _release,
-        bytes calldata _releaseMetadata
-    ) external auth(address(this), CREATE_VERSION_PERMISSION_ID) {
+        bytes calldata _metadata
+    ) external auth(address(this), UPDATE_RELEASE_METADATA_PERMISSION_ID) {
         if (_release == 0) {
             revert ReleaseIdZeroNotAllowed();
         }
 
-        if (_releaseMetadata.length == 0) {
-            revert ReleaseMetadataInvalid({release: _release, releaseMetadata: _releaseMetadata});
+        if (_release > latestRelease) {
+            revert ReleaseDoesNotExist({release: _release});
         }
 
-        metadataPerRelease[_release] = _releaseMetadata;
+        if (_metadata.length == 0) {
+            revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
+        }
 
-        emit ReleaseUpdated(_release, _releaseMetadata);
+        metadataPerRelease[_release] = _metadata;
+
+        emit ReleaseMetadataUpdated(_release, _metadata);
     }
 
     /// @inheritdoc IPluginRepo
@@ -198,14 +211,9 @@ contract PluginRepo is
             revert ReleaseIdZeroNotAllowed();
         }
 
-        bytes memory releaseMetadata = metadataPerRelease[_release];
-        if (releaseMetadata.length == 0) {
-            revert ReleaseMetadataInvalid({release: _release, releaseMetadata: releaseMetadata});
-        }
-
         // Can't release 3 unless 2 is released.
         if (_release - latestRelease > 1) {
-            revert ReleaseIdIncrementInvalid(latestRelease, _release);
+            revert ReleaseIdIncrementInvalid({currentRelease: latestRelease, newRelease: _release});
         }
 
         if (_release > latestRelease) {

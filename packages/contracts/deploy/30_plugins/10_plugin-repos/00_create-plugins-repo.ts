@@ -44,11 +44,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // TokenVotingSetup
   const tokenReleaseCIDPath = await uploadToIPFS(
-    JSON.stringify(adminReleaseMetadata),
+    JSON.stringify(tokenReleaseMetadata),
     network.name
   );
   const tokenBuildCIDPath = await uploadToIPFS(
-    JSON.stringify(adminBuildMetadata),
+    JSON.stringify(tokenBuildMetadata),
     network.name
   );
   await createPluginRepo(
@@ -65,11 +65,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // AdminSetup
   const adminReleaseCIDPath = await uploadToIPFS(
-    JSON.stringify(multisigReleaseMetadata),
+    JSON.stringify(adminReleaseMetadata),
     network.name
   );
   const adminBuildCIDPath = await uploadToIPFS(
-    JSON.stringify(multisigBuildMetadata),
+    JSON.stringify(adminBuildMetadata),
     network.name
   );
   await createPluginRepo(
@@ -86,11 +86,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // MultisigSetup
   const multisigReleaseCIDPath = await uploadToIPFS(
-    JSON.stringify(tokenReleaseMetadata),
+    JSON.stringify(multisigReleaseMetadata),
     network.name
   );
   const multisigBuildCIDPath = await uploadToIPFS(
-    JSON.stringify(tokenBuildMetadata),
+    JSON.stringify(multisigBuildMetadata),
     network.name
   );
   await createPluginRepo(
