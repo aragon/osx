@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 
 import {IDAO} from "../IDAO.sol";
 
-/// @notice An interface to be used by DAO plugins that define membership based on a contract. This can be
+/// @notice An interface to be implemented by DAO plugins that define membership based on a contract. This can be
 /// - a token contract (e.g., (Governance-) ERC-20 and ERC-721) defining membership based on ownership / delegation.
 /// - a registry contract (e.g, `Addresslist`, the Proof of Humanity Registry) defining membership by curation of a list.
 interface IMembershipContract {

@@ -236,6 +236,8 @@ templates:
         - name: Admin
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
       eventHandlers:
+        - event: MembershipContractAnnounced(indexed address)
+          handler: handleMembershipContractAnnounced
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
