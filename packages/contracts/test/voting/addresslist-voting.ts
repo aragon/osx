@@ -8,6 +8,7 @@ import {
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {
@@ -120,8 +121,11 @@ describe('AddresslistVoting', function () {
         .be.false;
     });
 
-    it('should add new users in the address list', async () => {
-      await voting.addAddresses([signers[0].address, signers[1].address]);
+    it('should add new users in the address list and emit the `MembersAdded` event', async () => {
+      const addresses = [signers[0].address, signers[1].address];
+      await expect(voting.addAddresses(addresses))
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
+        .withArgs(addresses);
 
       const block = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);
@@ -132,7 +136,7 @@ describe('AddresslistVoting', function () {
       expect(await voting.isListed(signers[1].address)).to.be.true;
     });
 
-    it('should remove users from the address list', async () => {
+    it('should remove users from the address list and emit the `MembersRemoved` event', async () => {
       await voting.addAddresses([signers[0].address]);
 
       const block1 = await ethers.provider.getBlock('latest');
@@ -141,7 +145,9 @@ describe('AddresslistVoting', function () {
         .be.true;
       expect(await voting.isListed(signers[0].address)).to.be.true;
 
-      await voting.removeAddresses([signers[0].address]);
+      await expect(voting.removeAddresses([signers[0].address]))
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
+        .withArgs([signers[0].address]);
 
       const block2 = await ethers.provider.getBlock('latest');
       await ethers.provider.send('evm_mine', []);

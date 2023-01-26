@@ -6,8 +6,8 @@ import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 
 import {IDAO} from "../../core/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {Addresslist} from "./Addresslist.sol";
 
 /// @title AddresslistVoting
@@ -42,7 +42,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     ) public initializer {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
-        // add member addresses to the address list
         _addAddresses(_members);
     }
 

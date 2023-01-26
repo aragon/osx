@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the `MembershipContractAnnounced` event.
 - Added `executionTxHash` to `AddresslistVotingProposal`, `TokenVotingProposal`, `MultisigProposal` and `AdminProposal`.
 - Added `voteReplaced` and `updatedAt` to `TokenVotingVote` and `AddresslistVotingVote`.
 
 ### Changed
 
 - Changed indexing of `totalVotingPower` which is now obtained from the `snapshotBlock` and the public function `totalVotingPower(uint256 _blockNumber)`.
+- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
 - Changes `callId` in `Executed` event from `uint256` to `bytes32`.
 - Renames `name` in `PluginRepoRegistry` and `DAORegistry` to `subdomain`.
 
