@@ -132,6 +132,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
+    proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
   }
 

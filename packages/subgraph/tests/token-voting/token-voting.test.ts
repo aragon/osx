@@ -452,6 +452,12 @@ test('Run TokenVoting (handleProposalExecuted) mappings with mock event', () => 
     'executionBlockNumber',
     event.block.number.toString()
   );
+  assert.fieldEquals(
+    'TokenVotingProposal',
+    entityID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
+  );
 
   clearStore();
 });
