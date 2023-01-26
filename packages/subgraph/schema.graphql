@@ -97,7 +97,7 @@ type StandardCallback @entity {
 
 type Dao @entity {
   id: ID! # use address as id
-  name: String
+  subdomain: String
   creator: Bytes!
   metadata: String
   createdAt: BigInt!
@@ -134,7 +134,7 @@ type PluginVersion @entity(immutable: true) {
 
 type PluginRepo @entity(immutable: true) {
   id: ID! # address
-  name: String!
+  subdomain: String!
   versions: [PluginVersion!]! @derivedFrom(field: "pluginRepo")
 }
 
@@ -187,6 +187,7 @@ interface Proposal {
   createdAt: BigInt!
   startDate: BigInt!
   endDate: BigInt!
+  executionTxHash: Bytes
 }
 
 # Voting
@@ -272,6 +273,7 @@ type TokenVotingProposal implements Proposal @entity {
   executable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
+  executionTxHash: Bytes
 }
 
 # AddresslistVoting
@@ -340,6 +342,7 @@ type AddresslistVotingProposal implements Proposal @entity {
   executable: Boolean
   executionDate: BigInt
   executionBlockNumber: BigInt
+  executionTxHash: Bytes
 }
 
 # Admin (plugin)
@@ -380,6 +383,7 @@ type AdminProposal implements Proposal @entity {
   plugin: AdminPlugin!
   proposalId: BigInt!
   adminstrator: Adminstrator!
+  executionTxHash: Bytes
 }
 
 # Multisig
@@ -431,5 +435,6 @@ type MultisigProposal implements Proposal @entity {
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
+  executionTxHash: Bytes
   approvers: [MultisigProposalApprover!]! @derivedFrom(field: "proposal")
 }

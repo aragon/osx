@@ -102,8 +102,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     domainNamesReversed = domainNamesReversed.reverse();
 
     for (let i = 0; i < domainNamesReversed.length - 1; i++) {
+      // to support subdomains
+      const domain = domainNamesReversed.map((value, index) => (index <= i) ? value: '').filter(value => value !== '').reverse().join('.')
       await ensRegistryContract.setSubnodeRecord(
-        ensDomainHash(domainNamesReversed[i]),
+        ensDomainHash(domain),
         ensLabelHash(domainNamesReversed[i + 1]),
         deployer,
         resolver.address,

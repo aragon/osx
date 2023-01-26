@@ -91,6 +91,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = AdminProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
 
     // update actions

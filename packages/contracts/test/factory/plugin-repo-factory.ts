@@ -27,12 +27,12 @@ const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
 async function getPluginRepoRegistryEvents(tx: any) {
   const data = await tx.wait();
   const {events} = data;
-  const {name, pluginRepo} = events.find(
+  const {subdomain, pluginRepo} = events.find(
     ({event}: {event: any}) => event === EVENTS.PluginRepoRegistered
   ).args;
 
   return {
-    name,
+    subdomain,
     pluginRepo,
   };
 }
@@ -111,10 +111,10 @@ describe('PluginRepoFactory: ', function () {
       REGISTER_PLUGIN_REPO_PERMISSION_ID
     );
 
-    const pluginRepoName = 'my-pluginRepo';
+    const pluginRepoSubdomain = 'my-pluginRepo';
 
     await expect(
-      pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
+      pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
     )
       .to.be.revertedWithCustomError(pluginRepoRegistry, 'DaoUnauthorized')
       .withArgs(
@@ -126,32 +126,32 @@ describe('PluginRepoFactory: ', function () {
       );
   });
 
-  it('fail to create new pluginRepo with empty name', async () => {
-    const pluginRepoName = '';
+  it('fail to create new pluginRepo with empty subdomain', async () => {
+    const pluginRepoSubdomain = '';
 
     await expect(
-      pluginRepoFactory.createPluginRepo(pluginRepoName, ownerAddress)
-    ).to.be.revertedWithCustomError(pluginRepoFactory, 'EmptyPluginRepoName');
+      pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
+    ).to.be.revertedWithCustomError(pluginRepoFactory, 'EmptyPluginRepoSubdomain');
   });
 
   it('create new pluginRepo', async () => {
-    const pluginRepoName = 'my-pluginRepo';
+    const pluginRepoSubdomain = 'my-plugin-repo';
 
     let tx = await pluginRepoFactory.createPluginRepo(
-      pluginRepoName,
+      pluginRepoSubdomain,
       ownerAddress
     );
 
-    const {name, pluginRepo} = await getPluginRepoRegistryEvents(tx);
+    const {subdomain, pluginRepo} = await getPluginRepoRegistryEvents(tx);
 
-    expect(name).to.equal(pluginRepoName);
+    expect(subdomain).to.equal(pluginRepoSubdomain);
     expect(pluginRepo).not.undefined;
   });
 
   it.skip('fail creating new pluginRepo with wrong major version', async () => {
     const pluginSetupMock = await deployMockPluginSetup();
 
-    const pluginRepoName = 'my-pluginRepo';
+    const pluginRepoSubdomain = 'my-plugin-repo';
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
@@ -160,7 +160,7 @@ describe('PluginRepoFactory: ', function () {
     const PluginRepo = await ethers.getContractFactory('PluginRepo');
     const pluginRepoToBeCreated = PluginRepo.attach(
       pluginRepoFactory.callStatic.createPluginRepoWithFirstVersion(
-        pluginRepoName,
+        pluginRepoSubdomain,
         pluginSetupAddress,
         contentURI,
         ownerAddress
@@ -169,7 +169,7 @@ describe('PluginRepoFactory: ', function () {
 
     await expect(
       pluginRepoFactory.createPluginRepoWithFirstVersion(
-        pluginRepoName,
+        pluginRepoSubdomain,
         pluginSetupAddress,
         contentURI,
         ownerAddress
@@ -182,20 +182,20 @@ describe('PluginRepoFactory: ', function () {
   it('create new pluginRepo with version', async () => {
     const pluginSetupMock = await deployMockPluginSetup();
 
-    const pluginRepoName = 'my-pluginRepo';
+    const pluginRepoSubdomain = 'my-plugin-repo';
     const pluginSetupAddress = pluginSetupMock.address;
     const contentURI = '0x00';
 
     let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-      pluginRepoName,
+      pluginRepoSubdomain,
       pluginSetupAddress,
       contentURI,
       ownerAddress
     );
 
-    const {name, pluginRepo} = await getPluginRepoRegistryEvents(tx);
+    const {subdomain, pluginRepo} = await getPluginRepoRegistryEvents(tx);
 
-    expect(name).to.equal(pluginRepoName);
+    expect(subdomain).to.equal(pluginRepoSubdomain);
     expect(pluginRepo).not.undefined;
   });
 });
