@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 import {IDAO} from "../core/IDAO.sol";
@@ -14,7 +13,6 @@ import {IDAO} from "../core/IDAO.sol";
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 //TODO Make this PluginUUPSUpgradeable
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
-    using AddressUpgradeable for address;
     using ERC165CheckerUpgradeable for address;
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
@@ -34,11 +32,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice Thrown if the contract does not support the required interface.
     /// @param registrant The address of the contract to be registered.
     error ContractInterfaceInvalid(address registrant);
-
-    /// @notice Thrown if the address is not a contract.
-    /// @param registrant The address of the contract to be registered.
-    error ContractAddressInvalid(address registrant);
-
+    
     /// @notice Thrown if the contract do not support ERC165.
     /// @param registrant The address of the contract.
     error ContractERC165SupportInvalid(address registrant);
