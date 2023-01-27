@@ -6,7 +6,6 @@ import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";
 import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
-import {IPluginRepo} from "../plugin/IPluginRepo.sol";
 
 /// @title PluginRepoFactory
 /// @author Aragon Association - 2022
