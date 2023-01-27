@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `PreparedDependency` to `PreparedSetupData`.
 - Changed `CallbackReceived` which now emits the sender as well.
 - Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
 - Avoided integer division in the `MajorityVoting` execution criteria to avoid precision loss.
