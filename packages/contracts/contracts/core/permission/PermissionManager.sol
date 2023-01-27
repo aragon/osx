@@ -175,7 +175,6 @@ contract PermissionManager is Initializable {
         for (uint256 i; i < items.length; ) {
             PermissionLib.MultiTargetPermission memory item = items[i];
 
-            // TODO: Optimize
             _auth(item.where, ROOT_PERMISSION_ID);
 
             if (item.operation == PermissionLib.Operation.Grant) {
