@@ -7,7 +7,7 @@ import "./IPermissionCondition.sol";
 import "./PermissionLib.sol";
 
 /// @title PermissionManager
-/// @author Aragon Association - 2021, 2022
+/// @author Aragon Association - 2021-2023
 /// @notice The permission manager used in a DAO and its associated components.
 contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.

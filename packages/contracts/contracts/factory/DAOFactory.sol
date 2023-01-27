@@ -12,7 +12,7 @@ import {hashHelpers, PluginSetupRef} from "../plugin/psp/utils/Common.sol";
 import {IPluginSetup} from "../plugin/IPluginSetup.sol";
 
 /// @title DAOFactory
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.

@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
 import {IDAO} from "../IDAO.sol";
 
 /// @title ProposalBase
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract base contract defining the traits and internal functionality to create and execute proposals.
 abstract contract ProposalBase {
     /// @notice Emitted when a proposal is created.

@@ -9,7 +9,7 @@ import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Addr
 import "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
 
 /// @title InterfaceBasedRegistry
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
 //TODO Make this PluginUUPSUpgradeable
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {

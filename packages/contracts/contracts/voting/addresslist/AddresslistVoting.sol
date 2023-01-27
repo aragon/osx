@@ -11,7 +11,7 @@ import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {Addresslist} from "./Addresslist.sol";
 
 /// @title AddresslistVoting
-/// @author Aragon Association - 2021-2023.
+/// @author Aragon Association - 2022-2023.
 /// @notice The majority voting implementation using an list of member addresses.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract AddresslistVoting is Addresslist, MajorityVotingBase {

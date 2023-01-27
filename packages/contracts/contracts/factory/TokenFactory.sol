@@ -17,7 +17,7 @@ import {MerkleDistributor} from "../tokens/MerkleDistributor.sol";
 import {IMerkleDistributor} from "../tokens/IMerkleDistributor.sol";
 
 /// @title TokenFactory
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract creates [ERC-20](https://eips.ethereum.org/EIPS/eip-20) governance tokens.
 contract TokenFactory {
     using Address for address;

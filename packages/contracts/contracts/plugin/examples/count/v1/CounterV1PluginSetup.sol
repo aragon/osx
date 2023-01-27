@@ -11,7 +11,7 @@ import {MultiplyHelper} from "../MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
 /// @title CounterV1PluginSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `CounterV1` plugin.
 contract CounterV1PluginSetup is PluginSetup {
     using Clones for address;

@@ -8,7 +8,7 @@ import {PluginRepo} from "../plugin/PluginRepo.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 /// @title PluginRepoFactory
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract creates `PluginRepo` proxies and registers them on an `PluginRepoRegistry` contract.
 contract PluginRepoFactory {
     /// @notice The Aragon plugin registry contract.

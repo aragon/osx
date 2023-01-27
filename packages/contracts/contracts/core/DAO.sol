@@ -17,7 +17,7 @@ import "./IEIP4824.sol";
 import {hasBit, flipBit} from "../utils/BitMap.sol";
 
 /// @title DAO
-/// @author Aragon Association - 2021
+/// @author Aragon Association - 2022-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 contract DAO is

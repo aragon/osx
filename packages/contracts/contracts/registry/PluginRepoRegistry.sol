@@ -9,7 +9,7 @@ import {IPluginRepo} from "../plugin/IPluginRepo.sol";
 import {isSubdomainValid} from "./RegistryUtils.sol";
 
 /// @title PluginRepoRegistry
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract maintains an address-based registery of plugin repositories in the Aragon App DAO framework.
 contract PluginRepoRegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.

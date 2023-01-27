@@ -7,7 +7,7 @@ import {MultiplyHelper} from "../MultiplyHelper.sol";
 import {IDAO} from "../../../../core/IDAO.sol";
 
 /// @title CounterV1
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The first version of an example plugin counting numbers.
 contract CounterV1 is PluginUUPSUpgradeable {
     /// @notice The ID of the permission required to call the `multiply` function.

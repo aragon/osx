@@ -9,7 +9,7 @@ import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {Multisig} from "./Multisig.sol";
 
 /// @title MultisigSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Multisig` plugin.
 contract MultisigSetup is PluginSetup {
     /// @notice The address of `Multisig` plugin logic contract to be used in creating proxy contracts.
