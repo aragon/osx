@@ -13,7 +13,7 @@ import {RATIO_BASE, RatioOutOfBounds} from "../../utils/Ratio.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
-/// @author Aragon Association - 2022-2023-2023
+/// @author Aragon Association - 2022-2023
 
 /// @notice The abstract implementation of majority voting plugins.
 ///
