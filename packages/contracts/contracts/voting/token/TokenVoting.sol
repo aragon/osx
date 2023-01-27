@@ -12,7 +12,7 @@ import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 
 /// @title TokenVoting
-/// @author Aragon Association - 2022-2023
+/// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
 contract TokenVoting is IMembershipContract, MajorityVotingBase {
