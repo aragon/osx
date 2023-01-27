@@ -1,8 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {verifyContract} from '../utils/etherscan';
-import {getContractAddress} from './helpers';
+import {verifyContract} from '../../utils/etherscan';
+import {getContractAddress} from '../helpers';
 
 function shouldInclude(deployedContracts: any, deployment: any, deployed: any) {
   if (deployment.includes('_Proxy')) {
@@ -40,9 +40,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // await delay(minutesDelay);
-
-  // Prepare contracts and addresses
-  const managingDAOAddress = await getContractAddress('DAO', hre);
 
   // Prepare verify Array
   // So each verify is fired in a secuence

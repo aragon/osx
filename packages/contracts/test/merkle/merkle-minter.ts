@@ -14,11 +14,13 @@ import {
 import BalanceTree from './src/balance-tree';
 import {deployNewDAO} from '../test-utils/dao';
 import {deployWithProxy} from '../test-utils/proxy';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
 
-describe('MerkleDistributor', function () {
+describe('MerkleMinter', function () {
   let signers: SignerWithAddress[];
   let minter: MerkleMinter;
   let distributorBase: MerkleDistributor;
@@ -30,7 +32,7 @@ describe('MerkleDistributor', function () {
   let merkleRoot: string;
   let totalAmount: BigNumber;
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
@@ -72,7 +74,18 @@ describe('MerkleDistributor', function () {
       MERKLE_MINT_PERMISSION_ID
     );
     await managingDao.grant(token.address, minter.address, MINT_PERMISSION_ID);
+
+    this.upgrade = {
+      contract: minter,
+      dao: managingDao,
+      user: signers[8],
+    };
   });
+
+  shouldUpgradeCorrectly(
+    UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+    'DaoUnauthorized'
+  );
 
   describe('merkleMint:', () => {
     const dummyMerkleTreeStorageLink: string = '0x';

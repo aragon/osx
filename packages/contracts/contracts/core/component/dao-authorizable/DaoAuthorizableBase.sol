@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
@@ -8,7 +8,7 @@ import {_auth} from "../../../utils/auth.sol";
 import {IDAO} from "../../IDAO.sol";
 
 /// @title DaoAuthorizableBase
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract contract providing a meta transaction compatible modifier to authorize function calls through an associated DAO.
 abstract contract DaoAuthorizableBase is Context {
     /// @notice The associated DAO managing the permissions of inheriting contracts.

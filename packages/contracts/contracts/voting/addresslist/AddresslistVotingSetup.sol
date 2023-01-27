@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
@@ -10,7 +10,7 @@ import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `AddresslistVoting` plugin.
 contract AddresslistVotingSetup is PluginSetup {
     /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.

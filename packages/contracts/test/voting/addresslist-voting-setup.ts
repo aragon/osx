@@ -12,7 +12,7 @@ import {
   pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
-import metadata from '../../contracts/voting/addresslist/metadata.json';
+import metadata from '../../contracts/voting/addresslist/build-metadata.json';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;

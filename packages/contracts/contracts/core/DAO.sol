@@ -1,23 +1,26 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165StorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import "./component/CallbackHandler.sol";
-import "./permission/PermissionManager.sol";
-import "./IDAO.sol";
-import "./IEIP4824.sol";
+import {CallbackHandler} from "./component/CallbackHandler.sol";
+import {PermissionManager} from "./permission/PermissionManager.sol";
+import {IDAO} from "./IDAO.sol";
+import {IEIP4824} from "./IEIP4824.sol";
 import {hasBit, flipBit} from "../utils/BitMap.sol";
 
 /// @title DAO
-/// @author Aragon Association - 2021
+/// @author Aragon Association - 2021-2023
 /// @notice This contract is the entry point to the Aragon DAO framework and provides our users a simple and easy to use public interface.
 /// @dev Public API of the Aragon DAO framework.
 contract DAO is
@@ -113,6 +116,7 @@ contract DAO is
         _registerInterface(type(IDAO).interfaceId);
         _registerInterface(type(IERC1271).interfaceId);
         _registerInterface(type(IEIP4824).interfaceId);
+        _registerTokenInterfaces();
 
         _setMetadata(_metadata);
         _setTrustedForwarder(_trustedForwarder);
@@ -123,7 +127,7 @@ contract DAO is
     /// @inheritdoc PermissionManager
     function isPermissionRestrictedForAnyAddr(
         bytes32 _permissionId
-    ) internal view virtual override returns (bool) {
+    ) internal pure override returns (bool) {
         return
             _permissionId == EXECUTE_PERMISSION_ID ||
             _permissionId == UPGRADE_DAO_PERMISSION_ID ||
@@ -147,7 +151,7 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function getTrustedForwarder() public view virtual override returns (address) {
+    function getTrustedForwarder() external view virtual override returns (address) {
         return trustedForwarder;
     }
 
@@ -234,25 +238,6 @@ contract DAO is
     }
 
     /// @inheritdoc IDAO
-    function withdraw(
-        address _token,
-        address _to,
-        uint256 _amount,
-        string memory _reference
-    ) external override auth(address(this), WITHDRAW_PERMISSION_ID) {
-        if (_amount == 0) revert ZeroAmount();
-
-        if (_token == address(0)) {
-            (bool ok, ) = _to.call{value: _amount}("");
-            if (!ok) revert NativeTokenWithdrawFailed();
-        } else {
-            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
-        }
-
-        emit Withdrawn(_token, _to, _amount, _reference);
-    }
-
-    /// @inheritdoc IDAO
     function setSignatureValidator(
         address _signatureValidator
     ) external override auth(address(this), SET_SIGNATURE_VALIDATOR_PERMISSION_ID) {
@@ -299,6 +284,25 @@ contract DAO is
         emit TrustedForwarderSet(_trustedForwarder);
     }
 
+    /// @notice Registers ERC721/ERC1155 Interfaces and Callbacks.
+    function _registerTokenInterfaces() private {
+        _registerInterface(type(IERC721ReceiverUpgradeable).interfaceId);
+        _registerInterface(type(IERC1155ReceiverUpgradeable).interfaceId);
+
+        _registerCallback(
+            IERC721ReceiverUpgradeable.onERC721Received.selector,
+            IERC721ReceiverUpgradeable.onERC721Received.selector
+        );
+        _registerCallback(
+            IERC1155ReceiverUpgradeable.onERC1155Received.selector,
+            IERC1155ReceiverUpgradeable.onERC1155Received.selector
+        );
+        _registerCallback(
+            IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector,
+            IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector
+        );
+    }
+
     /// @inheritdoc IDAO
     function registerStandardCallback(
         bytes4 _interfaceId,
@@ -317,10 +321,9 @@ contract DAO is
 
     /// @notice Updates the set DAO uri to a new value.
     /// @param newDaoURI The new DAO uri to be set.
-    function setDaoURI(string calldata newDaoURI)
-        external
-        auth(address(this), SET_METADATA_PERMISSION_ID)
-    {
+    function setDaoURI(
+        string calldata newDaoURI
+    ) external auth(address(this), SET_METADATA_PERMISSION_ID) {
         _setDaoURI(newDaoURI);
     }
 

@@ -22,7 +22,6 @@ yarn build
 Make sure proper env variables are provided as explained bellow:
 
 - `<GRAPH_KEY>`: The Graph key (this is only needed when deploying on The Graph).
-- `<THEGRAPH_USERNAME>`: username of your subgraph (usually your GitHub username).
 - `<SUBGRAPH_NAME>`: name of the subgraph.
 - `<NETWORK_NAME>`: one of the supported networks by subgraph.
 

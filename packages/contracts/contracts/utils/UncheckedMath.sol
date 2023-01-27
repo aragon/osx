@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @notice Increments an unsigned integer by one without checking the result for overflow errors (using safe math).
 /// @param i The number to be incremented.

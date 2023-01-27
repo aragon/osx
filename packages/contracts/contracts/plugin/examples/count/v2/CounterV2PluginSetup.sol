@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
@@ -11,7 +11,7 @@ import {MultiplyHelper} from "../MultiplyHelper.sol";
 import {CounterV2} from "./CounterV2.sol";
 
 /// @title CounterV2PluginSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `CounterV2` plugin.
 contract CounterV2PluginSetup is PluginSetup {
     using Clones for address;

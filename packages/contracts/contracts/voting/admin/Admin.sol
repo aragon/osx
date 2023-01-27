@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
@@ -10,7 +10,7 @@ import {IMembershipContract} from "../../core/plugin/IMembershipContract.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
-/// @author Aragon Association - 2022-2023.
+/// @author Aragon Association - 2022-2023
 /// @notice The admin governance plugin giving execution permission on the DAO to a single address.
 contract Admin is IMembershipContract, PluginCloneable, Proposal {
     using SafeCast for uint256;

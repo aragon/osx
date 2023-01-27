@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./IPermissionCondition.sol";
 import "./PermissionLib.sol";
 
 /// @title PermissionManager
-/// @author Aragon Association - 2021, 2022
+/// @author Aragon Association - 2021-2023
 /// @notice The permission manager used in a DAO and its associated components.
 contract PermissionManager is Initializable {
     /// @notice The ID of the permission required to call the `grant`, `grantWithCondition`, `revoke`, and `bulk` function.

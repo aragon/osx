@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @title IERC20MintableUpgradeable
 /// @notice Interface to allow minting of [ERC-20](https://eips.ethereum.org/EIPS/eip-20) tokens.

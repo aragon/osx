@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
@@ -55,7 +55,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice A mapping between the plugin installation ID (obtained from the DAO and plugin address) and the plugin state information.
     /// @dev pluginInstallationId => abi.encode(pluginAddress, daoAddress)
-    mapping(bytes32 => PluginState) private states;
+    /// @dev This variable is public on purpose to allow future version to access and migrate the storage.
+    mapping(bytes32 => PluginState) public states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     /// @param pluginSetupRef The reference to the plugin setup to be used for the installation.

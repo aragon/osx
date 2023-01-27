@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for release metadata.
 - Added `IMembership` and `IMembershipContract` and the `MembershipContractAnnounced` event.
 - Added a `metadata.json` file for all plugins.
 - Added `startDate` and `endDate` to the `ProposalCreated` event.
@@ -17,10 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds `IEIP4824`
 - Adds `event NewURI` implementations for `daoURI()` and `setDaoURI()` definitions in `DAO`
 - Added check that plugin and DAO subdomains only contain `a-z`, `0-9` or a dash (`-`).
-- adds `allowFailureMap` to the plugins for creating proposals.
+- Adds `allowFailureMap` to the plugins for creating proposals.
+- Added verify steps into deployment scripts.
 
 ### Changed
 
+- Changed `CallbackReceived` which now emits the sender as well.
 - Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
 - Avoided integer division in the `MajorityVoting` execution criteria to avoid precision loss.
 - Replaced `ProposalParameters.minParticipation` by `minVotingPower` in `TokenVoting` and `AddresslistVoting`.
