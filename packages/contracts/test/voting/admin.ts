@@ -3,7 +3,12 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
 import {getMergedABI} from '../../utils/abi';
-import {findEvent, DAO_EVENTS, PROPOSAL_EVENTS} from '../../utils/event';
+import {
+  findEvent,
+  DAO_EVENTS,
+  PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
+} from '../../utils/event';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
@@ -78,6 +83,15 @@ describe('Admin plugin', function () {
       await expect(initializePlugin()).to.be.revertedWith(
         OZ_ERRORS.ALREADY_INITIALIZED
       );
+    });
+
+    it('emits the `MembershipContractAnnounced` event and returns the admin as a member afterwards', async () => {
+      await expect(plugin.initialize(dao.address))
+        .to.emit(plugin, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .withArgs(dao.address);
+
+      expect(await plugin.isMember(signers[0].address)).to.be.true; // signer[0] has `EXECUTE_PROPOSAL_PERMISSION_ID`
+      expect(await plugin.isMember(signers[1].address)).to.be.false; // signer[1] has not
     });
   });
 

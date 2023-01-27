@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 import {IDAO} from "../../core/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {Addresslist} from "./Addresslist.sol";
 
 /// @title AddresslistVoting
@@ -42,7 +42,6 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     ) public initializer {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
-        // add member addresses to the address list
         _addAddresses(_members);
     }
 
@@ -119,7 +118,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
         proposal_.tally.totalVotingPower = addresslistLengthAtBlock(snapshotBlock); // TODO THIS DOESN'T NEED TO BE STORED ANYMORE https://aragonassociation.atlassian.net/browse/APP-1417
 
         // Reduce costs
-        if(_allowFailureMap != 0) {
+        if (_allowFailureMap != 0) {
             proposal_.allowFailureMap = _allowFailureMap;
         }
 

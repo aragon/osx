@@ -5,8 +5,8 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
-  AddressesAdded,
-  AddressesRemoved,
+  MembersAdded,
+  MembersRemoved,
   AddresslistVoting
 } from '../../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
@@ -115,14 +115,19 @@ export function handleVoteCast(event: VoteCast): void {
   }
 
   let voterProposalVoteEntity = AddresslistVotingVote.load(voterVoteId);
-  if (!voterProposalVoteEntity) {
+  if (voterProposalVoteEntity) {
+    voterProposalVoteEntity.voteReplaced = true;
+    voterProposalVoteEntity.updatedAt = event.block.timestamp;
+  } else {
     voterProposalVoteEntity = new AddresslistVotingVote(voterVoteId);
     voterProposalVoteEntity.voter = memberId;
     voterProposalVoteEntity.proposal = proposalId;
+    voterProposalVoteEntity.createdAt = event.block.timestamp;
+    voterProposalVoteEntity.voteReplaced = false;
+    voterProposalVoteEntity.updatedAt = BigInt.zero();
   }
   voterProposalVoteEntity.voteOption = voteOption;
   voterProposalVoteEntity.votingPower = event.params.votingPower;
-  voterProposalVoteEntity.createdAt = event.block.timestamp;
   voterProposalVoteEntity.save();
 
   // update count
@@ -178,6 +183,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
+    proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
   }
 
@@ -217,7 +223,7 @@ export function handleVotingSettingsUpdated(
   }
 }
 
-export function handleAddressesAdded(event: AddressesAdded): void {
+export function handleMembersAdded(event: MembersAdded): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
@@ -234,7 +240,7 @@ export function handleAddressesAdded(event: AddressesAdded): void {
   }
 }
 
-export function handleAddressesRemoved(event: AddressesRemoved): void {
+export function handleMembersRemoved(event: MembersRemoved): void {
   let members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();

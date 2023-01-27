@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @title IDAO
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The interface required for DAOs within the Aragon App DAO framework.
 interface IDAO {
     struct Action {

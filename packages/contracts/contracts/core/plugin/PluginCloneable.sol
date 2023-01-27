@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
@@ -9,7 +9,7 @@ import {IDAO} from "../IDAO.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title PluginCloneable
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract, non-upgradeable contract to inherit from when creating a plugin being deployed via the minimal clones pattern (see [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167)).
 abstract contract PluginCloneable is IPlugin, ERC165, DaoAuthorizableCloneable {
     /// @notice Initializes the plugin by storing the associated DAO.
