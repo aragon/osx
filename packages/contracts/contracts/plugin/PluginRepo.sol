@@ -42,13 +42,8 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
-    /// @notice The ID of the latest release.
-    /// @dev The maximum release ID is 255 as it is later stored as an `uint8` inside `Version.tag`.
-    uint256 public latestRelease;
-
     /// @notice increasing build numbers per release
-    /// @dev keys can only be uint8 even though uint256 is specified to reduce gas cost.
-    mapping(uint256 => uint256) internal buildsPerRelease;
+    mapping(uint8 => uint16) internal buildsPerRelease;
 
     /// @notice The mapping between version hash and its corresponding Version information.
     /// @dev key: keccak(abi.encode(release, build)) value: Version struct.
@@ -59,6 +54,10 @@ contract PluginRepo is
 
     /// @notice The mapping between release id and release's metadata URI.
     mapping(uint8 => bytes) internal metadataPerRelease;
+
+    /// @notice The ID of the latest release.
+    /// @dev The maximum release ID is 255.
+    uint8 public latestRelease;
 
     /// @notice Thrown if version does not exist.
     /// @param versionHash The version Hash(release + build)
@@ -74,7 +73,7 @@ contract PluginRepo is
     /// @notice Thrown if release id is by more than 1 to the previous release id.
     /// @param latestRelease the current latest release id.
     /// @param newRelease new release id dev is trying to push.
-    error ReleaseIncrementInvalid(uint256 latestRelease, uint256 newRelease);
+    error ReleaseIncrementInvalid(uint8 latestRelease, uint8 newRelease);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number in which pluginSetup is found.
@@ -172,10 +171,7 @@ contract PluginRepo is
             );
         }
 
-        uint16 build;
-        unchecked {
-            build = uint16(++buildsPerRelease[_release]);
-        }
+        uint16 build = ++buildsPerRelease[_release];
 
         Tag memory tag = Tag(_release, build);
         bytes32 _tagHash = tagHash(tag);

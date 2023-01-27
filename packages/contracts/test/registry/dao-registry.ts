@@ -75,6 +75,18 @@ describe('DAORegistry', function () {
     );
   });
 
+  it('succeeds even if the dao subdomain is empty', async function () {
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, '')
+    ).to.not.be.reverted;
+  });
+
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await daoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
+    );
+  });
+
   it('Should register a new DAO successfully', async function () {
     await expect(daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain))
       .to.emit(daoRegistry, EVENTS.DAORegistered)
