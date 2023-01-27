@@ -201,7 +201,7 @@ contract PluginRepo is
         }
 
         if (_metadata.length == 0) {
-            revert ReleaseMetadataInvalid({release: _release, metadata: _metadata});
+            revert InvalidReleaseMetadata({release: _release, metadata: _metadata});
         }
 
         _updateReleaseMetadata(_release, _metadata);
