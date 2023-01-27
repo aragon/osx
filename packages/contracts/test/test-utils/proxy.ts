@@ -18,9 +18,7 @@ export async function deployWithProxy<T>(
   // NOTE: taking this out of this file and putting this in each test file's
   // before hook seems a good idea for efficiency, though, all test files become
   // highly dependent on this package which is undesirable for now.
-  if(process.env.PRE_DEPLOYMENT_TESTS !== 'true') {
-    upgrades.silenceWarnings();
-  }
+  upgrades.silenceWarnings();
 
   return upgrades.deployProxy(contractFactory, [], {
     kind: options.proxyType || 'uups',
