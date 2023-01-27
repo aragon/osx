@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title IMajorityVoting
-/// @author Aragon Association - 2022-2023-2023
+/// @author Aragon Association - 2022-2023
 /// @notice The interface of majority voting plugin.
 /// @dev This contract implements the `IMajorityVoting` interface.
 interface IMajorityVoting {
