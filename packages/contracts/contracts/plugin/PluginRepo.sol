@@ -84,7 +84,7 @@ contract PluginRepo is
     /// @notice Thrown if metadata is not set for release.
     /// @param release the release number in which pluginSetup is found.
     /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    error ReleaseMetadataInvalid(uint8 release, bytes metadata);
+    error InvalidReleaseMetadata(uint8 release, bytes metadata);
 
     /// @notice Thrown if release does not exist.
     /// @param release the release number in which pluginSetup is found.
