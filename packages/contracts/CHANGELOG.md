@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed redundant storage of `totalVotingPower` in `ProposalParameters.Tally` in `TokenVoting` and `AddresslistVoting` and obtain it from `snapshotBlock` and `votingToken.getPastTotalSupply` and `addresslistLengthAtBlock` instead.
 - Removed `prepare*DataABI()` from `IPluginSetup` & `PluginSetup` and all the other contracts that inherit from `PluginSetup`.
 - Removes `open` parameter from Multisig proposals.
 - Removes `Tally` struct as well as `addressListLength` and moves `approvals` in `Proposal`.
