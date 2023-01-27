@@ -6,6 +6,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {PluginSetup} from "./PluginSetup.sol";
@@ -24,6 +25,7 @@ contract PluginRepo is
     PermissionManager
 {
     using AddressUpgradeable for address;
+    using ERC165CheckerUpgradeable for address;
 
     struct Tag {
         uint8 release;
@@ -127,20 +129,7 @@ contract PluginRepo is
         bytes calldata _buildMetadata,
         bytes calldata _releaseMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
-        // In a case where _pluginSetup doesn't contain supportsInterface,
-        // but contains fallback, that doesn't return anything(most cases)
-        // the below approach aims to still return custom error which not possible with try/catch..
-        // NOTE: also checks if _pluginSetup is a contract and reverts if not.
-        bytes memory data = _pluginSetup.functionCall(
-            abi.encodeWithSelector(
-                ERC165Upgradeable.supportsInterface.selector,
-                type(IPluginSetup).interfaceId
-            )
-        );
-
-        // NOTE: if data contains 32 bytes that can't be decoded with uint256
-        // it reverts with solidity's ambigious error.
-        if (data.length != 32 || abi.decode(data, (uint256)) != 1) {
+        if (!_pluginSetup.supportsInterface(type(IPluginSetup).interfaceId)) {
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         }
 
