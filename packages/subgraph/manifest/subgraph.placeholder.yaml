@@ -126,8 +126,6 @@ templates:
           handler: handleGranted
         - event: Revoked(indexed bytes32,indexed address,address,indexed address)
           handler: handleRevoked
-        - event: Withdrawn(indexed address,indexed address,uint256,string)
-          handler: handleWithdrawn
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
         - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)

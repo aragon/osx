@@ -7,7 +7,6 @@ import {
   NativeTokenDeposited,
   Granted,
   Revoked,
-  Withdrawn,
   TrustedForwarderSet,
   SignatureValidatorSet,
   StandardCallbackRegistered
@@ -232,53 +231,6 @@ export function handleRevoked(event: Revoked): void {
   if (permissionEntity) {
     store.remove('Permission', permissionId);
   }
-}
-
-export function handleWithdrawn(event: Withdrawn): void {
-  let daoId = event.address.toHexString();
-  let token = event.params.token;
-  let tokenId = handleERC20Token(token);
-  let withdrawnId =
-    daoId +
-    '_' +
-    event.transaction.hash.toHexString() +
-    '_' +
-    event.transactionLogIndex.toHexString() +
-    '_' +
-    event.params.to.toHexString() +
-    '_' +
-    event.params.amount.toString() +
-    '_' +
-    tokenId +
-    '_' +
-    event.params._reference;
-  let balanceId = `${daoId}_${token.toHexString()}`;
-
-  let entity = VaultTransfer.load(withdrawnId);
-  if (entity) {
-    return;
-  }
-
-  updateBalance(
-    balanceId,
-    event.address,
-    token,
-    event.params.amount,
-    false,
-    event.block.timestamp
-  );
-
-  entity = new VaultTransfer(withdrawnId);
-  entity.dao = daoId;
-  entity.token = tokenId;
-  entity.sender = event.address;
-  entity.to = event.params.to;
-  entity.amount = event.params.amount;
-  entity.reference = event.params._reference;
-  entity.transaction = event.transaction.hash.toHexString();
-  entity.createdAt = event.block.timestamp;
-  entity.type = 'Withdraw';
-  entity.save();
 }
 
 export function handleTrustedForwarderSet(event: TrustedForwarderSet): void {

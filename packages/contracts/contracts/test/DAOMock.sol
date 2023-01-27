@@ -51,13 +51,6 @@ contract DAOMock is IDAO, PermissionManager {
         string calldata /* _reference */
     ) external payable override {}
 
-    function withdraw(
-        address, /* _token */
-        address, /* _to */
-        uint256, /* _amount */
-        string memory /* _reference */
-    ) public override {}
-
     function setSignatureValidator(
         address /* _signatureValidator */
     ) external override {}

@@ -66,6 +66,6 @@ describe('CallbackHandler', function () {
       callbackHandlerMockHelper.handleCallback(callbackSelector, data)
     )
       .to.emit(callbackHandlerMockHelper, EVENTS.CALLBACK_RECEIVED)
-      .withArgs(callbackSelector, data);
+      .withArgs(owner, callbackSelector, data);
   });
 });

@@ -51,6 +51,7 @@ On 2023-01-11 17:06:50
 ### Removed
 
 - Removes `open` and `executable` fields from Multisig proposals
+- Removed `withdraw` event handling.
 
 ## 0.5.0-alpha
 
