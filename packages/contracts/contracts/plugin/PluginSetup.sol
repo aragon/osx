@@ -11,7 +11,7 @@ import {IPluginSetup} from "./IPluginSetup.sol";
 import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 /// @title PluginSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract contract that developers have to inherit from to write the setup of a plugin.
 abstract contract PluginSetup is ERC165, IPluginSetup {
     /// @inheritdoc IPluginSetup

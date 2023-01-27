@@ -16,7 +16,7 @@ import {PluginRepo} from "./PluginRepo.sol";
 import {PluginSetupRef, hashHelpers, hashPermissions, _getSetupId, _getPluginInstallationId, PreparationType} from "./psp/utils/Common.sol";
 
 /// @title PluginSetupProcessor
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract processes the preparation and application of plugin setups (installation, update, uninstallation) on behalf of a requesting DAO.
 /// @dev This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
 contract PluginSetupProcessor is DaoAuthorizable {
@@ -33,19 +33,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
     bytes32 public constant APPLY_UNINSTALLATION_PERMISSION_ID =
         keccak256("APPLY_UNINSTALLATION_PERMISSION");
 
-    /// @notice Used when there's UI update only which gets stored for the setupId generation.
-    /// @dev keccak256(abi.encode([]))
+    /// @notice The hash obtained from the bytes-encoded empty array to be used for UI updates being required to submit an empty permission array.
+    /// @dev The hash is computed via `keccak256(abi.encode([]))`.
     bytes32 private constant EMPTY_ARRAY_HASH =
         0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd;
 
-    /// @notice Used to show that the value is NULL
-    /// @dev keccak256(abi.encode(bytes32(0))
+    /// @notice The hash obtained from the bytes-encoded zero value.
+    /// @dev The hash is computed via `keccak256(abi.encode(0))`.
     bytes32 private constant ZERO_BYTES_HASH =
         0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563;
 
-    /// @notice The plugin state struct that contains the information related to the installed plugin.
-    /// @param blockNumber The block number at which the `applyInstallation`, `applyUpdate` or `applyUninstallation` occured for the plugin.
-    /// @param currentSetupId The current setup id that plugin holds. Needed to confirm that `prepareUpdate` or `prepareUninstallation` happens for the plugin's current/valid dependencies.
+    /// @notice A struct containing the information related to the installed plugin.
+    /// @param blockNumber The block number at which the `applyInstallation`, `applyUpdate` or `applyUninstallation` was executed.
+    /// @param currentSetupId The current setup ID of the plugin, which is needed to confirm that `prepareUpdate` or `prepareUninstallation` happend for the plugin's current/valid dependencies.
     /// @param setupIds The block number at which `prepareInstallation`, `prepareUpdate` or `prepareUninstallation` occured for the derived setupId.
     struct PluginState {
         uint256 blockNumber;
@@ -53,20 +53,20 @@ contract PluginSetupProcessor is DaoAuthorizable {
         mapping(bytes32 => uint256) setupIds;
     }
 
-    /// @notice Stores plugin state information per pluginInstallationId
+    /// @notice A mapping between the plugin installation ID (obtained from the DAO and plugin address) and the plugin state information.
     /// @dev pluginInstallationId => abi.encode(pluginAddress, daoAddress)
     mapping(bytes32 => PluginState) private states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
-    /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
-    /// @param data The encoded data containing the input parameters for the installation as specified by the developer in the JSON.
+    /// @param pluginSetupRef The reference to the plugin setup to be installed.
+    /// @param data The bytes-encoded data containing the input parameters for the installation as specified by the developer in the JSON. // TODO MH
     struct PrepareInstallationParams {
         PluginSetupRef pluginSetupRef;
         bytes data;
     }
 
     /// @notice The struct containing the parameters for the `applyInstallation` function.
-    /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
+    /// @param pluginSetupRef The reference to the plugin setup to be installed.
     /// @param plugin The address of the `Plugin` contract that will be installed on the DAO.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
     /// @param helpersHash  The abi encoded hash of helpers that were deployed in `prepareInstallation`. This helps to derive the setupId.
@@ -81,7 +81,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param currentVersionTag Current version of the plugin from which it's updating.
     /// @param newVersionTag New version of the plugin to which it's updating.
     /// @param pluginSetupRepo The pluginSetupRepo address on which the plugin exists.
-    /// @param setupPayload see IPluginSetup.SetupPayload
+    /// @param setupPayload see IPluginSetup.SetupPayload // TODO
     struct PrepareUpdateParams {
         PluginRepo.Tag currentVersionTag;
         PluginRepo.Tag newVersionTag;
@@ -144,12 +144,6 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param plugin The address of the contract.
     error IPluginNotSupported(address plugin);
 
-    /// @notice Thrown if two permissions hashes obtained via [`getPermissionsHash`](#private-function-`getPermissionsHash`) don't match.
-    error PermissionsHashMismatch();
-
-    /// @notice Thrown if two helpers hashes obtained via  [`getHelpersHash`](#private-function-`getHelpersHash`) don't match.
-    error HelpersHashMismatch();
-
     /// @notice Thrown if a plugin repository does not exist on the plugin repo registry.
     error PluginRepoNonexistent();
 
@@ -157,19 +151,19 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param setupId Already prepared setupId.
     error SetupAlreadyPrepared(bytes32 setupId);
 
-    /// @notice Thrown when the setupId is no longer eligible for the `apply`. This could happen if another prepared setupId was chosen for the apply or setupId wasn't prepared in the first place.
+    /// @notice Thrown if the setupId is no longer eligible for the `apply`. This could happen if another prepared setupId was chosen for the apply or setupId wasn't prepared in the first place.
     /// @param setupId The prepared setup id from the `prepareInstallation`, `prepareUpdate` or `prepareUninstallation`.
     error SetupNotApplicable(bytes32 setupId);
 
-    /// @notice Thrown when the update version is invalid.
+    /// @notice Thrown if the update version is invalid.
     /// @param currentVersionTag The current version of the plugin from which it updates.
     /// @param newVersionTag The new version of the plugin to which it updates.
     error InvalidUpdateVersion(PluginRepo.Tag currentVersionTag, PluginRepo.Tag newVersionTag);
 
-    /// @notice Thrown when plugin is already installed and one tries to prepare or apply install on it.
+    /// @notice Thrown if plugin is already installed and one tries to prepare or apply install on it.
     error PluginAlreadyInstalled();
 
-    /// @notice Thrown when user's arguments for the apply function don't match the currently applied setupId.
+    /// @notice Thrown if user's arguments for the apply function don't match the currently applied setupId.
     /// @param currentSetupId The current setup id to which user's preparation setup should match to.
     /// @param setupId The user's preparation setup id.
     error InvalidSetupId(bytes32 currentSetupId, bytes32 setupId);
@@ -182,7 +176,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param versionTag The version tag of the plugin to used for install preparation.
     /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file..
     /// @param plugin The address of the plugin contract.
-    /// @param preparedDependency TOD:GIORGI
+    /// @param preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     event InstallationPrepared(
         address indexed sender,
         address indexed dao,
@@ -206,7 +200,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin to used for install preparation.
     /// @param setupPayload TOD:GIORGI
-    /// @param preparedDependency TOD:GIORGI
+    /// @param preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     /// @param initData The initialization data to be passed to the upgradeable plugin contract.
     event UpdatePrepared(
         address indexed sender,
@@ -268,7 +262,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareInstallation` function.
     /// @return plugin The prepared plugin contract address.
-    /// @return preparedDependency TOD:GIORGI
+    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareInstallation(
         address _dao,
         PrepareInstallationParams calldata _params
@@ -298,7 +292,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             hashPermissions(preparedDependency.permissions),
             hashHelpers(preparedDependency.helpers),
             bytes(""),
-            PreparationType.Install
+            PreparationType.Installation
         );
 
         PluginState storage pluginState = states[pluginInstallationId];
@@ -351,7 +345,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             hashPermissions(_params.permissions),
             _params.helpersHash,
             bytes(""),
-            PreparationType.Install
+            PreparationType.Installation
         );
 
         // Allow calling `applyInstallation` only when
@@ -362,6 +356,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         validateSetupId(pluginInstallationId, setupId);
 
+        //TODO SARKAWT: Perhaps a comment is needed explaining: why we don't include permission hashes again
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             ZERO_BYTES_HASH,
@@ -386,7 +381,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the DAO For which preparation of update happens.
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
-    /// @return preparedDependency TOD:GIORGI
+    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
     function prepareUpdate(
         address _dao,
@@ -583,7 +578,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             hashPermissions(permissions),
             ZERO_BYTES_HASH,
             bytes(""),
-            PreparationType.Uninstall
+            PreparationType.Uninstallation
         );
 
         // Only allow to prepare if setupId has not been prepared before.
@@ -624,7 +619,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             hashPermissions(_params.permissions),
             ZERO_BYTES_HASH,
             bytes(""),
-            PreparationType.Uninstall
+            PreparationType.Uninstallation
         );
 
         validateSetupId(pluginInstallationId, setupId);
@@ -710,7 +705,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the DAO For which preparation of update happens.
     /// @param _setupId The setupId
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
-    /// @param _preparedDependency TOD:GIORGI
+    /// @param _preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
     /// @param _initData The initialization data to be passed to upgradeable contracts when the update is applied
     function emitPrepareUpdateEvent(
         address _dao,
