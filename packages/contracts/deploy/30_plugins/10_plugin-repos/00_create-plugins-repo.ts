@@ -1,10 +1,14 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import addresslistMetadata from '../../../contracts/voting/addresslist/metadata.json';
-import adminMetadata from '../../../contracts/voting/admin/metadata.json';
-import multisigMetadata from '../../../contracts/voting/multisig/metadata.json';
-import tokenMetadata from '../../../contracts/voting/token/metadata.json';
+import addresslistReleaseMetadata from '../../../contracts/voting/addresslist/release-metadata.json';
+import addresslistBuildMetadata from '../../../contracts/voting/addresslist/build-metadata.json';
+import adminReleaseMetadata from '../../../contracts/voting/admin/release-metadata.json';
+import adminBuildMetadata from '../../../contracts/voting/admin/build-metadata.json';
+import multisigReleaseMetadata from '../../../contracts/voting/multisig/release-metadata.json';
+import multisigBuildMetadata from '../../../contracts/voting/multisig/build-metadata.json';
+import tokenReleaseMetadata from '../../../contracts/voting/token/release-metadata.json';
+import tokenBuildMetadata from '../../../contracts/voting/token/build-metadata.json';
 import {createPluginRepo, uploadToIPFS} from '../../helpers';
 import {ethers} from 'ethers';
 
@@ -18,8 +22,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {network} = hre;
 
   // AddresslistVotingSetup
-  const addresslistCIDPath = await uploadToIPFS(
-    JSON.stringify(addresslistMetadata),
+  const addresslistReleaseCIDPath = await uploadToIPFS(
+    JSON.stringify(addresslistReleaseMetadata),
+    network.name
+  );
+  const addresslistBuildCIDPath = await uploadToIPFS(
+    JSON.stringify(addresslistBuildMetadata),
     network.name
   );
   await createPluginRepo(
@@ -27,44 +35,74 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'address-list-voting',
     'AddresslistVotingSetup',
     ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes(`ipfs://${addresslistCIDPath}`)
+      ethers.utils.toUtf8Bytes(`ipfs://${addresslistReleaseCIDPath}`)
+    ),
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${addresslistBuildCIDPath}`)
     )
   );
 
   // TokenVotingSetup
-  const tokenCIDPath = await uploadToIPFS(
-    JSON.stringify(tokenMetadata),
+  const tokenReleaseCIDPath = await uploadToIPFS(
+    JSON.stringify(tokenReleaseMetadata),
+    network.name
+  );
+  const tokenBuildCIDPath = await uploadToIPFS(
+    JSON.stringify(tokenBuildMetadata),
     network.name
   );
   await createPluginRepo(
     hre,
     'token-voting',
     'TokenVotingSetup',
-    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${tokenCIDPath}`))
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${tokenReleaseCIDPath}`)
+    ),
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${tokenBuildCIDPath}`)
+    )
   );
 
   // AdminSetup
-  const adminCIDPath = await uploadToIPFS(
-    JSON.stringify(adminMetadata),
+  const adminReleaseCIDPath = await uploadToIPFS(
+    JSON.stringify(adminReleaseMetadata),
+    network.name
+  );
+  const adminBuildCIDPath = await uploadToIPFS(
+    JSON.stringify(adminBuildMetadata),
     network.name
   );
   await createPluginRepo(
     hre,
     'admin',
     'AdminSetup',
-    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${adminCIDPath}`))
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${adminReleaseCIDPath}`)
+    ),
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${adminBuildCIDPath}`)
+    )
   );
 
   // MultisigSetup
-  const multisigCIDPath = await uploadToIPFS(
-    JSON.stringify(multisigMetadata),
+  const multisigReleaseCIDPath = await uploadToIPFS(
+    JSON.stringify(multisigReleaseMetadata),
+    network.name
+  );
+  const multisigBuildCIDPath = await uploadToIPFS(
+    JSON.stringify(multisigBuildMetadata),
     network.name
   );
   await createPluginRepo(
     hre,
     'multisig',
     'MultisigSetup',
-    ethers.utils.hexlify(ethers.utils.toUtf8Bytes(`ipfs://${multisigCIDPath}`))
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${multisigReleaseCIDPath}`)
+    ),
+    ethers.utils.hexlify(
+      ethers.utils.toUtf8Bytes(`ipfs://${multisigBuildCIDPath}`)
+    )
   );
 };
 export default func;

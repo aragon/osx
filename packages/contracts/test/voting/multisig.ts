@@ -9,6 +9,7 @@ import {
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
+  MEMBERSHIP_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {deployNewDAO} from '../test-utils/dao';
@@ -20,6 +21,9 @@ import {
   timestampIn,
   toBytes32,
 } from '../test-utils/voting';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {deployWithProxy} from '../test-utils/proxy';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -76,7 +80,7 @@ describe('Multisig', function () {
     dao = await deployNewDAO(signers[0].address);
   });
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     multisigSettings = {
       minApprovals: 3,
       onlyListed: true,
@@ -87,7 +91,7 @@ describe('Multisig', function () {
       multisigFactoryBytecode,
       signers[0]
     );
-    multisig = await MultisigFactory.deploy();
+    multisig = await deployWithProxy(MultisigFactory);
 
     dao.grant(
       dao.address,
@@ -98,6 +102,26 @@ describe('Multisig', function () {
       multisig.address,
       signers[0].address,
       ethers.utils.id('UPDATE_MULTISIG_SETTINGS_PERMISSION')
+    );
+  });
+
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      this.upgrade = {
+        contract: multisig,
+        dao: dao,
+        user: signers[8],
+      };
+      await multisig.initialize(
+        dao.address,
+        signers.slice(0, 5).map(s => s.address),
+        multisigSettings
+      );
+    });
+
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+      'DaoUnauthorized'
     );
   });
 
@@ -215,7 +239,7 @@ describe('Multisig', function () {
   });
 
   describe('addAddresses:', async () => {
-    it('should add new members to the address list', async () => {
+    it('should add new members to the address list and emit the `MembersAdded` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -227,7 +251,9 @@ describe('Multisig', function () {
       expect(await multisig.isListed(signers[1].address)).to.equal(false);
 
       // add a new member
-      await multisig.addAddresses([signers[1].address]);
+      await expect(multisig.addAddresses([signers[1].address]))
+        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
+        .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
@@ -235,7 +261,7 @@ describe('Multisig', function () {
   });
 
   describe('removeAddresses:', async () => {
-    it('should remove users from the address list', async () => {
+    it('should remove users from the address list and emit the `MembersRemoved` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -247,7 +273,9 @@ describe('Multisig', function () {
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
 
       // remove an existing member
-      await multisig.removeAddresses([signers[1].address]);
+      await expect(multisig.removeAddresses([signers[1].address]))
+        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
+        .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(false);

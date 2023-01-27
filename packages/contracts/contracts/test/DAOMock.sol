@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -50,13 +50,6 @@ contract DAOMock is IDAO, PermissionManager {
         uint256, /* _amount */
         string calldata /* _reference */
     ) external payable override {}
-
-    function withdraw(
-        address, /* _token */
-        address, /* _to */
-        uint256, /* _amount */
-        string memory /* _reference */
-    ) public override {}
 
     function setSignatureValidator(
         address /* _signatureValidator */

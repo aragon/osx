@@ -7,7 +7,8 @@ import {deployNewDAO} from '../test-utils/dao';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {deployWithProxy} from '../test-utils/proxy';
-import {Wallet} from 'ethers';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 const EVENTS = {
   DAORegistered: 'DAORegistered',
@@ -72,6 +73,29 @@ describe('DAORegistry', function () {
       ensSubdomainRegistrar.address,
       daoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+
+    this.upgrade = {
+      contract: daoRegistry,
+      dao: managingDao,
+      user: signers[8],
+    }
+  });
+  
+  shouldUpgradeCorrectly(
+    UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID, 
+    'DaoUnauthorized'
+  )
+
+  it('succeeds even if the dao subdomain is empty', async function () {
+    await expect(
+      daoRegistry.register(targetDao.address, ownerAddress, '')
+    ).to.not.be.reverted;
+  });
+
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await daoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
     );
   });
 

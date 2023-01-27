@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {DAORegistry} from "../registry/DAORegistry.sol";
 import {DAO} from "../core/DAO.sol";
@@ -12,7 +12,7 @@ import {hashHelpers, PluginSetupRef} from "../plugin/psp/utils/Common.sol";
 import {IPluginSetup} from "../plugin/IPluginSetup.sol";
 
 /// @title DAOFactory
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract is used to create a DAO.
 contract DAOFactory {
     /// @notice The DAO base contract, to be used for creating new `DAO`s via `createERC1967Proxy` function.

@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {PluginCloneable} from "../../core/plugin/PluginCloneable.sol";
 import {Proposal} from "../../core/plugin/Proposal.sol";
+import {IMembershipContract} from "../../core/plugin/IMembershipContract.sol";
 import {IDAO} from "../../core/IDAO.sol";
 
 /// @title Admin
 /// @author Aragon Association - 2022-2023
-/// @notice The admin address governance plugin giving execution permission on the DAO to a single address.
-contract Admin is PluginCloneable, Proposal {
+/// @notice The admin governance plugin giving execution permission on the DAO to a single address.
+contract Admin is IMembershipContract, PluginCloneable, Proposal {
     using SafeCast for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -23,21 +24,30 @@ contract Admin is PluginCloneable, Proposal {
         keccak256("EXECUTE_PROPOSAL_PERMISSION");
 
     /// @notice Initializes the contract.
-    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     /// @param _dao The associated DAO.
+    /// @dev This method is required to support [ERC-1167](https://eips.ethereum.org/EIPS/eip-1167).
     function initialize(IDAO _dao) public initializer {
         __PluginCloneable_init(_dao);
+
+        emit MembershipContractAnnounced({definingContract: address(_dao)});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == ADMIN_INTERFACE_ID || PluginCloneable.supportsInterface(interfaceId);
+    }
+
+    /// @inheritdoc IMembershipContract
+    function isMember(address _account) external view returns (bool) {
         return
-            interfaceId == ADMIN_INTERFACE_ID ||
-            PluginCloneable.supportsInterface(interfaceId);
+            dao.hasPermission({
+                _where: address(this),
+                _who: _account,
+                _permissionId: EXECUTE_PROPOSAL_PERMISSION_ID,
+                _data: bytes("")
+            });
     }
 
     /// @notice Creates and executes a new proposal.

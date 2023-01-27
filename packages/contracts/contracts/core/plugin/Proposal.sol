@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./ProposalBase.sol";
 
 /// @title Proposal
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract contract defining the traits and internal functionality to create and execute proposals for non-upgradeable contracts.
 abstract contract Proposal is ProposalBase {
     using Counters for Counters.Counter;

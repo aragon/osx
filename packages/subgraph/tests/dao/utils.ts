@@ -9,7 +9,6 @@ import {
   Granted,
   Revoked,
   Executed,
-  Withdrawn,
   TrustedForwarderSet,
   SignatureValidatorSet,
   StandardCallbackRegistered
@@ -134,42 +133,6 @@ export function createNewDepositedEvent(
 
   newEvent.parameters.push(senderParam);
   newEvent.parameters.push(tokenParam);
-  newEvent.parameters.push(amountParam);
-  newEvent.parameters.push(referenceParam);
-
-  return newEvent;
-}
-
-export function createNewWithdrawnEvent(
-  token: string,
-  to: string,
-  amount: string,
-  reference: string,
-  contractAddress: string
-): Withdrawn {
-  let newEvent = changetype<Withdrawn>(newMockEvent());
-  newEvent.address = Address.fromString(contractAddress);
-  newEvent.parameters = [];
-
-  let tokenParam = new ethereum.EventParam(
-    'token',
-    ethereum.Value.fromAddress(Address.fromString(token))
-  );
-  let toParam = new ethereum.EventParam(
-    'to',
-    ethereum.Value.fromAddress(Address.fromString(to))
-  );
-  let amountParam = new ethereum.EventParam(
-    'amount',
-    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(amount))
-  );
-  let referenceParam = new ethereum.EventParam(
-    '_reference',
-    ethereum.Value.fromString(reference)
-  );
-
-  newEvent.parameters.push(tokenParam);
-  newEvent.parameters.push(toParam);
   newEvent.parameters.push(amountParam);
   newEvent.parameters.push(referenceParam);
 

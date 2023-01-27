@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
 import {IDAO} from "../core/IDAO.sol";
@@ -8,14 +8,14 @@ import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
 import {isSubdomainValid} from "./RegistryUtils.sol";
 
 /// @title Register your unique DAO subdomain
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract provides the possiblity to register a DAO.
 contract DAORegistry is InterfaceBasedRegistry {
     /// @notice The ID of the permission required to call the `register` function.
     bytes32 public constant REGISTER_DAO_PERMISSION_ID = keccak256("REGISTER_DAO_PERMISSION");
 
     /// @notice The ENS subdomain registrar registering the DAO subdomains.
-    ENSSubdomainRegistrar private subdomainRegistrar;
+    ENSSubdomainRegistrar public subdomainRegistrar;
 
     /// @notice Thrown if the DAO subdomain doesn't match the regex `[0-9a-z\-]`
     error InvalidDaoSubdomain(string subdomain);

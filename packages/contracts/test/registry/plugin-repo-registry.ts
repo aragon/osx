@@ -13,6 +13,8 @@ import {deployNewPluginRepo} from '../test-utils/repo';
 import {deployENSSubdomainRegistrar} from '../test-utils/ens';
 import {ensDomainHash} from '../../utils/ens';
 import {deployWithProxy} from '../test-utils/proxy';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -79,6 +81,23 @@ describe('PluginRepoRegistry', function () {
       ensSubdomainRegistrar.address,
       pluginRepoRegistry.address,
       REGISTER_ENS_SUBDOMAIN_PERMISSION_ID
+    );
+
+    this.upgrade = {
+      contract: pluginRepoRegistry,
+      dao: managingDAO,
+      user: signers[8],
+    };
+  });
+
+  shouldUpgradeCorrectly(
+    UPGRADE_PERMISSIONS.UPGRADE_REGISTRY_PERMISSION_ID,
+    'DaoUnauthorized'
+  );
+  
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await pluginRepoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
     );
   });
 
