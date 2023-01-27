@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added support for relase metadata.
+- Added support for release metadata.
 - Added `IMembership` and `IMembershipContract` and the `MembershipContractAnnounced` event.
 - Added a `metadata.json` file for all plugins.
 - Added `startDate` and `endDate` to the `ProposalCreated` event.
