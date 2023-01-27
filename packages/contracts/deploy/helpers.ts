@@ -153,7 +153,7 @@ export async function createPluginRepo(
   );
 }
 
-export async function checkSetMangingDao(
+export async function checkSetManagingDao(
   contract: Contract,
   expectedDaoAddress: string
 ) {
@@ -167,13 +167,13 @@ export async function checkSetMangingDao(
 
 export async function checkPermission(
   permissionManager: Contract,
-  who: string,
   where: string,
+  who: string,
   permission: string,
   data = '0x'
 ) {
   const permissionId = ethers.utils.id(permission)
-  const isGranted = await permissionManager.callStatic.isGranted(who, where, permissionId, data)
+  const isGranted = await permissionManager.callStatic.isGranted(where, who, permissionId, data)
   if(!isGranted) {
     throw new Error(`${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`)
   }

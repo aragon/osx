@@ -1,7 +1,7 @@
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-import {checkSetMangingDao, getContractAddress} from '../helpers';
+import {checkSetManagingDao, getContractAddress} from '../helpers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('\nVerifying framework deployment.');
@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get managing DAO address.
   const managingDAOAddress = await getContractAddress('DAO', hre);
 
-  // VERIFYING ENS SUBDOMAIN REGISTRARS
+  // VERIFYING DAO ENS SUBDOMAIN REGISTRAR
   const DAOENSSubdomainRegistrarAddress = await getContractAddress(
     'DAO_ENSSubdomainRegistrar',
     hre
@@ -21,8 +21,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'ENSSubdomainRegistrar',
     DAOENSSubdomainRegistrarAddress
   );
-  await checkSetMangingDao(DAOENSSubdomainRegistrar, managingDAOAddress);
+  await checkSetManagingDao(DAOENSSubdomainRegistrar, managingDAOAddress);
+  // scope to reuse same const again
+  {
+    const ensAddr = await DAOENSSubdomainRegistrar.ens();
+    const ensRegistryContract = await ethers.getContractAt(
+      'ENSRegistry',
+      ensAddr
+    );
+    const isApprovedForAll =
+      await ensRegistryContract.callStatic.isApprovedForAll(
+        deployer,
+        DAOENSSubdomainRegistrarAddress
+      );
+    if (!isApprovedForAll) {
+      throw new Error(
+        `DAOENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${DAOENSSubdomainRegistrarAddress} approved for all`
+      );
+    }
+  }
 
+  // VERIFYING PLUGIN ENS SUBDOMAIN REGISTRAR
   const PluginENSSubdomainRegistrarAddress = await getContractAddress(
     'Plugin_ENSSubdomainRegistrar',
     hre
@@ -31,7 +50,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'ENSSubdomainRegistrar',
     PluginENSSubdomainRegistrarAddress
   );
-  await checkSetMangingDao(PluginENSSubdomainRegistrar, managingDAOAddress);
+  await checkSetManagingDao(PluginENSSubdomainRegistrar, managingDAOAddress);
+  // scope to reuse same const again
+  {
+    const ensAddr = await PluginENSSubdomainRegistrar.ens();
+    const ensRegistryContract = await ethers.getContractAt(
+      'ENSRegistry',
+      ensAddr
+    );
+    const isApprovedForAll =
+      await ensRegistryContract.callStatic.isApprovedForAll(
+        deployer,
+        PluginENSSubdomainRegistrarAddress
+      );
+    if (!isApprovedForAll) {
+      throw new Error(
+        `PluginENSSubdomainRegistrar isn't approved for all. Expected ${deployer} to have ${PluginENSSubdomainRegistrarAddress} approved for all`
+      );
+    }
+  }
 
   // VERIFYING DAO REGISTRY
   const DAORegistryAddress = await getContractAddress('DAORegistry', hre);
@@ -39,7 +76,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'DAORegistry',
     DAORegistryAddress
   );
-  await checkSetMangingDao(DAORegistry, managingDAOAddress);
+  await checkSetManagingDao(DAORegistry, managingDAOAddress);
+  // scope to reuse same const again
+  {
+    const SubdomainRegistrarAddress =
+      await DAORegistry.callStatic.subdomainRegistrar();
+    if (SubdomainRegistrarAddress !== DAOENSSubdomainRegistrarAddress) {
+      throw new Error(
+        `${DAORegistry} has wrong SubdomainRegistrarAddress set. Expected ${DAOENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
+      );
+    }
+  }
 
   // VERIFYING PLUGIN REPO REGISTRY
   const PluginRepoRegistryAddress = await getContractAddress(
@@ -50,7 +97,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginRepoRegistry',
     PluginRepoRegistryAddress
   );
-  await checkSetMangingDao(PluginRepoRegistry, managingDAOAddress);
+  await checkSetManagingDao(PluginRepoRegistry, managingDAOAddress);
+  // scope to reuse same const again
+  {
+    const SubdomainRegistrarAddress =
+      await PluginRepoRegistry.callStatic.subdomainRegistrar();
+    if (SubdomainRegistrarAddress !== PluginENSSubdomainRegistrarAddress) {
+      throw new Error(
+        `${PluginRepoRegistry} has wrong SubdomainRegistrarAddress set. Expected ${PluginENSSubdomainRegistrarAddress} to be ${SubdomainRegistrarAddress}`
+      );
+    }
+  }
 
   // VERIFYING PLUGIN REPO FACTORY
   const PluginRepoFactoryAddress = await getContractAddress(
@@ -81,7 +138,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PluginSetupProcessor',
     PluginSetupProcessorAddress
   );
-  await checkSetMangingDao(PluginSetupProcessor, managingDAOAddress);
+  await checkSetManagingDao(PluginSetupProcessor, managingDAOAddress);
   // scope to reuse same const again
   {
     const SetPluginRepoRegistryAddress =
