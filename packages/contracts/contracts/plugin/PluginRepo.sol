@@ -73,7 +73,7 @@ contract PluginRepo is
     /// @notice Thrown if release id is by more than 1 to the previous release id.
     /// @param latestRelease the current latest release id.
     /// @param newRelease new release id dev is trying to push.
-    error ReleaseIncrementInvalid(uint8 latestRelease, uint8 newRelease);
+    error InvalidReleaseIncrement(uint8 latestRelease, uint8 newRelease);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
     /// @param release the release number in which pluginSetup is found.
@@ -150,14 +150,14 @@ contract PluginRepo is
 
         // Can't release `x` unless `x-1` is released.
         if (_release - latestRelease > 1) {
-            revert ReleaseIncrementInvalid({latestRelease: latestRelease, newRelease: _release});
+            revert InvalidReleaseIncrement({latestRelease: latestRelease, newRelease: _release});
         }
 
         if (_release > latestRelease) {
             latestRelease = _release;
 
             if (_releaseMetadata.length == 0) {
-                revert ReleaseMetadataInvalid({release: _release, metadata: _releaseMetadata});
+                revert InvalidReleaseMetadata({release: _release, metadata: _releaseMetadata});
             }
         }
 
