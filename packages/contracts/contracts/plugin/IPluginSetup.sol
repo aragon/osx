@@ -12,7 +12,7 @@ interface IPluginSetup {
     /// @notice The plugin's associated dependency.
     /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
-    struct PreparedDependency {
+    struct PreparedSetupData {
         address[] helpers;
         PermissionLib.MultiTargetPermission[] permissions;
     }
@@ -31,23 +31,23 @@ interface IPluginSetup {
     /// @param _dao The address of the installing DAO.
     /// @param _data The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata JSON file.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
-    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    ) external returns (address plugin, PreparedDependency memory preparedDependency);
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData);
 
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
     /// @param _currentBuild The build ID of the plugin to update from.
     /// @param _payload The relevant data necessary for the `prepareUpdate`. see above.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
-    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareUpdate(
         address _dao,
         uint16 _currentBuild,
         SetupPayload calldata _payload
-    ) external returns (bytes memory initData, PreparedDependency memory preparedDependency);
+    ) external returns (bytes memory initData, PreparedSetupData memory preparedSetupData);
 
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.

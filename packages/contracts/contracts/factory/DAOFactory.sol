@@ -87,7 +87,7 @@ contract DAOFactory {
             // Prepare plugin.
             (
                 address plugin,
-                IPluginSetup.PreparedDependency memory preparedDependency
+                IPluginSetup.PreparedSetupData memory preparedSetupData
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
                     PluginSetupProcessor.PrepareInstallationParams(
@@ -102,8 +102,8 @@ contract DAOFactory {
                 PluginSetupProcessor.ApplyInstallationParams(
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
-                    preparedDependency.permissions,
-                    hashHelpers(preparedDependency.helpers)
+                    preparedSetupData.permissions,
+                    hashHelpers(preparedSetupData.helpers)
                 )
             );
         }

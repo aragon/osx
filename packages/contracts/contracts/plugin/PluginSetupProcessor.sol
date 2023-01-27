@@ -176,7 +176,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param versionTag The version tag of the plugin to used for install preparation.
     /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file..
     /// @param plugin The address of the plugin contract.
-    /// @param preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @param preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     event InstallationPrepared(
         address indexed sender,
         address indexed dao,
@@ -185,7 +185,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginRepo.Tag versionTag,
         bytes data,
         address plugin,
-        IPluginSetup.PreparedDependency preparedDependency
+        IPluginSetup.PreparedSetupData preparedSetupData
     );
 
     /// @notice Emitted after a plugin installation was applied.
@@ -200,7 +200,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin to used for install preparation.
     /// @param setupPayload TOD:GIORGI
-    /// @param preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @param preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     /// @param initData The initialization data to be passed to the upgradeable plugin contract.
     event UpdatePrepared(
         address indexed sender,
@@ -209,7 +209,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         PluginRepo indexed pluginSetupRepo,
         PluginRepo.Tag versionTag,
         IPluginSetup.SetupPayload setupPayload,
-        IPluginSetup.PreparedDependency preparedDependency,
+        IPluginSetup.PreparedSetupData preparedSetupData,
         bytes initData
     );
 
@@ -262,11 +262,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareInstallation` function.
     /// @return plugin The prepared plugin contract address.
-    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     function prepareInstallation(
         address _dao,
         PrepareInstallationParams calldata _params
-    ) external returns (address plugin, IPluginSetup.PreparedDependency memory preparedDependency) {
+    ) external returns (address plugin, IPluginSetup.PreparedSetupData memory preparedSetupData) {
         PluginRepo pluginSetupRepo = _params.pluginSetupRef.pluginSetupRepo;
 
         // Check that the plugin repository exists on the plugin repo registry.
@@ -280,7 +280,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         // Prepare the installation
-        (plugin, preparedDependency) = PluginSetup(version.pluginSetup).prepareInstallation(
+        (plugin, preparedSetupData) = PluginSetup(version.pluginSetup).prepareInstallation(
             _dao,
             _params.data
         );
@@ -289,8 +289,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 setupId = _getSetupId(
             _params.pluginSetupRef,
-            hashPermissions(preparedDependency.permissions),
-            hashHelpers(preparedDependency.helpers),
+            hashPermissions(preparedSetupData.permissions),
+            hashHelpers(preparedSetupData.helpers),
             bytes(""),
             PreparationType.Installation
         );
@@ -323,10 +323,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
             versionTag: _params.pluginSetupRef.versionTag,
             data: _params.data,
             plugin: plugin,
-            preparedDependency: preparedDependency
+            preparedSetupData: preparedSetupData
         });
 
-        return (plugin, preparedDependency);
+        return (plugin, preparedSetupData);
     }
 
     /// @notice Applies the permissions of a prepared installation to a DAO.
@@ -381,14 +381,14 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the DAO For which preparation of update happens.
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
-    /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
     function prepareUpdate(
         address _dao,
         PrepareUpdateParams calldata _params
     )
         external
-        returns (bytes memory initData, IPluginSetup.PreparedDependency memory preparedDependency)
+        returns (bytes memory initData, IPluginSetup.PreparedSetupData memory preparedSetupData)
     {
         if (
             _params.currentVersionTag.release != _params.newVersionTag.release ||
@@ -452,7 +452,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             }
 
             // Prepare the update.
-            (initData, preparedDependency) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
+            (initData, preparedSetupData) = PluginSetup(newVersion.pluginSetup).prepareUpdate(
                 _dao,
                 _params.currentVersionTag.build,
                 _params.setupPayload
@@ -460,8 +460,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
             newSetupId = _getSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
-                hashPermissions(preparedDependency.permissions),
-                hashHelpers(preparedDependency.helpers),
+                hashPermissions(preparedSetupData.permissions),
+                hashHelpers(preparedSetupData.helpers),
                 initData,
                 PreparationType.Update
             );
@@ -477,9 +477,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         pluginState.setupIds[newSetupId] = block.number;
 
         // Avoid stack too deep.
-        emitPrepareUpdateEvent(_dao, newSetupId, _params, preparedDependency, initData);
+        emitPrepareUpdateEvent(_dao, newSetupId, _params, preparedSetupData, initData);
 
-        return (initData, preparedDependency);
+        return (initData, preparedSetupData);
     }
 
     /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
@@ -705,13 +705,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the DAO For which preparation of update happens.
     /// @param _setupId The setupId
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
-    /// @param _preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @param _preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     /// @param _initData The initialization data to be passed to upgradeable contracts when the update is applied
     function emitPrepareUpdateEvent(
         address _dao,
         bytes32 _setupId,
         PrepareUpdateParams calldata _params,
-        IPluginSetup.PreparedDependency memory _preparedDependency,
+        IPluginSetup.PreparedSetupData memory _preparedSetupData,
         bytes memory _initData
     ) private {
         emit UpdatePrepared({
@@ -721,7 +721,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             pluginSetupRepo: _params.pluginSetupRepo,
             versionTag: _params.newVersionTag,
             setupPayload: _params.setupPayload,
-            preparedDependency: _preparedDependency,
+            preparedSetupData: _preparedSetupData,
             initData: _initData
         });
     }

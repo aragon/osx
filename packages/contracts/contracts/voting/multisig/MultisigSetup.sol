@@ -27,7 +27,7 @@ contract MultisigSetup is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `Multisig` plugin.
@@ -73,7 +73,7 @@ contract MultisigSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
-        preparedDependency.permissions = permissions;
+        preparedSetupData.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup

@@ -178,7 +178,7 @@ describe('TokenVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await tokenVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         data
@@ -276,7 +276,7 @@ describe('TokenVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await tokenVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         data
@@ -327,7 +327,7 @@ describe('TokenVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await tokenVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         defaultData
