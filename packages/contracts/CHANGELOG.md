@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed `CallbackReceived` which now emits the sender as well.
 - Avoided integer division in the `MajorityVoting` execution criteria to avoid precision loss.
 - Replaced `ProposalParameters.minParticipation` by `minVotingPower` in `TokenVoting` and `AddresslistVoting`.
 - Rescaled and renamed `PCT_BASE = 10**18` to `RATIO_BASE = 10**6`.
