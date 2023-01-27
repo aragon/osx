@@ -99,7 +99,8 @@ export async function createPluginRepo(
   hre: HardhatRuntimeEnvironment,
   pluginContractName: string,
   pluginSetupContractName: string,
-  contentURI: string
+  releaseMetadata: string,
+  buildMetadata: string
 ): Promise<void> {
   const signers = await ethers.getSigners();
 
@@ -131,8 +132,9 @@ export async function createPluginRepo(
   const tx = await pluginRepoFactoryContract.createPluginRepoWithFirstVersion(
     pluginContractName,
     pluginSetupAddress,
-    contentURI,
-    managingDAOAddress
+    managingDAOAddress,
+    releaseMetadata,
+    buildMetadata
   );
 
   await tx.wait();
@@ -142,7 +144,7 @@ export async function createPluginRepo(
 
   console.log(
     `Created & registered repo for ${pluginContractName} at address: ${repoAddress}, with contentURI ${ethers.utils.toUtf8String(
-      contentURI
+      releaseMetadata
     )}`
   );
 }

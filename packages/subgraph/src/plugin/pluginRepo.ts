@@ -12,7 +12,7 @@ export function handleVersionCreated(event: VersionCreated): void {
   //   BigInt.fromI32(version)
   // );
   entity.pluginSetup = pluginSetupId;
-  entity.contentURI = event.params.contentURI;
+  entity.contentURI = event.params.metadata;
 
   entity.save();
 

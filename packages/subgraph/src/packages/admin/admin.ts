@@ -1,6 +1,7 @@
 import {dataSource} from '@graphprotocol/graph-ts';
 
 import {
+  MembershipContractAnnounced,
   ProposalCreated,
   ProposalExecuted
 } from '../../../generated/templates/Admin/Admin';
@@ -90,6 +91,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   let proposalEntity = AdminProposal.load(proposalId);
   if (proposalEntity) {
     proposalEntity.executed = true;
+    proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
 
     // update actions
@@ -109,5 +111,18 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
         actionEntity.save();
       }
     }
+  }
+}
+
+export function handleMembershipContractAnnounced(
+  event: MembershipContractAnnounced
+): void {
+  let dao = event.params.definingContract;
+  let packageEntity = AdminstratorAdminPlugin.load(event.address.toHexString());
+
+  if (packageEntity) {
+    // TODO: Query `dao` for addresses holding the `EXECUTE_PROPOSAL_PERMISSION` on `where = event.address` and store them as `administrators`
+    // <MISSING_IMPLEMENTATION>
+    // packageEntity.save();
   }
 }

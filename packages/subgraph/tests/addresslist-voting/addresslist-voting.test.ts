@@ -2,10 +2,10 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
-  handleAddressesAdded,
+  handleMembersAdded,
   handleVoteCast,
   handleProposalExecuted,
-  handleAddressesRemoved,
+  handleMembersRemoved,
   handleVotingSettingsUpdated,
   _handleProposalCreated
 } from '../../src/packages/addresslist/addresslist-voting';
@@ -36,10 +36,10 @@ import {
 } from '../constants';
 import {createDummyActions, createGetProposalCall} from '../utils';
 import {
-  createNewAddressesAddedEvent,
+  createNewMembersAddedEvent,
   createNewVoteCastEvent,
   createNewProposalExecutedEvent,
-  createNewAddressesRemovedEvent,
+  createNewMembersRemovedEvent,
   createNewProposalCreatedEvent,
   createNewVotingSettingsUpdatedEvent,
   getProposalCountCall,
@@ -251,8 +251,20 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   handleVoteCast(event);
 
   // checks
-  let entityID = ADDRESS_ONE + '_' + proposal.id;
-  assert.fieldEquals('AddresslistVotingVote', entityID, 'id', entityID);
+  let voteEntityID = ADDRESS_ONE + '_' + proposal.id;
+  assert.fieldEquals('AddresslistVotingVote', voteEntityID, 'id', voteEntityID);
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'voteReplaced',
+    'false'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'updatedAt',
+    BigInt.zero().toString()
+  );
 
   // check proposal
   assert.fieldEquals('AddresslistVotingProposal', proposal.id, 'yes', '1');
@@ -275,7 +287,56 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
     '1'
   );
 
-  // create calls
+  // Check when voter replace vote
+  // create calls 2
+  createGetProposalCall(
+    CONTRACT_ADDRESS,
+    PROPOSAL_ID,
+    true,
+    false,
+
+    VOTING_MODE,
+    SUPPORT_THRESHOLD,
+    MIN_VOTING_POWER,
+    START_DATE,
+    END_DATE,
+    SNAPSHOT_BLOCK,
+
+    '0', // abstain
+    '0', // yes
+    '1', // no
+    TOTAL_VOTING_POWER,
+
+    actions,
+    ALLOW_FAILURE_MAP
+  );
+
+  // create event
+  let event2 = createNewVoteCastEvent(
+    PROPOSAL_ID,
+    ADDRESS_ONE,
+    '3', // No
+    '1', // votingPower
+    CONTRACT_ADDRESS
+  );
+
+  handleVoteCast(event2);
+
+  // checks 2
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'voteReplaced',
+    'true'
+  );
+  assert.fieldEquals(
+    'AddresslistVotingVote',
+    voteEntityID,
+    'updatedAt',
+    event2.block.timestamp.toString()
+  );
+
+  // create calls 3
   createGetProposalCall(
     CONTRACT_ADDRESS,
     PROPOSAL_ID,
@@ -299,15 +360,15 @@ test('Run AddresslistVoting (handleVoteCast) mappings with mock event', () => {
   );
 
   // create event
-  let event2 = createNewVoteCastEvent(
+  let event3 = createNewVoteCastEvent(
     PROPOSAL_ID,
-    ADDRESS_ONE,
+    ADDRESS_TWO,
     '2', // yes
     '1', // votingPower
     CONTRACT_ADDRESS
   );
 
-  handleVoteCast(event2);
+  handleVoteCast(event3);
 
   // Check executable
   // abstain: 0, yes: 2, no: 0
@@ -410,6 +471,12 @@ test('Run AddresslistVoting (handleProposalExecuted) mappings with mock event', 
     'executionBlockNumber',
     event.block.number.toString()
   );
+  assert.fieldEquals(
+    'AddresslistVotingProposal',
+    entityID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
+  );
 
   clearStore();
 });
@@ -470,17 +537,17 @@ test('Run AddresslistVoting (handleVotingSettingsUpdated) mappings with mock eve
   clearStore();
 });
 
-test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', () => {
+test('Run AddresslistVoting (handleMembersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewAddressesAddedEvent(userArray, CONTRACT_ADDRESS);
+  let event = createNewMembersAddedEvent(userArray, CONTRACT_ADDRESS);
 
   // handle event
-  handleAddressesAdded(event);
+  handleMembersAdded(event);
 
   // checks
 
@@ -506,7 +573,7 @@ test('Run AddresslistVoting (handleAddressesAdded) mappings with mock event', ()
   clearStore();
 });
 
-test('Run AddresslistVoting (AddressesRemoved) mappings with mock event', () => {
+test('Run AddresslistVoting (MembersRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
@@ -536,13 +603,13 @@ test('Run AddresslistVoting (AddressesRemoved) mappings with mock event', () => 
   assert.fieldEquals('AddresslistVotingVoter', memberId2, 'id', memberId2);
 
   // create event
-  let event = createNewAddressesRemovedEvent(
+  let event = createNewMembersRemovedEvent(
     [memberAddresses[1]],
     CONTRACT_ADDRESS
   );
 
   // handle event
-  handleAddressesRemoved(event);
+  handleMembersRemoved(event);
 
   // checks
   assert.fieldEquals('AddresslistVotingVoter', memberId1, 'id', memberId1);

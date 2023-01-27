@@ -9,6 +9,7 @@ import {
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
+  MEMBERSHIP_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {deployNewDAO} from '../test-utils/dao';
@@ -215,7 +216,7 @@ describe('Multisig', function () {
   });
 
   describe('addAddresses:', async () => {
-    it('should add new members to the address list', async () => {
+    it('should add new members to the address list and emit the `MembersAdded` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -227,7 +228,9 @@ describe('Multisig', function () {
       expect(await multisig.isListed(signers[1].address)).to.equal(false);
 
       // add a new member
-      await multisig.addAddresses([signers[1].address]);
+      await expect(multisig.addAddresses([signers[1].address]))
+        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_ADDED)
+        .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
@@ -235,7 +238,7 @@ describe('Multisig', function () {
   });
 
   describe('removeAddresses:', async () => {
-    it('should remove users from the address list', async () => {
+    it('should remove users from the address list and emit the `MembersRemoved` event', async () => {
       multisigSettings.minApprovals = 1;
       await multisig.initialize(
         dao.address,
@@ -247,7 +250,9 @@ describe('Multisig', function () {
       expect(await multisig.isListed(signers[1].address)).to.equal(true);
 
       // remove an existing member
-      await multisig.removeAddresses([signers[1].address]);
+      await expect(multisig.removeAddresses([signers[1].address]))
+        .to.emit(multisig, MEMBERSHIP_EVENTS.MEMBERS_REMOVED)
+        .withArgs([signers[1].address]);
 
       expect(await multisig.isListed(signers[0].address)).to.equal(true);
       expect(await multisig.isListed(signers[1].address)).to.equal(false);
