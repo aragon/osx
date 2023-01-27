@@ -9,7 +9,7 @@ import {IDAO} from "../core/IDAO.sol";
 /// @author Aragon Association - 2022-2023
 /// @notice The interface required for a plugin setup contract to be consumed by the `PluginSetupProcessor` for plugin installations, updates, and uninstallations.
 interface IPluginSetup {
-    /// @notice The plugin's associated dependency.
+    /// @notice The data associated with a prepared setup.
     /// @param helpers The address array of helpers (contracts or EOAs) associated with the plugin after the install or update.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the installing or updating DAO.
     struct PreparedSetupData {
@@ -17,10 +17,10 @@ interface IPluginSetup {
         PermissionLib.MultiTargetPermission[] permissions;
     }
 
-    /// @notice The struct containing the pepared setup
+    /// @notice The payload for plugin updates and uninstallations containing the existing contracts as well as optional data to be consumed by the plugin setup.
     /// @param plugin The address of the `Plugin`.
     /// @param currentHelpers The address array of all current helpers (contracts or EOAs) associated with the plugin to update from.
-    /// @param data The `bytes` encoded data containing the input parameters for the preparation of update/uninstall as specified in the corresponding ABI on the version's metadata.
+    /// @param data The bytes-encoded data containing the input parameters for the preparation of update/uninstall as specified in the corresponding ABI on the version's metadata.
     struct SetupPayload {
         address plugin;
         address[] currentHelpers;

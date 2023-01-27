@@ -33,7 +33,7 @@ contract DAOFactory {
 
     struct PluginSettings {
         PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
-        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
+        bytes data; // The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
