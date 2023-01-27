@@ -82,4 +82,4 @@ To deploy run `yarn deploy --network NETWORK` in `packages/contracts` and replac
 
 ## Appendix
 
-- Changing the owner of the choosen ENS domains will also revoke the permissions of the `DAO_ENSSubdomainRegistrar` and `Plugin_ENSSubdomainRegistrar`. Therefore if the owner ship gets transfered restored the approval for these 2 contracts.
+- Changing the owner of the chosen ENS domains will also revoke the permissions of the `DAO_ENSSubdomainRegistrar` and `Plugin_ENSSubdomainRegistrar`. Therefore if the ownership gets transfered, restore the approval for these 2 contracts.
