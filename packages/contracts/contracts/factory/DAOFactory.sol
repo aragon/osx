@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {DAORegistry} from "../registry/DAORegistry.sol";
 import {DAO} from "../core/DAO.sol";

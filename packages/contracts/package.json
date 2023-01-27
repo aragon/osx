@@ -78,7 +78,7 @@
   "dependencies": {
     "@ensdomains/ens-contracts": "0.0.11",
     "@opengsn/contracts": "2.2.6",
-    "@openzeppelin/contracts": "4.7.0",
-    "@openzeppelin/contracts-upgradeable": "4.7.0"
+    "@openzeppelin/contracts": "4.8.1",
+    "@openzeppelin/contracts-upgradeable": "4.8.1"
   }
 }

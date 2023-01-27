@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @notice Checks if the name is either 0-9, a-z or a dash (-).
 /// @param subDomain The name of the DAO.

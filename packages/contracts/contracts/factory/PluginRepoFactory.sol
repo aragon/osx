@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {createERC1967Proxy} from "../utils/Proxy.sol";
 import {PluginRepoRegistry} from "../registry/PluginRepoRegistry.sol";

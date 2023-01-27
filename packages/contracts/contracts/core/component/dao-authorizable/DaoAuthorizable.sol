@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {IDAO} from "../../IDAO.sol";
 import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
