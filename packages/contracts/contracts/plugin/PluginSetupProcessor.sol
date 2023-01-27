@@ -431,10 +431,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 newSetupId;
 
-        // If the current version's pluginSetup is equal to
-        // new version's plugin setup, it means plugin or plugin setup
-        // have not changed and only UI change is detected. In such a case,
-        // We don't call plugin setup to not cause any side effects.
+        // If the current and new plugin setup are identical, this is an UI update.
+        // In this case, the permission hash is set to the empt array hash and the `prepareUpdate` call is skipped to avoid side effects.
         if (currentVersion.pluginSetup == newVersion.pluginSetup) {
             newSetupId = _getSetupId(
                 PluginSetupRef(_params.newVersionTag, _params.pluginSetupRepo),
@@ -468,7 +466,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             );
         }
 
-        // Only allow to prepare if setupId has not been prepared before.
+        // Check if the update has been prepared before by comparing it with the block number of the previous setup operation.
+        // If the is an active
         // Note that the following check ensures that the same setupId can be prepared
         // once again if the plugin was uninstalled and then installed.
         if (pluginState.blockNumber < pluginState.setupIdToBlockNumber[newSetupId]) {

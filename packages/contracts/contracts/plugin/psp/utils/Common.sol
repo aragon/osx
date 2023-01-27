@@ -34,7 +34,7 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
     return keccak256(abi.encode(_dao, _plugin));
 }
 
-/// @notice Returns an ID for prepared setup obtained from all characterizing elements.
+/// @notice Returns an ID for prepared setup obtained from hashing characterizing elements.
 /// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
 /// @param _permissionHash The hash of the permission operations requested by the setup.
 /// @param _helperHash The hash of the helper contract addresses.
