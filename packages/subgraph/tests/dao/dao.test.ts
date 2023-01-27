@@ -6,7 +6,6 @@ import {
   handleDeposited,
   handleExecuted,
   _handleMetadataSet,
-  handleWithdrawn,
   handleTrustedForwarderSet,
   handleSignatureValidatorSet,
   handleStandardCallbackRegistered
@@ -29,7 +28,6 @@ import {
   getBalanceOf,
   createNewExecutedEvent,
   createDaoEntityState,
-  createNewWithdrawnEvent,
   createTrustedForwarderSetEvent,
   createSignatureValidatorSetEvent,
   createStandardCallbackRegisteredEvent
@@ -213,115 +211,6 @@ test('Run dao (handleDeposited) for Token mappings with mock event', () => {
     newEvent.block.timestamp.toString()
   );
   assert.fieldEquals('VaultTransfer', entityID, 'type', 'Deposit');
-
-  clearStore();
-});
-
-test('Run dao (handleWithdrawn) for Token mappings with mock event', () => {
-  let newEvent = createNewWithdrawnEvent(
-    DAO_TOKEN_ADDRESS,
-    ADDRESS_ONE,
-    ONE_ETH,
-    STRING_DATA,
-    DAO_ADDRESS
-  );
-
-  let entityID =
-    Address.fromString(DAO_ADDRESS).toHexString() +
-    '_' +
-    newEvent.transaction.hash.toHexString() +
-    '_' +
-    newEvent.transactionLogIndex.toHexString() +
-    '_' +
-    newEvent.params.to.toHexString() +
-    '_' +
-    newEvent.params.amount.toString() +
-    '_' +
-    newEvent.params.token.toHexString() +
-    '_' +
-    newEvent.params._reference;
-
-  createTokenCalls(DAO_TOKEN_ADDRESS, 'DAO Token', 'DAOT', '6');
-  getBalanceOf(DAO_TOKEN_ADDRESS, DAO_ADDRESS, ONE_ETH);
-  handleWithdrawn(newEvent);
-
-  // check balance
-  assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString(),
-    'id',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString(),
-    'token',
-    Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString(),
-    'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'Balance',
-    Address.fromString(DAO_ADDRESS).toHexString() +
-      '_' +
-      Address.fromString(DAO_TOKEN_ADDRESS).toHexString(),
-    'balance',
-    ONE_ETH
-  );
-
-  // checks Withdrawn
-  assert.fieldEquals('VaultTransfer', entityID, 'id', entityID);
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'dao',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'token',
-    Address.fromString(DAO_TOKEN_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'sender',
-    Address.fromString(DAO_ADDRESS).toHexString()
-  );
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'to',
-    Address.fromString(ADDRESS_ONE).toHexString()
-  );
-  assert.fieldEquals('VaultTransfer', entityID, 'amount', ONE_ETH);
-  assert.fieldEquals('VaultTransfer', entityID, 'reference', STRING_DATA);
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'transaction',
-    newEvent.transaction.hash.toHexString()
-  );
-  assert.fieldEquals(
-    'VaultTransfer',
-    entityID,
-    'createdAt',
-    newEvent.block.timestamp.toString()
-  );
-  assert.fieldEquals('VaultTransfer', entityID, 'type', 'Withdraw');
 
   clearStore();
 });
