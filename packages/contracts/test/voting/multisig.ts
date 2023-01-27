@@ -21,6 +21,9 @@ import {
   timestampIn,
   toBytes32,
 } from '../test-utils/voting';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {deployWithProxy} from '../test-utils/proxy';
 
 export type MultisigSettings = {
   minApprovals: number;
@@ -77,7 +80,7 @@ describe('Multisig', function () {
     dao = await deployNewDAO(signers[0].address);
   });
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     multisigSettings = {
       minApprovals: 3,
       onlyListed: true,
@@ -88,7 +91,7 @@ describe('Multisig', function () {
       multisigFactoryBytecode,
       signers[0]
     );
-    multisig = await MultisigFactory.deploy();
+    multisig = await deployWithProxy(MultisigFactory);
 
     dao.grant(
       dao.address,
@@ -99,6 +102,26 @@ describe('Multisig', function () {
       multisig.address,
       signers[0].address,
       ethers.utils.id('UPDATE_MULTISIG_SETTINGS_PERMISSION')
+    );
+  });
+
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      this.upgrade = {
+        contract: multisig,
+        dao: dao,
+        user: signers[8],
+      };
+      await multisig.initialize(
+        dao.address,
+        signers.slice(0, 5).map(s => s.address),
+        multisigSettings
+      );
+    });
+
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+      'DaoUnauthorized'
     );
   });
 

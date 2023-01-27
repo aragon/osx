@@ -26,6 +26,9 @@ import {
 } from '../test-utils/voting';
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];
@@ -68,7 +71,7 @@ describe('AddresslistVoting', function () {
     dao = await deployNewDAO(signers[0].address);
   });
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     votingSettings = {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
@@ -82,7 +85,8 @@ describe('AddresslistVoting', function () {
       addresslistVotingFactoryBytecode,
       signers[0]
     );
-    voting = (await AddresslistVotingFactory.deploy()) as AddresslistVoting;
+
+    voting = await deployWithProxy(AddresslistVotingFactory);
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -96,6 +100,28 @@ describe('AddresslistVoting', function () {
       voting.address,
       signers[0].address,
       ethers.utils.id('UPDATE_ADDRESSES_PERMISSION')
+    );
+
+    this.upgrade = {
+      contract: voting,
+      dao: dao,
+      user: signers[8],
+    };
+  });
+
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      this.upgrade = {
+        contract: voting,
+        dao: dao,
+        user: signers[8],
+      };
+      await voting.initialize(dao.address, votingSettings, []);
+    });
+
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+      'DaoUnauthorized'
     );
   });
 
