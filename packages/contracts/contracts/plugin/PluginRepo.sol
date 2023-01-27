@@ -1,6 +1,6 @@
 // SPDX-License-Identifier:    MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
@@ -13,7 +13,7 @@ import {IPluginSetup} from "./PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
-/// @author Aragon Association - 2020 - 2022
+/// @author Aragon Association - 2020 - 2023
 /// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
 //TODO Rename to PluginSetupRepo?
 contract PluginRepo is

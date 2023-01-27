@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC1822ProxiableUpgradeable} from "@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol";
@@ -11,7 +11,7 @@ import {IDAO} from "../IDAO.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title PluginUUPSUpgradeable
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract, upgradeable contract to inherit from when creating a plugin being deployed via the UUPS pattern (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
 abstract contract PluginUUPSUpgradeable is
     IPlugin,

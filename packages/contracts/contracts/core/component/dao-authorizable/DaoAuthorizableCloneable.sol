@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
@@ -8,7 +8,7 @@ import {IDAO} from "../../IDAO.sol";
 import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
 
 /// @title DaoAuthorizableCloneable
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract contract providing a meta-transaction compatible modifier for clonable contracts to authorize function calls through an associated DAO.
 /// @dev Make sure to call `__DaoAuthorizableCloneable_init` during initialization of the inheriting contract.
 ///      This contract is compatible with meta transactions through OZ's `Context`.

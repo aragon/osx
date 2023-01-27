@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -21,7 +21,7 @@ import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
 /// @title TokenVotingSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `TokenVoting` plugin.
 contract TokenVotingSetup is PluginSetup {
     using Address for address;

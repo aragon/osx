@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @title IPermissionCondition
-/// @author Aragon Association - 2021
+/// @author Aragon Association - 2021-2023
 /// @notice This interface can be implemented to support more customary permissions depending on on- or off-chain state, e.g., by querying token ownershop or a secondary condition, respectively.
 interface IPermissionCondition {
     /// @notice This method is used to check if a call is permitted.

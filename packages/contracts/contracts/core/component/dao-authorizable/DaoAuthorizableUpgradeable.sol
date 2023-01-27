@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
@@ -8,7 +8,7 @@ import {_auth} from "../../../utils/auth.sol";
 import {IDAO} from "../../IDAO.sol";
 
 /// @title DaoAuthorizableUpgradeable
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An abstract contract providing a meta-transaction compatible modifier for upgradeable contracts to authorize function calls through an associated DAO.
 /// @dev Make sure to call `__DaoAuthorizableUpgradeable_init` during initialization of the inheriting contract.
 abstract contract DaoAuthorizableUpgradeable is ContextUpgradeable {

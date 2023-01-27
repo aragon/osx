@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
@@ -16,7 +16,7 @@ import {PluginRepo} from "./PluginRepo.sol";
 import {PluginSetupRef, hashHelpers, hashPermissions, _getSetupId, _getPluginInstallationId, PreparationType} from "./psp/utils/Common.sol";
 
 /// @title PluginSetupProcessor
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract processes the preparation and application of plugin setups (installation, update, uninstallation) on behalf of a requesting DAO.
 /// @dev This contract is temporarily granted the `ROOT_PERMISSION_ID` permission on the applying DAO and therefore is highly security critical.
 contract PluginSetupProcessor is DaoAuthorizable {
