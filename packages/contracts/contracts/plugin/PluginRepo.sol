@@ -82,7 +82,7 @@ contract PluginRepo is
     error InvalidReleaseIncrement(uint8 latestRelease, uint8 newRelease);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param release he release number in which pluginSetup is found.
+    /// @param release The release number in which pluginSetup is found.
     /// @param build The build ID of the release number in which pluginSetup is found.
     /// @param pluginSetup the plugin setup address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
