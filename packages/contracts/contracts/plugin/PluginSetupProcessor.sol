@@ -94,7 +94,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @notice The struct containing the parameters for the `applyUpdate` function.
     /// @param plugin The address of the plugin contract to be updated.
     /// @param pluginSetupRef The reference to the plugin setup used for the update.
-    /// @param initData The encoded data (function selector and arguments) to be providied to `upgradeToAndCall`.
+    /// @param initData The encoded data (function selector and arguments) to be provided to `upgradeToAndCall`.
     /// @param permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the DAO.
     /// @param helpersHash The hash of helpers that were deployed in `prepareUpdate`. This helps to derive the setup ID.
     struct ApplyUpdateParams {
@@ -636,7 +636,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     }
 
     /// @notice Validates that a setup ID can be applied for `applyInstallation`, `applyUpdate`, or `applyUninstallation`.
-    /// @param pluginInstallationId The plugin installation ID obtained fro mthe hash of `abi.encode(daoAddress, pluginAddress)`.
+    /// @param pluginInstallationId The plugin installation ID obtained from the hash of `abi.encode(daoAddress, pluginAddress)`.
     /// @param setupId The setup ID to be validated.
     /// @dev If the block number stored in `states[pluginInstallationId].blockNumber` exceeds the one stored in `pluginState.setupIdToBlockNumber[setupId]`, the prepared setup with `setupId` is outdated and not applicable anymore.
     function validateSetupId(bytes32 pluginInstallationId, bytes32 setupId) public view {
