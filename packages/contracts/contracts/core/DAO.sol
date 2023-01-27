@@ -317,10 +317,9 @@ contract DAO is
 
     /// @notice Updates the set DAO uri to a new value.
     /// @param newDaoURI The new DAO uri to be set.
-    function setDaoURI(string calldata newDaoURI)
-        external
-        auth(address(this), SET_METADATA_PERMISSION_ID)
-    {
+    function setDaoURI(
+        string calldata newDaoURI
+    ) external auth(address(this), SET_METADATA_PERMISSION_ID) {
         _setDaoURI(newDaoURI);
     }
 

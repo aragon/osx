@@ -147,10 +147,10 @@ contract PermissionManager is Initializable {
     /// @dev Requires the `ROOT_PERMISSION_ID` permission.
     /// @param _where The address of the contract.
     /// @param items The array of bulk items to process.
-    function applySingleTargetPermissions(address _where, PermissionLib.SingleTargetPermission[] calldata items)
-        external
-        auth(_where, ROOT_PERMISSION_ID)
-    {
+    function applySingleTargetPermissions(
+        address _where,
+        PermissionLib.SingleTargetPermission[] calldata items
+    ) external auth(_where, ROOT_PERMISSION_ID) {
         for (uint256 i; i < items.length; ) {
             PermissionLib.SingleTargetPermission memory item = items[i];
 
@@ -169,7 +169,9 @@ contract PermissionManager is Initializable {
     /// @notice Processes bulk items on the permission manager.
     /// @dev Requires that msg.sender has each permissionId on the where.
     /// @param items The array of bulk items to process.
-    function applyMultiTargetPermissions(PermissionLib.MultiTargetPermission[] calldata items) external {
+    function applyMultiTargetPermissions(
+        PermissionLib.MultiTargetPermission[] calldata items
+    ) external {
         for (uint256 i; i < items.length; ) {
             PermissionLib.MultiTargetPermission memory item = items[i];
 
@@ -223,11 +225,7 @@ contract PermissionManager is Initializable {
     /// @param _where The address of the target contract for which `who` recieves permission.
     /// @param _who The address (EOA or contract) owning the permission.
     /// @param _permissionId The permission identifier.
-    function _grant(
-        address _where,
-        address _who,
-        bytes32 _permissionId
-    ) internal {
+    function _grant(address _where, address _who, bytes32 _permissionId) internal {
         _grantWithCondition(_where, _who, _permissionId, IPermissionCondition(ALLOW_FLAG));
     }
 
@@ -317,7 +315,12 @@ contract PermissionManager is Initializable {
 
         // Since it's not a flag, assume it's a PermissionCondition and try-catch to skip failures
         try
-            IPermissionCondition(accessFlagOrCondition).isGranted(_where, _who, _permissionId, _data)
+            IPermissionCondition(accessFlagOrCondition).isGranted(
+                _where,
+                _who,
+                _permissionId,
+                _data
+            )
         returns (bool allowed) {
             if (allowed) return true;
         } catch {}
@@ -330,15 +333,16 @@ contract PermissionManager is Initializable {
     /// @param _permissionId The permission identifier required to call the method this modifier is applied to.
     function _auth(address _where, bytes32 _permissionId) private view {
         if (
-            !(isGranted(_where, msg.sender, _permissionId, msg.data) ||
-                isGranted(address(this), msg.sender, _permissionId, msg.data))
-        )
+            !isGranted(address(this), msg.sender, _permissionId, msg.data) &&
+            !isGranted(_where, msg.sender, _permissionId, msg.data)
+        ) {
             revert Unauthorized({
                 here: address(this),
                 where: _where,
                 who: msg.sender,
                 permissionId: _permissionId
             });
+        }
     }
 
     /// @notice Generates the hash for the `permissionsHashed` mapping obtained from the word "PERMISSION", the contract address, the address owning the permission, and the permission identifier.
