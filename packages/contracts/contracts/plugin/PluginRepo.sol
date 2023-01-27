@@ -76,7 +76,7 @@ contract PluginRepo is
     /// @notice Thrown if a release ID is zero.
     error ReleaseZeroNotAllowed();
 
-    /// @notice Thrown if a release ID is incremented by more than one..
+    /// @notice Thrown if a release ID is incremented by more than one.
     /// @param latestRelease The latest release ID.
     /// @param newRelease The new release ID.
     error InvalidReleaseIncrement(uint8 latestRelease, uint8 newRelease);
