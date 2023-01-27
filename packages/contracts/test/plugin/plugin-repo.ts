@@ -7,6 +7,8 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 import {PluginRepo, PluginUUPSUpgradeableSetupV1Mock} from '../../typechain';
 import {deployMockPluginSetup, deployNewPluginRepo} from '../test-utils/repo';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 const emptyBytes = '0x00';
 
@@ -47,7 +49,18 @@ describe.skip('PluginRepo', function () {
 
     // deploy pluging factory mock
     pluginSetupMock = await deployMockPluginSetup();
+
+    this.upgrade = {
+      contract: pluginRepo,
+      dao: pluginRepo,
+      user: signers[8],
+    };
   });
+
+  shouldUpgradeCorrectly(
+    UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
+    'Unauthorized'
+  );
 
   it('fails to update release metadata for release id 0', async function () {
     await expect(

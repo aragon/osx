@@ -20,6 +20,8 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../test-utils/dao';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 
@@ -48,7 +50,7 @@ const EVENTS = {
 };
 
 const PERMISSION_IDS = {
-  UPGRADE_DAO_PERMISSION_ID: ethers.utils.id('UPGRADE_DAO_PERMISSION'),
+  UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
   WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION'),
@@ -69,7 +71,7 @@ describe('DAO', function () {
   let ownerAddress: string;
   let dao: DAO;
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
@@ -120,7 +122,18 @@ describe('DAO', function () {
         PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       ),
     ]);
+
+    this.upgrade = {
+      contract: dao,
+      dao: dao,
+      user: signers[8],
+    };
   });
+
+  shouldUpgradeCorrectly(
+    UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
+    'Unauthorized'
+  );
 
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
@@ -921,28 +934,5 @@ describe('DAO', function () {
         expect(await dao.daoURI()).to.be.eq(daoExampleURI);
       });
     });
-  });
-
-  describe('ERC1967', async () => {
-    // TODO: Must be made as a test utils that can be imported in every upgradeable test file
-    // Such as https://github.com/OpenZeppelin/openzeppelin-contracts/blob/a28aafdc85a592776544f7978c6b1a462d28ede2/test/token/ERC20/ERC20.behavior.js#L5
-    // This will avoid having the same 3 tests in every file or we could just neglect this test as
-    // It's coming from UUPSUpgradeable which is already tested though since contracts are very critical,
-    // Still testing this most important part wouldn't be bad..
-    it.skip('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
-      await expect(dao.connect(signers[1]).upgradeTo(dao.address))
-        .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          dao.address,
-          dao.address,
-          signers[1].address,
-          PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-        );
-    });
-
-    it.skip('successfuly updates DAO contract', async () => {
-      await expect(dao.upgradeTo(dao.address)).to.not.be.reverted;
-    });
-    it.skip('shouldn not update if new implementation is not UUPS compliant'); // TODO:Implement
   });
 });
