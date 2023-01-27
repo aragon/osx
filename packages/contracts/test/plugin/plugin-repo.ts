@@ -43,10 +43,37 @@ describe.skip('PluginRepo', function () {
 
   beforeEach(async function () {
     // deploy a pluginRepo and initialize
-    pluginRepo = await deployNewPluginRepo(ownerAddress)
+    pluginRepo = await deployNewPluginRepo(ownerAddress);
 
     // deploy pluging factory mock
     pluginSetupMock = await deployMockPluginSetup();
+  });
+
+  it('fails to update release metadata for release id 0', async function () {
+    await expect(
+      pluginRepo.updateReleaseMetadata(0, emptyBytes)
+    ).to.be.revertedWithCustomError(pluginRepo, 'ReleaseIdZeroNotAllowed');
+  });
+
+  it('fails to update release with empty metadata', async function () {
+    const emptyMetadata = '0x';
+    await expect(pluginRepo.updateReleaseMetadata(1, emptyMetadata))
+      .to.be.revertedWithCustomError(pluginRepo, 'ReleaseMetadataInvalid')
+      .withArgs(1, emptyMetadata);
+  });
+
+  it('updates release metadata', async function () {
+    await expect(pluginRepo.updateReleaseMetadata(1, emptyBytes))
+      .to.emit(pluginRepo, 'ReleaseUpdated')
+      .withArgs(1, emptyBytes);
+  });
+
+  it('fails to create version without release metadata being updated first', async function () {
+    await expect(
+      pluginRepo.createVersion(1, pluginSetupMock.address, emptyBytes)
+    )
+      .to.be.revertedWithCustomError(pluginRepo, 'ReleaseMetadataInvalid')
+      .withArgs(1, emptyBytes);
   });
 
   // valid version as being a correct bump from 0.0.0
