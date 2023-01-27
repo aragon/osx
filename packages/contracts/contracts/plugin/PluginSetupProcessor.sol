@@ -264,7 +264,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareInstallation` function.
     /// @return plugin The prepared plugin contract address.
-    /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
+    /// @return preparedSetupData The data struct containing the array of helper contracts and permissions that the setup has prepared.
     function prepareInstallation(
         address _dao,
         PrepareInstallationParams calldata _params
@@ -305,12 +305,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
             revert PluginAlreadyInstalled();
         }
 
-        // Only allow to prepare if setupId has not been prepared before.
-        // NOTE that if plugin was uninstalled, the same setupId can still
-        // be prepared as blockNumber would end up being higher than setupId's blockNumber.
-        // This case applies to stateful plugins which means pluginSetup always returns the same plugin address.
-        // Though, the same setupId still would need to be prepared (see validateSetupId in `applyInstallation`) first
-        // to make sure prepare event is thrown again.
+        // Make sure that the setup ID has not been prepared before.
+        // NOTE, that if is plugin uninstalled, the same setup ID can still be prepared as the block number would end up being higher than setupId's block number.
+        // This case applies to stateful plugins, which means pluginSetup always returns the same plugin address.
+        // Still, the same setupId would need to be prepared (see `validateSetupId` in `applyInstallation`) first to make sure prepare event is thrown again.
         if (pluginState.blockNumber < pluginState.setupIdToBlockNumber[setupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
@@ -358,7 +356,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         validateSetupId(pluginInstallationId, setupId);
 
-        //TODO SARKAWT: Perhaps a comment is needed explaining: why we don't include permission hashes again
+        // Store only the data required for subsequent updates or uninstallations and set the rest to zero.
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             ZERO_BYTES_HASH,
@@ -383,8 +381,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the DAO For which preparation of update happens.
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied
-    /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for
+    /// @return preparedSetupData The data struct containing the array of helper contracts and permissions that the setup has prepared.
+    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the update is prepared for.
     function prepareUpdate(
         address _dao,
         PrepareUpdateParams calldata _params
@@ -416,8 +414,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
             PreparationType.None
         );
 
-        // The following check implicitly confirms that plugin
-        // is currently installed. Otherwise, currentSetupId wouldn't be set.
+        // The following check implicitly confirms that plugin is currently installed.
+        // Otherwise, `currentSetupId` would not be set.
         if (pluginState.currentSetupId != setupId) {
             revert InvalidSetupId({currentSetupId: pluginState.currentSetupId, setupId: setupId});
         }
@@ -484,7 +482,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         return (initData, preparedSetupData);
     }
 
-    /// @notice Applies the permissions of a prepared update of an UUPS upgradeable contract to a DAO.
+    /// @notice Applies the permissions of a prepared update of an UUPS upgradeable proxy contract to a DAO.
     /// @param _dao The address of the updating DAO.
     /// @param _params The struct containing the parameters for the `applyInstallation` function.
     function applyUpdate(
@@ -505,10 +503,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         validateSetupId(pluginInstallationId, setupId);
 
-        // Once the applyUpdate is called and arguments are confirmed(including initData)
-        // we update the setupId with the new versionTag, the current helpers. All other
-        // data can be put with bytes(0) as they don't need to be confirmed in the later
-        // prepareUpdate/prepareUninstallation.
+        // Store only the data required for subsequent updates or uninstallations and set the rest to zero.
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             ZERO_BYTES_HASH,
@@ -545,7 +540,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param _dao The address of the installing DAO.
     /// @param _params The struct containing the parameters for the `prepareUninstallation` function.
     /// @return permissions The list of multi-targeted permission operations to be applied to the uninstalling DAO.
-    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for
+    /// @dev The list of `_currentHelpers` has to be specified in the same order as they were returned from previous setups preparation steps (the latest `prepareInstallation` or `prepareUpdate` step that has happend) on which the uninstallation was prepared for.
     function prepareUninstallation(
         address _dao,
         PrepareUninstallationParams calldata _params
@@ -575,6 +570,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             _params.setupPayload
         );
 
+        // Store only the data required for subsequent updates or uninstallations and set the rest to zero.
         bytes32 newSetupId = _getSetupId(
             _params.pluginSetupRef,
             hashPermissions(permissions),
@@ -626,32 +622,31 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         validateSetupId(pluginInstallationId, setupId);
 
+        // Since the plugin is uninstalled, only the current block number must be updated.
         pluginState.blockNumber = block.number;
         pluginState.currentSetupId = bytes32(0);
 
-        // Process the permissions
-        // PSP on the DAO should have ROOT permission
+        // Process the permissions.
         if (_params.permissions.length > 0) {
+            // The following requires `ROOT_PERMISSION_ID` on the DAO
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
         emit UninstallationApplied({dao: _dao, plugin: _params.plugin, setupId: setupId});
     }
 
-    /// @notice Checks if the setupId for the plugin is valid to be applied for `applyUpdate`, `applyInstallation` or `applyUninstallation`.
-    /// @param pluginInstallationId the hash of `abi.encode(daoAddress, pluginAddress)`-
-    /// @param setupId The setupId to check for validity to be used in `applyType` functions.
+    /// @notice Validates that a setup ID can be applied for `applyInstallation`, `applyUpdate`, or `applyUninstallation`.
+    /// @param pluginInstallationId The plugin installation ID obtained fro mthe hash of `abi.encode(daoAddress, pluginAddress)`.
+    /// @param setupId The setup ID to be validated.
+    /// @dev If the block number stored in `states[pluginInstallationId].blockNumber` exceeds the one stored in `pluginState.setupIdToBlockNumber[setupId]`, the prepared setup with `setupId` is outdated and not applicable anymore.
     function validateSetupId(bytes32 pluginInstallationId, bytes32 setupId) public view {
         PluginState storage pluginState = states[pluginInstallationId];
-        // If the plugin block number exceeds the setupId preparation block number,
-        // This means applyUpdate was already called on another setupId
-        // and all the rest setupIdToBlockNumber should become idle or setupId is not prepared before.
         if (pluginState.blockNumber >= pluginState.setupIdToBlockNumber[setupId]) {
             revert SetupNotApplicable(setupId);
         }
     }
 
-    /// @notice Upgrades an `UUPSUpgradeable` proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @notice Upgrades an UUPS upgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @param _proxy The address of the proxy.
     /// @param _implementation The address of the implementation contract.
     /// @param _initData The initialization data to be passed to the upgradeable plugin contract via `upgradeToAndCall`.
@@ -687,9 +682,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    /// @notice Internal function to check if a caller has the permission to apply a prepared setup.
-    /// @param _dao The address of the DAO conducting the setup.
-    /// @param _permissionId The permission identifier.
+    /// @notice Checks if a caller has the permission to apply a setup.
+    /// @param _dao The address of the applying DAO.
+    /// @param _permissionId The permission ID.
     function _canApply(address _dao, bytes32 _permissionId) private view {
         if (
             msg.sender != _dao &&
@@ -703,12 +698,13 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    /// @dev to avoid stack too deep, the function makes sure it uses stack values at a correct level.
-    /// @param _dao The address of the DAO For which preparation of update happens.
+    /// @notice A helper to emit the `UpdatePrepared` event from the supplied, structured data.
+    /// @param _dao The address of the updating DAO.
     /// @param _setupId The setupId
     /// @param _params The struct containing the parameters for the `prepareUpdate` function.
     /// @param _preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
     /// @param _initData The initialization data to be passed to upgradeable contracts when the update is applied
+    /// @dev This functions exists to avoid stack-too-deep errors.
     function emitPrepareUpdateEvent(
         address _dao,
         bytes32 _setupId,
