@@ -2,10 +2,10 @@ import {assert, clearStore, test} from 'matchstick-as/assembly/index';
 import {Address, BigInt} from '@graphprotocol/graph-ts';
 
 import {
-  handleAddressesAdded,
+  handleMembersAdded,
   handleApproved,
   handleProposalExecuted,
-  handleAddressesRemoved,
+  handleMembersRemoved,
   _handleProposalCreated,
   handleMultisigSettingsUpdated
 } from '../../src/packages/multisig/multisig';
@@ -24,14 +24,15 @@ import {
   THREE,
   PROPOSAL_ENTITY_ID,
   START_DATE,
-  END_DATE
+  END_DATE,
+  ALLOW_FAILURE_MAP
 } from '../constants';
 import {createDummyActions} from '../utils';
 import {
-  createNewAddressesAddedEvent,
+  createNewMembersAddedEvent,
   createNewApprovedEvent,
   createNewProposalExecutedEvent,
-  createNewAddressesRemovedEvent,
+  createNewMembersRemovedEvent,
   createNewProposalCreatedEvent,
   getProposalCountCall,
   createMultisigProposalEntityState,
@@ -67,7 +68,9 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     // approvals
     ONE,
 
-    actions
+    actions,
+
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -78,6 +81,7 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
     END_DATE,
     STRING_DATA,
     actions,
+    ALLOW_FAILURE_MAP,
     CONTRACT_ADDRESS
   );
 
@@ -120,6 +124,12 @@ test('Run Multisig (handleProposalCreated) mappings with mock event', () => {
   assert.fieldEquals('MultisigProposal', entityID, 'minApprovals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'approvals', ONE);
   assert.fieldEquals('MultisigProposal', entityID, 'executed', 'false');
+  assert.fieldEquals(
+    'MultisigProposal',
+    entityID,
+    'allowFailureMap',
+    ALLOW_FAILURE_MAP
+  );
 
   // check MultisigPlugin
   assert.fieldEquals(
@@ -156,7 +166,8 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     // approvals
     ONE,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -219,7 +230,8 @@ test('Run Multisig (handleApproved) mappings with mock event', () => {
     // approvals
     TWO,
 
-    actions
+    actions,
+    ALLOW_FAILURE_MAP
   );
 
   // create event
@@ -277,21 +289,27 @@ test('Run Multisig (handleProposalExecuted) mappings with mock event', () => {
     'executionBlockNumber',
     event.block.number.toString()
   );
+  assert.fieldEquals(
+    'MultisigProposal',
+    PROPOSAL_ENTITY_ID,
+    'executionTxHash',
+    event.transaction.hash.toHexString()
+  );
 
   clearStore();
 });
 
-test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
+test('Run Multisig (handleMembersAdded) mappings with mock event', () => {
   let userArray = [
     Address.fromString(ADDRESS_ONE),
     Address.fromString(ADDRESS_TWO)
   ];
 
   // create event
-  let event = createNewAddressesAddedEvent(userArray, CONTRACT_ADDRESS);
+  let event = createNewMembersAddedEvent(userArray, CONTRACT_ADDRESS);
 
   // handle event
-  handleAddressesAdded(event);
+  handleMembersAdded(event);
 
   // checks
   let memberId =
@@ -316,7 +334,7 @@ test('Run Multisig (handleAddressesAdded) mappings with mock event', () => {
   clearStore();
 });
 
-test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
+test('Run Multisig (handleMembersRemoved) mappings with mock event', () => {
   // create state
   let memberAddresses = [
     Address.fromString(ADDRESS_ONE),
@@ -346,13 +364,13 @@ test('Run Multisig (handleAddressesRemoved) mappings with mock event', () => {
   assert.fieldEquals('MultisigApprover', memberId2, 'id', memberId2);
 
   // create event
-  let event = createNewAddressesRemovedEvent(
+  let event = createNewMembersRemovedEvent(
     [memberAddresses[1]],
     CONTRACT_ADDRESS
   );
 
   // handle event
-  handleAddressesRemoved(event);
+  handleMembersRemoved(event);
 
   // checks
   assert.fieldEquals('MultisigApprover', memberId1, 'id', memberId1);

@@ -3,8 +3,8 @@ import {dataSource, store, BigInt} from '@graphprotocol/graph-ts';
 import {
   ProposalCreated,
   ProposalExecuted,
-  AddressesAdded,
-  AddressesRemoved,
+  MembersAdded,
+  MembersRemoved,
   Multisig,
   Approved,
   MultisigSettingsUpdated
@@ -43,13 +43,14 @@ export function _handleProposalCreated(
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
+  proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = Multisig.bind(event.address);
   let vote = contract.try_getProposal(event.params.proposalId);
 
   if (!vote.reverted) {
     proposalEntity.executed = vote.value.value0;
-    proposalEntity.approvals = vote.value.value1;
+    proposalEntity.approvals = BigInt.fromU32(vote.value.value1);
 
     // ProposalParameters
     let parameters = vote.value.value2;
@@ -116,7 +117,7 @@ export function handleApproved(event: Approved): void {
     let proposal = contract.try_getProposal(event.params.proposalId);
 
     if (!proposal.reverted) {
-      proposalEntity.approvals = proposal.value.value1;
+      proposalEntity.approvals = BigInt.fromU32(proposal.value.value1);
 
       proposalEntity.save();
     }
@@ -131,6 +132,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
+    proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
   }
 
@@ -156,7 +158,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleAddressesAdded(event: AddressesAdded): void {
+export function handleMembersAdded(event: MembersAdded): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();
@@ -173,7 +175,7 @@ export function handleAddressesAdded(event: AddressesAdded): void {
   }
 }
 
-export function handleAddressesRemoved(event: AddressesRemoved): void {
+export function handleMembersRemoved(event: MembersRemoved): void {
   const members = event.params.members;
   for (let index = 0; index < members.length; index++) {
     const member = members[index].toHexString();

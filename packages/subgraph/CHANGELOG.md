@@ -7,8 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UPCOMING]
 
+### Added
+
+- Added the `MembershipContractAnnounced` event.
+- Added `executionTxHash` to `AddresslistVotingProposal`, `TokenVotingProposal`, `MultisigProposal` and `AdminProposal`.
+- Added `voteReplaced` and `updatedAt` to `TokenVotingVote` and `AddresslistVotingVote`.
+
 ### Changed
-- Changes callId in `Executed` event from `uint256` to `bytes32`
+
+- Renamed the `AddressesAdded` and `AddressesRemoved` event to `MembersAdded` and `MembersRemoved`.
+- Changes `callId` in `Executed` event from `uint256` to `bytes32`.
+- Renames `name` in `PluginRepoRegistry` and `DAORegistry` to `subdomain`.
 
 ## 0.6.2-alpha
 
@@ -16,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `startDate` and `endDate` to all `ProposalCreated` events.
 - Adds `startDate` and `endDate` fields to Multisig proposals.
+- Adds `allowFailureMap` to the proposal entities.
 
 ### Changed
 

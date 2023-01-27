@@ -132,12 +132,14 @@ abstract contract MajorityVotingBase is
     /// @param tally The vote tally of the proposal.
     /// @param voters The votes casted by the voters.
     /// @param actions The actions to be executed when the proposal passes.
+    /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
     struct Proposal {
         bool executed;
         ProposalParameters parameters;
         Tally tally;
         mapping(address => IMajorityVoting.VoteOption) voters;
         IDAO.Action[] actions;
+        uint256 allowFailureMap;
     }
 
     /// @notice A container for the proposal parameters at the time of proposal creation.
@@ -240,13 +242,7 @@ abstract contract MajorityVotingBase is
     /// @return bool Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
-        returns (bool)
-    {
+    ) public view virtual override(ERC165Upgradeable, PluginUUPSUpgradeable) returns (bool) {
         return
             interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
             PluginUUPSUpgradeable.supportsInterface(interfaceId);
@@ -374,6 +370,7 @@ abstract contract MajorityVotingBase is
     /// @return parameters The parameters of the proposal vote.
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
+    /// @return allowFailureMap The bit map representations of which actions are allowed to revert so tx still succeeds.
     function getProposal(
         uint256 _proposalId
     )
@@ -385,7 +382,8 @@ abstract contract MajorityVotingBase is
             bool executed,
             ProposalParameters memory parameters,
             Tally memory tally,
-            IDAO.Action[] memory actions
+            IDAO.Action[] memory actions,
+            uint256 allowFailureMap
         )
     {
         Proposal storage proposal_ = proposals[_proposalId];
@@ -395,6 +393,7 @@ abstract contract MajorityVotingBase is
         parameters = proposal_.parameters;
         tally = proposal_.tally;
         actions = proposal_.actions;
+        allowFailureMap = proposal_.allowFailureMap;
     }
 
     /// @notice Updates the voting settings.
@@ -408,6 +407,7 @@ abstract contract MajorityVotingBase is
     /// @notice Creates a new majority voting proposal.
     /// @param _metadata The metadata of the proposal.
     /// @param _actions The actions that will be executed after the proposal passes.
+    /// @param _allowFailureMap Allows proposal to succeed even if an action reverts. Uses bitmap representation. If the bit at index `x` is 1, the tx succeeds even if the action at `x` failed. Passing 0 will be treated as atomic execution.
     /// @param _startDate The start date of the proposal vote. If 0, the current timestamp is used and the vote starts immediately.
     /// @param _endDate The end date of the proposal vote. If 0, `_startDate + minDuration` is used.
     /// @param _voteOption The chosen vote option to be casted on proposal creation.
@@ -416,6 +416,7 @@ abstract contract MajorityVotingBase is
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         uint64 _startDate,
         uint64 _endDate,
         VoteOption _voteOption,
@@ -438,7 +439,12 @@ abstract contract MajorityVotingBase is
     function _execute(uint256 _proposalId) internal virtual {
         proposals[_proposalId].executed = true;
 
-        _executeProposal(dao, _proposalId, proposals[_proposalId].actions);
+        _executeProposal(
+            dao,
+            _proposalId,
+            proposals[_proposalId].actions,
+            proposals[_proposalId].allowFailureMap
+        );
     }
 
     /// @notice Internal function to check if a voter can vote. It assumes the queried proposal exists.

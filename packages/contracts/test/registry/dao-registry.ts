@@ -28,9 +28,9 @@ describe('DAORegistry', function () {
   const REGISTER_DAO_PERMISSION_ID = ethers.utils.id('REGISTER_DAO_PERMISSION');
 
   const topLevelDomain = 'dao.eth';
-  const daoName = 'my-cool-org';
-  const daoNameEnsLabelhash = ensLabelHash(daoName);
-  const daoDomainHash = ensDomainHash(daoName + '.' + topLevelDomain);
+  const daoSubdomain = 'my-cool-org';
+  const daoSubdomainEnsLabelhash = ensLabelHash(daoSubdomain);
+  const daoDomainHash = ensDomainHash(daoSubdomain + '.' + topLevelDomain);
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -53,7 +53,7 @@ describe('DAORegistry', function () {
 
     // DAO Registry
     const Registry = await ethers.getContractFactory('DAORegistry');
-    
+
     daoRegistry = await deployWithProxy(Registry);
 
     await daoRegistry.initialize(
@@ -87,23 +87,29 @@ describe('DAORegistry', function () {
     'DaoUnauthorized'
   )
 
-  it('reverts the registration if the DAO name is empty', async function () {
+  it('succeeds even if the dao subdomain is empty', async function () {
     await expect(
       daoRegistry.register(targetDao.address, ownerAddress, '')
-    ).to.be.revertedWithCustomError(daoRegistry, 'EmptyDaoName');
+    ).to.not.be.reverted;
+  });
+
+  it('successfully sets subdomainregistrar', async () => {
+    expect(await daoRegistry.subdomainRegistrar()).to.equal(
+      ensSubdomainRegistrar.address
+    );
   });
 
   it('Should register a new DAO successfully', async function () {
-    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
+    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain))
       .to.emit(daoRegistry, EVENTS.DAORegistered)
-      .withArgs(targetDao.address, ownerAddress, daoName);
+      .withArgs(targetDao.address, ownerAddress, daoSubdomain);
 
     expect(await daoRegistry.entries(targetDao.address)).to.equal(true);
   });
 
   it('fails to register if the sender lacks the required role', async () => {
     // Register a DAO successfully
-    await daoRegistry.register(targetDao.address, ownerAddress, daoName);
+    await daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain);
 
     // Revoke the permission
     await managingDao.revoke(
@@ -115,7 +121,7 @@ describe('DAORegistry', function () {
     const newTargetDao = await deployNewDAO(ownerAddress);
 
     await expect(
-      daoRegistry.register(newTargetDao.address, ownerAddress, daoName)
+      daoRegistry.register(newTargetDao.address, ownerAddress, daoSubdomain)
     )
       .to.be.revertedWithCustomError(daoRegistry, 'DaoUnauthorized')
       .withArgs(
@@ -131,26 +137,108 @@ describe('DAORegistry', function () {
     await daoRegistry.register(
       targetDao.address,
       ownerAddress,
-      daoNameEnsLabelhash
+      daoSubdomainEnsLabelhash
     );
 
-    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoName))
+    await expect(daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain))
       .to.be.revertedWithCustomError(daoRegistry, 'ContractAlreadyRegistered')
       .withArgs(targetDao.address);
   });
 
   it('fails to register a DAO with the same name twice', async function () {
     // Register the the DAO name under the top level domain
-    await daoRegistry.register(targetDao.address, ownerAddress, daoName);
+    await daoRegistry.register(targetDao.address, ownerAddress, daoSubdomain);
 
     const newTargetDao = await deployNewDAO(ownerAddress);
     const otherOwnerAddress = await (await ethers.getSigners())[1].getAddress();
 
     // Try to register the the DAO name under the top level domain a second time
     await expect(
-      daoRegistry.register(newTargetDao.address, otherOwnerAddress, daoName)
+      daoRegistry.register(newTargetDao.address, otherOwnerAddress, daoSubdomain)
     )
       .to.be.revertedWithCustomError(ensSubdomainRegistrar, 'AlreadyRegistered')
       .withArgs(daoDomainHash, ensSubdomainRegistrar.address);
+  });
+
+  // without mocking we have to repeat the tests here to make sure the validation is correct
+  describe('subdomain validation', () => {
+    it('should validate the passed subdomain correctly (< 32 bytes long subdomain)', async () => {
+      const baseSubdomain = 'this-is-my-super-valid-subdomain';
+
+      // loop through the ascii table
+      for (let i = 0; i < 127; i++) {
+        const newTargetDao = await deployNewDAO(ownerAddress);
+
+        // replace the 10th char in the baseSubdomain
+        const subdomainName =
+          baseSubdomain.substring(0, 10) +
+          String.fromCharCode(i) +
+          baseSubdomain.substring(10 + 1);
+
+        // test success if it is a valid char [0-9a-z\-]
+        if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+          await expect(
+            daoRegistry.register(
+              newTargetDao.address,
+              ownerAddress,
+              subdomainName
+            )
+          )
+            .to.emit(daoRegistry, EVENTS.DAORegistered)
+            .withArgs(newTargetDao.address, ownerAddress, subdomainName);
+          continue;
+        }
+
+        await expect(
+          daoRegistry.register(
+            newTargetDao.address,
+            ownerAddress,
+            subdomainName
+          )
+        )
+          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
+          .withArgs(subdomainName);
+      }
+    });
+
+    it('should validate the passed subdomain correctly (> 32 bytes long subdomain)', async () => {
+      const baseSubdomain =
+        'this-is-my-super-looooooooooooooooooooooooooong-valid-subdomain';
+
+      // loop through the ascii table
+      for (let i = 0; i < 127; i++) {
+        const newTargetDao = await deployNewDAO(ownerAddress);
+
+        // replace the 40th char in the baseSubdomain
+        const subdomainName =
+          baseSubdomain.substring(0, 40) +
+          String.fromCharCode(i) +
+          baseSubdomain.substring(40 + 1);
+
+        // test success if it is a valid char [0-9a-z\-]
+        if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
+          await expect(
+            daoRegistry.register(
+              newTargetDao.address,
+              ownerAddress,
+              subdomainName
+            )
+          )
+            .to.emit(daoRegistry, EVENTS.DAORegistered)
+            .withArgs(newTargetDao.address, ownerAddress, subdomainName);
+          continue;
+        }
+
+        await expect(
+          daoRegistry.register(
+            newTargetDao.address,
+            ownerAddress,
+            subdomainName
+          )
+        )
+          .to.be.revertedWithCustomError(daoRegistry, 'InvalidDaoSubdomain')
+          .withArgs(subdomainName);
+      }
+    });
   });
 });

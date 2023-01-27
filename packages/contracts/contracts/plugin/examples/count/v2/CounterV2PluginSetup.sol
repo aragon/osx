@@ -4,37 +4,35 @@ pragma solidity 0.8.10;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {IDAO} from "../../../core/IDAO.sol";
-import {IPluginSetup} from "../../IPluginSetup.sol";
-import {PluginSetup} from "../../PluginSetup.sol";
-import {MultiplyHelper} from "./MultiplyHelper.sol";
-import {CounterV1} from "./CounterV1.sol";
+import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
+import {PluginSetup} from "../../../PluginSetup.sol";
+import {IPluginSetup} from "../../../IPluginSetup.sol";
+import {MultiplyHelper} from "../MultiplyHelper.sol";
+import {CounterV2} from "./CounterV2.sol";
 
-/// @title CounterV1PluginSetup
+/// @title CounterV2PluginSetup
 /// @author Aragon Association - 2022
-/// @notice The setup contract of the `CounterV1` plugin.
-contract CounterV1PluginSetup is PluginSetup {
+/// @notice The setup contract of the `CounterV2` plugin.
+contract CounterV2PluginSetup is PluginSetup {
     using Clones for address;
 
-    // For testing purposes, the below are public...
+    // For testing purposes, the contracts below are public.
     MultiplyHelper public multiplyHelperBase;
-    CounterV1 public counterBase;
+    CounterV2 public counterBase;
 
     address private constant NO_CONDITION = address(0);
 
-    constructor() {
-        multiplyHelperBase = new MultiplyHelper();
-        counterBase = new CounterV1();
+    // MultiplyHelper doesn't change. so dev decides to pass the old one.
+    constructor(MultiplyHelper _helper) {
+        multiplyHelperBase = _helper;
+        counterBase = new CounterV2();
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external view virtual override returns (string memory) {
-        return "(address multiplyHelper, uint num)";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes memory _data)
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    )
         external
         virtual
         override
@@ -102,17 +100,49 @@ contract CounterV1PluginSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external view virtual override returns (string memory) {
-        return "";
+    function prepareUpdate(
+        address _dao,
+        uint16 _currentBuild,
+        SetupPayload calldata _payload
+    )
+        external
+        view
+        override
+        returns (bytes memory initData, PreparedDependency memory preparedDependency)
+    {
+        uint256 _newVariable;
+
+        if (_currentBuild == 1) {
+            (_newVariable) = abi.decode(_payload.data, (uint256));
+            initData = abi.encodeWithSelector(
+                bytes4(keccak256("setNewVariable(uint256)")),
+                _newVariable
+            );
+        }
+
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](1);
+        permissions[0] = PermissionLib.MultiTargetPermission(
+            PermissionLib.Operation.Revoke,
+            _dao,
+            _payload.plugin,
+            NO_CONDITION,
+            multiplyHelperBase.MULTIPLY_PERMISSION_ID()
+        );
+
+        // if another helper is deployed, put it inside activeHelpers + put old ones as well.
+        address[] memory activeHelpers = new address[](1);
+        activeHelpers[0] = _payload.currentHelpers[0];
+
+        preparedDependency.helpers = activeHelpers;
+        preparedDependency.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        virtual
-        override
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external virtual override returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         permissions = new PermissionLib.MultiTargetPermission[](
             _payload.currentHelpers.length != 0 ? 3 : 2
         );

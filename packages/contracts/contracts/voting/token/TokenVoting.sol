@@ -5,6 +5,7 @@ pragma solidity 0.8.10;
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
+import {IMembershipContract} from "../../core/plugin/IMembershipContract.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
@@ -14,7 +15,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract TokenVoting is MajorityVotingBase {
+contract TokenVoting is IMembershipContract, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -45,6 +46,8 @@ contract TokenVoting is MajorityVotingBase {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         votingToken = _token;
+
+        emit MembershipContractAnnounced({definingContract: address(_token)});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -65,6 +68,7 @@ contract TokenVoting is MajorityVotingBase {
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
+        uint256 _allowFailureMap,
         uint64 _startDate,
         uint64 _endDate,
         VoteOption _voteOption,
@@ -87,7 +91,8 @@ contract TokenVoting is MajorityVotingBase {
             _metadata: _metadata,
             _startDate: _startDate,
             _endDate: _endDate,
-            _actions: _actions
+            _actions: _actions,
+            _allowFailureMap: _allowFailureMap
         });
 
         // Store proposal related information
@@ -108,6 +113,11 @@ contract TokenVoting is MajorityVotingBase {
 
         proposal_.tally.totalVotingPower = totalVotingPower;
 
+        // Reduce costs
+        if(_allowFailureMap != 0) {
+            proposal_.allowFailureMap = _allowFailureMap;
+        }
+
         for (uint256 i; i < _actions.length; ) {
             proposal_.actions.push(_actions[i]);
             unchecked {
@@ -118,6 +128,12 @@ contract TokenVoting is MajorityVotingBase {
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
+    }
+
+    /// @inheritdoc IMembershipContract
+    function isMember(address _account) external view returns (bool) {
+        /// whatever condition
+        return votingToken.getVotes(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase

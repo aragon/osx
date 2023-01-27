@@ -2,6 +2,7 @@ import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
 import {BigNumberish} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import IPFS from 'ipfs-http-client';
 
 import {findEvent} from '../utils/event';
 import {getMergedABI} from '../utils/abi';
@@ -14,6 +15,27 @@ export const ENS_ADDRESSES: {[key: string]: string} = {
   rinkeby: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // dao.eth
   goerli: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e', // aragon.eth
 };
+
+export async function uploadToIPFS(
+  metadata: string,
+  networkName: string
+): Promise<string> {
+  const client = IPFS.create({
+    url: 'https://ipfs-0.aragon.network/api/v0',
+    headers: {
+      'X-API-KEY': 'yRERPRwFAb5ZiV94XvJdgvDKoGEeFerfFsAQ65',
+    },
+  });
+
+  if (networkName == 'hardhat' || networkName == 'localhost') {
+    // return a dummy path
+    return 'QmNnobxuyCjtYgsStCPhXKEiQR5cjsc3GtG9ZMTKFTTEFJ';
+  }
+
+  const cid = await client.add(metadata);
+  await client.pin.add(cid.cid);
+  return cid.path;
+}
 
 export async function getContractAddress(
   contractName: string,
@@ -77,7 +99,8 @@ export async function createPluginRepo(
   hre: HardhatRuntimeEnvironment,
   pluginContractName: string,
   pluginSetupContractName: string,
-  contentURI: string
+  releaseMetadata: string,
+  buildMetadata: string
 ): Promise<void> {
   const signers = await ethers.getSigners();
 
@@ -109,8 +132,9 @@ export async function createPluginRepo(
   const tx = await pluginRepoFactoryContract.createPluginRepoWithFirstVersion(
     pluginContractName,
     pluginSetupAddress,
-    contentURI,
-    managingDAOAddress
+    managingDAOAddress,
+    releaseMetadata,
+    buildMetadata
   );
 
   await tx.wait();
@@ -119,7 +143,9 @@ export async function createPluginRepo(
   const repoAddress = event.args.pluginRepo;
 
   console.log(
-    `Created & registered repo for ${pluginContractName} at address: ${repoAddress}`
+    `Created & registered repo for ${pluginContractName} at address: ${repoAddress}, with contentURI ${ethers.utils.toUtf8String(
+      releaseMetadata
+    )}`
   );
 }
 

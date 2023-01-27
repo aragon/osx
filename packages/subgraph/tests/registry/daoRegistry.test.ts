@@ -22,7 +22,7 @@ test('Run dao registry mappings with mock event', () => {
     'creator',
     Address.fromString(ADDRESS_ONE).toHexString()
   );
-  assert.fieldEquals('Dao', entityID, 'name', 'mock-Dao');
+  assert.fieldEquals('Dao', entityID, 'subdomain', 'mock-Dao');
   assert.fieldEquals(
     'Dao',
     entityID,

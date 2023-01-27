@@ -23,23 +23,15 @@ interface IPluginSetup {
         bytes data;
     }
 
-    /// @notice The ABI required to decode the `bytes` data in `prepareInstallation()`.
-    /// @return The ABI in string format.
-    function prepareInstallationDataABI() external view returns (string memory);
-
     /// @notice Prepares the installation of a plugin.
     /// @param _dao The address of the installing DAO.
-    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function.
+    /// @param _data The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     /// @return plugin The address of the `Plugin` contract being prepared for installation.
     /// @return preparedDependency The deployed plugin's relevant data which consists of helpers and permissions.
-    function prepareInstallation(address _dao, bytes memory _data)
-        external
-        returns (address plugin, PreparedDependency memory preparedDependency);
-
-    /// @notice The ABI required to decode the `bytes` data in `prepareUpdate()`.
-    /// @return The ABI in string format.
-    /// @dev The empty implemention is provided here so that this doesn't need to be overriden and implemented. This is relevant, for example, for the initial version of a plugin for which no update exists.
-    function prepareUpdateDataABI() external view returns (string memory);
+    function prepareInstallation(
+        address _dao,
+        bytes memory _data
+    ) external returns (address plugin, PreparedDependency memory preparedDependency);
 
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
@@ -53,17 +45,14 @@ interface IPluginSetup {
         SetupPayload calldata _payload
     ) external returns (bytes memory initData, PreparedDependency memory preparedDependency);
 
-    /// @notice The ABI required to decode the `bytes` data in `prepareUninstallation()`.
-    /// @return The ABI in string format.
-    function prepareUninstallationDataABI() external view returns (string memory);
-
     /// @notice Prepares the uninstallation of a plugin.
     /// @param _dao The address of the uninstalling DAO.
     /// @param _payload The relevant data necessary for the `prepareUninstallation`. see above.
     /// @return permissions The array of multi-targeted permission operations to be applied by the `PluginSetupProcessor` to the uninstalling DAO.
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        returns (PermissionLib.MultiTargetPermission[] memory permissions);
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external returns (PermissionLib.MultiTargetPermission[] memory permissions);
 
     /// @notice Returns the plugin's base implementation.
     /// @return address The address of the plugin implementation contract.

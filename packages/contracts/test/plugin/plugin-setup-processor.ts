@@ -185,7 +185,7 @@ describe.skip('Plugin Setup Processor', function () {
 
     // Create and register a plugin on the PluginRepoRegistry
     let tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-      `PluginUUPSUpgradeableMock`,
+      `plugin-uupsupgradeable-mock`,
       setupUV1.address,
       '0x00',
       ownerAddress
@@ -201,7 +201,7 @@ describe.skip('Plugin Setup Processor', function () {
     await repoU.createVersion(1, setupUV4.address, EMPTY_DATA);
 
     tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
-      `PluginCloneableMock`,
+      `plugin-cloneable-mock`,
       setupCV1.address,
       '0x00',
       ownerAddress

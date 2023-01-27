@@ -6,7 +6,7 @@ export function handlePluginRepoRegistered(event: PluginRepoRegistered): void {
   let id = event.params.pluginRepo.toHexString();
   let entity = new PluginRepo(id);
 
-  entity.name = event.params.name;
+  entity.subdomain = event.params.subdomain;
 
   // subscribe to templates
   PluginRepoTemplate.create(event.params.pluginRepo);

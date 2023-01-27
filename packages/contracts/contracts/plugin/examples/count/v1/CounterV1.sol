@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.10;
 
-import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
-import {MultiplyHelper} from "./MultiplyHelper.sol";
-import {IDAO} from "../../../core/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {MultiplyHelper} from "../MultiplyHelper.sol";
+import {IDAO} from "../../../../core/IDAO.sol";
 
 /// @title CounterV1
 /// @author Aragon Association - 2022
@@ -23,7 +23,7 @@ contract CounterV1 is PluginUUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the plugin.
     /// @param _dao The contract of the associated DAO.
     /// @param _multiplyHelper The helper contract associated with the plugin to multiply numbers.

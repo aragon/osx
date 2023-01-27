@@ -5,6 +5,7 @@ import {
   ProposalCreated,
   ProposalExecuted,
   VotingSettingsUpdated,
+  MembershipContractAnnounced,
   TokenVoting
 } from '../../../generated/templates/TokenVoting/TokenVoting';
 import {
@@ -14,6 +15,7 @@ import {
   TokenVotingVoter,
   TokenVotingVote
 } from '../../../generated/schema';
+import {handleERC20Token} from '../../utils/tokens';
 
 import {RATIO_BASE, VOTER_OPTIONS, VOTING_MODES} from '../../utils/constants';
 
@@ -43,6 +45,7 @@ export function _handleProposalCreated(
   proposalEntity.creationBlockNumber = event.block.number;
   proposalEntity.startDate = event.params.startDate;
   proposalEntity.endDate = event.params.endDate;
+  proposalEntity.allowFailureMap = event.params.allowFailureMap;
 
   let contract = TokenVoting.bind(event.address);
   let proposal = contract.try_getProposal(event.params.proposalId);
@@ -114,14 +117,19 @@ export function handleVoteCast(event: VoteCast): void {
   }
 
   let voterProposalVoteEntity = TokenVotingVote.load(voterVoteId);
-  if (!voterProposalVoteEntity) {
+  if (voterProposalVoteEntity) {
+    voterProposalVoteEntity.voteReplaced = true;
+    voterProposalVoteEntity.updatedAt = event.block.timestamp;
+  } else {
     voterProposalVoteEntity = new TokenVotingVote(voterVoteId);
     voterProposalVoteEntity.voter = memberId;
     voterProposalVoteEntity.proposal = proposalId;
+    voterProposalVoteEntity.createdAt = event.block.timestamp;
+    voterProposalVoteEntity.voteReplaced = false;
+    voterProposalVoteEntity.updatedAt = BigInt.zero();
   }
   voterProposalVoteEntity.voteOption = voteOption;
   voterProposalVoteEntity.votingPower = event.params.votingPower;
-  voterProposalVoteEntity.createdAt = event.block.timestamp;
   voterProposalVoteEntity.save();
 
   // voter
@@ -190,6 +198,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
     proposalEntity.executed = true;
     proposalEntity.executionDate = event.block.timestamp;
     proposalEntity.executionBlockNumber = event.block.number;
+    proposalEntity.executionTxHash = event.transaction.hash;
     proposalEntity.save();
   }
 
@@ -225,6 +234,19 @@ export function handleVotingSettingsUpdated(
     packageEntity.minParticipation = event.params.minParticipation;
     packageEntity.minDuration = event.params.minDuration;
     packageEntity.minProposerVotingPower = event.params.minProposerVotingPower;
+    packageEntity.save();
+  }
+}
+
+export function handleMembershipContractAnnounced(
+  event: MembershipContractAnnounced
+): void {
+  let token = event.params.definingContract;
+  let packageEntity = TokenVotingPlugin.load(event.address.toHexString());
+
+  if (packageEntity) {
+    packageEntity.token = handleERC20Token(token);
+
     packageEntity.save();
   }
 }

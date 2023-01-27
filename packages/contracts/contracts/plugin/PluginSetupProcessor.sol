@@ -55,7 +55,8 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice Stores plugin state information per pluginInstallationId
     /// @dev pluginInstallationId => abi.encode(pluginAddress, daoAddress)
-    mapping(bytes32 => PluginState) private states;
+    /// @dev This variable is public on purpose to allow future version to access and migrate the storage.
+    mapping(bytes32 => PluginState) public states;
 
     /// @notice The struct containing the parameters for the `prepareInstallation` function.
     /// @param pluginSetupRef Contains PluginSetupRepo(where to find the plugin) and version tag(which version to install).
@@ -180,7 +181,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
     /// @param setupId TOD:GIORGI: The setup Id hash of the plugin's dependencies.
     /// @param pluginSetupRepo The repository storing the `PluginSetup` contracts of all versions of a plugin.
     /// @param versionTag The version tag of the plugin to used for install preparation.
-    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the `prepareInstallationDataABI()` function in the `pluginSetup` setup contract.
+    /// @param data The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file..
     /// @param plugin The address of the plugin contract.
     /// @param preparedDependency TOD:GIORGI
     event InstallationPrepared(

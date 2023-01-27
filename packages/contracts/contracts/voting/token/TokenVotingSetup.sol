@@ -16,8 +16,6 @@ import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
 import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol";
-import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
-import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
@@ -41,12 +39,6 @@ contract TokenVotingSetup is PluginSetup {
 
     /// @notice The address of the `GovernanceWrappedERC20` base contract.
     address public immutable governanceWrappedERC20Base;
-
-    /// @notice The address of the `MerkleMinter` base contract.
-    address public immutable merkleMinterBase;
-
-    /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter`.
-    address public immutable distributorBase;
 
     struct TokenSettings {
         address addr;
@@ -73,7 +65,6 @@ contract TokenVotingSetup is PluginSetup {
 
     /// @notice The contract constructor, that deployes the bases.
     constructor() {
-        distributorBase = address(new MerkleDistributor());
         governanceERC20Base = address(
             new GovernanceERC20(
                 IDAO(address(0)),
@@ -85,24 +76,14 @@ contract TokenVotingSetup is PluginSetup {
         governanceWrappedERC20Base = address(
             new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
         );
-        merkleMinterBase = address(new MerkleMinter());
         tokenVotingBase = new TokenVoting();
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareInstallationDataABI() external pure returns (string memory) {
-        return
-            "(tuple(uint8 votingMode, uint32 supportThreshold, uint32 minParticipation, uint64 minDuration, uint256 minProposerVotingPower) votingSettings, tuple(address addr, string name, string symbol) tokenSettings, tuple(address[] receivers, uint256[] amounts) mintSettings)";
     }
 
     /// @inheritdoc IPluginSetup
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    )
-        external
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
@@ -185,9 +166,10 @@ contract TokenVotingSetup is PluginSetup {
         );
 
         // Prepare permissions
-        PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](
-            tokenSettings.addr != address(0) ? 3 : 4
-        );
+        PermissionLib.MultiTargetPermission[]
+            memory permissions = new PermissionLib.MultiTargetPermission[](
+                tokenSettings.addr != address(0) ? 3 : 4
+            );
 
         // Set plugin permissions to be granted.
         // Grant the list of prmissions of the plugin to the DAO.
@@ -233,16 +215,10 @@ contract TokenVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallationDataABI() external pure returns (string memory) {
-        return "";
-    }
-
-    /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        view
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {        
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions.
         uint256 helperLength = _payload.currentHelpers.length;
         if (helperLength != 1) {

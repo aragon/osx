@@ -35,10 +35,11 @@ export const DAO_EVENTS = {
   STANDARD_CALLBACK_REGISTERED: 'StandardCallbackRegistered',
   TRUSTED_FORWARDER_SET: 'TrustedForwarderSet',
   SIGNATURE_VALIDATOR_SET: 'SignatureValidatorSet',
-  NEW_URI: 'NewURI'
+  NEW_URI: 'NewURI',
 };
 
-export const ADDRESSLIST_EVENTS = {
-  ADDRESSES_ADDED: 'AddressesAdded',
-  ADDRESSES_REMOVED: 'AddressesRemoved',
+export const MEMBERSHIP_EVENTS = {
+  MEMBERS_ADDED: 'MembersAdded',
+  MEMBERS_REMOVED: 'MembersRemoved',
+  MEMBERSHIP_CONTRACT_ANNOUNCED: 'MembershipContractAnnounced',
 };
