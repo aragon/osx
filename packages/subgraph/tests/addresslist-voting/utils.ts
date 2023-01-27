@@ -7,8 +7,8 @@ import {
   VoteCast,
   ProposalExecuted,
   VotingSettingsUpdated,
-  AddressesAdded,
-  AddressesRemoved
+  MembersAdded,
+  MembersRemoved
 } from '../../generated/templates/AddresslistVoting/AddresslistVoting';
 import {
   ADDRESS_ONE,
@@ -192,42 +192,42 @@ export function createNewVotingSettingsUpdatedEvent(
   return newVotingSettingsUpdatedEvent;
 }
 
-export function createNewAddressesAddedEvent(
+export function createNewMembersAddedEvent(
   addresses: Address[],
   contractAddress: string
-): AddressesAdded {
-  let newAddressesAddedEvent = changetype<AddressesAdded>(newMockEvent());
+): MembersAdded {
+  let newMembersAddedEvent = changetype<MembersAdded>(newMockEvent());
 
-  newAddressesAddedEvent.address = Address.fromString(contractAddress);
-  newAddressesAddedEvent.parameters = [];
+  newMembersAddedEvent.address = Address.fromString(contractAddress);
+  newMembersAddedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddressesAddedEvent.parameters.push(usersParam);
+  newMembersAddedEvent.parameters.push(usersParam);
 
-  return newAddressesAddedEvent;
+  return newMembersAddedEvent;
 }
 
-export function createNewAddressesRemovedEvent(
+export function createNewMembersRemovedEvent(
   addresses: Address[],
   contractAddress: string
-): AddressesRemoved {
-  let newAddressesRemovedEvent = changetype<AddressesRemoved>(newMockEvent());
+): MembersRemoved {
+  let newMembersRemovedEvent = changetype<MembersRemoved>(newMockEvent());
 
-  newAddressesRemovedEvent.address = Address.fromString(contractAddress);
-  newAddressesRemovedEvent.parameters = [];
+  newMembersRemovedEvent.address = Address.fromString(contractAddress);
+  newMembersRemovedEvent.parameters = [];
 
   let usersParam = new ethereum.EventParam(
     'users',
     ethereum.Value.fromAddressArray(addresses)
   );
 
-  newAddressesRemovedEvent.parameters.push(usersParam);
+  newMembersRemovedEvent.parameters.push(usersParam);
 
-  return newAddressesRemovedEvent;
+  return newMembersRemovedEvent;
 }
 
 // calls

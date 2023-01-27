@@ -14,6 +14,7 @@ import {
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {
@@ -153,6 +154,52 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+
+    it('emits the `MembershipContractAnnounced` event', async () => {
+      await expect(
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        )
+      )
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .withArgs(governanceErc20Mock.address);
+    });
+
+    it('reverts if trying to re-initialize', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await expect(
+        voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        )
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('isMember: ', async () => {
+    it('returns true if the account currently owns at least one token', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await setBalances([
+        {receiver: signers[0].address, amount: 1},
+        {receiver: signers[1].address, amount: 0},
+      ]);
+
+      expect(await voting.isMember(signers[0].address)).to.be.true;
+      expect(await voting.isMember(signers[1].address)).to.be.false;
     });
   });
 
