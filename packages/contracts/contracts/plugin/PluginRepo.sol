@@ -85,7 +85,7 @@ contract PluginRepo is
 
     /// @notice Thrown if the same plugin setup contract exists already in a previous releases.
     /// @param release The release ID of the already existing plugin setup.
-    /// @param build The build number of the already existing plugin setup.
+    /// @param build The build ID of the already existing plugin setup.
     /// @param pluginSetup The plugin setup contract address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
@@ -250,7 +250,7 @@ contract PluginRepo is
         return buildsPerRelease[_release];
     }
 
-    /// @notice The hash of the version tag obtained from the packed, bytes-encoded release and build number.
+    /// @notice The hash of the version tag obtained from the packed, bytes-encoded release and build ID.
     /// @param _tag The version tag.
     /// @return bytes32 The version tag hash.
     function tagHash(Tag memory _tag) internal pure returns (bytes32) {
