@@ -7,7 +7,7 @@ import {PermissionLib} from "../../core/permission/PermissionLib.sol";
 import {createERC1967Proxy} from "../../utils/Proxy.sol";
 import {PluginRepo} from "../plugin/repo/PluginRepo.sol";
 import {PluginSetupProcessor} from "../plugin/setup/PluginSetupProcessor.sol";
-import {hashHelpers, PluginSetupRef} from "../plugin/setup/Common.sol";
+import {hashHelpers, PluginSetupRef} from "../plugin/setup/PluginSetupProcessorHelpers.sol";
 import {IPluginSetup} from "../plugin/setup/IPluginSetup.sol";
 import {DAORegistry} from "./DAORegistry.sol";
 

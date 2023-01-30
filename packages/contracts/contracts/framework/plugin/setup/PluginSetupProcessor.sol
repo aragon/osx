@@ -15,7 +15,7 @@ import {PluginRepo} from "../repo/PluginRepo.sol";
 
 import {IPluginSetup} from "./IPluginSetup.sol";
 import {PluginSetup} from "./PluginSetup.sol";
-import {PluginSetupRef, hashHelpers, hashPermissions, _getPreparedSetupId, _getAppliedSetupId, _getPluginInstallationId, PreparationType} from "./Common.sol";
+import {PluginSetupRef, hashHelpers, hashPermissions, _getPreparedSetupId, _getAppliedSetupId, _getPluginInstallationId, PreparationType} from "./PluginSetupProcessorHelpers.sol";
 
 /// @title PluginSetupProcessor
 /// @author Aragon Association - 2022-2023
