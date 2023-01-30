@@ -5,12 +5,12 @@ import {ethers} from 'hardhat';
 import {BigNumber} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MerkleDistributor, DAO, TestERC20} from '../../typechain';
-import {deployWithProxy} from '../test-utils/proxy';
+import {MerkleDistributor, DAO, TestERC20} from '../../../../typechain';
+import {deployWithProxy} from '../../../test-utils/proxy';
 import BalanceTree from './src/balance-tree';
-import {deployNewDAO} from '../test-utils/dao';
-import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
 const ZERO_BYTES32 = `0x${`0`.repeat(64)}`;
 

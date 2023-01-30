@@ -4,8 +4,8 @@ pragma solidity 0.8.17;
 
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import {DaoAuthorizable} from "../component/dao-authorizable/DaoAuthorizable.sol";
-import {IDAO} from "../IDAO.sol";
+import {IDAO} from "../dao/IDAO.sol";
+import {DaoAuthorizable} from "./dao-authorizable/DaoAuthorizable.sol";
 import {IPlugin} from "./IPlugin.sol";
 
 /// @title Plugin

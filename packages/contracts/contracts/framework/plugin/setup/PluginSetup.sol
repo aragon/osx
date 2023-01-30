@@ -6,9 +6,9 @@ import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
-import {createERC1967Proxy as createERC1967} from "../utils/Proxy.sol";
+import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
+import {createERC1967Proxy as createERC1967} from "../../../utils/Proxy.sol";
 import {IPluginSetup} from "./IPluginSetup.sol";
-import {PermissionLib} from "../core/permission/PermissionLib.sol";
 
 /// @title PluginSetup
 /// @author Aragon Association - 2022-2023

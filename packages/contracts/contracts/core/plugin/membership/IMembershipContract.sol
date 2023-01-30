@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {IDAO} from "../IDAO.sol";
+import {IDAO} from "../../dao/IDAO.sol";
 
 /// @notice An interface to be implemented by DAO plugins that define membership based on a contract. This can be
 /// - a token contract (e.g., (Governance-) ERC-20 and ERC-721) defining membership based on ownership / delegation.

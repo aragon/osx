@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {CallbackHandler} from "../core/component/CallbackHandler.sol";
+import {CallbackHandler} from "../../core/dao/utils/CallbackHandler.sol";
 
 contract CallbackHandlerMockHelper is CallbackHandler {
     address callbackHandlerMockAddr;
@@ -11,7 +11,7 @@ contract CallbackHandlerMockHelper is CallbackHandler {
     /// @param selector The function selector of the callback function to be tested.
     /// @param data Arbitrary data accompanying the callback that will be emitted with the `CallbackReceived` event.
     function handleCallback(bytes4 selector, bytes memory data) external returns (bytes4) {
-        bytes4 magicNumber = _handleCallback(selector, data);      
+        bytes4 magicNumber = _handleCallback(selector, data);
         return magicNumber;
     }
 

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "../registry/InterfaceBasedRegistry.sol";
+import "../../framework/utils/InterfaceBasedRegistry.sol";
 
 contract InterfaceBasedRegistryMock is InterfaceBasedRegistry {
     bytes32 public constant REGISTER_PERMISSION_ID = keccak256("REGISTER_PERMISSION");

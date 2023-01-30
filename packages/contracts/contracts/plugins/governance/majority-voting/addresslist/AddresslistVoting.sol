@@ -4,11 +4,11 @@ pragma solidity 0.8.17;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IDAO} from "../../core/IDAO.sol";
-import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
-import {Addresslist} from "./Addresslist.sol";
+import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
+import {Addresslist} from "../../../utils/Addresslist.sol";
+import {IMajorityVoting} from "../IMajorityVoting.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 
 /// @title AddresslistVoting
 /// @author Aragon Association - 2021-2023.
@@ -35,7 +35,7 @@ contract AddresslistVoting is Addresslist, MajorityVotingBase {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.

@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
-import {RegistryUtils} from '../../typechain';
+import {RegistryUtils} from '../../../typechain';
 
 describe('RegistryUtils', () => {
   let registryUtilsContract: RegistryUtils;
@@ -26,8 +26,8 @@ describe('RegistryUtils', () => {
 
         // test success if it is a valid char [0-9a-z\-]
         if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
-          expect(await registryUtilsContract.isSubdomainValid(subdomainName))
-            .to.be.true;
+          expect(await registryUtilsContract.isSubdomainValid(subdomainName)).to
+            .be.true;
           continue;
         }
 
@@ -50,8 +50,8 @@ describe('RegistryUtils', () => {
 
         // test success if it is a valid char [0-9a-z\-]
         if ((i > 47 && i < 58) || (i > 96 && i < 123) || i === 45) {
-          expect(await registryUtilsContract.isSubdomainValid(subdomainName))
-            .to.be.true;
+          expect(await registryUtilsContract.isSubdomainValid(subdomainName)).to
+            .be.true;
           continue;
         }
 

@@ -8,9 +8,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-import {PermissionManager} from "../core/permission/PermissionManager.sol";
-import {PluginSetup} from "./PluginSetup.sol";
-import {IPluginSetup} from "./PluginSetup.sol";
+import {PermissionManager} from "../../../core/permission/PermissionManager.sol";
+import {PluginSetup} from "../setup/PluginSetup.sol";
+import {IPluginSetup} from "../setup/PluginSetup.sol";
 import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo

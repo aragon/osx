@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {IDAO} from "../IDAO.sol";
+import {IDAO} from "../../dao/IDAO.sol";
 
 /// @title ProposalBase
 /// @author Aragon Association - 2022-2023

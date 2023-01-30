@@ -8,14 +8,14 @@ import {ERC165Checker} from "@openzeppelin/contracts/utils/introspection/ERC165C
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 
-import {IDAO} from "../../core/IDAO.sol";
-import {DAO} from "../../core/DAO.sol";
-import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
-import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
-import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
+import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {DAO} from "../../../../core/dao/DAO.sol";
+import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
+import {PluginSetup, IPluginSetup} from "../../../../framework/plugin/setup/PluginSetup.sol";
+import {GovernanceERC20} from "../../../token/governance/GovernanceERC20.sol";
+import {GovernanceWrappedERC20} from "../../../token/governance/GovernanceWrappedERC20.sol";
+import {IGovernanceWrappedERC20} from "../../../token/governance/IGovernanceWrappedERC20.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
 /// @title TokenVotingSetup
@@ -223,7 +223,7 @@ contract TokenVotingSetup is PluginSetup {
             revert WrongHelpersArrayLength({length: helperLength});
         }
 
-        // token can be either GovernanceERC20, GovernanceWrappedERC20, or IVotesUpgradeable, which 
+        // token can be either GovernanceERC20, GovernanceWrappedERC20, or IVotesUpgradeable, which
         // does not follow the GovernanceERC20 and GovernanceWrappedERC20 standard.
         address token = _payload.currentHelpers[0];
 
@@ -258,7 +258,7 @@ contract TokenVotingSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
-        // Revocation of permission is necessary only if the deployed token is GovernanceERC20, 
+        // Revocation of permission is necessary only if the deployed token is GovernanceERC20,
         // as GovernanceWrapped does not possess this permission. Only return the following
         // if it's type of GovernanceERC20, otherwise revoking this permission wouldn't have any effect.
         if (isGovernanceERC20) {

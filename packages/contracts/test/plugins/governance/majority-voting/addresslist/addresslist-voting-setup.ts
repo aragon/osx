@@ -2,17 +2,17 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AddresslistVotingSetup} from '../../typechain';
-import {deployNewDAO} from '../test-utils/dao';
-import {getInterfaceID} from '../test-utils/interfaces';
-import {Operation} from '../core/permission/permission-manager';
+import {AddresslistVotingSetup} from '../../../../../typechain';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {Operation} from '../../../../core/permission/permission-manager';
 import {
   VotingSettings,
   VotingMode,
   pctToRatio,
   ONE_HOUR,
-} from '../test-utils/voting';
-import metadata from '../../contracts/voting/addresslist/build-metadata.json';
+} from '../../../../test-utils/voting';
+import metadata from '../../../../../contracts/plugins/governance/majority-voting/addresslist/build-metadata.json';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;

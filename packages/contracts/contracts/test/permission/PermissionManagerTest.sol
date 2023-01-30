@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../core/permission/PermissionManager.sol";
+import "../../core/permission/PermissionManager.sol";
 
 contract PermissionManagerTest is PermissionManager {
     // Restricted permissionIds that shouldn't be allowed to grant for who = ANY_ADDR or where = ANY_ADDR
@@ -44,13 +44,9 @@ contract PermissionManagerTest is PermissionManager {
         return _isGranted(_where, _who, _permissionId, _data);
     }
 
-    function isPermissionRestrictedForAnyAddr(bytes32 _permissionId)
-        internal
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function isPermissionRestrictedForAnyAddr(
+        bytes32 _permissionId
+    ) internal view virtual override returns (bool) {
         return _permissionId == TEST_PERMISSION_1_ID || _permissionId == TEST_PERMISSION_2_ID;
     }
 }

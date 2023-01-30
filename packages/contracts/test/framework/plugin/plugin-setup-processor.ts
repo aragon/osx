@@ -18,13 +18,13 @@ import {
   PluginRepoRegistry,
   PluginRepo,
   DAO,
-} from '../../typechain';
+} from '../../../typechain';
 
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
 
-import {deployNewDAO} from '../test-utils/dao';
-import {findEvent} from '../../utils/event';
-import {Operation} from '../core/permission/permission-manager';
+import {deployNewDAO} from '../../test-utils/dao';
+import {findEvent} from '../../../utils/event';
+import {Operation} from '../../core/permission/permission-manager';
 import {
   deployPluginSetupProcessor,
   prepareInstallation,
@@ -33,12 +33,12 @@ import {
   mockPermissionsOperations,
   PermissionOperation,
   mockHelpers,
-} from '../test-utils/plugin-setup-processor';
+} from '../../test-utils/plugin-setup-processor';
 
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
-} from '../test-utils/repo';
+} from '../../test-utils/repo';
 import {BytesLike} from 'ethers';
 
 const EVENTS = {

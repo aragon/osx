@@ -2,10 +2,9 @@
 
 pragma solidity 0.8.17;
 
-import {PluginRepo} from "../../PluginRepo.sol";
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {PluginSetup} from "../../PluginSetup.sol";
-import {IPluginSetup} from "../../IPluginSetup.sol";
+import {PluginRepo} from "../repo/PluginRepo.sol";
+import {PluginSetup} from "./PluginSetup.sol";
 
 /// @notice The struct containin a reference to a plugin setup by specifying the containing plugin repository and the associated version tag.
 /// @param versionTag The tag associated with the plugin setup version.

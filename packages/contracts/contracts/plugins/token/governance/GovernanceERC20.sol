@@ -9,8 +9,9 @@ import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/E
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
-import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "../core/IDAO.sol";
+
+import {DaoAuthorizableUpgradeable} from "../../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../../../core/dao/IDAO.sol";
 import {IERC20MintableUpgradeable} from "./IERC20MintableUpgradeable.sol";
 
 /// @title GovernanceERC20
@@ -91,11 +92,7 @@ contract GovernanceERC20 is
 
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
     /// @inheritdoc ERC20VotesUpgradeable
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override {
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal override {
         super._afterTokenTransfer(from, to, amount);
         // reduce _delegate calls only when minting
         if (from == address(0) && to != address(0) && delegates(to) == address(0)) {

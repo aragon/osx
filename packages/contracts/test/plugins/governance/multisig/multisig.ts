@@ -3,27 +3,27 @@ import {ethers} from 'hardhat';
 import {Contract} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {DAO} from '../../typechain';
+import {DAO} from '../../../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MULTISIG_EVENTS,
   MEMBERSHIP_EVENTS,
-} from '../../utils/event';
-import {getMergedABI} from '../../utils/abi';
-import {deployNewDAO} from '../test-utils/dao';
-import {OZ_ERRORS} from '../test-utils/error';
+} from '../../../../utils/event';
+import {getMergedABI} from '../../../../utils/abi';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../test-utils/error';
 import {
   advanceTime,
   getTime,
   setTimeForNextBlock,
   timestampIn,
   toBytes32,
-} from '../test-utils/voting';
-import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
-import {deployWithProxy} from '../test-utils/proxy';
+} from '../../../test-utils/voting';
+import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
+import {deployWithProxy} from '../../../test-utils/proxy';
 
 export type MultisigSettings = {
   minApprovals: number;

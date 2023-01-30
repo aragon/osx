@@ -7,14 +7,14 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {ERC20VotesUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 
-import {GovernanceERC20} from "../tokens/GovernanceERC20.sol";
-import {GovernanceWrappedERC20} from "../tokens/GovernanceWrappedERC20.sol";
-import {DAO} from "../core/DAO.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {IERC20MintableUpgradeable} from "../tokens/IERC20MintableUpgradeable.sol";
-import {MerkleMinter} from "../tokens/MerkleMinter.sol";
-import {MerkleDistributor} from "../tokens/MerkleDistributor.sol";
-import {IMerkleDistributor} from "../tokens/IMerkleDistributor.sol";
+import {GovernanceERC20} from "../../plugins/token/governance/GovernanceERC20.sol";
+import {GovernanceWrappedERC20} from "../../plugins/token/governance/GovernanceWrappedERC20.sol";
+import {IERC20MintableUpgradeable} from "../../plugins/token/governance/IERC20MintableUpgradeable.sol";
+import {MerkleMinter} from "../../plugins/token/creation/MerkleMinter.sol";
+import {MerkleDistributor} from "../../plugins/token/distribution/MerkleDistributor.sol";
+import {IMerkleDistributor} from "../../plugins/token/distribution/IMerkleDistributor.sol";
+import {DAO} from "../../core/dao/DAO.sol";
+import {IDAO} from "../../core/dao/IDAO.sol";
 
 /// @title TokenFactory
 /// @author Aragon Association - 2022-2023
@@ -89,8 +89,8 @@ contract TokenFactory {
                 abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
             );
 
-            if(data.length != 0x20) {
-                revert TokenNotERC20(token, data); 
+            if (data.length != 0x20) {
+                revert TokenNotERC20(token, data);
             }
 
             token = governanceWrappedERC20Base.clone();
@@ -109,7 +109,12 @@ contract TokenFactory {
         }
 
         token = governanceERC20Base.clone();
-        GovernanceERC20(token).initialize(_managingDao, _tokenConfig.name, _tokenConfig.symbol, _mintSettings);
+        GovernanceERC20(token).initialize(
+            _managingDao,
+            _tokenConfig.name,
+            _tokenConfig.symbol,
+            _mintSettings
+        );
 
         // Clone and initialize a `MerkleMinter`
         address merkleMinter = merkleMinterBase.clone();
@@ -124,7 +129,7 @@ contract TokenFactory {
 
         bytes32 tokenMintPermission = GovernanceERC20(token).MINT_PERMISSION_ID();
         bytes32 merkleMintPermission = MerkleMinter(merkleMinter).MERKLE_MINT_PERMISSION_ID();
-        
+
         // Grant the managing DAO permission to directly mint tokens to an receiving address.
         _managingDao.grant(token, address(_managingDao), tokenMintPermission);
 

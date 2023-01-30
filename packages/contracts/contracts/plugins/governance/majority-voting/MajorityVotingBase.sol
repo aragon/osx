@@ -6,11 +6,11 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {ProposalUpgradeable, ProposalBase} from "../../core/plugin/ProposalUpgradeable.sol";
-import {IDAO} from "../../core/IDAO.sol";
+import {ProposalUpgradeable, ProposalBase} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
+import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../../core/dao/IDAO.sol";
 import {RATIO_BASE, RatioOutOfBounds} from "../../utils/Ratio.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {IMajorityVoting} from "./IMajorityVoting.sol";
 
 /// @title MajorityVotingBase
 /// @author Aragon Association - 2022-2023

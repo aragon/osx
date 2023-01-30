@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
 import {CheckpointsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
 
 import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
-import {IMembership} from "../../core/plugin/IMembership.sol";
+import {IMembership} from "../../core/plugin/membership/IMembership.sol";
 
 /// @title Addresslist
 /// @author Aragon Association - 2021-2023

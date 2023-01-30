@@ -2,18 +2,18 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {ERC20, TokenVotingSetup} from '../../typechain';
-import {deployNewDAO} from '../test-utils/dao';
-import {getInterfaceID} from '../test-utils/interfaces';
-import {Operation} from '../core/permission/permission-manager';
-import metadata from '../../contracts/voting/token/build-metadata.json';
+import {ERC20, TokenVotingSetup} from '../../../../../typechain';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {getInterfaceID} from '../../../../test-utils/interfaces';
+import {Operation} from '../../../../core/permission/permission-manager';
+import metadata from '../../../../../contracts/plugins/governance/majority-voting/token/build-metadata.json';
 
 import {
   VotingSettings,
   VotingMode,
   pctToRatio,
   ONE_HOUR,
-} from '../test-utils/voting';
+} from '../../../../test-utils/voting';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;

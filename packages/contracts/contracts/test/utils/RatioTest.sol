@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "../utils/Ratio.sol";
+import "../../plugins/utils/Ratio.sol";
 
 contract RatioTest {
     function getRatioBase() public pure returns (uint256) {

@@ -4,12 +4,10 @@ pragma solidity 0.8.17;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {_uncheckedAdd, _uncheckedSub} from "../../utils/UncheckedMath.sol";
-import {PluginUUPSUpgradeable} from "../../core/plugin/PluginUUPSUpgradeable.sol";
-import {ProposalUpgradeable} from "../../core/plugin/ProposalUpgradeable.sol";
-import {IDAO} from "../../core/IDAO.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
-import {Addresslist} from "../addresslist/Addresslist.sol";
+import {IDAO} from "../../../core/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
+import {ProposalUpgradeable} from "../../../core/plugin/proposal/ProposalUpgradeable.sol";
+import {Addresslist} from "../../utils/Addresslist.sol";
 
 /// @title Multisig
 /// @author Aragon Association - 2022-2023
@@ -118,7 +116,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.

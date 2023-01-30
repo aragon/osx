@@ -13,11 +13,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgrad
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-import {CallbackHandler} from "./component/CallbackHandler.sol";
-import {PermissionManager} from "./permission/PermissionManager.sol";
+import {PermissionManager} from "../permission/PermissionManager.sol";
+import {CallbackHandler} from "./utils/CallbackHandler.sol";
+import {hasBit, flipBit} from "./utils/BitMap.sol";
+import {IEIP4824} from "./utils/IEIP4824.sol";
 import {IDAO} from "./IDAO.sol";
-import {IEIP4824} from "./IEIP4824.sol";
-import {hasBit, flipBit} from "../utils/BitMap.sol";
 
 /// @title DAO
 /// @author Aragon Association - 2021-2023

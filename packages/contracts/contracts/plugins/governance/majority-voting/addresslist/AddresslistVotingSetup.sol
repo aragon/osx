@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.17;
 
-import {IDAO} from "../../core/IDAO.sol";
-import {DAO} from "../../core/DAO.sol";
-import {PermissionLib} from "../../core/permission/PermissionLib.sol";
-import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
+import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {DAO} from "../../../../core/dao/DAO.sol";
+import {PermissionLib} from "../../../../core/permission/PermissionLib.sol";
+import {PluginSetup, IPluginSetup} from "../../../../framework/plugin/setup/PluginSetup.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup

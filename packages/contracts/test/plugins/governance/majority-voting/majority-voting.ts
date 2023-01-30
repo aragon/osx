@@ -2,18 +2,18 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {MajorityVotingMock, DAO} from '../../typechain';
-import {VOTING_EVENTS} from '../../utils/event';
+import {MajorityVotingMock, DAO} from '../../../../typechain';
+import {VOTING_EVENTS} from '../../../../utils/event';
 import {
   VotingSettings,
   VotingMode,
   pctToRatio,
   ONE_HOUR,
   ONE_YEAR,
-} from '../test-utils/voting';
-import {deployWithProxy} from '../test-utils/proxy';
-import {OZ_ERRORS} from '../test-utils/error';
-import {daoExampleURI} from '../test-utils/dao';
+} from '../../../test-utils/voting';
+import {deployWithProxy} from '../../../test-utils/proxy';
+import {OZ_ERRORS} from '../../../test-utils/error';
+import {daoExampleURI} from '../../../test-utils/dao';
 
 describe('MajorityVotingMock', function () {
   let signers: SignerWithAddress[];

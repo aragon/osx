@@ -8,8 +8,8 @@ import {
   CounterV1PluginSetup,
   CounterV2PluginSetup,
   MultiplyHelper,
-} from '../../typechain';
-import {Operation} from '../core/permission/permission-manager';
+} from '../../../typechain';
+import {Operation} from '../../core/permission/permission-manager';
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 const AddressZero = ethers.constants.AddressZero;

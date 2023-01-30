@@ -5,11 +5,11 @@ pragma solidity 0.8.17;
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
-import {IMembershipContract} from "../../core/plugin/IMembershipContract.sol";
-import {IDAO} from "../../core/IDAO.sol";
-import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
-import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
-import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
+import {IMembershipContract} from "../../../../core/plugin/membership/IMembershipContract.sol";
+import {IDAO} from "../../../../core/dao/IDAO.sol";
+import {RATIO_BASE, _applyRatioCeiled} from "../../../utils/Ratio.sol";
+import {MajorityVotingBase} from "../MajorityVotingBase.sol";
+import {IMajorityVoting} from "../IMajorityVoting.sol";
 
 /// @title TokenVoting
 /// @author Aragon Association - 2021-2023
@@ -32,7 +32,7 @@ contract TokenVoting is IMembershipContract, MajorityVotingBase {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.

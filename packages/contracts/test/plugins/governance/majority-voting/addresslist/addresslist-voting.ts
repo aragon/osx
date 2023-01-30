@@ -2,15 +2,15 @@ import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {AddresslistVoting, DAO} from '../../typechain';
+import {AddresslistVoting, DAO} from '../../../../../typechain';
 import {
   findEvent,
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
-} from '../../utils/event';
-import {getMergedABI} from '../../utils/abi';
+} from '../../../../../utils/event';
+import {getMergedABI} from '../../../../../utils/abi';
 import {
   VoteOption,
   pctToRatio,
@@ -23,12 +23,12 @@ import {
   MAX_UINT64,
   voteWithSigners,
   toBytes32,
-} from '../test-utils/voting';
-import {deployNewDAO} from '../test-utils/dao';
-import {OZ_ERRORS} from '../test-utils/error';
-import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
-import {deployWithProxy} from '../test-utils/proxy';
+} from '../../../../test-utils/voting';
+import {deployNewDAO} from '../../../../test-utils/dao';
+import {OZ_ERRORS} from '../../../../test-utils/error';
+import {shouldUpgradeCorrectly} from '../../../../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../../../../test-utils/permissions';
+import {deployWithProxy} from '../../../../test-utils/proxy';
 
 describe('AddresslistVoting', function () {
   let signers: SignerWithAddress[];

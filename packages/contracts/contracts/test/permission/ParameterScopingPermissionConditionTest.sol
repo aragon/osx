@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.17;
 
-import {IPermissionCondition} from "../core/permission/IPermissionCondition.sol";
-import {TestPlugin} from "./TestPlugin.sol";
+import {IPermissionCondition} from "../../core/permission/IPermissionCondition.sol";
+import {TestPlugin} from "./PluginTest.sol";
 
 contract TestParameterScopingPermissionCondition is IPermissionCondition {
     bytes4 public constant ADD_PERMISSIONED_SELECTOR = TestPlugin.addPermissioned.selector;

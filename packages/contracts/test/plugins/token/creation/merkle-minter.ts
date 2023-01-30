@@ -10,12 +10,12 @@ import {
   MerkleDistributor,
   DAO,
   GovernanceERC20,
-} from '../../typechain';
-import BalanceTree from './src/balance-tree';
-import {deployNewDAO} from '../test-utils/dao';
-import {deployWithProxy} from '../test-utils/proxy';
-import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
-import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+} from '../../../../typechain';
+import BalanceTree from '../distribution/src/balance-tree';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {deployWithProxy} from '../../../test-utils/proxy';
+import {shouldUpgradeCorrectly} from '../../../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../../../test-utils/permissions';
 
 const MERKLE_MINT_PERMISSION_ID = ethers.utils.id('MERKLE_MINT_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');

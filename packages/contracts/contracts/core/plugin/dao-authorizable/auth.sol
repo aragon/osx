@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {IDAO} from "../core/IDAO.sol";
+import {IDAO} from "../../dao/IDAO.sol";
 
 /// @notice Thrown if a call is unauthorized in the associated DAO.
 /// @param dao The associated DAO.

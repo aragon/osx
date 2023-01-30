@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
-import {deployWithProxy} from '../test-utils/proxy';
+import {deployWithProxy} from '../../test-utils/proxy';
 
-import {DAO, InterfaceBasedRegistryMock} from '../../typechain';
-import {deployNewDAO} from '../test-utils/dao';
+import {DAO, InterfaceBasedRegistryMock} from '../../../typechain';
+import {deployNewDAO} from '../../test-utils/dao';
 
 const REGISTER_PERMISSION_ID = ethers.utils.id('REGISTER_PERMISSION');
 

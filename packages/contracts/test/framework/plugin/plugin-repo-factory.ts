@@ -5,12 +5,12 @@ import {ethers} from 'hardhat';
 import {
   deployMockPluginSetup,
   deployPluginRepoRegistry,
-} from '../test-utils/repo';
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {deployNewDAO} from '../test-utils/dao';
+} from '../../test-utils/repo';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
+import {deployNewDAO} from '../../test-utils/dao';
 
-import {PluginRepoRegistry, DAO} from '../../typechain';
-import {getMergedABI} from '../../utils/abi';
+import {PluginRepoRegistry, DAO} from '../../../typechain';
+import {getMergedABI} from '../../../utils/abi';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',
@@ -131,7 +131,10 @@ describe('PluginRepoFactory: ', function () {
 
     await expect(
       pluginRepoFactory.createPluginRepo(pluginRepoSubdomain, ownerAddress)
-    ).to.be.revertedWithCustomError(pluginRepoFactory, 'EmptyPluginRepoSubdomain');
+    ).to.be.revertedWithCustomError(
+      pluginRepoFactory,
+      'EmptyPluginRepoSubdomain'
+    );
   });
 
   it('create new pluginRepo', async () => {

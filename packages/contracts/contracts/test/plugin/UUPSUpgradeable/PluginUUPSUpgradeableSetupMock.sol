@@ -3,11 +3,11 @@
 pragma solidity 0.8.17;
 
 import {PermissionLib} from "../../../core/permission/PermissionLib.sol";
-import {IDAO} from "../../../core/IDAO.sol";
-import {PluginSetup} from "../../../plugin/PluginSetup.sol";
-import {IPluginSetup} from "../../../plugin/IPluginSetup.sol";
-import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
+import {IDAO} from "../../../core/dao/IDAO.sol";
+import {PluginSetup} from "../../../framework/plugin/setup/PluginSetup.sol";
+import {IPluginSetup} from "../../../framework/plugin/setup/IPluginSetup.sol";
 import {mockPermissions, mockHelpers, mockPluginProxy} from "../PluginMockData.sol";
+import {PluginUUPSUpgradeableV1Mock, PluginUUPSUpgradeableV2Mock, PluginUUPSUpgradeableV3Mock} from "./PluginUUPSUpgradeableMock.sol";
 
 contract PluginUUPSUpgradeableSetupV1Mock is PluginSetup {
     address internal pluginBase;

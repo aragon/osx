@@ -2,17 +2,17 @@ import {expect} from 'chai';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import {ethers} from 'hardhat';
 
-import {getMergedABI} from '../../utils/abi';
+import {getMergedABI} from '../../../../utils/abi';
 import {
   findEvent,
   DAO_EVENTS,
   PROPOSAL_EVENTS,
   MEMBERSHIP_EVENTS,
-} from '../../utils/event';
-import {deployNewDAO} from '../test-utils/dao';
-import {getInterfaceID} from '../test-utils/interfaces';
-import {OZ_ERRORS} from '../test-utils/error';
-import {toBytes32} from '../test-utils/voting';
+} from '../../../../utils/event';
+import {deployNewDAO} from '../../../test-utils/dao';
+import {getInterfaceID} from '../../../test-utils/interfaces';
+import {OZ_ERRORS} from '../../../test-utils/error';
+import {toBytes32} from '../../../test-utils/voting';
 
 // Permissions
 const EXECUTE_PROPOSAL_PERMISSION_ID = ethers.utils.id(
@@ -160,7 +160,11 @@ describe('Admin plugin', function () {
 
       const allowFailureMap = 1;
 
-      const tx = await plugin.executeProposal(dummyMetadata, dummyActions, allowFailureMap);
+      const tx = await plugin.executeProposal(
+        dummyMetadata,
+        dummyActions,
+        allowFailureMap
+      );
 
       await expect(tx).to.emit(plugin, PROPOSAL_EVENTS.PROPOSAL_CREATED);
 
@@ -206,7 +210,11 @@ describe('Admin plugin', function () {
         const proposalId = 0;
         const allowFailureMap = 1;
 
-        const tx = await plugin.executeProposal(dummyMetadata, dummyActions, allowFailureMap);
+        const tx = await plugin.executeProposal(
+          dummyMetadata,
+          dummyActions,
+          allowFailureMap
+        );
         const event = await findEvent(tx, DAO_EVENTS.EXECUTED);
 
         expect(event.args.actor).to.equal(plugin.address);

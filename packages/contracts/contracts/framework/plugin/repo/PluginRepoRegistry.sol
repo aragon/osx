@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.17;
 
-import {ENSSubdomainRegistrar} from "./ens/ENSSubdomainRegistrar.sol";
-import {IDAO} from "../core/IDAO.sol";
-import {InterfaceBasedRegistry} from "./InterfaceBasedRegistry.sol";
-import {IPluginRepo} from "../plugin/IPluginRepo.sol";
-import {isSubdomainValid} from "./RegistryUtils.sol";
+import {IDAO} from "../../../core/dao/IDAO.sol";
+import {ENSSubdomainRegistrar} from "../../utils/ens/ENSSubdomainRegistrar.sol";
+import {InterfaceBasedRegistry} from "../../utils/InterfaceBasedRegistry.sol";
+import {isSubdomainValid} from "../../utils/RegistryUtils.sol";
+import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepoRegistry
 /// @author Aragon Association - 2022-2023

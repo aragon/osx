@@ -9,10 +9,9 @@ import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/intro
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-import {PluginUUPSUpgradeable} from "../core/plugin/PluginUUPSUpgradeable.sol";
+import {IDAO} from "../../../core/dao/IDAO.sol";
+import {PluginUUPSUpgradeable} from "../../../core/plugin/PluginUUPSUpgradeable.sol";
 import {IMerkleDistributor} from "./IMerkleDistributor.sol";
-import {IMerkleDistributor} from "./IMerkleDistributor.sol";
-import {IDAO} from "../core/IDAO.sol";
 
 /// @title MerkleDistributor
 /// @author Uniswap 2020
@@ -43,7 +42,7 @@ contract MerkleDistributor is IMerkleDistributor, PluginUUPSUpgradeable {
     constructor() {
         _disableInitializers();
     }
-    
+
     /// @inheritdoc IMerkleDistributor
     function initialize(
         IDAO _dao,

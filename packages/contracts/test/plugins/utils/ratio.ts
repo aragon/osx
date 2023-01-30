@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {ethers} from 'hardhat';
 
-import {RatioTest} from '../../typechain';
-import {pctToRatio, RATIO_BASE} from '../test-utils/voting';
+import {RatioTest} from '../../../typechain';
+import {pctToRatio, RATIO_BASE} from '../../test-utils/voting';
 
 describe('Ratio', function () {
   let ratio: RatioTest;

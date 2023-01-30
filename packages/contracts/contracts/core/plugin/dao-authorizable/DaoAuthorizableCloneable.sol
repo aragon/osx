@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-import {IDAO} from "../../IDAO.sol";
+import {IDAO} from "../../dao/IDAO.sol";
 import {DaoAuthorizableBase} from "./DaoAuthorizableBase.sol";
 
 /// @title DaoAuthorizableCloneable

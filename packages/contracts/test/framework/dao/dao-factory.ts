@@ -7,18 +7,18 @@ import {
   PluginSetupProcessor,
   PluginUUPSUpgradeableSetupV1Mock,
   PluginRepoRegistry,
-} from '../../typechain';
+} from '../../../typechain';
 
-import {deployENSSubdomainRegistrar} from '../test-utils/ens';
-import {deployPluginSetupProcessor} from '../test-utils/plugin-setup-processor';
+import {deployENSSubdomainRegistrar} from '../../test-utils/ens';
+import {deployPluginSetupProcessor} from '../../test-utils/plugin-setup-processor';
 import {
   deployPluginRepoFactory,
   deployPluginRepoRegistry,
-} from '../test-utils/repo';
-import {findEvent} from '../../utils/event';
-import {getMergedABI} from '../../utils/abi';
-import {daoExampleURI, deployNewDAO} from '../test-utils/dao';
-import {deployWithProxy} from '../test-utils/proxy';
+} from '../../test-utils/repo';
+import {findEvent} from '../../../utils/event';
+import {getMergedABI} from '../../../utils/abi';
+import {daoExampleURI, deployNewDAO} from '../../test-utils/dao';
+import {deployWithProxy} from '../../test-utils/proxy';
 
 const EVENTS = {
   PluginRepoRegistered: 'PluginRepoRegistered',

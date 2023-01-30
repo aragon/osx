@@ -5,8 +5,8 @@ pragma solidity 0.8.17;
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "../core/IDAO.sol";
+import {DaoAuthorizableUpgradeable} from "../../core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../../core/dao/IDAO.sol";
 
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022-2023
@@ -31,7 +31,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice Thrown if the contract does not support the required interface.
     /// @param registrant The address of the contract to be registered.
     error ContractInterfaceInvalid(address registrant);
-    
+
     /// @notice Thrown if the contract do not support ERC165.
     /// @param registrant The address of the contract.
     error ContractERC165SupportInvalid(address registrant);
