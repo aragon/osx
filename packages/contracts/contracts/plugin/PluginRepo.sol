@@ -84,7 +84,7 @@ contract PluginRepo is
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
     /// @notice Thrown if metadata length is zero.
-    error InvalidReleaseMetadata();
+    error InvalidMetadata();
 
     /// @notice Thrown if release does not exist.
     /// @param release the release number in which pluginSetup is found.
