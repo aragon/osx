@@ -55,7 +55,7 @@ contract GovernanceERC20 is
         string memory _name,
         string memory _symbol,
         MintSettings memory _mintSettings
-    ) external initializer {
+    ) public initializer {
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
         __DaoAuthorizableUpgradeable_init(_dao);
