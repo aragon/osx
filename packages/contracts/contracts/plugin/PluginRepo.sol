@@ -54,8 +54,8 @@ contract PluginRepo is
     /// @notice The mapping between plugin setup address and its corresponding versionHash
     mapping(address => bytes32) internal latestTagHashForPluginSetup;
 
-    /// @notice The mapping between release id and release's metadata URI.
-    mapping(uint8 => bytes) internal metadataPerRelease;
+    /// @notice The plugin metadata
+    bytes public metadata;
 
     /// @notice The ID of the latest release.
     /// @dev The maximum release ID is 255.
@@ -83,10 +83,8 @@ contract PluginRepo is
     /// @param pluginSetup the plugin setup address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
-    /// @notice Thrown if metadata is not set for release.
-    /// @param release the release number in which pluginSetup is found.
-    /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    error InvalidReleaseMetadata(uint8 release, bytes metadata);
+    /// @notice Thrown if metadata length is zero.
+    error InvalidReleaseMetadata();
 
     /// @notice Thrown if release does not exist.
     /// @param release the release number in which pluginSetup is found.
@@ -99,10 +97,9 @@ contract PluginRepo is
     /// @param metadata External URI where the plugin metadata and subsequent resources can be fetched from.
     event VersionCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
 
-    /// @notice Thrown when a release's metadata was updated.
-    /// @param release the release number.
+    /// @notice Emitted when a plugin's metadata was updated.
     /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    event ReleaseMetadataUpdated(uint8 release, bytes metadata);
+    event MetadataUpdated(bytes metadata);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -126,8 +123,7 @@ contract PluginRepo is
     function createVersion(
         uint8 _release,
         address _pluginSetup,
-        bytes calldata _buildMetadata,
-        bytes calldata _releaseMetadata
+        bytes calldata _buildMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
         if (!_pluginSetup.supportsInterface(type(IPluginSetup).interfaceId)) {
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
@@ -144,10 +140,6 @@ contract PluginRepo is
 
         if (_release > latestRelease) {
             latestRelease = _release;
-
-            if (_releaseMetadata.length == 0) {
-                revert InvalidReleaseMetadata({release: _release, metadata: _releaseMetadata});
-            }
         }
 
         // Make sure the same plugin setup wasn't used in previous releases.
@@ -170,39 +162,19 @@ contract PluginRepo is
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
         emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
-
-        if (_releaseMetadata.length > 0) {
-            _updateReleaseMetadata(_release, _releaseMetadata);
-        }
     }
 
     /// @inheritdoc IPluginRepo
-    function updateReleaseMetadata(
-        uint8 _release,
+    function updateMetadata(
         bytes calldata _metadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
-        if (_release == 0) {
-            revert ReleaseZeroNotAllowed();
-        }
-
-        if (_release > latestRelease) {
-            revert ReleaseDoesNotExist({release: _release});
-        }
-
         if (_metadata.length == 0) {
-            revert InvalidReleaseMetadata({release: _release, metadata: _metadata});
+            revert InvalidReleaseMetadata();
         }
 
-        _updateReleaseMetadata(_release, _metadata);
-    }
+        metadata = _metadata;
 
-    /// @notice The private helper function to replace new `_metadata` for the `_release`.
-    /// @param _release The release number.
-    /// @param _metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) internal {
-        metadataPerRelease[_release] = _metadata;
-
-        emit ReleaseMetadataUpdated(_release, _metadata);
+        emit MetadataUpdated(_metadata);
     }
 
     /// @notice latest version in the release number.

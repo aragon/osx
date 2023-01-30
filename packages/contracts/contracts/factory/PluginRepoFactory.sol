@@ -44,19 +44,20 @@ contract PluginRepoFactory {
     /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _maintainer The plugin maintainer address.
-    /// @param _releaseMetadata The external URI for fetching the new version's release content.
+    /// @param _pluginMetadata The external URI for fetching the plugin's content.
     /// @param _buildMetadata The external URI for fetching the new version's build content.
     function createPluginRepoWithFirstVersion(
         string calldata _subdomain,
         address _pluginSetup,
         address _maintainer,
-        bytes memory _releaseMetadata,
+        bytes memory _pluginMetadata,
         bytes memory _buildMetadata
     ) external returns (PluginRepo pluginRepo) {
         // Sets `address(this)` as initial owner which is later replaced with the maintainer address.
         pluginRepo = _createPluginRepo(_subdomain, address(this));
 
-        pluginRepo.createVersion(1, _pluginSetup, _buildMetadata, _releaseMetadata);
+        pluginRepo.createVersion(1, _pluginSetup, _buildMetadata);
+        pluginRepo.updateMetadata( _pluginMetadata);
 
         // Setup permissions and transfer ownership from `address(this)` to `_maintainer`.
         _setPluginRepoPermissions(pluginRepo, _maintainer);
