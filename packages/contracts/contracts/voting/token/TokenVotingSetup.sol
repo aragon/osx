@@ -38,10 +38,10 @@ contract TokenVotingSetup is PluginSetup {
     /// @notice The address of the `GovernanceWrappedERC20` base contract.
     address public immutable governanceWrappedERC20Base;
 
-    /// @notice The token settings structure holds information on whether to deploy a new contract or utilize the provided address.
-    /// @param addr The token address, if non-zero, wraps it with GovernanceWrappedERC20, otherwise, deploys GovernanceERC20.
-    /// @param name The token name. Only relevant if token address is zero.
-    /// @param name The token symbol. Only relevant if token address is zero.
+    /// @notice The token settings struct.
+    /// @param addr The token address. If this is `address(0)`, a new `GovernanceERC20` token is deployed. If not, the existing token is wrapped as an `GovernanceWrappedERC20`.
+    /// @param name The token name. This parameter is only relevant if the token address is `address(0)`.
+    /// @param name The token symbol. This parameter is only relevant if the token address is `address(0)`.
     struct TokenSettings {
         address addr;
         string name;
