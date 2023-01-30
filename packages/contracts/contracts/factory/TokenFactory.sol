@@ -69,9 +69,6 @@ contract TokenFactory {
         setupBases();
     }
 
-    event gio(bytes);
-
-    /// TODO: Worth considering the decimals ?
     /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token depending on the address used in the `TokenConfig` provided.
     /// @param _managingDao The address of the DAO managing the token.
     /// @param _tokenConfig The token configuration struct containing the name, and symbol of the token to be create, but also an address. For `address(0)`, a new governance token is created. For any other address pointing to an [ERC-20](https://eips.ethereum.org/EIPS/eip-20)-compatible contract, a wrapped governance token is created.
