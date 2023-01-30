@@ -91,8 +91,8 @@ contract PluginRepo is
 
     /// @notice Thrown if the metadata URI is not set for a release.
     /// @param release the release number for which the metadata URI is not set.
-    /// @param metadata The release metadata URI.
-    error InvalidReleaseMetadata(uint8 release, bytes metadata);
+    /// @param releaseMetadata The release metadata URI.
+    error InvalidReleaseMetadata(uint8 release, bytes releaseMetadata);
 
     /// @notice Thrown if release does not exist.
     /// @param release The release number of the release that does not exist.
@@ -102,13 +102,18 @@ contract PluginRepo is
     /// @param release The release number.
     /// @param build The build number.
     /// @param pluginSetup The address of the plugin setup contract.
-    /// @param metadata The URI where the plugin metadata and subsequent resources can be fetched from.
-    event VersionCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
+    /// @param buildMetadata The build metadata URI.
+    event VersionCreated(
+        uint8 release,
+        uint16 build,
+        address indexed pluginSetup,
+        bytes buildMetadata
+    );
 
     /// @notice Thrown when a release's metadata was updated.
     /// @param release The release number.
-    /// @param metadata The release metadata URI.
-    event ReleaseMetadataUpdated(uint8 release, bytes metadata);
+    /// @param releaseMetadata The release metadata URI.
+    event ReleaseMetadataUpdated(uint8 release, bytes releaseMetadata);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -149,7 +154,10 @@ contract PluginRepo is
             latestRelease = _release;
 
             if (_releaseMetadata.length == 0) {
-                revert InvalidReleaseMetadata({release: _release, metadata: _releaseMetadata});
+                revert InvalidReleaseMetadata({
+                    release: _release,
+                    releaseMetadata: _releaseMetadata
+                });
             }
         }
 
@@ -172,7 +180,12 @@ contract PluginRepo is
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
-        emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
+        emit VersionCreated({
+            release: _release,
+            build: build,
+            pluginSetup: _pluginSetup,
+            buildMetadata: _buildMetadata
+        });
 
         if (_releaseMetadata.length > 0) {
             _updateReleaseMetadata(_release, _releaseMetadata);
@@ -182,7 +195,7 @@ contract PluginRepo is
     /// @inheritdoc IPluginRepo
     function updateReleaseMetadata(
         uint8 _release,
-        bytes calldata _metadata
+        bytes calldata _releaseMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
         if (_release == 0) {
             revert ReleaseZeroNotAllowed();
@@ -192,11 +205,11 @@ contract PluginRepo is
             revert ReleaseDoesNotExist({release: _release});
         }
 
-        if (_metadata.length == 0) {
-            revert InvalidReleaseMetadata({release: _release, metadata: _metadata});
+        if (_releaseMetadata.length == 0) {
+            revert InvalidReleaseMetadata({release: _release, releaseMetadata: _releaseMetadata});
         }
 
-        _updateReleaseMetadata(_release, _metadata);
+        _updateReleaseMetadata(_release, _releaseMetadata);
     }
 
     /// @notice The private helper function to replace new `_metadata` for the `_release`.
