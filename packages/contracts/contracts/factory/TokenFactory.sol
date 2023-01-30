@@ -49,6 +49,10 @@ contract TokenFactory {
     /// @param token GovernanceWrappedERC20 token address
     event WrappedToken(GovernanceWrappedERC20 token);
 
+    /// @notice Thrown if token address is not ERC20.
+    /// @param token The token address
+    error TokenNotERC20(address token, bytes data);
+
     struct TokenConfig {
         address addr;
         string name;
@@ -64,6 +68,8 @@ contract TokenFactory {
     constructor() {
         setupBases();
     }
+
+    event gio(bytes);
 
     /// TODO: Worth considering the decimals ?
     /// @notice Creates a new `GovernanceERC20` token or a `GovernanceWrappedERC20` from an existing [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token depending on the address used in the `TokenConfig` provided.
@@ -82,10 +88,13 @@ contract TokenFactory {
         // deploy token
         if (token != address(0)) {
             // Validate if token is ERC20
-            // Not Enough Checks, but better than nothing.
-            token.functionCall(
+            bytes memory data = token.functionStaticCall(
                 abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
             );
+
+            if(data.length != 0x20) {
+                revert TokenNotERC20(token, data); 
+            }
 
             token = governanceWrappedERC20Base.clone();
             // user already has a token. we need to wrap it in
