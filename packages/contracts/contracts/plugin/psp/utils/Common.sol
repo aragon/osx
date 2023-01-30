@@ -34,7 +34,7 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
 /// @param _helperHash The hash of the helper contract addresses.
 /// @param _data Encoded initialize data for the upgrade that is returned by the `prepareUpdate`.
 /// @param _preparationType Tells which PreparationType the plugin is in currently. Without this, it's possible to call applyUpdate even after applyInstallation is called.
-function _getSetupId(
+function _getPreparedSetupId(
     PluginSetupRef memory _pluginSetupRef,
     bytes32 _permissionHash,
     bytes32 _helperHash,
@@ -53,6 +53,23 @@ function _getSetupId(
             )
         );
 }
+
+
+function _getAppliedSetupId(
+    PluginSetupRef memory _pluginSetupRef,
+    bytes32 _helperHash,
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _pluginSetupRef.versionTag,
+                _pluginSetupRef.pluginSetupRepo,
+                _helperHash,
+                PreparationType.None
+            )
+        );
+}
+
 
 /// @notice Returns a hash of an array of helper addresses (contracts or EOAs).
 /// @param _helpers The array of helper addresses (contracts or EOAs) to be hashed.

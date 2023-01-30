@@ -294,7 +294,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 pluginInstallationId = _getPluginInstallationId(_dao, plugin);
 
-        bytes32 setupId = _getSetupId(
+        bytes32 preparedSetupId = _getPreparedSetupId(
             _params.pluginSetupRef,
             hashPermissions(preparedDependency.permissions),
             hashHelpers(preparedDependency.helpers),
@@ -316,16 +316,16 @@ contract PluginSetupProcessor is DaoAuthorizable {
         // This case applies to stateful plugins which means pluginSetup always returns the same plugin address.
         // Though, the same setupId still would need to be prepared (see validateSetupId in `applyInstallation`) first
         // to make sure prepare event is thrown again.
-        if (pluginState.blockNumber < pluginState.setupIds[setupId]) {
+        if (pluginState.blockNumber < pluginState.setupIds[preparedSetupId]) {
             revert SetupAlreadyPrepared(setupId);
         }
 
-        pluginState.setupIds[setupId] = block.number;
+        pluginState.setupIds[preparedSetupId] = block.number;
 
         emit InstallationPrepared({
             sender: msg.sender,
             dao: _dao,
-            setupId: setupId,
+            preparedSetupId: preparedSetupId,
             pluginSetupRepo: pluginSetupRepo,
             versionTag: _params.pluginSetupRef.versionTag,
             data: _params.data,
@@ -347,7 +347,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         PluginState storage pluginState = states[pluginInstallationId];
 
-        bytes32 setupId = _getSetupId(
+        bytes32 setupId = _getPreparedSetupId(
             _params.pluginSetupRef,
             hashPermissions(_params.permissions),
             _params.helpersHash,
@@ -363,15 +363,12 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         validateSetupId(pluginInstallationId, setupId);
 
-        bytes32 newSetupId = _getSetupId(
+        bytes32 appliedSetupId = _getAppliedSetupId(
             _params.pluginSetupRef,
-            ZERO_BYTES_HASH,
             _params.helpersHash,
-            bytes(""),
-            PreparationType.None
         );
 
-        pluginState.currentSetupId = newSetupId;
+        pluginState.currentSetupId = appliedSetupId;
         pluginState.blockNumber = block.number;
 
         // Process the permissions
@@ -380,7 +377,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
             DAO(payable(_dao)).applyMultiTargetPermissions(_params.permissions);
         }
 
-        emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: newSetupId});
+        emit InstallationApplied({dao: _dao, plugin: _params.plugin, setupId: appliedSetupId});
     }
 
     /// @notice Prepares the update of an UUPS upgradeable plugin.
