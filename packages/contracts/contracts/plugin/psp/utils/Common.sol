@@ -36,14 +36,15 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
 
 /// @notice Returns an ID for prepared setup obtained from hashing characterizing elements.
 /// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
-/// @param _permissionHash The hash of the permission operations requested by the setup.
-/// @param _helperHash The hash of the helper contract addresses.
+/// @param _permissionsHash The hash of the permission operations requested by the setup.
+/// @param _helpersHash The hash of the helper contract addresses.
 /// @param _data The bytes-encoded initialize data for the upgrade that is returned by `prepareUpdate`.
 /// @param _preparationType The type of preparation the plugin is currently undergoing. Without this, it is possible to call `applyUpdate` even after `applyInstallation` is called.
-function _getSetupId(
+/// @return bytes32 The prepared setup id.
+function _getPreparedSetupId(
     PluginSetupRef memory _pluginSetupRef,
-    bytes32 _permissionHash,
-    bytes32 _helperHash,
+    bytes32 _permissionsHash,
+    bytes32 _helpersHash,
     bytes memory _data,
     PreparationType _preparationType
 ) pure returns (bytes32) {
@@ -52,11 +53,25 @@ function _getSetupId(
             abi.encode(
                 _pluginSetupRef.versionTag,
                 _pluginSetupRef.pluginSetupRepo,
-                _permissionHash,
-                _helperHash,
+                _permissionsHash,
+                _helpersHash,
                 keccak256(_data),
                 _preparationType
             )
+        );
+}
+
+/// @notice Returns an identifier for applied installations.
+/// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
+/// @param _helpersHash The hash of the helper contract addresses.
+/// @return bytes32 The applied setup id.
+function _getAppliedSetupId(
+    PluginSetupRef memory _pluginSetupRef,
+    bytes32 _helpersHash
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(_pluginSetupRef.versionTag, _pluginSetupRef.pluginSetupRepo, _helpersHash)
         );
 }
 
