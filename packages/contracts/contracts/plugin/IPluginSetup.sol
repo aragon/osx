@@ -39,7 +39,7 @@ interface IPluginSetup {
 
     /// @notice Prepares the update of a plugin.
     /// @param _dao The address of the updating DAO.
-    /// @param _currentBuild The build ID of the plugin to update from.
+    /// @param _currentBuild The build number of the plugin to update from.
     /// @param _payload The relevant data necessary for the `prepareUpdate`. see above.
     /// @return initData The initialization data to be passed to upgradeable contracts when the update is applied in the `PluginSetupProcessor`.
     /// @return preparedSetupData The deployed plugin's relevant data which consists of helpers and permissions.
