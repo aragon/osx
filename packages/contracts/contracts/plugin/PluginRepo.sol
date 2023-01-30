@@ -169,7 +169,7 @@ contract PluginRepo is
         bytes calldata _metadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
         if (_metadata.length == 0) {
-            revert InvalidReleaseMetadata();
+            revert InvalidMetadata();
         }
 
         metadata = _metadata;
