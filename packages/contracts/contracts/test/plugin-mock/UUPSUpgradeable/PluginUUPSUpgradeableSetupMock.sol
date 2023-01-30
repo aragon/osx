@@ -92,7 +92,6 @@ contract PluginUUPSUpgradeableSetupV2Mock is PluginUUPSUpgradeableSetupV1Mock {
 
         // Update from V1
         if (_currentBuild == 1) {
-            // if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) { // TODO:GIORGI
             preparedDependency.helpers = mockHelpers(2);
             initData = abi.encodeWithSelector(
                 PluginUUPSUpgradeableV2Mock.initializeV1toV2.selector
@@ -136,7 +135,6 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
 
         // Update from V1
         if (_currentBuild == 1) {
-            // if (_oldVersion[0] == 1 && _oldVersion[1] == 0 && _oldVersion[2] == 0) { // TODO:GIORGI
             preparedDependency.helpers = mockHelpers(3);
             initData = abi.encodeWithSelector(
                 PluginUUPSUpgradeableV3Mock.initializeV1toV3.selector
@@ -146,7 +144,6 @@ contract PluginUUPSUpgradeableSetupV3Mock is PluginUUPSUpgradeableSetupV2Mock {
 
         // Update from V2
         if (_currentBuild == 2) {
-            // if (_oldVersion[0] == 1 && _oldVersion[1] == 1 && _oldVersion[2] == 0) { // TODO:GIORGI
             preparedDependency.helpers = mockHelpers(3);
             initData = abi.encodeWithSelector(
                 PluginUUPSUpgradeableV3Mock.initializeV2toV3.selector
