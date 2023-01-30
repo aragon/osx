@@ -45,11 +45,11 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
     /// @notice The plugin state struct that contains the information related to the installed plugin.
     /// @param blockNumber The block number at which the `applyInstallation`, `applyUpdate` or `applyUninstallation` occured for the plugin.
-    /// @param currentSetupId The current setup id that plugin holds. Needed to confirm that `prepareUpdate` or `prepareUninstallation` happens for the plugin's current/valid dependencies.
+    /// @param currentAppliedSetupId The current setup id that plugin holds. Needed to confirm that `prepareUpdate` or `prepareUninstallation` happens for the plugin's current/valid dependencies.
     /// @param setupIds The block number at which `prepareInstallation`, `prepareUpdate` or `prepareUninstallation` occured for the derived setupId.
     struct PluginState {
         uint256 blockNumber;
-        bytes32 currentSetupId;
+        bytes32 currentAppliedSetupId;
         mapping(bytes32 => uint256) setupIds;
     }
 
@@ -171,9 +171,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
     error PluginAlreadyInstalled();
 
     /// @notice Thrown when user's arguments for the apply function don't match the currently applied setupId.
-    /// @param currentSetupId The current setup id to which user's preparation setup should match to.
+    /// @param currentAppliedSetupId The current setup id to which user's preparation setup should match to.
     /// @param appliedSetupId The TODO:GIORGI
-    error InvalidAppliedSetupId(bytes32 currentSetupId, bytes32 appliedSetupId);
+    error InvalidAppliedSetupId(bytes32 currentAppliedSetupId, bytes32 appliedSetupId);
 
     /// @notice Emitted with a prepared plugin installation to store data relevant for the application step.
     /// @param sender The sender that prepared the plugin installation.
@@ -319,7 +319,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Allow calling `prepareInstallation` only when
         // plugin was uninstalled or never been installed before.
-        if (pluginState.currentSetupId != bytes32(0)) {
+        if (pluginState.currentAppliedSetupId != bytes32(0)) {
             revert PluginAlreadyInstalled();
         }
 
@@ -370,7 +370,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         // Allow calling `applyInstallation` only when
         // plugin was uninstalled or never been installed before.
-        if (pluginState.currentSetupId != bytes32(0)) {
+        if (pluginState.currentAppliedSetupId != bytes32(0)) {
             revert PluginAlreadyInstalled();
         }
 
@@ -378,7 +378,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
 
         bytes32 appliedSetupId = _getAppliedSetupId(_params.pluginSetupRef, _params.helpersHash);
 
-        pluginState.currentSetupId = appliedSetupId;
+        pluginState.currentAppliedSetupId = appliedSetupId;
         pluginState.blockNumber = block.number;
 
         // Process the permissions
@@ -430,10 +430,10 @@ contract PluginSetupProcessor is DaoAuthorizable {
         );
 
         // The following check implicitly confirms that plugin
-        // is currently installed. Otherwise, currentSetupId wouldn't be set.
-        if (pluginState.currentSetupId != appliedSetupId) {
+        // is currently installed. Otherwise, currentAppliedSetupId wouldn't be set.
+        if (pluginState.currentAppliedSetupId != appliedSetupId) {
             revert InvalidAppliedSetupId({
-                currentSetupId: pluginState.currentSetupId,
+                currentAppliedSetupId: pluginState.currentAppliedSetupId,
                 appliedSetupId: appliedSetupId
             });
         }
@@ -528,7 +528,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         bytes32 appliedSetupId = _getAppliedSetupId(_params.pluginSetupRef, _params.helpersHash);
 
         pluginState.blockNumber = block.number;
-        pluginState.currentSetupId = appliedSetupId;
+        pluginState.currentAppliedSetupId = appliedSetupId;
 
         PluginRepo.Version memory version = _params.pluginSetupRef.pluginSetupRepo.getVersion(
             _params.pluginSetupRef.versionTag
@@ -574,9 +574,9 @@ contract PluginSetupProcessor is DaoAuthorizable {
             hashHelpers(_params.setupPayload.currentHelpers)
         );
 
-        if (pluginState.currentSetupId != appliedSetupId) {
+        if (pluginState.currentAppliedSetupId != appliedSetupId) {
             revert InvalidAppliedSetupId({
-                currentSetupId: pluginState.currentSetupId,
+                currentAppliedSetupId: pluginState.currentAppliedSetupId,
                 appliedSetupId: appliedSetupId
             });
         }
@@ -642,7 +642,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         validatePreparedSetupId(pluginInstallationId, preparedSetupId);
 
         pluginState.blockNumber = block.number;
-        pluginState.currentSetupId = bytes32(0);
+        pluginState.currentAppliedSetupId = bytes32(0);
 
         // Process the permissions
         // PSP on the dao should have ROOT permission
