@@ -1,14 +1,14 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import addresslistReleaseMetadata from '../../../contracts/voting/addresslist/release-metadata.json';
-import addresslistBuildMetadata from '../../../contracts/voting/addresslist/build-metadata.json';
-import adminReleaseMetadata from '../../../contracts/voting/admin/release-metadata.json';
-import adminBuildMetadata from '../../../contracts/voting/admin/build-metadata.json';
-import multisigReleaseMetadata from '../../../contracts/voting/multisig/release-metadata.json';
-import multisigBuildMetadata from '../../../contracts/voting/multisig/build-metadata.json';
-import tokenReleaseMetadata from '../../../contracts/voting/token/release-metadata.json';
-import tokenBuildMetadata from '../../../contracts/voting/token/build-metadata.json';
+import addresslistReleaseMetadata from '../../../contracts/plugins/governance/majority-voting/addresslist/release-metadata.json';
+import addresslistBuildMetadata from '../../../contracts/plugins/governance/majority-voting/addresslist/build-metadata.json';
+import adminReleaseMetadata from '../../../contracts/plugins/governance/admin/release-metadata.json';
+import adminBuildMetadata from '../../../contracts/plugins/governance/admin/build-metadata.json';
+import multisigReleaseMetadata from '../../../contracts/plugins/governance/multisig/release-metadata.json';
+import multisigBuildMetadata from '../../../contracts/plugins/governance/multisig/build-metadata.json';
+import tokenReleaseMetadata from '../../../contracts/plugins/governance/majority-voting/token/release-metadata.json';
+import tokenBuildMetadata from '../../../contracts/plugins/governance/majority-voting/token/build-metadata.json';
 import {createPluginRepo, uploadToIPFS} from '../../helpers';
 import {ethers} from 'ethers';
 
