@@ -6,6 +6,7 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
 import {PermissionManager} from "../core/permission/PermissionManager.sol";
 import {PluginSetup} from "./PluginSetup.sol";
@@ -14,8 +15,7 @@ import {IPluginRepo} from "./IPluginRepo.sol";
 
 /// @title PluginRepo
 /// @author Aragon Association - 2020 - 2023
-/// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework following the [Semantic Versioning 2.0.0](https://semver.org/) convention.
-//TODO Rename to PluginSetupRepo?
+/// @notice The plugin repository contract required for managing and publishing different plugin versions within the Aragon DAO framework.
 contract PluginRepo is
     Initializable,
     ERC165Upgradeable,
@@ -24,12 +24,21 @@ contract PluginRepo is
     PermissionManager
 {
     using AddressUpgradeable for address;
+    using ERC165CheckerUpgradeable for address;
 
+    /// @notice The struct describing the tag of a version obtained by a release and build number as `RELEASE.BUILD`.
+    /// @param release The release number.
+    /// @param build The build number
+    /// @dev Releases can include a storage layout or the addition of new functions. Builds include logic changes or updates of the UI.
     struct Tag {
         uint8 release;
         uint16 build;
     }
 
+    /// @notice The struct describing a plugin version (release and build).
+    /// @param tag The version tag.
+    /// @param pluginSetup The setup contract associated with this version.
+    /// @param buildMetadata The build metadata URI.
     struct Version {
         Tag tag;
         address pluginSetup;
@@ -42,65 +51,69 @@ contract PluginRepo is
     /// @notice The ID of the permission required to call the `createVersion` function.
     bytes32 public constant UPGRADE_REPO_PERMISSION_ID = keccak256("UPGRADE_REPO_PERMISSION");
 
-    /// @notice increasing build numbers per release
+    /// @notice The mapping between release and build numbers.
     mapping(uint8 => uint16) internal buildsPerRelease;
 
-    /// @notice The mapping between version hash and its corresponding Version information.
-    /// @dev key: keccak(abi.encode(release, build)) value: Version struct.
+    /// @notice The mapping between the version hash and the corresponding version information.
     mapping(bytes32 => Version) internal versions;
 
-    /// @notice The mapping between plugin setup address and its corresponding versionHash
+    /// @notice The mapping between the plugin setup address and its corresponding version hash.
     mapping(address => bytes32) internal latestTagHashForPluginSetup;
 
     /// @notice The mapping between release id and release's metadata URI.
     mapping(uint8 => bytes) internal metadataPerRelease;
 
     /// @notice The ID of the latest release.
-    /// @dev The maximum release ID is 255.
+    /// @dev The maximum release number is 255.
     uint8 public latestRelease;
 
-    /// @notice Thrown if version does not exist.
-    /// @param versionHash The version Hash(release + build)
+    /// @notice Thrown if a version does not exist.
+    /// @param versionHash The tag hash.
     error VersionHashDoesNotExist(bytes32 versionHash);
 
     /// @notice Thrown if a contract does not inherit from `PluginSetup`.
     /// @param invalidPluginSetup The address of the contract missing the `PluginSetup` interface.
     error InvalidPluginSetupInterface(address invalidPluginSetup);
 
-    /// @notice Thrown if release is 0.
+    /// @notice Thrown if a release number is zero.
     error ReleaseZeroNotAllowed();
 
-    /// @notice Thrown if release id is by more than 1 to the previous release id.
-    /// @param latestRelease the current latest release id.
-    /// @param newRelease new release id dev is trying to push.
+    /// @notice Thrown if a release number is incremented by more than one.
+    /// @param latestRelease The latest release number.
+    /// @param newRelease The new release number.
     error InvalidReleaseIncrement(uint8 latestRelease, uint8 newRelease);
 
-    /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param release the release number in which pluginSetup is found.
-    /// @param build the build number of the release number in which pluginSetup is found.
-    /// @param pluginSetup the plugin setup address.
+    /// @notice Thrown if the same plugin setup contract exists already in a previous releases.
+    /// @param release The release number of the already existing plugin setup.
+    /// @param build The build number of the already existing plugin setup.
+    /// @param pluginSetup The plugin setup contract address.
     error PluginSetupAlreadyInPreviousRelease(uint8 release, uint16 build, address pluginSetup);
 
-    /// @notice Thrown if metadata is not set for release.
-    /// @param release the release number in which pluginSetup is found.
-    /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    error InvalidReleaseMetadata(uint8 release, bytes metadata);
+    /// @notice Thrown if the metadata URI is not set for a release.
+    /// @param release the release number for which the metadata URI is not set.
+    /// @param releaseMetadata The release metadata URI.
+    error InvalidReleaseMetadata(uint8 release, bytes releaseMetadata);
 
     /// @notice Thrown if release does not exist.
-    /// @param release the release number in which pluginSetup is found.
+    /// @param release The release number of the release that does not exist.
     error ReleaseDoesNotExist(uint8 release);
 
     /// @notice Thrown if the same plugin setup exists in previous releases.
-    /// @param release the release number.
-    /// @param build the build number.
+    /// @param release The release number.
+    /// @param build The build number.
     /// @param pluginSetup The address of the plugin setup contract.
-    /// @param metadata External URI where the plugin metadata and subsequent resources can be fetched from.
-    event VersionCreated(uint8 release, uint16 build, address indexed pluginSetup, bytes metadata);
+    /// @param buildMetadata The build metadata URI.
+    event VersionCreated(
+        uint8 release,
+        uint16 build,
+        address indexed pluginSetup,
+        bytes buildMetadata
+    );
 
     /// @notice Thrown when a release's metadata was updated.
-    /// @param release the release number.
-    /// @param metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
-    event ReleaseMetadataUpdated(uint8 release, bytes metadata);
+    /// @param release The release number.
+    /// @param releaseMetadata The release metadata URI.
+    event ReleaseMetadataUpdated(uint8 release, bytes releaseMetadata);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
     constructor() {
@@ -108,15 +121,12 @@ contract PluginRepo is
     }
 
     /// @notice Initializes the contract by
-    /// - registering the [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID
     /// - initializing the permission manager
-    /// - setting the next version index to 1 and
-    /// - giving the `MAINTAINER_PERMISSION_ID` permission to the initial owner.
+    /// - granting the `MAINTAINER_PERMISSION_ID` permission to the initial owner.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     function initialize(address initialOwner) external initializer {
         __PermissionManager_init(initialOwner);
 
-        // set permissionIds.
         _grant(address(this), initialOwner, MAINTAINER_PERMISSION_ID);
     }
 
@@ -127,20 +137,7 @@ contract PluginRepo is
         bytes calldata _buildMetadata,
         bytes calldata _releaseMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
-        // In a case where _pluginSetup doesn't contain supportsInterface,
-        // but contains fallback, that doesn't return anything(most cases)
-        // the below approach aims to still return custom error which not possible with try/catch..
-        // NOTE: also checks if _pluginSetup is a contract and reverts if not.
-        bytes memory data = _pluginSetup.functionCall(
-            abi.encodeWithSelector(
-                ERC165Upgradeable.supportsInterface.selector,
-                type(IPluginSetup).interfaceId
-            )
-        );
-
-        // NOTE: if data contains 32 bytes that can't be decoded with uint256
-        // it reverts with solidity's ambigious error.
-        if (data.length != 32 || abi.decode(data, (uint256)) != 1) {
+        if (!_pluginSetup.supportsInterface(type(IPluginSetup).interfaceId)) {
             revert InvalidPluginSetupInterface({invalidPluginSetup: _pluginSetup});
         }
 
@@ -148,7 +145,7 @@ contract PluginRepo is
             revert ReleaseZeroNotAllowed();
         }
 
-        // Can't release `x` unless `x-1` is released.
+        // Check that the release number is not incremented by more than one
         if (_release - latestRelease > 1) {
             revert InvalidReleaseIncrement({latestRelease: latestRelease, newRelease: _release});
         }
@@ -157,7 +154,10 @@ contract PluginRepo is
             latestRelease = _release;
 
             if (_releaseMetadata.length == 0) {
-                revert InvalidReleaseMetadata({release: _release, metadata: _releaseMetadata});
+                revert InvalidReleaseMetadata({
+                    release: _release,
+                    releaseMetadata: _releaseMetadata
+                });
             }
         }
 
@@ -180,7 +180,12 @@ contract PluginRepo is
 
         latestTagHashForPluginSetup[_pluginSetup] = _tagHash;
 
-        emit VersionCreated(_release, build, _pluginSetup, _buildMetadata);
+        emit VersionCreated({
+            release: _release,
+            build: build,
+            pluginSetup: _pluginSetup,
+            buildMetadata: _buildMetadata
+        });
 
         if (_releaseMetadata.length > 0) {
             _updateReleaseMetadata(_release, _releaseMetadata);
@@ -190,7 +195,7 @@ contract PluginRepo is
     /// @inheritdoc IPluginRepo
     function updateReleaseMetadata(
         uint8 _release,
-        bytes calldata _metadata
+        bytes calldata _releaseMetadata
     ) external auth(address(this), MAINTAINER_PERMISSION_ID) {
         if (_release == 0) {
             revert ReleaseZeroNotAllowed();
@@ -200,47 +205,47 @@ contract PluginRepo is
             revert ReleaseDoesNotExist({release: _release});
         }
 
-        if (_metadata.length == 0) {
-            revert InvalidReleaseMetadata({release: _release, metadata: _metadata});
+        if (_releaseMetadata.length == 0) {
+            revert InvalidReleaseMetadata({release: _release, releaseMetadata: _releaseMetadata});
         }
 
-        _updateReleaseMetadata(_release, _metadata);
+        _updateReleaseMetadata(_release, _releaseMetadata);
     }
 
     /// @notice The private helper function to replace new `_metadata` for the `_release`.
     /// @param _release The release number.
-    /// @param _metadata External URI where the plugin's release metadata and subsequent resources can be fetched from.
+    /// @param _metadata The release metadata URI.
     function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) internal {
         metadataPerRelease[_release] = _metadata;
 
         emit ReleaseMetadataUpdated(_release, _metadata);
     }
 
-    /// @notice latest version in the release number.
-    /// @param _release the release number.
-    /// @return Version the latest version in the release number.
+    /// @notice Returns the latest version for a given release number.
+    /// @param _release The release number.
+    /// @return Version The latest version of this release.
     function getLatestVersion(uint8 _release) public view returns (Version memory) {
         uint16 latestBuild = uint16(buildsPerRelease[_release]);
         return getVersion(tagHash(Tag(_release, latestBuild)));
     }
 
-    /// @notice get the latest version by plugin setup.
+    /// @notice Returns the latest version for a given plugin setup.
     /// @param _pluginSetup the plugin setup address
     /// @return Version latest version that is bound to the _pluginSetup
     function getLatestVersion(address _pluginSetup) public view returns (Version memory) {
         return getVersion(latestTagHashForPluginSetup[_pluginSetup]);
     }
 
-    /// @notice get the version by tag.
-    /// @param _tag the version tag.
-    /// @return the version which belongs to the _tag.
+    /// @notice Returns the version associated with a tag.
+    /// @param _tag The version tag.
+    /// @return The version associated with the tag.
     function getVersion(Tag calldata _tag) public view returns (Version memory) {
         return getVersion(tagHash(_tag));
     }
 
-    /// @notice get the concrete version.
-    /// @param _tagHash the tag hash.
-    /// @return Version the concrete version by the exact hash.
+    /// @notice Returns the version for a tag hash.
+    /// @param _tagHash The tag hash.
+    /// @return The version associated with a tag hash.
     function getVersion(bytes32 _tagHash) public view returns (Version memory) {
         Version storage version = versions[_tagHash];
 
@@ -251,16 +256,16 @@ contract PluginRepo is
         return version;
     }
 
-    /// @notice Gets the total number of published versions per release.
-    /// @param _release release id.
-    /// @return The number of published versions in the release.
+    /// @notice Gets the total number of builds for a given release number.
+    /// @param _release The release number.
+    /// @return The number of builds of this release.
     function buildCount(uint8 _release) public view returns (uint256) {
         return buildsPerRelease[_release];
     }
 
-    /// @notice get the tag hash.
-    /// @param _tag the tag.
-    /// @return bytes32 the keccak hash of abi encoded _release and _build
+    /// @notice The hash of the version tag obtained from the packed, bytes-encoded release and build number.
+    /// @param _tag The version tag.
+    /// @return bytes32 The version tag hash.
     function tagHash(Tag memory _tag) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_tag.release, _tag.build));
     }

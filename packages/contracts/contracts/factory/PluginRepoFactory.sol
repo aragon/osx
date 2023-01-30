@@ -31,7 +31,6 @@ contract PluginRepoFactory {
     /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The plugin maintainer address.
-    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithFirstVersion`.
     function createPluginRepo(
         string calldata _subdomain,
         address _initialOwner
@@ -44,8 +43,8 @@ contract PluginRepoFactory {
     /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _maintainer The plugin maintainer address.
-    /// @param _releaseMetadata The external URI for fetching the new version's release content.
-    /// @param _buildMetadata The external URI for fetching the new version's build content.
+    /// @param _releaseMetadata The release metadata URI.
+    /// @param _buildMetadata The build metadata URI.
     function createPluginRepoWithFirstVersion(
         string calldata _subdomain,
         address _pluginSetup,
@@ -71,11 +70,14 @@ contract PluginRepoFactory {
         PermissionLib.SingleTargetPermission[]
             memory items = new PermissionLib.SingleTargetPermission[](5);
 
+        bytes32 rootPermissionID = pluginRepo.ROOT_PERMISSION_ID();
+        bytes32 maintainerPermissionID = pluginRepo.MAINTAINER_PERMISSION_ID();
+
         // Grant the plugin maintainer all the permissions required
         items[0] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.MAINTAINER_PERMISSION_ID()
+            maintainerPermissionID
         );
         items[1] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
@@ -85,19 +87,19 @@ contract PluginRepoFactory {
         items[2] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Grant,
             maintainer,
-            pluginRepo.ROOT_PERMISSION_ID()
+            rootPermissionID
         );
 
         // Revoke permissions from the plugin repository factory (`address(this)`).
         items[3] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
-            pluginRepo.ROOT_PERMISSION_ID()
+            rootPermissionID
         );
         items[4] = PermissionLib.SingleTargetPermission(
             PermissionLib.Operation.Revoke,
             address(this),
-            pluginRepo.MAINTAINER_PERMISSION_ID()
+            maintainerPermissionID
         );
 
         pluginRepo.applySingleTargetPermissions(address(pluginRepo), items);

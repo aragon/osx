@@ -36,7 +36,7 @@ contract CounterV2PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (address plugin, PreparedDependency memory preparedDependency)
+        returns (address plugin, PreparedSetupData memory preparedSetupData)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -93,10 +93,10 @@ contract CounterV2PluginSetup is PluginSetup {
         // add helpers
         helpers[0] = multiplyHelper;
 
-        preparedDependency.helpers = helpers;
-        preparedDependency.permissions = permissions;
+        preparedSetupData.helpers = helpers;
+        preparedSetupData.permissions = permissions;
 
-        return (plugin, preparedDependency);
+        return (plugin, preparedSetupData);
     }
 
     /// @inheritdoc IPluginSetup
@@ -108,7 +108,7 @@ contract CounterV2PluginSetup is PluginSetup {
         external
         view
         override
-        returns (bytes memory initData, PreparedDependency memory preparedDependency)
+        returns (bytes memory initData, PreparedSetupData memory preparedSetupData)
     {
         uint256 _newVariable;
 
@@ -134,8 +134,8 @@ contract CounterV2PluginSetup is PluginSetup {
         address[] memory activeHelpers = new address[](1);
         activeHelpers[0] = _payload.currentHelpers[0];
 
-        preparedDependency.helpers = activeHelpers;
-        preparedDependency.permissions = permissions;
+        preparedSetupData.helpers = activeHelpers;
+        preparedSetupData.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup

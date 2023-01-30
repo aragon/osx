@@ -20,15 +20,10 @@ contract PluginCloneableSetupV1Mock is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory
-    )
-        public
-        virtual
-        override
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         plugin = mockPluginProxy(pluginBase, _dao);
-        preparedDependency.helpers = mockHelpers(1);
-        preparedDependency.permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
+        preparedSetupData.helpers = mockHelpers(1);
+        preparedSetupData.permissions = mockPermissions(5, 6, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup
@@ -55,15 +50,10 @@ contract PluginCloneableSetupV2Mock is PluginCloneableSetupV1Mock {
     function prepareInstallation(
         address _dao,
         bytes memory
-    )
-        public
-        virtual
-        override
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    ) public virtual override returns (address plugin, PreparedSetupData memory preparedSetupData) {
         plugin = mockPluginProxy(pluginBase, _dao);
-        preparedDependency.helpers = mockHelpers(1);
-        preparedDependency.permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
+        preparedSetupData.helpers = mockHelpers(1);
+        preparedSetupData.permissions = mockPermissions(5, 7, PermissionLib.Operation.Grant);
     }
 
     /// @inheritdoc IPluginSetup

@@ -33,7 +33,7 @@ contract DAOFactory {
 
     struct PluginSettings {
         PluginSetupRef pluginSetupRef; // The `PluginSetupRepo` address of the plugin and the version tag.
-        bytes data; // The `bytes` encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
+        bytes data; // The bytes-encoded data containing the input parameters for the installation as specified in the plugin's build metadata json file.
     }
 
     /// @notice Thrown if `PluginSettings` array is empty, and no plugin is provided.
@@ -41,7 +41,7 @@ contract DAOFactory {
 
     /// @notice The constructor setting the registry and plugin setup processor and creating the base contracts for the factory.
     /// @param _registry The DAO registry to register the DAO by its name.
-    /// @param _pluginSetupProcessor The addres of PluginSetupProcessor.
+    /// @param _pluginSetupProcessor The address of PluginSetupProcessor.
     constructor(DAORegistry _registry, PluginSetupProcessor _pluginSetupProcessor) {
         daoRegistry = _registry;
         pluginSetupProcessor = _pluginSetupProcessor;
@@ -67,19 +67,20 @@ contract DAOFactory {
         // Register DAO.
         daoRegistry.register(createdDao, msg.sender, _daoSettings.name);
 
+        // Get Permission IDs
+        bytes32 rootPermissionID = createdDao.ROOT_PERMISSION_ID();
+        bytes32 applyInstallationPermissionID = pluginSetupProcessor
+            .APPLY_INSTALLATION_PERMISSION_ID();
+
         // Grant the temporary permissions.
         // Grant Temporarly `ROOT_PERMISSION` to `pluginSetupProcessor`.
-        createdDao.grant(
-            address(createdDao),
-            address(pluginSetupProcessor),
-            createdDao.ROOT_PERMISSION_ID()
-        );
+        createdDao.grant(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
 
         // Grant Temporarly `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` to this `DAOFactory`.
         createdDao.grant(
             address(pluginSetupProcessor),
             address(this),
-            pluginSetupProcessor.APPLY_INSTALLATION_PERMISSION_ID()
+            applyInstallationPermissionID
         );
 
         // Install plugins on the newly created DAO.
@@ -87,7 +88,7 @@ contract DAOFactory {
             // Prepare plugin.
             (
                 address plugin,
-                IPluginSetup.PreparedDependency memory preparedDependency
+                IPluginSetup.PreparedSetupData memory preparedSetupData
             ) = pluginSetupProcessor.prepareInstallation(
                     address(createdDao),
                     PluginSetupProcessor.PrepareInstallationParams(
@@ -102,8 +103,8 @@ contract DAOFactory {
                 PluginSetupProcessor.ApplyInstallationParams(
                     _pluginSettings[i].pluginSetupRef,
                     plugin,
-                    preparedDependency.permissions,
-                    hashHelpers(preparedDependency.helpers)
+                    preparedSetupData.permissions,
+                    hashHelpers(preparedSetupData.helpers)
                 )
             );
         }
@@ -113,22 +114,18 @@ contract DAOFactory {
 
         // Revoke the temporarly granted permissions.
         // Revoke Temporarly `ROOT_PERMISSION` from `pluginSetupProcessor`.
-        createdDao.revoke(
-            address(createdDao),
-            address(pluginSetupProcessor),
-            createdDao.ROOT_PERMISSION_ID()
-        );
+        createdDao.revoke(address(createdDao), address(pluginSetupProcessor), rootPermissionID);
 
         // Revoke `APPLY_INSTALLATION_PERMISSION` on `pluginSetupProcessor` from this `DAOFactory` .
         createdDao.revoke(
             address(pluginSetupProcessor),
             address(this),
-            pluginSetupProcessor.APPLY_INSTALLATION_PERMISSION_ID()
+            applyInstallationPermissionID
         );
 
         // Revoke Temporarly `ROOT_PERMISSION_ID` from `pluginSetupProcessor` that implecitly granted to this `DaoFactory`
         // at the create dao step `address(this)` being the initial owner of the new created DAO.
-        createdDao.revoke(address(createdDao), address(this), createdDao.ROOT_PERMISSION_ID());
+        createdDao.revoke(address(createdDao), address(this), rootPermissionID);
     }
 
     /// @notice Creates a new DAO, and initialize it with this contract as intial owner.

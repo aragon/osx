@@ -76,11 +76,13 @@ describe('CounterPluginSetup(Example)', function () {
 
       const data = abiCoder.encode(['address', 'uint256'], [ownerAddress, num]);
 
-      const {plugin, preparedDependency: {helpers, permissions}} =
-        await counterV1Setup.callStatic.prepareInstallation(
-          daoMock.address,
-          data
-        );
+      const {
+        plugin,
+        preparedSetupData: {helpers, permissions},
+      } = await counterV1Setup.callStatic.prepareInstallation(
+        daoMock.address,
+        data
+      );
 
       expect(permissions.length).to.be.equal(2);
       expect(helpers.length).to.be.equal(1);
@@ -109,11 +111,13 @@ describe('CounterPluginSetup(Example)', function () {
 
       const data = abiCoder.encode(['address', 'uint256'], [AddressZero, num]);
 
-      const {plugin, preparedDependency: {helpers, permissions}} =
-        await counterV1Setup.callStatic.prepareInstallation(
-          daoMock.address,
-          data
-        );
+      const {
+        plugin,
+        preparedSetupData: {helpers, permissions},
+      } = await counterV1Setup.callStatic.prepareInstallation(
+        daoMock.address,
+        data
+      );
 
       expect(permissions.length).to.be.equal(3);
       expect(helpers.length).to.be.equal(1);
@@ -157,16 +161,14 @@ describe('CounterPluginSetup(Example)', function () {
         num,
       ]);
 
-      const {initData, preparedDependency: {permissions, helpers}}=
-        await counterV2Setup.callStatic.prepareUpdate(
-          daoMock.address,
-          1,
-          {
-            plugin,
-            currentHelpers: [helper],
-            data: data
-          }        
-        );
+      const {
+        initData,
+        preparedSetupData: {permissions, helpers},
+      } = await counterV2Setup.callStatic.prepareUpdate(daoMock.address, 1, {
+        plugin,
+        currentHelpers: [helper],
+        data: data,
+      });
 
       expect(helpers.length).to.be.equal(1);
       expect(initData).to.be.equal(expectedInitData);
@@ -189,7 +191,7 @@ describe('CounterPluginSetup(Example)', function () {
         {
           plugin: address1,
           currentHelpers: [],
-          data: EMPTY_DATA
+          data: EMPTY_DATA,
         }
       );
 
@@ -220,7 +222,7 @@ describe('CounterPluginSetup(Example)', function () {
         {
           plugin,
           currentHelpers: [helper],
-          data: EMPTY_DATA
+          data: EMPTY_DATA,
         }
       );
 

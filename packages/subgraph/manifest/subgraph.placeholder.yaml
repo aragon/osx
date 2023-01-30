@@ -76,11 +76,11 @@ dataSources:
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
-        - event: UninstallationApplied(indexed address,indexed address,bytes32)
+        - event: InstallationApplied(indexed address,indexed address,bytes32,bytes32)
           handler: handleInstallationApplied
         - event: UpdatePrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),(address,address[],bytes),(address[],(uint8,address,address,address,bytes32)[]),bytes)
           handler: handleUpdatePrepared
-        - event: UpdateApplied(indexed address,indexed address,bytes32)
+        - event: UpdateApplied(indexed address,indexed address,bytes32,bytes32)
           handler: handleUpdateApplied
         - event: UninstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),(address,address[],bytes),(uint8,address,address,address,bytes32)[])
           handler: handleUninstallationPrepared
