@@ -6,8 +6,8 @@ import {
   TestParameterScopingPermissionCondition,
   TestPlugin,
   DAO,
-} from '../../../../typechain';
-import {deployNewDAO} from '../../../test-utils/dao';
+} from '../../../typechain';
+import {deployNewDAO} from '../../test-utils/dao';
 
 const DO_SOMETHING_PERMISSION_ID = ethers.utils.id('DO_SOMETHING_PERMISSION');
 
