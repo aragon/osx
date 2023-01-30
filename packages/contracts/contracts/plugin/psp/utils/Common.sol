@@ -65,12 +65,7 @@ function _getAppliedSetupId(
 ) pure returns (bytes32) {
     return
         keccak256(
-            abi.encode(
-                _pluginSetupRef.versionTag,
-                _pluginSetupRef.pluginSetupRepo,
-                _helpersHash,
-                PreparationType.None
-            )
+            abi.encode(_pluginSetupRef.versionTag, _pluginSetupRef.pluginSetupRepo, _helpersHash)
         );
 }
 
