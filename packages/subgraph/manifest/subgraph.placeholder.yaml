@@ -22,7 +22,7 @@ dataSources:
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: DAORegistry
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/DAORegistry.sol/DAORegistry.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/framework/dao/DAORegistry.sol/DAORegistry.json
       eventHandlers:
         - event: DAORegistered(indexed address,indexed address,string)
           handler: handleDAORegistered
@@ -42,7 +42,7 @@ dataSources:
         - PluginRepo
       abis:        
         - name: PluginRepoRegistry
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/registry/PluginRepoRegistry.sol/PluginRepoRegistry.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/framework/plugin/repo/PluginRepoRegistry.sol/PluginRepoRegistry.json
       eventHandlers:
         - event: PluginRepoRegistered(string,address)
           handler: handlePluginRepoRegistered
@@ -64,15 +64,15 @@ dataSources:
         - PluginGrantedPermission
       abis:        
         - name: PluginSetupProcessor
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginSetupProcessor.sol/PluginSetupProcessor.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/framework/plugin/setup/PluginSetupProcessor.sol/PluginSetupProcessor.json
         - name: ERC20
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json
         - name: ERC165
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: TokenVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
         - name: AddresslistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
@@ -108,11 +108,11 @@ templates:
         - name: ERC165
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/@openzeppelin/contracts/utils/introspection/ERC165.sol/ERC165.json
         - name: TokenVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
         - name: AddresslistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
         - name: DAO
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/DAO.sol/DAO.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/core/dao/DAO.sol/DAO.json
       eventHandlers:
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
@@ -147,7 +147,7 @@ templates:
         - Dao
       abis:
         - name: TokenVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/majority-voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
         - event: MembershipContractAnnounced(indexed address)
           handler: handleMembershipContractAnnounced
@@ -174,7 +174,7 @@ templates:
         - Dao
       abis:
         - name: AddresslistVoting
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/majority-voting/addresslist/AddresslistVoting.sol/AddresslistVoting.json
       eventHandlers:
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
@@ -203,7 +203,7 @@ templates:
         - Dao
       abis:
         - name: Multisig
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/multisig/Multisig.sol/Multisig.json
       eventHandlers:
         - event: MembersAdded(address[])
           handler: handleMembersAdded
@@ -232,7 +232,7 @@ templates:
         - Dao
       abis:
         - name: Admin
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugins/governance/admin/Admin.sol/Admin.json
       eventHandlers:
         - event: MembershipContractAnnounced(indexed address)
           handler: handleMembershipContractAnnounced
@@ -255,7 +255,7 @@ templates:
         - PluginRepo
       abis:
         - name: PluginRepo
-          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/plugin/PluginRepo.sol/PluginRepo.json
+          file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/framework/plugin/repo/PluginRepo.sol/PluginRepo.json
       eventHandlers:
         - event: VersionCreated(uint8,uint16,indexed address,bytes)
           handler: handleVersionCreated
