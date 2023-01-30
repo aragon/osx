@@ -30,14 +30,14 @@ function _getPluginInstallationId(address _dao, address _plugin) pure returns (b
 
 /// @notice Returns an identifier for prepared installations by hashing the DAO and plugin address.
 /// @param _pluginSetupRef The reference of the plugin setup containing plugin setup repo and version tag.
-/// @param _permissionHash The hash of the permission objects.
+/// @param _permissionsHash The hash of the permission objects.
 /// @param _helpersHash The hash of the helper contract addresses.
 /// @param _data Encoded initialize data for the upgrade that is returned by the `prepareUpdate`.
 /// @param _preparationType Tells which PreparationType the plugin is in currently. Without this, it's possible to call applyUpdate even after applyInstallation is called.
 /// @return bytes32 The prepared setup id.
 function _getPreparedSetupId(
     PluginSetupRef memory _pluginSetupRef,
-    bytes32 _permissionHash,
+    bytes32 _permissionsHash,
     bytes32 _helpersHash,
     bytes memory _data,
     PreparationType _preparationType
@@ -47,7 +47,7 @@ function _getPreparedSetupId(
             abi.encode(
                 _pluginSetupRef.versionTag,
                 _pluginSetupRef.pluginSetupRepo,
-                _permissionHash,
+                _permissionsHash,
                 _helpersHash,
                 keccak256(_data),
                 _preparationType
