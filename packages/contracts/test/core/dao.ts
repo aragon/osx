@@ -591,8 +591,6 @@ describe('DAO', function () {
         '0x',
       ]);
 
-      console.log(encoded, ' nice');
-
       await expect(
         erc721Token['safeTransferFrom(address,address,uint256)'](
           ownerAddress,
