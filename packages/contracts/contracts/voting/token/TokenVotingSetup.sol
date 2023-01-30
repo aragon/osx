@@ -288,7 +288,7 @@ contract TokenVotingSetup is PluginSetup {
         return token.getSupportedInterfaces(interfaceIds);
     }
 
-    /// @notice Unsatisfiably determines if contract is ERC20..
+    /// @notice Unsatisfiably determines if the contract is an ERC20 token.
     /// @dev It's important to first check whether token is a contract prior to this call.
     /// @param token The token address
     function _isERC20(address token) private view returns (bool) {
