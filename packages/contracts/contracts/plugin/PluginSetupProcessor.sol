@@ -668,7 +668,7 @@ contract PluginSetupProcessor is DaoAuthorizable {
         }
     }
 
-    /// @notice Upgrades an UUPS upgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
+    /// @notice Upgrades a UUPS upgradeable proxy contract (see [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822)).
     /// @param _proxy The address of the proxy.
     /// @param _implementation The address of the implementation contract.
     /// @param _initData The initialization data to be passed to the upgradeable plugin contract via `upgradeToAndCall`.

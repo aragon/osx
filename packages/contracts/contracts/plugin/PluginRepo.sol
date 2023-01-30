@@ -35,7 +35,7 @@ contract PluginRepo is
         uint16 build;
     }
 
-    /// @notice The struct describing a plugin version.
+    /// @notice The struct describing a plugin version (release and build).
     /// @param tag The version tag.
     /// @param pluginSetup The setup contract associated with this version.
     /// @param buildMetadata The URI where the plugin's build metadata and subsequent resources can be fetched from.
