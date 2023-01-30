@@ -38,7 +38,7 @@ contract PluginRepo is
     /// @notice The struct describing a plugin version (release and build).
     /// @param tag The version tag.
     /// @param pluginSetup The setup contract associated with this version.
-    /// @param buildMetadata The URI where the plugin's build metadata and subsequent resources can be fetched from.
+    /// @param buildMetadata The build metadata URI.
     struct Version {
         Tag tag;
         address pluginSetup;
@@ -91,7 +91,7 @@ contract PluginRepo is
 
     /// @notice Thrown if the metadata URI is not set for a release.
     /// @param release the release number for which the metadata URI is not set.
-    /// @param metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
+    /// @param metadata The release metadata URI.
     error InvalidReleaseMetadata(uint8 release, bytes metadata);
 
     /// @notice Thrown if release does not exist.
@@ -107,7 +107,7 @@ contract PluginRepo is
 
     /// @notice Thrown when a release's metadata was updated.
     /// @param release The release number.
-    /// @param metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
+    /// @param metadata The release metadata URI.
     event ReleaseMetadataUpdated(uint8 release, bytes metadata);
 
     /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
@@ -201,7 +201,7 @@ contract PluginRepo is
 
     /// @notice The private helper function to replace new `_metadata` for the `_release`.
     /// @param _release The release number.
-    /// @param _metadata The URI where the plugin's release metadata and subsequent resources can be fetched from.
+    /// @param _metadata The release metadata URI.
     function _updateReleaseMetadata(uint8 _release, bytes calldata _metadata) internal {
         metadataPerRelease[_release] = _metadata;
 

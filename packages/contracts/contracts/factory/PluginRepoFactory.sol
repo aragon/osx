@@ -44,8 +44,8 @@ contract PluginRepoFactory {
     /// @param _subdomain The plugin repository subdomain.
     /// @param _pluginSetup The plugin factory contract associated with the plugin version.
     /// @param _maintainer The plugin maintainer address.
-    /// @param _releaseMetadata The external URI for fetching the new version's release content.
-    /// @param _buildMetadata The external URI for fetching the new version's build content.
+    /// @param _releaseMetadata The release metadata URI.
+    /// @param _buildMetadata The build metadata URI.
     function createPluginRepoWithFirstVersion(
         string calldata _subdomain,
         address _pluginSetup,
