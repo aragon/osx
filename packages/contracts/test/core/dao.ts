@@ -2,15 +2,17 @@ import chai, {expect} from 'chai';
 import {ethers} from 'hardhat';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-import {
-  DAO,
-  DAO__factory,
-  GovernanceERC20,
-} from '../../typechain';
+import {DAO, TestERC1155, TestERC20, TestERC721} from '../../typechain';
 import {findEvent, DAO_EVENTS} from '../../utils/event';
 import {flipBit} from '../test-utils/bitmap';
 
-import {getActions} from '../test-utils/dao';
+import {
+  getActions,
+  getERC1155TransferAction,
+  getERC20TransferAction,
+  getERC721TransferAction,
+  TOKEN_INTERFACE_IDS,
+} from '../test-utils/dao';
 
 import {getInterfaceID} from '../test-utils/interfaces';
 import {OZ_ERRORS} from '../test-utils/error';
@@ -18,7 +20,10 @@ import {IERC1271__factory} from '../../typechain/factories/IERC1271__factory';
 import {smock} from '@defi-wonderland/smock';
 import {deployWithProxy} from '../test-utils/proxy';
 import {UNREGISTERED_INTERFACE_RETURN} from './component/callback-handler';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 import {ZERO_BYTES32, daoExampleURI} from '../test-utils/dao';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 
 chai.use(smock.matchers);
 
@@ -37,15 +42,15 @@ const EVENTS = {
   Granted: 'Granted',
   Revoked: 'Revoked',
   Deposited: 'Deposited',
-  Withdrawn: 'Withdrawn',
   Executed: 'Executed',
   NativeTokenDeposited: 'NativeTokenDeposited',
   SignatureValidatorSet: 'SignatureValidatorSet',
   StandardCallbackRegistered: 'StandardCallbackRegistered',
+  CallbackReceived: 'CallbackReceived',
 };
 
 const PERMISSION_IDS = {
-  UPGRADE_DAO_PERMISSION_ID: ethers.utils.id('UPGRADE_DAO_PERMISSION'),
+  UPGRADE_DAO_PERMISSION_ID: UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
   SET_METADATA_PERMISSION_ID: ethers.utils.id('SET_METADATA_PERMISSION'),
   EXECUTE_PERMISSION_ID: ethers.utils.id('EXECUTE_PERMISSION'),
   WITHDRAW_PERMISSION_ID: ethers.utils.id('WITHDRAW_PERMISSION'),
@@ -65,9 +70,8 @@ describe('DAO', function () {
   let signers: SignerWithAddress[];
   let ownerAddress: string;
   let dao: DAO;
-  let token: GovernanceERC20;
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     signers = await ethers.getSigners();
     ownerAddress = await signers[0].getAddress();
 
@@ -79,12 +83,6 @@ describe('DAO', function () {
       dummyAddress1,
       daoExampleURI
     );
-
-    const Token = await ethers.getContractFactory('GovernanceERC20');
-    token = await Token.deploy(dao.address, 'GOV', 'GOV', {
-      receivers: [],
-      amounts: [],
-    });
 
     // Grant permissions
     await Promise.all([
@@ -123,9 +121,19 @@ describe('DAO', function () {
         ownerAddress,
         PERMISSION_IDS.REGISTER_STANDARD_CALLBACK_PERMISSION_ID
       ),
-      dao.grant(token.address, ownerAddress, PERMISSION_IDS.MINT_PERMISSION_ID),
     ]);
+
+    this.upgrade = {
+      contract: dao,
+      dao: dao,
+      user: signers[8],
+    };
   });
+
+  shouldUpgradeCorrectly(
+    UPGRADE_PERMISSIONS.UPGRADE_DAO_PERMISSION_ID,
+    'Unauthorized'
+  );
 
   describe('initialize', async () => {
     it('reverts if trying to re-initialize', async () => {
@@ -139,8 +147,44 @@ describe('DAO', function () {
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
     });
 
-    it('sets the trusted forwarder correctly', async () => {
+    it('initializes with the correct trusted forwarder', async () => {
       expect(await dao.getTrustedForwarder()).to.be.equal(dummyAddress1);
+    });
+
+    it('initializes with the correct token interfaces', async () => {
+      const callbacksReturned = await Promise.all([
+        ethers.provider.call({
+          to: dao.address,
+          data: TOKEN_INTERFACE_IDS.erc721ReceivedId,
+        }),
+        ethers.provider.call({
+          to: dao.address,
+          data: TOKEN_INTERFACE_IDS.erc1155ReceivedId,
+        }),
+        ethers.provider.call({
+          to: dao.address,
+          data: TOKEN_INTERFACE_IDS.erc1155BatchReceivedId,
+        }),
+      ]);
+
+      // confirm callbacks are registered.
+      expect(callbacksReturned[0]).to.equal(
+        TOKEN_INTERFACE_IDS.erc721ReceivedId + '00'.repeat(28)
+      );
+      expect(callbacksReturned[1]).to.equal(
+        TOKEN_INTERFACE_IDS.erc1155ReceivedId + '00'.repeat(28)
+      );
+      expect(callbacksReturned[2]).to.equal(
+        TOKEN_INTERFACE_IDS.erc1155BatchReceivedId + '00'.repeat(28)
+      );
+
+      // confirm interfaces are registered.
+      expect(
+        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc721InterfaceId)
+      ).to.equal(true);
+      expect(
+        await dao.supportsInterface(TOKEN_INTERFACE_IDS.erc1155InterfaceId)
+      ).to.equal(true);
     });
   });
 
@@ -233,10 +277,9 @@ describe('DAO', function () {
       // add one more to make sure it fails
       actions[MAX_ACTIONS] = data.failAction;
 
-      await expect(dao.execute(ZERO_BYTES32, actions, 0)).to.be.revertedWithCustomError(
-        dao,
-        'TooManyActions'
-      );
+      await expect(
+        dao.execute(ZERO_BYTES32, actions, 0)
+      ).to.be.revertedWithCustomError(dao, 'TooManyActions');
     });
 
     it("reverts if action is failable and allowFailureMap doesn't include it", async () => {
@@ -330,58 +373,324 @@ describe('DAO', function () {
       expect(event.args.execResults[0]).to.equal(data.successActionResult);
     });
 
-    it('should transfer native token(eth) to recipient with action', async () => {
-      const recipient = signers[1].address;
-      const currentBalance = await ethers.provider.getBalance(recipient);
+    describe('Transfering tokens', async () => {
+      const amount = ethers.utils.parseEther('1.23');
+      const options = {value: amount};
 
-      // deposit some eth so it can later transfer
-      const depositAmount = ethers.utils.parseEther('1.23');
-      await dao.deposit(ethers.constants.AddressZero, depositAmount, 'ref', {
-        value: depositAmount,
+      describe('ETH Transfer', async () => {
+        it('reverts if transfers more eth than dao has', async () => {
+          const transferAction = {
+            to: signers[1].address,
+            value: amount,
+            data: '0x',
+          };
+          await expect(dao.execute(ZERO_BYTES32, [transferAction], 0)).to.be
+            .reverted;
+        });
+
+        it('transfers native token(eth) to recipient', async () => {
+          // put native tokens into the DAO
+          await dao.deposit(
+            ethers.constants.AddressZero,
+            amount,
+            'ref',
+            options
+          );
+
+          const recipient = signers[1].address;
+          const currentBalance = await ethers.provider.getBalance(recipient);
+
+          const transferAction = {to: recipient, value: amount, data: '0x'};
+          await dao.execute(ZERO_BYTES32, [transferAction], 0);
+          const newBalance = await ethers.provider.getBalance(recipient);
+          expect(newBalance.sub(currentBalance)).to.equal(amount);
+        });
       });
 
-      const transferAction = {to: recipient, value: depositAmount, data: '0x'};
-      await dao.execute(ZERO_BYTES32, [transferAction], 0);
-      const newBalance = await ethers.provider.getBalance(recipient);
-      expect(newBalance.sub(currentBalance)).to.equal(depositAmount);
-    });
+      describe('ERC20 Transfer', async () => {
+        let erc20Token: TestERC20;
 
-    it('should transfer ERC20 tokens to recipient with action', async () => {
-      const TokenFactory = await ethers.getContractFactory('TestERC20');
-      const token = await TokenFactory.deploy('name', 'symbol', 20);
+        beforeEach(async () => {
+          const TestERC20 = await ethers.getContractFactory('TestERC20');
+          erc20Token = await TestERC20.deploy('name', 'symbol', 0);
+        });
 
-      await token.transfer(dao.address, 20);
+        it('reverts if transfers more ERC20 than dao has', async () => {
+          const transferAction = getERC20TransferAction(
+            erc20Token.address,
+            signers[1].address,
+            amount
+          );
 
-      const recipient = signers[1].address;
+          await expect(dao.execute(ZERO_BYTES32, [transferAction], 0)).to.be
+            .reverted;
+        });
 
-      const iface = new ethers.utils.Interface(DAO__factory.abi);
+        it('transfers native token(eth) to recipient', async () => {
+          // put ERC20 into the DAO
+          await erc20Token.setBalance(dao.address, amount);
 
-      const encoded = iface.encodeFunctionData('withdraw', [
-        token.address,
-        recipient,
-        20,
-        'ref',
-      ]);
+          const recipient = signers[1].address;
 
-      await dao.grant(
-        dao.address,
-        dao.address,
-        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
-      );
+          const transferAction = getERC20TransferAction(
+            erc20Token.address,
+            recipient,
+            amount
+          );
 
-      const transferAction = {to: dao.address, value: 0, data: encoded};
+          expect(await erc20Token.balanceOf(dao.address)).to.equal(amount);
+          expect(await erc20Token.balanceOf(recipient)).to.equal(0);
 
-      expect(await token.balanceOf(dao.address)).to.equal(20);
-      expect(await token.balanceOf(recipient)).to.equal(0);
+          await dao.execute(ZERO_BYTES32, [transferAction], 0);
+          expect(await erc20Token.balanceOf(dao.address)).to.equal(0);
+          expect(await erc20Token.balanceOf(recipient)).to.equal(amount);
+        });
+      });
 
-      await dao.execute(ZERO_BYTES32, [transferAction], 0);
-      expect(await token.balanceOf(dao.address)).to.equal(0);
-      expect(await token.balanceOf(recipient)).to.equal(20);
+      describe('ERC721 Transfer', async () => {
+        let erc721Token: TestERC721;
+
+        beforeEach(async () => {
+          const TestERC721 = await ethers.getContractFactory('TestERC721');
+          erc721Token = await TestERC721.deploy('name', 'symbol');
+        });
+
+        it('reverts if transfers more ERC721 than dao has', async () => {
+          const transferAction = getERC721TransferAction(
+            erc721Token.address,
+            dao.address,
+            signers[1].address,
+            1
+          );
+
+          await expect(dao.execute(ZERO_BYTES32, [transferAction], 0)).to.be
+            .reverted;
+        });
+
+        it('transfers native ERC721(eth) to recipient', async () => {
+          // put ERC721 into the DAO
+          await erc721Token.mint(dao.address, 1);
+
+          const recipient = signers[1].address;
+
+          const transferAction = getERC721TransferAction(
+            erc721Token.address,
+            dao.address,
+            recipient,
+            1
+          );
+
+          expect(await erc721Token.balanceOf(dao.address)).to.equal(1);
+          expect(await erc721Token.balanceOf(recipient)).to.equal(0);
+
+          await dao.execute(ZERO_BYTES32, [transferAction], 0);
+
+          expect(await erc721Token.balanceOf(dao.address)).to.equal(0);
+          expect(await erc721Token.balanceOf(recipient)).to.equal(1);
+        });
+      });
+
+      describe('ERC1155 Transfer', async () => {
+        let erc1155Token: TestERC1155;
+
+        beforeEach(async () => {
+          const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+          erc1155Token = await TestERC1155.deploy('URI');
+        });
+
+        it('reverts if transfers more ERC1155 than dao has', async () => {
+          const transferAction = getERC1155TransferAction(
+            erc1155Token.address,
+            dao.address,
+            signers[1].address,
+            1,
+            1
+          );
+
+          await expect(dao.execute(ZERO_BYTES32, [transferAction], 0)).to.be
+            .reverted;
+        });
+
+        it('transfers ERC1155 tokens to recipient', async () => {
+          await erc1155Token.mint(dao.address, 1, 1);
+          await erc1155Token.mint(dao.address, 2, 50);
+          const recipient = signers[1].address;
+
+          const transferAction1 = getERC1155TransferAction(
+            erc1155Token.address,
+            dao.address,
+            signers[1].address,
+            1,
+            1
+          );
+          const transferAction2 = getERC1155TransferAction(
+            erc1155Token.address,
+            dao.address,
+            signers[1].address,
+            2,
+            50
+          );
+
+          expect(await erc1155Token.balanceOf(dao.address, 1)).to.equal(1);
+          expect(await erc1155Token.balanceOf(dao.address, 2)).to.equal(50);
+          expect(await erc1155Token.balanceOf(recipient, 1)).to.equal(0);
+          expect(await erc1155Token.balanceOf(recipient, 2)).to.equal(0);
+
+          await dao.execute(
+            ZERO_BYTES32,
+            [transferAction1, transferAction2],
+            0
+          );
+          expect(await erc1155Token.balanceOf(dao.address, 1)).to.equal(0);
+          expect(await erc1155Token.balanceOf(dao.address, 2)).to.equal(0);
+          expect(await erc1155Token.balanceOf(recipient, 1)).to.equal(1);
+          expect(await erc1155Token.balanceOf(recipient, 2)).to.equal(50);
+        });
+      });
     });
   });
 
-  describe('deposit:', async () => {
+  describe('Deposit through direct transfer:', async () => {
+    let erc721Token: TestERC721;
+    let erc1155Token: TestERC1155;
+
+    beforeEach(async () => {
+      const TestERC1155 = await ethers.getContractFactory('TestERC1155');
+      erc1155Token = await TestERC1155.deploy('URI');
+
+      const TestERC721 = await ethers.getContractFactory('TestERC721');
+      erc721Token = await TestERC721.deploy('name', 'symbol');
+
+      erc721Token.mint(ownerAddress, 1);
+      erc1155Token.mint(ownerAddress, 1, 2);
+    });
+
+    it('reverts if erc721 callback is not registered', async () => {
+      await dao.registerStandardCallback(
+        TOKEN_INTERFACE_IDS.erc721ReceivedId,
+        TOKEN_INTERFACE_IDS.erc721ReceivedId,
+        UNREGISTERED_INTERFACE_RETURN
+      );
+
+      await expect(
+        erc721Token['safeTransferFrom(address,address,uint256)'](
+          ownerAddress,
+          dao.address,
+          1
+        )
+      ).to.be.reverted;
+    });
+
+    it('successfully transfers erc721 into the dao and emits the correct callback received event', async () => {
+      const ABI = ['function onERC721Received(address,address,uint256,bytes)'];
+      const iface = new ethers.utils.Interface(ABI);
+      const encoded = iface.encodeFunctionData('onERC721Received', [
+        ownerAddress,
+        ownerAddress,
+        1,
+        '0x',
+      ]);
+
+      await expect(
+        erc721Token['safeTransferFrom(address,address,uint256)'](
+          ownerAddress,
+          dao.address,
+          1
+        )
+      )
+        .to.emit(dao, EVENTS.CallbackReceived)
+        .withArgs(
+          erc721Token.address,
+          TOKEN_INTERFACE_IDS.erc721ReceivedId,
+          encoded
+        );
+    });
+
+    it('reverts if erc1155 callbacks are not registered', async () => {
+      await dao.registerStandardCallback(
+        TOKEN_INTERFACE_IDS.erc1155ReceivedId,
+        TOKEN_INTERFACE_IDS.erc1155ReceivedId,
+        UNREGISTERED_INTERFACE_RETURN
+      );
+
+      await dao.registerStandardCallback(
+        TOKEN_INTERFACE_IDS.erc1155BatchReceivedId,
+        TOKEN_INTERFACE_IDS.erc1155BatchReceivedId,
+        UNREGISTERED_INTERFACE_RETURN
+      );
+
+      await expect(
+        erc1155Token.safeTransferFrom(ownerAddress, dao.address, 1, 1, '0x')
+      ).to.be.reverted;
+      await expect(
+        erc1155Token.safeBatchTransferFrom(
+          ownerAddress,
+          dao.address,
+          [1],
+          [1],
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    it('successfully transfers erc1155 into the dao', async () => {
+      // encode onERC1155Received call
+      const erc1155ReceivedEncoded = new ethers.utils.Interface([
+        'function onERC1155Received(address,address,uint256,uint256,bytes)',
+      ]).encodeFunctionData('onERC1155Received', [
+        ownerAddress,
+        ownerAddress,
+        1,
+        1,
+        '0x',
+      ]);
+
+      // encode onERC1155BatchReceived call
+      const erc1155BatchReceivedEncoded = new ethers.utils.Interface([
+        'function onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)',
+      ]).encodeFunctionData('onERC1155BatchReceived', [
+        ownerAddress,
+        ownerAddress,
+        [1],
+        [1],
+        '0x',
+      ]);
+
+      await expect(
+        erc1155Token.safeTransferFrom(ownerAddress, dao.address, 1, 1, '0x')
+      )
+        .to.emit(dao, EVENTS.CallbackReceived)
+        .withArgs(
+          erc1155Token.address,
+          TOKEN_INTERFACE_IDS.erc1155ReceivedId,
+          erc1155ReceivedEncoded
+        );
+      await expect(
+        erc1155Token.safeBatchTransferFrom(
+          ownerAddress,
+          dao.address,
+          [1],
+          [1],
+          '0x'
+        )
+      )
+        .to.emit(dao, EVENTS.CallbackReceived)
+        .withArgs(
+          erc1155Token.address,
+          TOKEN_INTERFACE_IDS.erc1155BatchReceivedId,
+          erc1155BatchReceivedEncoded
+        );
+    });
+  });
+
+  describe('Deposit through deposit function:', async () => {
     const amount = ethers.utils.parseEther('1.23');
+    let token: TestERC20;
+
+    beforeEach(async () => {
+      const TestERC20 = await ethers.getContractFactory('TestERC20');
+      token = await TestERC20.deploy('name', 'symbol', 0);
+    });
 
     it('reverts if amount is zero', async () => {
       await expect(
@@ -402,7 +711,7 @@ describe('DAO', function () {
 
     it('reverts if ERC20 and native tokens are deposited at the same time', async () => {
       const options = {value: amount};
-      await token.mint(ownerAddress, amount);
+      await token.setBalance(ownerAddress, amount);
 
       await expect(dao.deposit(token.address, amount, 'ref', options))
         .to.be.revertedWithCustomError(dao, 'NativeTokenDepositAmountMismatch')
@@ -414,7 +723,7 @@ describe('DAO', function () {
     });
 
     it('reverts when tries to deposit ERC20 token while sender does not have approved token transfer', async () => {
-      await token.mint(ownerAddress, amount);
+      await token.setBalance(ownerAddress, amount);
 
       await expect(
         dao.deposit(token.address, amount, 'ref')
@@ -438,7 +747,7 @@ describe('DAO', function () {
     });
 
     it('deposits ERC20 into the DAO', async () => {
-      await token.mint(ownerAddress, amount);
+      await token.setBalance(ownerAddress, amount);
       await token.approve(dao.address, amount);
 
       // is empty at the beginning
@@ -450,99 +759,6 @@ describe('DAO', function () {
 
       // holds amount now
       expect(await token.balanceOf(dao.address)).to.equal(amount);
-    });
-  });
-
-  describe('withdraw:', async () => {
-    const amount = ethers.utils.parseEther('1.23');
-    const options = {value: amount};
-
-    beforeEach(async () => {
-      // put native tokens into the DAO
-      await dao.deposit(ethers.constants.AddressZero, amount, 'ref', options);
-
-      // put ERC20 into the DAO
-      await token.mint(dao.address, amount);
-    });
-
-    it('reverts if the sender lacks the required permissionId', async () => {
-      await dao.revoke(
-        dao.address,
-        ownerAddress,
-        PERMISSION_IDS.WITHDRAW_PERMISSION_ID
-      );
-
-      await expect(
-        dao.withdraw(ethers.constants.AddressZero, ownerAddress, amount, 'ref')
-      )
-        .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          dao.address,
-          dao.address,
-          ownerAddress,
-          PERMISSION_IDS.WITHDRAW_PERMISSION_ID
-        );
-    });
-
-    it('withdraws native tokens if DAO balance is high enough', async () => {
-      const receiverBalance = await signers[1].getBalance();
-
-      await expect(
-        dao.withdraw(
-          ethers.constants.AddressZero,
-          signers[1].address,
-          amount,
-          'ref'
-        )
-      )
-        .to.emit(dao, EVENTS.Withdrawn)
-        .withArgs(
-          ethers.constants.AddressZero,
-          signers[1].address,
-          amount,
-          'ref'
-        );
-
-      expect(await signers[1].getBalance()).to.equal(
-        receiverBalance.add(amount)
-      );
-    });
-
-    it('throws an error if the native token balance is too low', async () => {
-      await expect(
-        dao.withdraw(
-          ethers.constants.AddressZero,
-          ownerAddress,
-          amount.add(1),
-          'ref'
-        )
-      ).to.be.revertedWithCustomError(dao, 'NativeTokenWithdrawFailed');
-    });
-
-    it('withdraws ERC20 if DAO balance is high enough', async () => {
-      const receiverBalance = await token.balanceOf(signers[1].address);
-
-      await expect(
-        dao.withdraw(token.address, signers[1].address, amount, 'ref')
-      )
-        .to.emit(dao, EVENTS.Withdrawn)
-        .withArgs(token.address, signers[1].address, amount, 'ref');
-
-      expect(await token.balanceOf(signers[1].address)).to.equal(
-        receiverBalance.add(amount)
-      );
-    });
-
-    it('throws an error if the ERC20 balance is too low', async () => {
-      await expect(
-        dao.withdraw(token.address, ownerAddress, amount.add(1), 'ref')
-      ).to.be.revertedWith('ERC20: transfer amount exceeds balance');
-    });
-
-    it('throws an error if the amount is 0', async () => {
-      await expect(
-        dao.withdraw(token.address, ownerAddress, 0, 'ref')
-      ).to.be.revertedWithCustomError(dao, 'ZeroAmount');
     });
   });
 
@@ -575,10 +791,7 @@ describe('DAO', function () {
     });
 
     it('correctly sets callback selector and interface and can call later', async () => {
-      // (Real usecase example)
-      // interfaceId for supportsInterface(type(IERC721Receiver).interfaceId)
-      // callbackSelector (onERC721Received.selector)
-      const id = '0x150b7a02';
+      const id = '0x11111111';
 
       // onERC721Received selector doesn't exist, so it should fail..
       await expect(
@@ -590,16 +803,15 @@ describe('DAO', function () {
         .to.be.revertedWithCustomError(dao, 'UnkownCallback')
         .withArgs(id, UNREGISTERED_INTERFACE_RETURN);
 
-      // register onERC721Received selector
       await dao.registerStandardCallback(id, id, id);
 
-      let onERC721ReceivedReturned = await ethers.provider.call({
+      let onCallbackReturned = await ethers.provider.call({
         to: dao.address,
         data: id,
       });
 
       // TODO: ethers utils pads zero to the left. we need to pad to the right.
-      expect(onERC721ReceivedReturned).to.equal(id + '00'.repeat(28));
+      expect(onCallbackReturned).to.equal(id + '00'.repeat(28));
       expect(await dao.supportsInterface(id)).to.equal(true);
     });
   });
@@ -720,28 +932,5 @@ describe('DAO', function () {
         expect(await dao.daoURI()).to.be.eq(daoExampleURI);
       });
     });
-  });
-
-  describe('ERC1967', async () => {
-    // TODO: Must be made as a test utils that can be imported in every upgradeable test file
-    // Such as https://github.com/OpenZeppelin/openzeppelin-contracts/blob/a28aafdc85a592776544f7978c6b1a462d28ede2/test/token/ERC20/ERC20.behavior.js#L5
-    // This will avoid having the same 3 tests in every file or we could just neglect this test as
-    // It's coming from UUPSUpgradeable which is already tested though since contracts are very critical,
-    // Still testing this most important part wouldn't be bad..
-    it.skip('reverts if `UPGRADE_DAO_PERMISSION` is not granted or revoked', async () => {
-      await expect(dao.connect(signers[1]).upgradeTo(dao.address))
-        .to.be.revertedWithCustomError(dao, 'Unauthorized')
-        .withArgs(
-          dao.address,
-          dao.address,
-          signers[1].address,
-          PERMISSION_IDS.UPGRADE_DAO_PERMISSION_ID
-        );
-    });
-
-    it.skip('successfuly updates DAO contract', async () => {
-      await expect(dao.upgradeTo(dao.address)).to.not.be.reverted;
-    });
-    it.skip('shouldn not update if new implementation is not UUPS compliant'); // TODO:Implement
   });
 });

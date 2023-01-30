@@ -76,11 +76,11 @@ dataSources:
       eventHandlers:
         - event: InstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),bytes,address,(address[],(uint8,address,address,address,bytes32)[]))
           handler: handleInstallationPrepared
-        - event: UninstallationApplied(indexed address,indexed address,bytes32)
+        - event: InstallationApplied(indexed address,indexed address,bytes32,bytes32)
           handler: handleInstallationApplied
         - event: UpdatePrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),(address,address[],bytes),(address[],(uint8,address,address,address,bytes32)[]),bytes)
           handler: handleUpdatePrepared
-        - event: UpdateApplied(indexed address,indexed address,bytes32)
+        - event: UpdateApplied(indexed address,indexed address,bytes32,bytes32)
           handler: handleUpdateApplied
         - event: UninstallationPrepared(indexed address,indexed address,bytes32,indexed address,(uint8,uint16),(address,address[],bytes),(uint8,address,address,address,bytes32)[])
           handler: handleUninstallationPrepared
@@ -126,8 +126,6 @@ templates:
           handler: handleGranted
         - event: Revoked(indexed bytes32,indexed address,address,indexed address)
           handler: handleRevoked
-        - event: Withdrawn(indexed address,indexed address,uint256,string)
-          handler: handleWithdrawn
         - event: TrustedForwarderSet(address)
           handler: handleTrustedForwarderSet
         - event: StandardCallbackRegistered(bytes4,bytes4,bytes4)
@@ -151,6 +149,8 @@ templates:
         - name: TokenVoting
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/token/TokenVoting.sol/TokenVoting.json
       eventHandlers:
+        - event: MembershipContractAnnounced(indexed address)
+          handler: handleMembershipContractAnnounced
         - event: VoteCast(indexed uint256,indexed address,uint8,uint256)
           handler: handleVoteCast
         - event: ProposalExecuted(indexed uint256,bytes[])
@@ -184,10 +184,10 @@ templates:
           handler: handleProposalCreated
         - event: VotingSettingsUpdated(uint8,uint32,uint32,uint64,uint256)
           handler: handleVotingSettingsUpdated
-        - event: AddressesAdded(address[])
-          handler: handleAddressesAdded
-        - event: AddressesRemoved(address[])
-          handler: handleAddressesRemoved
+        - event: MembersAdded(address[])
+          handler: handleMembersAdded
+        - event: MembersRemoved(address[])
+          handler: handleMembersRemoved
   # Multisig (package)
   - name: Multisig
     kind: ethereum/contract
@@ -205,10 +205,10 @@ templates:
         - name: Multisig
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/multisig/Multisig.sol/Multisig.json
       eventHandlers:
-        - event: AddressesAdded(address[])
-          handler: handleAddressesAdded
-        - event: AddressesRemoved(address[])
-          handler: handleAddressesRemoved
+        - event: MembersAdded(address[])
+          handler: handleMembersAdded
+        - event: MembersRemoved(address[])
+          handler: handleMembersRemoved
         - event: Approved(indexed uint256,indexed address)
           handler: handleApproved
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)
@@ -234,6 +234,8 @@ templates:
         - name: Admin
           file: $ZARAGOZA_CONTRACTS_MODULE/artifacts/contracts/voting/admin/Admin.sol/Admin.json
       eventHandlers:
+        - event: MembershipContractAnnounced(indexed address)
+          handler: handleMembershipContractAnnounced
         - event: ProposalExecuted(indexed uint256,bytes[])
           handler: handleProposalExecuted
         - event: ProposalCreated(indexed uint256,indexed address,uint64,uint64,bytes,(address,uint256,bytes)[],uint256)

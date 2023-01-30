@@ -2,7 +2,7 @@
 analyze:
     create-group: true
     group-name: Core
-    solc: 0.8.10
+    solc: 0.8.17
     remappings:
         - "@openzeppelin/=./node_modules/@openzeppelin/"
         - "@opengsn/=./node_modules/@opengsn/"

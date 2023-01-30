@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
+import {IMembershipContract} from "../../core/plugin/IMembershipContract.sol";
 import {IDAO} from "../../core/IDAO.sol";
 import {RATIO_BASE, _applyRatioCeiled} from "../../utils/Ratio.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
@@ -14,7 +15,7 @@ import {IMajorityVoting} from "../majority/IMajorityVoting.sol";
 /// @author Aragon Association - 2021-2023
 /// @notice The majority voting implementation using an [OpenZepplin `Votes`](https://docs.openzeppelin.com/contracts/4.x/api/governance#Votes) compatible governance token.
 /// @dev This contract inherits from `MajorityVotingBase` and implements the `IMajorityVoting` interface.
-contract TokenVoting is MajorityVotingBase {
+contract TokenVoting is IMembershipContract, MajorityVotingBase {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -27,6 +28,11 @@ contract TokenVoting is MajorityVotingBase {
     /// @notice Thrown if the voting power is zero
     error NoVotingPower();
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -40,6 +46,8 @@ contract TokenVoting is MajorityVotingBase {
         __MajorityVotingBase_init(_dao, _votingSettings);
 
         votingToken = _token;
+
+        emit MembershipContractAnnounced({definingContract: address(_token)});
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
@@ -57,6 +65,11 @@ contract TokenVoting is MajorityVotingBase {
     }
 
     /// @inheritdoc MajorityVotingBase
+    function totalVotingPower(uint256 _blockNumber) public view override returns (uint256) {
+        return votingToken.getPastTotalSupply(_blockNumber);
+    }
+
+    /// @inheritdoc MajorityVotingBase
     function createProposal(
         bytes calldata _metadata,
         IDAO.Action[] calldata _actions,
@@ -66,13 +79,16 @@ contract TokenVoting is MajorityVotingBase {
         VoteOption _voteOption,
         bool _tryEarlyExecution
     ) external override returns (uint256 proposalId) {
-        uint64 snapshotBlock;
+        uint256 snapshotBlock;
         unchecked {
-            snapshotBlock = block.number.toUint64() - 1;
+            snapshotBlock = block.number - 1;
         }
 
-        uint256 totalVotingPower = votingToken.getPastTotalSupply(snapshotBlock);
-        if (totalVotingPower == 0) revert NoVotingPower();
+        uint256 totalVotingPower_ = totalVotingPower(snapshotBlock);
+
+        if (totalVotingPower_ == 0) {
+            revert NoVotingPower();
+        }
 
         if (votingToken.getPastVotes(_msgSender(), snapshotBlock) < minProposerVotingPower()) {
             revert ProposalCreationForbidden(_msgSender());
@@ -94,19 +110,16 @@ contract TokenVoting is MajorityVotingBase {
             _startDate,
             _endDate
         );
-        proposal_.parameters.snapshotBlock = snapshotBlock;
+        proposal_.parameters.snapshotBlock = snapshotBlock.toUint64();
         proposal_.parameters.votingMode = votingMode();
         proposal_.parameters.supportThreshold = supportThreshold();
-
         proposal_.parameters.minVotingPower = _applyRatioCeiled(
-            totalVotingPower,
+            totalVotingPower_,
             minParticipation()
         );
 
-        proposal_.tally.totalVotingPower = totalVotingPower;
-
         // Reduce costs
-        if(_allowFailureMap != 0) {
+        if (_allowFailureMap != 0) {
             proposal_.allowFailureMap = _allowFailureMap;
         }
 
@@ -120,6 +133,12 @@ contract TokenVoting is MajorityVotingBase {
         if (_voteOption != VoteOption.None) {
             vote(proposalId, _voteOption, _tryEarlyExecution);
         }
+    }
+
+    /// @inheritdoc IMembershipContract
+    function isMember(address _account) external view returns (bool) {
+        /// whatever condition
+        return votingToken.getVotes(_account) > 0;
     }
 
     /// @inheritdoc MajorityVotingBase

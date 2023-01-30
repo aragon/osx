@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
@@ -114,6 +114,11 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @param minApprovals The minimum amount of approvals needed to pass a proposal.
     event MultisigSettingsUpdated(bool onlyListed, uint16 indexed minApprovals);
 
+    /// @dev Used to disallow initializing the implementation contract by an attacker for extra safety.
+    constructor() {
+        _disableInitializers();
+    }
+    
     /// @notice Initializes the component.
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
@@ -125,18 +130,14 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     ) public initializer {
         __PluginUUPSUpgradeable_init(_dao);
 
-        // add member addresses to the address list
         _addAddresses(_members);
-
         _updateMultisigSettings(_multisigSettings);
     }
 
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param _interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(
-        bytes4 _interfaceId
-    ) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return
             _interfaceId == MULTISIG_INTERFACE_ID ||
             PluginUUPSUpgradeable.supportsInterface(_interfaceId);
@@ -144,10 +145,9 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice Adds new members to the address list and updates the minimum approval parameter.
     /// @param _members The addresses of the members to be added.
-    function addAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function addAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         uint256 newAddresslistLength = addresslistLength() + _members.length;
 
         // Check if the new address list length would be greater than `type(uint16).max`, the maximal number of approvals.
@@ -163,10 +163,9 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice Removes existing members from the address list. Previously, it checks if the new address list length at least as long as the minimum approvals parameter requires. Note that `minApprovals` is must be at least 1 so the address list cannot become empty.
     /// @param _members The addresses of the members to be removed.
-    function removeAddresses(address[] calldata _members)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function removeAddresses(
+        address[] calldata _members
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         uint16 newAddresslistLength = uint16(addresslistLength() - _members.length);
 
         // Check if the new address list length would become less than the current minimum number of approvals required.
@@ -182,10 +181,9 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
 
     /// @notice Updates the plugin settings.
     /// @param _multisigSettings The new settings.
-    function updateMultisigSettings(MultisigSettings calldata _multisigSettings)
-        external
-        auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID)
-    {
+    function updateMultisigSettings(
+        MultisigSettings calldata _multisigSettings
+    ) external auth(UPDATE_MULTISIG_SETTINGS_PERMISSION_ID) {
         _updateMultisigSettings(_multisigSettings);
     }
 
@@ -239,7 +237,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         proposal_.parameters.minApprovals = multisigSettings.minApprovals;
 
         // Reduce costs
-        if(_allowFailureMap != 0) {
+        if (_allowFailureMap != 0) {
             proposal_.allowFailureMap = _allowFailureMap;
         }
 
@@ -306,7 +304,9 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
     /// @return parameters The parameters of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1, the proposal succeeds even if the `i`th action reverts. A failure map value of 0 requires every action to not revert.
-    function getProposal(uint256 _proposalId)
+    function getProposal(
+        uint256 _proposalId
+    )
         public
         view
         returns (
@@ -359,7 +359,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         );
     }
 
-    /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists. //TODO is this assumption relevant?
+    /// @notice Internal function to check if an account can approve. It assumes the queried proposal exists.
     /// @param _proposalId The ID of the proposal.
     /// @param _account The account to check.
     /// @return Returns `true` if the given account can approve on a certain proposal and `false` otherwise.
@@ -425,6 +425,7 @@ contract Multisig is PluginUUPSUpgradeable, ProposalUpgradeable, Addresslist {
         }
 
         multisigSettings = _multisigSettings;
+
         emit MultisigSettingsUpdated({
             onlyListed: _multisigSettings.onlyListed,
             minApprovals: _multisigSettings.minApprovals

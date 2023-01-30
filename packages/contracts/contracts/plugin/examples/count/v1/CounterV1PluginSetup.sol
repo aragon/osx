@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
@@ -11,7 +11,7 @@ import {MultiplyHelper} from "../MultiplyHelper.sol";
 import {CounterV1} from "./CounterV1.sol";
 
 /// @title CounterV1PluginSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `CounterV1` plugin.
 contract CounterV1PluginSetup is PluginSetup {
     using Clones for address;
@@ -35,7 +35,7 @@ contract CounterV1PluginSetup is PluginSetup {
         external
         virtual
         override
-        returns (address plugin, PreparedDependency memory preparedDependency)
+        returns (address plugin, PreparedSetupData memory preparedSetupData)
     {
         // Decode the parameters from the UI
         (address _multiplyHelper, uint256 _num) = abi.decode(_data, (address, uint256));
@@ -92,10 +92,10 @@ contract CounterV1PluginSetup is PluginSetup {
         // add helpers
         helpers[0] = multiplyHelper;
 
-        preparedDependency.helpers = helpers;
-        preparedDependency.permissions = permissions;
+        preparedSetupData.helpers = helpers;
+        preparedSetupData.permissions = permissions;
 
-        return (plugin, preparedDependency);
+        return (plugin, preparedSetupData);
     }
 
     /// @inheritdoc IPluginSetup

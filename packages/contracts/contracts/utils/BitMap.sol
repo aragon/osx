@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @param bitmap The `uint256` representation of bits.
 /// @param index The index number to check whether 1 or 0 is set.

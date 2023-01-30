@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {IDAO} from "../../core/IDAO.sol";
 import {DAO} from "../../core/DAO.sol";
@@ -10,7 +10,7 @@ import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {AddresslistVoting} from "./AddresslistVoting.sol";
 
 /// @title AddresslistVotingSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `AddresslistVoting` plugin.
 contract AddresslistVotingSetup is PluginSetup {
     /// @notice The address of `AddresslistVoting` plugin logic contract to be used in creating proxy contracts.
@@ -28,7 +28,7 @@ contract AddresslistVotingSetup is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `AddresslistVoting` plugin.
@@ -85,7 +85,7 @@ contract AddresslistVotingSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
-        preparedDependency.permissions = permissions;
+        preparedSetupData.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup

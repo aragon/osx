@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import "../voting/majority/MajorityVotingBase.sol";
 
@@ -18,6 +18,10 @@ contract MajorityVotingMock is MajorityVotingBase {
         VoteOption /* _voteOption */,
         bool /* _tryEarlyExecution */
     ) external pure override returns (uint256 proposalId) {
+        return 0;
+    }
+
+    function totalVotingPower(uint256 /* _blockNumber */) public pure override returns (uint256) {
         return 0;
     }
 

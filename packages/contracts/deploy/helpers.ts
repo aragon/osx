@@ -1,6 +1,6 @@
 import {promises as fs} from 'fs';
 import {ethers} from 'hardhat';
-import {BigNumberish} from 'ethers';
+import {BigNumberish, Contract} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import IPFS from 'ipfs-http-client';
 
@@ -99,7 +99,8 @@ export async function createPluginRepo(
   hre: HardhatRuntimeEnvironment,
   pluginContractName: string,
   pluginSetupContractName: string,
-  contentURI: string
+  releaseMetadata: string,
+  buildMetadata: string
 ): Promise<void> {
   const signers = await ethers.getSigners();
 
@@ -131,8 +132,9 @@ export async function createPluginRepo(
   const tx = await pluginRepoFactoryContract.createPluginRepoWithFirstVersion(
     pluginContractName,
     pluginSetupAddress,
-    contentURI,
-    managingDAOAddress
+    managingDAOAddress,
+    releaseMetadata,
+    buildMetadata
   );
 
   await tx.wait();
@@ -140,11 +142,43 @@ export async function createPluginRepo(
   const event = await findEvent(tx, 'PluginRepoRegistered');
   const repoAddress = event.args.pluginRepo;
 
+  if (!hre.aragonPluginRepos) {
+    hre.aragonPluginRepos = {};
+  }
+
+  hre.aragonPluginRepos[pluginContractName] = repoAddress;
+
   console.log(
     `Created & registered repo for ${pluginContractName} at address: ${repoAddress}, with contentURI ${ethers.utils.toUtf8String(
-      contentURI
+      releaseMetadata
     )}`
   );
+}
+
+export async function checkSetManagingDao(
+  contract: Contract,
+  expectedDaoAddress: string
+) {
+  const setDAO = await contract.callStatic.getDAO();
+  if (setDAO !== expectedDaoAddress) {
+    throw new Error(
+      `${contract.address} has wrong DAO. Expected ${setDAO} to be ${expectedDaoAddress}`
+    );
+  }
+}
+
+export async function checkPermission(
+  permissionManager: Contract,
+  where: string,
+  who: string,
+  permission: string,
+  data = '0x'
+) {
+  const permissionId = ethers.utils.id(permission)
+  const isGranted = await permissionManager.callStatic.isGranted(where, who, permissionId, data)
+  if(!isGranted) {
+    throw new Error(`${who} doesn't have ${permission} on ${where} in ${permissionManager.address}`)
+  }
 }
 
 // exports dummy function for hardhat-deploy. Otherwise we would have to move this file

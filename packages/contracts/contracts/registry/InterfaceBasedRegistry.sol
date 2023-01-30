@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {IERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
-import {AddressUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import {ERC165CheckerUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-import "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {DaoAuthorizableUpgradeable} from "../core/component/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import {IDAO} from "../core/IDAO.sol";
 
 /// @title InterfaceBasedRegistry
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
-//TODO Make this PluginUUPSUpgradeable
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
-    using AddressUpgradeable for address;
+    using ERC165CheckerUpgradeable for address;
 
     /// @notice The ID of the permission required to call the `_authorizeUpgrade` function.
     bytes32 public constant UPGRADE_REGISTRY_PERMISSION_ID =
@@ -32,11 +31,7 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @notice Thrown if the contract does not support the required interface.
     /// @param registrant The address of the contract to be registered.
     error ContractInterfaceInvalid(address registrant);
-
-    /// @notice Thrown if the address is not a contract.
-    /// @param registrant The address of the contract to be registered.
-    error ContractAddressInvalid(address registrant);
-
+    
     /// @notice Thrown if the contract do not support ERC165.
     /// @param registrant The address of the contract.
     error ContractERC165SupportInvalid(address registrant);
@@ -64,16 +59,13 @@ abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgr
     /// @dev The managing DAO needs to grant REGISTER_PERMISSION_ID to registrar.
     /// @param _registrant The address of an [ERC-165](https://eips.ethereum.org/EIPS/eip-165) contract.
     function _register(address _registrant) internal {
-        if (!_registrant.isContract()) {
-            revert ContractAddressInvalid({registrant: _registrant});
+        if (entries[_registrant]) {
+            revert ContractAlreadyRegistered({registrant: _registrant});
         }
 
-        if (entries[_registrant]) revert ContractAlreadyRegistered({registrant: _registrant});
-
-        try IERC165Upgradeable(_registrant).supportsInterface(targetInterfaceId) returns (bool result) {
-            if (!result) revert ContractInterfaceInvalid(_registrant);
-        } catch {
-            revert ContractERC165SupportInvalid({registrant: _registrant});
+        // Will revert if address is not a contract or doesn't fully support targetInterfaceId + ERC165.
+        if (!_registrant.supportsInterface(targetInterfaceId)) {
+            revert ContractInterfaceInvalid(_registrant);
         }
 
         entries[_registrant] = true;

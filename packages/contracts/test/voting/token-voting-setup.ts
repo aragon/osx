@@ -6,7 +6,7 @@ import {ERC20, TokenVotingSetup} from '../../typechain';
 import {deployNewDAO} from '../test-utils/dao';
 import {getInterfaceID} from '../test-utils/interfaces';
 import {Operation} from '../core/permission/permission-manager';
-import metadata from '../../contracts/voting/token/metadata.json';
+import metadata from '../../contracts/voting/token/build-metadata.json';
 
 import {
   VotingSettings,
@@ -178,7 +178,7 @@ describe('TokenVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await tokenVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         data
@@ -276,7 +276,7 @@ describe('TokenVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await tokenVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         data
@@ -327,7 +327,7 @@ describe('TokenVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await tokenVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         defaultData

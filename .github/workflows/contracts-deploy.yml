@@ -59,11 +59,11 @@ jobs:
         run: yarn install --pure-lockfile
       - name: Compile
         run: cd packages/contracts && yarn run build
-      - name: Register Random ENS
+      - name: Register Random ENS Subdomain
         if: matrix.network == 'goerli'
-        run: node .github/helpers/contracts/register-ens.js aragon-plugins-${{ github.run_number	}}-${{ github.run_id	}} 31536000 0xE264d5bb84bA3b8061ADC38D3D76e6674aB91852
+        run: node .github/helpers/contracts/register-ens-subdomain.js dao plugin-${{ github.run_number }}-${{ github.run_id }} 0xE264d5bb84bA3b8061ADC38D3D76e6674aB91852
         env:
-          ENS_REGISTRY: '0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5'
+          ENS_REGISTRY: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e'
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
       - name: Deploy
@@ -72,7 +72,7 @@ jobs:
           ETH_KEY: ${{ secrets.ETH_KEY }}
           NETWORK: ${{ matrix.network }}
           GOERLI_DAO_ENS_DOMAIN: dao.eth
-          GOERLI_PLUGIN_ENS_DOMAIN: 'aragon-plugins-${{ github.run_number	}}-${{ github.run_id	}}.eth'
+          GOERLI_PLUGIN_ENS_DOMAIN: 'plugin-${{ github.run_number }}-${{ github.run_id }}.dao.eth'
           ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
           ARBISCAN_KEY: ${{ secrets.ARBISCAN_KEY }}
           POLYGONSCAN_KEY: ${{ secrets.POLYGONSCAN_KEY }}

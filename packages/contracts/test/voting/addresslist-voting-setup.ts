@@ -12,7 +12,7 @@ import {
   pctToRatio,
   ONE_HOUR,
 } from '../test-utils/voting';
-import metadata from '../../contracts/voting/addresslist/metadata.json';
+import metadata from '../../contracts/voting/addresslist/build-metadata.json';
 
 let defaultData: any;
 let defaultVotingSettings: VotingSettings;
@@ -119,7 +119,7 @@ describe('AddresslistVotingSetup', function () {
 
       const {
         plugin,
-        preparedDependency: {helpers, permissions},
+        preparedSetupData: {helpers, permissions},
       } = await addresslistVotingSetup.callStatic.prepareInstallation(
         targetDao.address,
         defaultData

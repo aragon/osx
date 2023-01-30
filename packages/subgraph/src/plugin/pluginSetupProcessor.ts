@@ -25,7 +25,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   pluginEntity.data = event.params.data;
   pluginEntity.state = 'InstallationPrepared';
 
-  handleHelperIds(event.params.preparedDependency.helpers, pluginId);
+  handleHelperIds(event.params.preparedSetupData.helpers, pluginId);
   pluginEntity.save();
 }
 
@@ -61,7 +61,7 @@ export function handleUpdatePrepared(event: UpdatePrepared): void {
     pluginEntity.state = 'UpdatePrepared';
     pluginEntity.save();
 
-    handleHelperIds(event.params.preparedDependency.helpers, pluginId);
+    handleHelperIds(event.params.preparedSetupData.helpers, pluginId);
   } else {
     log.warning(
       'UpdatePrepared event happened without being installed, for DAO: {}, plugin: {}',

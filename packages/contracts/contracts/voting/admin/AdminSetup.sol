@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
@@ -11,7 +11,7 @@ import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {Admin} from "./Admin.sol";
 
 /// @title AdminAddressSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `Admin` plugin.
 contract AdminSetup is PluginSetup {
     using Clones for address;
@@ -35,10 +35,7 @@ contract AdminSetup is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    )
-        external
-        returns (address plugin, PreparedDependency memory preparedDependency)
-    {
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for cloning and initializing `Admin` plugin.
@@ -76,7 +73,7 @@ contract AdminSetup is PluginSetup {
             DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
         );
 
-        preparedDependency.permissions = permissions;
+        preparedSetupData.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup
@@ -84,11 +81,10 @@ contract AdminSetup is PluginSetup {
     /// that have been granted to addresses during the life cycle of the plugin.
     /// or the ones that have been granted are not revoked already,
     /// therefore, only `EXECUTE_PERMISSION_ID` is revoked for this uninstallation.
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        view
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
         // Prepare permissions
         permissions = new PermissionLib.MultiTargetPermission[](1);
 

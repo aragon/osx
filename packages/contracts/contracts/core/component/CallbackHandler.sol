@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 /// @title CallbackHandler
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice This contract handles callbacks by registering a magic number together with the callback function's selector. It provides the `_handleCallback` function that inherting have to call inside their `fallback()` function  (`_handleCallback(msg.callbackSelector, msg.data)`).  This allows to adaptively register ERC standards (e.g., [ERC-721](https://eips.ethereum.org/EIPS/eip-721), [ERC-1115](https://eips.ethereum.org/EIPS/eip-1155), or future versions of [ERC-165](https://eips.ethereum.org/EIPS/eip-165)) and returning the required magic numbers for the associated callback functions for the inheriting contract so that it doesn't need to be upgraded.
 /// @dev This callback handling functionality is intented to be used by executor contracts (i.e., `DAO.sol`).
 abstract contract CallbackHandler {
@@ -19,9 +19,10 @@ abstract contract CallbackHandler {
     error UnkownCallback(bytes4 callbackSelector, bytes4 magicNumber);
 
     /// @notice Emitted when `_handleCallback` is called.
+    /// @param sender Who called the callback.
     /// @param sig The function signature.
     /// @param data The calldata for the function signature.
-    event CallbackReceived(bytes4 indexed sig, bytes data);
+    event CallbackReceived(address sender, bytes4 indexed sig, bytes data);
 
     /// @notice Handles callbacks to adaptively support ERC standards.
     /// @dev This function is supposed to be called via `_handleCallback(msg.sig, msg.data)` in the `fallback()` function of the inheriting contract.
@@ -36,7 +37,7 @@ abstract contract CallbackHandler {
             revert UnkownCallback({callbackSelector: _callbackSelector, magicNumber: magicNumber});
         }
 
-        emit CallbackReceived({sig: _callbackSelector, data: _data});
+        emit CallbackReceived({sender: msg.sender, sig: _callbackSelector, data: _data});
 
         return magicNumber;
     }

@@ -14,6 +14,7 @@ import {
   DAO_EVENTS,
   VOTING_EVENTS,
   PROPOSAL_EVENTS,
+  MEMBERSHIP_EVENTS,
 } from '../../utils/event';
 import {getMergedABI} from '../../utils/abi';
 import {
@@ -32,6 +33,9 @@ import {
 } from '../test-utils/voting';
 import {deployNewDAO} from '../test-utils/dao';
 import {OZ_ERRORS} from '../test-utils/error';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
+import {deployWithProxy} from '../test-utils/proxy';
 
 describe('TokenVoting', function () {
   let signers: SignerWithAddress[];
@@ -77,7 +81,7 @@ describe('TokenVoting', function () {
     dao = await deployNewDAO(signers[0].address);
   });
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     votingSettings = {
       votingMode: VotingMode.EarlyExecution,
       supportThreshold: pctToRatio(50),
@@ -104,7 +108,8 @@ describe('TokenVoting', function () {
       tokenVotingFactoryBytecode,
       signers[0]
     );
-    voting = (await TokenVotingFactory.deploy()) as TokenVoting;
+
+    voting = await deployWithProxy(TokenVotingFactory);
 
     startDate = (await getTime()) + startOffset;
     endDate = startDate + votingSettings.minDuration;
@@ -113,6 +118,26 @@ describe('TokenVoting', function () {
       dao.address,
       voting.address,
       ethers.utils.id('EXECUTE_PERMISSION')
+    );
+  });
+
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      this.upgrade = {
+        contract: voting,
+        dao: dao,
+        user: signers[8],
+      };
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+    });
+
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_PLUGIN_PERMISSION_ID,
+      'DaoUnauthorized'
     );
   });
 
@@ -153,6 +178,52 @@ describe('TokenVoting', function () {
           governanceErc20Mock.address
         )
       ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+
+    it('emits the `MembershipContractAnnounced` event', async () => {
+      await expect(
+        await voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        )
+      )
+        .to.emit(voting, MEMBERSHIP_EVENTS.MEMBERSHIP_CONTRACT_ANNOUNCED)
+        .withArgs(governanceErc20Mock.address);
+    });
+
+    it('reverts if trying to re-initialize', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await expect(
+        voting.initialize(
+          dao.address,
+          votingSettings,
+          governanceErc20Mock.address
+        )
+      ).to.be.revertedWith(OZ_ERRORS.ALREADY_INITIALIZED);
+    });
+  });
+
+  describe('isMember: ', async () => {
+    it('returns true if the account currently owns at least one token', async () => {
+      await voting.initialize(
+        dao.address,
+        votingSettings,
+        governanceErc20Mock.address
+      );
+
+      await setBalances([
+        {receiver: signers[0].address, amount: 1},
+        {receiver: signers[1].address, amount: 0},
+      ]);
+
+      expect(await voting.isMember(signers[0].address)).to.be.true;
+      expect(await voting.isMember(signers[1].address)).to.be.false;
     });
   });
 
@@ -459,7 +530,7 @@ describe('TokenVoting', function () {
       );
 
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
@@ -468,7 +539,9 @@ describe('TokenVoting', function () {
         proposal.parameters.startDate.add(votingSettings.minDuration)
       ).to.equal(proposal.parameters.endDate);
 
-      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(10);
       expect(proposal.tally.yes).to.equal(0);
       expect(proposal.tally.no).to.equal(0);
 
@@ -526,13 +599,15 @@ describe('TokenVoting', function () {
         votingSettings.supportThreshold
       );
       expect(proposal.parameters.minVotingPower).to.equal(
-        proposal.tally.totalVotingPower
+        (await voting.totalVotingPower(proposal.parameters.snapshotBlock))
           .mul(votingSettings.minParticipation)
           .div(pctToRatio(100))
       );
       expect(proposal.parameters.snapshotBlock).to.equal(block.number - 1);
 
-      expect(proposal.tally.totalVotingPower).to.equal(10);
+      expect(
+        await voting.totalVotingPower(proposal.parameters.snapshotBlock)
+      ).to.equal(10);
       expect(proposal.tally.yes).to.equal(10);
       expect(proposal.tally.no).to.equal(0);
       expect(proposal.tally.abstain).to.equal(0);
@@ -1303,11 +1378,15 @@ describe('TokenVoting', function () {
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
 
-        // 1 vote is still missing to meet >99.9999% worst-case support
-        const tally = (await voting.getProposal(id)).tally;
+        // 1 vote is still missing to meet >99.9999% worst case support
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
-        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
+          totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(totalVotingPower.div(RATIO_BASE));
 
         // vote with 1 more yes vote
         await voting.connect(signers[1]).vote(id, VoteOption.Yes, false);
@@ -1327,9 +1406,13 @@ describe('TokenVoting', function () {
         await voting.connect(signers[2]).vote(id, VoteOption.Yes, false);
 
         // 1 vote is still missing to meet particpiation = 100%
-        const tally = (await voting.getProposal(id)).tally;
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+          totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
         ).to.eq(1);
         expect(await voting.isMinParticipationReached(id)).to.be.false;
 
@@ -1366,10 +1449,14 @@ describe('TokenVoting', function () {
         await voting.connect(signers[0]).vote(id, VoteOption.Yes, false);
 
         // 1 vote is still missing to meet >99.9999%
-        const tally = (await voting.getProposal(id)).tally;
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
-        ).to.eq(tally.totalVotingPower.div(RATIO_BASE));
+          totalVotingPower.sub(tally.yes).sub(tally.abstain) // this is the number of worst case no votes
+        ).to.eq(totalVotingPower.div(RATIO_BASE));
 
         expect(await voting.isSupportThresholdReachedEarly(id)).to.be.false;
         expect(await voting.isSupportThresholdReached(id)).to.be.true;
@@ -1387,9 +1474,13 @@ describe('TokenVoting', function () {
         expect(await voting.isMinParticipationReached(id)).to.be.false;
 
         // 1 vote is still missing to meet particpiation = 100%
-        const tally = (await voting.getProposal(id)).tally;
+        const proposal = await voting.getProposal(id);
+        const tally = proposal.tally;
+        const totalVotingPower = await voting.totalVotingPower(
+          proposal.parameters.snapshotBlock
+        );
         expect(
-          tally.totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
+          totalVotingPower.sub(tally.yes).sub(tally.no).sub(tally.abstain)
         ).to.eq(1);
         expect(await voting.isMinParticipationReached(id)).to.be.false;
 
@@ -1447,7 +1538,10 @@ describe('TokenVoting', function () {
           false
         );
 
-        expect((await voting.getProposal(id)).tally.totalVotingPower).to.eq(
+        const snapshotBlock = (await voting.getProposal(id)).parameters
+          .snapshotBlock;
+        const totalVotingPower = await voting.totalVotingPower(snapshotBlock);
+        expect(totalVotingPower).to.eq(
           balances[0].amount.add(balances[1].amount)
         );
 

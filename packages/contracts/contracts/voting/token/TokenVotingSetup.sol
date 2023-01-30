@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -16,14 +16,12 @@ import {PluginSetup, IPluginSetup} from "../../plugin/PluginSetup.sol";
 import {GovernanceERC20} from "../../tokens/GovernanceERC20.sol";
 import {GovernanceWrappedERC20} from "../../tokens/GovernanceWrappedERC20.sol";
 import {IGovernanceWrappedERC20} from "../../tokens/IGovernanceWrappedERC20.sol";
-import {MerkleMinter} from "../../tokens/MerkleMinter.sol";
-import {MerkleDistributor} from "../../tokens/MerkleDistributor.sol";
 import {IERC20MintableUpgradeable} from "../../tokens/IERC20MintableUpgradeable.sol";
 import {MajorityVotingBase} from "../majority/MajorityVotingBase.sol";
 import {TokenVoting} from "./TokenVoting.sol";
 
 /// @title TokenVotingSetup
-/// @author Aragon Association - 2022
+/// @author Aragon Association - 2022-2023
 /// @notice The setup contract of the `TokenVoting` plugin.
 contract TokenVotingSetup is PluginSetup {
     using Address for address;
@@ -41,12 +39,6 @@ contract TokenVotingSetup is PluginSetup {
 
     /// @notice The address of the `GovernanceWrappedERC20` base contract.
     address public immutable governanceWrappedERC20Base;
-
-    /// @notice The address of the `MerkleMinter` base contract.
-    address public immutable merkleMinterBase;
-
-    /// @notice The `MerkleDistributor` base contract used to initialize the `MerkleMinter`.
-    address public immutable distributorBase;
 
     struct TokenSettings {
         address addr;
@@ -73,7 +65,6 @@ contract TokenVotingSetup is PluginSetup {
 
     /// @notice The contract constructor, that deployes the bases.
     constructor() {
-        distributorBase = address(new MerkleDistributor());
         governanceERC20Base = address(
             new GovernanceERC20(
                 IDAO(address(0)),
@@ -85,7 +76,6 @@ contract TokenVotingSetup is PluginSetup {
         governanceWrappedERC20Base = address(
             new GovernanceWrappedERC20(IERC20Upgradeable(address(0)), "", "")
         );
-        merkleMinterBase = address(new MerkleMinter());
         tokenVotingBase = new TokenVoting();
     }
 
@@ -93,7 +83,7 @@ contract TokenVotingSetup is PluginSetup {
     function prepareInstallation(
         address _dao,
         bytes memory _data
-    ) external returns (address plugin, PreparedDependency memory preparedDependency) {
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
         IDAO dao = IDAO(_dao);
 
         // Decode `_data` to extract the params needed for deploying and initializing `TokenVoting` plugin,
@@ -220,8 +210,8 @@ contract TokenVotingSetup is PluginSetup {
             );
         }
 
-        preparedDependency.helpers = helpers;
-        preparedDependency.permissions = permissions;
+        preparedSetupData.helpers = helpers;
+        preparedSetupData.permissions = permissions;
     }
 
     /// @inheritdoc IPluginSetup

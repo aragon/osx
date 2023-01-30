@@ -13,6 +13,8 @@ import {deployNewDAO} from '../test-utils/dao';
 import {ensDomainHash, ensLabelHash} from '../../utils/ens';
 import {OZ_ERRORS} from '../test-utils/error';
 import {setupResolver} from '../test-utils/ens';
+import {shouldUpgradeCorrectly} from '../test-utils/uups-upgradeable';
+import {UPGRADE_PERMISSIONS} from '../test-utils/permissions';
 
 const REGISTER_ENS_SUBDOMAIN_PERMISSION_ID = ethers.utils.id(
   'REGISTER_ENS_SUBDOMAIN_PERMISSION'
@@ -94,10 +96,37 @@ describe('ENSSubdomainRegistrar', function () {
     );
   }
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     signers = await ethers.getSigners();
 
     [ens, resolver, managingDao, registrar] = await setupENS(signers[0]);
+
+    this.upgrade = {
+      contract: registrar,
+      dao: managingDao,
+      user: signers[8],
+    };
+  });
+
+  describe('Upgrade', () => {
+    beforeEach(async function () {
+      registerSubdomainHelper('test', '', signers[0], registrar.address);
+      this.upgrade = {
+        contract: registrar,
+        dao: managingDao,
+        user: signers[8],
+      };
+      await registrar.initialize(
+        managingDao.address,
+        ens.address,
+        ensDomainHash('test')
+      );
+    });
+
+    shouldUpgradeCorrectly(
+      UPGRADE_PERMISSIONS.UPGRADE_REGISTRAR_PERMISSION_ID,
+      'DaoUnauthorized'
+    );
   });
 
   describe('Check the initial ENS state', async () => {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity 0.8.17;
 
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -162,12 +162,10 @@ abstract contract MajorityVotingBase is
     /// @param abstain The number of abstain votes casted.
     /// @param yes The number of yes votes casted.
     /// @param no The number of no votes casted.
-    /// @param totalVotingPower The total voting power available at the block prior to the proposal creation.
     struct Tally {
         uint256 abstain;
         uint256 yes;
         uint256 no;
-        uint256 totalVotingPower;
     }
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -229,10 +227,10 @@ abstract contract MajorityVotingBase is
     /// @dev This method is required to support [ERC-1822](https://eips.ethereum.org/EIPS/eip-1822).
     /// @param _dao The IDAO interface of the associated DAO.
     /// @param _votingSettings The voting settings.
-    function __MajorityVotingBase_init(IDAO _dao, VotingSettings calldata _votingSettings)
-        internal
-        onlyInitializing
-    {
+    function __MajorityVotingBase_init(
+        IDAO _dao,
+        VotingSettings calldata _votingSettings
+    ) internal onlyInitializing {
         __PluginUUPSUpgradeable_init(_dao);
         _updateVotingSettings(_votingSettings);
     }
@@ -240,13 +238,9 @@ abstract contract MajorityVotingBase is
     /// @notice Checks if this or the parent contract supports an interface by its ID.
     /// @param interfaceId The ID of the interface.
     /// @return bool Returns `true` if the interface is supported.
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC165Upgradeable, PluginUUPSUpgradeable)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165Upgradeable, PluginUUPSUpgradeable) returns (bool) {
         return
             interfaceId == MAJORITY_VOTING_INTERFACE_ID ||
             PluginUUPSUpgradeable.supportsInterface(interfaceId);
@@ -279,12 +273,10 @@ abstract contract MajorityVotingBase is
     }
 
     /// @inheritdoc IMajorityVoting
-    function getVoteOption(uint256 _proposalId, address _voter)
-        public
-        view
-        virtual
-        returns (VoteOption)
-    {
+    function getVoteOption(
+        uint256 _proposalId,
+        address _voter
+    ) public view virtual returns (VoteOption) {
         return proposals[_proposalId].voters[_voter];
     }
 
@@ -319,7 +311,7 @@ abstract contract MajorityVotingBase is
     ) public view virtual returns (bool) {
         Proposal storage proposal_ = proposals[_proposalId];
 
-        uint256 noVotesWorstCase = proposal_.tally.totalVotingPower -
+        uint256 noVotesWorstCase = totalVotingPower(proposal_.parameters.snapshotBlock) -
             proposal_.tally.yes -
             proposal_.tally.abstain;
 
@@ -369,6 +361,11 @@ abstract contract MajorityVotingBase is
         return votingSettings.votingMode;
     }
 
+    /// @notice Returns the total voting power checkpointed for a specific block number.
+    /// @param _blockNumber The block number.
+    /// @return The total voting power.
+    function totalVotingPower(uint256 _blockNumber) public view virtual returns (uint256);
+
     /// @notice Returns all information for a proposal vote by its ID.
     /// @param _proposalId The ID of the proposal.
     /// @return open Whether the proposal is open or not.
@@ -377,7 +374,9 @@ abstract contract MajorityVotingBase is
     /// @return tally The current tally of the proposal vote.
     /// @return actions The actions to be executed in the associated DAO after the proposal has passed.
     /// @return allowFailureMap The bit map representations of which actions are allowed to revert so tx still succeeds.
-    function getProposal(uint256 _proposalId)
+    function getProposal(
+        uint256 _proposalId
+    )
         public
         view
         virtual
@@ -402,11 +401,9 @@ abstract contract MajorityVotingBase is
 
     /// @notice Updates the voting settings.
     /// @param _votingSettings The new voting settings.
-    function updateVotingSettings(VotingSettings calldata _votingSettings)
-        external
-        virtual
-        auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID)
-    {
+    function updateVotingSettings(
+        VotingSettings calldata _votingSettings
+    ) external virtual auth(UPDATE_VOTING_SETTINGS_PERMISSION_ID) {
         _updateVotingSettings(_votingSettings);
     }
 
@@ -549,12 +546,10 @@ abstract contract MajorityVotingBase is
     /// @param _end The end date of the proposal vote. If 0, `_start + minDuration` is used.
     /// @return startDate The validated start date of the proposal vote.
     /// @return endDate The validated end date of the proposal vote.
-    function _validateProposalDates(uint64 _start, uint64 _end)
-        internal
-        view
-        virtual
-        returns (uint64 startDate, uint64 endDate)
-    {
+    function _validateProposalDates(
+        uint64 _start,
+        uint64 _end
+    ) internal view virtual returns (uint64 startDate, uint64 endDate) {
         uint64 currentTimestamp = block.timestamp.toUint64();
 
         if (_start == 0) {
