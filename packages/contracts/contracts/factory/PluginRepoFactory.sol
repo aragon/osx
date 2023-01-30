@@ -31,7 +31,6 @@ contract PluginRepoFactory {
     /// @notice Creates a plugin repository proxy pointing to the `pluginRepoBase` implementation and registers it in the Aragon plugin registry.
     /// @param _subdomain The plugin repository subdomain.
     /// @param _initialOwner The plugin maintainer address.
-    /// TODO: Rethink if it need permission to prevent it from getting poluted, same for `createPluginRepoWithFirstVersion`.
     function createPluginRepo(
         string calldata _subdomain,
         address _initialOwner

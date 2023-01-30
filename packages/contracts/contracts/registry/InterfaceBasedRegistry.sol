@@ -11,7 +11,6 @@ import {IDAO} from "../core/IDAO.sol";
 /// @title InterfaceBasedRegistry
 /// @author Aragon Association - 2022-2023
 /// @notice An [ERC-165](https://eips.ethereum.org/EIPS/eip-165)-based registry for contracts
-//TODO Make this PluginUUPSUpgradeable
 abstract contract InterfaceBasedRegistry is UUPSUpgradeable, DaoAuthorizableUpgradeable {
     using ERC165CheckerUpgradeable for address;
 
